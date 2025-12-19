@@ -194,7 +194,7 @@ export default function Layout({ children, currentPageName }) {
                 <div className="hidden lg:flex items-center gap-3">
                   <Button
                     variant="ghost"
-                    onClick={() => base44.auth.redirectToLogin()}
+                    onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
                     className={scrolled || !isPublicPage ? "text-burgundy" : "text-white"}
                   >
                     Log In
