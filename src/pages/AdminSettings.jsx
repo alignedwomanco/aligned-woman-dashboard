@@ -1,0 +1,275 @@
+import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Shield, Users, Upload, Camera, Trash2, Save } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+export default function AdminSettings() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [profileData, setProfileData] = useState({});
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const user = await base44.auth.me();
+      setCurrentUser(user);
+      setProfileData({
+        full_name: user.full_name,
+        bio: user.bio || "",
+        expertise: user.expertise || [],
+      });
+    };
+    loadUser();
+  }, []);
+
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: () => base44.entities.User.list(),
+    enabled: currentUser?.role === "admin" || currentUser?.role === "master_admin",
+  });
+
+  const updateUserRoleMutation = useMutation({
+    mutationFn: ({ userId, role }) => base44.entities.User.update(userId, { role }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+    },
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (data) => base44.auth.updateMe(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    },
+  });
+
+  const handleProfileUpdate = async () => {
+    await updateProfileMutation.mutateAsync(profileData);
+  };
+
+  const handleProfilePicture = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    await base44.auth.updateMe({ profile_picture: file_url });
+    setCurrentUser({ ...currentUser, profile_picture: file_url });
+  };
+
+  const getRoleBadgeColor = (role) => {
+    const colors = {
+      master_admin: "bg-purple-100 text-purple-800",
+      admin: "bg-blue-100 text-blue-800",
+      moderator: "bg-green-100 text-green-800",
+      course_creator: "bg-orange-100 text-orange-800",
+      expert: "bg-pink-100 text-pink-800",
+      user: "bg-gray-100 text-gray-800",
+    };
+    return colors[role] || colors.user;
+  };
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-[#6B1B3D] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  const canManageUsers = currentUser.role === "admin" || currentUser.role === "master_admin";
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#4A1228] mb-2">Settings</h1>
+          <p className="text-gray-600">Manage your profile and system settings</p>
+        </div>
+
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            {canManageUsers && <TabsTrigger value="users">User Management</TabsTrigger>}
+          </TabsList>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Camera className="w-5 h-5" />
+                  Your Profile
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Profile Picture */}
+                <div className="flex items-center gap-6">
+                  <Avatar className="w-24 h-24">
+                    <AvatarImage src={currentUser.profile_picture} />
+                    <AvatarFallback className="bg-[#6B1B3D] text-white text-2xl">
+                      {currentUser.full_name?.[0] || currentUser.email?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <Label htmlFor="profile-pic" className="cursor-pointer">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors">
+                        <Upload className="w-4 h-4 text-[#6B1B3D]" />
+                        <span className="text-sm font-medium text-[#6B1B3D]">
+                          Change Picture
+                        </span>
+                      </div>
+                      <Input
+                        id="profile-pic"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleProfilePicture}
+                      />
+                    </Label>
+                    <p className="text-xs text-gray-500 mt-2">JPG, PNG, max 5MB</p>
+                  </div>
+                </div>
+
+                {/* Basic Info */}
+                <div className="space-y-4">
+                  <div>
+                    <Label>Full Name</Label>
+                    <Input
+                      value={profileData.full_name || ""}
+                      onChange={(e) =>
+                        setProfileData({ ...profileData, full_name: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Email</Label>
+                    <Input value={currentUser.email} disabled className="bg-gray-50" />
+                  </div>
+
+                  <div>
+                    <Label>Role</Label>
+                    <Badge className={getRoleBadgeColor(currentUser.role)}>
+                      {currentUser.role?.replace("_", " ").toUpperCase()}
+                    </Badge>
+                  </div>
+
+                  <div>
+                    <Label>Bio</Label>
+                    <Textarea
+                      value={profileData.bio || ""}
+                      onChange={(e) =>
+                        setProfileData({ ...profileData, bio: e.target.value })
+                      }
+                      placeholder="Tell us about yourself..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleProfileUpdate}
+                  className="bg-[#6B1B3D] hover:bg-[#4A1228]"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* User Management Tab */}
+          {canManageUsers && (
+            <TabsContent value="users">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    User Permissions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>User</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Current Role</TableHead>
+                        <TableHead>Change Role</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={user.profile_picture} />
+                              <AvatarFallback className="bg-[#6B1B3D] text-white">
+                                {user.full_name?.[0] || user.email?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{user.full_name || "User"}</span>
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <Badge className={getRoleBadgeColor(user.role)}>
+                              {user.role?.replace("_", " ")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={user.role}
+                              onValueChange={(role) =>
+                                updateUserRoleMutation.mutate({ userId: user.id, role })
+                              }
+                              disabled={user.id === currentUser.id}
+                            >
+                              <SelectTrigger className="w-48">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="user">User</SelectItem>
+                                <SelectItem value="expert">Expert</SelectItem>
+                                <SelectItem value="course_creator">Course Creator</SelectItem>
+                                <SelectItem value="moderator">Moderator</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                {currentUser.role === "master_admin" && (
+                                  <SelectItem value="master_admin">Master Admin</SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+        </Tabs>
+      </div>
+    </div>
+  );
+}

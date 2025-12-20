@@ -15,6 +15,8 @@ import CheckIn from './pages/CheckIn';
 import Blueprint from './pages/Blueprint';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
+import AdminSettings from './pages/AdminSettings';
+import ModuleFrameworkBuilder from './pages/ModuleFrameworkBuilder';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +38,8 @@ export const PAGES = {
     "Blueprint": Blueprint,
     "Progress": Progress,
     "Settings": Settings,
+    "AdminSettings": AdminSettings,
+    "ModuleFrameworkBuilder": ModuleFrameworkBuilder,
 }
 
 export const pagesConfig = {
