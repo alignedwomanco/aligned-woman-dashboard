@@ -137,25 +137,6 @@ export default function Layout({ children, currentPageName }) {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={createPageUrl(item.name)}
-                  className={`text-sm font-medium tracking-wide transition-colors ${
-                    currentPageName === item.name
-                      ? scrolled || !isPublicPage ? "text-burgundy" : "text-white"
-                      : scrolled || !isPublicPage
-                        ? "text-gray-600 hover:text-burgundy"
-                        : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  {item.label.toUpperCase()}
-                </Link>
-              ))}
-            </nav>
-
             {/* Right side actions */}
             <div className="flex items-center gap-3">
               {/* Login/Account Icon - Always visible */}
@@ -210,14 +191,14 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Hamburger Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-white border-t"
+              className="bg-white border-t"
             >
               <div className="px-4 py-6 space-y-1">
                 {navItems.map((item) => (
@@ -234,7 +215,7 @@ export default function Layout({ children, currentPageName }) {
                     <ChevronRight className="w-4 h-4 text-gray-400" />
                   </Link>
                 ))}
-                
+
                 <div className="pt-4 border-t mt-4">
                   {isAuthenticated ? (
                     <Button
