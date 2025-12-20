@@ -41,7 +41,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-none"
+            className="text-6xl sm:text-7xl lg:text-8xl font-extrabold text-white tracking-tight leading-none px-8 sm:px-12"
           >
             THE ALIGNED WOMAN
             <br />
@@ -53,7 +53,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-xl sm:text-2xl text-white/80 font-light max-w-2xl mx-auto"
+            className="text-2xl sm:text-3xl text-white/80 font-light max-w-3xl mx-auto px-8 sm:px-12"
           >
             Your personal operating system for embodied success
             <br />
@@ -61,19 +61,14 @@ export default function HeroSection() {
           </motion.p>
 
           {/* Body Copy */}
-          <motion.div
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="max-w-xl mx-auto text-white/70 text-lg leading-relaxed space-y-4"
+            className="max-w-2xl mx-auto text-white/70 text-lg leading-relaxed px-8 sm:px-12"
           >
-            <p>
-              You were never meant to force yourself into systems that exhaust you.
-            </p>
-            <p>
-              This is education, embodiment, and action — unified into one intelligent system that adapts to you.
-            </p>
-          </motion.div>
+            You were never meant to force yourself into systems that exhaust you. This is education, embodiment, and action — unified into one intelligent system that adapts to you.
+          </motion.p>
 
           {/* CTA */}
           <motion.div

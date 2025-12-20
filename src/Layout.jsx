@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
-import { Menu, X, ChevronRight, LogOut, User, Settings } from "lucide-react";
+import { Menu, X, ChevronRight, LogOut, User, Settings, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -126,7 +126,12 @@ export default function Layout({ children, currentPageName }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to={createPageUrl(isAuthenticated && !isPublicPage ? "Dashboard" : "Landing")} className="flex-shrink-0">
+            <Link to={createPageUrl(isAuthenticated && !isPublicPage ? "Dashboard" : "Landing")} className="flex items-center gap-3">
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/c471bd504_image.png"
+                alt="Logo"
+                className="w-10 h-10 object-contain"
+              />
               <span className={`text-xl font-bold tracking-tight ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}>
                 THE ALIGNED WOMAN
               </span>
@@ -152,23 +157,18 @@ export default function Layout({ children, currentPageName }) {
             </nav>
 
             {/* Right side actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              {/* Login/Account Icon - Always visible */}
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={`hidden lg:flex items-center gap-2 ${
-                        scrolled || !isPublicPage ? "text-burgundy" : "text-white"
-                      }`}
-                    >
+                    <button className={`p-2 ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}>
                       <div className="w-8 h-8 rounded-full bg-burgundy flex items-center justify-center">
                         <span className="text-white text-sm font-medium">
                           {user?.full_name?.[0] || user?.email?.[0] || "U"}
                         </span>
                       </div>
-                      <span className="font-medium">{user?.full_name?.split(" ")[0] || "Account"}</span>
-                    </Button>
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuItem asChild>
@@ -191,29 +191,20 @@ export default function Layout({ children, currentPageName }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="hidden lg:flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                    className={scrolled || !isPublicPage ? "text-burgundy" : "text-white"}
-                  >
-                    Log In
-                  </Button>
-                  <Button
-                    onClick={() => base44.auth.redirectToLogin(createPageUrl("OnboardingDiagnostic"))}
-                    className="bg-burgundy hover:bg-burgundy-deep text-white px-6"
-                  >
-                    Get Started
-                  </Button>
-                </div>
+                <button
+                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                  className={`p-2 ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}
+                >
+                  <UserCircle className="w-8 h-8" />
+                </button>
               )}
 
-              {/* Mobile menu button */}
+              {/* Mobile menu button (hamburger) */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`lg:hidden p-2 ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}
+                className={`p-2 ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}
               >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {mobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
               </button>
             </div>
           </div>
