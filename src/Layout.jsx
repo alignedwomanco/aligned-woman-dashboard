@@ -83,6 +83,15 @@ export default function Layout({ children, currentPageName }) {
     setMobileMenuOpen(false);
   }, [location]);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+    return () => document.body.classList.remove('sidebar-open');
+  }, [mobileMenuOpen]);
+
   const handleLogout = () => {
     base44.auth.logout();
   };
@@ -112,6 +121,11 @@ export default function Layout({ children, currentPageName }) {
         
         .animate-fade-in-up {
           animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Prevent scroll when sidebar is open */
+        body.sidebar-open {
+          overflow: hidden;
         }
       `}</style>
 
@@ -186,7 +200,7 @@ export default function Layout({ children, currentPageName }) {
               {/* Mobile menu button (hamburger) */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}
+                className={`p-2 ${scrolled || !isPublicPage ? "text-[#6C1A3E]" : "text-white"}`}
               >
                 {mobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
               </button>
@@ -194,53 +208,81 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
 
-        {/* Hamburger Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
+      {/* Sidebar Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="bg-white border-t"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/50 z-50"
+            />
+            
+            {/* Sidebar */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-white z-50 shadow-2xl overflow-y-auto"
             >
-              <div className="px-4 py-6 space-y-1">
+              {/* Sidebar Header */}
+              <div className="p-6 border-b flex items-center justify-between">
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
+                  alt="The Aligned Woman"
+                  className="w-12 h-12 object-contain"
+                />
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 text-[#6C1A3E] hover:bg-pink-50 rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="p-6 space-y-2">
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
                     to={createPageUrl(item.name)}
-                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors ${
                       currentPageName === item.name
-                        ? "bg-pink-50 text-burgundy"
+                        ? "bg-pink-50 text-[#6C1A3E]"
                         : "text-gray-700 hover:bg-pink-50"
                     }`}
                   >
                     {item.label}
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
                   </Link>
                 ))}
+              </div>
 
-                <div className="pt-4 border-t mt-4">
-                  {isAuthenticated ? (
-                    <Button
-                      onClick={handleLogout}
-                      variant="outline"
-                      className="w-full border-burgundy text-burgundy"
-                    >
-                      Sign Out
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => base44.auth.redirectToLogin(createPageUrl("OnboardingDiagnostic"))}
-                      className="w-full bg-burgundy hover:bg-burgundy-deep text-white"
-                    >
-                      Get Started
-                    </Button>
-                  )}
-                </div>
+              {/* Bottom Action */}
+              <div className="p-6 border-t mt-auto">
+                {isAuthenticated ? (
+                  <Button
+                    onClick={handleLogout}
+                    className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-6"
+                  >
+                    Sign Out
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => base44.auth.redirectToLogin(createPageUrl("OnboardingDiagnostic"))}
+                    className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-6"
+                  >
+                    Apply Now
+                  </Button>
+                )}
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </>
+        )}
+      </AnimatePresence>
       </header>
 
       {/* Page Content */}
