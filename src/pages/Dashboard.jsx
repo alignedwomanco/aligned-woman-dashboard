@@ -81,6 +81,12 @@ export default function Dashboard() {
     VisionEmbodiment: 0,
   };
 
+  useEffect(() => {
+    if (diagnosticSession?.snapshotFrequency) {
+      setSnapshotView(diagnosticSession.snapshotFrequency);
+    }
+  }, [diagnosticSession]);
+
   // If no diagnostic completed, show onboarding prompt
   if (!diagnosticSession) {
     return (
@@ -115,12 +121,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (diagnosticSession?.snapshotFrequency) {
-      setSnapshotView(diagnosticSession.snapshotFrequency);
-    }
-  }, [diagnosticSession]);
 
   const getSnapshotContent = () => {
     const todayDate = new Date().toLocaleDateString("en-US", {
