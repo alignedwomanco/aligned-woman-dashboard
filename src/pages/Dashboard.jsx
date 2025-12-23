@@ -74,12 +74,31 @@ export default function Dashboard() {
   const checkInStreak = checkIns?.length || 0;
   const latestCheckIn = checkIns?.[0];
 
-  const phaseProgress = {
-    Awareness: 40,
-    Liberation: 20,
-    Intention: 0,
-    VisionEmbodiment: 0,
+  const { data: allModules } = useQuery({
+    queryKey: ["allModules"],
+    queryFn: () => base44.entities.Module.list(),
+    initialData: [],
+  });
+
+  const calculatePhaseProgress = () => {
+    const phases = ["Awareness", "Liberation", "Intention", "VisionEmbodiment"];
+    const progress = {};
+    
+    phases.forEach(phase => {
+      const modulesInPhase = allModules.filter(m => m.phase === phase);
+      const completedInPhase = moduleProgress.filter(p => 
+        p.status === "Complete" && 
+        modulesInPhase.some(m => m.id === p.moduleId)
+      );
+      progress[phase] = modulesInPhase.length > 0 
+        ? Math.round((completedInPhase.length / modulesInPhase.length) * 100)
+        : 0;
+    });
+    
+    return progress;
   };
+
+  const phaseProgress = calculatePhaseProgress();
 
   useEffect(() => {
     if (diagnosticSession?.snapshotFrequency) {
@@ -129,73 +148,116 @@ export default function Dashboard() {
       day: "numeric",
     });
 
+    if (snapshotView === "weekly") {
+      return (
+        <Card className="bg-gradient-to-br from-purple-50 to-white border-purple-100">
+          <CardHeader>
+            <CardTitle className="text-2xl">This Week's Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm max-w-none">
+            <p className="text-gray-700 whitespace-pre-line">
+              {diagnosticSession.weeklySnapshotSummary || "Your weekly overview will appear here after your first check-in cycle completes."}
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (snapshotView === "monthly") {
+      return (
+        <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-100">
+          <CardHeader>
+            <CardTitle className="text-2xl">This Month's Reflection</CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm max-w-none">
+            <p className="text-gray-700 whitespace-pre-line">
+              {diagnosticSession.monthlySnapshotSummary || "Your monthly reflection will appear here as you progress through your journey."}
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
     return (
       <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl">
-              {snapshotView === "daily" && "Today's Snapshot"}
-              {snapshotView === "weekly" && "This Week's Overview"}
-              {snapshotView === "monthly" && "This Month's Reflection"}
-            </CardTitle>
+            <CardTitle className="text-2xl">Today's Snapshot</CardTitle>
             <Badge className="bg-[#6B1B3D] text-white">{todayDate}</Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Focus Areas */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Current Focus</h3>
-            <div className="flex flex-wrap gap-2">
-              {diagnosticSession.concerns?.slice(0, 5).map((concern) => (
-                <Badge key={concern} variant="outline" className="bg-white">
-                  {concern}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Emotional State */}
-          {latestCheckIn && (
-            <div>
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">Current State</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Energy</div>
-                  <div className="text-2xl font-bold text-[#6B1B3D]">{latestCheckIn.energy}/10</div>
-                </div>
-                <div className="bg-white p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Capacity</div>
-                  <div className="text-2xl font-bold text-[#6B1B3D]">{latestCheckIn.capacity}/10</div>
-                </div>
+          {diagnosticSession.dailySnapshot && (
+            <>
+              {/* Primary Guidance */}
+              <div className="bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white p-6 rounded-2xl">
+                <h3 className="text-lg font-semibold mb-3">Your Energy Today</h3>
+                <p className="text-white/90 leading-relaxed">
+                  {diagnosticSession.dailySnapshot.focusReminder}
+                </p>
               </div>
-            </div>
+
+              {/* Energy & Capacity */}
+              {latestCheckIn && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white p-4 rounded-xl border-2 border-pink-100">
+                    <div className="text-xs text-gray-500 mb-1">Energy</div>
+                    <div className="text-3xl font-bold text-[#6B1B3D]">{latestCheckIn.energy}/10</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-xl border-2 border-pink-100">
+                    <div className="text-xs text-gray-500 mb-1">Capacity</div>
+                    <div className="text-3xl font-bold text-[#6B1B3D]">{latestCheckIn.capacity}/10</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Cycle Insight */}
+              {diagnosticSession.dailySnapshot.cycleInsight && (
+                <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+                  <h3 className="text-sm font-semibold text-purple-900 mb-2">Cycle Wisdom</h3>
+                  <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.cycleInsight}</p>
+                </div>
+              )}
+
+              {/* Astrology Insight */}
+              {diagnosticSession.dailySnapshot.astrologyInsight && (
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                  <h3 className="text-sm font-semibold text-blue-900 mb-2">Astrology</h3>
+                  <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.astrologyInsight}</p>
+                </div>
+              )}
+
+              {/* Human Design */}
+              {diagnosticSession.dailySnapshot.humanDesignInsight && (
+                <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                  <h3 className="text-sm font-semibold text-amber-900 mb-2">Your Design</h3>
+                  <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.humanDesignInsight}</p>
+                </div>
+              )}
+
+              {/* Movement & Nutrition */}
+              <div className="grid md:grid-cols-2 gap-3">
+                {diagnosticSession.dailySnapshot.exerciseRecommendation && (
+                  <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                    <h3 className="text-sm font-semibold text-green-900 mb-2">Movement</h3>
+                    <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.exerciseRecommendation}</p>
+                  </div>
+                )}
+                {diagnosticSession.dailySnapshot.nutritionRecommendation && (
+                  <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                    <h3 className="text-sm font-semibold text-orange-900 mb-2">Nutrition</h3>
+                    <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.nutritionRecommendation}</p>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
-          {/* Cycle Insight */}
-          {diagnosticSession.cycleProfile?.cycleStage && (
-            <div>
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">Cycle Phase</h3>
-              <Badge className="bg-purple-100 text-purple-800">
-                {diagnosticSession.cycleProfile.cycleStage}
-              </Badge>
+          {!diagnosticSession.dailySnapshot && (
+            <div className="text-center py-8 text-gray-500">
+              Complete your onboarding to generate your personalized daily snapshot.
             </div>
           )}
-
-          {/* Suggested Action */}
-          <div className="bg-rose-50 p-4 rounded-xl">
-            <h3 className="text-sm font-semibold text-[#6B1B3D] mb-2">Suggested Action</h3>
-            <p className="text-gray-700">
-              Based on your capacity ({diagnosticSession.capacityScore}/10), consider a {diagnosticSession.timeAvailable} session today.
-            </p>
-          </div>
-
-          {/* Progress Note */}
-          <div className="bg-[#6B1B3D] text-white p-4 rounded-xl">
-            <h3 className="text-sm font-semibold mb-2">Phase Progress</h3>
-            <p className="text-sm">
-              You're working through <strong>{diagnosticSession.primaryPhase}</strong> with a focus on {diagnosticSession.secondaryPhase}.
-            </p>
-          </div>
         </CardContent>
       </Card>
     );
@@ -266,11 +328,148 @@ export default function Dashboard() {
           </Tabs>
         </motion.div>
 
-        {/* Quick Actions & Tools */}
+        {/* Your ALIVE Path */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="mb-10"
+        >
+          <Card className="bg-gradient-to-br from-[#6B1B3D] to-[#4A1228] border-0 text-white">
+            <CardContent className="p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="w-5 h-5 text-rose-300" />
+                <h2 className="text-2xl font-bold">Your ALIVE Path</h2>
+              </div>
+              {diagnosticSession.aliveNarrative && (
+                <p className="text-white/90 mb-4 leading-relaxed">
+                  {diagnosticSession.aliveNarrative}
+                </p>
+              )}
+              {diagnosticSession.phaseFocusAdvice && (
+                <div className="bg-white/10 p-4 rounded-xl mb-4">
+                  <p className="text-white/90">{diagnosticSession.phaseFocusAdvice}</p>
+                </div>
+              )}
+              {diagnosticSession.recommendedModules && diagnosticSession.recommendedModules.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold text-rose-200 mb-2">Recommended for You</h3>
+                  <div className="space-y-2">
+                    {diagnosticSession.recommendedModules.slice(0, 3).map((module, i) => (
+                      <div key={i} className="flex items-center gap-2 text-white/80 text-sm">
+                        <CheckCircle className="w-4 h-4 text-rose-300" />
+                        {module}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <Link to={createPageUrl("MyPathway")}>
+                <Button className="bg-white text-[#6B1B3D] hover:bg-white/90">
+                  Continue Your Path <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Cycle & Body Intelligence */}
+        {diagnosticSession.dailySnapshot?.cycleInsight && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-10"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-purple-600" />
+                  Your Cycle & Body Today
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-purple-50 p-4 rounded-xl">
+                  <h3 className="text-sm font-semibold text-purple-900 mb-2">Phase Wisdom</h3>
+                  <p className="text-gray-700">{diagnosticSession.dailySnapshot.cycleInsight}</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {diagnosticSession.dailySnapshot.exerciseRecommendation && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Movement</h3>
+                      <p className="text-gray-600 text-sm">{diagnosticSession.dailySnapshot.exerciseRecommendation}</p>
+                    </div>
+                  )}
+                  {diagnosticSession.dailySnapshot.nutritionRecommendation && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Nutrition</h3>
+                      <p className="text-gray-600 text-sm">{diagnosticSession.dailySnapshot.nutritionRecommendation}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Design & Energetics */}
+        {diagnosticSession.enableDeepPersonalisation && (diagnosticSession.astrologyProfile || diagnosticSession.humanDesignProfile) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mb-10"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-600" />
+                  Your Design & Energetics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {diagnosticSession.humanDesignProfile && (
+                  <div className="bg-amber-50 p-4 rounded-xl">
+                    <h3 className="text-sm font-semibold text-amber-900 mb-2">Human Design</h3>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      <Badge className="bg-amber-200 text-amber-900">
+                        {diagnosticSession.humanDesignProfile.type}
+                      </Badge>
+                      <Badge variant="outline">{diagnosticSession.humanDesignProfile.authority}</Badge>
+                    </div>
+                    <p className="text-gray-700 text-sm">
+                      <strong>Strategy:</strong> {diagnosticSession.humanDesignProfile.strategy}
+                    </p>
+                    <p className="text-gray-600 text-sm mt-2">{diagnosticSession.humanDesignProfile.energyPattern}</p>
+                  </div>
+                )}
+                {diagnosticSession.astrologyProfile && (
+                  <div className="bg-blue-50 p-4 rounded-xl">
+                    <h3 className="text-sm font-semibold text-blue-900 mb-2">Astrology</h3>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {diagnosticSession.astrologyProfile.sunSign && (
+                        <Badge className="bg-blue-200 text-blue-900">☉ {diagnosticSession.astrologyProfile.sunSign}</Badge>
+                      )}
+                      {diagnosticSession.astrologyProfile.moonSign && (
+                        <Badge variant="outline">☽ {diagnosticSession.astrologyProfile.moonSign}</Badge>
+                      )}
+                      {diagnosticSession.astrologyProfile.risingSign && (
+                        <Badge variant="outline">↑ {diagnosticSession.astrologyProfile.risingSign}</Badge>
+                      )}
+                    </div>
+                    <p className="text-gray-600 text-sm">{diagnosticSession.astrologyProfile.currentTransitSummary}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Quick Actions & Tools */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
           className="mb-10"
         >
           <div className="flex items-center justify-between mb-4">
@@ -392,7 +591,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.8 }}
           >
             <Card>
               <CardHeader className="pb-2">
@@ -420,7 +619,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.9 }}
           >
             <Card>
               <CardHeader className="pb-2">

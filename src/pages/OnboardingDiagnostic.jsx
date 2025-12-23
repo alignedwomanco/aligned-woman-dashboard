@@ -223,25 +223,73 @@ export default function OnboardingDiagnostic() {
     }, 2000);
   };
 
+  const getCyclePhase = (lastPeriodDate, cycleLength) => {
+    if (!lastPeriodDate) return null;
+    const daysSincePeriod = Math.floor((new Date() - new Date(lastPeriodDate)) / (1000 * 60 * 60 * 24));
+    const cycleDay = daysSincePeriod % cycleLength;
+    
+    if (cycleDay <= 6) return "Menstrual";
+    if (cycleDay <= Math.floor(cycleLength * 0.4)) return "Follicular";
+    if (cycleDay <= Math.floor(cycleLength * 0.5)) return "Ovulatory";
+    return "Luteal";
+  };
+
   const analyzeAnswers = async (data) => {
-    const prompt = `Analyze this user's onboarding responses and provide recommendations:
+    const cyclePhase = getCyclePhase(data.cycleProfile?.lastPeriodDate, data.cycleProfile?.cycleLength);
+    const daysSincePeriod = data.cycleProfile?.lastPeriodDate 
+      ? Math.floor((new Date() - new Date(data.cycleProfile.lastPeriodDate)) / (1000 * 60 * 60 * 24))
+      : null;
 
-Concerns: ${data.concerns.join(", ")}
-Current Feeling: ${data.currentFeeling}
-Capacity: ${data.capacityScore}/10
-Time Available: ${data.timeAvailable}
-Context: ${data.userContextText}
-Values: ${data.values.join(", ")}
+    const prompt = `You are analyzing a woman's wellness profile to create her personalized ALIVE Method pathway.
 
-Based on these answers, determine:
-1. Primary phase (Awareness, Liberation, Intention, or VisionEmbodiment)
-2. Secondary phase
-3. Any risk flags (e.g., burnout, overwhelm, low capacity)
-4. Topics to condense (things they already know)
-5. 3-5 recommended first modules
-6. 3-5 action items for their first week
+CONTEXT:
+- Concerns: ${data.concerns.join(", ")}
+- Current Feeling: ${data.currentFeeling}
+- Capacity Score: ${data.capacityScore}/10
+- Time Available: ${data.timeAvailable}
+- Personal Context: ${data.userContextText || "Not provided"}
+- Core Values: ${data.values.join(", ")}
+- Releasing: ${data.releasing || "Not specified"}
+- Becoming: ${data.becoming || "Not specified"}
+- Boundaries: ${data.boundaries.filter(b => b).join("; ") || "Not set"}
+${data.cycleProfile?.cycleStage === "Cycling" ? `- Cycle Phase: ${cyclePhase} (Day ${daysSincePeriod} of ${data.cycleProfile.cycleLength}-day cycle)` : `- Cycle Stage: ${data.cycleProfile?.cycleStage || "Not specified"}`}
+${data.enableDeepPersonalisation ? `- Birth Data: ${data.dob} ${data.tob ? `at ${data.tob}` : ""} in ${data.pob}` : ""}
 
-Be concise and specific.`;
+PROVIDE:
+1. Primary ALIVE Phase (Awareness/Liberation/Intention/VisionEmbodiment) - which phase she needs most right now
+2. Secondary Phase - supporting phase for integration
+3. ALIVE Narrative - 2-3 sentences explaining why these phases and what they mean for her journey
+4. Phase Focus Advice - one clear action statement for her primary phase
+5. Risk Flags - any concerns (burnout, overwhelm, low capacity, isolation)
+6. Condensed Topics - areas she may already understand or have worked on
+7. Recommended Modules - 3-5 specific module topics aligned with her phases
+8. First Week Plan - 3-5 concrete, time-appropriate actions
+
+${data.enableDeepPersonalisation ? `
+ASTROLOGY (based on ${data.dob}):
+- Determine likely Sun, Moon, Rising signs
+- Current transit summary (general for this time of year)
+` : ""}
+
+${data.enableDeepPersonalisation ? `
+HUMAN DESIGN (inferred from birth data):
+- Determine likely Type, Authority, Strategy
+- Energy pattern description
+` : ""}
+
+DAILY SNAPSHOT:
+- Astrology Insight: One sentence about current energy
+- Human Design Insight: How to work with her design today
+- Cycle Insight: Guidance based on ${cyclePhase || data.cycleProfile?.cycleStage || "her body's rhythm"}
+- Energy Guidance: What to do with ${data.capacityScore}/10 capacity
+- Exercise Recommendation: Type and intensity for today
+- Nutrition Recommendation: What to prioritize nutritionally
+- Focus Reminder: One grounding statement
+
+WEEKLY SUMMARY: 2-3 paragraph overview for the week ahead
+MONTHLY SUMMARY: 2-3 paragraph reflection and intention-setting for the month
+
+Be warm, specific, and action-oriented.`;
 
     const result = await base44.integrations.Core.InvokeLLM({
       prompt,
@@ -250,10 +298,44 @@ Be concise and specific.`;
         properties: {
           primaryPhase: { type: "string" },
           secondaryPhase: { type: "string" },
+          aliveNarrative: { type: "string" },
+          phaseFocusAdvice: { type: "string" },
           riskFlags: { type: "array", items: { type: "string" } },
           condensedTopics: { type: "array", items: { type: "string" } },
           recommendedModules: { type: "array", items: { type: "string" } },
           firstWeekPlan: { type: "array", items: { type: "string" } },
+          astrologyProfile: {
+            type: "object",
+            properties: {
+              sunSign: { type: "string" },
+              moonSign: { type: "string" },
+              risingSign: { type: "string" },
+              currentTransitSummary: { type: "string" }
+            }
+          },
+          humanDesignProfile: {
+            type: "object",
+            properties: {
+              type: { type: "string" },
+              authority: { type: "string" },
+              strategy: { type: "string" },
+              energyPattern: { type: "string" }
+            }
+          },
+          dailySnapshot: {
+            type: "object",
+            properties: {
+              astrologyInsight: { type: "string" },
+              humanDesignInsight: { type: "string" },
+              cycleInsight: { type: "string" },
+              energyGuidance: { type: "string" },
+              exerciseRecommendation: { type: "string" },
+              nutritionRecommendation: { type: "string" },
+              focusReminder: { type: "string" }
+            }
+          },
+          weeklySnapshotSummary: { type: "string" },
+          monthlySnapshotSummary: { type: "string" }
         },
       },
     });
