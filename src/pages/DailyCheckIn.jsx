@@ -221,6 +221,15 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
     }
   };
 
+  const handleNext = () => {
+    setVisitedSteps(prev => new Set([...prev, step]));
+    if (step < totalSteps - 1) {
+      setStep(step + 1);
+    } else {
+      handleComplete();
+    }
+  };
+
   if (isProcessing) {
     return (
       <div className="min-h-screen bg-[#611836] flex items-center justify-center p-6">
@@ -421,13 +430,7 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
             </Button>
           )}
           <Button
-            onClick={() => {
-              if (step < totalSteps - 1) {
-                setStep(step + 1);
-              } else {
-                handleComplete();
-              }
-            }}
+            onClick={handleNext}
             disabled={!canProceed()}
             size="lg"
             className="flex-1 bg-[#FECDD4] hover:bg-[#FDB8C3] text-[#611836] rounded-2xl py-6 text-lg font-semibold disabled:opacity-40"
