@@ -28,6 +28,7 @@ const appPages = [
   { name: "Dashboard", label: "Dashboard" },
   { name: "ModulesLibrary", label: "Courses" },
   { name: "Experts", label: "Expert Library" },
+  { name: "ALIVEMethod", label: "ALIVE Method" },
   { name: "ToolsHub", label: "Tools" },
   { name: "Contact", label: "Support" },
 ];
@@ -276,95 +277,43 @@ export default function Layout({ children, currentPageName }) {
                 </button>
               </div>
 
-              {/* Menu Links - Scrollable */}
+              {/* Navigation Links - Scrollable */}
               <div className="flex-1 overflow-y-auto sidebar-scroll">
                 <div className="p-6 space-y-2">
-                  {isAuthenticated ? (
-                    <>
-                      <Link
-                        to={createPageUrl("Dashboard")}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors flex items-center gap-3 ${
-                          currentPageName === "Dashboard"
-                            ? "bg-pink-50 text-[#6C1A3E]"
-                            : "text-gray-700 hover:bg-pink-50"
-                        }`}
-                      >
-                        <User className="w-5 h-5" />
-                        Dashboard
-                      </Link>
-                      
-                      <Link
-                        to={createPageUrl("ProfileSettings")}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors flex items-center gap-3 ${
-                          currentPageName === "ProfileSettings"
-                            ? "bg-pink-50 text-[#6C1A3E]"
-                            : "text-gray-700 hover:bg-pink-50"
-                        }`}
-                      >
-                        <UserCircle className="w-5 h-5" />
-                        Profile Settings
-                      </Link>
-                      
-                      {user && ["admin", "master_admin", "moderator", "expert", "course_creator"].includes(user.role) && (
-                        <Link
-                          to={createPageUrl("AdminSettings")}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors flex items-center gap-3 ${
-                            currentPageName === "AdminSettings"
-                              ? "bg-pink-50 text-[#6C1A3E]"
-                              : "text-gray-700 hover:bg-pink-50"
-                          }`}
-                        >
-                          <Settings className="w-5 h-5" />
-                          Admin Settings
-                        </Link>
-                      )}
-                      
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          handleLogout();
-                        }}
-                        className="w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-colors flex items-center gap-3 text-red-600 hover:bg-red-50"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        Sign Out
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={createPageUrl(item.name)}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors ${
-                            currentPageName === item.name
-                              ? "bg-pink-50 text-[#6C1A3E]"
-                              : "text-gray-700 hover:bg-pink-50"
-                          }`}
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </>
-                  )}
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={createPageUrl(item.name)}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                        currentPageName === item.name
+                          ? "bg-pink-50 text-[#6C1A3E]"
+                          : "text-gray-700 hover:bg-pink-50"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </div>
               </div>
 
-              {/* Bottom Action - Only for non-authenticated */}
-              {!isAuthenticated && (
-                <div className="p-6 border-t flex-shrink-0">
+              {/* Bottom Action */}
+              <div className="p-6 border-t flex-shrink-0">
+                {isAuthenticated ? (
+                  <Button
+                    onClick={handleLogout}
+                    className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-6"
+                  >
+                    Sign Out
+                  </Button>
+                ) : (
                   <Button
                     onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
                     className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-6"
                   >
                     Apply Now
                   </Button>
-                </div>
-              )}
+                )}
             </motion.div>
           </>
         )}
