@@ -19,6 +19,7 @@ import OurWhy from './pages/OurWhy';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import ToolsHub from './pages/ToolsHub';
+import DefineMyPurpose from './pages/DefineMyPurpose';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "Progress": Progress,
     "Settings": Settings,
     "ToolsHub": ToolsHub,
+    "DefineMyPurpose": DefineMyPurpose,
 }
 
 export const pagesConfig = {
