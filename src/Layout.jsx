@@ -280,6 +280,7 @@ export default function Layout({ children, currentPageName }) {
               {/* Navigation Links - Scrollable */}
               <div className="flex-1 overflow-y-auto sidebar-scroll bg-white">
                 <div className="p-6 space-y-1">
+                  {console.log('Debug - navItems:', navItems, 'isPublicPage:', isPublicPage, 'currentPageName:', currentPageName, 'isAuthenticated:', isAuthenticated)}
                   {navItems.map((item) => (
                     <Link
                       key={item.name}
@@ -299,19 +300,26 @@ export default function Layout({ children, currentPageName }) {
 
               {/* Bottom Action */}
               <div className="p-6 border-t flex-shrink-0 bg-white">
-                <Button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    if (isAuthenticated) {
+                {isAuthenticated ? (
+                  <Button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
                       handleLogout();
-                    } else {
-                      base44.auth.redirectToLogin(createPageUrl("Dashboard"));
-                    }
-                  }}
-                  className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-4 text-base font-medium"
-                >
-                  Sign Out
-                </Button>
+                    }}
+                    className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-4 text-base font-medium"
+                  >
+                    Sign Out
+                  </Button>
+                ) : (
+                  <Link to={createPageUrl("Apply")}>
+                    <Button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-4 text-base font-medium"
+                    >
+                      Apply Now
+                    </Button>
+                  </Link>
+                )}
               </div>
               </motion.div>
               </>
