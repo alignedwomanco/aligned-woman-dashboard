@@ -388,7 +388,7 @@ export default function Dashboard() {
                 <TabsTrigger value="daily">Daily</TabsTrigger>
                 <TabsTrigger value="weekly">Weekly</TabsTrigger>
                 <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              </Tabs>
+              </TabsList>
               <TabsContent value={snapshotView}>
                 {getSnapshotContent()}
               </TabsContent>
