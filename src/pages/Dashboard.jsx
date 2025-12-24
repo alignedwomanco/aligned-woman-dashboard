@@ -69,10 +69,29 @@ export default function Dashboard() {
     initialData: [],
   });
 
+  const { data: purposeRuns } = useQuery({
+    queryKey: ["purposeRuns"],
+    queryFn: () =>
+      base44.entities.ToolRun.filter(
+        { toolSlug: "define-my-purpose", status: "Complete" },
+        "-completed_date",
+        1
+      ),
+    initialData: [],
+  });
+
   const completedModules = moduleProgress?.filter((p) => p.status === "Complete").length || 0;
   const inProgressModule = moduleProgress?.find((p) => p.status === "InProgress");
   const checkInStreak = checkIns?.length || 0;
   const latestCheckIn = checkIns?.[0];
+  const latestPurposeRun = purposeRuns?.[0];
+  
+  const canRerunPurpose = () => {
+    if (!latestPurposeRun?.completedAt) return true;
+    const lastRun = new Date(latestPurposeRun.completedAt);
+    const daysSince = Math.floor((new Date() - lastRun) / (1000 * 60 * 60 * 24));
+    return daysSince >= 7;
+  };
 
   const { data: allModules } = useQuery({
     queryKey: ["allModules"],
@@ -356,30 +375,103 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Snapshot Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-8"
-        >
-          <Tabs value={snapshotView} onValueChange={setSnapshotView}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="daily">Daily</TabsTrigger>
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            </TabsList>
-            <TabsContent value={snapshotView}>
-              {getSnapshotContent()}
-            </TabsContent>
-          </Tabs>
-        </motion.div>
+        {/* 2-Column Layout: Snapshot + Purpose */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          {/* Left Column: Today's Snapshot */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Tabs value={snapshotView} onValueChange={setSnapshotView}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="daily">Daily</TabsTrigger>
+                <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              </Tabs>
+              <TabsContent value={snapshotView}>
+                {getSnapshotContent()}
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+
+          {/* Right Column: Purpose Tool */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#6B1B3D]" />
+                  My Purpose
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!latestPurposeRun ? (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Sparkles className="w-10 h-10 text-[#6B1B3D]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#4A1228] mb-3">
+                      Define My Purpose
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                      Uncover the masks you wear and the truth you are ready to live
+                    </p>
+                    <Link to={createPageUrl("DefineMyPurpose")}>
+                      <Button className="bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] hover:from-[#4A1228] hover:to-[#6B1B3D] text-white px-8 py-6">
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        Begin Journey
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <span className="text-sm font-semibold text-green-700">
+                          Completed{" "}
+                          {new Date(latestPurposeRun.completedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-[#4A1228] mb-2">
+                        Your Purpose Report is Ready
+                      </h4>
+                      <p className="text-gray-600 text-sm">
+                        View your personalized insights and higher self guidance.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <Link to={createPageUrl("DefineMyPurpose")}>
+                        <Button className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white">
+                          View Purpose Report
+                        </Button>
+                      </Link>
+                      {canRerunPurpose() && (
+                        <Link to={createPageUrl("DefineMyPurpose")}>
+                          <Button variant="outline" className="w-full border-[#6B1B3D] text-[#6B1B3D] hover:bg-pink-50">
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Redefine My Purpose
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Your ALIVE Path */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.4 }}
           className="mb-10"
         >
           <Card className="bg-gradient-to-br from-[#6B1B3D] to-[#4A1228] border-0 text-white">
@@ -425,7 +517,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="mb-10"
           >
             <div className="flex items-center justify-between mb-4">
@@ -470,7 +562,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.6 }}
             className="mb-10"
           >
             <Card>
@@ -509,7 +601,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.7 }}
             className="mb-10"
           >
             <Card>
@@ -561,7 +653,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.8 }}
           className="mb-10"
         >
           <div className="flex items-center justify-between mb-4">
@@ -620,7 +712,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.9 }}
           >
             <Card>
               <CardHeader>
@@ -645,7 +737,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 1.0 }}
           >
             <Card>
               <CardHeader>
@@ -683,7 +775,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 1.1 }}
           >
             <Card>
               <CardHeader className="pb-2">
@@ -711,7 +803,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
+            transition={{ delay: 1.2 }}
           >
             <Card>
               <CardHeader className="pb-2">
