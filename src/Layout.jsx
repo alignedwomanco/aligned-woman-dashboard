@@ -314,10 +314,11 @@ export default function Layout({ children, currentPageName }) {
                     Apply Now
                   </Button>
                 )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              </div>
+              </motion.div>
+              </>
+              )}
+              </AnimatePresence>
       </header>
 
       {/* Page Content */}
