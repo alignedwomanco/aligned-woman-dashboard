@@ -122,9 +122,14 @@ export default function Layout({ children, currentPageName }) {
           animation: fadeInUp 0.6s ease-out forwards;
         }
 
-        /* Prevent scroll when sidebar is open */
+        /* Prevent main scroll when sidebar is open, but allow sidebar scroll */
         body.sidebar-open {
           overflow: hidden;
+        }
+        
+        .sidebar-scroll {
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
         }
       `}</style>
 
