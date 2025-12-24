@@ -373,12 +373,57 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
+        {/* Recommended Modules */}
+        {diagnosticSession.recommendedModules && diagnosticSession.recommendedModules.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-10"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-[#4A1228]">Recommended for You</h2>
+                <p className="text-gray-600">Based on your diagnostic and current phase</p>
+              </div>
+              <Link to={createPageUrl("ModulesLibrary")}>
+                <Button variant="ghost" className="text-[#6B1B3D]">
+                  See all <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {diagnosticSession.recommendedModules.slice(0, 3).map((module, index) => (
+                <Card key={index} className="hover:shadow-lg transition-shadow border-2 border-pink-100">
+                  <CardContent className="p-6">
+                    <div className="w-14 h-14 bg-gradient-to-br from-[#6B1B3D] to-[#8B2E4D] rounded-2xl flex items-center justify-center mb-4">
+                      <BookOpen className="w-7 h-7 text-white" />
+                    </div>
+                    <Badge className="bg-pink-100 text-[#6B1B3D] mb-3">
+                      {diagnosticSession.primaryPhase}
+                    </Badge>
+                    <h3 className="font-bold text-lg text-[#4A1228] mb-2">{module}</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Aligned with your current journey
+                    </p>
+                    <Link to={createPageUrl("ModulesLibrary")}>
+                      <Button className="w-full bg-[#6B1B3D] hover:bg-[#4A1228]">
+                        Start Module <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* Cycle & Body Intelligence */}
         {diagnosticSession.dailySnapshot?.cycleInsight && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="mb-10"
           >
             <Card>
@@ -417,7 +462,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.6 }}
             className="mb-10"
           >
             <Card>
@@ -469,7 +514,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.7 }}
           className="mb-10"
         >
           <div className="flex items-center justify-between mb-4">
