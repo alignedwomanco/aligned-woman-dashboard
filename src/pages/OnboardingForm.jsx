@@ -369,8 +369,8 @@ Be warm, specific, and action-oriented.`;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#4A1228] to-[#2A0A18] p-4 md:p-6 pb-28">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-[#4A1228] to-[#2A0A18] p-4 md:p-6 flex flex-col">
+      <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col">
         {/* Header */}
         <div className="py-6">
           <div className="flex items-center justify-between mb-4">
@@ -390,7 +390,7 @@ Be warm, specific, and action-oriented.`;
         </div>
 
         {/* Question Content */}
-        <div className="min-h-[60vh]">
+        <div className="flex-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}

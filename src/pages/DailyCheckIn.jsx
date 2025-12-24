@@ -224,8 +224,8 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#4A1228] to-[#2A0A18] p-4 md:p-6 pb-28">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-[#4A1228] to-[#2A0A18] p-4 md:p-6 flex flex-col">
+      <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col">
         <div className="py-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -241,7 +241,7 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
           <Progress value={((step + 1) / totalSteps) * 100} className="h-1.5" />
         </div>
 
-        <div className="min-h-[60vh]">
+        <div className="flex-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -394,10 +394,8 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
             </motion.div>
           </AnimatePresence>
         </div>
-      </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#2A0A18] via-[#2A0A18] to-[#2A0A18]/90 pt-6 pb-safe pb-6 px-4 border-t border-white/5">
-        <div className="max-w-2xl mx-auto flex gap-3">
+        <div className="mt-8 pb-6 flex gap-3">
           {step > 0 && (
             <Button
               onClick={() => setStep(step - 1)}
