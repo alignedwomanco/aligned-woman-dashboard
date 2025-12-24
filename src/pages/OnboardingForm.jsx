@@ -473,7 +473,7 @@ Be warm, specific, and action-oriented.`;
                         onClick={() => handleSingleSelect("currentFeeling", feeling)}
                         className={`p-4 rounded-2xl border-2 transition-all text-center ${
                           answers.currentFeeling === feeling
-                            ? "bg-rose-400/10 border-rose-400/50 text-white"
+                            ? "bg-[#FECDD4]/10 border-[#FECDD4]/50 text-white"
                             : "bg-white/5 border-white/10 hover:border-white/20 text-white/70"
                         }`}
                       >
@@ -500,7 +500,7 @@ Be warm, specific, and action-oriented.`;
                         onClick={() => handleSingleSelect("timeAvailable", time)}
                         className={`p-5 rounded-2xl border-2 transition-all ${
                           answers.timeAvailable === time
-                            ? "bg-rose-400/10 border-rose-400/50 text-white"
+                            ? "bg-[#FECDD4]/10 border-[#FECDD4]/50 text-white"
                             : "bg-white/5 border-white/10 hover:border-white/20 text-white/70"
                         }`}
                       >
@@ -784,7 +784,7 @@ Be warm, specific, and action-oriented.`;
                         onClick={() => updateAnswer("snapshotFrequency", option.value)}
                         className={`w-full p-4 rounded-2xl border-2 transition-all text-left ${
                           answers.snapshotFrequency === option.value
-                            ? "bg-rose-400/10 border-rose-400/50 text-white"
+                            ? "bg-[#FECDD4]/10 border-[#FECDD4]/50 text-white"
                             : "bg-white/5 border-white/10 hover:border-white/20 text-white/70"
                         }`}
                       >
