@@ -209,7 +209,7 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
 
   if (isProcessing) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#4A1228] to-[#2A0A18] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#772343] flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -224,8 +224,8 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#4A1228] to-[#2A0A18] p-4 md:p-6 flex flex-col">
-      <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col">
+    <div className="min-h-screen bg-[#772343] p-4 md:p-6">
+      <div className="max-w-2xl mx-auto w-full">
         <div className="py-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -241,7 +241,7 @@ Be warm, specific, and synthesized. This is ONE intelligence speaking, not five 
           <Progress value={((step + 1) / totalSteps) * 100} className="h-1.5" />
         </div>
 
-        <div className="flex-1">
+        <div>
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
