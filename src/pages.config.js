@@ -4,6 +4,7 @@ import Apply from './pages/Apply';
 import Blueprint from './pages/Blueprint';
 import CheckIn from './pages/CheckIn';
 import Contact from './pages/Contact';
+import DailyCheckIn from './pages/DailyCheckIn';
 import Dashboard from './pages/Dashboard';
 import Experts from './pages/Experts';
 import Journal from './pages/Journal';
@@ -18,7 +19,6 @@ import OurWhy from './pages/OurWhy';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import ToolsHub from './pages/ToolsHub';
-import DailyCheckIn from './pages/DailyCheckIn';
 import __Layout from './Layout.jsx';
 
 
@@ -29,6 +29,7 @@ export const PAGES = {
     "Blueprint": Blueprint,
     "CheckIn": CheckIn,
     "Contact": Contact,
+    "DailyCheckIn": DailyCheckIn,
     "Dashboard": Dashboard,
     "Experts": Experts,
     "Journal": Journal,
@@ -43,7 +44,6 @@ export const PAGES = {
     "Progress": Progress,
     "Settings": Settings,
     "ToolsHub": ToolsHub,
-    "DailyCheckIn": DailyCheckIn,
 }
 
 export const pagesConfig = {

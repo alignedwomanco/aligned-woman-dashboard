@@ -32,7 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ModuleBuilderContent from "@/components/admin/ModuleBuilderContent";
+import CourseBuilderContent from "@/components/admin/CourseBuilderContent";
 import AdminMetricsContent from "@/components/admin/AdminMetricsContent";
 import AvatarGenerator from "@/components/admin/AvatarGenerator";
 import { createPageUrl } from "@/utils";
@@ -161,7 +161,7 @@ export default function AdminSettings() {
           <TabsList className="grid w-full max-w-3xl grid-cols-4">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             {canManageUsers && <TabsTrigger value="users">Users</TabsTrigger>}
-            {canAccessModuleBuilder && <TabsTrigger value="modules">Modules</TabsTrigger>}
+            {canAccessModuleBuilder && <TabsTrigger value="courses">Course Builder</TabsTrigger>}
             {canAccessModuleBuilder && <TabsTrigger value="metrics">Metrics</TabsTrigger>}
           </TabsList>
 
@@ -481,10 +481,10 @@ export default function AdminSettings() {
             </TabsContent>
           )}
 
-          {/* Module Builder Tab */}
+          {/* Course Builder Tab */}
           {canAccessModuleBuilder && (
-            <TabsContent value="modules">
-              <ModuleBuilderContent />
+            <TabsContent value="courses">
+              <CourseBuilderContent />
             </TabsContent>
           )}
 
