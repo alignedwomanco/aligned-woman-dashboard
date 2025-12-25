@@ -20,9 +20,7 @@ import {
   MessageCircle,
   Send,
   Check,
-  Trophy,
 } from "lucide-react";
-import QuizSection from "@/components/classroom/QuizSection";
 
 export default function ModulePlayer() {
   const navigate = useNavigate();
@@ -30,8 +28,6 @@ export default function ModulePlayer() {
   const moduleId = searchParams.get("id");
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [quizCompleted, setQuizCompleted] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: module } = useQuery({
