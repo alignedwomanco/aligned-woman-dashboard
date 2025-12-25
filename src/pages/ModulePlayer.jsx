@@ -208,9 +208,9 @@ export default function ModulePlayer() {
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
-        <div className="grid lg:grid-cols-12 gap-6">
-          {/* Left Sidebar - Pages List */}
-          <div className="lg:col-span-3">
+        <div className="grid lg:grid-cols-[320px_1fr] gap-6">
+          {/* Left Sidebar - Pages List & Resources */}
+          <div className="space-y-6">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm">Course Content</CardTitle>
@@ -253,10 +253,44 @@ export default function ModulePlayer() {
                 </ScrollArea>
               </CardContent>
             </Card>
+
+            {/* Resources Section */}
+            {selectedPage.downloads && selectedPage.downloads.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Download className="w-4 h-4" />
+                    Resources
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {selectedPage.downloads.map((download, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Download className="w-4 h-4 text-[#6B1B3D] flex-shrink-0" />
+                        <span className="text-sm font-medium text-[#4A1228] truncate">
+                          {download.name}
+                        </span>
+                      </div>
+                      <a
+                        href={download.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2"
+                      >
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </a>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-6 space-y-6">
+          <div className="space-y-6">
             {/* Video Player */}
             <motion.div
               key={selectedPage.id}
@@ -310,39 +344,31 @@ export default function ModulePlayer() {
             {/* Lesson Content */}
             <Card>
               <CardHeader>
-                <CardTitle>{selectedPage.title}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{selectedPage.title}</CardTitle>
+                  {currentProgress.status !== "Complete" && (
+                    <Button
+                      onClick={handleMarkComplete}
+                      disabled={!canMarkComplete}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Mark Complete
+                    </Button>
+                  )}
+                  {currentProgress.status === "Complete" && (
+                    <div className="flex items-center gap-2 text-green-600">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="font-medium">Completed</span>
+                    </div>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div 
                   className="prose max-w-none" 
                   dangerouslySetInnerHTML={{ __html: selectedPage.content || '' }}
                 />
-
-                {/* Downloads */}
-                {selectedPage.downloads && selectedPage.downloads.length > 0 && (
-                  <div className="mt-6 pt-6 border-t">
-                    <h3 className="font-medium text-[#4A1228] mb-3 flex items-center gap-2">
-                      <Download className="w-4 h-4" />
-                      Downloads
-                    </h3>
-                    <div className="space-y-2">
-                      {selectedPage.downloads.map((download, idx) => (
-                        <a
-                          key={idx}
-                          href={download.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 p-3 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
-                        >
-                          <Download className="w-4 h-4 text-[#6B1B3D]" />
-                          <span className="text-sm font-medium text-[#4A1228]">
-                            {download.name}
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
@@ -398,43 +424,20 @@ export default function ModulePlayer() {
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Right Sidebar */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Learning Outcomes */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Learning Outcomes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {module.outcomes?.map((outcome, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 text-sm">{outcome}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Progress Card */}
+            {/* Next/Complete Actions */}
             <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
               <CardContent className="p-6">
-                <h3 className="font-bold text-[#4A1228] mb-4">Your Progress</h3>
                 <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600">Video Progress</span>
-                      <span className="font-medium">
-                        {currentProgress.videoWatchedPercent}%
-                      </span>
+                  {!canMarkComplete && (
+                    <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <p className="text-xs text-orange-800">
+                        ⏳ Watch at least 50% of the video to continue
+                      </p>
                     </div>
-                    <Progress value={currentProgress.videoWatchedPercent} className="h-2" />
-                  </div>
+                  )}
 
-                  {/* Simulate video progress */}
+                  {/* Simulate progress button for testing */}
                   {currentProgress.status !== "Complete" && currentProgress.videoWatchedPercent < 100 && (
                     <Button
                       variant="outline"
@@ -442,76 +445,50 @@ export default function ModulePlayer() {
                       onClick={() => {
                         const newPercent = Math.min(currentProgress.videoWatchedPercent + 25, 100);
                         updateProgressMutation.mutate({
-                          status: newPercent >= 100 ? "Complete" : "InProgress",
+                          status: newPercent >= 100 ? "InProgress" : "InProgress",
                           videoWatchedPercent: newPercent,
                         });
                       }}
                       className="w-full text-xs"
                     >
-                      Simulate +25% Watch Progress
+                      Simulate +25% Watch Progress ({currentProgress.videoWatchedPercent}%)
                     </Button>
                   )}
-                </div>
 
-                {!canMarkComplete && (
-                  <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                    <p className="text-xs text-orange-800">
-                      ⏳ Watch at least 50% of the video to unlock completion
-                    </p>
-                  </div>
-                )}
-
-                {canMarkComplete && currentProgress.status !== "Complete" && (
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                      <input
-                        type="checkbox"
-                        id="complete-checkbox"
-                        className="w-4 h-4 text-green-600 rounded"
-                        onChange={(e) => {
-                          if (e.target.checked) {
+                  {(() => {
+                    const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
+                    const nextPage = pages[currentIndex + 1];
+                    return nextPage ? (
+                      <Button
+                        className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white"
+                        onClick={() => {
+                          if (currentProgress.status !== "Complete" && canMarkComplete) {
                             handleMarkComplete();
                           }
+                          setSelectedPage(nextPage);
                         }}
-                      />
-                      <label htmlFor="complete-checkbox" className="text-sm text-green-900 cursor-pointer">
-                        I've completed this module
-                      </label>
-                    </div>
-                  </div>
-                )}
-
-                {currentProgress.status === "Complete" && (
-                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 text-center">
-                    <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
-                    <span className="text-sm font-medium text-green-700">
-                      ✓ Module Completed
-                    </span>
-                  </div>
-                )}
+                        disabled={!canMarkComplete}
+                      >
+                        {currentProgress.status !== "Complete" ? "Complete & Continue →" : "Next Lesson →"}
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white"
+                        onClick={() => {
+                          if (currentProgress.status !== "Complete" && canMarkComplete) {
+                            handleMarkComplete();
+                          }
+                          navigate(createPageUrl("Classroom"));
+                        }}
+                        disabled={currentProgress.status !== "Complete" && !canMarkComplete}
+                      >
+                        {currentProgress.status !== "Complete" ? "Complete & Finish Module" : "Back to Classroom"}
+                      </Button>
+                    );
+                  })()}
+                </div>
               </CardContent>
             </Card>
-
-            {/* Next Button */}
-            {(() => {
-              const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
-              const nextPage = pages[currentIndex + 1];
-              return nextPage ? (
-                <Button
-                  className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white"
-                  onClick={() => setSelectedPage(nextPage)}
-                >
-                  Next Lesson →
-                </Button>
-              ) : (
-                <Button
-                  className="w-full bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white"
-                  onClick={() => navigate(createPageUrl("Classroom"))}
-                >
-                  Back to Classroom
-                </Button>
-              );
-            })()}
           </div>
         </div>
       </div>
