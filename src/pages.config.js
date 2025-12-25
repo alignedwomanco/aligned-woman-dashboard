@@ -17,10 +17,10 @@ import MyMetrics from './pages/MyMetrics';
 import MyPathway from './pages/MyPathway';
 import OnboardingForm from './pages/OnboardingForm';
 import OurWhy from './pages/OurWhy';
+import ProfileSettings from './pages/ProfileSettings';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import ToolsHub from './pages/ToolsHub';
-import ProfileSettings from './pages/ProfileSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -44,10 +44,10 @@ export const PAGES = {
     "MyPathway": MyPathway,
     "OnboardingForm": OnboardingForm,
     "OurWhy": OurWhy,
+    "ProfileSettings": ProfileSettings,
     "Progress": Progress,
     "Settings": Settings,
     "ToolsHub": ToolsHub,
-    "ProfileSettings": ProfileSettings,
 }
 
 export const pagesConfig = {

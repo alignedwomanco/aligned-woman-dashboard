@@ -111,18 +111,28 @@ export default function DefineMyPurpose() {
   const loadNextQuestion = async (step, sessionId) => {
     setIsLoading(true);
     try {
+      // Refresh session data to get latest answers
+      const sessions = await base44.entities.DefineMyPurposeSession.filter(
+        { id: sessionId || session.id },
+        null,
+        1
+      );
+      
+      if (sessions && sessions.length > 0) {
+        setSession(sessions[0]);
+      }
+      
       const { data } = await base44.functions.invoke("defineMyPurposeNextQuestion", {
         sessionId: sessionId || session.id,
         currentStep: step,
       });
 
       setCurrentQuestion(data.question);
-      setCurrentAnswer(data.question.format === "multi_select" ? [] : "");
+      setCurrentAnswer("");
     } catch (error) {
       console.error("Error loading question:", error);
     } finally {
       setIsLoading(false);
-      setCurrentAnswer("");
     }
   };
 
@@ -132,9 +142,12 @@ export default function DefineMyPurpose() {
       const answerValue =
         Array.isArray(currentAnswer) ? currentAnswer.join(", ") : currentAnswer;
 
-      await base44.entities.DefineMyPurposeSession.update(session.id, {
+      // Save answer and update session
+      const updatedSession = await base44.entities.DefineMyPurposeSession.update(session.id, {
         [`dyp_ans${currentStep}`]: answerValue,
       });
+      
+      setSession(updatedSession);
 
       if (currentStep === 9) {
         // Generate mirror summary
@@ -146,11 +159,10 @@ export default function DefineMyPurpose() {
         setFinalQuestion(data.finalQuestion);
         setShowMirror(true);
       } else {
-        setCurrentStep(currentStep + 1);
-        await loadNextQuestion(currentStep + 1, session.id);
+        const nextStep = currentStep + 1;
+        setCurrentStep(nextStep);
+        await loadNextQuestion(nextStep, session.id);
       }
-
-      setCurrentAnswer("");
     } catch (error) {
       console.error("Error submitting answer:", error);
     } finally {
@@ -178,10 +190,27 @@ export default function DefineMyPurpose() {
     }
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      loadNextQuestion(currentStep - 1, session.id);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      
+      // Load previous question and answer
+      const prevAnswer = session[`dyp_ans${prevStep}`];
+      const prevQuestion = session[`dyp_q${prevStep}`];
+      
+      if (prevQuestion) {
+        setCurrentQuestion({
+          questionNumber: prevStep,
+          questionText: prevQuestion,
+          format: "short_text",
+          helperText: prevStep === 1 ? "Take your time. Be honest with yourself." : "Explore any underlying fears or patterns.",
+          storeAs: `dyp_q${prevStep}`,
+        });
+      }
+      
+      // Restore previous answer
+      setCurrentAnswer(prevAnswer || "");
     }
   };
 
