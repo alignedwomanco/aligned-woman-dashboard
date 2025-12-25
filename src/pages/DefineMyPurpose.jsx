@@ -115,7 +115,6 @@ export default function DefineMyPurpose() {
   };
 
   const loadNextQuestion = async (step, sessionId) => {
-    setIsLoading(true);
     try {
       // Refresh session data to get latest answers
       const sessions = await base44.entities.DefineMyPurposeSession.filter(
@@ -142,7 +141,6 @@ export default function DefineMyPurpose() {
             storeAs: `dyp_q${step}`,
           });
           setCurrentAnswer(existingAnswer || "");
-          setIsLoading(false);
           return;
         }
       }
@@ -153,12 +151,16 @@ export default function DefineMyPurpose() {
         currentStep: step,
       });
 
-      setCurrentQuestion(data.question);
+      setCurrentQuestion({
+        questionNumber: step,
+        questionText: data.question,
+        format: "short_text",
+        helperText: data.description,
+        storeAs: `dyp_q${step}`,
+      });
       setCurrentAnswer("");
     } catch (error) {
       console.error("Error loading question:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -193,14 +195,16 @@ export default function DefineMyPurpose() {
         setMirrorHtml(data.mirrorSummaryHtml);
         setFinalQuestion(data.finalQuestion);
         setShowMirror(true);
+        setIsLoading(false);
       } else {
         const nextStep = currentStep + 1;
         setCurrentStep(nextStep);
+        // Load next question, loading state will remain true until complete
         await loadNextQuestion(nextStep, session.id);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error submitting answer:", error);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -414,36 +418,43 @@ export default function DefineMyPurpose() {
           />
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  {currentQuestion.questionText}
-                </h2>
-                {currentQuestion.helperText && (
-                  <p className="text-white/60">{currentQuestion.helperText}</p>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+            <Loader2 className="w-12 h-12 text-[#FECDD4] animate-spin" />
+            <p className="text-white/70 text-lg">Generating your next question...</p>
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {currentQuestion.questionText}
+                  </h2>
+                  {currentQuestion.helperText && (
+                    <p className="text-white/60">{currentQuestion.helperText}</p>
+                  )}
+                </div>
+
+                {/* Short Text */}
+                {(currentQuestion.format === "short_text" || !currentQuestion.format) && (
+                  <Textarea
+                    value={currentAnswer}
+                    onChange={(e) => setCurrentAnswer(e.target.value)}
+                    placeholder="Share what comes up for you..."
+                    className="min-h-[200px] bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-2xl text-lg p-6"
+                  />
                 )}
               </div>
-
-              {/* Short Text */}
-              {(currentQuestion.format === "short_text" || !currentQuestion.format) && (
-                <Textarea
-                  value={currentAnswer}
-                  onChange={(e) => setCurrentAnswer(e.target.value)}
-                  placeholder="Share what comes up for you..."
-                  className="min-h-[200px] bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-2xl text-lg p-6"
-                />
-              )}
-            </div>
-          </motion.div>
-        </AnimatePresence>
+            </motion.div>
+          </AnimatePresence>
+        )}
 
         <div className="mt-8 flex gap-3">
           {currentStep > 1 && (
