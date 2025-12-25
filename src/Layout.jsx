@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import NotificationsDropdown from "../components/navigation/NotificationsDropdown";
 import MessagesDrawer from "../components/navigation/MessagesDrawer";
+import LaurAIChatWidget from "../components/LaurAIChatWidget";
 
 const publicPages = [
 { name: "Home", label: "Home" },
@@ -397,6 +398,9 @@ export default function Layout({ children, currentPageName }) {
       <main className="pt-[160px]">
         {children}
       </main>
+
+      {/* LaurAI Chat Widget */}
+      <LaurAIChatWidget />
     </div>);
 
 }
