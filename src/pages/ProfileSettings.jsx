@@ -118,10 +118,19 @@ export default function ProfileSettings() {
     try {
       await updateProfileMutation.mutateAsync(formattedData);
       
-      // Update local state with the saved values
-      setCurrentUser({ ...currentUser, full_name });
+      // Update both current user and profile data states
+      const updatedUser = { ...currentUser, ...formattedData };
+      setCurrentUser(updatedUser);
+      
+      // Keep the form values as-is (don't re-parse from server)
+      setProfileData({
+        ...profileData,
+        first_name: toTitleCase(profileData.first_name),
+        last_name: toTitleCase(profileData.last_name),
+      });
       
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       
       setValidationError({
         show: true,

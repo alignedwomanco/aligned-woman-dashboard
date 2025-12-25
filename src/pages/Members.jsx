@@ -105,7 +105,7 @@ export default function Members() {
   const requestConnectionMutation = useMutation({
     mutationFn: async ({ userEmail, note }) => {
       // Create connection request
-      await base44.entities.UserFollow.create({
+      const newRequest = await base44.entities.UserFollow.create({
         followingEmail: userEmail,
         status: "pending",
       });
@@ -123,14 +123,18 @@ export default function Members() {
         subject: "New Connection Request",
         body: `${currentUser.full_name} (${currentUser.email}) wants to connect with you.\n\nMessage: ${note}\n\nView your connection requests at ${window.location.origin}${createPageUrl("Members")}`,
       });
+      
+      return newRequest;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["connections"] });
-      queryClient.invalidateQueries({ queryKey: ["connectionRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["myFollows"] });
+    onSuccess: async () => {
       setConnectionNote("");
       setSelectedMember(null);
       setDialogOpen(false);
+      
+      // Force refresh queries
+      await queryClient.invalidateQueries({ queryKey: ["connections"] });
+      await queryClient.invalidateQueries({ queryKey: ["connectionRequests"] });
+      await queryClient.invalidateQueries({ queryKey: ["myFollows"] });
     },
   });
 
