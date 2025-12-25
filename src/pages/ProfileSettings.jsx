@@ -32,6 +32,7 @@ export default function ProfileSettings() {
   const [showConnectionRequests, setShowConnectionRequests] = useState(false);
   const [emailChangeDialogOpen, setEmailChangeDialogOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
+  const [validationError, setValidationError] = useState({ show: false, title: "", message: "" });
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -72,13 +73,22 @@ export default function ProfileSettings() {
   });
 
   const handleProfileUpdate = async () => {
-    if (!profileData.bio || !profileData.bio.trim()) {
-      alert("Bio is required. Please add a bio before saving.");
+    // Validation
+    if (!profileData.first_name?.trim() || !profileData.last_name?.trim()) {
+      setValidationError({
+        show: true,
+        title: "Name Required",
+        message: "Please enter both your first name and last name. This helps other members in the community identify and connect with you."
+      });
       return;
     }
 
-    if (!profileData.first_name?.trim() || !profileData.last_name?.trim()) {
-      alert("First name and last name are required.");
+    if (!profileData.bio || !profileData.bio.trim()) {
+      setValidationError({
+        show: true,
+        title: "Bio Required",
+        message: "Please add a bio to your profile. Your bio helps other members understand your background, interests, and what you're working on in your journey."
+      });
       return;
     }
 
@@ -102,15 +112,27 @@ export default function ProfileSettings() {
     try {
       await updateProfileMutation.mutateAsync(formattedData);
       setCurrentUser({ ...currentUser, ...formattedData });
-      alert("Profile updated successfully!");
+      setValidationError({
+        show: true,
+        title: "Success!",
+        message: "Your profile has been updated successfully."
+      });
     } catch (error) {
-      alert("Failed to update profile. Please try again.");
+      setValidationError({
+        show: true,
+        title: "Update Failed",
+        message: "We couldn't save your changes right now. Please check your connection and try again."
+      });
     }
   };
 
   const handleEmailChange = async () => {
     if (!newEmail || !newEmail.includes("@")) {
-      alert("Please enter a valid email address.");
+      setValidationError({
+        show: true,
+        title: "Invalid Email",
+        message: "Please enter a valid email address with an @ symbol."
+      });
       return;
     }
 
@@ -130,9 +152,17 @@ If you did not request this change, please ignore this email.
       
       setEmailChangeDialogOpen(false);
       setNewEmail("");
-      alert("Verification email sent! Please check your inbox and follow the instructions.");
+      setValidationError({
+        show: true,
+        title: "Verification Email Sent",
+        message: "We've sent a verification link to your new email address. Please check your inbox and click the link to complete the change."
+      });
     } catch (error) {
-      alert("Failed to send verification email. Please try again.");
+      setValidationError({
+        show: true,
+        title: "Email Send Failed",
+        message: "We couldn't send the verification email. Please check the email address and try again."
+      });
     }
   };
 
@@ -344,7 +374,6 @@ If you did not request this change, please ignore this email.
                         onChange={(e) =>
                           setProfileData({ ...profileData, first_name: e.target.value })
                         }
-                        required
                       />
                     </div>
                     <div>
@@ -354,7 +383,6 @@ If you did not request this change, please ignore this email.
                         onChange={(e) =>
                           setProfileData({ ...profileData, last_name: e.target.value })
                         }
-                        required
                       />
                     </div>
                   </div>
@@ -414,7 +442,6 @@ If you did not request this change, please ignore this email.
                       }
                       placeholder="Tell us about yourself..."
                       className="min-h-[100px]"
-                      required
                     />
                     <p className="text-xs text-gray-500 mt-1">Required field</p>
                   </div>
@@ -738,6 +765,37 @@ If you did not request this change, please ignore this email.
             <AdminMetricsContent />
           </TabsContent>
         </Tabs>
+
+        {/* Custom Validation Dialog */}
+        <Dialog open={validationError.show} onOpenChange={(open) => setValidationError({ ...validationError, show: open })}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-3 mb-2">
+                {validationError.title === "Success!" ? (
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <Save className="w-6 h-6 text-green-600" />
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-[#6B1B3D]" />
+                  </div>
+                )}
+                <DialogTitle className="text-xl">{validationError.title}</DialogTitle>
+              </div>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 leading-relaxed">{validationError.message}</p>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={() => setValidationError({ show: false, title: "", message: "" })}
+                className="bg-[#6B1B3D] hover:bg-[#4A1228]"
+              >
+                Got it
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
