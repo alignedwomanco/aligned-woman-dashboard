@@ -12,8 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import NotificationsDropdown from "@/components/navigation/NotificationsDropdown.js";
-import MessagesDrawer from "@/components/navigation/MessagesDrawer.js";
+import NotificationsDropdown from "../components/navigation/NotificationsDropdown";
+import MessagesDrawer from "../components/navigation/MessagesDrawer";
 
 const publicPages = [
   { name: "Landing", label: "Home" },
