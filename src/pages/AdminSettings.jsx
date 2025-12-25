@@ -364,7 +364,7 @@ export default function AdminSettings() {
                       <TableRow>
                         <TableHead>User</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Current Role</TableHead>
+                        <TableHead>Role / Title</TableHead>
                         <TableHead>Change Role</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
@@ -479,7 +479,7 @@ export default function AdminSettings() {
                       <TableRow>
                         <TableHead>User</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Current Role</TableHead>
+                        <TableHead>Role / Title</TableHead>
                         <TableHead>Change Role</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
@@ -498,9 +498,14 @@ export default function AdminSettings() {
                           </TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>
-                            <Badge className={getRoleBadgeColor(user.role)}>
-                              {user.role?.replace("_", " ")}
-                            </Badge>
+                            <div className="space-y-1">
+                              <Badge className={getRoleBadgeColor(user.role)}>
+                                {user.role?.replace("_", " ")}
+                              </Badge>
+                              {user.custom_title && (
+                                <div className="text-xs text-gray-600">{user.custom_title}</div>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <Select
