@@ -118,18 +118,27 @@ export default function ProfileSettings() {
     try {
       await updateProfileMutation.mutateAsync(formattedData);
       
-      // Update both current user and profile data states
-      const updatedUser = { ...currentUser, ...formattedData };
-      setCurrentUser(updatedUser);
+      // Immediately update current user state with new data
+      const updatedUserData = { ...currentUser, ...formattedData };
+      setCurrentUser(updatedUserData);
       
-      // Keep the form values as-is (don't re-parse from server)
+      // Update profileData state to match what was saved
+      const savedFirstName = toTitleCase(profileData.first_name);
+      const savedLastName = toTitleCase(profileData.last_name);
       setProfileData({
-        ...profileData,
-        first_name: toTitleCase(profileData.first_name),
-        last_name: toTitleCase(profileData.last_name),
+        first_name: savedFirstName,
+        last_name: savedLastName,
+        bio: profileData.bio,
+        occupation: profileData.occupation,
+        date_of_birth: profileData.date_of_birth,
+        time_of_birth: profileData.time_of_birth,
+        location: profileData.location,
       });
       
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      // Update query cache directly
+      queryClient.setQueryData(["currentUser"], updatedUserData);
+      
+      // Then invalidate to sync with server
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       
       setValidationError({

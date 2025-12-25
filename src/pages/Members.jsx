@@ -44,7 +44,10 @@ export default function Members() {
 
   const { data: myFollows = [] } = useQuery({
     queryKey: ["myFollows"],
-    queryFn: () => base44.entities.UserFollow.list(),
+    queryFn: async () => {
+      const allFollows = await base44.entities.UserFollow.list();
+      return allFollows.filter(f => f.created_by === currentUser?.email);
+    },
     initialData: [],
     enabled: !!currentUser,
   });
@@ -124,10 +127,13 @@ export default function Members() {
         body: `${currentUser.full_name} (${currentUser.email}) wants to connect with you.\n\nMessage: ${note}\n\nView your connection requests at ${window.location.origin}${createPageUrl("Members")}`,
       });
       
-      return newRequest;
+      return { newRequest, userEmail };
     },
-    onSuccess: async () => {
-      // Refetch all follow data immediately
+    onSuccess: async ({ newRequest }) => {
+      // Immediately update cache with new request
+      queryClient.setQueryData(["myFollows"], (old = []) => [...old, newRequest]);
+      
+      // Then refetch to ensure consistency
       await queryClient.refetchQueries({ queryKey: ["myFollows"] });
       await queryClient.refetchQueries({ queryKey: ["connections"] });
       await queryClient.refetchQueries({ queryKey: ["connectionRequests"] });
