@@ -21,6 +21,7 @@ import ProfileSettings from './pages/ProfileSettings';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import ToolsHub from './pages/ToolsHub';
+import Community from './pages/Community';
 import __Layout from './Layout.jsx';
 
 
@@ -48,6 +49,7 @@ export const PAGES = {
     "Progress": Progress,
     "Settings": Settings,
     "ToolsHub": ToolsHub,
+    "Community": Community,
 }
 
 export const pagesConfig = {
