@@ -17,6 +17,7 @@ import {
   Play,
   Lock,
   CheckCircle,
+  BookOpen,
 } from "lucide-react";
 import GamificationStats from "@/components/classroom/GamificationStats";
 import LeaderboardCard from "@/components/classroom/LeaderboardCard";
