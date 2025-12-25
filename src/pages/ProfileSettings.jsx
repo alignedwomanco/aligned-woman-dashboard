@@ -118,19 +118,8 @@ export default function ProfileSettings() {
     try {
       await updateProfileMutation.mutateAsync(formattedData);
       
-      // Refresh user data from server to ensure consistency
-      const updatedUser = await base44.auth.me();
-      setCurrentUser(updatedUser);
-      
-      // Update form with title-cased values
-      const nameParts = (updatedUser.full_name || "").split(" ");
-      const firstName = toTitleCase(nameParts[0] || "");
-      const lastName = toTitleCase(nameParts.slice(1).join(" ") || "");
-      setProfileData({
-        ...profileData,
-        first_name: firstName,
-        last_name: lastName,
-      });
+      // Update local state with the saved values
+      setCurrentUser({ ...currentUser, full_name });
       
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       
@@ -139,6 +128,11 @@ export default function ProfileSettings() {
         title: "Success!",
         message: "Your profile has been updated successfully."
       });
+      
+      // Auto-dismiss after 3 seconds
+      setTimeout(() => {
+        setValidationError({ show: false, title: "", message: "" });
+      }, 3000);
     } catch (error) {
       setValidationError({
         show: true,
