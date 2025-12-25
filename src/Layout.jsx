@@ -292,29 +292,29 @@ export default function Layout({ children, currentPageName }) {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6">
           {/* Top Row: Logo, Search, Icons, Profile */}
-          <div className="flex items-center justify-between py-5 gap-6">
+          <div className="flex items-center justify-between py-6 gap-6">
             {/* Logo */}
-            <Link to={createPageUrl("Home")} className="flex items-center gap-2 flex-shrink-0">
+            <Link to={createPageUrl("Home")} className="flex items-center gap-3 flex-shrink-0">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
                 alt="AW"
-                className="w-8 h-8"
+                className="w-10 h-10"
               />
-              <span className="hidden lg:block text-base font-bold text-[#6B1B3D]">
+              <span className="hidden lg:block text-lg font-bold text-[#6B1B3D]">
                 THE ALIGNED WOMAN
               </span>
             </Link>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-md">
+            <form onSubmit={handleSearch} className="flex-1 max-w-xl">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
                   type="text"
                   placeholder="Search community, modules, tools..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-gray-50 border-gray-200"
+                  className="pl-11 bg-gray-50 border-gray-200 text-[20px]"
                 />
               </div>
             </form>
@@ -341,12 +341,12 @@ export default function Layout({ children, currentPageName }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                    <div className="w-8 h-8 rounded-full border-2 border-purple-500 overflow-hidden">
+                    <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden">
                       {user?.profile_picture ? (
                         <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-[#6B1B3D] flex items-center justify-center">
-                          <span className="text-white text-xs font-medium">
+                          <span className="text-white text-sm font-medium">
                             {user?.full_name?.[0] || user?.email?.[0] || "U"}
                           </span>
                         </div>
@@ -416,7 +416,7 @@ export default function Layout({ children, currentPageName }) {
       )}
 
       {/* Main Content */}
-      <main className="pt-[140px]">
+      <main className="pt-[160px]">
         {children}
       </main>
     </div>
