@@ -24,6 +24,7 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
     estimatedMinutes: 0,
     order: 0,
     moduleId: moduleId || "",
+    downloads: [],
   });
 
   const queryClient = useQueryClient();
@@ -40,6 +41,7 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
         estimatedMinutes: 0,
         order: 0,
         moduleId: moduleId || "",
+        downloads: [],
       });
     }
   }, [page, open, moduleId]);
@@ -63,6 +65,25 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
     if (!file) return;
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setFormData({ ...formData, videoUrl: file_url });
+  };
+
+  const handleResourceUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const newDownload = {
+      name: file.name,
+      url: file_url,
+    };
+    setFormData({
+      ...formData,
+      downloads: [...(formData.downloads || []), newDownload],
+    });
+  };
+
+  const removeDownload = (index) => {
+    const newDownloads = formData.downloads.filter((_, i) => i !== index);
+    setFormData({ ...formData, downloads: newDownloads });
   };
 
   const modules = {
@@ -142,7 +163,42 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-16">
+          <div>
+            <Label>Resources & Downloads</Label>
+            <p className="text-xs text-gray-600 mb-2">Upload PDFs, worksheets, or other resources for students</p>
+            <div className="space-y-2">
+              {formData.downloads?.map((download, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{download.name}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeDownload(index)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <Label htmlFor="resource-upload" className="cursor-pointer">
+                <div className="flex items-center gap-2 p-3 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors border border-dashed border-pink-300">
+                  <Upload className="w-4 h-4 text-[#6B1B3D]" />
+                  <span className="text-sm text-[#6B1B3D]">Upload Resource</span>
+                </div>
+                <Input
+                  id="resource-upload"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
+                  className="hidden"
+                  onChange={handleResourceUpload}
+                />
+              </Label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Estimated Minutes</Label>
               <Input
