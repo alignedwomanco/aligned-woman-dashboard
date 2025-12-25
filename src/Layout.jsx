@@ -172,6 +172,21 @@ export default function Layout({ children, currentPageName }) {
                 </div>
 
                 <nav className="flex-1 p-6">
+                  {isAuthenticated && (
+                    <>
+                      <Button
+                        onClick={() => {
+                          setShowMobileMenu(false);
+                          window.location.href = createPageUrl("Dashboard");
+                        }}
+                        className="w-full mb-4 text-white"
+                        style={{ backgroundColor: '#6C1A3E' }}
+                      >
+                        Go to Dashboard
+                      </Button>
+                      <div className="h-px bg-gray-200 mb-6" />
+                    </>
+                  )}
                   <ul className="space-y-2">
                     {publicPages.map((item) => (
                       <li key={item.name}>
@@ -187,26 +202,14 @@ export default function Layout({ children, currentPageName }) {
                   </ul>
                 </nav>
 
-                <div className="p-6 border-t space-y-3">
+                <div className="p-6 border-t">
                   {isAuthenticated ? (
-                    <>
-                      <Button
-                        onClick={() => {
-                          setShowMobileMenu(false);
-                          window.location.href = createPageUrl("Dashboard");
-                        }}
-                        variant="outline"
-                        className="w-full border-burgundy text-burgundy hover:bg-pink-50"
-                      >
-                        Go to Dashboard
-                      </Button>
-                      <Button
-                        onClick={handleLogout}
-                        className="w-full bg-burgundy hover:bg-burgundy-deep text-white"
-                      >
-                        Sign Out
-                      </Button>
-                    </>
+                    <Button
+                      onClick={handleLogout}
+                      className="w-full bg-burgundy hover:bg-burgundy-deep text-white"
+                    >
+                      Sign Out
+                    </Button>
                   ) : (
                     <Button
                       onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
