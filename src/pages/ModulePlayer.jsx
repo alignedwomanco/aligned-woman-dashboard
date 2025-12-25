@@ -604,7 +604,6 @@ export default function ModulePlayer() {
               );
             })()}
           </div>
-          </div>
         </div>
       </div>
     </div>
