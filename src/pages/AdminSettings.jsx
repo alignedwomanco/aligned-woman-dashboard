@@ -42,6 +42,7 @@ import BackgroundSelector from "@/components/settings/BackgroundSelector";
 import AIChatWidgetSettings from "@/components/admin/AIChatWidgetSettings";
 import StripeIntegrationContent from "@/components/admin/StripeIntegrationContent";
 import SupportRoomContent from "@/components/admin/SupportRoomContent";
+import EducatorAnalyticsContent from "@/components/admin/EducatorAnalyticsContent";
 
 export default function AdminSettings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -760,7 +761,11 @@ export default function AdminSettings() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <AdminMetricsContent />
+            {["educator", "expert"].includes(currentUser?.role) || currentUser?.is_educator || currentUser?.is_expert ? (
+              <EducatorAnalyticsContent currentUser={currentUser} />
+            ) : (
+              <AdminMetricsContent />
+            )}
           </TabsContent>
 
           {/* AI Chat Widget Tab */}

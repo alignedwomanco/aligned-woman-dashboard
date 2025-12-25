@@ -23,6 +23,7 @@ import AvatarGenerator from "@/components/admin/AvatarGenerator";
 import BackgroundSelector from "@/components/settings/BackgroundSelector";
 import { createPageUrl } from "@/utils";
 import AdminMetricsContent from "@/components/admin/AdminMetricsContent";
+import MessageInbox from "@/components/messages/MessageInbox";
 
 export default function ProfileSettings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -328,6 +329,7 @@ If you did not request this change, please ignore this email.
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="social">Social & Connections</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -580,6 +582,12 @@ If you did not request this change, please ignore this email.
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Social & Connections Tab */}
+          {/* Messages Tab */}
+          <TabsContent value="messages">
+            <MessageInbox currentUser={currentUser} />
           </TabsContent>
 
           {/* Social & Connections Tab */}
