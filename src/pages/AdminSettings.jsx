@@ -39,6 +39,7 @@ import ExpertsManagementContent from "@/components/admin/ExpertsManagementConten
 import DashboardConfiguratorContent from "@/components/admin/DashboardConfiguratorContent";
 import { createPageUrl } from "@/utils";
 import BackgroundSelector from "@/components/settings/BackgroundSelector";
+import AIChatWidgetSettings from "@/components/admin/AIChatWidgetSettings";
 
 export default function AdminSettings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -663,14 +664,7 @@ export default function AdminSettings() {
 
           {/* AI Chat Widget Tab */}
           <TabsContent value="ai-chat">
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Chat Widget Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">LaurAI chat widget configuration coming soon...</p>
-              </CardContent>
-            </Card>
+            <AIChatWidgetSettings />
           </TabsContent>
 
           {/* Support Room Tab */}
