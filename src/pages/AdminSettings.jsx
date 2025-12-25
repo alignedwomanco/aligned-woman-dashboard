@@ -65,7 +65,7 @@ export default function AdminSettings() {
   const { data: allUsers = [] } = useQuery({
     queryKey: ["allUsers"],
     queryFn: () => base44.entities.User.list(),
-    enabled: currentUser?.role === "admin" || currentUser?.role === "master_admin",
+    enabled: currentUser?.role === "admin" || currentUser?.role === "master_admin" || currentUser?.role === "owner",
   });
 
   const updateUserRoleMutation = useMutation({
@@ -311,8 +311,11 @@ export default function AdminSettings() {
                                 <SelectItem value="course_creator">Course Creator</SelectItem>
                                 <SelectItem value="moderator">Moderator</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
-                                {currentUser.role === "master_admin" && (
+                                {(currentUser.role === "master_admin" || currentUser.role === "owner") && (
                                   <SelectItem value="master_admin">Master Admin</SelectItem>
+                                )}
+                                {currentUser.role === "owner" && (
+                                  <SelectItem value="owner">Owner</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
