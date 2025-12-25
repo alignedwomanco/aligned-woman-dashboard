@@ -28,7 +28,6 @@ export default function ModulePlayer() {
   const moduleId = searchParams.get("id");
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
-  const [completedPages, setCompletedPages] = useState(new Set());
   const queryClient = useQueryClient();
 
   const { data: module } = useQuery({
@@ -49,6 +48,12 @@ export default function ModulePlayer() {
   const { data: moduleProgress = [] } = useQuery({
     queryKey: ["moduleProgress", moduleId],
     queryFn: () => base44.entities.UserModuleProgress.filter({ moduleId }),
+    enabled: !!moduleId,
+  });
+
+  const { data: subModuleProgress = [] } = useQuery({
+    queryKey: ["subModuleProgress", moduleId],
+    queryFn: () => base44.entities.SubModuleProgress.filter({ moduleId }),
     enabled: !!moduleId,
   });
 
@@ -91,18 +96,54 @@ export default function ModulePlayer() {
     },
   });
 
+  const togglePageCompleteMutation = useMutation({
+    mutationFn: async ({ pageId, isComplete }) => {
+      const existing = subModuleProgress.find(p => p.subModuleId === pageId);
+      if (existing) {
+        return base44.entities.SubModuleProgress.update(existing.id, {
+          isComplete,
+          watchedPercent: isComplete ? 100 : existing.watchedPercent,
+        });
+      } else {
+        return base44.entities.SubModuleProgress.create({
+          subModuleId: pageId,
+          moduleId,
+          isComplete,
+          watchedPercent: isComplete ? 100 : 0,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subModuleProgress"] });
+    },
+  });
+
   useEffect(() => {
     if (pages.length > 0 && !selectedPage) {
       setSelectedPage(pages[0]);
     }
   }, [pages]);
 
-  const handleMarkComplete = async () => {
-    const progress = moduleProgress[0];
-    const watchedPercent = progress?.videoWatchedPercent || 0;
+  const handleTogglePageComplete = async () => {
+    const pageProgress = subModuleProgress.find(p => p.subModuleId === selectedPage.id);
+    const isCurrentlyComplete = pageProgress?.isComplete || false;
+    
+    await togglePageCompleteMutation.mutateAsync({
+      pageId: selectedPage.id,
+      isComplete: !isCurrentlyComplete,
+    });
 
-    if (watchedPercent >= 50) {
-      await completeModule();
+    // If marking as complete and it's the last page, complete the module
+    if (!isCurrentlyComplete) {
+      const allPagesCompleted = pages.every(page => {
+        if (page.id === selectedPage.id) return true;
+        const progress = subModuleProgress.find(p => p.subModuleId === page.id);
+        return progress?.isComplete;
+      });
+
+      if (allPagesCompleted) {
+        await completeModule();
+      }
     }
   };
 
@@ -111,9 +152,6 @@ export default function ModulePlayer() {
       status: "Complete",
       videoWatchedPercent: 100,
     });
-
-    // Mark current page as complete
-    setCompletedPages(prev => new Set([...prev, selectedPage.id]));
 
     // Award points for module completion
     await awardModuleCompletion();
@@ -224,7 +262,8 @@ export default function ModulePlayer() {
                 <ScrollArea className="h-[calc(100vh-300px)]">
                   <div className="space-y-1 p-4">
                     {pages.map((page, idx) => {
-                      const isCompleted = completedPages.has(page.id);
+                      const pageProgress = subModuleProgress.find(p => p.subModuleId === page.id);
+                      const isCompleted = pageProgress?.isComplete || false;
                       return (
                         <button
                           key={page.id}
@@ -357,22 +396,21 @@ export default function ModulePlayer() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>{selectedPage.title}</CardTitle>
-                  {currentProgress.status !== "Complete" && (
-                    <Button
-                      onClick={handleMarkComplete}
-                      disabled={!canMarkComplete}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Mark Complete
-                    </Button>
-                  )}
-                  {currentProgress.status === "Complete" && (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-medium">Completed</span>
-                    </div>
-                  )}
+                  {(() => {
+                    const pageProgress = subModuleProgress.find(p => p.subModuleId === selectedPage.id);
+                    const isPageComplete = pageProgress?.isComplete || false;
+                    
+                    return (
+                      <Button
+                        onClick={handleTogglePageComplete}
+                        variant={isPageComplete ? "outline" : "default"}
+                        className={isPageComplete ? "border-green-600 text-green-600 hover:bg-green-50" : "bg-green-600 hover:bg-green-700 text-white"}
+                      >
+                        <span className="font-medium">{isPageComplete ? "Completed" : "Mark Complete"}</span>
+                        <CheckCircle className="w-4 h-4 ml-2" />
+                      </Button>
+                    );
+                  })()}
                 </div>
               </CardHeader>
               <CardContent>
@@ -387,60 +425,22 @@ export default function ModulePlayer() {
             <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
               <CardContent className="p-6">
                 <div className="space-y-4">
-                  {!canMarkComplete && (
-                    <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <p className="text-xs text-orange-800">
-                        ⏳ Watch at least 50% of the video to continue
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Simulate progress button for testing */}
-                  {currentProgress.status !== "Complete" && currentProgress.videoWatchedPercent < 100 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const newPercent = Math.min(currentProgress.videoWatchedPercent + 25, 100);
-                        updateProgressMutation.mutate({
-                          status: newPercent >= 100 ? "InProgress" : "InProgress",
-                          videoWatchedPercent: newPercent,
-                        });
-                      }}
-                      className="w-full text-xs"
-                    >
-                      Simulate +25% Watch Progress ({currentProgress.videoWatchedPercent}%)
-                    </Button>
-                  )}
-
                   {(() => {
                     const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
                     const nextPage = pages[currentIndex + 1];
                     return nextPage ? (
                       <Button
                         className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white"
-                        onClick={() => {
-                          if (currentProgress.status !== "Complete" && canMarkComplete) {
-                            handleMarkComplete();
-                          }
-                          setSelectedPage(nextPage);
-                        }}
-                        disabled={!canMarkComplete}
+                        onClick={() => setSelectedPage(nextPage)}
                       >
-                        {currentProgress.status !== "Complete" ? "Complete & Continue →" : "Next Lesson →"}
+                        Next Lesson →
                       </Button>
                     ) : (
                       <Button
                         className="w-full bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white"
-                        onClick={() => {
-                          if (currentProgress.status !== "Complete" && canMarkComplete) {
-                            handleMarkComplete();
-                          }
-                          navigate(createPageUrl("Classroom"));
-                        }}
-                        disabled={currentProgress.status !== "Complete" && !canMarkComplete}
+                        onClick={() => navigate(createPageUrl("Classroom"))}
                       >
-                        {currentProgress.status !== "Complete" ? "Complete & Finish Module" : "Back to Classroom"}
+                        Back to Classroom
                       </Button>
                     );
                   })()}
