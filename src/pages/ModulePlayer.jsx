@@ -179,7 +179,7 @@ export default function ModulePlayer() {
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       {/* Header */}
       <div className="bg-white border-b sticky top-20 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link to={createPageUrl("Classroom")}>
@@ -264,16 +264,42 @@ export default function ModulePlayer() {
               animate={{ opacity: 1, y: 0 }}
             >
               <Card className="overflow-hidden">
-                <div className="aspect-video bg-gray-900">
+                <div style={{ paddingTop: '56.25%', position: 'relative' }} className="bg-gray-900">
                   {selectedPage.videoUrl ? (
-                    <iframe
-                      src={selectedPage.videoUrl}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
+                    (() => {
+                      const url = selectedPage.videoUrl;
+                      let embedUrl = url;
+                      
+                      // YouTube
+                      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                        const videoId = url.includes('youtu.be') 
+                          ? url.split('youtu.be/')[1]?.split('?')[0]
+                          : new URLSearchParams(url.split('?')[1]).get('v');
+                        embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+                      }
+                      // Wistia
+                      else if (url.includes('wistia.com')) {
+                        const videoId = url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] || url.split('/').pop();
+                        embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
+                      }
+                      // Google Drive
+                      else if (url.includes('drive.google.com')) {
+                        const fileId = url.match(/[-\w]{25,}/)?.[0];
+                        embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                      }
+                      
+                      return (
+                        <iframe
+                          src={embedUrl}
+                          className="absolute top-0 left-0 w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                          allowFullScreen
+                          style={{ border: 0 }}
+                        />
+                      );
+                    })()
                   ) : (
-                    <div className="flex items-center justify-center h-full text-white">
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white">
                       No video available
                     </div>
                   )}
