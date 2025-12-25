@@ -383,59 +383,6 @@ export default function ModulePlayer() {
               </CardContent>
             </Card>
 
-            {/* Comments Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <MessageCircle className="w-5 h-5" />
-                  Questions & Comments
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Add Comment */}
-                  <div className="flex gap-3">
-                    <Textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Ask a question or leave a comment..."
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={handleAddComment}
-                      className="bg-[#6B1B3D] hover:bg-[#4A1228]"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  <Separator />
-
-                  {/* Comments List */}
-                  <ScrollArea className="h-[300px]">
-                    <div className="space-y-4">
-                      {comments.map((comment) => (
-                        <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 bg-[#6B1B3D] rounded-full flex items-center justify-center text-white text-sm">
-                              {comment.created_by?.[0]}
-                            </div>
-                            <span className="text-sm font-medium text-gray-700">
-                              {comment.created_by}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {new Date(comment.created_date).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-gray-700">{comment.comment}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Next/Complete Actions */}
             <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
               <CardContent className="p-6">
@@ -497,6 +444,59 @@ export default function ModulePlayer() {
                       </Button>
                     );
                   })()}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Comments Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <MessageCircle className="w-5 h-5" />
+                  Questions & Comments
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Add Comment */}
+                  <div className="flex gap-3">
+                    <Textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Ask a question or leave a comment..."
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleAddComment}
+                      className="bg-[#6B1B3D] hover:bg-[#4A1228]"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <Separator />
+
+                  {/* Comments List */}
+                  <ScrollArea className="h-[300px]">
+                    <div className="space-y-4">
+                      {comments.map((comment) => (
+                        <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 bg-[#6B1B3D] rounded-full flex items-center justify-center text-white text-sm">
+                              {comment.created_by?.[0]}
+                            </div>
+                            <span className="text-sm font-medium text-gray-700">
+                              {comment.created_by}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(comment.created_date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-gray-700">{comment.comment}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
               </CardContent>
             </Card>
