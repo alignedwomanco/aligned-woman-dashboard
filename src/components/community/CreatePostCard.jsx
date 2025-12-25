@@ -157,26 +157,27 @@ export default function CreatePostCard({ currentUser, onPostCreated }) {
             {/* Actions */}
             <div className="flex items-center justify-between pt-3 border-t">
               <div className="flex gap-2">
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                    disabled={isUploading}
-                  >
-                    <Image className="w-4 h-4 mr-2" />
-                    {isUploading ? "Uploading..." : "Photo"}
-                  </Button>
-                  <input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                </label>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*,video/*"
+                  capture="environment"
+                  multiple
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                  disabled={isUploading}
+                  onClick={() => document.getElementById('image-upload').click()}
+                  asChild={false}
+                >
+                  <Image className="w-4 h-4 mr-2" />
+                  {isUploading ? "Uploading..." : "Photo"}
+                </Button>
                 <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
                   <Hash className="w-4 h-4 mr-2" />
                   Tag

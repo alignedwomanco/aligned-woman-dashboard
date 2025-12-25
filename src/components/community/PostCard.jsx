@@ -83,7 +83,7 @@ export default function PostCard({
                     className="font-semibold text-gray-900 hover:text-[#6B1B3D] cursor-pointer"
                     onClick={() => window.location.href = createPageUrl("Members") + `?user=${author?.email}`}
                   >
-                    {author?.full_name || post.created_by}
+                    {author?.full_name || "Anonymous User"}
                   </p>
                   {author?.level && author.level > 1 && (
                     <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs">
@@ -288,7 +288,7 @@ export default function PostCard({
                           <div className="flex-1">
                             <div className="bg-gray-50 rounded-lg p-3 group-hover:bg-gray-100 transition-colors">
                               <div className="flex items-center gap-2 mb-1">
-                                <p className="text-sm font-medium">{commentAuthor?.full_name || comment.created_by}</p>
+                                <p className="text-sm font-medium">{commentAuthor?.full_name || "Anonymous User"}</p>
                                 <span className="text-xs text-gray-500">{moment(comment.created_date).fromNow()}</span>
                               </div>
                               <p className="text-sm text-gray-700">{comment.content}</p>
@@ -321,7 +321,7 @@ export default function PostCard({
                                       <div className="flex-1">
                                         <div className="bg-gray-50 rounded-lg p-2">
                                           <div className="flex items-center gap-2 mb-1">
-                                            <p className="text-xs font-medium">{replyAuthor?.full_name || reply.created_by}</p>
+                                            <p className="text-xs font-medium">{replyAuthor?.full_name || "Anonymous User"}</p>
                                             <span className="text-xs text-gray-500">{moment(reply.created_date).fromNow()}</span>
                                           </div>
                                           <p className="text-xs text-gray-700">{reply.content}</p>
