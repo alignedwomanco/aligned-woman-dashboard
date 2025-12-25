@@ -187,14 +187,26 @@ export default function Layout({ children, currentPageName }) {
                   </ul>
                 </nav>
 
-                <div className="p-6 border-t">
+                <div className="p-6 border-t space-y-3">
                   {isAuthenticated ? (
-                    <Button
-                      onClick={handleLogout}
-                      className="w-full bg-burgundy hover:bg-burgundy-deep text-white"
-                    >
-                      Sign Out
-                    </Button>
+                    <>
+                      <Button
+                        onClick={() => {
+                          setShowMobileMenu(false);
+                          window.location.href = createPageUrl("Dashboard");
+                        }}
+                        variant="outline"
+                        className="w-full border-burgundy text-burgundy hover:bg-pink-50"
+                      >
+                        Go to Dashboard
+                      </Button>
+                      <Button
+                        onClick={handleLogout}
+                        className="w-full bg-burgundy hover:bg-burgundy-deep text-white"
+                      >
+                        Sign Out
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
