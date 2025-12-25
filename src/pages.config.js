@@ -26,6 +26,7 @@ import Members from './pages/Members';
 import Messages from './pages/Messages';
 import Classroom from './pages/Classroom';
 import Support from './pages/Support';
+import ExpertsDirectory from './pages/ExpertsDirectory';
 import __Layout from './Layout.jsx';
 
 
@@ -58,6 +59,7 @@ export const PAGES = {
     "Messages": Messages,
     "Classroom": Classroom,
     "Support": Support,
+    "ExpertsDirectory": ExpertsDirectory,
 }
 
 export const pagesConfig = {

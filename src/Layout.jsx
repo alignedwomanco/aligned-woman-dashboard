@@ -29,7 +29,7 @@ const appNavigation = [
   { name: "Community", label: "Community" },
   { name: "Members", label: "Members" },
   { name: "Classroom", label: "Classroom" },
-  { name: "Experts", label: "Experts" },
+  { name: "ExpertsDirectory", label: "Experts" },
   { name: "ToolsHub", label: "Tools" },
   { name: "ALIVEMethod", label: "ALIVE Method" },
   { name: "Support", label: "Support" },
@@ -297,19 +297,23 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Navigation Bar - Rounded Pill Style */}
           <div className="pb-5">
-            <nav className="bg-[#6B1B3D] rounded-full px-2 py-2 flex items-center gap-1 overflow-x-auto">
-              {visibleNavItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={createPageUrl(item.name)}
-                  className={`px-6 py-2.5 text-sm font-medium whitespace-nowrap transition-all rounded-full ${
-                    currentPageName === item.name
-                      ? "bg-white text-[#6B1B3D]"
-                      : "text-white hover:bg-white/10"
-                  }`}
-                >
-                  {item.label}
-                </Link>
+            <nav className="bg-[#6B1B3D] rounded-full px-2 py-2 flex items-center overflow-x-auto">
+              {visibleNavItems.map((item, index) => (
+                <React.Fragment key={item.name}>
+                  <Link
+                    to={createPageUrl(item.name)}
+                    className={`px-6 py-2.5 text-sm font-bold whitespace-nowrap transition-all rounded-full text-center ${
+                      currentPageName === item.name
+                        ? "bg-white text-[#6B1B3D]"
+                        : "text-white hover:bg-white/10"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                  {index < visibleNavItems.length - 1 && (
+                    <div className="h-6 w-px bg-white/20 mx-1" />
+                  )}
+                </React.Fragment>
               ))}
             </nav>
           </div>
