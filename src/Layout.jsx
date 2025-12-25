@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
-import { Menu, X, ChevronRight, LogOut, User, Settings, UserCircle } from "lucide-react";
+import { Bell, MessageCircle, Search, LogOut, User, Settings, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
-import LaurAIChatWidget from "../components/LaurAIChatWidget";
+import { Input } from "@/components/ui/input";
+import NotificationsDropdown from "@/components/navigation/NotificationsDropdown";
+import MessagesDrawer from "@/components/navigation/MessagesDrawer";
 
 const publicPages = [
   { name: "Landing", label: "Home" },
@@ -24,24 +24,26 @@ const publicPages = [
   { name: "Contact", label: "Contact" },
 ];
 
-const appPages = [
+const appNavigation = [
   { name: "Dashboard", label: "Dashboard" },
-  { name: "ModulesLibrary", label: "Courses" },
-  { name: "Experts", label: "Expert Library" },
-  { name: "ALIVEMethod", label: "ALIVE Method" },
+  { name: "Community", label: "Community" },
+  { name: "Members", label: "Members" },
+  { name: "Classroom", label: "Classroom" },
+  { name: "Experts", label: "Experts" },
   { name: "ToolsHub", label: "Tools" },
-  { name: "Contact", label: "Support" },
+  { name: "ALIVEMethod", label: "ALIVE Method" },
+  { name: "Support", label: "Support" },
 ];
 
 export default function Layout({ children, currentPageName }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-  const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
   const location = useLocation();
 
   const isPublicPage = publicPages.some(p => p.name === currentPageName) || currentPageName === "Login";
-  const navItems = isPublicPage ? publicPages : appPages;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,7 +54,7 @@ export default function Layout({ children, currentPageName }) {
           const userData = await base44.auth.me();
           setUser(userData);
           
-          // Redirect authenticated users to onboarding if not completed
+          // Redirect to onboarding if not completed
           if (!isPublicPage && currentPageName !== "OnboardingForm") {
             const sessions = await base44.entities.DiagnosticSession.filter(
               { isComplete: true },
@@ -61,7 +63,6 @@ export default function Layout({ children, currentPageName }) {
             );
 
             if (!sessions || sessions.length === 0) {
-              // No completed diagnostic, redirect to onboarding
               window.location.href = createPageUrl("OnboardingForm");
             }
           }
@@ -73,270 +74,75 @@ export default function Layout({ children, currentPageName }) {
     checkAuth();
   }, [currentPageName, isPublicPage]);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location]);
-
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.classList.add('sidebar-open');
-    } else {
-      document.body.classList.remove('sidebar-open');
-    }
-    return () => document.body.classList.remove('sidebar-open');
-  }, [mobileMenuOpen]);
-
   const handleLogout = () => {
     base44.auth.logout();
   };
 
-  return (
-    <div className="min-h-screen bg-pink-50/30">
-      <style>{`
-        :root {
-          --burgundy: #6B1B3D;
-          --burgundy-deep: #4A1228;
-          --rose-accent: #C67793;
-          --rose-accent-2: #C4687D;
-          --rose-dark: #8B2E4D;
-        }
-        
-        .text-burgundy { color: var(--burgundy); }
-        .bg-burgundy { background-color: var(--burgundy); }
-        .border-burgundy { border-color: var(--burgundy); }
-        .hover\\:bg-burgundy-deep:hover { background-color: var(--burgundy-deep); }
-        .text-rose-accent { color: var(--rose-accent); }
-        .bg-rose-accent { background-color: var(--rose-accent); }
-        
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = createPageUrl("SearchResults") + `?q=${encodeURIComponent(searchQuery)}`;
+    }
+  };
 
-        /* Prevent main scroll when sidebar is open, but allow sidebar scroll */
-        body.sidebar-open {
-          overflow: hidden;
-        }
-        
-        .sidebar-scroll {
-          overflow-y: auto;
-          -webkit-overflow-scrolling: touch;
-        }
-      `}</style>
+  // Public page layout (unchanged)
+  if (isPublicPage) {
+    return (
+      <div className="min-h-screen bg-pink-50/30">
+        <style>{`
+          :root {
+            --burgundy: #6B1B3D;
+            --burgundy-deep: #4A1228;
+            --rose-accent: #C67793;
+            --rose-accent-2: #C4687D;
+            --rose-dark: #8B2E4D;
+          }
+          .text-burgundy { color: var(--burgundy); }
+          .bg-burgundy { background-color: var(--burgundy); }
+        `}</style>
 
-      {/* Navigation */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled || !isPublicPage
-            ? "bg-white/95 backdrop-blur-md shadow-sm"
-            : "bg-transparent"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Left side: Logo */}
-            <Link to={createPageUrl(isAuthenticated && !isPublicPage ? "Dashboard" : "Landing")} className="flex items-center gap-3">
-              <img 
-                src={scrolled || !isPublicPage 
-                  ? "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
-                  : "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/6f3c1f132_AWLogoWhite.png"
-                }
-                alt="The Aligned Woman Logo"
-                className="w-10 h-10 object-contain"
-              />
-              <span className={`text-xl font-bold tracking-tight ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}>
-                THE ALIGNED WOMAN
-              </span>
-            </Link>
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-20">
+              <Link to={createPageUrl("Landing")} className="flex items-center gap-3">
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
+                  alt="The Aligned Woman Logo"
+                  className="w-10 h-10 object-contain"
+                />
+                <span className="text-xl font-bold tracking-tight text-burgundy">
+                  THE ALIGNED WOMAN
+                </span>
+              </Link>
 
-            {/* Right side actions */}
-            <div className="flex items-center gap-3">
-              {/* Dashboard Button - Only when NOT on dashboard */}
-              {isAuthenticated && currentPageName !== "Dashboard" && (
-                <Link to={createPageUrl("Dashboard")}>
-                  <Button className="bg-[#6B1B3D] hover:bg-[#4A1228] text-white rounded-xl px-4 py-2 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    Dashboard
-                  </Button>
-                </Link>
-              )}
+              <nav className="hidden md:flex items-center gap-6">
+                {publicPages.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={createPageUrl(item.name)}
+                    className="text-gray-700 hover:text-burgundy transition-colors font-medium"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
 
-              {/* Mobile menu button (hamburger) */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 ${scrolled || !isPublicPage ? "text-[#6C1A3E]" : "text-white"}`}
-              >
-                {mobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
-              </button>
-
-              {/* Profile Icon - Always visible */}
-              {isAuthenticated ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="p-1">
-                      <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden">
-                        {user?.profile_picture ? (
-                          <img 
-                            src={user.profile_picture} 
-                            alt={user.full_name || "Profile"}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-burgundy flex items-center justify-center">
-                            <span className="text-white text-sm font-medium">
-                              {user?.full_name?.[0] || user?.email?.[0] || "U"}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Profile Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    {user && ["admin", "master_admin", "moderator", "expert", "course_creator"].includes(user.role) && (
-                      <DropdownMenuItem asChild>
-                        <Link to={createPageUrl("AdminSettings")} className="flex items-center gap-2">
-                          <Settings className="w-4 h-4" />
-                          Admin Settings
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <button
+              {!isAuthenticated && (
+                <Button
                   onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                  className={`p-1 ${scrolled || !isPublicPage ? "text-burgundy" : "text-white"}`}
+                  className="bg-burgundy hover:bg-burgundy-deep text-white"
                 >
-                  <UserCircle className="w-10 h-10" />
-                </button>
+                  Sign In
+                </Button>
               )}
             </div>
           </div>
-        </div>
+        </header>
 
-      {/* Sidebar Overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 z-[9998]"
-            />
+        <main className="pt-20">
+          {children}
+        </main>
 
-            {/* Sidebar */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-white z-[9999] shadow-2xl flex flex-col"
-            >
-              {/* Sidebar Header */}
-              <div className="p-6 border-b flex items-center justify-between flex-shrink-0 bg-white">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
-                  alt="The Aligned Woman"
-                  className="w-12 h-12 object-contain"
-                />
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-6 h-6 text-gray-700" />
-                </button>
-              </div>
-
-              {/* Navigation Links - Scrollable */}
-              <div className="flex-1 overflow-y-auto sidebar-scroll bg-white">
-                <div className="p-6 space-y-1">
-                  {console.log('Debug - navItems:', navItems, 'isPublicPage:', isPublicPage, 'currentPageName:', currentPageName, 'isAuthenticated:', isAuthenticated)}
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={createPageUrl(item.name)}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                        currentPageName === item.name
-                          ? "bg-pink-50 text-[#6C1A3E]"
-                          : "text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom Action */}
-              <div className="p-6 border-t flex-shrink-0 bg-white">
-                {isAuthenticated ? (
-                  <Button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-4 text-base font-medium"
-                  >
-                    Sign Out
-                  </Button>
-                ) : (
-                  <Link to={createPageUrl("Apply")}>
-                    <Button
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-full bg-[#6C1A3E] hover:bg-[#4A1228] text-white rounded-full py-4 text-base font-medium"
-                    >
-                      Apply Now
-                    </Button>
-                  </Link>
-                )}
-              </div>
-              </motion.div>
-              </>
-              )}
-              </AnimatePresence>
-      </header>
-
-      {/* Page Content */}
-      <main className={isPublicPage ? "" : "pt-20"}>
-        {children}
-      </main>
-
-      {/* LaurAI Chat Widget */}
-      {isAuthenticated && <LaurAIChatWidget />}
-
-      {/* Footer - only on public pages */}
-      {isPublicPage && (
         <footer className="bg-[#4A1228] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
@@ -351,10 +157,7 @@ export default function Layout({ children, currentPageName }) {
                 <ul className="space-y-2">
                   {publicPages.slice(0, 4).map((item) => (
                     <li key={item.name}>
-                      <Link
-                        to={createPageUrl(item.name)}
-                        className="text-white/70 hover:text-white transition-colors text-sm"
-                      >
+                      <Link to={createPageUrl(item.name)} className="text-white/70 hover:text-white transition-colors text-sm">
                         {item.label}
                       </Link>
                     </li>
@@ -382,7 +185,151 @@ export default function Layout({ children, currentPageName }) {
             </div>
           </div>
         </footer>
+      </div>
+    );
+  }
+
+  // Authenticated app layout (Skool-inspired)
+  const visibleNavItems = currentPageName === "Dashboard" 
+    ? appNavigation.filter(item => item.name !== "Dashboard")
+    : appNavigation;
+
+  return (
+    <div className="min-h-screen">
+      <style>{`
+        :root {
+          --burgundy: #6B1B3D;
+          --burgundy-deep: #4A1228;
+        }
+      `}</style>
+
+      {/* Global Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+        <div className="mx-auto px-6">
+          {/* Top Row: Logo, Search, Icons, Profile */}
+          <div className="flex items-center justify-between h-16 gap-4">
+            {/* Logo */}
+            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2 flex-shrink-0">
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
+                alt="AW"
+                className="w-8 h-8"
+              />
+              <span className="hidden lg:block text-base font-bold text-[#6B1B3D]">
+                THE ALIGNED WOMAN
+              </span>
+            </Link>
+
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex-1 max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search community, modules, tools..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-gray-50 border-gray-200"
+                />
+              </div>
+            </form>
+
+            {/* Right Icons */}
+            <div className="flex items-center gap-2">
+              {/* Messages */}
+              <button
+                onClick={() => setShowMessages(!showMessages)}
+                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 text-gray-600" />
+                {/* Unread badge would go here */}
+              </button>
+
+              {/* Notifications */}
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5 text-gray-600" />
+                {/* Unread badge would go here */}
+              </button>
+
+              {/* Profile Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                    <div className="w-8 h-8 rounded-full border-2 border-purple-500 overflow-hidden">
+                      {user?.profile_picture ? (
+                        <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-[#6B1B3D] flex items-center justify-center">
+                          <span className="text-white text-xs font-medium">
+                            {user?.full_name?.[0] || user?.email?.[0] || "U"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Profile Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  {user && ["admin", "master_admin", "moderator", "expert", "course_creator"].includes(user.role) && (
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl("AdminSettings")} className="flex items-center gap-2">
+                        <Settings className="w-4 h-4" />
+                        Admin Settings
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          {/* Navigation Bar */}
+          <nav className="flex items-center gap-1 overflow-x-auto pb-0 border-t border-gray-100">
+            {visibleNavItems.map((item) => (
+              <Link
+                key={item.name}
+                to={createPageUrl(item.name)}
+                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
+                  currentPageName === item.name
+                    ? "text-[#6B1B3D] border-[#6B1B3D]"
+                    : "text-gray-600 hover:text-[#6B1B3D] border-transparent hover:border-gray-300"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      {/* Notifications Dropdown */}
+      {showNotifications && (
+        <NotificationsDropdown onClose={() => setShowNotifications(false)} />
       )}
+
+      {/* Messages Drawer */}
+      {showMessages && (
+        <MessagesDrawer onClose={() => setShowMessages(false)} />
+      )}
+
+      {/* Main Content */}
+      <main className="pt-[120px]">
+        {children}
+      </main>
     </div>
   );
 }
