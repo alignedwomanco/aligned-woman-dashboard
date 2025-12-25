@@ -143,7 +143,7 @@ export default function ModulePlayer() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to={createPageUrl("MyPathway")}>
+              <Link to={createPageUrl("Classroom")}>
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
@@ -423,9 +423,9 @@ export default function ModulePlayer() {
 
             <Button
               className="w-full bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white"
-              onClick={() => navigate(createPageUrl("MyPathway"))}
+              onClick={() => navigate(createPageUrl("Classroom"))}
             >
-              Back to Pathway
+              Back to Classroom
             </Button>
           </div>
         </div>
