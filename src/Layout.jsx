@@ -289,7 +289,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Global Header */}
-      <header className="bg-white mr-16 mb-10 ml-1 fixed top-0 left-0 right-0 z-50 border-b border-gray-200">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
           {/* Top Row: Logo, Search, Icons, Profile */}
           <div className="flex items-center justify-between py-6 gap-6 px-6">
