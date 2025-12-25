@@ -16,7 +16,7 @@ import NotificationsDropdown from "../components/navigation/NotificationsDropdow
 import MessagesDrawer from "../components/navigation/MessagesDrawer";
 
 const publicPages = [
-  { name: "Landing", label: "Home" },
+  { name: "Home", label: "Home" },
   { name: "OurWhy", label: "Our Why" },
   { name: "ALIVEMethod", label: "ALIVE Method" },
   { name: "Experts", label: "Experts" },
@@ -105,7 +105,7 @@ export default function Layout({ children, currentPageName }) {
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-20">
-              <Link to={createPageUrl("Landing")} className="flex items-center gap-3">
+              <Link to={createPageUrl("Home")} className="flex items-center gap-3">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
                   alt="The Aligned Woman Logo"
@@ -294,7 +294,7 @@ export default function Layout({ children, currentPageName }) {
           {/* Top Row: Logo, Search, Icons, Profile */}
           <div className="flex items-center justify-between py-5 gap-6">
             {/* Logo */}
-            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2 flex-shrink-0">
+            <Link to={createPageUrl("Home")} className="flex items-center gap-2 flex-shrink-0">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
                 alt="AW"

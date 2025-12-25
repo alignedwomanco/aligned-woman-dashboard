@@ -12,7 +12,6 @@ import DefineMyPurpose from './pages/DefineMyPurpose';
 import Experts from './pages/Experts';
 import ExpertsDirectory from './pages/ExpertsDirectory';
 import Journal from './pages/Journal';
-import Landing from './pages/Landing';
 import Members from './pages/Members';
 import Messages from './pages/Messages';
 import ModuleFrameworkBuilder from './pages/ModuleFrameworkBuilder';
@@ -27,6 +26,7 @@ import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import Support from './pages/Support';
 import ToolsHub from './pages/ToolsHub';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -45,7 +45,6 @@ export const PAGES = {
     "Experts": Experts,
     "ExpertsDirectory": ExpertsDirectory,
     "Journal": Journal,
-    "Landing": Landing,
     "Members": Members,
     "Messages": Messages,
     "ModuleFrameworkBuilder": ModuleFrameworkBuilder,
@@ -60,10 +59,11 @@ export const PAGES = {
     "Settings": Settings,
     "Support": Support,
     "ToolsHub": ToolsHub,
+    "Home": Home,
 }
 
 export const pagesConfig = {
-    mainPage: "Landing",
+    mainPage: "ALIVEMethod",
     Pages: PAGES,
     Layout: __Layout,
 };

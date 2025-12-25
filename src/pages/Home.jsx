@@ -8,7 +8,7 @@ import TopicsSection from "@/components/landing/TopicsSection";
 import WhoIsForSection from "@/components/landing/WhoIsForSection";
 import FinalCTASection from "@/components/landing/FinalCTASection";
 
-export default function Landing() {
+export default function Home() {
   return (
     <div className="bg-white">
       <HeroSection />
