@@ -26,6 +26,7 @@ import {
   Smile,
   Moon,
   Edit3,
+  Activity,
 } from "lucide-react";
 
 export default function Dashboard() {
