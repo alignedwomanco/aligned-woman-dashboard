@@ -25,6 +25,7 @@ export default function Members() {
   const [filterBy, setFilterBy] = useState("all");
   const [selectedMember, setSelectedMember] = useState(null);
   const [connectionNote, setConnectionNote] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
@@ -126,8 +127,25 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["connections"] });
       queryClient.invalidateQueries({ queryKey: ["connectionRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["myFollows"] });
       setConnectionNote("");
       setSelectedMember(null);
+      setDialogOpen(false);
+    },
+  });
+
+  const cancelConnectionMutation = useMutation({
+    mutationFn: async (userEmail) => {
+      const pendingRequest = myFollows.find(
+        f => f.followingEmail === userEmail && f.status === "pending"
+      );
+      if (pendingRequest) {
+        await base44.entities.UserFollow.delete(pendingRequest.id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connections"] });
+      queryClient.invalidateQueries({ queryKey: ["myFollows"] });
     },
   });
 
@@ -143,9 +161,9 @@ export default function Members() {
   };
 
   const isPending = (userEmail) => {
-    return connections.some(c => 
-      c.followingEmail === userEmail && 
-      c.status === "pending"
+    return myFollows.some(f => 
+      f.followingEmail === userEmail && 
+      f.status === "pending"
     );
   };
 
@@ -273,17 +291,31 @@ export default function Members() {
                         Connected
                       </Button>
                     ) : isPending(user.email) ? (
-                      <Button disabled className="w-full" variant="outline" size="sm">
+                      <Button 
+                        onClick={() => cancelConnectionMutation.mutate(user.email)}
+                        className="w-full" 
+                        variant="outline" 
+                        size="sm"
+                      >
                         <UserCheck className="w-4 h-4 mr-2" />
-                        Pending
+                        Requested
                       </Button>
                     ) : (
-                      <Dialog>
+                      <Dialog open={dialogOpen && selectedMember?.email === user.email} onOpenChange={(open) => {
+                        setDialogOpen(open);
+                        if (!open) {
+                          setConnectionNote("");
+                          setSelectedMember(null);
+                        }
+                      }}>
                         <DialogTrigger asChild>
                           <Button
                             className="w-full bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D]"
                             size="sm"
-                            onClick={() => setSelectedMember(user)}
+                            onClick={() => {
+                              setSelectedMember(user);
+                              setDialogOpen(true);
+                            }}
                           >
                             <UserCheck className="w-4 h-4 mr-2" />
                             Connect
