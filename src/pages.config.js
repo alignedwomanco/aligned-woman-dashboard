@@ -22,6 +22,10 @@ import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import ToolsHub from './pages/ToolsHub';
 import Community from './pages/Community';
+import Members from './pages/Members';
+import Messages from './pages/Messages';
+import Classroom from './pages/Classroom';
+import Support from './pages/Support';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +54,10 @@ export const PAGES = {
     "Settings": Settings,
     "ToolsHub": ToolsHub,
     "Community": Community,
+    "Members": Members,
+    "Messages": Messages,
+    "Classroom": Classroom,
+    "Support": Support,
 }
 
 export const pagesConfig = {
