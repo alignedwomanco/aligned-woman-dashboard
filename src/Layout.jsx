@@ -205,9 +205,9 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Global Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
-        <div className="mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           {/* Top Row: Logo, Search, Icons, Profile */}
-          <div className="flex items-center justify-between h-16 gap-4">
+          <div className="flex items-center justify-between py-5 gap-6">
             {/* Logo */}
             <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2 flex-shrink-0">
               <img 
@@ -235,14 +235,13 @@ export default function Layout({ children, currentPageName }) {
             </form>
 
             {/* Right Icons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {/* Messages */}
               <button
                 onClick={() => setShowMessages(!showMessages)}
                 className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <MessageCircle className="w-5 h-5 text-gray-600" />
-                {/* Unread badge would go here */}
               </button>
 
               {/* Notifications */}
@@ -251,7 +250,6 @@ export default function Layout({ children, currentPageName }) {
                 className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <Bell className="w-5 h-5 text-gray-600" />
-                {/* Unread badge would go here */}
               </button>
 
               {/* Profile Dropdown */}
@@ -297,22 +295,24 @@ export default function Layout({ children, currentPageName }) {
             </div>
           </div>
 
-          {/* Navigation Bar */}
-          <nav className="flex items-center gap-1 overflow-x-auto pb-0 border-t border-gray-100">
-            {visibleNavItems.map((item) => (
-              <Link
-                key={item.name}
-                to={createPageUrl(item.name)}
-                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
-                  currentPageName === item.name
-                    ? "text-[#6B1B3D] border-[#6B1B3D]"
-                    : "text-gray-600 hover:text-[#6B1B3D] border-transparent hover:border-gray-300"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          {/* Navigation Bar - Rounded Pill Style */}
+          <div className="pb-5">
+            <nav className="bg-[#6B1B3D] rounded-full px-2 py-2 flex items-center gap-1 overflow-x-auto">
+              {visibleNavItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={createPageUrl(item.name)}
+                  className={`px-6 py-2.5 text-sm font-medium whitespace-nowrap transition-all rounded-full ${
+                    currentPageName === item.name
+                      ? "bg-white text-[#6B1B3D]"
+                      : "text-white hover:bg-white/10"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       </header>
 
@@ -327,7 +327,7 @@ export default function Layout({ children, currentPageName }) {
       )}
 
       {/* Main Content */}
-      <main className="pt-[120px]">
+      <main className="pt-[140px]">
         {children}
       </main>
     </div>
