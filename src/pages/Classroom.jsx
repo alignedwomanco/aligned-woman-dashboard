@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Clock,
   Eye,
@@ -17,6 +19,8 @@ import {
   Lock,
   CheckCircle,
 } from "lucide-react";
+import GamificationStats from "@/components/classroom/GamificationStats";
+import LeaderboardCard from "@/components/classroom/LeaderboardCard";
 
 const phaseIcons = {
   Awareness: Eye,
@@ -56,6 +60,54 @@ const allModules = [
 export default function Classroom() {
   const [activePhase, setActivePhase] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const user = await base44.auth.me();
+      setCurrentUser(user);
+    };
+    loadUser();
+  }, []);
+
+  const { data: userPoints } = useQuery({
+    queryKey: ["userPoints", currentUser?.email],
+    queryFn: async () => {
+      const points = await base44.entities.UserPoints.filter({});
+      return points[0] || null;
+    },
+    enabled: !!currentUser,
+  });
+
+  const { data: userBadges = [] } = useQuery({
+    queryKey: ["userBadges", currentUser?.email],
+    queryFn: () => base44.entities.UserBadge.list("-earnedDate"),
+    enabled: !!currentUser,
+  });
+
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: () => base44.entities.User.list(),
+  });
+
+  const { data: allUserPoints = [] } = useQuery({
+    queryKey: ["allUserPoints"],
+    queryFn: () => base44.entities.UserPoints.list("-points"),
+  });
+
+  // Build leaderboard
+  const leaderboard = allUserPoints
+    .map((points) => {
+      const user = allUsers.find((u) => u.email === points.created_by);
+      return {
+        ...points,
+        email: points.created_by,
+        full_name: user?.full_name,
+        profile_picture: user?.profile_picture,
+      };
+    })
+    .slice(0, 10);
 
   const filteredModules = allModules.filter((module) => {
     const phaseMatch = activePhase === "all" || module.phase === activePhase;
@@ -80,7 +132,7 @@ export default function Classroom() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
+          className="mb-8"
         >
           <h1 className="text-3xl font-bold text-[#4A1228] mb-2">Classroom</h1>
           <p className="text-gray-600">
@@ -88,13 +140,28 @@ export default function Classroom() {
           </p>
         </motion.div>
 
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8 flex flex-col sm:flex-row gap-4"
-        >
+        {/* Gamification Stats */}
+        {currentUser && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <GamificationStats userPoints={userPoints} userBadges={userBadges} />
+          </motion.div>
+        )}
+
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+          {/* Left Column - Modules */}
+          <div>
+            {/* Filters */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-8 flex flex-col sm:flex-row gap-4"
+            >
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
@@ -104,19 +171,19 @@ export default function Classroom() {
               className="pl-10 rounded-xl border-gray-200"
             />
           </div>
-          <Tabs value={activePhase} onValueChange={setActivePhase}>
-            <TabsList className="bg-white border">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="Awareness">Awareness</TabsTrigger>
-              <TabsTrigger value="Liberation">Liberation</TabsTrigger>
-              <TabsTrigger value="Intention">Intention</TabsTrigger>
-              <TabsTrigger value="VisionEmbodiment">Vision</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </motion.div>
+              <Tabs value={activePhase} onValueChange={setActivePhase}>
+                <TabsList className="bg-white border">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="Awareness">Awareness</TabsTrigger>
+                  <TabsTrigger value="Liberation">Liberation</TabsTrigger>
+                  <TabsTrigger value="Intention">Intention</TabsTrigger>
+                  <TabsTrigger value="VisionEmbodiment">Vision</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </motion.div>
 
-        {/* Modules Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Modules Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
           {filteredModules.map((module, index) => {
             const PhaseIcon = phaseIcons[module.phase];
             const isClickable = module.status !== "Locked";
@@ -178,11 +245,28 @@ export default function Classroom() {
           })}
         </div>
 
-        {filteredModules.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-gray-500">No modules found matching your criteria.</p>
+            {filteredModules.length === 0 && (
+              <div className="text-center py-16">
+                <p className="text-gray-500">No modules found matching your criteria.</p>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Right Column - Leaderboard */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="sticky top-6"
+            >
+              <LeaderboardCard 
+                leaderboard={leaderboard} 
+                currentUserEmail={currentUser?.email} 
+              />
+            </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );
