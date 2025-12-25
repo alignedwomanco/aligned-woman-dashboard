@@ -46,6 +46,7 @@ export default function AdminSettings() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("moderator");
+  const [activeTab, setActiveTab] = useState("users");
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -167,7 +168,7 @@ export default function AdminSettings() {
           <p className="text-gray-600">Manage system settings and configurations</p>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white border border-gray-200">
             <TabsTrigger 
               value="users" 
@@ -364,7 +365,7 @@ export default function AdminSettings() {
                       <p className="text-sm text-gray-600">View metrics, content, and manage expert accounts</p>
                     </div>
                     <Button 
-                      onClick={() => document.querySelector('[value="experts"]').click()}
+                      onClick={() => setActiveTab("experts")}
                       className="bg-[#6B1B3D] hover:bg-[#4A1228]"
                     >
                       Go to Experts →
