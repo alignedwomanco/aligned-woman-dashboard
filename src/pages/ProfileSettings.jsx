@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Camera, Upload, Save, RefreshCw } from "lucide-react";
+import { Camera, Upload, Save, RefreshCw, Users, UserCheck, Heart, FileText, Plus, X, MessageCircle, UserMinus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import AvatarGenerator from "@/components/admin/AvatarGenerator";
 import BackgroundSelector from "@/components/settings/BackgroundSelector";
 import { createPageUrl } from "@/utils";
@@ -28,7 +29,11 @@ export default function ProfileSettings() {
       setProfileData({
         full_name: user.full_name,
         bio: user.bio || "",
+        date_of_birth: user.date_of_birth || "",
+        time_of_birth: user.time_of_birth || "",
+        location: user.location || "",
       });
+      setSocialLinks(user.social_links || []);
     };
     loadUser();
   }, []);
@@ -97,6 +102,45 @@ export default function ProfileSettings() {
     return levels[level] || levels[1];
   };
 
+  const { data: myFollows = [] } = useQuery({
+    queryKey: ["myFollows"],
+    queryFn: () => base44.entities.UserFollow.list(),
+    initialData: [],
+    enabled: !!currentUser,
+  });
+
+  const { data: connections = [] } = useQuery({
+    queryKey: ["connections"],
+    queryFn: () => base44.entities.UserFollow.filter({ status: "connected" }),
+    initialData: [],
+    enabled: !!currentUser,
+  });
+
+  const { data: myPosts = [] } = useQuery({
+    queryKey: ["myPosts"],
+    queryFn: () => base44.entities.CommunityPost.filter({ created_by: currentUser?.email }),
+    initialData: [],
+    enabled: !!currentUser,
+  });
+
+  const unfollowMutation = useMutation({
+    mutationFn: async (followId) => {
+      await base44.entities.UserFollow.delete(followId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["myFollows"] });
+    },
+  });
+
+  const removeConnectionMutation = useMutation({
+    mutationFn: async (connectionId) => {
+      await base44.entities.UserFollow.delete(connectionId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connections"] });
+    },
+  });
+
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -113,9 +157,10 @@ export default function ProfileSettings() {
           <p className="text-gray-600">Manage your profile and preferences</p>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="social">Social & Connections</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -130,15 +175,24 @@ export default function ProfileSettings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Profile Picture */}
+                {/* Profile Picture & Level */}
                 <div className="flex items-center gap-6">
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage src={currentUser.profile_picture} />
-                    <AvatarFallback className="bg-[#6B1B3D] text-white text-2xl">
-                      {currentUser.full_name?.[0] || currentUser.email?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <div className={`w-32 h-32 rounded-full bg-gradient-to-br ${getLevelInfo(currentUser?.level).color} p-1`}>
+                      <Avatar className="w-full h-full border-4 border-white">
+                        <AvatarImage src={currentUser.profile_picture} />
+                        <AvatarFallback className="bg-[#6B1B3D] text-white text-3xl">
+                          {currentUser.full_name?.[0] || currentUser.email?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <Badge className={`absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r ${getLevelInfo(currentUser?.level).color} text-white border-2 border-white`}>
+                      Level {currentUser?.level || 1}
+                    </Badge>
+                  </div>
                   <div>
+                    <h3 className="font-semibold text-lg mb-1">{getLevelInfo(currentUser?.level).label}</h3>
+                    <p className="text-sm text-gray-600 mb-3">Keep contributing to level up!</p>
                     <div className="flex items-center gap-2 mb-2">
                       <Label htmlFor="profile-pic" className="cursor-pointer">
                         <div className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors">
@@ -192,6 +246,78 @@ export default function ProfileSettings() {
                       className="min-h-[100px]"
                     />
                   </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="dob">Date of Birth</Label>
+                      <Input
+                        id="dob"
+                        type="date"
+                        value={profileData.date_of_birth}
+                        onChange={(e) => setProfileData({ ...profileData, date_of_birth: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="tob">Time of Birth (Human Design)</Label>
+                      <Input
+                        id="tob"
+                        type="time"
+                        value={profileData.time_of_birth}
+                        onChange={(e) => setProfileData({ ...profileData, time_of_birth: e.target.value })}
+                        placeholder="Optional"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      value={profileData.location}
+                      onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+                      placeholder="City, Country"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <Label>Social Links & Websites</Label>
+                      <Button
+                        onClick={addSocialLink}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Link
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      {socialLinks.map((link, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            placeholder="Platform (e.g., Instagram)"
+                            value={link.platform}
+                            onChange={(e) => updateSocialLink(index, "platform", e.target.value)}
+                            className="w-1/3"
+                          />
+                          <Input
+                            placeholder="URL"
+                            value={link.url}
+                            onChange={(e) => updateSocialLink(index, "url", e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeSocialLink(index)}
+                            className="text-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-3">
@@ -210,6 +336,157 @@ export default function ProfileSettings() {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Restart Onboarding
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Social & Connections Tab */}
+          <TabsContent value="social" className="space-y-6">
+            {/* Stats Overview */}
+            <div className="grid md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Users className="w-8 h-8 mx-auto mb-2 text-[#6B1B3D]" />
+                  <div className="text-2xl font-bold">{connections.length}</div>
+                  <div className="text-sm text-gray-600">Connections</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Heart className="w-8 h-8 mx-auto mb-2 text-pink-600" />
+                  <div className="text-2xl font-bold">{myFollows.filter(f => !f.status).length}</div>
+                  <div className="text-sm text-gray-600">Following</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <UserCheck className="w-8 h-8 mx-auto mb-2 text-purple-600" />
+                  <div className="text-2xl font-bold">{myFollows.length}</div>
+                  <div className="text-sm text-gray-600">Followers</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                  <div className="text-2xl font-bold">{myPosts.length}</div>
+                  <div className="text-sm text-gray-600">Posts</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Connections */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Connections ({connections.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {connections.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No connections yet</p>
+                  ) : (
+                    connections.map((connection) => (
+                      <div key={connection.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarFallback className="bg-[#6B1B3D] text-white">
+                              {connection.followingEmail?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">{connection.followingEmail}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.location.href = createPageUrl("Messages") + `?user=${connection.followingEmail}`}
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeConnectionMutation.mutate(connection.id)}
+                            className="text-red-600"
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Following */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="w-5 h-5" />
+                  Following ({myFollows.filter(f => !f.status).length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {myFollows.filter(f => !f.status).length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">Not following anyone yet</p>
+                  ) : (
+                    myFollows.filter(f => !f.status).map((follow) => (
+                      <div key={follow.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarFallback className="bg-[#6B1B3D] text-white">
+                              {follow.followingEmail?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">{follow.followingEmail}</span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => unfollowMutation.mutate(follow.id)}
+                        >
+                          <UserMinus className="w-4 h-4 mr-1" />
+                          Unfollow
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Posts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Recent Posts ({myPosts.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {myPosts.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No posts yet</p>
+                  ) : (
+                    myPosts.slice(0, 5).map((post) => (
+                      <div key={post.id} className="p-4 bg-gray-50 rounded-lg">
+                        <div 
+                          className="prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: post.content }}
+                        />
+                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                          <span>{post.likes} likes</span>
+                          <span>{post.commentCount} comments</span>
+                          <span>{new Date(post.created_date).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
