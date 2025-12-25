@@ -35,13 +35,22 @@ export default function ProfileSettings() {
   const [validationError, setValidationError] = useState({ show: false, title: "", message: "" });
   const queryClient = useQueryClient();
 
+  const toTitleCase = (str) => {
+    if (!str) return "";
+    return str
+      .trim()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   useEffect(() => {
     const loadUser = async () => {
       const user = await base44.auth.me();
       setCurrentUser(user);
       const nameParts = (user.full_name || "").split(" ");
-      const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || "";
+      const firstName = toTitleCase(nameParts[0] || "");
+      const lastName = toTitleCase(nameParts.slice(1).join(" ") || "");
       setProfileData({
         first_name: firstName,
         last_name: lastName,
@@ -93,12 +102,6 @@ export default function ProfileSettings() {
       return;
     }
 
-    const toTitleCase = (str) => str
-      ?.trim()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-
     const full_name = `${toTitleCase(profileData.first_name)} ${toTitleCase(profileData.last_name)}`.trim();
     
     const formattedData = {
@@ -113,7 +116,23 @@ export default function ProfileSettings() {
     
     try {
       await updateProfileMutation.mutateAsync(formattedData);
-      setCurrentUser({ ...currentUser, ...formattedData });
+      
+      // Refresh user data from server to ensure consistency
+      const updatedUser = await base44.auth.me();
+      setCurrentUser(updatedUser);
+      
+      // Update form with title-cased values
+      const nameParts = (updatedUser.full_name || "").split(" ");
+      const firstName = toTitleCase(nameParts[0] || "");
+      const lastName = toTitleCase(nameParts.slice(1).join(" ") || "");
+      setProfileData({
+        ...profileData,
+        first_name: firstName,
+        last_name: lastName,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      
       setValidationError({
         show: true,
         title: "Success!",
