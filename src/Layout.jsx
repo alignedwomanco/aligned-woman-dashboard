@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
-import { Bell, MessageCircle, Search, LogOut, User, Settings, ChevronDown } from "lucide-react";
+import { Bell, MessageCircle, LogOut, User, Settings, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,7 +38,6 @@ const appNavigation = [
 export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -77,13 +76,6 @@ export default function Layout({ children, currentPageName }) {
 
   const handleLogout = () => {
     base44.auth.logout();
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = createPageUrl("SearchResults") + `?q=${encodeURIComponent(searchQuery)}`;
-    }
   };
 
   // Public page layout with hamburger menu
@@ -303,23 +295,9 @@ export default function Layout({ children, currentPageName }) {
               <span className="hidden lg:block text-lg font-bold text-[#6B1B3D]">
                 THE ALIGNED WOMAN
               </span>
-            </Link>
+              </Link>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-xl">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Search community, modules, tools..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 bg-gray-50 border-gray-200 text-[20px]" />
-
-              </div>
-            </form>
-
-            {/* Right Icons */}
+              {/* Right Icons */}
             <div className="flex items-center gap-2 flex-shrink-0">
               {/* Messages */}
               <button
