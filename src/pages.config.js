@@ -3,13 +3,18 @@ import AdminSettings from './pages/AdminSettings';
 import Apply from './pages/Apply';
 import Blueprint from './pages/Blueprint';
 import CheckIn from './pages/CheckIn';
+import Classroom from './pages/Classroom';
+import Community from './pages/Community';
 import Contact from './pages/Contact';
 import DailyCheckIn from './pages/DailyCheckIn';
 import Dashboard from './pages/Dashboard';
 import DefineMyPurpose from './pages/DefineMyPurpose';
 import Experts from './pages/Experts';
+import ExpertsDirectory from './pages/ExpertsDirectory';
 import Journal from './pages/Journal';
 import Landing from './pages/Landing';
+import Members from './pages/Members';
+import Messages from './pages/Messages';
 import ModuleFrameworkBuilder from './pages/ModuleFrameworkBuilder';
 import ModulePlayer from './pages/ModulePlayer';
 import ModulesLibrary from './pages/ModulesLibrary';
@@ -20,13 +25,8 @@ import OurWhy from './pages/OurWhy';
 import ProfileSettings from './pages/ProfileSettings';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
-import ToolsHub from './pages/ToolsHub';
-import Community from './pages/Community';
-import Members from './pages/Members';
-import Messages from './pages/Messages';
-import Classroom from './pages/Classroom';
 import Support from './pages/Support';
-import ExpertsDirectory from './pages/ExpertsDirectory';
+import ToolsHub from './pages/ToolsHub';
 import __Layout from './Layout.jsx';
 
 
@@ -36,13 +36,18 @@ export const PAGES = {
     "Apply": Apply,
     "Blueprint": Blueprint,
     "CheckIn": CheckIn,
+    "Classroom": Classroom,
+    "Community": Community,
     "Contact": Contact,
     "DailyCheckIn": DailyCheckIn,
     "Dashboard": Dashboard,
     "DefineMyPurpose": DefineMyPurpose,
     "Experts": Experts,
+    "ExpertsDirectory": ExpertsDirectory,
     "Journal": Journal,
     "Landing": Landing,
+    "Members": Members,
+    "Messages": Messages,
     "ModuleFrameworkBuilder": ModuleFrameworkBuilder,
     "ModulePlayer": ModulePlayer,
     "ModulesLibrary": ModulesLibrary,
@@ -53,13 +58,8 @@ export const PAGES = {
     "ProfileSettings": ProfileSettings,
     "Progress": Progress,
     "Settings": Settings,
-    "ToolsHub": ToolsHub,
-    "Community": Community,
-    "Members": Members,
-    "Messages": Messages,
-    "Classroom": Classroom,
     "Support": Support,
-    "ExpertsDirectory": ExpertsDirectory,
+    "ToolsHub": ToolsHub,
 }
 
 export const pagesConfig = {

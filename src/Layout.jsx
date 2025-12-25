@@ -20,7 +20,7 @@ const publicPages = [
   { name: "OurWhy", label: "Our Why" },
   { name: "ALIVEMethod", label: "ALIVE Method" },
   { name: "Experts", label: "Experts" },
-  { name: "Apply", label: "Apply" },
+  { name: "Apply", label: "Join" },
   { name: "Contact", label: "Contact" },
 ];
 
@@ -41,6 +41,7 @@ export default function Layout({ children, currentPageName }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const location = useLocation();
 
   const isPublicPage = publicPages.some(p => p.name === currentPageName) || currentPageName === "Login";
@@ -85,7 +86,7 @@ export default function Layout({ children, currentPageName }) {
     }
   };
 
-  // Public page layout (unchanged)
+  // Public page layout with hamburger menu
   if (isPublicPage) {
     return (
       <div className="min-h-screen bg-pink-50/30">
@@ -115,38 +116,98 @@ export default function Layout({ children, currentPageName }) {
                 </span>
               </Link>
 
-              <nav className="hidden md:flex items-center gap-6">
-                {publicPages.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={createPageUrl(item.name)}
-                    className="text-gray-700 hover:text-burgundy transition-colors font-medium"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-
               <div className="flex items-center gap-3">
-                {isAuthenticated ? (
-                  <Button
-                    onClick={() => window.location.href = createPageUrl("Dashboard")}
-                    className="bg-burgundy hover:bg-burgundy-deep text-white"
-                  >
-                    Go to Dashboard
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                    className="bg-burgundy hover:bg-burgundy-deep text-white"
-                  >
-                    Sign In
-                  </Button>
-                )}
+                {/* Profile/Login Icon */}
+                <button
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      window.location.href = createPageUrl("Dashboard");
+                    } else {
+                      base44.auth.redirectToLogin(createPageUrl("Dashboard"));
+                    }
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  title={isAuthenticated ? "Go to Dashboard" : "Login"}
+                >
+                  <User className="w-6 h-6 text-[#6B1B3D]" />
+                </button>
+
+                {/* Hamburger Menu Icon */}
+                <button
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg className="w-6 h-6 text-[#6B1B3D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
         </header>
+
+        {/* Mobile Sidebar Menu */}
+        {showMobileMenu && (
+          <>
+            <div
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={() => setShowMobileMenu(false)}
+            />
+            <div className="fixed top-0 right-0 bottom-0 w-80 bg-white z-50 shadow-2xl">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between p-6 border-b">
+                  <img 
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
+                    alt="AW"
+                    className="w-10 h-10"
+                  />
+                  <button
+                    onClick={() => setShowMobileMenu(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <nav className="flex-1 p-6">
+                  <ul className="space-y-2">
+                    {publicPages.map((item) => (
+                      <li key={item.name}>
+                        <Link
+                          to={createPageUrl(item.name)}
+                          onClick={() => setShowMobileMenu(false)}
+                          className="block px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-[#6B1B3D] rounded-lg transition-colors font-medium"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+
+                <div className="p-6 border-t">
+                  {isAuthenticated ? (
+                    <Button
+                      onClick={handleLogout}
+                      className="w-full bg-burgundy hover:bg-burgundy-deep text-white"
+                    >
+                      Sign Out
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                      className="w-full bg-burgundy hover:bg-burgundy-deep text-white"
+                    >
+                      Sign In
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         <main className="pt-20">
           {children}
