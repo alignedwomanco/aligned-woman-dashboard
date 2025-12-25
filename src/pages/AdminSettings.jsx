@@ -378,8 +378,11 @@ export default function AdminSettings() {
                                 <SelectItem value="course_creator">Course Creator</SelectItem>
                                 <SelectItem value="moderator">Moderator</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
-                                {currentUser.role === "master_admin" && (
+                                {(currentUser.role === "master_admin" || currentUser.role === "owner") && (
                                   <SelectItem value="master_admin">Master Admin</SelectItem>
+                                )}
+                                {currentUser.role === "owner" && (
+                                  <SelectItem value="owner">Owner</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
@@ -479,8 +482,11 @@ export default function AdminSettings() {
                                 <SelectItem value="course_creator">Course Creator</SelectItem>
                                 <SelectItem value="moderator">Moderator</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
-                                {currentUser.role === "master_admin" && (
+                                {(currentUser.role === "master_admin" || currentUser.role === "owner") && (
                                   <SelectItem value="master_admin">Master Admin</SelectItem>
+                                )}
+                                {currentUser.role === "owner" && (
+                                  <SelectItem value="owner">Owner</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
