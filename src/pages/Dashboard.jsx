@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { daysBetweenDates, isSameDay } from "@/utils/dateUtils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -10,18 +11,16 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PersonalizedLearningPath from "@/components/dashboard/PersonalizedLearningPath";
+import DailySnapshotCard from "@/components/dashboard/DailySnapshotCard";
+import WeeklySnapshotCard from "@/components/dashboard/WeeklySnapshotCard";
+import MonthlySnapshotCard from "@/components/dashboard/MonthlySnapshotCard";
+import { DASHBOARD_CONSTANTS, ALIVE_PHASES, SNAPSHOT_VIEWS } from "@/components/dashboard/constants";
 import {
-  Play,
   Sparkles,
   Target,
-  Wrench,
-  Calendar,
   TrendingUp,
   ArrowRight,
   CheckCircle,
-  Clock,
-  Flame,
-  BookOpen,
   Heart,
   Smile,
   Moon,
@@ -30,33 +29,16 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [snapshotView, setSnapshotView] = useState("daily");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [snapshotView, setSnapshotView] = useState(SNAPSHOT_VIEWS.DAILY);
 
   useEffect(() => {
     const loadUser = async () => {
-      const userData = await base44.auth.me();
-      setUser(userData);
-      
-      // Apply background
-      if (userData?.background_image) {
-        const bg = userData.background_image;
-        if (bg.startsWith('#')) {
-          document.body.style.backgroundColor = bg;
-          document.body.style.backgroundImage = "none";
-        } else if (bg.startsWith('data:image/svg+xml')) {
-          document.body.style.backgroundImage = `url("${bg}")`;
-          document.body.style.backgroundSize = "cover";
-          document.body.style.backgroundPosition = "center";
-          document.body.style.backgroundAttachment = "fixed";
-          document.body.style.backgroundColor = "transparent";
-        } else {
-          document.body.style.backgroundImage = `url(${bg})`;
-          document.body.style.backgroundSize = "cover";
-          document.body.style.backgroundPosition = "center";
-          document.body.style.backgroundAttachment = "fixed";
-          document.body.style.backgroundColor = "transparent";
-        }
+      try {
+        const userData = await base44.auth.me();
+        setCurrentUser(userData);
+      } catch (error) {
+        console.error("Failed to load user:", error);
       }
     };
     loadUser();
@@ -82,13 +64,13 @@ export default function Dashboard() {
 
   const { data: checkIns } = useQuery({
     queryKey: ["checkIns"],
-    queryFn: () => base44.entities.CheckIn.list("-created_date", 7),
+    queryFn: () => base44.entities.CheckIn.list("-created_date", DASHBOARD_CONSTANTS.RECENT_CHECKINS_LIMIT),
     initialData: [],
   });
 
   const { data: journalEntries } = useQuery({
     queryKey: ["journalEntries"],
-    queryFn: () => base44.entities.JournalEntry.list("-created_date", 30),
+    queryFn: () => base44.entities.JournalEntry.list("-created_date", DASHBOARD_CONSTANTS.RECENT_JOURNAL_ENTRIES_LIMIT),
     initialData: [],
   });
 
@@ -109,7 +91,7 @@ export default function Dashboard() {
       const points = await base44.entities.UserPoints.filter({});
       return points[0] || null;
     },
-    enabled: !!user,
+    enabled: !!currentUser,
   });
 
   const completedModules = moduleProgress?.filter((p) => p.status === "Complete").length || 0;
@@ -120,21 +102,22 @@ export default function Dashboard() {
   const latestPurposeRun = purposeRuns?.[0];
 
   // Generate personalized recommendations
-  const recommendedModules = diagnosticSession?.recommendedModules?.slice(0, 3).map((title, index) => ({
-    id: `rec-${index}`,
-    title,
-    phase: diagnosticSession.primaryPhase || "Awareness",
-    duration: 45,
-    summary: `Recommended based on your ${diagnosticSession.primaryPhase} phase focus`,
-    isRecommended: true,
-    pointsReward: 20,
-  })) || [];
+  const recommendedModules = useMemo(() => {
+    return diagnosticSession?.recommendedModules?.slice(0, DASHBOARD_CONSTANTS.RECOMMENDED_MODULES_LIMIT).map((title, index) => ({
+      id: `rec-${index}`,
+      title,
+      phase: diagnosticSession.primaryPhase || ALIVE_PHASES.AWARENESS,
+      duration: 45,
+      summary: `Recommended based on your ${diagnosticSession.primaryPhase} phase focus`,
+      isRecommended: true,
+      pointsReward: 20,
+    })) || [];
+  }, [diagnosticSession]);
   
   const canRerunPurpose = () => {
     if (!latestPurposeRun?.completedAt) return true;
-    const lastRun = new Date(latestPurposeRun.completedAt);
-    const daysSince = Math.floor((new Date() - lastRun) / (1000 * 60 * 60 * 24));
-    return daysSince >= 7;
+    const daysSince = daysBetweenDates(latestPurposeRun.completedAt, new Date());
+    return daysSince >= DASHBOARD_CONSTANTS.PURPOSE_RERUN_COOLDOWN_DAYS;
   };
 
   const { data: allModules } = useQuery({
@@ -143,8 +126,8 @@ export default function Dashboard() {
     initialData: [],
   });
 
-  const calculatePhaseProgress = () => {
-    const phases = ["Awareness", "Liberation", "Intention", "VisionEmbodiment"];
+  const phaseProgress = useMemo(() => {
+    const phases = Object.values(ALIVE_PHASES);
     const progress = {};
     
     phases.forEach(phase => {
@@ -159,9 +142,7 @@ export default function Dashboard() {
     });
     
     return progress;
-  };
-
-  const phaseProgress = calculatePhaseProgress();
+  }, [allModules, moduleProgress]);
 
   useEffect(() => {
     if (diagnosticSession?.snapshotFrequency) {
@@ -184,7 +165,7 @@ export default function Dashboard() {
               <Sparkles className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-4xl font-bold text-[#4A1228] mb-4">
-              Welcome{user?.full_name ? `, ${user.full_name.split(" ")[0]}` : ""}!
+              Welcome{currentUser?.full_name ? `, ${currentUser.full_name.split(" ")[0]}` : ""}!
             </h1>
             <p className="text-xl text-gray-600 max-w-xl mx-auto mb-8">
               Let's build your personalised ALIVE Pathway. Complete a short diagnostic so we can prescribe exactly what you need.
@@ -204,173 +185,21 @@ export default function Dashboard() {
     );
   }
 
-  const needsCheckIn = () => {
+  const needsCheckIn = useMemo(() => {
     if (!diagnosticSession?.lastCheckInDate) return true;
-    const lastCheckIn = new Date(diagnosticSession.lastCheckInDate);
-    const today = new Date();
-    lastCheckIn.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    return lastCheckIn.getTime() !== today.getTime();
-  };
+    return !isSameDay(diagnosticSession.lastCheckInDate, new Date());
+  }, [diagnosticSession]);
 
   const getSnapshotContent = () => {
-    const todayDate = new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-
-    if (snapshotView === "weekly") {
-      return (
-        <Card className="bg-gradient-to-br from-purple-50 to-white border-purple-100">
-          <CardHeader>
-            <CardTitle className="text-2xl">This Week's Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="prose prose-sm max-w-none">
-            <p className="text-gray-700 whitespace-pre-line">
-              {diagnosticSession.weeklySnapshotSummary || "Your weekly overview will appear here after your first check-in cycle completes."}
-            </p>
-          </CardContent>
-        </Card>
-      );
+    if (snapshotView === SNAPSHOT_VIEWS.WEEKLY) {
+      return <WeeklySnapshotCard diagnosticSession={diagnosticSession} />;
     }
 
-    if (snapshotView === "monthly") {
-      return (
-        <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-100">
-          <CardHeader>
-            <CardTitle className="text-2xl">This Month's Reflection</CardTitle>
-          </CardHeader>
-          <CardContent className="prose prose-sm max-w-none">
-            <p className="text-gray-700 whitespace-pre-line">
-              {diagnosticSession.monthlySnapshotSummary || "Your monthly reflection will appear here as you progress through your journey."}
-            </p>
-          </CardContent>
-        </Card>
-      );
+    if (snapshotView === SNAPSHOT_VIEWS.MONTHLY) {
+      return <MonthlySnapshotCard diagnosticSession={diagnosticSession} />;
     }
 
-    return (
-      <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl">Today's Snapshot</CardTitle>
-            <Badge className="bg-[#6B1B3D] text-white">{todayDate}</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {diagnosticSession.dailySnapshot?.mainNarrative ? (
-            <>
-              {/* Check-in prompt if needed */}
-              {needsCheckIn() && (
-                <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white p-6 rounded-2xl">
-                  <div className="flex items-start gap-4">
-                    <Sparkles className="w-6 h-6 flex-shrink-0 mt-1" />
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2">Start Your Day</h3>
-                      <p className="text-white/90 mb-4">Take 2 minutes to check in and get your personalized snapshot for today.</p>
-                      <Link to={createPageUrl("DailyCheckIn")}>
-                        <Button className="bg-white text-rose-600 hover:bg-white/90">
-                          Daily Check-In <ArrowRight className="ml-2 w-4 h-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Today Is About */}
-              {diagnosticSession.dailySnapshot.todayIsAbout && (
-                <div className="bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white p-6 rounded-2xl">
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Today Is About
-                  </h3>
-                  <p className="text-white/90 text-lg leading-relaxed">
-                    {diagnosticSession.dailySnapshot.todayIsAbout}
-                  </p>
-                </div>
-              )}
-
-              {/* Main Narrative - The Integration */}
-              <div className="prose prose-sm max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line text-base">
-                  {diagnosticSession.dailySnapshot.mainNarrative}
-                </p>
-              </div>
-
-              {/* Guidance Grid */}
-              <div className="grid md:grid-cols-2 gap-4">
-                {diagnosticSession.dailySnapshot.movementRecommendation && (
-                  <div className="bg-green-50 p-4 rounded-xl border border-green-200">
-                    <h3 className="text-sm font-semibold text-green-900 mb-2">Movement</h3>
-                    <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.movementRecommendation}</p>
-                  </div>
-                )}
-                {diagnosticSession.dailySnapshot.nutritionRecommendation && (
-                  <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
-                    <h3 className="text-sm font-semibold text-orange-900 mb-2">Nutrition</h3>
-                    <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.nutritionRecommendation}</p>
-                  </div>
-                )}
-                {diagnosticSession.dailySnapshot.energyGuidance && (
-                  <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
-                    <h3 className="text-sm font-semibold text-purple-900 mb-2">Energy Guidance</h3>
-                    <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.energyGuidance}</p>
-                  </div>
-                )}
-                {diagnosticSession.dailySnapshot.focusReminder && (
-                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                    <h3 className="text-sm font-semibold text-blue-900 mb-2">Focus</h3>
-                    <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.focusReminder}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* ALIVE Lens */}
-              {diagnosticSession.dailySnapshot.aliveLens && (
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-xl border border-indigo-200">
-                  <h3 className="text-sm font-semibold text-indigo-900 mb-2">Your ALIVE Lens</h3>
-                  <p className="text-gray-700 text-sm">{diagnosticSession.dailySnapshot.aliveLens}</p>
-                </div>
-              )}
-
-              {/* Recommended Modules */}
-              {diagnosticSession.dailySnapshot.recommendedModules && diagnosticSession.dailySnapshot.recommendedModules.length > 0 && (
-                <div className="bg-white p-5 rounded-xl border-2 border-pink-100">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Recommended for Today</h3>
-                  <div className="space-y-2">
-                    {diagnosticSession.dailySnapshot.recommendedModules.map((module, i) => (
-                      <div key={i} className="flex items-center gap-2 text-gray-700 text-sm">
-                        <CheckCircle className="w-4 h-4 text-[#6B1B3D]" />
-                        {module}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-rose-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Complete Your Daily Check-In
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Get your personalized snapshot with integrated guidance for today
-              </p>
-              <Link to={createPageUrl("DailyCheckIn")}>
-                <Button className="bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white">
-                  Start Check-In <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
+    return <DailySnapshotCard diagnosticSession={diagnosticSession} needsCheckIn={needsCheckIn} />;
   };
 
   return (
@@ -383,7 +212,7 @@ export default function Dashboard() {
           className="mb-10"
         >
           <h1 className="text-3xl font-bold text-[#4A1228] mb-2">
-            Welcome back{user?.full_name ? `, ${user.full_name.split(" ")[0]}` : ""}
+            Welcome back{currentUser?.full_name ? `, ${currentUser.full_name.split(" ")[0]}` : ""}
           </h1>
           <p className="text-gray-600">Your personalised ALIVE operating system.</p>
         </motion.div>
@@ -404,14 +233,14 @@ export default function Dashboard() {
                   <span className="text-rose-200 font-medium">Your ALIVE Profile</span>
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2">
-                  Primary: {diagnosticSession?.primaryPhase || "Awareness"}
+                  Primary: {diagnosticSession?.primaryPhase || ALIVE_PHASES.AWARENESS}
                 </h2>
                 <div className="flex flex-wrap gap-3">
                   <Badge className="bg-white/20 text-white border-0 px-4 py-2">
                     Capacity: {diagnosticSession?.capacityScore || 7}/10
                   </Badge>
                   <Badge className="bg-rose-500/30 text-rose-200 border-0 px-4 py-2">
-                    Secondary: {diagnosticSession?.secondaryPhase || "Liberation"}
+                    Secondary: {diagnosticSession?.secondaryPhase || ALIVE_PHASES.LIBERATION}
                   </Badge>
                 </div>
               </div>
@@ -429,9 +258,9 @@ export default function Dashboard() {
           >
             <Tabs value={snapshotView} onValueChange={setSnapshotView}>
               <TabsList className="mb-4">
-                <TabsTrigger value="daily">Daily</TabsTrigger>
-                <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                <TabsTrigger value={SNAPSHOT_VIEWS.DAILY}>Daily</TabsTrigger>
+                <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY}>Weekly</TabsTrigger>
+                <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY}>Monthly</TabsTrigger>
               </TabsList>
               <TabsContent value={snapshotView}>
                 {getSnapshotContent()}
@@ -538,7 +367,7 @@ export default function Dashboard() {
                 <div className="mb-4">
                   <h3 className="text-sm font-semibold text-rose-200 mb-2">Recommended for You</h3>
                   <div className="space-y-2">
-                    {diagnosticSession.recommendedModules.slice(0, 3).map((module, i) => (
+                    {diagnosticSession.recommendedModules.slice(0, DASHBOARD_CONSTANTS.RECOMMENDED_MODULES_LIMIT).map((module, i) => (
                       <div key={i} className="flex items-center gap-2 text-white/80 text-sm">
                         <CheckCircle className="w-4 h-4 text-rose-300" />
                         {module}
@@ -802,7 +631,7 @@ export default function Dashboard() {
                   <div key={phase}>
                     <div className="flex justify-between text-sm mb-2">
                       <span className="font-medium text-gray-700">
-                        {phase === "VisionEmbodiment" ? "Vision & Embodiment" : phase}
+                        {phase === ALIVE_PHASES.VISION_EMBODIMENT ? "Vision & Embodiment" : phase}
                       </span>
                       <span className="text-gray-500">{progress}%</span>
                     </div>
