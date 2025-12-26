@@ -150,6 +150,11 @@ export default function Dashboard() {
     }
   }, [diagnosticSession]);
 
+  const needsCheckIn = useMemo(() => {
+    if (!diagnosticSession?.lastCheckInDate) return true;
+    return !isSameDay(diagnosticSession.lastCheckInDate, new Date());
+  }, [diagnosticSession]);
+
   // If no diagnostic completed, show onboarding prompt
   if (!diagnosticSession) {
     return (
@@ -184,11 +189,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  const needsCheckIn = useMemo(() => {
-    if (!diagnosticSession?.lastCheckInDate) return true;
-    return !isSameDay(diagnosticSession.lastCheckInDate, new Date());
-  }, [diagnosticSession]);
 
   const getSnapshotContent = () => {
     if (snapshotView === SNAPSHOT_VIEWS.WEEKLY) {
