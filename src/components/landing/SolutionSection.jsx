@@ -46,9 +46,9 @@ export default function SolutionSection() {
         >
           <div className="inline-flex items-center gap-2 bg-pink-100 border border-pink-200 rounded-full px-5 py-2 mb-6">
             <Sparkles className="w-4 h-4 text-[#6B1B3D]" />
-            <span className="text-[#6B1B3D] text-sm font-medium">The Solution</span>
+            <span className="text-[#3D2250] text-sm font-medium">The Solution</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#4A1228] tracking-tight mb-6">
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#3D2250] tracking-tight mb-6">
             Not Another Course.
             <br />
             <span className="text-[#C67793]">An Intelligent Learning Environment.</span>
@@ -74,13 +74,13 @@ export default function SolutionSection() {
                 </div>
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#6B1B3D] to-[#8B2E4D] rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#3D2250] to-[#5B2E84] rounded-xl flex items-center justify-center">
                       <step.icon className="w-5 h-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-[#4A1228]">{step.title}</h3>
+                    <h3 className="text-xl font-bold text-[#3D2250]">{step.title}</h3>
                   </div>
                   <p className="text-gray-600 mb-4">{step.description}</p>
-                  <p className="text-[#6B1B3D] font-medium text-sm bg-pink-50 rounded-lg px-4 py-2 inline-block">
+                  <p className="text-[#3D2250] font-medium text-sm bg-pink-50 rounded-lg px-4 py-2 inline-block">
                     {step.highlight}
                   </p>
                 </div>
@@ -94,7 +94,7 @@ export default function SolutionSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="bg-gradient-to-br from-[#6B1B3D] to-[#4A1228] rounded-3xl p-10 lg:p-14 text-center"
+          className="bg-gradient-to-br from-[#3D2250] to-[#5B2E84] rounded-3xl p-10 lg:p-14 text-center"
         >
           <div className="flex items-center justify-center gap-4 mb-6">
             <BookOpen className="w-8 h-8 text-[#C67793]" />

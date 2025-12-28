@@ -96,49 +96,25 @@ export default function Layout({ children, currentPageName }) {
           .bg-burgundy { background-color: var(--burgundy); }
         `}</style>
 
-        <header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
-              <Link to={createPageUrl("Home")} className="flex items-center gap-3">
-                <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/6f3c1f132_AWLogoWhite.png"
-                  alt="The Aligned Woman Logo"
-                  className="w-10 h-10 object-contain" />
+        <div className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <Link to={createPageUrl("Home")}>
+              <img
+                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/af7d78781_AlignedWomanLogoWhite.png"}
+                alt="The Aligned Woman"
+                className="h-12 object-contain"
+              />
+            </Link>
 
-                <span className="text-xl font-bold tracking-tight text-white">
-                  THE ALIGNED WOMAN
-                </span>
-              </Link>
-
-              <div className="flex items-center gap-3">
-                {/* Profile/Login Icon */}
-                <button
-                  onClick={() => {
-                    if (isAuthenticated) {
-                      window.location.href = createPageUrl("Dashboard");
-                    } else {
-                      base44.auth.redirectToLogin(createPageUrl("Dashboard"));
-                    }
-                  }}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                  title={isAuthenticated ? "Go to Dashboard" : "Login"}>
-
-                  <User className="w-6 h-6 text-white" />
-                </button>
-
-                {/* Hamburger Menu Icon */}
-                <button
-                  onClick={() => setShowMobileMenu(!showMobileMenu)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
-        </header>
+        </div>
 
         {/* Mobile Sidebar Menu */}
         {showMobileMenu &&
@@ -150,10 +126,10 @@ export default function Layout({ children, currentPageName }) {
             <div className="fixed top-0 right-0 bottom-0 w-80 bg-white z-50 shadow-2xl">
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b">
-                  <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
-                  alt="AW"
-                  className="w-10 h-10" />
+                      <img
+                      src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/87267545a_AlignedWomanLogoPurple.png"}
+                      alt="AW"
+                      className="h-10 object-contain" />
 
                   <button
                   onClick={() => setShowMobileMenu(false)}
@@ -262,16 +238,25 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </div>
             <div className="border-t border-white/10 mt-12 pt-8 text-center text-white/50 text-sm">
-              © {new Date().getFullYear()} The Aligned Woman Blueprint. All rights reserved.
-            </div>
-          </div>
-        </footer>
-      </div>);
+                        © {new Date().getFullYear()} The Aligned Woman Blueprint. All rights reserved.
+                      </div>
+                    </div>
+                  </footer>
+                </div>);
 
-  }
+            }
 
-  // Authenticated app layout with left sidebar
-  const [showToolsDropdown, setShowToolsDropdown] = React.useState(false);
+            // Authenticated app layout with left sidebar
+            const [showToolsDropdown, setShowToolsDropdown] = React.useState(false);
+            const [siteSettings, setSiteSettings] = React.useState(null);
+
+            React.useEffect(() => {
+              const loadSettings = async () => {
+                const settings = await base44.entities.SiteSettings.list();
+                setSiteSettings(settings[0] || null);
+              };
+              loadSettings();
+            }, []);
 
   return (
     <div className="min-h-screen flex">
@@ -286,13 +271,12 @@ export default function Layout({ children, currentPageName }) {
       <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[#3C224F] text-white flex flex-col z-50">
         {/* Logo */}
         <div className="p-6 border-b border-white/10">
-          <Link to={createPageUrl("Home")} className="flex items-center gap-3">
+          <Link to={createPageUrl("Home")}>
             <img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
-              alt="AW"
-              className="w-10 h-10"
+              src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/af7d78781_AlignedWomanLogoWhite.png"}
+              alt="The Aligned Woman"
+              className="h-10 object-contain"
             />
-            <span className="text-sm font-bold">THE ALIGNED WOMAN</span>
           </Link>
         </div>
 

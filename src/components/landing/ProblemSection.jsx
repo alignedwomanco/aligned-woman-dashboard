@@ -24,7 +24,7 @@ export default function ProblemSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#4A1228] tracking-tight leading-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#3D2250] tracking-tight leading-tight">
             Women Are Not Broken.
             <br />
             <span className="text-[#C67793]">The Systems They're Using Are.</span>
@@ -40,7 +40,7 @@ export default function ProblemSection() {
         >
           <p className="text-xl text-gray-600 leading-relaxed">
             Women make up the largest share of the wellness, education, and self-development market.
-            And yet the tools available to them are <span className="font-semibold text-[#6B1B3D]">fragmented, shallow, and fundamentally misaligned</span> with how women actually live, work, and grow.
+            And yet the tools available to them are <span className="font-semibold text-[#3D2250]">fragmented, shallow, and fundamentally misaligned</span> with how women actually live, work, and grow.
           </p>
         </motion.div>
 
@@ -65,7 +65,7 @@ export default function ProblemSection() {
                 className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-center hover:shadow-lg hover:border-[#C67793]/30 transition-all duration-300"
               >
                 <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <app.icon className="w-6 h-6 text-[#6B1B3D]" />
+                  <app.icon className="w-6 h-6 text-[#3D2250]" />
                 </div>
                 <span className="text-sm font-medium text-gray-700">{app.label}</span>
               </motion.div>
@@ -88,7 +88,7 @@ export default function ProblemSection() {
             None of them integrate body, identity, money, ambition, and leadership.
           </p>
           <div className="mt-8 pt-8 border-t border-pink-200">
-            <p className="text-lg font-medium text-[#6B1B3D] text-center">
+            <p className="text-lg font-medium text-[#3D2250] text-center">
               The result is not growth.
               <br />
               <span className="text-[#C67793]">It is overwhelm disguised as self-improvement.</span>

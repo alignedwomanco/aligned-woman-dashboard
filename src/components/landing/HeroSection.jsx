@@ -14,7 +14,7 @@ export default function HeroSection() {
           alt="Serene woman in nature"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#4A1228]/80 via-[#6B1B3D]/70 to-[#6B1B3D]/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#3D2250]/80 via-[#5B2E84]/70 to-[#5B2E84]/90" />
       </div>
 
       {/* Content */}
@@ -80,7 +80,7 @@ export default function HeroSection() {
             <Button
               onClick={() => base44.auth.redirectToLogin()}
               size="lg"
-              className="bg-white text-[#6B1B3D] hover:bg-rose-100 px-10 py-6 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
+              className="bg-white text-[#3D2250] hover:bg-rose-100 px-10 py-6 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
             >
               Create Your Free Account
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
