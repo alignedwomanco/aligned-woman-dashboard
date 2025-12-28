@@ -175,7 +175,7 @@ export default function CourseBuilderContent() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[#4A1228]">Course Builder</h2>
+          <h2 className="text-2xl font-bold text-[#2F1B3E]">Course Builder</h2>
           <p className="text-gray-600">Create and manage learning sections</p>
         </div>
         <Button
@@ -183,7 +183,7 @@ export default function CourseBuilderContent() {
             setEditingSection(null);
             setSectionDialogOpen(true);
           }}
-          className="bg-[#6B1B3D] hover:bg-[#4A1228]"
+          className="bg-[#2F1B3E] hover:bg-[#2F1B3E]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Section
@@ -203,13 +203,13 @@ export default function CourseBuilderContent() {
                 onClick={() => setSelectedSection(section)}
                 className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                   selectedSection?.id === section.id
-                    ? "border-[#6B1B3D] bg-pink-50"
+                    ? "border-[#2F1B3E] bg-pink-50"
                     : "border-gray-200 hover:border-pink-200"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#6B1B3D] text-white rounded-lg flex items-center justify-center font-bold">
+                    <div className="w-8 h-8 bg-[#2F1B3E] text-white rounded-lg flex items-center justify-center font-bold">
                       {getPhaseIcon(section.phase)}
                     </div>
                     <span className="font-semibold">{section.name}</span>
@@ -261,7 +261,7 @@ export default function CourseBuilderContent() {
                     setEditingModule(null);
                     setModuleDialogOpen(true);
                   }}
-                  className="bg-[#6B1B3D] hover:bg-[#4A1228]"
+                  className="bg-[#2F1B3E] hover:bg-[#2F1B3E]"
                   size="sm"
                 >
                   <Plus className="w-4 h-4 mr-2" />

@@ -80,7 +80,7 @@ export default function MessagesDrawer({ onClose }) {
                   >
                     <Avatar className="w-10 h-10">
                       <AvatarImage src={partner?.profile_picture} />
-                      <AvatarFallback className="bg-[#6B1B3D] text-white">
+                      <AvatarFallback className="bg-[#2F1B3E] text-white">
                         {partner?.full_name?.[0] || partnerEmail[0]}
                       </AvatarFallback>
                     </Avatar>
@@ -89,7 +89,7 @@ export default function MessagesDrawer({ onClose }) {
                       <p className="text-xs text-gray-500 truncate">{msg.message}</p>
                     </div>
                     {!msg.isRead && msg.recipientEmail === (base44.auth.me()).email && (
-                      <div className="w-2 h-2 bg-[#6B1B3D] rounded-full flex-shrink-0 mt-2" />
+                      <div className="w-2 h-2 bg-[#2F1B3E] rounded-full flex-shrink-0 mt-2" />
                     )}
                   </Link>
                 );
@@ -100,7 +100,7 @@ export default function MessagesDrawer({ onClose }) {
 
         <div className="p-4 border-t">
           <Link to={createPageUrl("Messages")} onClick={onClose}>
-            <Button className="w-full bg-[#6B1B3D] hover:bg-[#4A1228]">
+            <Button className="w-full bg-[#2F1B3E] hover:bg-[#2F1B3E]">
               View All Messages
             </Button>
           </Link>

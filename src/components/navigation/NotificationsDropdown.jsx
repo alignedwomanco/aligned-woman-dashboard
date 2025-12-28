@@ -85,9 +85,9 @@ export default function NotificationsDropdown({ onClose }) {
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        !notif.isRead ? "bg-[#6B1B3D]/10" : "bg-gray-100"
+                        !notif.isRead ? "bg-[#2F1B3E]/10" : "bg-gray-100"
                       }`}>
-                        <Icon className={`w-4 h-4 ${!notif.isRead ? "text-[#6B1B3D]" : "text-gray-600"}`} />
+                        <Icon className={`w-4 h-4 ${!notif.isRead ? "text-[#2F1B3E]" : "text-gray-600"}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-900">{notif.message}</p>
@@ -96,7 +96,7 @@ export default function NotificationsDropdown({ onClose }) {
                         </p>
                       </div>
                       {!notif.isRead && (
-                        <div className="w-2 h-2 bg-[#6B1B3D] rounded-full flex-shrink-0 mt-2" />
+                        <div className="w-2 h-2 bg-[#2F1B3E] rounded-full flex-shrink-0 mt-2" />
                       )}
                     </div>
                   </button>

@@ -205,7 +205,7 @@ export default function Members() {
         {/* Left Column - Members List */}
         <div>
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#4A1228] mb-4">Members</h1>
+            <h1 className="text-3xl font-bold text-[#2F1B3E] mb-4">Members</h1>
             
             {/* Search Bar */}
             <div className="relative mb-6">
@@ -241,7 +241,7 @@ export default function Members() {
                 <div className="flex flex-col items-center text-center">
                   <Avatar className="w-20 h-20 mb-4">
                     <AvatarImage src={user.profile_picture} />
-                    <AvatarFallback className="bg-[#6B1B3D] text-white text-2xl">
+                    <AvatarFallback className="bg-[#2F1B3E] text-white text-2xl">
                       {user.full_name?.[0] || user.email?.[0]}
                     </AvatarFallback>
                   </Avatar>
@@ -249,7 +249,7 @@ export default function Members() {
                   <h3 className="font-semibold text-lg mb-1">{user.full_name || "Anonymous"}</h3>
                   
                   {user.role && ["admin", "expert", "moderator", "contributor"].includes(user.role) && (
-                    <Badge className="mb-3 bg-[#6B1B3D] text-white">
+                    <Badge className="mb-3 bg-[#2F1B3E] text-white">
                       {user.role}
                     </Badge>
                   )}
@@ -266,7 +266,7 @@ export default function Members() {
                         onClick={() => followMutation.mutate(user.email)}
                         variant={isFollowing(user.email) ? "outline" : "default"}
                         className={`flex-1 ${
-                          !isFollowing(user.email) && "bg-[#6B1B3D] hover:bg-[#4A1228]"
+                          !isFollowing(user.email) && "bg-[#2F1B3E] hover:bg-[#2F1B3E]"
                         }`}
                         size="sm"
                       >
@@ -320,7 +320,7 @@ export default function Members() {
                       }}>
                         <DialogTrigger asChild>
                           <Button
-                            className="w-full bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D]"
+                            className="w-full bg-gradient-to-r from-[#2F1B3E] to-[#8B2E4D]"
                             size="sm"
                             onClick={() => {
                               setSelectedMember(user);
@@ -357,7 +357,7 @@ export default function Members() {
                                 }
                               }}
                               disabled={!connectionNote.trim() || requestConnectionMutation.isPending}
-                              className="w-full bg-[#6B1B3D] hover:bg-[#4A1228]"
+                              className="w-full bg-[#2F1B3E] hover:bg-[#2F1B3E]"
                             >
                               {requestConnectionMutation.isPending ? "Sending..." : "Send Connection Request"}
                             </Button>
@@ -389,7 +389,7 @@ export default function Members() {
                 <UserCheck className="w-5 h-5" />
                 Connection Requests
                 {connectionRequests.length > 0 && (
-                  <Badge className="bg-[#6B1B3D] text-white ml-auto">
+                  <Badge className="bg-[#2F1B3E] text-white ml-auto">
                     {connectionRequests.length}
                   </Badge>
                 )}
@@ -409,7 +409,7 @@ export default function Members() {
                         <div className="flex items-start gap-3 mb-3">
                           <Avatar className="w-10 h-10">
                             <AvatarImage src={requester?.profile_picture} />
-                            <AvatarFallback className="bg-[#6B1B3D] text-white">
+                            <AvatarFallback className="bg-[#2F1B3E] text-white">
                               {requester?.full_name?.[0] || request.created_by?.[0]}
                             </AvatarFallback>
                           </Avatar>
@@ -426,7 +426,7 @@ export default function Members() {
                           <Button
                             onClick={() => acceptConnectionMutation.mutate(request.id)}
                             size="sm"
-                            className="flex-1 bg-[#6B1B3D] hover:bg-[#4A1228]"
+                            className="flex-1 bg-[#2F1B3E] hover:bg-[#2F1B3E]"
                           >
                             <Check className="w-4 h-4 mr-1" />
                             Accept
