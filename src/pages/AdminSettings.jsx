@@ -43,6 +43,7 @@ import AIChatWidgetSettings from "@/components/admin/AIChatWidgetSettings";
 import StripeIntegrationContent from "@/components/admin/StripeIntegrationContent";
 import SupportRoomContent from "@/components/admin/SupportRoomContent";
 import EducatorAnalyticsContent from "@/components/admin/EducatorAnalyticsContent";
+import LogoManagement from "@/components/admin/LogoManagement";
 
 export default function AdminSettings() {
   const [currentUser, setCurrentUser] = useState(null);
