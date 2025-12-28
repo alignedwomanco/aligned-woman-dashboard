@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, UserPlus, TrendingUp, DollarSign, Eye, Plus, X, Edit } from "lucide-react";
+import { Trash2, UserPlus, TrendingUp, DollarSign, Eye, Plus, X, Edit, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -451,12 +451,40 @@ export default function ExpertsManagementContent() {
             </div>
 
             <div>
-              <Label>Profile Picture URL</Label>
-              <Input
-                value={expertForm.profile_picture}
-                onChange={(e) => setExpertForm({ ...expertForm, profile_picture: e.target.value })}
-                placeholder="https://..."
-              />
+              <Label>Profile Picture</Label>
+              <div className="flex items-center gap-3">
+                {expertForm.profile_picture && (
+                  <img
+                    src={expertForm.profile_picture}
+                    alt="Profile preview"
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                )}
+                <div className="flex-1 space-y-2">
+                  <label htmlFor="expert-pic-upload" className="cursor-pointer">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-white transition-colors" style={{ backgroundColor: 'var(--theme-secondary, #5B2E84)' }}>
+                      <Upload className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        {expertForm.profile_picture ? 'Change Picture' : 'Upload Picture'}
+                      </span>
+                    </div>
+                  </label>
+                  <input
+                    id="expert-pic-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        setExpertForm({ ...expertForm, profile_picture: file_url });
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-gray-500">JPG, PNG, max 5MB</p>
+                </div>
+              </div>
             </div>
 
             <div>
