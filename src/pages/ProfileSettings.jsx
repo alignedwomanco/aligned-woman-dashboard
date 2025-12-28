@@ -61,8 +61,15 @@ export default function ProfileSettings() {
     
     const theme = themeOptions.find(t => t.id === themeId) || themeOptions[0];
     
+    // Apply to CSS variables
     document.documentElement.style.setProperty('--theme-primary', theme.colors.primary);
     document.documentElement.style.setProperty('--theme-secondary', theme.colors.secondary);
+    
+    // Apply to page background if needed
+    const mainContent = document.querySelector('.min-h-screen');
+    if (mainContent && mainContent.style.backgroundColor) {
+      mainContent.style.backgroundColor = theme.colors.primary;
+    }
   };
 
   const handleThemeChange = (themeId) => {
@@ -73,14 +80,6 @@ export default function ProfileSettings() {
   const handleThemeSave = async () => {
     await base44.auth.updateMe({ theme: selectedTheme });
     queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-    setValidationError({
-      show: true,
-      title: "Success!",
-      message: "Your theme has been saved successfully."
-    });
-    setTimeout(() => {
-      setValidationError({ show: false, title: "", message: "" });
-    }, 3000);
   };
 
   useEffect(() => {
@@ -100,10 +99,11 @@ export default function ProfileSettings() {
         location: user.location || "",
       });
       setSocialLinks(user.social_links || []);
-      setSelectedTheme(user.theme || "aligned");
-      
+      const userTheme = user.theme || "aligned";
+      setSelectedTheme(userTheme);
+
       // Apply theme colors
-      applyTheme(user.theme || "aligned");
+      applyTheme(userTheme);
     };
     loadUser();
   }, []);

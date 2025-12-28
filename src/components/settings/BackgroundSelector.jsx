@@ -80,7 +80,21 @@ export default function BackgroundSelector({ currentBackground, onBackgroundChan
           {BACKGROUND_OPTIONS.map((bg) => (
             <button
               key={bg.id}
-              onClick={() => setSelectedBackground(bg.type === "color" ? bg.value : `data:image/svg+xml,${encodeURIComponent(bg.value)}`)}
+              onClick={() => {
+                const newBg = bg.type === "color" ? bg.value : `data:image/svg+xml,${encodeURIComponent(bg.value)}`;
+                setSelectedBackground(newBg);
+                // Apply instantly
+                if (newBg && newBg.startsWith('#')) {
+                  document.body.style.backgroundColor = newBg;
+                  document.body.style.backgroundImage = "none";
+                } else if (newBg && newBg.startsWith('data:image/svg+xml')) {
+                  document.body.style.backgroundImage = `url("${newBg}")`;
+                  document.body.style.backgroundSize = "cover";
+                  document.body.style.backgroundPosition = "center";
+                  document.body.style.backgroundAttachment = "fixed";
+                  document.body.style.backgroundColor = "transparent";
+                }
+              }}
               className={`relative rounded-lg overflow-hidden border-2 transition-all h-20 ${
                 selectedBackground === (bg.type === "color" ? bg.value : `data:image/svg+xml,${encodeURIComponent(bg.value)}`)
                   ? "border-[#3B224E] ring-2 ring-[#3B224E]/20"
