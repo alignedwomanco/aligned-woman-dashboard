@@ -23,7 +23,6 @@ export default function LogoManagement() {
     light_logo: siteSettings?.light_logo || "",
     dark_logo: siteSettings?.dark_logo || "",
     light_favicon: siteSettings?.light_favicon || "",
-    dark_favicon: siteSettings?.dark_favicon || "",
   });
 
   React.useEffect(() => {
@@ -32,7 +31,6 @@ export default function LogoManagement() {
         light_logo: siteSettings.light_logo || "",
         dark_logo: siteSettings.dark_logo || "",
         light_favicon: siteSettings.light_favicon || "",
-        dark_favicon: siteSettings.dark_favicon || "",
       });
     }
   }, [siteSettings]);
@@ -67,8 +65,7 @@ export default function LogoManagement() {
   const logoFields = [
     { key: "light_logo", label: "Light Logo", description: "Used on light backgrounds (dark purple logo)" },
     { key: "dark_logo", label: "Dark Logo", description: "Used on dark backgrounds (white logo)" },
-    { key: "light_favicon", label: "Light Favicon", description: "Favicon for light theme (dark icon)" },
-    { key: "dark_favicon", label: "Dark Favicon", description: "Favicon for dark theme (white icon)" },
+    { key: "light_favicon", label: "Favicon", description: "Browser tab icon" },
   ];
 
   return (
