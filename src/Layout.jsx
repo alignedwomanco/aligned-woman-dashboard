@@ -49,6 +49,13 @@ export default function Layout({ children, currentPageName }) {
 
   const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login";
 
+  // Redirect ALIVEMethod to Home as default page
+  useEffect(() => {
+    if (currentPageName === "ALIVEMethod" && window.location.pathname === "/ALIVEMethod") {
+      window.location.href = createPageUrl("Home");
+    }
+  }, [currentPageName]);
+
   useEffect(() => {
     const loadSettings = async () => {
       try {
