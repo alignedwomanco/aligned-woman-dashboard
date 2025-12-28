@@ -19,7 +19,7 @@ export const BACKGROUND_OPTIONS = [
     id: "pattern1", 
     label: "Purple Gradient", 
     type: "svg",
-    value: `<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#2F1B3E;stop-opacity:1" /><stop offset="100%" style="stop-color:#482C83;stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad1)"/><circle cx="85%" cy="30%" r="200" fill="rgba(72, 44, 131, 0.3)"/><circle cx="15%" cy="70%" r="150" fill="rgba(72, 44, 131, 0.2)"/></svg>`
+    value: `<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#2F1B3E;stop-opacity:1" /><stop offset="100%" style="stop-color:#5B2D83;stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad1)"/><circle cx="85%" cy="30%" r="200" fill="rgba(91, 45, 131, 0.3)"/><circle cx="15%" cy="70%" r="150" fill="rgba(91, 45, 131, 0.2)"/></svg>`
   },
   { 
     id: "pattern2", 
@@ -130,7 +130,7 @@ export default function BackgroundSelector({ currentBackground, onBackgroundChan
 
           <Button 
             onClick={handleSave} 
-            className="w-full bg-[#2F1B3E] hover:bg-[#482C83]"
+            className="w-full bg-[#2F1B3E] hover:bg-[#5B2D83]"
             disabled={isUploading}
           >
             Save Background

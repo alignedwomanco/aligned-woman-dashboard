@@ -482,7 +482,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Main Content Area */}
       <div className="flex-1 ml-64">
         {/* Top Header */}
-        <header className="sticky top-0 z-40 border-b border-gray-200" style={{ backgroundColor: '#482C83' }}>
+        <header className="sticky top-0 z-40 border-b border-gray-200" style={{ backgroundColor: '#5B2D83' }}>
           <div className="flex items-center justify-between gap-4 px-8 py-4">
             {/* Greeting */}
             <div>

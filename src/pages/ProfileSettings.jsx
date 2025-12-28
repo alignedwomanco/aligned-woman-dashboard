@@ -49,7 +49,7 @@ export default function ProfileSettings() {
 
   const applyTheme = (themeId) => {
     const themeOptions = [
-      { id: "aligned", colors: { primary: "#2F1B3E", secondary: "#482C83" } },
+      { id: "aligned", colors: { primary: "#2F1B3E", secondary: "#5B2D83" } },
       { id: "rose", colors: { primary: "#E11D48", secondary: "#F43F5E" } },
       { id: "lavender", colors: { primary: "#9333EA", secondary: "#C084FC" } },
       { id: "ocean", colors: { primary: "#0369A1", secondary: "#0EA5E9" } },
