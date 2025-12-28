@@ -53,7 +53,18 @@ export default function Layout({ children, currentPageName }) {
     const loadSettings = async () => {
       try {
         const settings = await base44.entities.SiteSettings.list();
-        setSiteSettings(settings[0] || null);
+        const settingsData = settings[0] || null;
+        setSiteSettings(settingsData);
+        
+        // Update favicon dynamically
+        if (settingsData?.light_favicon) {
+          const favicon = document.querySelector("link[rel='icon']") || document.createElement("link");
+          favicon.rel = "icon";
+          favicon.href = settingsData.light_favicon;
+          if (!document.querySelector("link[rel='icon']")) {
+            document.head.appendChild(favicon);
+          }
+        }
       } catch (error) {
         console.error("Failed to load site settings:", error);
         setSiteSettings(null);

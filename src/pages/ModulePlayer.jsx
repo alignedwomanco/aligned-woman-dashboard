@@ -25,35 +25,39 @@ import {
 export default function ModulePlayer() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const moduleId = searchParams.get("id");
+  const moduleId = searchParams.get("moduleId");
+  const courseId = searchParams.get("courseId");
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
   const { data: module } = useQuery({
-    queryKey: ["module", moduleId],
+    queryKey: ["courseModule", moduleId],
     queryFn: async () => {
-      const modules = await base44.entities.Module.filter({ id: moduleId });
+      const modules = await base44.entities.CourseModule.filter({ id: moduleId });
       return modules[0];
     },
     enabled: !!moduleId,
   });
 
+  const { data: course } = useQuery({
+    queryKey: ["course", courseId],
+    queryFn: async () => {
+      const courses = await base44.entities.Course.filter({ id: courseId });
+      return courses[0];
+    },
+    enabled: !!courseId,
+  });
+
   const { data: pages = [] } = useQuery({
-    queryKey: ["modulePages", moduleId],
-    queryFn: () => base44.entities.ModulePage.filter({ moduleId }, "order"),
+    queryKey: ["coursePages", moduleId],
+    queryFn: () => base44.entities.CoursePage.filter({ moduleId }, "order"),
     enabled: !!moduleId,
   });
 
   const { data: moduleProgress = [] } = useQuery({
-    queryKey: ["moduleProgress", moduleId],
-    queryFn: () => base44.entities.UserModuleProgress.filter({ moduleId }),
-    enabled: !!moduleId,
-  });
-
-  const { data: subModuleProgress = [] } = useQuery({
-    queryKey: ["subModuleProgress", moduleId],
-    queryFn: () => base44.entities.SubModuleProgress.filter({ moduleId }),
+    queryKey: ["courseProgress", moduleId],
+    queryFn: () => base44.entities.CourseProgress.filter({ moduleId }),
     enabled: !!moduleId,
   });
 
@@ -68,23 +72,24 @@ export default function ModulePlayer() {
   });
 
   const updateProgressMutation = useMutation({
-    mutationFn: async ({ status, videoWatchedPercent }) => {
+    mutationFn: async ({ status, progressPercentage }) => {
       const existing = moduleProgress[0];
       if (existing) {
-        return base44.entities.UserModuleProgress.update(existing.id, {
+        return base44.entities.CourseProgress.update(existing.id, {
           status,
-          videoWatchedPercent: videoWatchedPercent || existing.videoWatchedPercent || 0,
+          progressPercentage: progressPercentage || existing.progressPercentage || 0,
         });
       } else {
-        return base44.entities.UserModuleProgress.create({
+        return base44.entities.CourseProgress.create({
+          courseId,
           moduleId,
           status,
-          videoWatchedPercent: videoWatchedPercent || 0,
+          progressPercentage: progressPercentage || 0,
         });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["moduleProgress"] });
+      queryClient.invalidateQueries({ queryKey: ["courseProgress"] });
     },
   });
 
@@ -98,23 +103,24 @@ export default function ModulePlayer() {
 
   const togglePageCompleteMutation = useMutation({
     mutationFn: async ({ pageId, isComplete }) => {
-      const existing = subModuleProgress.find(p => p.subModuleId === pageId);
+      const existing = moduleProgress.find(p => p.pageId === pageId);
       if (existing) {
-        return base44.entities.SubModuleProgress.update(existing.id, {
-          isComplete,
-          watchedPercent: isComplete ? 100 : existing.watchedPercent,
+        return base44.entities.CourseProgress.update(existing.id, {
+          status: isComplete ? "completed" : "in_progress",
+          progressPercentage: isComplete ? 100 : existing.progressPercentage,
         });
       } else {
-        return base44.entities.SubModuleProgress.create({
-          subModuleId: pageId,
+        return base44.entities.CourseProgress.create({
+          courseId,
           moduleId,
-          isComplete,
-          watchedPercent: isComplete ? 100 : 0,
+          pageId,
+          status: isComplete ? "completed" : "in_progress",
+          progressPercentage: isComplete ? 100 : 0,
         });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subModuleProgress"] });
+      queryClient.invalidateQueries({ queryKey: ["courseProgress"] });
     },
   });
 
@@ -125,8 +131,8 @@ export default function ModulePlayer() {
   }, [pages]);
 
   const handleTogglePageComplete = async () => {
-    const pageProgress = subModuleProgress.find(p => p.subModuleId === selectedPage.id);
-    const isCurrentlyComplete = pageProgress?.isComplete || false;
+    const pageProgress = moduleProgress.find(p => p.pageId === selectedPage.id);
+    const isCurrentlyComplete = pageProgress?.status === "completed" || false;
     
     await togglePageCompleteMutation.mutateAsync({
       pageId: selectedPage.id,
@@ -137,8 +143,8 @@ export default function ModulePlayer() {
     if (!isCurrentlyComplete) {
       const allPagesCompleted = pages.every(page => {
         if (page.id === selectedPage.id) return true;
-        const progress = subModuleProgress.find(p => p.subModuleId === page.id);
-        return progress?.isComplete;
+        const progress = moduleProgress.find(p => p.pageId === page.id);
+        return progress?.status === "completed";
       });
 
       if (allPagesCompleted) {
@@ -149,8 +155,8 @@ export default function ModulePlayer() {
 
   const completeModule = async () => {
     updateProgressMutation.mutate({
-      status: "Complete",
-      videoWatchedPercent: 100,
+      status: "completed",
+      progressPercentage: 100,
     });
 
     // Award points for module completion
@@ -204,8 +210,8 @@ export default function ModulePlayer() {
     });
   };
 
-  const currentProgress = moduleProgress[0] || { videoWatchedPercent: 0, status: "Available" };
-  const overallProgress = currentProgress.videoWatchedPercent || 0;
+  const currentProgress = moduleProgress[0] || { progressPercentage: 0, status: "not_started" };
+  const overallProgress = currentProgress.progressPercentage || 0;
 
   if (!module || !selectedPage) {
     return (
@@ -215,7 +221,7 @@ export default function ModulePlayer() {
     );
   }
 
-  const canMarkComplete = currentProgress.videoWatchedPercent >= 50;
+  const canMarkComplete = currentProgress.progressPercentage >= 50;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
@@ -230,11 +236,13 @@ export default function ModulePlayer() {
                 </Button>
               </Link>
               <div>
-                <Badge className="bg-blue-100 text-blue-700 border-blue-200 border mb-1">
-                  <Eye className="w-3 h-3 mr-1" />
-                  {module.phase}
-                </Badge>
-                <h1 className="text-xl font-bold text-[#4A1228]">{module.title}</h1>
+                {course && (
+                  <Badge className="bg-purple-100 text-purple-700 border-purple-200 border mb-1">
+                    <Eye className="w-3 h-3 mr-1" />
+                    {course.title}
+                  </Badge>
+                )}
+                <h1 className="text-xl font-bold text-[#4A1228]">{module?.title}</h1>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -262,8 +270,8 @@ export default function ModulePlayer() {
                 <ScrollArea className="h-[calc(100vh-300px)]">
                   <div className="space-y-1 p-4">
                     {pages.map((page, idx) => {
-                      const pageProgress = subModuleProgress.find(p => p.subModuleId === page.id);
-                      const isCompleted = pageProgress?.isComplete || false;
+                      const pageProgress = moduleProgress.find(p => p.pageId === page.id);
+                      const isCompleted = pageProgress?.status === "completed" || false;
                       return (
                         <button
                           key={page.id}
@@ -288,10 +296,10 @@ export default function ModulePlayer() {
                               <div className="text-sm font-medium text-[#4A1228] truncate">
                                 {page.title}
                               </div>
-                              {page.estimatedMinutes && (
+                              {page.videoDuration && (
                                 <div className="text-xs text-gray-500 mt-1">
                                   <Clock className="w-3 h-3 inline mr-1" />
-                                  {page.estimatedMinutes} min
+                                  {Math.round(page.videoDuration / 60)} min
                                 </div>
                               )}
                             </div>
@@ -395,10 +403,10 @@ export default function ModulePlayer() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>{selectedPage.title}</CardTitle>
-                  {(() => {
-                    const pageProgress = subModuleProgress.find(p => p.subModuleId === selectedPage.id);
-                    const isPageComplete = pageProgress?.isComplete || false;
+                <CardTitle>{selectedPage.title}</CardTitle>
+                {(() => {
+                  const pageProgress = moduleProgress.find(p => p.pageId === selectedPage.id);
+                  const isPageComplete = pageProgress?.status === "completed" || false;
                     
                     return (
                       <Button

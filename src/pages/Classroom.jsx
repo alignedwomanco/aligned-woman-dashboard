@@ -55,19 +55,26 @@ export default function Classroom() {
         const user = await base44.auth.me();
         setCurrentUser(user);
 
-        // Load modules
-        const modules = await base44.entities.Module.list("order");
-        setAllModules(modules);
+        // Load courses and modules from Course Builder
+        const courses = await base44.entities.Course.filter({ isPublished: true });
+        const allModulesData = [];
+        
+        for (const course of courses) {
+          const modules = await base44.entities.CourseModule.filter({ courseId: course.id }, "order");
+          allModulesData.push(...modules.map(m => ({ ...m, courseTitle: course.title })));
+        }
+        
+        setAllModules(allModulesData);
 
-        // Load module progress
-        const progress = await base44.entities.UserModuleProgress.list();
+        // Load module progress (using CourseProgress)
+        const progress = await base44.entities.CourseProgress.filter({ status: { $ne: "not_started" } });
         setModuleProgress(progress);
 
-        // Load all pages and submodule progress for progress bars
-        const pages = await base44.entities.ModulePage.list();
+        // Load all pages and progress
+        const pages = await base44.entities.CoursePage.list();
         setAllPages(pages);
         
-        const subProgress = await base44.entities.SubModuleProgress.list();
+        const subProgress = await base44.entities.CourseProgress.list();
         setSubModuleProgress(subProgress);
 
         // Load user points
@@ -113,20 +120,22 @@ export default function Classroom() {
     if (pages.length === 0) return 0;
     
     const completedPages = pages.filter(page => {
-      const pageProgress = subModuleProgress.find(p => p.subModuleId === page.id);
-      return pageProgress?.isComplete;
+      const pageProgress = subModuleProgress.find(p => 
+        p.pageId === page.id && p.status === "completed"
+      );
+      return pageProgress;
     }).length;
     
     return Math.round((completedPages / pages.length) * 100);
   };
 
   const filteredModules = allModules
-    .filter((module) => module.isEnabled) // Only show enabled modules
+    .filter((module) => module.isPublished) // Only show published modules
     .filter((module) => {
-      const phaseMatch = activePhase === "all" || module.phase === activePhase;
+      const phaseMatch = activePhase === "all"; // Show all for now since we're not using phases
       const searchMatch = 
         module.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        module.summary?.toLowerCase().includes(searchQuery.toLowerCase());
+        module.description?.toLowerCase().includes(searchQuery.toLowerCase());
       return phaseMatch && searchMatch;
     });
 
@@ -199,27 +208,26 @@ export default function Classroom() {
             {/* Modules Grid */}
             <div className="grid md:grid-cols-2 gap-6">
           {filteredModules.map((module, index) => {
-            const PhaseIcon = phaseIcons[module.phase];
             const status = getModuleStatus(module.id);
-            const isClickable = status !== "Locked";
+            const isClickable = true; // All published modules are clickable
 
             const cardContent = (
-              <Card className={`h-full transition-all ${isClickable ? "hover:shadow-lg cursor-pointer" : "opacity-60"}`}>
+              <Card className={`h-full transition-all hover:shadow-lg cursor-pointer`}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <Badge className={`${phaseColors[module.phase]} border`}>
-                      <PhaseIcon className="w-3 h-3 mr-1" />
-                      {module.phase === "VisionEmbodiment" ? "Vision" : module.phase}
+                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 border">
+                      <BookOpen className="w-3 h-3 mr-1" />
+                      {module.courseTitle || "Course"}
                     </Badge>
                     {getStatusIcon(status)}
                   </div>
                   
-                  <h3 className={`text-lg font-bold mb-2 ${status === "Locked" ? "text-gray-400" : "text-[#4A1228]"}`}>
+                  <h3 className="text-lg font-bold mb-2 text-[#4A1228]">
                     {module.title}
                   </h3>
                   
-                  <p className={`text-sm mb-4 line-clamp-2 ${status === "Locked" ? "text-gray-400" : "text-gray-600"}`}>
-                    {module.summary}
+                  <p className="text-sm mb-4 line-clamp-2 text-gray-600">
+                    {module.description || "Start learning this module"}
                   </p>
                   
                   <div className="space-y-2">
@@ -228,22 +236,17 @@ export default function Classroom() {
                         <Clock className="w-4 h-4" />
                         {module.durationMinutes || 45} min
                       </span>
-                      {status === "Locked" && (
-                        <span className="text-gray-400">Locked</span>
-                      )}
                     </div>
                     
-                    {status !== "Locked" && (
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-gray-600">Progress</span>
-                          <span className="text-xs font-medium text-[#6B1B3D]">
-                            {getModuleProgressPercent(module.id)}%
-                          </span>
-                        </div>
-                        <Progress value={getModuleProgressPercent(module.id)} className="h-2" />
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-600">Progress</span>
+                        <span className="text-xs font-medium text-[#6B1B3D]">
+                          {getModuleProgressPercent(module.id)}%
+                        </span>
                       </div>
-                    )}
+                      <Progress value={getModuleProgressPercent(module.id)} className="h-2" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -256,13 +259,9 @@ export default function Classroom() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                {isClickable ? (
-                  <Link to={createPageUrl("ModulePlayer") + `?id=${module.id}`}>
-                    {cardContent}
-                  </Link>
-                ) : (
-                  cardContent
-                )}
+                <Link to={createPageUrl("ModulePlayer") + `?moduleId=${module.id}&courseId=${module.courseId}`}>
+                  {cardContent}
+                </Link>
               </motion.div>
             );
           })}
