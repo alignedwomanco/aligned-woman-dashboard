@@ -26,11 +26,19 @@ import {
   Moon,
   Edit3,
   Activity,
+  Calendar,
+  Play,
+  Clock,
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Waves,
 } from "lucide-react";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [snapshotView, setSnapshotView] = useState(SNAPSHOT_VIEWS.DAILY);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   useEffect(() => {
     const loadUser = async () => {
@@ -155,6 +163,30 @@ export default function Dashboard() {
     return !isSameDay(diagnosticSession.lastCheckInDate, new Date());
   }, [diagnosticSession]);
 
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return { text: "Good Morning", emoji: "☀️" };
+    if (hour < 17) return { text: "Good Afternoon", emoji: "🌤️" };
+    return { text: "Good Evening", emoji: "🌙" };
+  };
+
+  const greeting = getGreeting();
+
+  // Mock stress/energy calendar data (would come from CheckIn entities)
+  const stressCalendarData = useMemo(() => {
+    const data = {};
+    checkIns?.forEach(checkIn => {
+      const date = new Date(checkIn.created_date).toLocaleDateString();
+      data[date] = {
+        stress: checkIn.stress,
+        energy: checkIn.energy,
+        regulated: checkIn.stress < 5
+      };
+    });
+    return data;
+  }, [checkIns]);
+
   // If no diagnostic completed, show onboarding prompt
   if (!diagnosticSession) {
     return (
@@ -203,486 +235,529 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen p-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
+      <div className="max-w-[1600px] mx-auto px-8 py-8">
+        {/* Greeting Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
+          className="mb-6"
         >
-          <h1 className="text-3xl font-bold text-[#4A1228] mb-2">
-            Welcome back{currentUser?.full_name ? `, ${currentUser.full_name.split(" ")[0]}` : ""}
+          <h1 className="text-3xl font-bold text-[#4A1228] mb-1">
+            {greeting.text}, {currentUser?.full_name?.split(" ")[0] || "there"} {greeting.emoji}
           </h1>
-          <p className="text-gray-600">Your personalised ALIVE operating system.</p>
+          <p className="text-gray-600">Hope you feel centered today.</p>
         </motion.div>
 
-        {/* ALIVE Profile Header */}
+        {/* Timeframe Toggle */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <Card className="bg-gradient-to-br from-[#6B1B3D] to-[#4A1228] border-0 overflow-hidden">
-            <CardContent className="p-8 relative">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-rose-300" />
-                  <span className="text-rose-200 font-medium">Your ALIVE Profile</span>
-                </div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Primary: {diagnosticSession?.primaryPhase || ALIVE_PHASES.AWARENESS}
-                </h2>
-                <div className="flex flex-wrap gap-3">
-                  <Badge className="bg-white/20 text-white border-0 px-4 py-2">
-                    Capacity: {diagnosticSession?.capacityScore || 7}/10
-                  </Badge>
-                  <Badge className="bg-rose-500/30 text-rose-200 border-0 px-4 py-2">
-                    Secondary: {diagnosticSession?.secondaryPhase || ALIVE_PHASES.LIBERATION}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <Tabs value={snapshotView} onValueChange={setSnapshotView} className="w-auto inline-block">
+            <TabsList className="bg-white/80 backdrop-blur-sm border border-purple-200">
+              <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="data-[state=active]:bg-[#6B1B3D] data-[state=active]:text-white">
+                Daily
+              </TabsTrigger>
+              <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY} className="data-[state=active]:bg-[#6B1B3D] data-[state=active]:text-white">
+                Weekly
+              </TabsTrigger>
+              <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY} className="data-[state=active]:bg-[#6B1B3D] data-[state=active]:text-white">
+                Monthly
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </motion.div>
 
-        {/* 2-Column Layout: Snapshot + Purpose */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-8">
-          {/* Left Column: Today's Snapshot */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Tabs value={snapshotView} onValueChange={setSnapshotView}>
-              <TabsList className="mb-4">
-                <TabsTrigger value={SNAPSHOT_VIEWS.DAILY}>Daily</TabsTrigger>
-                <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY}>Weekly</TabsTrigger>
-                <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY}>Monthly</TabsTrigger>
-              </TabsList>
-              <TabsContent value={snapshotView}>
-                {getSnapshotContent()}
-              </TabsContent>
-            </Tabs>
-          </motion.div>
-
-          {/* Right Column: Purpose Tool */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#6B1B3D]" />
-                  My Purpose
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!latestPurposeRun ? (
-                  <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Sparkles className="w-10 h-10 text-[#6B1B3D]" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[#4A1228] mb-3">
-                      Define My Purpose
-                    </h3>
-                    <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-                      Uncover the masks you wear and the truth you are ready to live
-                    </p>
-                    <Link to={createPageUrl("DefineMyPurpose")}>
-                      <Button className="bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] hover:from-[#4A1228] hover:to-[#6B1B3D] text-white px-8 py-6">
-                        <Sparkles className="w-5 h-5 mr-2" />
-                        Begin Journey
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-100">
-                      <div className="flex items-center gap-2 mb-3">
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                        <span className="text-sm font-semibold text-green-700">
-                          Completed{" "}
-                          {new Date(latestPurposeRun.completedAt).toLocaleDateString()}
-                        </span>
+        {/* Main Grid Layout */}
+        <div className="grid lg:grid-cols-12 gap-6">
+          {/* Left Column: Your Inner Systems + Life Domains */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Your Inner Systems */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-purple-900">Your Inner Systems</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* My Nervous System */}
+                  <div className="bg-pink-50 rounded-lg p-4 border border-pink-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+                        <Heart className="w-4 h-4 text-white" />
                       </div>
-                      <h4 className="font-semibold text-[#4A1228] mb-2">
-                        Your Purpose Report is Ready
-                      </h4>
-                      <p className="text-gray-600 text-sm">
-                        View your personalized insights and higher self guidance.
+                      <h3 className="font-semibold text-sm text-pink-900">My Nervous System</h3>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-1">
+                      <span className="font-medium">Current State:</span> Fawn
+                    </p>
+                    <p className="text-xs text-gray-600 mb-2">
+                      Your system is prioritizing safety today
+                    </p>
+                    <button className="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
+                      View nervous system guidance →
+                    </button>
+                  </div>
+
+                  {/* My Human Design */}
+                  {diagnosticSession?.humanDesignProfile && (
+                    <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="font-semibold text-sm text-purple-900">My Human Design</h3>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-1">
+                        <span className="font-medium">Type:</span> {diagnosticSession.humanDesignProfile.type}
+                      </p>
+                      <p className="text-xs text-gray-600 mb-1">
+                        <span className="font-medium">Authority:</span> {diagnosticSession.humanDesignProfile.authority}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Discernment beats effort today
+                      </p>
+                      <button className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
+                        View cycle guidance →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* My Cycle */}
+                  {diagnosticSession?.cycleProfile && (
+                    <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                          <Moon className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="font-semibold text-sm text-indigo-900">My Cycle</h3>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-1">
+                        <span className="font-medium">Phase:</span> {diagnosticSession.cycleProfile.cycleStage}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Lower energy is natural in this phase. Adapt, don't push.
+                      </p>
+                      <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                        View cycle guidance →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* My Astrology */}
+                  {diagnosticSession?.astrologyProfile && (
+                    <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="font-semibold text-sm text-amber-900">My Astrology</h3>
+                      </div>
+                      <div className="flex gap-2 mb-2">
+                        {diagnosticSession.astrologyProfile.sunSign && (
+                          <Badge className="bg-amber-200 text-amber-900 text-xs">
+                            ☉ {diagnosticSession.astrologyProfile.sunSign}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mb-2">
+                        {diagnosticSession.astrologyProfile.currentTransitSummary?.slice(0, 80)}...
                       </p>
                     </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
-                    <div className="flex flex-col gap-3">
-                      <Link to={createPageUrl("DefineMyPurpose")}>
-                        <Button className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white">
-                          View Purpose Report
-                        </Button>
-                      </Link>
-                      {canRerunPurpose() && (
-                        <Link to={createPageUrl("DefineMyPurpose")}>
-                          <Button variant="outline" className="w-full border-[#6B1B3D] text-[#6B1B3D] hover:bg-pink-50">
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Redefine My Purpose
-                          </Button>
-                        </Link>
-                      )}
+            {/* Your Life Domains */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-purple-900 flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Your Life Domains
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Business & Career */}
+                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                    <h3 className="font-semibold text-sm text-blue-900 mb-2">Business + Career</h3>
+                    <p className="text-xs text-gray-600 mb-1">
+                      <span className="font-medium">Current theme:</span> Clarity before momentum
+                    </p>
+                    <button className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+                      View work guidance/guidance →
+                    </button>
+                  </div>
+
+                  {/* Finance */}
+                  <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                    <h3 className="font-semibold text-sm text-green-900 mb-2">Finance <Badge className="bg-purple-200 text-purple-900 text-xs ml-2">Intention</Badge></h3>
+                    <p className="text-xs text-gray-600 mb-1">
+                      <span className="font-medium">Focus today:</span> Conscious spending habits
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Center Column: Main Snapshot */}
+          <div className="lg:col-span-6 space-y-6">
+            {/* Your Daily ALIVE Snapshot */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="bg-gradient-to-br from-[#2D1B3D] to-[#4A1B4A] text-white border-0 overflow-hidden">
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold mb-6 text-center">Your Daily ALIVE Snapshot</h2>
+                  
+                  {/* System Icons */}
+                  <div className="flex justify-center gap-4 mb-8">
+                    {diagnosticSession?.astrologyProfile?.sunSign && (
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 mx-auto">
+                          <Sparkles className="w-8 h-8 text-yellow-300" />
+                        </div>
+                        <p className="text-xs font-medium">{diagnosticSession.astrologyProfile.sunSign}</p>
+                      </div>
+                    )}
+                    {diagnosticSession?.humanDesignProfile && (
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 mx-auto">
+                          <Target className="w-8 h-8 text-purple-300" />
+                        </div>
+                        <p className="text-xs font-medium">{diagnosticSession.humanDesignProfile.type}</p>
+                      </div>
+                    )}
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 mx-auto">
+                        <Moon className="w-8 h-8 text-blue-300" />
+                      </div>
+                      <p className="text-xs font-medium">Luteal</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-pink-500 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 mx-auto">
+                        <Heart className="w-8 h-8 text-white" />
+                      </div>
+                      <p className="text-xs font-medium">Fawn</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 mx-auto">
+                        <Waves className="w-8 h-8 text-indigo-300" />
+                      </div>
+                      <p className="text-xs font-medium">{diagnosticSession?.primaryPhase || "Intention"}</p>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
 
-        {/* Your ALIVE Path */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-10"
-        >
-          <Card className="bg-gradient-to-br from-[#6B1B3D] to-[#4A1228] border-0 text-white">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Target className="w-5 h-5 text-rose-300" />
-                <h2 className="text-2xl font-bold">Your ALIVE Path</h2>
-              </div>
-              {diagnosticSession.aliveNarrative && (
-                <p className="text-white/90 mb-4 leading-relaxed">
-                  {diagnosticSession.aliveNarrative}
-                </p>
-              )}
-              {diagnosticSession.phaseFocusAdvice && (
-                <div className="bg-white/10 p-4 rounded-xl mb-4">
-                  <p className="text-white/90">{diagnosticSession.phaseFocusAdvice}</p>
-                </div>
-              )}
-              {diagnosticSession.recommendedModules && diagnosticSession.recommendedModules.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-rose-200 mb-2">Recommended for You</h3>
-                  <div className="space-y-2">
-                    {diagnosticSession.recommendedModules.slice(0, DASHBOARD_CONSTANTS.RECOMMENDED_MODULES_LIMIT).map((module, i) => (
-                      <div key={i} className="flex items-center gap-2 text-white/80 text-sm">
-                        <CheckCircle className="w-4 h-4 text-rose-300" />
-                        {module}
+                  {/* Main Narrative */}
+                  <div className="mb-6">
+                    <p className="text-white/90 leading-relaxed mb-4">
+                      {diagnosticSession?.aliveNarrative || "Today is about responding, not pushing. Sagittarius energy is activating your long-term vision but your Moon in Virgo asks for refinement, not expansion."}
+                    </p>
+                  </div>
+
+                  {/* Guiding Phrase */}
+                  <div className="bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl p-4 mb-6 text-center">
+                    <p className="font-bold text-lg">Less effort. More alignment.</p>
+                  </div>
+
+                  {/* Ask LaurAI */}
+                  <div className="bg-white/10 rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium mb-1">Ask LaurAI about today</p>
+                      <div className="flex gap-2 flex-wrap">
+                        <Badge className="bg-white/20 text-white text-xs border-0">How should I work today?</Badge>
+                        <Badge className="bg-white/20 text-white text-xs border-0">Why does this feel harder?</Badge>
+                        <Badge className="bg-white/20 text-white text-xs border-0">What should I focus on?</Badge>
+                      </div>
+                    </div>
+                    <Button size="sm" className="bg-pink-500 hover:bg-pink-600 text-white">
+                      <Heart className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Recommended For You Right Now */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="bg-gradient-to-br from-purple-900 to-indigo-900 text-white border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Sparkles className="w-5 h-5" />
+                    Recommended For You Right Now
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Module 1 */}
+                    <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-5">
+                      <h3 className="font-bold mb-2">In your Orbit Today</h3>
+                      <p className="text-sm mb-3">Understanding your inner Operating System</p>
+                      <p className="text-xs mb-3 text-white/80">
+                        🎬 Emotional to stop letting your feelings entangle
+                      </p>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-xs">12 min • Video</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-white/20 text-white text-xs border-0 flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" />
+                          Lesson 01
+                        </Badge>
+                        <Badge className="bg-white/20 text-white text-xs border-0">Nervous system ready</Badge>
+                      </div>
+                      <Button className="w-full mt-4 bg-white text-pink-600 hover:bg-white/90">
+                        Start
+                      </Button>
+                    </div>
+
+                    {/* Module 2 */}
+                    <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-5">
+                      <h3 className="font-bold mb-2">Your Cubaneer Focus</h3>
+                      <p className="text-sm mb-3">Setting Boundaries Without Guilt</p>
+                      <p className="text-xs mb-3 text-white/80">
+                        🎬 Removing because Life loves 2 hrs
+                      </p>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-xs">20 min • Video</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-white/20 text-white text-xs border-0">Binds path</Badge>
+                        <Badge className="bg-white/20 text-white text-xs border-0">Mam in ascendance</Badge>
+                      </div>
+                      <Button className="w-full mt-4 bg-white text-purple-600 hover:bg-white/90">
+                        Start
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Right Column: Cycle, Activity, Patterns */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Cycle & Capacity */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-purple-900 flex items-center gap-2">
+                    <Activity className="w-5 h-5" />
+                    Cycle & Capacity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-gradient-to-br from-pink-400 to-rose-500 rounded-xl p-5 text-white mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">Luteal</span>
+                      <span className="text-3xl font-bold">{diagnosticSession?.capacityScore || 5.5}</span>
+                    </div>
+                    <Progress value={(diagnosticSession?.capacityScore || 5.5) * 10} className="h-2 bg-white/30 mb-3" />
+                    <p className="text-xs text-white/90">Gentle movement & warm foods</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Recent Activity */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-purple-900 flex items-center gap-2">
+                    <Calendar className="w-5 h-5" />
+                    Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    {['Thu', 'Fri', 'Mar', 'Apr', 'May', 'Jun', 'Jul'].map((day, i) => (
+                      <div key={day} className="text-center">
+                        <div className={`w-8 h-8 rounded-full mb-1 ${i < 3 ? 'bg-purple-500' : i < 5 ? 'bg-purple-300' : 'bg-gray-200'}`} />
+                        <span className="text-xs text-gray-600">{day}</span>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-              <Link to={createPageUrl("MyPathway")}>
-                <Button className="bg-white text-[#6B1B3D] hover:bg-white/90">
-                  Continue Your Path <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-        {/* Personalized Learning Path */}
+            {/* Body Patterns */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-purple-900">Body Patterns</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-gray-600 mb-2">
+                      <span>Energy</span>
+                      <span>Capacity</span>
+                    </div>
+                    <div className="h-32 bg-purple-50 rounded-lg flex items-center justify-center">
+                      {/* Placeholder for wave chart */}
+                      <svg className="w-full h-full" viewBox="0 0 200 80">
+                        <path
+                          d="M 0 40 Q 25 20, 50 40 T 100 40 T 150 40 T 200 40"
+                          stroke="#C67793"
+                          strokeWidth="2"
+                          fill="none"
+                        />
+                        <path
+                          d="M 0 50 Q 25 30, 50 50 T 100 50 T 150 50 T 200 50"
+                          stroke="#9333EA"
+                          strokeWidth="2"
+                          fill="none"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex justify-center gap-2">
+                    <Button size="sm" variant="ghost" className="text-xs">Daily</Button>
+                    <Button size="sm" variant="ghost" className="text-xs">Weekly</Button>
+                    <Button size="sm" className="text-xs bg-pink-500 text-white">Monthly</Button>
+                    <span className="text-xs text-gray-600 self-center">Jul</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Stress & Energy Patterns Calendar */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg text-purple-900">Your Stress & Energy Patterns</CardTitle>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" className="h-6 w-6">
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-6 w-6">
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-semibold text-sm">May 2024</h3>
+                      <div className="flex gap-2 text-xs">
+                        <Button size="sm" variant="ghost" className="text-xs h-6 px-2">Daily</Button>
+                        <Button size="sm" variant="ghost" className="text-xs h-6 px-2">Weekly</Button>
+                        <Button size="sm" variant="ghost" className="text-xs h-6 px-2">(More)</Button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Calendar Grid */}
+                  <div className="grid grid-cols-7 gap-1 mb-3">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      <div key={day} className="text-center text-xs font-medium text-gray-600">{day}</div>
+                    ))}
+                    {Array.from({ length: 31 }, (_, i) => (
+                      <div
+                        key={i}
+                        className={`aspect-square rounded-full flex items-center justify-center text-xs ${
+                          i % 5 === 0 ? 'bg-green-200' : 
+                          i % 3 === 0 ? 'bg-pink-300' : 
+                          i % 2 === 0 ? 'bg-red-300' : 'bg-gray-100'
+                        }`}
+                      >
+                        {i + 1}
+                      </div>
+                    ))}
+                  </div>
+                  {/* Legend */}
+                  <div className="flex gap-3 text-xs">
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-green-200" />
+                      <span className="text-gray-600">Regulated</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-pink-300" />
+                      <span className="text-gray-600">Mild Stress</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-red-300" />
+                      <span className="text-gray-600">High Stress</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Bottom Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mb-10"
+          transition={{ delay: 1.0 }}
+          className="mt-8"
         >
-          <PersonalizedLearningPath
-            userPoints={userPoints}
-            completedModules={completedModulesList}
-            recommendedModules={recommendedModules}
-          />
-        </motion.div>
-
-        {/* Cycle & Body Intelligence */}
-        {diagnosticSession.dailySnapshot?.cycleInsight && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mb-10"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-purple-600" />
-                  Your Cycle & Body Today
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-purple-50 p-4 rounded-xl">
-                  <h3 className="text-sm font-semibold text-purple-900 mb-2">Phase Wisdom</h3>
-                  <p className="text-gray-700">{diagnosticSession.dailySnapshot.cycleInsight}</p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {diagnosticSession.dailySnapshot.exerciseRecommendation && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Movement</h3>
-                      <p className="text-gray-600 text-sm">{diagnosticSession.dailySnapshot.exerciseRecommendation}</p>
-                    </div>
-                  )}
-                  {diagnosticSession.dailySnapshot.nutritionRecommendation && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Nutrition</h3>
-                      <p className="text-gray-600 text-sm">{diagnosticSession.dailySnapshot.nutritionRecommendation}</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Design & Energetics */}
-        {diagnosticSession.enableDeepPersonalisation && (diagnosticSession.astrologyProfile || diagnosticSession.humanDesignProfile) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="mb-10"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-amber-600" />
-                  Your Design & Energetics
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {diagnosticSession.humanDesignProfile && (
-                  <div className="bg-amber-50 p-4 rounded-xl">
-                    <h3 className="text-sm font-semibold text-amber-900 mb-2">Human Design</h3>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      <Badge className="bg-amber-200 text-amber-900">
-                        {diagnosticSession.humanDesignProfile.type}
-                      </Badge>
-                      <Badge variant="outline">{diagnosticSession.humanDesignProfile.authority}</Badge>
-                    </div>
-                    <p className="text-gray-700 text-sm">
-                      <strong>Strategy:</strong> {diagnosticSession.humanDesignProfile.strategy}
-                    </p>
-                    <p className="text-gray-600 text-sm mt-2">{diagnosticSession.humanDesignProfile.energyPattern}</p>
-                  </div>
-                )}
-                {diagnosticSession.astrologyProfile && (
-                  <div className="bg-blue-50 p-4 rounded-xl">
-                    <h3 className="text-sm font-semibold text-blue-900 mb-2">Astrology</h3>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {diagnosticSession.astrologyProfile.sunSign && (
-                        <Badge className="bg-blue-200 text-blue-900">☉ {diagnosticSession.astrologyProfile.sunSign}</Badge>
-                      )}
-                      {diagnosticSession.astrologyProfile.moonSign && (
-                        <Badge variant="outline">☽ {diagnosticSession.astrologyProfile.moonSign}</Badge>
-                      )}
-                      {diagnosticSession.astrologyProfile.risingSign && (
-                        <Badge variant="outline">↑ {diagnosticSession.astrologyProfile.risingSign}</Badge>
-                      )}
-                    </div>
-                    <p className="text-gray-600 text-sm">{diagnosticSession.astrologyProfile.currentTransitSummary}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Quick Actions & Tools */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="mb-10"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-[#4A1228]">Tools</h2>
-            <Link to={createPageUrl("ToolsHub")}>
-              <Button variant="ghost" className="text-[#6B1B3D]">
-                See all <ArrowRight className="ml-2 w-4 h-4" />
+          <div className="grid grid-cols-4 gap-4">
+            <Link to={createPageUrl("Journal")}>
+              <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white h-14 flex items-center gap-2">
+                <Edit3 className="w-5 h-5" />
+                Reflect
               </Button>
             </Link>
-          </div>
-          <div className="grid md:grid-cols-4 gap-4">
-            <Link to={createPageUrl("Journal")}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-5 text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Edit3 className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-[#4A1228]">Quick Journal</h3>
-                </CardContent>
-              </Card>
-            </Link>
-
             <Link to={createPageUrl("CheckIn")}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-5 text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-rose-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Heart className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-[#4A1228]">Daily Check-In</h3>
-                </CardContent>
-              </Card>
+              <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white h-14 flex items-center gap-2">
+                <Heart className="w-5 h-5" />
+                Regulate
+              </Button>
             </Link>
-
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-5 text-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Smile className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-[#4A1228]">Gratitude</h3>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-5 text-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Moon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-[#4A1228]">Sleep Check</h3>
-              </CardContent>
-            </Card>
+            <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white h-14 flex items-center gap-2">
+              <Activity className="w-5 h-5" />
+              Cycle
+            </Button>
+            <Button className="w-full bg-indigo-500 hover:bg-indigo-600 text-white h-14 flex items-center gap-2">
+              <Moon className="w-5 h-5" />
+              Sleep
+            </Button>
           </div>
         </motion.div>
 
-        {/* Identity & Values Section */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#6B1B3D]" />
-                  Identity Evolution
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-red-50 p-4 rounded-xl">
-                  <h3 className="text-sm font-semibold text-red-800 mb-2">Releasing</h3>
-                  <p className="text-gray-700">{diagnosticSession.releasing || "Not set"}</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-xl">
-                  <h3 className="text-sm font-semibold text-green-800 mb-2">Becoming</h3>
-                  <p className="text-gray-700">{diagnosticSession.becoming || "Not set"}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Core Values & Boundaries</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Core Values</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {diagnosticSession.values?.map((value) => (
-                      <Badge key={value} className="bg-[#6B1B3D] text-white">
-                        {value}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Active Boundaries</h3>
-                  <ul className="space-y-1">
-                    {diagnosticSession.boundaries?.filter(b => b).map((boundary, i) => (
-                      <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-[#6B1B3D] flex-shrink-0 mt-0.5" />
-                        {boundary}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-
-        {/* Phase Integration & Stats */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1 }}
-          >
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Target className="w-5 h-5 text-[#6B1B3D]" />
-                  Phase Integration
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {Object.entries(phaseProgress).map(([phase, progress]) => (
-                  <div key={phase}>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium text-gray-700">
-                        {phase === ALIVE_PHASES.VISION_EMBODIMENT ? "Vision & Embodiment" : phase}
-                      </span>
-                      <span className="text-gray-500">{progress}%</span>
-                    </div>
-                    <Progress value={progress} className="h-2" />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-          >
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <TrendingUp className="w-5 h-5 text-[#6B1B3D]" />
-                  Your Stats
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-pink-50 rounded-2xl p-5 text-center">
-                    <div className="text-3xl font-bold text-[#6B1B3D] mb-1">
-                      {completedModules}
-                    </div>
-                    <div className="text-sm text-gray-600">Modules Complete</div>
-                  </div>
-                  <div className="bg-purple-50 rounded-2xl p-5 text-center">
-                    <div className="text-3xl font-bold text-purple-700 mb-1">4</div>
-                    <div className="text-sm text-gray-600">Tools Unlocked</div>
-                  </div>
-                  <div className="bg-orange-50 rounded-2xl p-5 text-center">
-                    <div className="text-3xl font-bold text-orange-600 mb-1">
-                      {checkInStreak}
-                    </div>
-                    <div className="text-sm text-gray-600">Day Streak</div>
-                  </div>
-                  <div className="bg-green-50 rounded-2xl p-5 text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-1">
-                      {journalEntries.length}
-                    </div>
-                    <div className="text-sm text-gray-600">Journal Entries</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
       </div>
     </div>
   );
