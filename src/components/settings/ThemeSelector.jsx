@@ -4,45 +4,45 @@ import { Check } from "lucide-react";
 
 export const THEME_OPTIONS = [
   {
-    id: "burgundy",
-    label: "Burgundy Rose",
-    colors: { primary: "#601735", secondary: "#8B2E4D", accent: "#C67793" },
+    id: "aligned",
+    label: "Aligned",
+    colors: { primary: "#2F1B3E", secondary: "#482C83" },
     isDefault: true,
-  },
-  {
-    id: "pink",
-    label: "Soft Pink",
-    colors: { primary: "#D946A6", secondary: "#EC4899", accent: "#F9A8D4" },
   },
   {
     id: "rose",
     label: "Rose Bloom",
-    colors: { primary: "#E11D48", secondary: "#F43F5E", accent: "#FDA4AF" },
-  },
-  {
-    id: "coral",
-    label: "Coral Sunset",
-    colors: { primary: "#DC2626", secondary: "#F97316", accent: "#FED7AA" },
+    colors: { primary: "#E11D48", secondary: "#F43F5E" },
   },
   {
     id: "lavender",
     label: "Lavender Dream",
-    colors: { primary: "#9333EA", secondary: "#C084FC", accent: "#E9D5FF" },
+    colors: { primary: "#9333EA", secondary: "#C084FC" },
   },
   {
-    id: "sky",
-    label: "Baby Blue",
-    colors: { primary: "#0EA5E9", secondary: "#38BDF8", accent: "#BAE6FD" },
+    id: "ocean",
+    label: "Ocean Depths",
+    colors: { primary: "#0369A1", secondary: "#0EA5E9" },
   },
   {
-    id: "mint",
-    label: "Fresh Mint",
-    colors: { primary: "#10B981", secondary: "#34D399", accent: "#A7F3D0" },
+    id: "forest",
+    label: "Forest Green",
+    colors: { primary: "#065F46", secondary: "#10B981" },
   },
   {
-    id: "sunshine",
-    label: "Sunshine Yellow",
-    colors: { primary: "#F59E0B", secondary: "#FBBF24", accent: "#FDE68A" },
+    id: "sunset",
+    label: "Sunset Glow",
+    colors: { primary: "#DC2626", secondary: "#F97316" },
+  },
+  {
+    id: "midnight",
+    label: "Midnight Sky",
+    colors: { primary: "#1E293B", secondary: "#475569" },
+  },
+  {
+    id: "blush",
+    label: "Blush Pink",
+    colors: { primary: "#BE185D", secondary: "#EC4899" },
   },
 ];
 
@@ -62,22 +62,18 @@ export default function ThemeSelector({ currentTheme, onThemeChange }) {
               onClick={() => onThemeChange(theme.id)}
               className={`relative rounded-lg overflow-hidden border-2 transition-all p-4 ${
                 currentTheme === theme.id
-                  ? "border-[#601735] ring-2 ring-[#601735]/20"
+                  ? "border-[#2F1B3E] ring-2 ring-[#2F1B3E]/20"
                   : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <div className="flex gap-2 mb-2">
                 <div
-                  className="w-8 h-8 rounded-full"
+                  className="w-10 h-10 rounded-full"
                   style={{ backgroundColor: theme.colors.primary }}
                 />
                 <div
-                  className="w-8 h-8 rounded-full"
+                  className="w-10 h-10 rounded-full"
                   style={{ backgroundColor: theme.colors.secondary }}
-                />
-                <div
-                  className="w-8 h-8 rounded-full"
-                  style={{ backgroundColor: theme.colors.accent }}
                 />
               </div>
               <p className="text-sm font-medium text-gray-900">{theme.label}</p>
@@ -86,7 +82,7 @@ export default function ThemeSelector({ currentTheme, onThemeChange }) {
               )}
               {currentTheme === theme.id && (
                 <div className="absolute top-2 right-2">
-                  <Check className="w-5 h-5 text-[#601735]" />
+                  <Check className="w-5 h-5 text-[#2F1B3E]" />
                 </div>
               )}
             </button>

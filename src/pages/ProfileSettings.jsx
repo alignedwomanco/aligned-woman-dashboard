@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import AvatarGenerator from "@/components/admin/AvatarGenerator";
 import BackgroundSelector from "@/components/settings/BackgroundSelector";
+import ThemeSelector from "@/components/settings/ThemeSelector";
 import { createPageUrl } from "@/utils";
 import AdminMetricsContent from "@/components/admin/AdminMetricsContent";
 import MessageInbox from "@/components/messages/MessageInbox";
@@ -34,6 +35,7 @@ export default function ProfileSettings() {
   const [emailChangeDialogOpen, setEmailChangeDialogOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [validationError, setValidationError] = useState({ show: false, title: "", message: "" });
+  const [selectedTheme, setSelectedTheme] = useState("aligned");
   const queryClient = useQueryClient();
 
   const toTitleCase = (str) => {
@@ -43,6 +45,31 @@ export default function ProfileSettings() {
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  };
+
+  const applyTheme = (themeId) => {
+    const themeOptions = [
+      { id: "aligned", colors: { primary: "#2F1B3E", secondary: "#482C83" } },
+      { id: "rose", colors: { primary: "#E11D48", secondary: "#F43F5E" } },
+      { id: "lavender", colors: { primary: "#9333EA", secondary: "#C084FC" } },
+      { id: "ocean", colors: { primary: "#0369A1", secondary: "#0EA5E9" } },
+      { id: "forest", colors: { primary: "#065F46", secondary: "#10B981" } },
+      { id: "sunset", colors: { primary: "#DC2626", secondary: "#F97316" } },
+      { id: "midnight", colors: { primary: "#1E293B", secondary: "#475569" } },
+      { id: "blush", colors: { primary: "#BE185D", secondary: "#EC4899" } },
+    ];
+    
+    const theme = themeOptions.find(t => t.id === themeId) || themeOptions[0];
+    
+    document.documentElement.style.setProperty('--theme-primary', theme.colors.primary);
+    document.documentElement.style.setProperty('--theme-secondary', theme.colors.secondary);
+  };
+
+  const handleThemeChange = async (themeId) => {
+    setSelectedTheme(themeId);
+    applyTheme(themeId);
+    await base44.auth.updateMe({ theme: themeId });
+    queryClient.invalidateQueries({ queryKey: ["currentUser"] });
   };
 
   useEffect(() => {
@@ -62,6 +89,10 @@ export default function ProfileSettings() {
         location: user.location || "",
       });
       setSocialLinks(user.social_links || []);
+      setSelectedTheme(user.theme || "aligned");
+      
+      // Apply theme colors
+      applyTheme(user.theme || "aligned");
     };
     loadUser();
   }, []);
@@ -804,7 +835,11 @@ If you did not request this change, please ignore this email.
           </TabsContent>
 
           {/* Appearance Tab */}
-          <TabsContent value="appearance">
+          <TabsContent value="appearance" className="space-y-6">
+            <ThemeSelector
+              currentTheme={selectedTheme}
+              onThemeChange={handleThemeChange}
+            />
             <BackgroundSelector
               currentBackground={currentUser.background_image || "#FEF5F9"}
               onBackgroundChange={(backgroundUrl) => {
