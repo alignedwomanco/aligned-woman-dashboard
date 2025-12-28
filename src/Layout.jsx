@@ -150,7 +150,13 @@ export default function Layout({ children, currentPageName }) {
                       <img
                       src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                       alt="AW"
-                      className="h-10 object-contain" />
+                      className="object-contain w-auto"
+                      style={{ 
+                        height: siteSettings?.logo_size === "small" ? "28px" : 
+                               siteSettings?.logo_size === "medium" ? "40px" : 
+                               siteSettings?.logo_size === "large" ? "56px" : 
+                               siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.83)}px` : "40px"
+                      }} />
 
                   <button
                   onClick={() => setShowMobileMenu(false)}
