@@ -24,7 +24,7 @@ export default function Contact() {
   return (
     <div className="pt-20">
       {/* Hero */}
-      <section className="py-24 bg-gradient-to-b from-[#4A1228] to-[#6B1B3D]">
+      <section className="py-24 bg-gradient-to-b from-[#3D2250] to-[#5B2E84]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -126,7 +126,7 @@ export default function Contact() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] hover:from-[#4A1228] hover:to-[#6B1B3D] text-white py-6 text-lg font-semibold rounded-xl shadow-lg group"
+                className="w-full bg-gradient-to-r from-[#3D2250] to-[#5B2E84] hover:from-[#3D2250]/90 hover:to-[#5B2E84]/90 text-white py-6 text-lg font-semibold rounded-xl shadow-lg group"
               >
                 <Send className="mr-2 w-5 h-5" />
                 Send Message

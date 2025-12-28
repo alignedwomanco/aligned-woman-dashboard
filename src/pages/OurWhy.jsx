@@ -6,7 +6,7 @@ export default function OurWhy() {
   return (
     <div className="pt-20">
       {/* Hero */}
-      <section className="py-24 bg-gradient-to-b from-[#4A1228] to-[#6B1B3D]">
+      <section className="py-24 bg-gradient-to-b from-[#3D2250] to-[#5B2E84]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -59,10 +59,10 @@ export default function OurWhy() {
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                   className="flex items-center gap-4 bg-pink-50 rounded-xl p-5"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#6B1B3D] to-[#8B2E4D] rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#3D2250] to-[#5B2E84] rounded-xl flex items-center justify-center">
                     <item.icon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-lg font-medium text-[#4A1228]">{item.text}</span>
+                  <span className="text-lg font-medium text-[#3D2250]">{item.text}</span>
                 </motion.div>
               ))}
             </div>
@@ -71,7 +71,7 @@ export default function OurWhy() {
               This ecosystem required behavioural science, ethical AI design, and female-centred leadership.
             </p>
 
-            <div className="bg-gradient-to-br from-[#6B1B3D] to-[#4A1228] rounded-2xl p-8 text-center my-12">
+            <div className="bg-gradient-to-br from-[#3D2250] to-[#5B2E84] rounded-2xl p-8 text-center my-12">
               <p className="text-2xl text-white font-medium">
                 We chose coherence over noise.
               </p>

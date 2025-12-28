@@ -1,51 +1,27 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
-
-const experts = [
-  {
-    name: "Dr. Sarah Mitchell",
-    role: "Nervous System & Trauma Specialist",
-    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
-    bio: "PhD in Clinical Psychology with 15 years experience in somatic therapy and nervous system regulation.",
-  },
-  {
-    name: "Dr. Emily Chen",
-    role: "Women's Health & Hormones",
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
-    bio: "Board-certified OB/GYN specializing in hormonal health and female physiology.",
-  },
-  {
-    name: "Jessica Williams",
-    role: "Financial Strategist",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80",
-    bio: "CFP and wealth advisor focused on helping women build financial independence and literacy.",
-  },
-  {
-    name: "Maria Rodriguez",
-    role: "Leadership & Executive Coach",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80",
-    bio: "Former Fortune 500 executive turned coach, specializing in women's leadership development.",
-  },
-  {
-    name: "Dr. Amanda Foster",
-    role: "Behavioral Psychologist",
-    image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=80",
-    bio: "Research psychologist focusing on habit formation, identity change, and sustainable transformation.",
-  },
-  {
-    name: "Claire Thompson",
-    role: "Nutrition & Movement Specialist",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80",
-    bio: "Registered dietitian and movement coach with expertise in female-specific nutrition protocols.",
-  },
-];
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, X, DollarSign, Clock } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 export default function Experts() {
+  const [selectedExpert, setSelectedExpert] = useState(null);
+
+  const { data: experts = [] } = useQuery({
+    queryKey: ["experts"],
+    queryFn: async () => {
+      const allExperts = await base44.entities.Expert.list();
+      return allExperts.filter(e => e.isPublished !== false);
+    },
+    initialData: [],
+  });
   return (
     <div className="pt-20">
       {/* Hero */}
-      <section className="py-24 bg-gradient-to-b from-[#4A1228] to-[#6B1B3D]">
+      <section className="py-24 bg-gradient-to-b from-[#3D2250] to-[#5B2E84]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -72,30 +48,37 @@ export default function Experts() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {experts.map((expert, index) => (
               <motion.div
-                key={expert.name}
+                key={expert.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+                onClick={() => setSelectedExpert(expert)}
+                className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer group"
               >
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
-                    src={expert.image}
+                    src={expert.profile_picture || "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80"}
                     alt={expert.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#4A1228] mb-1">
+                  <h3 className="text-xl font-bold text-[#3D2250] mb-1">
                     {expert.name}
                   </h3>
-                  <p className="text-[#C67793] font-medium text-sm mb-4">
-                    {expert.role}
+                  <p className="text-[#C67793] font-medium text-sm mb-3">
+                    {expert.title}
                   </p>
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
                     {expert.bio}
                   </p>
+                  {expert.services && expert.services.length > 0 && (
+                    <div className="flex items-center gap-2 text-[#5B2E84] font-medium text-sm">
+                      <span>{expert.services.length} service{expert.services.length > 1 ? 's' : ''} available</span>
+                      <span>→</span>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -115,12 +98,80 @@ export default function Experts() {
             <p className="text-xl text-gray-600 mb-4">
               Education is taught by real experts.
             </p>
-            <p className="text-xl font-bold text-[#6B1B3D]">
+            <p className="text-xl font-bold text-[#3D2250]">
               Integration is supported by AI. Authority always remains with you.
             </p>
           </motion.div>
         </div>
       </section>
+
+      {/* Expert Detail Dialog */}
+      <Dialog open={!!selectedExpert} onOpenChange={() => setSelectedExpert(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedExpert && (
+            <div>
+              <DialogHeader>
+                <div className="flex gap-4 items-start mb-4">
+                  <img
+                    src={selectedExpert.profile_picture || "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80"}
+                    alt={selectedExpert.name}
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <DialogTitle className="text-2xl text-[#3D2250]">{selectedExpert.name}</DialogTitle>
+                    <p className="text-[#C67793] font-medium mt-1">{selectedExpert.title}</p>
+                    {selectedExpert.specialties && selectedExpert.specialties.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {selectedExpert.specialties.map((specialty, idx) => (
+                          <Badge key={idx} className="bg-purple-100 text-purple-800">
+                            {specialty}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-6 mt-4">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">About</h3>
+                  <p className="text-gray-600 leading-relaxed">{selectedExpert.bio}</p>
+                </div>
+
+                {selectedExpert.services && selectedExpert.services.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-4">Services</h3>
+                    <div className="space-y-3">
+                      {selectedExpert.services.map((service, idx) => (
+                        <div key={idx} className="border border-gray-200 rounded-xl p-4 hover:border-[#5B2E84] transition-colors">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-semibold text-[#3D2250]">{service.name}</h4>
+                            <div className="flex items-center gap-1 text-green-600 font-bold">
+                              <DollarSign className="w-4 h-4" />
+                              {service.price}
+                            </div>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-2">{service.description}</p>
+                          {service.duration && (
+                            <div className="flex items-center gap-1 text-gray-500 text-sm">
+                              <Clock className="w-4 h-4" />
+                              {service.duration}
+                            </div>
+                          )}
+                          <Button className="w-full mt-3 bg-gradient-to-r from-[#3D2250] to-[#5B2E84] hover:from-[#3D2250]/90 hover:to-[#5B2E84]/90">
+                            Book Now
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

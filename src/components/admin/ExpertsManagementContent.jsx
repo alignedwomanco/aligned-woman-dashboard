@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, UserPlus, TrendingUp, DollarSign, Eye } from "lucide-react";
+import { Trash2, UserPlus, TrendingUp, DollarSign, Eye, Plus, X, Edit } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -37,7 +38,23 @@ export default function ExpertsManagementContent() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("expert");
+  const [editExpertDialogOpen, setEditExpertDialogOpen] = useState(false);
+  const [currentExpert, setCurrentExpert] = useState(null);
+  const [expertForm, setExpertForm] = useState({
+    name: "",
+    title: "",
+    bio: "",
+    profile_picture: "",
+    specialties: [],
+    services: [],
+    isPublished: true,
+  });
   const queryClient = useQueryClient();
+
+  const { data: expertsProfiles = [] } = useQuery({
+    queryKey: ["expertsProfiles"],
+    queryFn: () => base44.entities.Expert.list(),
+  });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ["allUsers"],
@@ -82,6 +99,82 @@ export default function ExpertsManagementContent() {
     },
   });
 
+  const createExpertMutation = useMutation({
+    mutationFn: (data) => base44.entities.Expert.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] });
+      setEditExpertDialogOpen(false);
+      resetForm();
+    },
+  });
+
+  const updateExpertMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Expert.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] });
+      setEditExpertDialogOpen(false);
+      resetForm();
+    },
+  });
+
+  const deleteExpertMutation = useMutation({
+    mutationFn: (id) => base44.entities.Expert.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] });
+    },
+  });
+
+  const resetForm = () => {
+    setCurrentExpert(null);
+    setExpertForm({
+      name: "",
+      title: "",
+      bio: "",
+      profile_picture: "",
+      specialties: [],
+      services: [],
+      isPublished: true,
+    });
+  };
+
+  const openEditDialog = (expert = null) => {
+    if (expert) {
+      setCurrentExpert(expert);
+      setExpertForm(expert);
+    } else {
+      resetForm();
+    }
+    setEditExpertDialogOpen(true);
+  };
+
+  const handleSaveExpert = () => {
+    if (currentExpert) {
+      updateExpertMutation.mutate({ id: currentExpert.id, data: expertForm });
+    } else {
+      createExpertMutation.mutate(expertForm);
+    }
+  };
+
+  const addService = () => {
+    setExpertForm({
+      ...expertForm,
+      services: [...expertForm.services, { name: "", description: "", price: 0, duration: "" }],
+    });
+  };
+
+  const updateService = (index, field, value) => {
+    const updated = [...expertForm.services];
+    updated[index][field] = value;
+    setExpertForm({ ...expertForm, services: updated });
+  };
+
+  const removeService = (index) => {
+    setExpertForm({
+      ...expertForm,
+      services: expertForm.services.filter((_, i) => i !== index),
+    });
+  };
+
   const getRoleBadgeColor = (role) => {
     const colors = {
       course_creator: "bg-orange-100 text-orange-800",
@@ -104,12 +197,72 @@ export default function ExpertsManagementContent() {
 
   return (
     <div className="space-y-6">
+      {/* Expert Profiles Management */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl mb-2">Experts & Course Creators</CardTitle>
-              <p className="text-gray-600">Manage expert profiles, content, and performance metrics</p>
+              <CardTitle className="text-2xl mb-2">Expert Profiles</CardTitle>
+              <p className="text-gray-600">Manage expert profiles shown on the Experts page</p>
+            </div>
+            <Button onClick={() => openEditDialog()} className="bg-[#3D2250] hover:bg-[#5B2E84]">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Expert Profile
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {expertsProfiles.map((expert) => (
+              <div key={expert.id} className="border rounded-xl p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-3 mb-3">
+                  <img
+                    src={expert.profile_picture || "https://via.placeholder.com/100"}
+                    alt={expert.name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-[#3D2250] truncate">{expert.name}</h3>
+                    <p className="text-sm text-gray-600 truncate">{expert.title}</p>
+                    {expert.services && expert.services.length > 0 && (
+                      <Badge className="mt-1 bg-green-100 text-green-800 text-xs">
+                        {expert.services.length} service{expert.services.length > 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openEditDialog(expert)}
+                    className="flex-1"
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => deleteExpertMutation.mutate(expert.id)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* User Roles Management */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl mb-2">User Roles Management</CardTitle>
+              <p className="text-gray-600">Manage expert and course creator user accounts</p>
             </div>
             <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
               <DialogTrigger asChild>
@@ -261,6 +414,135 @@ export default function ExpertsManagementContent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Expert Dialog */}
+      <Dialog open={editExpertDialogOpen} onOpenChange={setEditExpertDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{currentExpert ? "Edit Expert Profile" : "Add Expert Profile"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Name *</Label>
+              <Input
+                value={expertForm.name}
+                onChange={(e) => setExpertForm({ ...expertForm, name: e.target.value })}
+                placeholder="Expert full name"
+              />
+            </div>
+
+            <div>
+              <Label>Title *</Label>
+              <Input
+                value={expertForm.title}
+                onChange={(e) => setExpertForm({ ...expertForm, title: e.target.value })}
+                placeholder="e.g., Nervous System Specialist"
+              />
+            </div>
+
+            <div>
+              <Label>Bio</Label>
+              <Textarea
+                value={expertForm.bio}
+                onChange={(e) => setExpertForm({ ...expertForm, bio: e.target.value })}
+                placeholder="Expert biography"
+                className="min-h-[100px]"
+              />
+            </div>
+
+            <div>
+              <Label>Profile Picture URL</Label>
+              <Input
+                value={expertForm.profile_picture}
+                onChange={(e) => setExpertForm({ ...expertForm, profile_picture: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <Label>Services</Label>
+              <div className="space-y-3 mt-2">
+                {expertForm.services.map((service, idx) => (
+                  <div key={idx} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Service {idx + 1}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeService(idx)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      placeholder="Service name"
+                      value={service.name}
+                      onChange={(e) => updateService(idx, "name", e.target.value)}
+                    />
+                    <Textarea
+                      placeholder="Service description"
+                      value={service.description}
+                      onChange={(e) => updateService(idx, "description", e.target.value)}
+                      className="min-h-[60px]"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        type="number"
+                        placeholder="Price"
+                        value={service.price}
+                        onChange={(e) => updateService(idx, "price", parseFloat(e.target.value))}
+                      />
+                      <Input
+                        placeholder="Duration (e.g., 60 min)"
+                        value={service.duration}
+                        onChange={(e) => updateService(idx, "duration", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={addService}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Service
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="isPublished"
+                checked={expertForm.isPublished}
+                onChange={(e) => setExpertForm({ ...expertForm, isPublished: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="isPublished" className="cursor-pointer">
+                Publish on Experts page
+              </Label>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={handleSaveExpert}
+                disabled={!expertForm.name || !expertForm.title}
+                className="flex-1 bg-[#3D2250] hover:bg-[#5B2E84]"
+              >
+                {currentExpert ? "Update Expert" : "Create Expert"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setEditExpertDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
