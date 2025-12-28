@@ -269,13 +269,11 @@ export default function Layout({ children, currentPageName }) {
 
   }
 
-  // Authenticated app layout (Skool-inspired)
-  const visibleNavItems = currentPageName === "Dashboard" ?
-  appNavigation.filter((item) => item.name !== "Dashboard") :
-  appNavigation;
+  // Authenticated app layout with left sidebar
+  const [showToolsDropdown, setShowToolsDropdown] = React.useState(false);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex">
       <style>{`
         :root {
           --burgundy: #2F1B3E;
@@ -283,126 +281,262 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Global Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          {/* Top Row: Logo, Search, Icons, Profile */}
-          <div className="flex items-center justify-between py-6 gap-6 px-6">
-            {/* Logo */}
-            <Link to={createPageUrl("Home")} className="flex items-center gap-3 flex-shrink-0">
-              <img
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
-                alt="AW"
-                className="w-10 h-10" />
+      {/* Left Sidebar */}
+      <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[#2F1B3E] text-white flex flex-col z-50">
+        {/* Logo */}
+        <div className="p-6 border-b border-white/10">
+          <Link to={createPageUrl("Home")} className="flex items-center gap-3">
+            <img
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6945438e6f6e0e1d874ba569/fa1001979_AWLogo_.png"
+              alt="AW"
+              className="w-10 h-10"
+            />
+            <span className="text-sm font-bold">THE ALIGNED WOMAN</span>
+          </Link>
+        </div>
 
-              <span className="hidden lg:block text-lg font-bold text-[#6B1B3D]">
-                THE ALIGNED WOMAN
-              </span>
-              </Link>
-
-              {/* Right Icons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Messages */}
-              <button
-                onClick={() => setShowMessages(!showMessages)}
-                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-
-                <MessageCircle className="w-5 h-5 text-gray-600" />
-              </button>
-
-              {/* Notifications */}
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-
-                <Bell className="w-5 h-5 text-gray-600" />
-              </button>
-
-              {/* Profile Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                    <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden">
-                      {user?.profile_picture ?
-                      <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" /> :
-
-                      <div className="w-full h-full bg-[#2F1B3E] flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">
-                            {user?.full_name?.[0] || user?.email?.[0] || "U"}
-                          </span>
-                        </div>
-                      }
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-gray-600" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Profile Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  {user && ["owner", "admin", "master_admin", "moderator", "expert", "course_creator"].includes(user.role) &&
-                  <DropdownMenuItem asChild>
-                      <Link to={createPageUrl("AdminSettings")} className="flex items-center gap-2">
-                        <Settings className="w-4 h-4" />
-                        Admin Settings
-                      </Link>
-                    </DropdownMenuItem>
-                  }
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          {/* Navigation Bar */}
-          <div className="pb-6 px-6">
-            <nav className="bg-[#2F1B3E] rounded-xl py-2 flex items-center justify-between overflow-x-auto scrollbar-hide">
-              {visibleNavItems.map((item, index) =>
-              <React.Fragment key={item.name}>
-                  <Link
-                  to={createPageUrl(item.name)}
-                  className={`flex-1 px-3 py-2.5 text-sm font-bold whitespace-nowrap transition-all rounded-lg text-center ${
-                  currentPageName === item.name ?
-                  "bg-white text-[#6B1B3D]" :
-                  "text-white hover:bg-white/10"}`
-                  }>
-
-                    {item.label}
-                  </Link>
-                  {index < visibleNavItems.length - 1 &&
-                <div className="h-6 w-[2px] bg-white/40 mx-0.5 flex-shrink-0" />
-                }
-                </React.Fragment>
-              )}
-            </nav>
+        {/* Search */}
+        <div className="px-4 py-4">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+            />
           </div>
         </div>
-      </header>
 
-      {/* Notifications Dropdown */}
-      {showNotifications &&
-      <NotificationsDropdown onClose={() => setShowNotifications(false)} />
-      }
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-2 overflow-y-auto">
+          <ul className="space-y-1">
+            <li>
+              <Link
+                to={createPageUrl("Dashboard")}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  currentPageName === "Dashboard"
+                    ? "bg-white/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span className="font-medium">Dashboard</span>
+              </Link>
+            </li>
 
-      {/* Messages Drawer */}
-      {showMessages &&
-      <MessagesDrawer onClose={() => setShowMessages(false)} />
-      }
+            <li>
+              <Link
+                to={createPageUrl("MyMetrics")}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  currentPageName === "MyMetrics"
+                    ? "bg-white/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span className="font-medium">Insights</span>
+              </Link>
+            </li>
 
-      {/* Main Content */}
-      <main className="pt-[160px]">
-        {children}
-      </main>
+            <li>
+              <Link
+                to={createPageUrl("Journal")}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  currentPageName === "Journal"
+                    ? "bg-white/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span className="font-medium">Journal</span>
+              </Link>
+            </li>
 
-      {/* LaurAI Chat Widget */}
-      <LaurAIChatWidget />
-    </div>);
+            <li>
+              <Link
+                to={createPageUrl("Classroom")}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  currentPageName === "Classroom"
+                    ? "bg-white/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                </svg>
+                <span className="font-medium">Classroom</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                to={createPageUrl("Community")}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  currentPageName === "Community"
+                    ? "bg-white/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span className="font-medium">Community</span>
+              </Link>
+            </li>
+
+            {/* Tools Dropdown */}
+            <li>
+              <button
+                onClick={() => setShowToolsDropdown(!showToolsDropdown)}
+                className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  ["ToolsHub", "CheckIn"].includes(currentPageName)
+                    ? "bg-white/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                  </svg>
+                  <span className="font-medium">Tools</span>
+                </div>
+                <svg
+                  className={`w-4 h-4 transition-transform ${showToolsDropdown ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown Items */}
+              {showToolsDropdown && (
+                <ul className="mt-1 ml-8 space-y-1">
+                  <li>
+                    <Link
+                      to={createPageUrl("CheckIn")}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      Regulate
+                    </Link>
+                  </li>
+                  <li>
+                    <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Cycle
+                    </button>
+                  </li>
+                  <li>
+                    <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                      </svg>
+                      Sleep
+                    </button>
+                  </li>
+                </ul>
+              )}
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 ml-64">
+        {/* Top Header */}
+        <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-end gap-4 px-8 py-4">
+            {/* Messages */}
+            <button
+              onClick={() => setShowMessages(!showMessages)}
+              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <MessageCircle className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Notifications */}
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Bell className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Profile Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                  <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden">
+                    {user?.profile_picture ? (
+                      <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-[#2F1B3E] flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">
+                          {user?.full_name?.[0] || user?.email?.[0] || "U"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 max-w-[120px] truncate">
+                    {user?.full_name?.split(" ")[0] || "User"}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Profile Settings
+                  </Link>
+                </DropdownMenuItem>
+                {user && ["owner", "admin", "master_admin", "moderator", "expert", "course_creator"].includes(user.role) && (
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl("AdminSettings")} className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Admin Settings
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
+        {/* Notifications Dropdown */}
+        {showNotifications && <NotificationsDropdown onClose={() => setShowNotifications(false)} />}
+
+        {/* Messages Drawer */}
+        {showMessages && <MessagesDrawer onClose={() => setShowMessages(false)} />}
+
+        {/* Main Content */}
+        <main>{children}</main>
+
+        {/* LaurAI Chat Widget */}
+        <LaurAIChatWidget />
+      </div>
+    </div>
+  );
 
 }
