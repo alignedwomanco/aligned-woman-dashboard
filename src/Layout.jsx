@@ -100,7 +100,7 @@ export default function Layout({ children, currentPageName }) {
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <Link to={createPageUrl("Home")}>
               <img
-                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/af7d78781_AlignedWomanLogoWhite.png"}
+                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
                 alt="The Aligned Woman"
                 className="h-12 object-contain"
               />
@@ -127,7 +127,7 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b">
                       <img
-                      src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/87267545a_AlignedWomanLogoPurple.png"}
+                      src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                       alt="AW"
                       className="h-10 object-contain" />
 
@@ -273,7 +273,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="p-6 border-b border-white/10">
           <Link to={createPageUrl("Home")}>
             <img
-              src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/af7d78781_AlignedWomanLogoWhite.png"}
+              src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
               alt="The Aligned Woman"
               className="h-10 object-contain"
             />

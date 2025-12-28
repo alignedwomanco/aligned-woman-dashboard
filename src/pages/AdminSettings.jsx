@@ -254,7 +254,7 @@ export default function AdminSettings() {
   const regularUsers = allUsers.filter(u => u.role === "user");
 
   return (
-    <div className="min-h-screen p-12">
+    <div className="min-h-screen p-12" style={{ backgroundColor: '#FBF4FD' }}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-16">
           <h1 className="text-3xl font-bold text-[#4A1228] mb-2">Admin Settings</h1>
