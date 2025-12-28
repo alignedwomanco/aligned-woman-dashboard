@@ -61,14 +61,7 @@ export default function Layout({ children, currentPageName }) {
     loadSettings();
   }, []);
 
-  // Separate useEffect for redirect to avoid conflicts
-  useEffect(() => {
-    // Only redirect if on actual root path or empty
-    const currentPath = location.pathname;
-    if (currentPath === "/" || currentPath === "" || currentPath === "/app") {
-      navigate(createPageUrl("Home"), { replace: true });
-    }
-  }, [location.pathname, navigate]);
+  // No redirect needed - Home page is served at root
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -124,15 +117,15 @@ export default function Layout({ children, currentPageName }) {
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <Link to={createPageUrl("Home")}>
               <img
-                src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
                 alt="The Aligned Woman"
                 className="object-contain w-auto"
                 style={{ 
-                  height: siteSettings?.logo_size === "small" ? "32px" : 
-                         siteSettings?.logo_size === "medium" ? "48px" : 
-                         siteSettings?.logo_size === "large" ? "64px" : 
-                         siteSettings?.logo_size === "custom" ? `${siteSettings.custom_logo_height}px` : "48px",
-                  maxWidth: "200px"
+                  height: siteSettings?.logo_size === "small" ? "24px" : 
+                         siteSettings?.logo_size === "medium" ? "32px" : 
+                         siteSettings?.logo_size === "large" ? "40px" : 
+                         siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.67)}px` : "32px",
+                  maxWidth: "180px"
                 }}
               />
             </Link>
@@ -158,14 +151,15 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b">
                       <img
-                      src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                      src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
                       alt="AW"
                       className="object-contain w-auto"
                       style={{ 
-                        height: siteSettings?.logo_size === "small" ? "28px" : 
-                               siteSettings?.logo_size === "medium" ? "40px" : 
-                               siteSettings?.logo_size === "large" ? "56px" : 
-                               siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.83)}px` : "40px"
+                        height: siteSettings?.logo_size === "small" ? "24px" : 
+                               siteSettings?.logo_size === "medium" ? "32px" : 
+                               siteSettings?.logo_size === "large" ? "40px" : 
+                               siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.67)}px` : "32px",
+                        maxWidth: "160px"
                       }} />
 
                   <button
@@ -301,7 +295,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="p-6 border-b border-white/10">
           <Link to={createPageUrl("Home")}>
             <img
-              src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
+              src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
               alt="The Aligned Woman"
               className="object-contain w-auto max-w-full"
               style={{ 
