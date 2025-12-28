@@ -460,45 +460,60 @@ export default function Layout({ children, currentPageName }) {
       {/* Main Content Area */}
       <div className="flex-1 ml-64">
         {/* Top Header */}
-        <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
-          <div className="flex items-center justify-end gap-4 px-8 py-4">
-            {/* Messages */}
-            <button
-              onClick={() => setShowMessages(!showMessages)}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <MessageCircle className="w-5 h-5 text-gray-600" />
-            </button>
+        <header className="sticky top-0 z-40 border-b border-gray-200" style={{ backgroundColor: '#482C83' }}>
+          <div className="flex items-center justify-between gap-4 px-8 py-4">
+            {/* Greeting */}
+            <div>
+              <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                {(() => {
+                  const hour = new Date().getHours();
+                  if (hour < 12) return "Good Morning";
+                  if (hour < 18) return "Good Afternoon";
+                  return "Good Evening";
+                })()}, {user?.full_name?.split(" ")[0] || "there"} 👋
+              </h1>
+              <p className="text-white/80 text-sm">Hope you feel centered today.</p>
+            </div>
 
-            {/* Notifications */}
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Bell className="w-5 h-5 text-gray-600" />
-            </button>
+            {/* Right Actions */}
+            <div className="flex items-center gap-2">
+              {/* Messages */}
+              <button
+                onClick={() => setShowMessages(!showMessages)}
+                className="relative p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 text-white" />
+              </button>
 
-            {/* Profile Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                  <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden">
-                    {user?.profile_picture ? (
-                      <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-[#2F1B3E] flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {user?.full_name?.[0] || user?.email?.[0] || "U"}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 max-w-[120px] truncate">
-                    {user?.full_name?.split(" ")[0] || "User"}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-gray-600" />
-                </button>
-              </DropdownMenuTrigger>
+              {/* Notifications */}
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5 text-white" />
+              </button>
+
+              {/* Profile Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 p-1 hover:bg-white/10 rounded-lg transition-colors">
+                    <div className="w-10 h-10 rounded-full border-2 border-white/30 overflow-hidden">
+                      {user?.profile_picture ? (
+                        <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                          <span className="text-white text-sm font-medium">
+                            {user?.full_name?.[0] || user?.email?.[0] || "U"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium text-white max-w-[120px] truncate">
+                      {user?.full_name?.split(" ")[0] || "User"}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-white" />
+                  </button>
+                </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem asChild>
                   <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
@@ -520,7 +535,8 @@ export default function Layout({ children, currentPageName }) {
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+              </DropdownMenu>
+            </div>
           </div>
         </header>
 
