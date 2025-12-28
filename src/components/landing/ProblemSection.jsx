@@ -27,7 +27,7 @@ export default function ProblemSection() {
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#3D2250] tracking-tight leading-tight">
             Women Are Not Broken.
             <br />
-            <span style={{ color: '#5B2E84' }}>The Systems They're Using Are.</span>
+            <span style={{ color: '#a861e9' }}>The Systems They're Using Are.</span>
           </h2>
         </motion.div>
 
@@ -91,7 +91,7 @@ export default function ProblemSection() {
             <p className="text-lg font-medium text-[#3D2250] text-center">
               The result is not growth.
               <br />
-              <span style={{ color: '#5B2E84' }}>It is overwhelm disguised as self-improvement.</span>
+              <span style={{ color: '#a861e9' }}>It is overwhelm disguised as self-improvement.</span>
             </p>
           </div>
         </motion.div>
