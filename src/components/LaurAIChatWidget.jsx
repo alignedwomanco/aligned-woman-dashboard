@@ -25,39 +25,87 @@ export default function LaurAIChatWidget() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (quickPrompt = null) => {
+    const userMessage = quickPrompt || input.trim();
+    if (!userMessage || isLoading) return;
 
-    const userMessage = input.trim();
-    setInput("");
+    if (!quickPrompt) setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
 
     try {
+      // Fetch user context
+      const user = await base44.auth.me();
+      const diagnosticSessions = await base44.entities.DiagnosticSession.filter(
+        { isComplete: true },
+        "-created_date",
+        1
+      );
+      const diagnosticSession = diagnosticSessions[0];
+      
+      const checkIns = await base44.entities.CheckIn.list("-created_date", 3);
+      const latestCheckIn = checkIns[0];
+
       const conversationHistory = messages
         .slice(-4)
         .map((m) => `${m.role === "user" ? "User" : "LaurAI"}: ${m.content}`)
         .join("\n");
 
-      const systemPrompt = `You are LaurAI, the helpful AI assistant for The Aligned Woman Blueprint platform. You help users understand:
+      // Build context-aware prompt
+      const contextData = {
+        userName: user?.full_name?.split(" ")[0] || "there",
+        primaryPhase: diagnosticSession?.primaryPhase || "not set",
+        secondaryPhase: diagnosticSession?.secondaryPhase || "not set",
+        capacityScore: diagnosticSession?.capacityScore || latestCheckIn?.capacity || "unknown",
+        nervousSystemState: "Fawn", // From current snapshot
+        cyclePhase: diagnosticSession?.cycleProfile?.cycleStage || "not tracked",
+        humanDesignType: diagnosticSession?.humanDesignProfile?.type || "not set",
+        astrologySign: diagnosticSession?.astrologyProfile?.sunSign || "not set",
+        recentEnergy: latestCheckIn?.energy || "not logged",
+        recentStress: latestCheckIn?.stress || "not logged",
+        aliveNarrative: diagnosticSession?.aliveNarrative || "not generated yet",
+      };
 
-- The ALIVE Method: A framework with 4 phases (Awareness, Liberation, Intention, Vision & Embodiment) for personal transformation
-- Classroom: Browse and complete learning modules organized by phase, track progress with points and badges, view leaderboards
-- Module Player: Watch videos, read lesson content, download resources, mark lessons complete, ask questions in comments
-- Tools Hub: Access tools for journaling, check-ins, purpose work, and more - unlocked by completing modules
-- Daily Check-In: Log energy, mood, stress, capacity, and receive personalized daily snapshots
-- Dashboard: View personalized learning path, ALIVE profile, cycle insights, design/energetics, daily guidance
-- Profile Settings: Manage account, social links, background image, restart onboarding
-- Community: Connect with other members, share posts, direct messaging
-- Support: Get help with platform features
-- Onboarding: Complete diagnostic to get personalized pathway based on concerns, capacity, cycle, values, and goals
+      const systemPrompt = `You are LaurAI, the deeply integrated AI guide for The Aligned Woman Blueprint platform.
 
-Be warm, supportive, and concise. Keep responses under 150 words. If you don't know something specific, suggest they reach out to support.
+CRITICAL: You are NOT a generic chatbot. You are context-aware and state-aware.
+
+USER'S CURRENT STATE:
+- Name: ${contextData.userName}
+- Primary ALIVE Phase: ${contextData.primaryPhase}
+- Secondary ALIVE Phase: ${contextData.secondaryPhase}
+- Current Capacity: ${contextData.capacityScore}/10
+- Nervous System State: ${contextData.nervousSystemState}
+- Cycle Phase: ${contextData.cyclePhase}
+- Human Design Type: ${contextData.humanDesignType}
+- Astrology Sun Sign: ${contextData.astrologySign}
+- Recent Energy Level: ${contextData.recentEnergy}
+- Recent Stress Level: ${contextData.recentStress}
+
+TODAY'S ALIVE NARRATIVE:
+${contextData.aliveNarrative}
+
+YOUR ROLE:
+- Always reference their current state when answering
+- Never contradict their capacity, nervous system state, or biological limits
+- Act as a translation layer, not motivation
+- Explain why things feel the way they do based on their systems
+- Connect insights across astrology, Human Design, cycle, nervous system, and ALIVE phase
+- Safety before productivity
+
+PLATFORM FEATURES YOU CAN REFERENCE:
+- ALIVE Method phases: Awareness, Liberation, Intention, Vision & Embodiment
+- Classroom: Learning modules organized by phase
+- Tools: Journal, Check-In, Regulate, Cycle tracking, Sleep tracking
+- Dashboard: Integrated snapshot of all systems
+- Community: Connect with other members
 
 Previous conversation:
 ${conversationHistory}
 
-User's question: ${userMessage}`;
+User's question: ${userMessage}
+
+Respond in 150 words or less. Be warm, supportive, and grounded in their current reality.`;
 
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: systemPrompt,
