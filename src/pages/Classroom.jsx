@@ -56,12 +56,14 @@ export default function Classroom() {
         setCurrentUser(user);
 
         // Load courses and modules from Course Builder
-        const courses = await base44.entities.Course.filter({ isPublished: true });
+        const courses = await base44.entities.Course.list();
+        const publishedCourses = courses.filter(c => c.isPublished);
         const allModulesData = [];
         
-        for (const course of courses) {
+        for (const course of publishedCourses) {
           const modules = await base44.entities.CourseModule.filter({ courseId: course.id }, "order");
-          allModulesData.push(...modules.map(m => ({ ...m, courseTitle: course.title })));
+          const publishedModules = modules.filter(m => m.isPublished !== false);
+          allModulesData.push(...publishedModules.map(m => ({ ...m, courseTitle: course.title })));
         }
         
         setAllModules(allModulesData);
