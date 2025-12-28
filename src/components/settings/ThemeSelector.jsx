@@ -80,7 +80,10 @@ export default function ThemeSelector({ currentTheme, onThemeChange, onSave }) {
                   style={{ backgroundColor: theme.colors.tertiary }}
                 />
               </div>
-              <p className="text-xs font-medium text-gray-900 truncate">{theme.label}</p>
+              <p className="text-xs font-medium text-gray-900 truncate">
+                {theme.label}
+                {theme.isDefault && <span className="text-gray-400 ml-1">(default)</span>}
+              </p>
               {currentTheme === theme.id && (
                 <div className="absolute top-1 right-1">
                   <Check className="w-4 h-4 text-[#3C224F]" />
@@ -91,7 +94,13 @@ export default function ThemeSelector({ currentTheme, onThemeChange, onSave }) {
         </div>
         <button
           onClick={onSave}
-          className="w-full px-4 py-2 bg-[#3C224F] hover:bg-[#5B2E84] text-white rounded-lg text-sm font-medium transition-colors"
+          className="w-full px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors"
+          style={{ 
+            backgroundColor: selectedTheme.colors.primary,
+            opacity: 0.95
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.95'}
         >
           Save Theme
         </button>
