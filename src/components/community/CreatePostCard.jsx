@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Image, Video, Smile, Hash } from "lucide-react";
+import { motion } from "framer-motion";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { base44 } from "@/api/base44Client";
@@ -105,96 +106,99 @@ export default function CreatePostCard({ currentUser, onPostCreated }) {
   };
 
   return (
-    <Card className="shadow-sm border-2 border-gray-100">
-      <CardContent className="p-6">
-        <div className="flex gap-4">
-          <Avatar className="w-12 h-12 ring-2 ring-purple-500/20">
-            <AvatarImage src={currentUser?.profile_picture} />
-            <AvatarFallback className="bg-gradient-to-br from-[#6B1B3D] to-[#8B2E4D] text-white">
-              {currentUser?.full_name?.[0] || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 space-y-4">
-            <ReactQuill
-              value={content}
-              onChange={setContent}
-              placeholder={`What's on your mind, ${currentUser?.full_name?.split(' ')[0] || 'there'}?`}
-              className="bg-white rounded-lg"
-              modules={{
-                toolbar: [
-                  ["bold", "italic", "underline"],
-                  [{ list: "ordered" }, { list: "bullet" }],
-                  ["link"],
-                ],
-              }}
-            />
+    <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4">
+      <div className="flex gap-3">
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={currentUser?.profile_picture} />
+          <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white">
+            {currentUser?.full_name?.[0] || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 space-y-3">
+          <ReactQuill
+            value={content}
+            onChange={setContent}
+            placeholder={`What's on your mind, ${currentUser?.full_name?.split(' ')[0] || 'there'}?`}
+            className="bg-white/5 rounded-lg [&_.ql-editor]:text-white [&_.ql-editor]:min-h-[80px] [&_.ql-toolbar]:border-white/10 [&_.ql-container]:border-white/10"
+            modules={{
+              toolbar: [
+                ["bold", "italic"],
+                ["link"],
+              ],
+            }}
+          />
 
-            {/* Media Preview */}
-            {mediaUrls.length > 0 && (
-              <div className="grid grid-cols-4 gap-2">
-                {mediaUrls.map((url, idx) => (
-                  <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden">
-                    <img src={url} alt={`Upload ${idx + 1}`} className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => removeMedia(idx)}
-                      className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Hashtags Input */}
-            <Input
-              value={hashtags}
-              onChange={(e) => setHashtags(e.target.value)}
-              placeholder="Add hashtags (e.g., #wellness #growth)"
-              className="text-sm"
-            />
-
-            {/* Actions */}
-            <div className="flex items-center justify-between pt-3 border-t">
-              <div className="flex gap-2">
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*,video/*"
-                  capture="environment"
-                  multiple
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                  disabled={isUploading}
-                  onClick={() => document.getElementById('image-upload').click()}
-                  asChild={false}
+          {/* Media Preview */}
+          {mediaUrls.length > 0 && (
+            <div className="grid grid-cols-4 gap-2">
+              {mediaUrls.map((url, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="relative group aspect-square rounded-xl overflow-hidden"
                 >
-                  <Image className="w-4 h-4 mr-2" />
-                  {isUploading ? "Uploading..." : "Photo"}
-                </Button>
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                  <Hash className="w-4 h-4 mr-2" />
-                  Tag
-                </Button>
-              </div>
+                  <img src={url} alt={`Upload ${idx + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removeMedia(idx)}
+                    className="absolute top-1 right-1 bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ✕
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex gap-1">
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                type="button"
+                onClick={() => document.getElementById('image-upload').click()}
+                disabled={isUploading}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Image className="w-5 h-5 text-green-400" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                type="button"
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Hash className="w-5 h-5 text-purple-400" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                type="button"
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Smile className="w-5 h-5 text-yellow-400" />
+              </motion.button>
+            </div>
+
+            <motion.div whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={handlePost}
                 disabled={!content.trim() || isPosting}
-                className="bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] hover:from-[#4A1228] hover:to-[#6B1B3D] text-white font-medium px-6"
+                size="sm"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full px-6"
               >
                 {isPosting ? "Posting..." : "Post"}
               </Button>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

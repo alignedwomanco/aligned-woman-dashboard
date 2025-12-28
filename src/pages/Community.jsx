@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Search, TrendingUp, Award } from "lucide-react";
+import { Search, TrendingUp, Award, Plus, MessageSquare } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
 import CreatePostCard from "../components/community/CreatePostCard";
 import PostCard from "../components/community/PostCard";
 import CommunityLeaderboard from "../components/community/CommunityLeaderboard";
@@ -222,93 +224,206 @@ export default function Community() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-          {/* Main Feed */}
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-[#4A1228] mb-1">Community</h1>
-                <p className="text-gray-600">Connect, share, and grow together</p>
-              </div>
-              <Button 
-                variant="outline" 
-                className="gap-2"
-                onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-              >
-                <Award className="w-4 h-4" />
-                Leaderboard
-              </Button>
-            </div>
-
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search posts, people, hashtags..."
-                className="pl-10 h-12 bg-white border-2"
-              />
-            </div>
-
-            {/* Create Post */}
-            <CreatePostCard 
-              currentUser={currentUser} 
-              onPostCreated={(data) => createPostMutation.mutate(data)}
-            />
-
-            {/* Sort Tabs */}
-            <Tabs value={sortBy} onValueChange={setSortBy}>
-              <TabsList className="w-full grid grid-cols-2">
-                <TabsTrigger value="new" className="gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  New
-                </TabsTrigger>
-                <TabsTrigger value="top" className="gap-2">
-                  <Award className="w-4 h-4" />
-                  Top
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={sortBy} className="space-y-4 mt-6">
-                {filteredPosts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    currentUser={currentUser}
-                    author={getUserByEmail(post.created_by)}
-                    isLiked={hasLiked(post.id)}
-                    comments={getPostComments(post.id)}
-                    onLike={likePostMutation.mutate}
-                    onComment={commentMutation.mutate}
-                    onDelete={deletePostMutation.mutate}
-                    onShare={(post) => sharePostMutation.mutate(post)}
-                    getUserByEmail={getUserByEmail}
-                  />
-                ))}
-
-                {filteredPosts.length === 0 && (
-                  <Card>
-                    <CardContent className="p-12 text-center text-gray-500">
-                      <p className="text-lg">
-                        {searchQuery ? "No posts found matching your search" : "No posts yet. Be the first to share!"}
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <CommunityLeaderboard currentUser={currentUser} />
+    <div className="min-h-screen bg-black">
+      {/* Header Bar */}
+      <motion.div 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="sticky top-0 z-40 backdrop-blur-xl bg-black/80 border-b border-white/10"
+      >
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Community
+          </h1>
+          <div className="flex items-center gap-3">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2 }}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-4 py-1.5 rounded-full border border-purple-500/30"
+            >
+              <Award className="w-4 h-4 text-yellow-400" />
+              <span className="text-sm font-semibold text-white">
+                {currentUser?.total_community_points || 0} pts
+              </span>
+            </motion.div>
           </div>
         </div>
+      </motion.div>
+
+      <div className="max-w-2xl mx-auto pb-20">
+        {/* Stories Bar */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="px-4 py-4 border-b border-white/10"
+        >
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+            {users.slice(0, 8).map((user, idx) => (
+              <motion.div
+                key={user.email}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: idx * 0.05, type: "spring" }}
+                className="flex-shrink-0 text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-0.5 mb-1">
+                  <div className="w-full h-full rounded-full bg-black p-0.5">
+                    <Avatar className="w-full h-full">
+                      <AvatarImage src={user.profile_picture} />
+                      <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white text-xs">
+                        {user.full_name?.[0] || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </div>
+                <p className="text-xs text-white/70 truncate w-16">{user.full_name?.split(" ")[0]}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="px-4 py-3"
+        >
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search posts, people, #tags..."
+              className="pl-12 h-11 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-full focus:bg-white/10"
+            />
+          </div>
+        </motion.div>
+
+        {/* Sort Pills */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="px-4 py-2 flex gap-2"
+        >
+          <Button
+            onClick={() => setSortBy("new")}
+            variant="ghost"
+            size="sm"
+            className={`rounded-full ${
+              sortBy === "new"
+                ? "bg-white text-black hover:bg-white/90"
+                : "bg-white/5 text-white/70 hover:bg-white/10"
+            }`}
+          >
+            <TrendingUp className="w-4 h-4 mr-1" />
+            Latest
+          </Button>
+          <Button
+            onClick={() => setSortBy("top")}
+            variant="ghost"
+            size="sm"
+            className={`rounded-full ${
+              sortBy === "top"
+                ? "bg-white text-black hover:bg-white/90"
+                : "bg-white/5 text-white/70 hover:bg-white/10"
+            }`}
+          >
+            <Award className="w-4 h-4 mr-1" />
+            Popular
+          </Button>
+        </motion.div>
+
+        {/* Create Post Quick Action */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="px-4 py-3"
+        >
+          <CreatePostCard 
+            currentUser={currentUser} 
+            onPostCreated={(data) => createPostMutation.mutate(data)}
+          />
+        </motion.div>
+
+        {/* Feed */}
+        <div className="space-y-0 border-t border-white/5">
+          {filteredPosts.map((post, idx) => (
+            <motion.div
+              key={post.id}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05, type: "spring", stiffness: 100 }}
+            >
+              <PostCard
+                post={post}
+                currentUser={currentUser}
+                author={getUserByEmail(post.created_by)}
+                isLiked={hasLiked(post.id)}
+                comments={getPostComments(post.id)}
+                onLike={likePostMutation.mutate}
+                onComment={commentMutation.mutate}
+                onDelete={deletePostMutation.mutate}
+                onShare={(post) => sharePostMutation.mutate(post)}
+                getUserByEmail={getUserByEmail}
+              />
+            </motion.div>
+          ))}
+
+          {filteredPosts.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-12 text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4">
+                <Search className="w-10 h-10 text-white/40" />
+              </div>
+              <p className="text-white/60">
+                {searchQuery ? "No posts found" : "Be the first to share!"}
+              </p>
+            </motion.div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom Nav Bar */}
+      <motion.div
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-black/90 border-t border-white/10 z-40"
+      >
+        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-around">
+          <Button variant="ghost" size="icon" className="text-white">
+            <TrendingUp className="w-6 h-6" />
+          </Button>
+          <Button variant="ghost" size="icon" className="text-white">
+            <Search className="w-6 h-6" />
+          </Button>
+          <Button
+            size="icon"
+            className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 transition-transform"
+            onClick={() => document.querySelector('.ql-editor')?.focus()}
+          >
+            <Plus className="w-6 h-6" />
+          </Button>
+          <Button variant="ghost" size="icon" className="text-white">
+            <MessageSquare className="w-6 h-6" />
+          </Button>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => window.location.href = createPageUrl("ProfileSettings")}>
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={currentUser?.profile_picture} />
+              <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white text-xs">
+                {currentUser?.full_name?.[0]}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </div>
+      </motion.div>
     </div>
   );
 }

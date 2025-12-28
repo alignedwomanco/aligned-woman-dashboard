@@ -58,45 +58,51 @@ export default function PostCard({
   const topLevelComments = comments.filter(c => !c.parentCommentId);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-    >
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardContent className="p-6">
+    <div className="border-b border-white/5 bg-black">
+      <div className="p-4">
           {/* Post Header */}
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between mb-3">
             <div className="flex gap-3 flex-1">
-              <Avatar 
-                className="w-12 h-12 cursor-pointer ring-2 ring-purple-500/20" 
-                onClick={() => window.location.href = createPageUrl("Members") + `?user=${author?.email}`}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <AvatarImage src={author?.profile_picture} />
-                <AvatarFallback className="bg-gradient-to-br from-[#6B1B3D] to-[#8B2E4D] text-white">
-                  {author?.full_name?.[0] || post.created_by[0]}
-                </AvatarFallback>
-              </Avatar>
+                <Avatar 
+                  className="w-10 h-10 cursor-pointer ring-2 ring-purple-500/30" 
+                  onClick={() => window.location.href = createPageUrl("Members") + `?user=${author?.email}`}
+                >
+                  <AvatarImage src={author?.profile_picture} />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white">
+                    {author?.full_name?.[0] || post.created_by[0]}
+                  </AvatarFallback>
+                </Avatar>
+              </motion.div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p 
-                    className="font-semibold text-gray-900 hover:text-[#6B1B3D] cursor-pointer"
+                    className="font-semibold text-white hover:text-purple-400 cursor-pointer transition-colors"
                     onClick={() => window.location.href = createPageUrl("Members") + `?user=${author?.email}`}
                   >
                     {author?.full_name || "Anonymous User"}
                   </p>
                   {author?.level && author.level > 1 && (
-                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs">
-                      Level {author.level}
-                    </Badge>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring" }}
+                    >
+                      <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold">
+                        ⚡ L{author.level}
+                      </Badge>
+                    </motion.div>
                   )}
                   {author?.role && ["admin", "expert", "moderator"].includes(author.role) && (
-                    <Badge className="bg-[#6B1B3D] text-white text-xs">
-                      {author.role}
+                    <Badge className="bg-blue-500 text-white text-xs">
+                      ✓ {author.role}
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                <div className="flex items-center gap-2 text-xs text-white/50 mt-0.5">
                   <span>{moment(post.created_date).fromNow()}</span>
                   {post.reshared_from_post_id && (
                     <span className="flex items-center gap-1">
@@ -109,22 +115,22 @@ export default function PostCard({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/5">
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-zinc-900 border-white/10">
                 {(isAdmin || isAuthor) && (
-                  <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-red-600">
+                  <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-red-400">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem>
+                <DropdownMenuItem className="text-white">
                   <Bookmark className="w-4 h-4 mr-2" />
                   Save Post
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem className="text-white">
                   <Flag className="w-4 h-4 mr-2" />
                   Report
                 </DropdownMenuItem>
@@ -133,9 +139,9 @@ export default function PostCard({
           </div>
 
           {/* Post Content */}
-          <div className="mb-4">
+          <div className="mb-3">
             <div
-              className="prose prose-sm max-w-none mb-3"
+              className="prose prose-sm max-w-none mb-3 text-white [&_p]:text-white [&_strong]:text-white [&_em]:text-white"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
             
@@ -168,65 +174,70 @@ export default function PostCard({
             {post.hashtags && post.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {post.hashtags.map((tag, idx) => (
-                  <span key={idx} className="text-sm text-[#6B1B3D] hover:underline cursor-pointer">
+                  <motion.span
+                    key={idx}
+                    whileHover={{ scale: 1.05 }}
+                    className="text-sm text-purple-400 hover:text-pink-400 cursor-pointer transition-colors"
+                  >
                     #{tag}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Engagement Stats */}
-          <div className="flex items-center gap-4 pb-3 mb-3 border-b text-sm text-gray-600">
-            {post.likes > 0 && (
-              <span className="flex items-center gap-1">
-                <Heart className="w-4 h-4 fill-[#6B1B3D] text-[#6B1B3D]" />
-                {post.likes}
-              </span>
-            )}
-            {post.commentCount > 0 && (
-              <span>{post.commentCount} {post.commentCount === 1 ? 'comment' : 'comments'}</span>
-            )}
-            {post.shareCount > 0 && (
-              <span>{post.shareCount} {post.shareCount === 1 ? 'share' : 'shares'}</span>
-            )}
-          </div>
-
           {/* Action Buttons */}
-          <div className="grid grid-cols-3 gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onLike(post.id)}
-              className={`justify-center ${
-                isLiked 
-                  ? "text-[#6B1B3D] hover:text-[#6B1B3D]/80" 
-                  : "text-gray-600 hover:text-[#6B1B3D]"
-              }`}
-            >
-              <Heart className={`w-4 h-4 mr-2 ${isLiked ? "fill-current" : ""}`} />
-              Like
-            </Button>
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-4">
+              <motion.button
+                whileTap={{ scale: 0.8 }}
+                onClick={() => onLike(post.id)}
+                className="flex items-center gap-2 group"
+              >
+                <motion.div
+                  animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Heart className={`w-6 h-6 transition-all ${
+                    isLiked 
+                      ? "fill-pink-500 text-pink-500" 
+                      : "text-white/70 group-hover:text-pink-500"
+                  }`} />
+                </motion.div>
+                {post.likes > 0 && (
+                  <span className="text-sm text-white/70">{post.likes}</span>
+                )}
+              </motion.button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowComments(!showComments)}
-              className="justify-center text-gray-600 hover:text-[#6B1B3D]"
-            >
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Comment
-            </Button>
+              <motion.button
+                whileTap={{ scale: 0.8 }}
+                onClick={() => setShowComments(!showComments)}
+                className="flex items-center gap-2 group"
+              >
+                <MessageSquare className="w-6 h-6 text-white/70 group-hover:text-blue-400 transition-colors" />
+                {post.commentCount > 0 && (
+                  <span className="text-sm text-white/70">{post.commentCount}</span>
+                )}
+              </motion.button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onShare(post)}
-              className="justify-center text-gray-600 hover:text-[#6B1B3D]"
+              <motion.button
+                whileTap={{ scale: 0.8 }}
+                onClick={() => onShare(post)}
+                className="flex items-center gap-2 group"
+              >
+                <Share2 className="w-6 h-6 text-white/70 group-hover:text-green-400 transition-colors" />
+                {post.shareCount > 0 && (
+                  <span className="text-sm text-white/70">{post.shareCount}</span>
+                )}
+              </motion.button>
+            </div>
+
+            <motion.button
+              whileTap={{ scale: 0.8 }}
+              className="text-white/70 hover:text-yellow-400 transition-colors"
             >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
-            </Button>
+              <Bookmark className="w-5 h-5" />
+            </motion.button>
           </div>
 
           {/* Comments Section */}
@@ -242,7 +253,7 @@ export default function PostCard({
                 <div className="flex gap-3">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={currentUser?.profile_picture} />
-                    <AvatarFallback className="bg-[#6B1B3D] text-white text-xs">
+                    <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white text-xs">
                       {currentUser?.full_name?.[0] || "U"}
                     </AvatarFallback>
                   </Avatar>
@@ -250,8 +261,8 @@ export default function PostCard({
                     <Textarea
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
-                      placeholder={replyingTo ? "Write a reply..." : "Write a comment..."}
-                      className="min-h-[60px] resize-none"
+                      placeholder={replyingTo ? "Write a reply..." : "Add a comment..."}
+                      className="min-h-[60px] resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -259,14 +270,16 @@ export default function PostCard({
                         }
                       }}
                     />
-                    <Button
-                      onClick={handleComment}
-                      disabled={!commentText.trim()}
-                      size="icon"
-                      className="bg-[#6B1B3D] hover:bg-[#4A1228] flex-shrink-0"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
+                    <motion.div whileTap={{ scale: 0.9 }}>
+                      <Button
+                        onClick={handleComment}
+                        disabled={!commentText.trim()}
+                        size="icon"
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 flex-shrink-0"
+                      >
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </motion.div>
                   </div>
                 </div>
 
@@ -341,8 +354,7 @@ export default function PostCard({
               </motion.div>
             )}
           </AnimatePresence>
-        </CardContent>
-      </Card>
-    </motion.div>
+      </div>
+    </div>
   );
 }
