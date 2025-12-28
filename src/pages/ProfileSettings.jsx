@@ -540,7 +540,8 @@ If you did not request this change, please ignore this email.
                             </div>
                             <Button
                               onClick={handleEmailChange}
-                              className="w-full bg-[#3B224E] hover:bg-[#3B224E]"
+                              className="w-full text-white"
+                              style={{ backgroundColor: 'var(--theme-primary, #3C224F)' }}
                             >
                               Send Verification Email
                             </Button>
@@ -659,7 +660,13 @@ If you did not request this change, please ignore this email.
                 <div className="flex gap-3">
                   <Button
                     onClick={handleProfileUpdate}
-                    className="bg-[#3B224E] hover:bg-[#3B224E]"
+                    className="text-white"
+                    style={{ 
+                      backgroundColor: 'var(--theme-primary, #3C224F)',
+                      opacity: 0.95
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.95'}
                   >
                     <Save className="w-4 h-4 mr-2" />
                     Save Changes
@@ -667,7 +674,11 @@ If you did not request this change, please ignore this email.
                   <Button
                     onClick={() => restartOnboardingMutation.mutate()}
                     variant="outline"
-                    className="border-[#3B224E] text-[#3B224E] hover:bg-pink-50"
+                    className="hover:bg-pink-50"
+                    style={{ 
+                      borderColor: 'var(--theme-primary, #3C224F)',
+                      color: 'var(--theme-primary, #3C224F)'
+                    }}
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Restart Onboarding
@@ -896,6 +907,7 @@ If you did not request this change, please ignore this email.
               onBackgroundChange={(backgroundUrl) => {
                 setCurrentUser({ ...currentUser, background_image: backgroundUrl });
               }}
+              currentTheme={selectedTheme}
             />
           </TabsContent>
 
@@ -928,7 +940,8 @@ If you did not request this change, please ignore this email.
             <div className="flex justify-end">
               <Button
                 onClick={() => setValidationError({ show: false, title: "", message: "" })}
-                className="bg-[#3B224E] hover:bg-[#3B224E]"
+                className="text-white"
+                style={{ backgroundColor: 'var(--theme-primary, #3C224F)' }}
               >
                 Got it
               </Button>
