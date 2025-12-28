@@ -49,14 +49,14 @@ export default function ProfileSettings() {
 
   const applyTheme = (themeId) => {
     const themeOptions = [
-      { id: "aligned", colors: { primary: "#3B224E", secondary: "#5B2D83" } },
-      { id: "rose", colors: { primary: "#E11D48", secondary: "#F43F5E" } },
-      { id: "lavender", colors: { primary: "#9333EA", secondary: "#C084FC" } },
-      { id: "ocean", colors: { primary: "#0369A1", secondary: "#0EA5E9" } },
-      { id: "forest", colors: { primary: "#065F46", secondary: "#10B981" } },
-      { id: "sunset", colors: { primary: "#DC2626", secondary: "#F97316" } },
-      { id: "midnight", colors: { primary: "#1E293B", secondary: "#475569" } },
-      { id: "blush", colors: { primary: "#BE185D", secondary: "#EC4899" } },
+      { id: "aligned", colors: { primary: "#3C224F", secondary: "#5B2E84", tertiary: "#4B397F" } },
+      { id: "rose", colors: { primary: "#E11D48", secondary: "#F43F5E", tertiary: "#BE123C" } },
+      { id: "lavender", colors: { primary: "#9333EA", secondary: "#C084FC", tertiary: "#7C3AED" } },
+      { id: "ocean", colors: { primary: "#0369A1", secondary: "#0EA5E9", tertiary: "#0284C7" } },
+      { id: "forest", colors: { primary: "#065F46", secondary: "#10B981", tertiary: "#047857" } },
+      { id: "sunset", colors: { primary: "#DC2626", secondary: "#F97316", tertiary: "#EA580C" } },
+      { id: "midnight", colors: { primary: "#1E293B", secondary: "#475569", tertiary: "#334155" } },
+      { id: "blush", colors: { primary: "#BE185D", secondary: "#EC4899", tertiary: "#DB2777" } },
     ];
     
     const theme = themeOptions.find(t => t.id === themeId) || themeOptions[0];
@@ -64,6 +64,7 @@ export default function ProfileSettings() {
     // Apply to CSS variables
     document.documentElement.style.setProperty('--theme-primary', theme.colors.primary);
     document.documentElement.style.setProperty('--theme-secondary', theme.colors.secondary);
+    document.documentElement.style.setProperty('--theme-tertiary', theme.colors.tertiary);
     
     // Apply to sidebar
     const sidebar = document.querySelector('aside');
@@ -83,14 +84,14 @@ export default function ProfileSettings() {
     applyTheme(themeId);
     
     const themeOptions = [
-      { id: "aligned", colors: { primary: "#3B224E", secondary: "#5B2D83" } },
-      { id: "rose", colors: { primary: "#E11D48", secondary: "#F43F5E" } },
-      { id: "lavender", colors: { primary: "#9333EA", secondary: "#C084FC" } },
-      { id: "ocean", colors: { primary: "#0369A1", secondary: "#0EA5E9" } },
-      { id: "forest", colors: { primary: "#065F46", secondary: "#10B981" } },
-      { id: "sunset", colors: { primary: "#DC2626", secondary: "#F97316" } },
-      { id: "midnight", colors: { primary: "#1E293B", secondary: "#475569" } },
-      { id: "blush", colors: { primary: "#BE185D", secondary: "#EC4899" } },
+      { id: "aligned", colors: { primary: "#3C224F", secondary: "#5B2E84", tertiary: "#4B397F" } },
+      { id: "rose", colors: { primary: "#E11D48", secondary: "#F43F5E", tertiary: "#BE123C" } },
+      { id: "lavender", colors: { primary: "#9333EA", secondary: "#C084FC", tertiary: "#7C3AED" } },
+      { id: "ocean", colors: { primary: "#0369A1", secondary: "#0EA5E9", tertiary: "#0284C7" } },
+      { id: "forest", colors: { primary: "#065F46", secondary: "#10B981", tertiary: "#047857" } },
+      { id: "sunset", colors: { primary: "#DC2626", secondary: "#F97316", tertiary: "#EA580C" } },
+      { id: "midnight", colors: { primary: "#1E293B", secondary: "#475569", tertiary: "#334155" } },
+      { id: "blush", colors: { primary: "#BE185D", secondary: "#EC4899", tertiary: "#DB2777" } },
     ];
     const theme = themeOptions.find(t => t.id === themeId) || themeOptions[0];
     
@@ -109,7 +110,7 @@ export default function ProfileSettings() {
     // Update all gradient backgrounds on dashboard
     const gradientCards = document.querySelectorAll('.bg-gradient-to-br, .bg-gradient-to-r');
     gradientCards.forEach(card => {
-      if (card.classList.contains('from-[#3B224E]') || card.style.background.includes('#3B224E')) {
+      if (card.classList.contains('from-[#3C224F]') || card.style.background.includes('#3C224F')) {
         card.style.background = `linear-gradient(to bottom right, ${theme.colors.primary}, ${theme.colors.secondary})`;
       }
     });

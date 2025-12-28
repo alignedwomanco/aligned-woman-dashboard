@@ -85,8 +85,9 @@ export default function Layout({ children, currentPageName }) {
       <div className="min-h-screen bg-pink-50/30">
         <style>{`
           :root {
-            --burgundy: #3B224E;
+            --burgundy: #3C224F;
             --burgundy-deep: #1F0B2E;
+            --tertiary: #4B397F;
             --rose-accent: #C67793;
             --rose-accent-2: #C4687D;
             --rose-dark: #8B2E4D;
@@ -282,7 +283,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Left Sidebar */}
-      <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[#3B224E] text-white flex flex-col z-50">
+      <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[#3C224F] text-white flex flex-col z-50">
         {/* Logo */}
         <div className="p-6 border-b border-white/10">
           <Link to={createPageUrl("Home")} className="flex items-center gap-3">
