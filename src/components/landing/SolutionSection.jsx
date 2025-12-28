@@ -51,7 +51,7 @@ export default function SolutionSection() {
           <h2 className="text-4xl sm:text-5xl font-extrabold text-[#3D2250] tracking-tight mb-6">
             Not Another Course.
             <br />
-            <span className="text-[#C67793]">An Intelligent Learning Environment.</span>
+            <span style={{ color: '#5B2E84' }}>An Intelligent Learning Environment.</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             A dynamic, adaptive learning system that prescribes what you need next based on where you are right now.
@@ -97,16 +97,16 @@ export default function SolutionSection() {
           className="bg-gradient-to-br from-[#3D2250] to-[#5B2E84] rounded-3xl p-10 lg:p-14 text-center"
         >
           <div className="flex items-center justify-center gap-4 mb-6">
-            <BookOpen className="w-8 h-8 text-[#C67793]" />
+            <BookOpen className="w-8 h-8" style={{ color: '#5B2E84' }} />
             <Sparkles className="w-6 h-6 text-white/30" />
-            <UserCheck className="w-8 h-8 text-[#C67793]" />
+            <UserCheck className="w-8 h-8" style={{ color: '#5B2E84' }} />
           </div>
           <p className="text-2xl lg:text-3xl text-white font-medium leading-relaxed max-w-3xl mx-auto">
             Education is taught by real experts.
             <br />
             Integration is supported by AI.
             <br />
-            <span className="text-[#C67793]">Authority always remains with you.</span>
+            <span style={{ color: '#5B2E84' }}>Authority always remains with you.</span>
           </p>
         </motion.div>
       </div>

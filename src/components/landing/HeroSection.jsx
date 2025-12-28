@@ -32,7 +32,7 @@ export default function HeroSection() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2"
           >
-            <Sparkles className="w-4 h-4 text-rose-300" />
+            <Sparkles className="w-4 h-4" style={{ color: '#5B2E84' }} />
             <span className="text-white/90 text-sm font-medium tracking-wide">Powered by Adaptive Pathway OS</span>
           </motion.div>
 
@@ -45,7 +45,7 @@ export default function HeroSection() {
           >
             THE ALIGNED WOMAN
             <br />
-            <span className="text-rose-300">BLUEPRINT™</span>
+            <span style={{ color: '#5B2E84' }}>BLUEPRINT™</span>
           </motion.h1>
 
           {/* Subheadline */}
@@ -57,7 +57,7 @@ export default function HeroSection() {
           >
             Your personal operating system for embodied success
             <br />
-            <span className="text-rose-300">Powered by the ALIVE Method™</span>
+            <span style={{ color: '#5B2E84' }}>Powered by the ALIVE Method™</span>
           </motion.p>
 
           {/* Body Copy */}
