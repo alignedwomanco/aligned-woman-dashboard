@@ -716,13 +716,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Bottom Quick Actions */}
+        {/* Tools Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0 }}
           className="mt-8"
         >
+          <h2 className="text-2xl font-bold text-[#2F1B3E] mb-6">Tools</h2>
           <div className="grid grid-cols-4 gap-4">
             <Link to={createPageUrl("Journal")} className="block">
               <Card className="bg-white/80 backdrop-blur-sm border-purple-200 hover:shadow-lg transition-all cursor-pointer h-full">
