@@ -105,11 +105,11 @@ export default function Layout({ children, currentPageName }) {
           .bg-burgundy { background-color: var(--burgundy); }
         `}</style>
 
-        <div className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-6">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm px-4 sm:px-6 lg:px-8 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <Link to={createPageUrl("Home")}>
               <img
-                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
+                src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                 alt="The Aligned Woman"
                 className="h-12 object-contain"
               />
@@ -117,8 +117,8 @@ export default function Layout({ children, currentPageName }) {
 
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
