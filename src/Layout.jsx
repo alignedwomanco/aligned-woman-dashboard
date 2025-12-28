@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
 import { Bell, MessageCircle, LogOut, User, Settings, ChevronDown } from "lucide-react";
@@ -44,6 +44,7 @@ export default function Layout({ children, currentPageName }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [siteSettings, setSiteSettings] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login";
 
@@ -53,7 +54,12 @@ export default function Layout({ children, currentPageName }) {
       setSiteSettings(settings[0] || null);
     };
     loadSettings();
-  }, []);
+
+    // Redirect root to Home page
+    if (location.pathname === "/" || location.pathname === "") {
+      navigate(createPageUrl("Home"), { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -111,7 +117,13 @@ export default function Layout({ children, currentPageName }) {
               <img
                 src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                 alt="The Aligned Woman"
-                className="h-12 object-contain"
+                className="object-contain"
+                style={{ 
+                  height: siteSettings?.logo_size === "small" ? "32px" : 
+                         siteSettings?.logo_size === "medium" ? "48px" : 
+                         siteSettings?.logo_size === "large" ? "64px" : 
+                         siteSettings?.logo_size === "custom" ? `${siteSettings.custom_logo_height}px` : "48px"
+                }}
               />
             </Link>
 
@@ -275,7 +287,13 @@ export default function Layout({ children, currentPageName }) {
             <img
               src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
               alt="The Aligned Woman"
-              className="h-10 object-contain"
+              className="object-contain"
+              style={{ 
+                height: siteSettings?.logo_size === "small" ? "28px" : 
+                       siteSettings?.logo_size === "medium" ? "40px" : 
+                       siteSettings?.logo_size === "large" ? "56px" : 
+                       siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.83)}px` : "40px"
+              }}
             />
           </Link>
         </div>

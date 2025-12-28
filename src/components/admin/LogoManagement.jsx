@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Upload, Save } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from "@/components/ui/slider";
 
 export default function LogoManagement() {
   const [isUploading, setIsUploading] = useState({});
@@ -23,6 +25,8 @@ export default function LogoManagement() {
     light_logo: siteSettings?.light_logo || "",
     dark_logo: siteSettings?.dark_logo || "",
     light_favicon: siteSettings?.light_favicon || "",
+    logo_size: siteSettings?.logo_size || "medium",
+    custom_logo_height: siteSettings?.custom_logo_height || 48,
   });
 
   React.useEffect(() => {
@@ -31,6 +35,8 @@ export default function LogoManagement() {
         light_logo: siteSettings.light_logo || "",
         dark_logo: siteSettings.dark_logo || "",
         light_favicon: siteSettings.light_favicon || "",
+        logo_size: siteSettings.logo_size || "medium",
+        custom_logo_height: siteSettings.custom_logo_height || 48,
       });
     }
   }, [siteSettings]);
@@ -115,6 +121,47 @@ export default function LogoManagement() {
             </div>
           </div>
         ))}
+
+        {/* Logo Size */}
+        <div className="space-y-4 pt-4 border-t">
+          <div>
+            <Label>Logo Size</Label>
+            <p className="text-xs text-gray-500 mb-3">Choose the display size for logos in the navigation</p>
+          </div>
+
+          <RadioGroup value={logos.logo_size} onValueChange={(value) => setLogos({ ...logos, logo_size: value })}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="small" id="small" />
+              <Label htmlFor="small" className="cursor-pointer">Small (32px)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="medium" id="medium" />
+              <Label htmlFor="medium" className="cursor-pointer">Medium (48px)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="large" id="large" />
+              <Label htmlFor="large" className="cursor-pointer">Large (64px)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="custom" id="custom" />
+              <Label htmlFor="custom" className="cursor-pointer">Custom</Label>
+            </div>
+          </RadioGroup>
+
+          {logos.logo_size === "custom" && (
+            <div className="ml-6 space-y-2">
+              <Label>Custom Height (px): {logos.custom_logo_height}</Label>
+              <Slider
+                value={[logos.custom_logo_height]}
+                onValueChange={(value) => setLogos({ ...logos, custom_logo_height: value[0] })}
+                min={24}
+                max={128}
+                step={4}
+                className="w-full"
+              />
+            </div>
+          )}
+        </div>
 
         <Button
           onClick={() => saveMutation.mutate(logos)}
