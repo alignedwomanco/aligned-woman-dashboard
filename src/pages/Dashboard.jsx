@@ -782,34 +782,41 @@ RESPONSE REQUIREMENTS:
           {/* Right Sidebar */}
           <div className="lg:col-span-3 space-y-4">
             {/* Community */}
-            <Card className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl">
-              <CardHeader className="pb-4 pt-6">
-                <CardTitle className="text-sm font-medium text-gray-600 tracking-wide uppercase flex items-center gap-2">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
+            <Card className="bg-gradient-to-br from-purple-50/60 via-pink-50/40 to-transparent backdrop-blur-xl border-0 shadow-[0_8px_30px_rgba(147,51,234,0.08)] rounded-3xl overflow-hidden">
+              <CardHeader className="pb-3 pt-7">
+                <div className="flex items-center gap-2 mb-2">
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400/20 to-pink-400/20 flex items-center justify-center"
+                  >
+                    <svg className="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </motion.div>
+                </div>
+                <CardTitle className="text-xl font-light text-gray-900 tracking-tight mb-2">
                   Community
                 </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0 pb-6">
-                <p className="text-sm text-gray-600 mb-5 font-light leading-relaxed">
+                <p className="text-sm text-gray-600 font-light leading-relaxed">
                   You don't have to navigate this alone
                 </p>
-
-                <div className="space-y-2 mb-6">
-                  <div className="bg-gradient-to-br from-purple-50/50 to-transparent rounded-xl px-3 py-2 border border-purple-100/50">
-                    <p className="text-xs text-gray-700 font-light">Navigating a breakup</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-pink-50/50 to-transparent rounded-xl px-3 py-2 border border-pink-100/50">
-                    <p className="text-xs text-gray-700 font-light">Building without burnout</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-indigo-50/50 to-transparent rounded-xl px-3 py-2 border border-indigo-100/50">
-                    <p className="text-xs text-gray-700 font-light">Cycle-aware work & life</p>
-                  </div>
+              </CardHeader>
+              <CardContent className="pt-2 pb-7 px-6">
+                <div className="flex flex-wrap gap-2 mb-6">
+                  <button className="group bg-gradient-to-br from-purple-100/80 via-purple-50/60 to-transparent backdrop-blur-sm rounded-full px-4 py-2.5 border border-purple-200/40 hover:border-purple-300/60 transition-all duration-300 hover:shadow-md hover:scale-105">
+                    <p className="text-xs text-purple-700 font-medium">Navigating a breakup</p>
+                  </button>
+                  <button className="group bg-gradient-to-br from-pink-100/80 via-pink-50/60 to-transparent backdrop-blur-sm rounded-full px-4 py-2.5 border border-pink-200/40 hover:border-pink-300/60 transition-all duration-300 hover:shadow-md hover:scale-105">
+                    <p className="text-xs text-pink-700 font-medium">Building without burnout</p>
+                  </button>
+                  <button className="group bg-gradient-to-br from-indigo-100/80 via-indigo-50/60 to-transparent backdrop-blur-sm rounded-full px-4 py-2.5 border border-indigo-200/40 hover:border-indigo-300/60 transition-all duration-300 hover:shadow-md hover:scale-105">
+                    <p className="text-xs text-indigo-700 font-medium">Cycle-aware work & life</p>
+                  </button>
                 </div>
 
                 <Link to={createPageUrl("Community")}>
-                  <Button className="w-full bg-gradient-to-r from-purple-400/90 to-indigo-400/90 hover:from-purple-400 hover:to-indigo-400 text-white text-sm h-10 rounded-full font-light shadow-sm">
+                  <Button className="w-full bg-gradient-to-r from-purple-400/90 via-pink-400/90 to-rose-400/90 hover:from-purple-500 hover:via-pink-500 hover:to-rose-500 text-white text-sm h-11 rounded-full font-light shadow-[0_4px_20px_rgba(147,51,234,0.25)] hover:shadow-[0_6px_30px_rgba(147,51,234,0.35)] transition-all duration-300">
                     Find your people
                   </Button>
                 </Link>
