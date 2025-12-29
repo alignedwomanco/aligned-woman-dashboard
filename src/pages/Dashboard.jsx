@@ -256,45 +256,43 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12" style={{ backgroundColor: '#F3E8FF' }}>
       <div className="max-w-[1600px] mx-auto px-8 py-8">
-
-
-        {/* Timeframe Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6"
-        >
-          <Tabs value={snapshotView} onValueChange={setSnapshotView} className="w-auto inline-block">
-            <TabsList className="bg-white/80 backdrop-blur-sm border border-purple-200">
-              <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="data-[state=active]:bg-[#3B224E] data-[state=active]:text-white">
-                Daily
-              </TabsTrigger>
-              <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY} className="data-[state=active]:bg-[#3B224E] data-[state=active]:text-white">
-                Weekly
-              </TabsTrigger>
-              <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY} className="data-[state=active]:bg-[#3B224E] data-[state=active]:text-white">
-                Monthly
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </motion.div>
+        {/* Timeframe Toggle - Moved Below */}
 
         {/* Main Grid Layout */}
         <div className="grid lg:grid-cols-12 gap-6">
           {/* Left Column: Your Inner Systems + Life Domains */}
           <div className="lg:col-span-3 space-y-6">
+            {/* Timeframe Toggle Above Left Column */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Tabs value={snapshotView} onValueChange={setSnapshotView} className="w-full">
+                <TabsList className="w-full bg-white/90 backdrop-blur-sm border-0 h-11 p-1 rounded-xl">
+                  <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="flex-1 data-[state=active]:bg-[#3B224E] data-[state=active]:text-white rounded-lg font-medium">
+                    Daily
+                  </TabsTrigger>
+                  <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY} className="flex-1 data-[state=active]:bg-[#3B224E] data-[state=active]:text-white rounded-lg font-medium">
+                    Weekly
+                  </TabsTrigger>
+                  <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY} className="flex-1 data-[state=active]:bg-[#3B224E] data-[state=active]:text-white rounded-lg font-medium">
+                    Monthly
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </motion.div>
             {/* Your Inner Systems */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-purple-900">Your Inner Systems</CardTitle>
+                  <CardTitle className="text-base font-semibold text-gray-900">Your Inner Systems</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* My Nervous System */}
@@ -392,10 +390,12 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-purple-900 flex items-center gap-2">
-                    <Target className="w-5 h-5" />
+                  <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <div className="w-6 h-6 bg-pink-500 rounded-lg flex items-center justify-center">
+                      <Target className="w-4 h-4 text-white" />
+                    </div>
                     Your Life Domains
                   </CardTitle>
                 </CardHeader>
@@ -431,9 +431,9 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <Card className="bg-gradient-to-br from-[#3B224E] to-[#4A2B5E] text-white border-0 overflow-hidden">
+              <Card className="bg-gradient-to-br from-[#2D1B3D] to-[#4A2B5E] text-white border-0 overflow-hidden rounded-2xl shadow-xl">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-6 text-center">Your Daily ALIVE Snapshot</h2>
+                  <h2 className="text-2xl font-bold mb-8 text-center">Your Daily ALIVE Snapshot</h2>
                   
                   {/* System Icons */}
                   <div className="flex justify-center gap-4 mb-8">
@@ -486,20 +486,20 @@ export default function Dashboard() {
                   </div>
 
                   {/* Ask LaurAI */}
-                  <div className="bg-white/10 rounded-xl p-4 flex items-center gap-3">
+                  <div className="bg-pink-100 rounded-xl p-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center flex-shrink-0">
                       <Sparkles className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium mb-1">Ask LaurAI about today</p>
+                      <p className="text-sm font-semibold text-gray-900 mb-2">Ask LaurAI about today</p>
                       <div className="flex gap-2 flex-wrap">
-                        <Badge className="bg-white/20 text-white text-xs border-0">How should I work today?</Badge>
-                        <Badge className="bg-white/20 text-white text-xs border-0">Why does this feel harder?</Badge>
-                        <Badge className="bg-white/20 text-white text-xs border-0">What should I focus on?</Badge>
+                        <Badge className="bg-white text-gray-700 text-xs border-0 shadow-sm">How should I work today?</Badge>
+                        <Badge className="bg-white text-gray-700 text-xs border-0 shadow-sm">Why does this feel harder than usual?</Badge>
+                        <Badge className="bg-white text-gray-700 text-xs border-0 shadow-sm">What should I focus on this...</Badge>
                       </div>
                     </div>
-                    <Button size="sm" className="bg-pink-500 hover:bg-pink-600 text-white">
-                      <Heart className="w-4 h-4" />
+                    <Button size="sm" className="bg-pink-500 hover:bg-pink-600 text-white rounded-full h-10 w-10 p-0 flex items-center justify-center">
+                      <Heart className="w-5 h-5" />
                     </Button>
                   </div>
                 </CardContent>
@@ -512,9 +512,9 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <Card className="bg-gradient-to-br from-[#3B224E] to-[#4A2B5E] text-white border-0">
+              <Card className="bg-gradient-to-br from-[#2D1B3D] to-[#4A2B5E] text-white border-0 rounded-2xl shadow-xl">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
+                  <CardTitle className="flex items-center gap-2 text-white text-lg">
                     <Sparkles className="w-5 h-5" />
                     Recommended For You Right Now
                   </CardTitle>
@@ -577,10 +577,10 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
             >
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-purple-900 flex items-center gap-2">
-                    <Activity className="w-5 h-5" />
+                  <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-purple-600" />
                     Cycle & Capacity
                   </CardTitle>
                 </CardHeader>
@@ -603,10 +603,10 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-purple-900 flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
+                  <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-purple-600" />
                     Recent Activity
                   </CardTitle>
                 </CardHeader>
@@ -629,9 +629,9 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-purple-900">Body Patterns</CardTitle>
+                  <CardTitle className="text-base font-semibold text-gray-900">Body Patterns</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="mb-4">
@@ -673,10 +673,10 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.9 }}
             >
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-purple-900">Your Stress & Energy Patterns</CardTitle>
+                    <CardTitle className="text-base font-semibold text-gray-900">Your Stress & Energy Patterns</CardTitle>
                     <div className="flex gap-1">
                       <Button size="icon" variant="ghost" className="h-6 w-6">
                         <ChevronLeft className="w-4 h-4" />
@@ -744,10 +744,35 @@ export default function Dashboard() {
           transition={{ delay: 1.0 }}
           className="mt-8"
         >
-          <h2 className="text-2xl font-bold text-[#3B224E] mb-6">Tools</h2>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <Edit3 className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-medium">Reflect</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
+                <Heart className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-medium">Regulate</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                <Activity className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-medium">Cycle</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                <Moon className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-medium">Sleep</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-4 hidden">
             <Link to={createPageUrl("Journal")} className="block">
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200 hover:shadow-lg transition-all cursor-pointer h-full">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer h-full">
                 <CardContent className="p-6 flex flex-col items-center justify-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                     <Edit3 className="w-6 h-6 text-white" />
@@ -760,7 +785,7 @@ export default function Dashboard() {
               </Card>
             </Link>
             <Link to={createPageUrl("CheckIn")} className="block">
-              <Card className="bg-white/80 backdrop-blur-sm border-purple-200 hover:shadow-lg transition-all cursor-pointer h-full">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer h-full">
                 <CardContent className="p-6 flex flex-col items-center justify-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
                     <Heart className="w-6 h-6 text-white" />
@@ -772,7 +797,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </Link>
-            <Card className="bg-white/80 backdrop-blur-sm border-purple-200 hover:shadow-lg transition-all cursor-pointer h-full">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer h-full">
               <CardContent className="p-6 flex flex-col items-center justify-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
                   <Activity className="w-6 h-6 text-white" />
@@ -783,7 +808,7 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-white/80 backdrop-blur-sm border-purple-200 hover:shadow-lg transition-all cursor-pointer h-full">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer h-full">
               <CardContent className="p-6 flex flex-col items-center justify-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
                   <Moon className="w-6 h-6 text-white" />
