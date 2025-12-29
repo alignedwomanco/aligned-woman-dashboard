@@ -41,6 +41,8 @@ export default function Dashboard() {
   const [lauraiQuestion, setLauraiQuestion] = useState("");
   const [lauraiResponse, setLauraiResponse] = useState("");
   const [isLauraiThinking, setIsLauraiThinking] = useState(false);
+  const [selectedFocus, setSelectedFocus] = useState("General");
+  const [showFullInsight, setShowFullInsight] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -258,6 +260,53 @@ NO TWO SNAPSHOTS SHOULD BE IDENTICAL. Reference today's date, energy patterns, a
     }
   }, [diagnosticSession, currentUser, snapshotView]);
 
+  // Get focus-specific LaurAI prompts
+  const getFocusPrompts = () => {
+    const prompts = {
+      General: [
+        "How should I work today?",
+        "Why does this feel harder than usual?",
+        "What should I focus on this week?"
+      ],
+      Relationships: [
+        "What should I be mindful of in connection today?",
+        "Where might I be over-accommodating?",
+        "How can I honor my needs in relationships?"
+      ],
+      Business: [
+        "What's my work capacity today?",
+        "Should I push forward or pause?",
+        "What's the best way to approach meetings today?"
+      ],
+      Money: [
+        "How should I think about investments today?",
+        "What financial decisions can I make now?",
+        "Where is scarcity showing up?"
+      ],
+      Mindset: [
+        "What belief is blocking me?",
+        "What do I need to hear today?",
+        "How do I stop overthinking this?"
+      ],
+      "Nervous System": [
+        "Why am I dysregulated?",
+        "What does my body need?",
+        "How do I come back to safety?"
+      ],
+      Astrology: [
+        "What's happening astrologically?",
+        "How do the planets affect me today?",
+        "What cosmic energy am I working with?"
+      ],
+      "Human Design": [
+        "How should I make this decision?",
+        "Am I forcing or flowing?",
+        "What does my authority say?"
+      ]
+    };
+    return prompts[selectedFocus] || prompts.General;
+  };
+
   // Handle LaurAI questions
   const askLaurAI = async (question) => {
     if (!question.trim() || !snapshotData) return;
@@ -278,6 +327,7 @@ CRITICAL CONTEXT (Must reference in every response):
 - Human Design Authority: ${snapshotData.humanDesign?.authority || "Emotional"}
 - ALIVE Phase: ${snapshotData.alivePhase}
 - Recent Concerns: ${diagnosticSession.concerns?.join(", ") || "General wellbeing"}
+- CURRENT FOCUS: ${selectedFocus}
 
 TODAY'S SNAPSHOT SUMMARY:
 ${snapshotData.narrative}
@@ -286,6 +336,7 @@ USER QUESTION: "${question}"
 
 RESPONSE REQUIREMENTS:
 - Reference their current cycle, nervous system, or capacity
+- Filter through ${selectedFocus} lens
 - Normalize reduced capacity - it's biological
 - Connect to their ALIVE phase
 - Never contradict today's snapshot
@@ -473,7 +524,7 @@ RESPONSE REQUIREMENTS:
             {/* Daily ALIVE Snapshot */}
             <Card className="bg-gradient-to-br from-[#2A1A3C]/95 via-[#3B224E]/95 to-[#4A2B5E]/95 text-white border-0 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl rounded-3xl overflow-hidden">
               <CardHeader className="pb-6 pt-7">
-                <div className="flex items-center justify-center mb-6">
+                <div className="flex items-center justify-center mb-4">
                   <Tabs value={snapshotView} onValueChange={setSnapshotView} className="w-auto">
                     <TabsList className="bg-white/10 backdrop-blur-md border-0 rounded-full p-1">
                       <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70 text-sm rounded-full px-4">
@@ -488,6 +539,24 @@ RESPONSE REQUIREMENTS:
                     </TabsList>
                   </Tabs>
                 </div>
+
+                {/* Focus Selector */}
+                <div className="flex items-center justify-center gap-2 mb-6 flex-wrap">
+                  {["General", "Relationships", "Business", "Money", "Mindset", "Nervous System", "Astrology", "Human Design"].map((focus) => (
+                    <button
+                      key={focus}
+                      onClick={() => setSelectedFocus(focus)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-light transition-all ${
+                        selectedFocus === focus
+                          ? "bg-white/20 text-white shadow-sm"
+                          : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
+                      }`}
+                    >
+                      {focus}
+                    </button>
+                  ))}
+                </div>
+
                 <CardTitle className="text-xl text-center font-light tracking-tight">Your Daily ALIVE Snapshot</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 pb-8">
@@ -497,48 +566,85 @@ RESPONSE REQUIREMENTS:
                     <p className="text-white/70 text-sm font-light">Understanding your state today...</p>
                   </div>
                 ) : snapshotData ? (
-                  <div className="space-y-8">
-                    {/* System Icons */}
-                    <div className="flex justify-center items-center gap-4 mb-6">
-                      {snapshotData.astrology?.sunSign && (
-                        <div className="text-center">
-                          <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-2 shadow-lg">
-                            <Sparkles className="w-5 h-5 text-amber-300/90" strokeWidth={1.5} />
+                  <div className="space-y-6">
+                    {/* Above the Fold - Always Visible */}
+                    <div className="space-y-6">
+                      {/* System Icons */}
+                      <div className="flex justify-center items-center gap-4">
+                        {snapshotData.astrology?.sunSign && (
+                          <div className="text-center">
+                            <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                              <Sparkles className="w-4 h-4 text-amber-300/90" strokeWidth={1.5} />
+                            </div>
+                            <p className="text-xs text-white/70 font-light">{snapshotData.astrology.sunSign}</p>
                           </div>
-                          <p className="text-xs text-white/70 font-light">{snapshotData.astrology.sunSign}</p>
+                        )}
+                        <div className="text-center">
+                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                            <Target className="w-4 h-4 text-purple-300/90" strokeWidth={1.5} />
+                          </div>
+                          <p className="text-xs text-white/70 font-light">{snapshotData.humanDesign?.type || "Projector"}</p>
                         </div>
-                      )}
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-2 shadow-lg">
-                          <Target className="w-5 h-5 text-purple-300/90" strokeWidth={1.5} />
+                        <div className="text-center">
+                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                            <Moon className="w-4 h-4 text-indigo-300/90" strokeWidth={1.5} />
+                          </div>
+                          <p className="text-xs text-white/70 font-light">{snapshotData.cyclePhase}</p>
                         </div>
-                        <p className="text-xs text-white/70 font-light">{snapshotData.humanDesign?.type || "Projector"}</p>
+                        <div className="text-center">
+                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                            <Heart className="w-4 h-4 text-pink-300/90" strokeWidth={1.5} />
+                          </div>
+                          <p className="text-xs text-white/70 font-light">{snapshotData.nervousSystemState}</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                            <TrendingUp className="w-4 h-4 text-purple-300/90" strokeWidth={1.5} />
+                          </div>
+                          <p className="text-xs text-white/70 font-light">{snapshotData.alivePhase}</p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-2 shadow-lg">
-                          <Moon className="w-5 h-5 text-indigo-300/90" strokeWidth={1.5} />
-                        </div>
-                        <p className="text-xs text-white/70 font-light">{snapshotData.cyclePhase}</p>
+
+                      {/* Headline - ONE sentence */}
+                      <div className="text-center px-6">
+                        <h3 className="text-2xl font-light tracking-tight leading-relaxed">{snapshotData.guidingPhrase}</h3>
                       </div>
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-2 shadow-lg">
-                          <Heart className="w-5 h-5 text-pink-300/90" strokeWidth={1.5} />
-                        </div>
-                        <p className="text-xs text-white/70 font-light">{snapshotData.nervousSystemState}</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-2 shadow-lg">
-                          <TrendingUp className="w-5 h-5 text-purple-300/90" strokeWidth={1.5} />
-                        </div>
-                        <p className="text-xs text-white/70 font-light">{snapshotData.alivePhase}</p>
+
+                      {/* Short Summary - 2-3 lines */}
+                      <div className="text-center px-8">
+                        <p className="text-white/80 leading-relaxed text-sm font-light max-w-xl mx-auto">
+                          {snapshotData.narrative.split('\n')[0]}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Main Narrative */}
-                    <div className="text-center mb-6 px-4">
-                      <h3 className="text-xl font-light mb-6 tracking-tight leading-relaxed">{snapshotData.guidingPhrase}</h3>
-                      <p className="text-white/80 leading-relaxed whitespace-pre-line text-sm font-light max-w-2xl mx-auto">{snapshotData.narrative}</p>
-                    </div>
+                    {/* Expandable Deep Insight */}
+                    {snapshotData.narrative.split('\n').length > 1 && (
+                      <div className="border-t border-white/10 pt-6">
+                        <button
+                          onClick={() => setShowFullInsight(!showFullInsight)}
+                          className="w-full flex items-center justify-center gap-2 text-xs text-white/60 hover:text-white/80 transition-colors mb-4"
+                        >
+                          <span className="font-light">{showFullInsight ? "Show less" : "Read full insight"}</span>
+                          <ChevronRight className={`w-3 h-3 transition-transform ${showFullInsight ? "rotate-90" : ""}`} strokeWidth={1.5} />
+                        </button>
+
+                        {showFullInsight && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="max-h-64 overflow-y-auto scrollbar-hide"
+                          >
+                            <div className="px-8 pb-4">
+                              <p className="text-white/80 leading-relaxed whitespace-pre-line text-sm font-light">
+                                {snapshotData.narrative}
+                              </p>
+                            </div>
+                          </motion.div>
+                        )}
+                      </div>
+                    )}
 
                     {/* CTA Button */}
                     <div className="bg-gradient-to-r from-pink-500/90 to-rose-500/90 rounded-full py-3 px-8 text-center backdrop-blur-sm shadow-lg">
@@ -557,10 +663,10 @@ RESPONSE REQUIREMENTS:
 
             {/* Ask LaurAI */}
             <Card className="bg-white/70 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-400/90 to-purple-500/90 flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Sparkles className="w-5 h-5 text-white" strokeWidth={1.5} />
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-400/90 to-purple-500/90 flex items-center justify-center flex-shrink-0 shadow-md">
+                    <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 text-sm tracking-tight">Ask LaurAI about today</h3>
@@ -568,37 +674,24 @@ RESPONSE REQUIREMENTS:
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <Button
-                    onClick={() => handleQuickQuestion("How should I work today?")}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-8 px-4 rounded-full border-gray-200/50 hover:bg-gray-50/50 font-light"
-                  >
-                    How should I work today?
-                  </Button>
-                  <Button
-                    onClick={() => handleQuickQuestion("Why does this feel harder than usual?")}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-8 px-4 rounded-full border-gray-200/50 hover:bg-gray-50/50 font-light"
-                  >
-                    Why does this feel harder than usual?
-                  </Button>
-                  <Button
-                    onClick={() => handleQuickQuestion("What should I focus on this week?")}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-8 px-4 rounded-full border-gray-200/50 hover:bg-gray-50/50 font-light"
-                  >
-                    What should I focus on this week?
-                  </Button>
+                  {getFocusPrompts().map((prompt, idx) => (
+                    <Button
+                      key={idx}
+                      onClick={() => handleQuickQuestion(prompt)}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8 px-4 rounded-full border-gray-200/50 hover:bg-gray-50/50 font-light"
+                    >
+                      {prompt}
+                    </Button>
+                  ))}
                 </div>
 
                 {lauraiResponse && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-sm"
+                    className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-sm"
                   >
                     <p className="text-xs text-gray-700 whitespace-pre-line leading-relaxed font-light">
                       {lauraiResponse}
