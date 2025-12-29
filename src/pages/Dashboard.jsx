@@ -34,7 +34,6 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Waves,
 } from "lucide-react";
 
