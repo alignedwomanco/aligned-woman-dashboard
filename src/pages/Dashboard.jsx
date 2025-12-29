@@ -585,34 +585,54 @@ RESPONSE REQUIREMENTS:
                       <div className="flex justify-center items-center gap-4">
                         {snapshotData.astrology?.sunSign && (
                           <div className="text-center">
-                            <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                            <motion.div 
+                              className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                              animate={{ rotate: [0, 360] }}
+                              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                            >
                               <Sparkles className="w-4 h-4 text-amber-300/90" strokeWidth={1.5} />
-                            </div>
+                            </motion.div>
                             <p className="text-xs text-white/70 font-light">{snapshotData.astrology.sunSign}</p>
                           </div>
                         )}
                         <div className="text-center">
-                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                          <motion.div 
+                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            animate={{ rotate: [0, 360] }}
+                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                          >
                             <Target className="w-4 h-4 text-purple-300/90" strokeWidth={1.5} />
-                          </div>
+                          </motion.div>
                           <p className="text-xs text-white/70 font-light">{snapshotData.humanDesign?.type || "Projector"}</p>
                         </div>
                         <div className="text-center">
-                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                          <motion.div 
+                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            animate={{ y: [0, -6, 0] }}
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                          >
                             <Moon className="w-4 h-4 text-indigo-300/90" strokeWidth={1.5} />
-                          </div>
+                          </motion.div>
                           <p className="text-xs text-white/70 font-light">{snapshotData.cyclePhase}</p>
                         </div>
                         <div className="text-center">
-                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                          <motion.div 
+                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            animate={{ scale: [1, 1.15, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                          >
                             <Heart className="w-4 h-4 text-pink-300/90" strokeWidth={1.5} />
-                          </div>
+                          </motion.div>
                           <p className="text-xs text-white/70 font-light">{snapshotData.nervousSystemState}</p>
                         </div>
                         <div className="text-center">
-                          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg">
+                          <motion.div 
+                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            animate={{ y: [0, -4, 0], opacity: [1, 0.8, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          >
                             <TrendingUp className="w-4 h-4 text-purple-300/90" strokeWidth={1.5} />
-                          </div>
+                          </motion.div>
                           <p className="text-xs text-white/70 font-light">{snapshotData.alivePhase}</p>
                         </div>
                       </div>
@@ -781,52 +801,7 @@ RESPONSE REQUIREMENTS:
               </CardContent>
             </Card>
 
-            {/* Recent Activity */}
-            <Card className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-sm font-medium text-gray-600 tracking-wide uppercase">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Thu</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Feb</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Mar</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Apr</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">May</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Jun</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Jul</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Jul</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-gray-500 font-light">Jul</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Body Patterns */}
             <Card className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl">
