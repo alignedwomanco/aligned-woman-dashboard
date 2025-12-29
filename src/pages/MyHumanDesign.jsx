@@ -425,134 +425,121 @@ This should feel embodied and personal.`;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 p-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50/30 via-white to-indigo-50/30 py-12 px-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Minimal Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="flex items-center justify-between mb-16"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center">
-              <Target className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Human Design</h1>
-              <p className="text-sm text-gray-600 mt-1">Your personal operating manual</p>
-            </div>
+          <div>
+            <h1 className="text-4xl font-light text-gray-900 tracking-tight">Your Design</h1>
+            <p className="text-gray-500 mt-2 font-light">A guide to how you're built to move through the world</p>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="rounded-full"
+            className="rounded-full hover:bg-gray-100"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 text-gray-400" />
           </Button>
         </motion.div>
 
-        {/* Design Snapshot */}
+        {/* Design Snapshot - Hero Insight */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="mb-20"
         >
-          <Card className="mb-6 border-l-4 border-purple-500">
-            <CardHeader>
-              <CardTitle>Your Design Snapshot</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isGeneratingSnapshot ? (
-                <div className="flex items-center gap-3 py-4">
-                  <div className="animate-spin w-6 h-6 border-2 border-purple-500/20 border-t-purple-500 rounded-full" />
-                  <span className="text-gray-600">Understanding your design...</span>
-                </div>
-              ) : designSnapshot ? (
-                <div className="space-y-4">
-                  <p className="text-gray-700 leading-relaxed">
-                    {designSnapshot.orientation}
-                  </p>
+          {isGeneratingSnapshot ? (
+            <div className="flex items-center justify-center gap-3 py-16">
+              <div className="animate-spin w-6 h-6 border-2 border-purple-300/30 border-t-purple-400 rounded-full" />
+              <span className="text-gray-500 font-light">Understanding your design...</span>
+            </div>
+          ) : designSnapshot ? (
+            <div className="space-y-8">
+              {/* Main Insight */}
+              <div className="bg-gradient-to-br from-purple-50/50 to-transparent rounded-3xl p-12 max-w-3xl mx-auto">
+                <p className="text-xl text-gray-700 leading-relaxed font-light text-center">
+                  {designSnapshot.orientation}
+                </p>
+              </div>
 
-                  <div className="grid md:grid-cols-3 gap-4 mt-4">
-                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                      <p className="text-xs font-medium text-green-900 mb-1">How you work best</p>
-                      <p className="text-sm text-gray-700">{designSnapshot.howYouWorkBest}</p>
-                    </div>
-                    <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                      <p className="text-xs font-medium text-red-900 mb-1">What drains you</p>
-                      <p className="text-sm text-gray-700">{designSnapshot.whatDrainsYou}</p>
-                    </div>
-                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                      <p className="text-xs font-medium text-blue-900 mb-1">What supports you</p>
-                      <p className="text-sm text-gray-700">{designSnapshot.whatSupportsYou}</p>
-                    </div>
-                  </div>
+              {/* Three Soft Cards */}
+              <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                <div className="bg-gradient-to-br from-emerald-50/50 to-transparent rounded-2xl p-6">
+                  <p className="text-xs uppercase tracking-wider text-emerald-700 mb-3 font-medium">How you work best</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{designSnapshot.howYouWorkBest}</p>
                 </div>
-              ) : (
-                <Button onClick={generateDesignSnapshot} className="bg-purple-500 hover:bg-purple-600">
-                  Generate Design Snapshot
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+                <div className="bg-gradient-to-br from-rose-50/50 to-transparent rounded-2xl p-6">
+                  <p className="text-xs uppercase tracking-wider text-rose-700 mb-3 font-medium">What drains you</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{designSnapshot.whatDrainsYou}</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50/50 to-transparent rounded-2xl p-6">
+                  <p className="text-xs uppercase tracking-wider text-blue-700 mb-3 font-medium">What supports you</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{designSnapshot.whatSupportsYou}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Button onClick={generateDesignSnapshot} className="bg-purple-400 hover:bg-purple-500 text-white rounded-full px-8 py-6 text-base shadow-sm">
+                Generate Your Snapshot
+              </Button>
+            </div>
+          )}
         </motion.div>
 
-        {/* Bodygraph */}
+        {/* Bodygraph - Floating Prominence */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="mb-20"
         >
-          <Card className="mb-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Your Bodygraph</CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <ZoomIn className="w-4 h-4 mr-2" />
-                    Zoom
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <BodygraphVisualization humanDesign={humanDesign} />
-            </CardContent>
-          </Card>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-light text-gray-900 mb-2">Your Bodygraph</h2>
+            <p className="text-gray-500 text-sm font-light">The map of your energy centres and channels</p>
+          </div>
+          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-sm border border-gray-100/50">
+            <BodygraphVisualization humanDesign={humanDesign} />
+          </div>
         </motion.div>
 
-        {/* Core Design */}
+        {/* Core Design - Identity Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="mb-20"
         >
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Your Core Design</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-light text-gray-900 mb-2">Your Operating System</h2>
+            <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">The four pillars of how you're designed to work</p>
+          </div>
+
+          <div className="space-y-6 max-w-3xl mx-auto">
               {/* Type */}
-              <div className="border border-gray-200 rounded-lg">
+              <div className="bg-gradient-to-br from-purple-50/40 to-transparent rounded-2xl overflow-hidden shadow-sm">
                 <button
                   onClick={() => handleCardExpand('type')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  className="w-full p-8 hover:bg-white/30 transition-all text-left"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <Target className="w-5 h-5 text-purple-600" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-purple-600 mb-2 font-medium">Your Type</p>
+                      <p className="text-2xl font-light text-gray-900 mb-3">{humanDesign?.type || "Projector"}</p>
+                      <p className="text-sm text-gray-600 font-light leading-relaxed">
+                        {expandedCard === 'type' ? 'Tap to close' : 'Your energy signature and how you're meant to interact'}
+                      </p>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs text-gray-500 uppercase">Type</p>
-                      <p className="font-semibold text-gray-900">{humanDesign?.type || "Projector"}</p>
+                    <div className="flex-shrink-0">
+                      {expandedCard === 'type' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                     </div>
                   </div>
-                  {expandedCard === 'type' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                 </button>
                 
                 <AnimatePresence>
@@ -561,72 +548,28 @@ This should feel embodied and personal.`;
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="px-4 pb-4 space-y-3"
+                      className="px-8 pb-8 space-y-6"
                     >
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-700">{coreDesignInsights.type.whatThisMeans}</p>
+                      <div className="bg-white/60 rounded-xl p-6">
+                        <p className="text-gray-700 leading-relaxed">{coreDesignInsights.type.whatThisMeans}</p>
                       </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-600 mb-1">How to use energy</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.type.howToUseEnergy}</p>
-                      </div>
-                      <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                        <p className="text-xs font-medium text-amber-900 mb-1">Common conditioning trap</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.type.commonConditioning}</p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                        <p className="text-xs font-medium text-green-900 mb-1">What alignment feels like</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.type.whatAlignmentFeels}</p>
-                      </div>
-                      <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                        <p className="text-xs font-medium text-purple-900 mb-1">Supportive practice</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.type.supportivePractice}</p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Strategy */}
-              <div className="border border-gray-200 rounded-lg">
-                <button
-                  onClick={() => handleCardExpand('strategy')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                      <Sparkles className="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs text-gray-500 uppercase">Strategy</p>
-                      <p className="font-semibold text-gray-900">{humanDesign?.strategy || "Wait for the invitation"}</p>
-                    </div>
-                  </div>
-                  {expandedCard === 'strategy' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
-                </button>
-                
-                <AnimatePresence>
-                  {expandedCard === 'strategy' && coreDesignInsights.strategy && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="px-4 pb-4 space-y-3"
-                    >
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-700">{coreDesignInsights.strategy.whatWaitingMeans}</p>
-                      </div>
-                      <div className="bg-red-50 rounded-lg p-3 border border-red-200">
-                        <p className="text-xs font-medium text-red-900 mb-1">What forcing looks like</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.strategy.whatForcingLooks}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-600 mb-1">How invitations show up</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.strategy.howInvitationsShow}</p>
-                      </div>
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <p className="text-xs font-medium text-blue-900 mb-1">Daily application</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.strategy.dailyApplication}</p>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">How to use your energy</p>
+                          <p className="text-gray-700 leading-relaxed">{coreDesignInsights.type.howToUseEnergy}</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-amber-50/50 to-transparent rounded-xl p-5">
+                          <p className="text-xs uppercase tracking-wider text-amber-700 mb-2">Watch for this pattern</p>
+                          <p className="text-gray-700 leading-relaxed">{coreDesignInsights.type.commonConditioning}</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-emerald-50/50 to-transparent rounded-xl p-5">
+                          <p className="text-xs uppercase tracking-wider text-emerald-700 mb-2">Alignment feels like</p>
+                          <p className="text-gray-700 leading-relaxed">{coreDesignInsights.type.whatAlignmentFeels}</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-50/50 to-transparent rounded-xl p-5">
+                          <p className="text-xs uppercase tracking-wider text-purple-700 mb-2">Try this</p>
+                          <p className="text-gray-700 leading-relaxed">{coreDesignInsights.type.supportivePractice}</p>
+                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -634,21 +577,23 @@ This should feel embodied and personal.`;
               </div>
 
               {/* Authority */}
-              <div className="border border-gray-200 rounded-lg">
+              <div className="bg-gradient-to-br from-pink-50/40 to-transparent rounded-2xl overflow-hidden shadow-sm">
                 <button
                   onClick={() => handleCardExpand('authority')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  className="w-full p-8 hover:bg-white/30 transition-all text-left"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                      <Heart className="w-5 h-5 text-pink-600" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-pink-600 mb-2 font-medium">Your Authority</p>
+                      <p className="text-2xl font-light text-gray-900 mb-3">{humanDesign?.authority || "Emotional"}</p>
+                      <p className="text-sm text-gray-600 font-light leading-relaxed">
+                        {expandedCard === 'authority' ? 'Tap to close' : 'How you're designed to make decisions'}
+                      </p>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs text-gray-500 uppercase">Authority</p>
-                      <p className="font-semibold text-gray-900">{humanDesign?.authority || "Emotional"}</p>
+                    <div className="flex-shrink-0">
+                      {expandedCard === 'authority' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                     </div>
                   </div>
-                  {expandedCard === 'authority' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                 </button>
                 
                 <AnimatePresence>
@@ -657,22 +602,66 @@ This should feel embodied and personal.`;
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="px-4 pb-4 space-y-3"
+                      className="px-8 pb-8 space-y-6"
                     >
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-700">{coreDesignInsights.authority.howDecisionsWork}</p>
+                      <div className="bg-white/60 rounded-xl p-6">
+                        <p className="text-gray-700 leading-relaxed">{coreDesignInsights.authority.howDecisionsWork}</p>
                       </div>
-                      <div className="bg-red-50 rounded-lg p-3 border border-red-200">
-                        <p className="text-xs font-medium text-red-900 mb-1">What not to trust</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.authority.whatNotToTrust}</p>
+                      <div className="space-y-4">
+                        <div className="bg-gradient-to-br from-rose-50/50 to-transparent rounded-xl p-5">
+                          <p className="text-xs uppercase tracking-wider text-rose-700 mb-2">Don't trust this</p>
+                          <p className="text-gray-700 leading-relaxed">{coreDesignInsights.authority.whatNotToTrust}</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-emerald-50/50 to-transparent rounded-xl p-5">
+                          <p className="text-xs uppercase tracking-wider text-emerald-700 mb-2">Clarity feels like</p>
+                          <p className="text-gray-700 leading-relaxed">{coreDesignInsights.authority.whatClarityFeels}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">How to practice</p>
+                          <p className="text-gray-700 leading-relaxed">{coreDesignInsights.authority.howToPractice}</p>
+                        </div>
                       </div>
-                      <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                        <p className="text-xs font-medium text-green-900 mb-1">What clarity feels like</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.authority.whatClarityFeels}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-600 mb-1">How to practice</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.authority.howToPractice}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Strategy */}
+              <div className="bg-gradient-to-br from-indigo-50/40 to-transparent rounded-2xl overflow-hidden shadow-sm">
+                <button
+                  onClick={() => handleCardExpand('strategy')}
+                  className="w-full p-6 hover:bg-white/30 transition-all text-left"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-indigo-600 mb-1 font-medium">Strategy</p>
+                      <p className="text-lg font-light text-gray-900 mb-2">{humanDesign?.strategy || "Wait for the invitation"}</p>
+                      <p className="text-xs text-gray-500 font-light">{expandedCard === 'strategy' ? 'Tap to close' : 'Your approach to life'}</p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {expandedCard === 'strategy' ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                    </div>
+                  </div>
+                </button>
+                
+                <AnimatePresence>
+                  {expandedCard === 'strategy' && coreDesignInsights.strategy && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="px-6 pb-6 space-y-4"
+                    >
+                      <p className="text-sm text-gray-700 leading-relaxed">{coreDesignInsights.strategy.whatWaitingMeans}</p>
+                      <div className="space-y-3 text-xs">
+                        <div>
+                          <p className="text-gray-500 uppercase tracking-wider mb-1">Forcing looks like</p>
+                          <p className="text-gray-700">{coreDesignInsights.strategy.whatForcingLooks}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 uppercase tracking-wider mb-1">Daily practice</p>
+                          <p className="text-gray-700">{coreDesignInsights.strategy.dailyApplication}</p>
+                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -680,21 +669,21 @@ This should feel embodied and personal.`;
               </div>
 
               {/* Profile */}
-              <div className="border border-gray-200 rounded-lg">
+              <div className="bg-gradient-to-br from-amber-50/40 to-transparent rounded-2xl overflow-hidden shadow-sm">
                 <button
                   onClick={() => handleCardExpand('profile')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  className="w-full p-6 hover:bg-white/30 transition-all text-left"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                      <Target className="w-5 h-5 text-amber-600" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-amber-600 mb-1 font-medium">Profile</p>
+                      <p className="text-lg font-light text-gray-900 mb-2">{humanDesign?.profile || "2/4"}</p>
+                      <p className="text-xs text-gray-500 font-light">{expandedCard === 'profile' ? 'Tap to close' : 'Your life theme'}</p>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs text-gray-500 uppercase">Profile</p>
-                      <p className="font-semibold text-gray-900">{humanDesign?.profile || "2/4"}</p>
+                    <div className="flex-shrink-0">
+                      {expandedCard === 'profile' ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                     </div>
                   </div>
-                  {expandedCard === 'profile' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                 </button>
                 
                 <AnimatePresence>
@@ -703,29 +692,22 @@ This should feel embodied and personal.`;
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="px-4 pb-4 space-y-3"
+                      className="px-6 pb-6 space-y-3 text-xs"
                     >
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-700">{coreDesignInsights.profile.yourNaturalRole}</p>
+                      <p className="text-sm text-gray-700">{coreDesignInsights.profile.yourNaturalRole}</p>
+                      <div>
+                        <p className="text-gray-500 uppercase tracking-wider mb-1">How others see you</p>
+                        <p className="text-gray-700">{coreDesignInsights.profile.howOthersSeeYou}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-600 mb-1">How others see you</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.profile.howOthersSeeYou}</p>
-                      </div>
-                      <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                        <p className="text-xs font-medium text-amber-900 mb-1">Internal tension</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.profile.internalTension}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-600 mb-1">Why rest matters</p>
-                        <p className="text-sm text-gray-700">{coreDesignInsights.profile.whyRestMatters}</p>
+                        <p className="text-gray-500 uppercase tracking-wider mb-1">Why rest matters</p>
+                        <p className="text-gray-700">{coreDesignInsights.profile.whyRestMatters}</p>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            </CardContent>
-          </Card>
+            </div>
         </motion.div>
 
         {/* Energy Centres */}
@@ -733,36 +715,33 @@ This should feel embodied and personal.`;
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="mb-20"
         >
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Your Energy Centres</CardTitle>
-              <p className="text-sm text-gray-600">Understanding your defined and undefined centres</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {ENERGY_CENTRES.map((centre, idx) => {
-                const isDefined = humanDesign?.definedCentres?.includes(centre.key) || false;
-                return (
-                  <div key={centre.key} className="border border-gray-200 rounded-lg">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-light text-gray-900 mb-2">Your Energy Centres</h2>
+            <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">Where you have consistent energy, and where you're taking in others'</p>
+          </div>
+
+          <div className="space-y-8 max-w-3xl mx-auto">
+            {/* Defined Centres Group */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-purple-600 mb-4 font-medium">Defined — Consistent for you</p>
+              <div className="space-y-3">
+                {ENERGY_CENTRES.filter(c => humanDesign?.definedCentres?.includes(c.key)).map((centre) => (
+                  <div key={centre.key} className="bg-gradient-to-br from-purple-50/40 to-transparent rounded-2xl overflow-hidden shadow-sm">
                     <button
                       onClick={() => handleCentreExpand(centre)}
-                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                      className="w-full p-5 hover:bg-white/30 transition-all text-left"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 ${isDefined ? 'bg-purple-100' : 'bg-gray-100'} rounded-lg flex items-center justify-center`}>
-                          <div className={`w-3 h-3 rounded-full ${isDefined ? 'bg-purple-600' : 'border-2 border-gray-400'}`} />
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-gray-900 mb-1">{centre.name}</p>
+                          <p className="text-xs text-gray-600 font-light">{centre.governs}</p>
                         </div>
-                        <div className="text-left">
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-gray-900">{centre.name}</p>
-                            <Badge className={isDefined ? "bg-purple-200 text-purple-900" : "bg-gray-200 text-gray-700"}>
-                              {isDefined ? "Defined" : "Undefined"}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-gray-500">{centre.governs}</p>
+                        <div className="flex-shrink-0">
+                          {expandedCentre === centre.key ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                         </div>
                       </div>
-                      {expandedCentre === centre.key ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                     </button>
                     
                     <AnimatePresence>
@@ -771,38 +750,83 @@ This should feel embodied and personal.`;
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="px-4 pb-4 space-y-3"
+                          className="px-5 pb-5 space-y-4"
                         >
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs font-medium text-gray-600 mb-1">What this governs</p>
-                            <p className="text-sm text-gray-700">{centreInsights[centre.key].whatThisGoverns}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-600 mb-1">How it works for you</p>
-                            <p className="text-sm text-gray-700">{centreInsights[centre.key].howItWorksForYou}</p>
-                          </div>
-                          <div className="grid md:grid-cols-2 gap-3">
-                            <div className="bg-red-50 rounded-lg p-3 border border-red-200">
-                              <p className="text-xs font-medium text-red-900 mb-1">When conditioned</p>
-                              <p className="text-sm text-gray-700">{centreInsights[centre.key].whenConditioned}</p>
+                          <p className="text-sm text-gray-700 leading-relaxed">{centreInsights[centre.key].howItWorksForYou}</p>
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="bg-gradient-to-br from-rose-50/50 to-transparent rounded-xl p-3">
+                              <p className="text-rose-700 uppercase tracking-wider mb-1">Not-self</p>
+                              <p className="text-gray-700">{centreInsights[centre.key].whenConditioned}</p>
                             </div>
-                            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                              <p className="text-xs font-medium text-green-900 mb-1">When aligned</p>
-                              <p className="text-sm text-gray-700">{centreInsights[centre.key].whenAligned}</p>
+                            <div className="bg-gradient-to-br from-emerald-50/50 to-transparent rounded-xl p-3">
+                              <p className="text-emerald-700 uppercase tracking-wider mb-1">Aligned</p>
+                              <p className="text-gray-700">{centreInsights[centre.key].whenAligned}</p>
                             </div>
                           </div>
-                          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                            <p className="text-xs font-medium text-blue-900 mb-1">Practice</p>
-                            <p className="text-sm text-gray-700">{centreInsights[centre.key].practice}</p>
+                          <div className="bg-white/60 rounded-xl p-3 text-xs">
+                            <p className="text-gray-500 uppercase tracking-wider mb-1">Practice</p>
+                            <p className="text-gray-700">{centreInsights[centre.key].practice}</p>
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
-                );
-              })}
-            </CardContent>
-          </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Undefined Centres Group */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-gray-500 mb-4 font-medium">Undefined — Open to others</p>
+              <div className="space-y-3">
+                {ENERGY_CENTRES.filter(c => !humanDesign?.definedCentres?.includes(c.key)).map((centre) => (
+                  <div key={centre.key} className="bg-white/40 rounded-2xl overflow-hidden border border-gray-100/50">
+                    <button
+                      onClick={() => handleCentreExpand(centre)}
+                      className="w-full p-5 hover:bg-gray-50/30 transition-all text-left"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-gray-700 mb-1">{centre.name}</p>
+                          <p className="text-xs text-gray-500 font-light">{centre.governs}</p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          {expandedCentre === centre.key ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                        </div>
+                      </div>
+                    </button>
+                    
+                    <AnimatePresence>
+                      {expandedCentre === centre.key && centreInsights[centre.key] && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="px-5 pb-5 space-y-4"
+                        >
+                          <p className="text-sm text-gray-700 leading-relaxed">{centreInsights[centre.key].howItWorksForYou}</p>
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="bg-gradient-to-br from-rose-50/50 to-transparent rounded-xl p-3">
+                              <p className="text-rose-700 uppercase tracking-wider mb-1">Conditioning</p>
+                              <p className="text-gray-700">{centreInsights[centre.key].whenConditioned}</p>
+                            </div>
+                            <div className="bg-gradient-to-br from-emerald-50/50 to-transparent rounded-xl p-3">
+                              <p className="text-emerald-700 uppercase tracking-wider mb-1">Wisdom</p>
+                              <p className="text-gray-700">{centreInsights[centre.key].whenAligned}</p>
+                            </div>
+                          </div>
+                          <div className="bg-white/60 rounded-xl p-3 text-xs">
+                            <p className="text-gray-500 uppercase tracking-wider mb-1">Practice</p>
+                            <p className="text-gray-700">{centreInsights[centre.key].practice}</p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Conditioning Themes */}
@@ -811,29 +835,32 @@ This should feel embodied and personal.`;
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
+            className="mb-20"
           >
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>What You're Deconditioning Right Now</CardTitle>
-                <p className="text-sm text-gray-600">Current patterns to be aware of</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {conditioningThemes.map((theme, idx) => (
-                  <div key={idx} className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                    <h3 className="font-semibold text-amber-900 mb-2">{theme.themeTitle}</h3>
-                    <p className="text-sm text-gray-700 mb-2">{theme.explanation}</p>
-                    <div className="bg-white rounded-lg p-3 mb-2">
-                      <p className="text-xs font-medium text-gray-600 mb-1">How it shows up</p>
-                      <p className="text-sm text-gray-700">{theme.howItShowsUp}</p>
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-light text-gray-900 mb-2">What You're Unlearning</h2>
+              <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">Patterns that aren't yours to carry</p>
+              <p className="text-xs text-gray-400 mt-2 italic">This is common. Nothing is wrong with you.</p>
+            </div>
+
+            <div className="space-y-6 max-w-2xl mx-auto">
+              {conditioningThemes.map((theme, idx) => (
+                <div key={idx} className="bg-gradient-to-br from-amber-50/40 to-transparent rounded-2xl p-8 shadow-sm">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">{theme.themeTitle}</h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-6">{theme.explanation}</p>
+                  <div className="space-y-4">
+                    <div className="bg-white/60 rounded-xl p-4">
+                      <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">This shows up as</p>
+                      <p className="text-sm text-gray-700 leading-relaxed">{theme.howItShowsUp}</p>
                     </div>
-                    <div className="bg-white rounded-lg p-3">
-                      <p className="text-xs font-medium text-gray-600 mb-1">What to try instead</p>
-                      <p className="text-sm text-gray-700">{theme.whatToTry}</p>
+                    <div className="bg-gradient-to-br from-emerald-50/50 to-transparent rounded-xl p-4">
+                      <p className="text-xs uppercase tracking-wider text-emerald-700 mb-2">Try this instead</p>
+                      <p className="text-sm text-gray-700 leading-relaxed">{theme.whatToTry}</p>
                     </div>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
+                </div>
+              ))}
+            </div>
           </motion.div>
         )}
 
@@ -842,74 +869,70 @@ This should feel embodied and personal.`;
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
+          className="mb-20"
         >
-          <Card className="mb-6 bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Ask LaurAI</p>
-                  <p className="text-xs text-gray-600">Design-aware guidance</p>
-                </div>
+          <div className="bg-gradient-to-br from-pink-50/50 via-purple-50/30 to-transparent rounded-3xl p-8 shadow-sm max-w-2xl mx-auto">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
+              <p className="text-lg font-light text-gray-900">Ask LaurAI</p>
+              <p className="text-xs text-gray-500 font-light">Design-aware guidance just for you</p>
+            </div>
 
-              <div className="flex gap-2 flex-wrap mb-4">
-                {[
-                  "Why do I feel exhausted even when I rest?",
-                  "How should I be making decisions?",
-                  "Why does forcing things backfire for me?",
-                  "How do I stop over-giving?"
-                ].map((prompt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleQuickQuestion(prompt)}
-                    className="bg-white text-gray-700 text-xs px-3 py-1.5 rounded-full hover:bg-gray-50 transition-colors border border-gray-200"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex gap-2 mb-4">
-                <Input
-                  value={lauraiQuestion}
-                  onChange={(e) => setLauraiQuestion(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleCustomQuestion()}
-                  placeholder="Ask your own question..."
-                  className="flex-1 bg-white"
-                  disabled={isLauraiThinking}
-                />
-                <Button 
-                  onClick={handleCustomQuestion}
-                  disabled={isLauraiThinking || !lauraiQuestion.trim()}
-                  className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+            <div className="flex gap-2 flex-wrap justify-center mb-6">
+              {[
+                "Why do I feel exhausted even when I rest?",
+                "How should I be making decisions?",
+                "Why does forcing things backfire for me?"
+              ].map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleQuickQuestion(prompt)}
+                  className="bg-white/80 text-gray-600 text-xs px-4 py-2 rounded-full hover:bg-white transition-colors shadow-sm font-light"
                 >
-                  {isLauraiThinking ? (
-                    <div className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full" />
-                  ) : (
-                    <ArrowRight className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
+                  {prompt}
+                </button>
+              ))}
+            </div>
 
-              <AnimatePresence>
-                {lauraiResponse && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="bg-white rounded-lg p-4 border border-gray-200"
-                  >
-                    <p className="text-sm text-gray-900 whitespace-pre-line leading-relaxed">
-                      {lauraiResponse}
-                    </p>
-                  </motion.div>
+            <div className="flex gap-3 mb-6">
+              <Input
+                value={lauraiQuestion}
+                onChange={(e) => setLauraiQuestion(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleCustomQuestion()}
+                placeholder="Or ask your own question..."
+                className="flex-1 bg-white/80 border-0 rounded-full px-5 shadow-sm font-light"
+                disabled={isLauraiThinking}
+              />
+              <Button 
+                onClick={handleCustomQuestion}
+                disabled={isLauraiThinking || !lauraiQuestion.trim()}
+                className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-full shadow-sm"
+              >
+                {isLauraiThinking ? (
+                  <div className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full" />
+                ) : (
+                  <ArrowRight className="w-4 h-4" />
                 )}
-              </AnimatePresence>
-            </CardContent>
-          </Card>
+              </Button>
+            </div>
+
+            <AnimatePresence>
+              {lauraiResponse && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-white/80 rounded-2xl p-6 shadow-sm"
+                >
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-light">
+                    {lauraiResponse}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
 
         {/* Recommended For You */}
@@ -918,46 +941,36 @@ This should feel embodied and personal.`;
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
+            className="max-w-2xl mx-auto"
           >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-pink-500" />
-                  Recommended For You
-                </CardTitle>
-                <p className="text-sm text-gray-600">Support for {humanDesign?.type || "Projector"}s</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {recommendedCourses.map((course) => (
-                    <div key={course.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">{course.title}</h4>
-                          <p className="text-xs text-purple-600 mb-2">{course.reason}</p>
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {course.durationMinutes || "20"} min
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <BookOpen className="w-3 h-3" />
-                              Course
-                            </span>
-                          </div>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
-                        >
-                          Start
-                        </Button>
+            <div className="text-center mb-8">
+              <h3 className="text-xl font-light text-gray-900 mb-2">Aligned Support</h3>
+              <p className="text-xs text-gray-500 font-light">Courses designed for {humanDesign?.type || "Projector"}s</p>
+            </div>
+            <div className="space-y-4">
+              {recommendedCourses.map((course) => (
+                <div key={course.id} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 hover:shadow-md transition-all border border-gray-100/50">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">{course.title}</h4>
+                      <p className="text-xs text-purple-600 mb-3 font-light">{course.reason}</p>
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {course.durationMinutes || "20"} min
+                        </span>
                       </div>
                     </div>
-                  ))}
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-full shadow-sm"
+                    >
+                      Start
+                    </Button>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           </motion.div>
         )}
       </div>
