@@ -315,71 +315,63 @@ export default function Dashboard() {
                   </div>
 
                   {/* My Human Design */}
-                  {diagnosticSession?.humanDesignProfile && (
-                    <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                          <Sparkles className="w-4 h-4 text-white" />
-                        </div>
-                        <h3 className="font-semibold text-sm text-purple-900">My Human Design</h3>
+                  <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
                       </div>
-                      <p className="text-xs text-gray-600 mb-1">
-                        <span className="font-medium">Type:</span> {diagnosticSession.humanDesignProfile.type}
-                      </p>
-                      <p className="text-xs text-gray-600 mb-1">
-                        <span className="font-medium">Authority:</span> {diagnosticSession.humanDesignProfile.authority}
-                      </p>
-                      <p className="text-xs text-gray-500 mb-2">
-                        Discernment beats effort today
-                      </p>
-                      <button className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
-                        View cycle guidance →
-                      </button>
+                      <h3 className="font-semibold text-sm text-purple-900">My Human Design</h3>
                     </div>
-                  )}
+                    <p className="text-xs text-gray-600 mb-1">
+                      <span className="font-medium">Type:</span> {diagnosticSession?.humanDesignProfile?.type || "Projector"}
+                    </p>
+                    <p className="text-xs text-gray-600 mb-1">
+                      <span className="font-medium">Authority:</span> {diagnosticSession?.humanDesignProfile?.authority || "Emotional"}
+                    </p>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Discernment beats effort today
+                    </p>
+                    <button className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
+                      View cycle guidance →
+                    </button>
+                  </div>
 
                   {/* My Cycle */}
-                  {diagnosticSession?.cycleProfile && (
-                    <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-                          <Moon className="w-4 h-4 text-white" />
-                        </div>
-                        <h3 className="font-semibold text-sm text-indigo-900">My Cycle</h3>
+                  <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                        <Moon className="w-4 h-4 text-white" />
                       </div>
-                      <p className="text-xs text-gray-600 mb-1">
-                        <span className="font-medium">Phase:</span> {diagnosticSession.cycleProfile.cycleStage}
-                      </p>
-                      <p className="text-xs text-gray-500 mb-2">
-                        Lower energy is natural in this phase. Adapt, don't push.
-                      </p>
-                      <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
-                        View cycle guidance →
-                      </button>
+                      <h3 className="font-semibold text-sm text-indigo-900">My Cycle</h3>
                     </div>
-                  )}
+                    <p className="text-xs text-gray-600 mb-1">
+                      <span className="font-medium">Phase:</span> Luteal
+                    </p>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Lower energy is natural in this phase. Adapt, don't push.
+                    </p>
+                    <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                      View cycle guidance →
+                    </button>
+                  </div>
 
                   {/* My Astrology */}
-                  {diagnosticSession?.astrologyProfile && (
-                    <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-                          <Sparkles className="w-4 h-4 text-white" />
-                        </div>
-                        <h3 className="font-semibold text-sm text-amber-900">My Astrology</h3>
+                  <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
                       </div>
-                      <div className="flex gap-2 mb-2">
-                        {diagnosticSession.astrologyProfile.sunSign && (
-                          <Badge className="bg-amber-200 text-amber-900 text-xs">
-                            ☉ {diagnosticSession.astrologyProfile.sunSign}
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-500 mb-2">
-                        {diagnosticSession.astrologyProfile.currentTransitSummary?.slice(0, 80)}...
-                      </p>
+                      <h3 className="font-semibold text-sm text-amber-900">My Astrology</h3>
                     </div>
-                  )}
+                    <div className="flex gap-2 mb-2">
+                      <Badge className="bg-amber-200 text-amber-900 text-xs">
+                        ☉ {diagnosticSession?.astrologyProfile?.sunSign || "Sagittarius"}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2">
+                      {diagnosticSession?.astrologyProfile?.currentTransitSummary?.slice(0, 80) || "Current transits support vision and refinement"}...
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
