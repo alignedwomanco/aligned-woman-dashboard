@@ -428,8 +428,8 @@ RESPONSE REQUIREMENTS:
                     <div className="flex items-start gap-3">
                       <motion.div 
                         className="w-10 h-10 bg-gradient-to-br from-pink-400/90 to-rose-400/90 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        animate={{ scale: [1, 1.15, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                       >
                         <Heart className="w-4 h-4 text-white" strokeWidth={1.5} />
                       </motion.div>
@@ -454,7 +454,7 @@ RESPONSE REQUIREMENTS:
                       <motion.div 
                         className="w-10 h-10 bg-gradient-to-br from-purple-400/90 to-indigo-400/90 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
                         animate={{ rotate: [0, 360] }}
-                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                       >
                         <Target className="w-4 h-4 text-white" strokeWidth={1.5} />
                       </motion.div>
@@ -481,8 +481,8 @@ RESPONSE REQUIREMENTS:
                     <div className="flex items-start gap-3">
                       <motion.div 
                         className="w-10 h-10 bg-gradient-to-br from-indigo-400/90 to-blue-400/90 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                        animate={{ y: [0, -3, 0] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                       >
                         <Moon className="w-4 h-4 text-white" strokeWidth={1.5} />
                       </motion.div>
