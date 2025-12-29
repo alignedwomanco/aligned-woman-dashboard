@@ -20,7 +20,6 @@ import {
   BookOpen,
   Heart
 } from "lucide-react";
-import BodygraphChart from "@/components/humandesign/BodygraphChart";
 
 const ENERGY_CENTRES = [
   { key: "head", name: "Head", governs: "Inspiration & mental pressure" },
@@ -521,7 +520,14 @@ This should feel embodied and personal.`;
               </div>
             </CardHeader>
             <CardContent>
-              <BodygraphChart humanDesign={humanDesign} />
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-8 flex items-center justify-center">
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/210034b82_image.png"
+                  alt="Human Design Bodygraph"
+                  className="max-w-full h-auto"
+                  style={{ maxHeight: "600px" }}
+                />
+              </div>
             </CardContent>
           </Card>
         </motion.div>
