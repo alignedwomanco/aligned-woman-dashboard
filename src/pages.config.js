@@ -28,6 +28,7 @@ import Support from './pages/Support';
 import ToolsHub from './pages/ToolsHub';
 import Dashboard from './pages/Dashboard';
 import MyAstrology from './pages/MyAstrology';
+import MyCycle from './pages/MyCycle';
 import __Layout from './Layout.jsx';
 
 
@@ -62,6 +63,7 @@ export const PAGES = {
     "ToolsHub": ToolsHub,
     "Dashboard": Dashboard,
     "MyAstrology": MyAstrology,
+    "MyCycle": MyCycle,
 }
 
 export const pagesConfig = {

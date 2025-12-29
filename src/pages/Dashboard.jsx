@@ -603,9 +603,9 @@ Format: JSON with keys: summary, guidance, helps (array), avoid (array)`;
               </button>
 
               {/* My Cycle */}
-              <button 
-                onClick={() => handleSystemClick('cycle')}
-                className="w-full bg-indigo-50 rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow text-left"
+              <Link 
+                to={createPageUrl("MyCycle")}
+                className="block w-full bg-indigo-50 rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow text-left"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
@@ -622,7 +622,7 @@ Format: JSON with keys: summary, guidance, helps (array), avoid (array)`;
                 <span className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
                   View cycle guidance →
                 </span>
-              </button>
+              </Link>
 
               {/* My Astrology */}
               <Link 
