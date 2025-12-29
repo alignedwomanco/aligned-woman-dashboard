@@ -952,34 +952,39 @@ RESPONSE REQUIREMENTS:
                 <p className="text-xs text-gray-400 mt-1 font-light">Noteworthy moments and emotional rhythms over time</p>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="flex items-center justify-between mb-4">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full hover:bg-gray-100/50"
-                    onClick={() => {
-                      const newDate = new Date(selectedMonth);
-                      newDate.setMonth(newDate.getMonth() - 1);
-                      setSelectedMonth(newDate);
-                    }}
-                  >
-                    <ChevronLeft className="w-4 h-4 text-gray-600" strokeWidth={1.5} />
-                  </Button>
-                  <p className="text-sm font-medium text-gray-700">
-                    {selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 rounded-full hover:bg-gray-100/50"
+                      onClick={() => {
+                        const newDate = new Date(selectedMonth);
+                        newDate.setMonth(newDate.getMonth() - 1);
+                        setSelectedMonth(newDate);
+                      }}
+                    >
+                      <ChevronLeft className="w-4 h-4 text-gray-600" strokeWidth={1.5} />
+                    </Button>
+                    <p className="text-sm font-medium text-gray-700">
+                      {selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </p>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 rounded-full hover:bg-gray-100/50"
+                      onClick={() => {
+                        const newDate = new Date(selectedMonth);
+                        newDate.setMonth(newDate.getMonth() + 1);
+                        setSelectedMonth(newDate);
+                      }}
+                    >
+                      <ChevronRight className="w-4 h-4 text-gray-600" strokeWidth={1.5} />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-400 text-center font-light">
+                    Each day reflects your overall stress level. Tap a day to see what showed up.
                   </p>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full hover:bg-gray-100/50"
-                    onClick={() => {
-                      const newDate = new Date(selectedMonth);
-                      newDate.setMonth(newDate.getMonth() + 1);
-                      setSelectedMonth(newDate);
-                    }}
-                  >
-                    <ChevronRight className="w-4 h-4 text-gray-600" strokeWidth={1.5} />
-                  </Button>
                 </div>
 
                 <div className="mb-4">
@@ -1050,20 +1055,56 @@ RESPONSE REQUIREMENTS:
                   </div>
                 </div>
 
-                <div className="flex justify-center gap-4 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-green-400/90" />
-                    <span className="text-gray-500 font-light">Regulated</span>
+                <div>
+                  <div className="flex justify-center gap-4 text-xs mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-green-400/90" />
+                      <span className="text-gray-600 font-light">Regulated — calm or steady day</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-pink-400/90" />
+                      <span className="text-gray-600 font-light">Mild Stress — emotional or mental strain</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-red-400/90" />
+                      <span className="text-gray-600 font-light">High Stress — overload, conflict, or depletion</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-pink-400/90" />
-                    <span className="text-gray-500 font-light">Mild Stress</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-400/90" />
-                    <span className="text-gray-500 font-light">High</span>
-                  </div>
+                  <p className="text-xs text-gray-400 text-center font-light">
+                    Based on check-ins, behaviour patterns, and emotional signals
+                  </p>
                 </div>
+
+                {/* Selected Day Label */}
+                {selectedDay && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 text-center"
+                  >
+                    <p className="text-sm text-purple-600 font-medium">
+                      {selectedDay.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · Noteworthy moment detected
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Collapsed Preview Card */}
+                {selectedDay && !document.querySelector('.fixed.inset-0.bg-black\\/30') && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mt-4 bg-gradient-to-br from-purple-50/50 to-pink-50/30 rounded-2xl p-4 border border-purple-100/50"
+                  >
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">What showed up on this day</h3>
+                    <p className="text-xs text-gray-600 leading-relaxed mb-3 font-light">
+                      {selectedDay.checkIn.stress >= 7 ? 'Elevated emotional stress' : 'Moderate tension'} coincided with {selectedDay.checkIn.capacity <= 3 ? 'low capacity' : 'reduced energy'}{selectedDay.checkIn.nervous_system_state && ` and ${selectedDay.checkIn.nervous_system_state} mode`}.
+                    </p>
+                    <button className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
+                      View details
+                      <ArrowRight className="w-3 h-3" strokeWidth={2} />
+                    </button>
+                  </motion.div>
+                )}
               </CardContent>
             </Card>
 
