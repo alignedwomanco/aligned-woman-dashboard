@@ -27,6 +27,7 @@ import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import Support from './pages/Support';
 import ToolsHub from './pages/ToolsHub';
+import MyAstrology from './pages/MyAstrology';
 import __Layout from './Layout.jsx';
 
 
@@ -60,6 +61,7 @@ export const PAGES = {
     "Settings": Settings,
     "Support": Support,
     "ToolsHub": ToolsHub,
+    "MyAstrology": MyAstrology,
 }
 
 export const pagesConfig = {
