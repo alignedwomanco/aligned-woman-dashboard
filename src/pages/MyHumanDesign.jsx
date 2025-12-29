@@ -435,7 +435,7 @@ This should feel embodied and personal.`;
         >
           <div>
             <h1 className="text-4xl font-light text-gray-900 tracking-tight">Your Design</h1>
-            <p className="text-gray-500 mt-2 font-light">A guide to how you're built to move through the world</p>
+            <p className="text-gray-500 mt-2 font-light">A guide to how you&apos;re built to move through the world</p>
           </div>
           <Button
             variant="ghost"
@@ -518,7 +518,7 @@ This should feel embodied and personal.`;
         >
           <div className="text-center mb-12">
             <h2 className="text-2xl font-light text-gray-900 mb-2">Your Operating System</h2>
-            <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">The four pillars of how you're designed to work</p>
+            <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">The four pillars of how you&apos;re designed to work</p>
           </div>
 
           <div className="space-y-6 max-w-3xl mx-auto">
@@ -719,7 +719,7 @@ This should feel embodied and personal.`;
         >
           <div className="text-center mb-12">
             <h2 className="text-2xl font-light text-gray-900 mb-2">Your Energy Centres</h2>
-            <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">Where you have consistent energy, and where you're taking in others'</p>
+            <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">Where you have consistent energy, and where you&apos;re taking in others&apos;</p>
           </div>
 
           <div className="space-y-8 max-w-3xl mx-auto">
@@ -838,8 +838,8 @@ This should feel embodied and personal.`;
             className="mb-20"
           >
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-light text-gray-900 mb-2">What You're Unlearning</h2>
-              <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">Patterns that aren't yours to carry</p>
+              <h2 className="text-2xl font-light text-gray-900 mb-2">What You&apos;re Unlearning</h2>
+              <p className="text-gray-500 text-sm font-light max-w-xl mx-auto">Patterns that aren&apos;t yours to carry</p>
               <p className="text-xs text-gray-400 mt-2 italic">This is common. Nothing is wrong with you.</p>
             </div>
 
