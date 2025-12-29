@@ -418,18 +418,18 @@ RESPONSE REQUIREMENTS:
 
                 {/* My Cycle */}
                 <Link to={createPageUrl("MyCycle")} className="block">
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 hover:bg-white/80 transition-all border border-indigo-200">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Moon className="w-5 h-5 text-white" />
+                  <div className="bg-white/70 backdrop-blur-sm rounded-lg p-3 hover:bg-white/90 transition-all border border-indigo-200/50">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Moon className="w-4 h-4 text-white" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">My Cycle</h3>
-                        <p className="text-sm text-gray-600 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-0.5 text-sm">My Cycle</h3>
+                        <p className="text-xs text-gray-600 mb-1">
                           <span className="font-medium">Phase:</span> {checkIns?.[0]?.cycle_phase || "Luteal"}
                         </p>
-                        <p className="text-xs text-gray-500">Turning inward, discernment, and expression.</p>
-                        <Button variant="link" className="text-xs text-purple-600 p-0 h-auto mt-2">
+                        <p className="text-xs text-gray-500 leading-snug">Turning inward, discernment, and expression.</p>
+                        <Button variant="link" className="text-xs text-purple-600 p-0 h-auto mt-1.5">
                           View cycle guidance →
                         </Button>
                       </div>
@@ -440,24 +440,24 @@ RESPONSE REQUIREMENTS:
             </Card>
 
             {/* Your Life Domains */}
-            <Card className="bg-gradient-to-br from-purple-100/50 to-indigo-100/50 border-purple-200">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Target className="w-5 h-5 text-purple-600" />
+            <Card className="bg-gradient-to-br from-purple-100/60 to-indigo-100/60 border-purple-200/50 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Target className="w-4 h-4 text-purple-600" />
                   Your Life Domains
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-2">Business • Career</h3>
-                  <p className="text-xs text-gray-600 mb-2">Current theme:</p>
+              <CardContent className="space-y-3 pt-0">
+                <div className="bg-white/70 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
+                  <h3 className="font-semibold text-gray-900 mb-1.5 text-sm">Business • Career</h3>
+                  <p className="text-xs text-gray-600 mb-1">Current theme:</p>
                   <p className="text-sm text-gray-700">Clarity before momentum</p>
-                  <Button variant="link" className="text-xs text-purple-600 p-0 h-auto mt-2">
+                  <Button variant="link" className="text-xs text-purple-600 p-0 h-auto mt-1.5">
                     View work guidance guidance →
                   </Button>
                 </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
+                  <h3 className="font-semibold text-gray-900 mb-1.5 text-sm flex items-center gap-2">
                     Finance
                     <Badge variant="secondary" className="text-xs">Intention</Badge>
                   </h3>
@@ -469,85 +469,85 @@ RESPONSE REQUIREMENTS:
           </div>
 
           {/* Main Content - Center */}
-          <div className="lg:col-span-6 space-y-6">
+          <div className="lg:col-span-6 space-y-5">
             {/* Daily ALIVE Snapshot */}
             <Card className="bg-gradient-to-br from-[#3B224E] to-[#4A2B5E] text-white border-0 shadow-xl">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-4">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-center mb-4">
                   <Tabs value={snapshotView} onValueChange={setSnapshotView} className="w-auto">
                     <TabsList className="bg-white/10 border-0">
-                      <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="data-[state=active]:bg-white/20 data-[state=active]:text-white">
+                      <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-sm">
                         Daily
                       </TabsTrigger>
-                      <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY} className="data-[state=active]:bg-white/20 data-[state=active]:text-white">
+                      <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY} className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-sm">
                         Weekly
                       </TabsTrigger>
-                      <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY} className="data-[state=active]:bg-white/20 data-[state=active]:text-white">
+                      <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY} className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-sm">
                         Monthly
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
-                <CardTitle className="text-2xl text-center mb-6">Your Daily ALIVE Snapshot</CardTitle>
+                <CardTitle className="text-xl text-center">Your Daily ALIVE Snapshot</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 {isGeneratingSnapshot ? (
-                  <div className="flex flex-col items-center justify-center py-12">
+                  <div className="flex flex-col items-center justify-center py-8">
                     <div className="animate-spin w-8 h-8 border-2 border-white/20 border-t-white rounded-full mb-4" />
-                    <p className="text-white/80">Understanding your state today...</p>
+                    <p className="text-white/80 text-sm">Understanding your state today...</p>
                   </div>
                 ) : snapshotData ? (
-                  <div className="space-y-6">
+                  <div className="space-y-5">
                     {/* System Icons */}
-                    <div className="flex justify-center items-center gap-4 mb-6">
+                    <div className="flex justify-center items-center gap-3 mb-5">
                       {snapshotData.astrology?.sunSign && (
                         <div className="text-center">
-                          <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-2">
-                            <Sparkles className="w-6 h-6 text-amber-300" />
+                          <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-1.5">
+                            <Sparkles className="w-5 h-5 text-amber-300" />
                           </div>
                           <p className="text-xs text-white/80">{snapshotData.astrology.sunSign}</p>
                         </div>
                       )}
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-2">
-                          <Target className="w-6 h-6 text-purple-300" />
+                        <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-1.5">
+                          <Target className="w-5 h-5 text-purple-300" />
                         </div>
                         <p className="text-xs text-white/80">{snapshotData.humanDesign?.type || "Projector"}</p>
                       </div>
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-2">
-                          <Moon className="w-6 h-6 text-indigo-300" />
+                        <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-1.5">
+                          <Moon className="w-5 h-5 text-indigo-300" />
                         </div>
                         <p className="text-xs text-white/80">{snapshotData.cyclePhase}</p>
                       </div>
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-2">
-                          <Heart className="w-6 h-6 text-pink-300" />
+                        <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-1.5">
+                          <Heart className="w-5 h-5 text-pink-300" />
                         </div>
                         <p className="text-xs text-white/80">{snapshotData.nervousSystemState}</p>
                       </div>
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-2">
-                          <TrendingUp className="w-6 h-6 text-purple-300" />
+                        <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-full flex flex-col items-center justify-center mb-1.5">
+                          <TrendingUp className="w-5 h-5 text-purple-300" />
                         </div>
                         <p className="text-xs text-white/80">{snapshotData.alivePhase}</p>
                       </div>
                     </div>
 
                     {/* Main Narrative */}
-                    <div className="text-center mb-6">
-                      <h3 className="text-xl font-semibold mb-4">{snapshotData.guidingPhrase}</h3>
-                      <p className="text-white/90 leading-relaxed whitespace-pre-line">{snapshotData.narrative}</p>
+                    <div className="text-center mb-5">
+                      <h3 className="text-lg font-semibold mb-3">{snapshotData.guidingPhrase}</h3>
+                      <p className="text-white/90 leading-relaxed whitespace-pre-line text-sm">{snapshotData.narrative}</p>
                     </div>
 
                     {/* CTA Button */}
-                    <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-full py-3 px-6 text-center">
-                      <p className="text-white font-medium">Less effort. More alignment.</p>
+                    <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-full py-2.5 px-6 text-center">
+                      <p className="text-white font-medium text-sm">Less effort. More alignment.</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <Button onClick={generateSnapshot} className="bg-white/20 hover:bg-white/30 text-white">
+                  <div className="text-center py-8">
+                    <Button onClick={generateSnapshot} className="bg-white/20 hover:bg-white/30 text-white text-sm">
                       Generate Today&apos;s Snapshot
                     </Button>
                   </div>
@@ -556,23 +556,23 @@ RESPONSE REQUIREMENTS:
             </Card>
 
             {/* Ask LaurAI */}
-            <Card className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-6 h-6 text-white" />
+            <Card className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200/50 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Ask LaurAI about today</h3>
+                    <h3 className="font-semibold text-gray-900 text-sm">Ask LaurAI about today</h3>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-1.5 mb-3">
                   <Button
                     onClick={() => handleQuickQuestion("How should I work today?")}
                     variant="outline"
                     size="sm"
-                    className="text-xs"
+                    className="text-xs h-7 px-2.5"
                   >
                     How should I work today?
                   </Button>
@@ -580,7 +580,7 @@ RESPONSE REQUIREMENTS:
                     onClick={() => handleQuickQuestion("Why does this feel harder than usual?")}
                     variant="outline"
                     size="sm"
-                    className="text-xs"
+                    className="text-xs h-7 px-2.5"
                   >
                     Why does this feel harder than usual?
                   </Button>
@@ -588,31 +588,9 @@ RESPONSE REQUIREMENTS:
                     onClick={() => handleQuickQuestion("What should I focus on this week?")}
                     variant="outline"
                     size="sm"
-                    className="text-xs"
+                    className="text-xs h-7 px-2.5"
                   >
                     What should I focus on this week?
-                  </Button>
-                </div>
-
-                <div className="flex gap-2">
-                  <Input
-                    value={lauraiQuestion}
-                    onChange={(e) => setLauraiQuestion(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleCustomQuestion()}
-                    placeholder="Or ask your own question..."
-                    className="flex-1 bg-white"
-                    disabled={isLauraiThinking}
-                  />
-                  <Button
-                    onClick={handleCustomQuestion}
-                    disabled={isLauraiThinking || !lauraiQuestion.trim()}
-                    className="bg-gradient-to-r from-pink-500 to-purple-500 text-white"
-                  >
-                    {isLauraiThinking ? (
-                      <div className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full" />
-                    ) : (
-                      <ArrowRight className="w-4 h-4" />
-                    )}
                   </Button>
                 </div>
 
@@ -620,9 +598,9 @@ RESPONSE REQUIREMENTS:
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 bg-white rounded-xl p-4"
+                    className="mb-3 bg-white rounded-lg p-3"
                   >
-                    <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                    <p className="text-xs text-gray-700 whitespace-pre-line leading-relaxed">
                       {lauraiResponse}
                     </p>
                   </motion.div>
@@ -631,30 +609,28 @@ RESPONSE REQUIREMENTS:
             </Card>
 
             {/* Recommended For You */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
+            <Card className="bg-gradient-to-br from-[#3B224E] to-[#4A2B5E] text-white border-0 shadow-md">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Sparkles className="w-4 h-4" />
                   Recommended For You Right Now
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
+              <CardContent className="pt-0">
+                <div className="grid md:grid-cols-2 gap-3">
                   {recommendedModules.slice(0, 2).map((module, idx) => (
-                    <div key={idx} className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-200">
-                      <h3 className="font-semibold text-gray-900 mb-2">{module.title}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{module.summary}</p>
-                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {module.duration} min • Video
-                        </span>
+                    <div key={idx} className="bg-gradient-to-br from-purple-400/20 to-pink-400/20 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+                      <h3 className="font-semibold text-white mb-2 text-sm">{module.title}</h3>
+                      <p className="text-xs text-white/80 mb-3 line-clamp-2">{module.summary}</p>
+                      <div className="flex items-center gap-2 text-xs text-white/70 mb-3">
+                        <Clock className="w-3 h-3" />
+                        <span>{module.duration} min • Video</span>
                       </div>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <Badge variant="secondary" className="text-xs">Lowest lift</Badge>
-                        <Badge variant="secondary" className="text-xs">Manifestation today</Badge>
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        <Badge variant="secondary" className="text-xs bg-white/20 text-white border-0 h-5">Lowest lift</Badge>
+                        <Badge variant="secondary" className="text-xs bg-white/20 text-white border-0 h-5">Manifestation today</Badge>
                       </div>
-                      <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                      <Button className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm h-8">
                         Start
                       </Button>
                     </div>
@@ -665,58 +641,82 @@ RESPONSE REQUIREMENTS:
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-5">
             {/* Cycle & Capacity */}
-            <Card className="bg-gradient-to-br from-pink-400 to-rose-500 text-white border-0">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Moon className="w-5 h-5" />
+            <Card className="bg-gradient-to-br from-pink-400 to-rose-500 text-white border-0 shadow-md">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Moon className="w-4 h-4" />
                   Cycle & Capacity
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-center mb-4">
-                  <p className="text-white/80 text-sm mb-2">{checkIns?.[0]?.cycle_phase || "Luteal"}</p>
-                  <p className="text-5xl font-bold">{diagnosticSession?.capacityScore || 5.5}</p>
+              <CardContent className="pt-0">
+                <div className="text-center mb-3">
+                  <p className="text-white/80 text-sm mb-1">{checkIns?.[0]?.cycle_phase || "Luteal"}</p>
+                  <p className="text-4xl font-bold">{diagnosticSession?.capacityScore || 5.5}</p>
                 </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                  <Progress value={(diagnosticSession?.capacityScore || 5.5) * 10} className="h-2 bg-white/30 mb-3" />
-                  <p className="text-white/90 text-sm">Gentle movement & warm foods</p>
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
+                  <Progress value={(diagnosticSession?.capacityScore || 5.5) * 10} className="h-2 bg-white/30 mb-2" />
+                  <p className="text-white/90 text-xs">Gentle movement & warm foods</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Recent Activity</CardTitle>
+            <Card className="bg-purple-100/60 border-purple-200/50 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Recent Activity</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-purple-500" />
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                     <span className="text-gray-600">Thu</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-purple-500" />
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                     <span className="text-gray-600">Feb</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-purple-500" />
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                     <span className="text-gray-600">Mar</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span className="text-gray-600">Apr</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span className="text-gray-600">May</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span className="text-gray-600">Jun</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span className="text-gray-600">Jul</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span className="text-gray-600">Jul</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <span className="text-gray-600">Jul</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Body Patterns */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Body Patterns</CardTitle>
+            <Card className="bg-purple-100/60 border-purple-200/50 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Body Patterns</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="h-32 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl flex items-center justify-center mb-4">
-                  <svg className="w-full h-full" viewBox="0 0 200 80">
+              <CardContent className="pt-0">
+                <div className="h-24 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center mb-3">
+                  <svg className="w-full h-full px-2" viewBox="0 0 200 80">
                     <path
                       d="M 0 40 Q 25 20, 50 40 T 100 40 T 150 40 T 200 40"
                       stroke="#C67793"
@@ -731,39 +731,89 @@ RESPONSE REQUIREMENTS:
                     />
                   </svg>
                 </div>
-                <div className="flex justify-center gap-4">
-                  <Button variant="outline" size="sm" className="text-xs">
+                <div className="flex justify-center gap-2">
+                  <Button variant="outline" size="sm" className="text-xs h-7 px-2.5">
                     Daily
                   </Button>
-                  <Button variant="outline" size="sm" className="text-xs">
+                  <Button variant="outline" size="sm" className="text-xs h-7 px-2.5">
                     Weekly
                   </Button>
-                  <Button variant="default" size="sm" className="text-xs bg-pink-500">
+                  <Button size="sm" className="text-xs h-7 px-2.5 bg-pink-500 hover:bg-pink-600">
                     Monthly
                   </Button>
-                  <Button variant="outline" size="sm" className="text-xs">
+                  <Button variant="outline" size="sm" className="text-xs h-7 px-2.5">
                     Jul
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Stress & Energy Patterns Placeholder */}
+            <Card className="bg-purple-100/60 border-purple-200/50 shadow-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Your Stress & Energy Patterns</CardTitle>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <ChevronLeft className="w-3 h-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <ChevronRight className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-center mb-3">
+                  <p className="text-sm font-semibold">May 2024</p>
+                  <div className="flex justify-between text-xs text-gray-600 mt-2 mb-1">
+                    <span>Sun</span>
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                  </div>
+                  <div className="grid grid-cols-7 gap-1">
+                    {Array.from({ length: 31 }).map((_, i) => (
+                      <div key={i} className="aspect-square rounded-full bg-pink-200/50" />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-center gap-3 text-xs mb-3">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-green-400" />
+                    <span>Regulated</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-pink-400" />
+                    <span>Mild Stress</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-red-400" />
+                    <span>High S</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Quick Action Buttons */}
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Edit3 className="w-4 h-4" />
+            <div className="flex flex-wrap gap-1.5">
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs h-7 px-2.5">
+                <Edit3 className="w-3 h-3" />
                 Reflect
               </Button>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Activity className="w-4 h-4" />
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs h-7 px-2.5">
+                <Activity className="w-3 h-3" />
                 Regulate
               </Button>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Moon className="w-4 h-4" />
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs h-7 px-2.5">
+                <Moon className="w-3 h-3" />
                 Cycle
               </Button>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Moon className="w-4 h-4" />
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs h-7 px-2.5">
+                <Moon className="w-3 h-3" />
                 Sleep
               </Button>
             </div>
