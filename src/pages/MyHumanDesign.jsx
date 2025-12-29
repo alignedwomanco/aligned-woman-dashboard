@@ -748,7 +748,7 @@ This should feel embodied and personal.`;
             </CardHeader>
             <CardContent className="space-y-3">
               {ENERGY_CENTRES.map((centre, idx) => {
-                const isDefined = humanDesign.definedCentres?.includes(centre.key);
+                const isDefined = humanDesign?.definedCentres?.includes(centre.key) || false;
                 return (
                   <div key={centre.key} className="border border-gray-200 rounded-lg">
                     <button
