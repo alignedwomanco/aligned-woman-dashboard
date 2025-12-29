@@ -516,45 +516,381 @@ Format: JSON with keys: summary, guidance, helps (array), avoid (array)`;
   };
 
   return (
-    <div className="min-h-screen pb-12" style={{ backgroundColor: '#F3E8FF' }}>
-      <div className="max-w-[1600px] mx-auto px-8 py-8">
-        {/* Timeframe Toggle - Moved Below */}
+    <div className="min-h-screen pb-12" style={{ backgroundColor: 'rgb(250, 248, 255)' }}>
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        {/* ZONE 1: ORIENTATION - Daily Anchor */}
+        {/* Your Daily ALIVE Snapshot - Hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-16"
+        >
+          <div className="bg-gradient-to-br from-purple-50/40 to-indigo-50/30 rounded-3xl p-10 max-w-4xl mx-auto shadow-sm">
+            {isGeneratingSnapshot ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="animate-spin w-8 h-8 border-2 border-purple-300/30 border-t-purple-400 rounded-full mb-4" />
+                <p className="text-gray-500 font-light">Understanding your state today...</p>
+              </div>
+            ) : snapshotData ? (
+              <div className="space-y-8">
+                {/* System Icons - Subtle */}
+                <div className="flex justify-center gap-6 mb-2">
+                  {snapshotData.astrology?.sunSign && (
+                    <button 
+                      onClick={() => setSelectedIcon(selectedIcon === 'astrology' ? null : 'astrology')}
+                      className="text-center hover:scale-105 transition-all"
+                    >
+                      <div className="w-14 h-14 bg-gradient-to-br from-amber-100/50 to-transparent rounded-full flex items-center justify-center mb-2 mx-auto hover:bg-amber-100/70">
+                        <Sparkles className="w-6 h-6 text-amber-500" />
+                      </div>
+                      <p className="text-xs text-gray-500 font-light">{snapshotData.astrology.sunSign}</p>
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setSelectedIcon(selectedIcon === 'humanDesign' ? null : 'humanDesign')}
+                    className="text-center hover:scale-105 transition-all"
+                  >
+                    <div className="w-14 h-14 bg-gradient-to-br from-purple-100/50 to-transparent rounded-full flex items-center justify-center mb-2 mx-auto hover:bg-purple-100/70">
+                      <Target className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 font-light">{snapshotData.humanDesign?.type || "Projector"}</p>
+                  </button>
+                  <button 
+                    onClick={() => setSelectedIcon(selectedIcon === 'cycle' ? null : 'cycle')}
+                    className="text-center hover:scale-105 transition-all"
+                  >
+                    <div className="w-14 h-14 bg-gradient-to-br from-indigo-100/50 to-transparent rounded-full flex items-center justify-center mb-2 mx-auto hover:bg-indigo-100/70">
+                      <Moon className="w-6 h-6 text-indigo-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 font-light">{snapshotData.cyclePhase}</p>
+                  </button>
+                  <button 
+                    onClick={() => setSelectedIcon(selectedIcon === 'nervousSystem' ? null : 'nervousSystem')}
+                    className="text-center hover:scale-105 transition-all"
+                  >
+                    <div className="w-14 h-14 bg-gradient-to-br from-pink-100/50 to-transparent rounded-full flex items-center justify-center mb-2 mx-auto hover:bg-pink-100/70">
+                      <Heart className="w-6 h-6 text-pink-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 font-light">{snapshotData.nervousSystemState}</p>
+                  </button>
+                </div>
 
-        {/* Main Grid Layout */}
-        <div className="grid lg:grid-cols-12 gap-6">
-          {/* Left Column: Your Inner Systems + Life Domains */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Timeframe Toggle Above Left Column */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+                {/* Icon Explanation */}
+                {selectedIcon && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-white/60 rounded-2xl p-5 mb-4"
+                  >
+                    <p className="text-sm text-gray-600 leading-relaxed font-light text-center">
+                      {snapshotData.iconExplanations?.[selectedIcon] || "Understanding this aspect..."}
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Main Narrative */}
+                <div className="max-w-3xl mx-auto">
+                  <p className="text-gray-700 leading-loose text-center whitespace-pre-line font-light text-lg">
+                    {snapshotData.narrative}
+                  </p>
+                </div>
+
+                {/* Guiding Phrase */}
+                <div className="text-center mt-8">
+                  <p className="text-2xl font-light text-gray-800 tracking-wide">
+                    {snapshotData.guidingPhrase}
+                  </p>
+                </div>
+
+                {/* Ask LaurAI - Softer */}
+                <div className="bg-gradient-to-br from-pink-50/50 to-purple-50/30 rounded-2xl p-6 mt-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-400 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <p className="text-sm font-light text-gray-700">You might explore with LaurAI</p>
+                  </div>
+                  
+                  {/* Quick Questions */}
+                  <div className="flex gap-2 flex-wrap mb-4">
+                    <button
+                      onClick={() => handleQuickQuestion("How should I work today?")}
+                      className="bg-white/80 text-gray-600 text-xs px-4 py-2 rounded-full hover:bg-white transition-colors shadow-sm font-light"
+                    >
+                      How should I work today?
+                    </button>
+                    <button
+                      onClick={() => handleQuickQuestion("Why does this feel harder than usual?")}
+                      className="bg-white/80 text-gray-600 text-xs px-4 py-2 rounded-full hover:bg-white transition-colors shadow-sm font-light"
+                    >
+                      Why does this feel harder?
+                    </button>
+                  </div>
+
+                  {/* Custom Question Input */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={lauraiQuestion}
+                      onChange={(e) => setLauraiQuestion(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleCustomQuestion()}
+                      placeholder="Or ask your own question..."
+                      className="flex-1 bg-white/80 border-0 rounded-full px-5 shadow-sm font-light text-sm"
+                      disabled={isLauraiThinking}
+                    />
+                    <Button 
+                      onClick={handleCustomQuestion}
+                      disabled={isLauraiThinking || !lauraiQuestion.trim()}
+                      className="bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-full shadow-sm hover:from-pink-500 hover:to-purple-500"
+                    >
+                      {isLauraiThinking ? (
+                        <div className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full" />
+                      ) : (
+                        <ArrowRight className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* LaurAI Response */}
+                  {lauraiResponse && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 bg-white/80 rounded-2xl p-5"
+                    >
+                      <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-light">{lauraiResponse}</p>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <Button onClick={generateSnapshot} className="bg-purple-400 hover:bg-purple-500 text-white rounded-full px-10 py-6 text-base font-light shadow-sm">
+                  Begin Today&apos;s Check-In
+                </Button>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* ZONE 2: SUPPORTING SIGNALS - Today's Signals */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="mb-16"
+        >
+          <h2 className="text-sm uppercase tracking-wider text-gray-400 mb-6 text-center font-light">Today&apos;s Signals</h2>
+          
+          <div className="grid md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {/* Nervous System */}
+            <button 
+              onClick={() => handleSystemClick('nervous_system')}
+              className="bg-white/40 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/60 transition-all text-left group"
             >
-              <Tabs value={snapshotView} onValueChange={setSnapshotView} className="w-full">
-                <TabsList className="w-full bg-white/90 backdrop-blur-sm border-0 h-11 p-1 rounded-xl">
-                  <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="flex-1 data-[state=active]:bg-[#3B224E] data-[state=active]:text-white rounded-lg font-medium">
-                    Daily
-                  </TabsTrigger>
-                  <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY} className="flex-1 data-[state=active]:bg-[#3B224E] data-[state=active]:text-white rounded-lg font-medium">
-                    Weekly
-                  </TabsTrigger>
-                  <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY} className="flex-1 data-[state=active]:bg-[#3B224E] data-[state=active]:text-white rounded-lg font-medium">
-                    Monthly
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </motion.div>
-            {/* Your Inner Systems */}
-            <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
+              <div className="w-10 h-10 bg-gradient-to-br from-pink-100 to-pink-200 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Heart className="w-5 h-5 text-pink-600" />
+              </div>
+              <p className="text-xs text-gray-500 mb-1 font-light">Nervous System</p>
+              <p className="text-sm font-medium text-gray-800">{checkIns?.[0]?.nervous_system_state || "Fawn"}</p>
+            </button>
+
+            {/* Human Design */}
+            <Link 
+              to={createPageUrl("MyHumanDesign")}
+              className="block bg-white/40 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/60 transition-all text-left group"
             >
-            <Card className="bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold text-gray-900">Your Inner Systems</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Target className="w-5 h-5 text-purple-600" />
+              </div>
+              <p className="text-xs text-gray-500 mb-1 font-light">Design</p>
+              <p className="text-sm font-medium text-gray-800">{diagnosticSession?.humanDesignProfile?.type || "Projector"}</p>
+            </Link>
+
+            {/* Cycle */}
+            <Link 
+              to={createPageUrl("MyCycle")}
+              className="block bg-white/40 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/60 transition-all text-left group"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Moon className="w-5 h-5 text-indigo-600" />
+              </div>
+              <p className="text-xs text-gray-500 mb-1 font-light">Cycle</p>
+              <p className="text-sm font-medium text-gray-800">{checkIns?.[0]?.cycle_phase || "Luteal"}</p>
+            </Link>
+
+            {/* Astrology */}
+            <Link 
+              to={createPageUrl("MyAstrology")}
+              className="block bg-white/40 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/60 transition-all text-left group"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Sparkles className="w-5 h-5 text-amber-600" />
+              </div>
+              <p className="text-xs text-gray-500 mb-1 font-light">Astrology</p>
+              <p className="text-sm font-medium text-gray-800">{diagnosticSession?.astrologyProfile?.sunSign || "Sagittarius"}</p>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* ZONE 3: OPTIONAL DEPTH - Progressive Disclosure */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+          className="space-y-12"
+        >
+          {/* Support Available */}
+          <div>
+            <h2 className="text-sm uppercase tracking-wider text-gray-400 mb-6 text-center font-light">Support Available</h2>
+            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {recommendedModules.slice(0, 2).map((module, idx) => (
+                <div key={idx} className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/60 transition-all group">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <Play className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 mb-1">{module.title}</h3>
+                      <p className="text-xs text-gray-500 font-light">{module.summary}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {module.duration} min
+                    </span>
+                  </div>
+                  <Button className="w-full bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-full font-light hover:from-purple-500 hover:to-pink-500">
+                    Begin when ready
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Optional: Patterns & Insights (Collapsed by Default) */}
+          <details className="group max-w-3xl mx-auto">
+            <summary className="flex items-center justify-center gap-2 cursor-pointer text-sm text-gray-500 hover:text-gray-700 font-light list-none">
+              <span>View patterns & insights</span>
+              <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="mt-8 space-y-6">
+              {/* Body Patterns */}
+              <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-4">Your Body Patterns</h3>
+                <div className="h-32 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-xl flex items-center justify-center">
+                  <svg className="w-full h-full" viewBox="0 0 200 80">
+                    <path
+                      d="M 0 40 Q 25 20, 50 40 T 100 40 T 150 40 T 200 40"
+                      stroke="#C67793"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                    <path
+                      d="M 0 50 Q 25 30, 50 50 T 100 50 T 150 50 T 200 50"
+                      stroke="#9333EA"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  </svg>
+                </div>
+                <div className="flex justify-center gap-3 mt-4 text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-[#C67793]" />
+                    Energy
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-[#9333EA]" />
+                    Capacity
+                  </span>
+                </div>
+              </div>
+
+              {/* Cycle & Capacity */}
+              <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-4">Cycle & Capacity</h3>
+                <div className="bg-gradient-to-br from-pink-100/50 to-rose-100/50 rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-gray-600 font-light">Current Phase</span>
+                    <span className="text-2xl font-light text-gray-800">{diagnosticSession?.capacityScore || 5.5}</span>
+                  </div>
+                  <Progress value={(diagnosticSession?.capacityScore || 5.5) * 10} className="h-2 bg-white/60 mb-3" />
+                  <p className="text-xs text-gray-600 font-light">Gentle movement & warm foods</p>
+                </div>
+              </div>
+            </div>
+          </details>
+        </motion.div>
+
+        {/* Quick Tools - Minimal */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9 }}
+          className="mt-16"
+        >
+          <div className="flex items-center justify-center gap-6">
+            <Link to={createPageUrl("Journal")} className="flex flex-col items-center gap-2 group">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Edit3 className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-xs text-gray-500 font-light">Reflect</span>
+            </Link>
+            <Link to={createPageUrl("CheckIn")} className="flex flex-col items-center gap-2 group">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-100 to-pink-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Heart className="w-5 h-5 text-pink-600" />
+              </div>
+              <span className="text-xs text-gray-500 font-light">Regulate</span>
+            </Link>
+            <Link to={createPageUrl("MyCycle")} className="flex flex-col items-center gap-2 group">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Activity className="w-5 h-5 text-purple-600" />
+              </div>
+              <span className="text-xs text-gray-500 font-light">Cycle</span>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Timeframe Toggle - Moved to Bottom */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="mt-16 max-w-md mx-auto"
+        >
+          <Tabs value={snapshotView} onValueChange={setSnapshotView} className="w-full">
+            <TabsList className="w-full bg-white/60 backdrop-blur-sm border-0 h-11 p-1 rounded-full">
+              <TabsTrigger value={SNAPSHOT_VIEWS.DAILY} className="flex-1 data-[state=active]:bg-purple-400 data-[state=active]:text-white rounded-full font-light">
+                Daily
+              </TabsTrigger>
+              <TabsTrigger value={SNAPSHOT_VIEWS.WEEKLY} className="flex-1 data-[state=active]:bg-purple-400 data-[state=active]:text-white rounded-full font-light">
+                Weekly
+              </TabsTrigger>
+              <TabsTrigger value={SNAPSHOT_VIEWS.MONTHLY} className="flex-1 data-[state=active]:bg-purple-400 data-[state=active]:text-white rounded-full font-light">
+                Monthly
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </motion.div>
+      </div>
+
+      {/* System Detail Drawer */}
+      {selectedSystem && snapshotData && (
+        <SystemDetailDrawer
+          isOpen={!!selectedSystem}
+          onClose={() => setSelectedSystem(null)}
+          system={selectedSystem}
+          systemData={systemData}
+          snapshotContext={snapshotData}
+          currentUser={currentUser}
+          courses={relevantCourses}
+        />
+      )}
+    </div>
+  );
+}
               {/* My Nervous System */}
               <button 
                 onClick={() => handleSystemClick('nervous_system')}
