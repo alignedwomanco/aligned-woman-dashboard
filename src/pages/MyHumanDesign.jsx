@@ -73,11 +73,11 @@ export default function MyHumanDesign() {
     initialData: [],
   });
 
-  const humanDesign = diagnosticSession?.humanDesignProfile;
+  const humanDesign = diagnosticSession?.humanDesignProfile || null;
 
   // Generate Design Snapshot
   const generateDesignSnapshot = async () => {
-    if (!diagnosticSession || !humanDesign) return;
+    if (!diagnosticSession) return;
     
     setIsGeneratingSnapshot(true);
     
@@ -85,10 +85,10 @@ export default function MyHumanDesign() {
       const prompt = `You are generating a Design Snapshot for ${currentUser.full_name}.
 
 HUMAN DESIGN DATA:
-- Type: ${humanDesign.type}
-- Strategy: ${humanDesign.strategy}
-- Authority: ${humanDesign.authority}
-- Profile: ${diagnosticSession.humanDesignProfile?.profile || "Not specified"}
+- Type: ${humanDesign?.type || "Projector"}
+- Strategy: ${humanDesign?.strategy || "Wait for the invitation"}
+- Authority: ${humanDesign?.authority || "Emotional"}
+- Profile: ${humanDesign?.profile || "2/4"}
 
 GENERATE:
 1. orientation (1 short paragraph explaining how their energy works and what they are not meant to force)
@@ -128,11 +128,16 @@ Example tone: "Your energy isn't designed to initiate. You're here to see what o
 
   // Generate Core Design Insight
   const generateCoreDesignInsight = async (cardType) => {
-    if (!humanDesign) return;
+    if (!diagnosticSession) return;
+    
+    const designType = humanDesign?.type || "Projector";
+    const designStrategy = humanDesign?.strategy || "Wait for the invitation";
+    const designAuthority = humanDesign?.authority || "Emotional";
+    const designProfile = humanDesign?.profile || "2/4";
     
     try {
       const prompts = {
-        type: `Generate deep insight about ${humanDesign.type} type.
+        type: `Generate deep insight about ${designType} type.
 
 INCLUDE:
 1. whatThisMeans (practical explanation)
@@ -144,7 +149,7 @@ INCLUDE:
 
 Be personal, not textbook. Use "you" language.`,
         
-        strategy: `Generate deep insight about "${humanDesign.strategy}" strategy.
+        strategy: `Generate deep insight about "${designStrategy}" strategy.
 
 INCLUDE:
 1. whatWaitingMeans (demystified explanation)
@@ -154,7 +159,7 @@ INCLUDE:
 5. supportivePractice (one concrete practice)
 6. suggestedCourse (course title that would help)`,
         
-        authority: `Generate deep insight about ${humanDesign.authority} authority.
+        authority: `Generate deep insight about ${designAuthority} authority.
 
 INCLUDE:
 1. howDecisionsWork (how they are meant to make decisions)
@@ -164,7 +169,7 @@ INCLUDE:
 5. supportivePractice (one concrete practice)
 6. suggestedCourse (course title that would help)`,
         
-        profile: `Generate deep insight about ${diagnosticSession.humanDesignProfile?.profile || "2/4"} profile.
+        profile: `Generate deep insight about ${designProfile} profile.
 
 INCLUDE:
 1. yourNaturalRole (what role they naturally play)
@@ -191,14 +196,16 @@ INCLUDE:
 
   // Generate Centre Insight
   const generateCentreInsight = async (centre) => {
-    if (!humanDesign) return;
+    if (!diagnosticSession) return;
     
     try {
-      const isDefined = humanDesign.definedCentres?.includes(centre.key) || false;
+      const isDefined = humanDesign?.definedCentres?.includes(centre.key) || false;
+      const designType = humanDesign?.type || "Projector";
+      const designAuthority = humanDesign?.authority || "Emotional";
       
       const prompt = `Generate insight about ${centre.name} centre (${isDefined ? "DEFINED" : "UNDEFINED"}) for ${currentUser.full_name}.
 
-HUMAN DESIGN: ${humanDesign.type}, ${humanDesign.authority}
+HUMAN DESIGN: ${designType}, ${designAuthority}
 
 INCLUDE:
 1. whatThisGoverns (what this centre governs in real life)
@@ -236,18 +243,20 @@ CRITICAL:
 
   // Generate Conditioning Themes
   const generateConditioningThemes = async () => {
-    if (!humanDesign) return;
+    if (!diagnosticSession || !currentUser) return;
     
     try {
+      const designType = humanDesign?.type || "Projector";
+      const designAuthority = humanDesign?.authority || "Emotional";
       const undefinedCentres = ENERGY_CENTRES.filter(c => 
-        !humanDesign.definedCentres?.includes(c.key)
+        !humanDesign?.definedCentres?.includes(c.key)
       ).map(c => c.name);
 
       const prompt = `Generate 3-4 current conditioning themes for ${currentUser.full_name}.
 
 DESIGN:
-- Type: ${humanDesign.type}
-- Authority: ${humanDesign.authority}
+- Type: ${designType}
+- Authority: ${designAuthority}
 - Undefined Centres: ${undefinedCentres.join(", ")}
 
 Each theme should include:
@@ -293,11 +302,11 @@ Make it specific to their design, not generic.`;
   };
 
   useEffect(() => {
-    if (diagnosticSession && humanDesign && currentUser && !designSnapshot) {
+    if (diagnosticSession && currentUser && !designSnapshot) {
       generateDesignSnapshot();
       generateConditioningThemes();
     }
-  }, [diagnosticSession, humanDesign, currentUser]);
+  }, [diagnosticSession, currentUser]);
 
   // Handle card expansion
   const handleCardExpand = async (cardType) => {
@@ -325,7 +334,12 @@ Make it specific to their design, not generic.`;
 
   // Ask LaurAI
   const askLaurAI = async (question) => {
-    if (!question.trim() || !humanDesign) return;
+    if (!question.trim() || !diagnosticSession) return;
+    
+    const designType = humanDesign?.type || "Projector";
+    const designStrategy = humanDesign?.strategy || "Wait for the invitation";
+    const designAuthority = humanDesign?.authority || "Emotional";
+    const designProfile = humanDesign?.profile || "2/4";
     
     setIsLauraiThinking(true);
     setLauraiResponse("");
@@ -334,10 +348,10 @@ Make it specific to their design, not generic.`;
       const contextPrompt = `You are LaurAI, providing Human Design guidance on the My Human Design page.
 
 DESIGN CONTEXT:
-- Type: ${humanDesign.type}
-- Strategy: ${humanDesign.strategy}
-- Authority: ${humanDesign.authority}
-- Profile: ${diagnosticSession.humanDesignProfile?.profile || "Not specified"}
+- Type: ${designType}
+- Strategy: ${designStrategy}
+- Authority: ${designAuthority}
+- Profile: ${designProfile}
 
 DESIGN SNAPSHOT:
 ${designSnapshot?.orientation || "Understanding their design..."}
@@ -388,15 +402,17 @@ This should feel embodied and personal.`;
     if (courses.length === 0) return [];
     
     // Intelligent recommendations based on design
+    const designType = humanDesign?.type || "Projector";
+    const designAuthority = humanDesign?.authority || "Emotional";
     return courses.slice(0, 2).map(course => ({
       ...course,
-      reason: `Support for ${humanDesign.type}s with ${humanDesign.authority} authority`
+      reason: `Support for ${designType}s with ${designAuthority} authority`
     }));
   };
 
   const recommendedCourses = getRecommendedCourses();
 
-  if (!diagnosticSession || !humanDesign) {
+  if (!diagnosticSession) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center p-6">
         <div className="text-center">
@@ -505,13 +521,13 @@ This should feel embodied and personal.`;
             </CardHeader>
             <CardContent>
               <div className="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-xl p-8 flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <Target className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                  <p className="text-gray-600">Bodygraph visualization</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {humanDesign.type} • {humanDesign.authority} Authority
-                  </p>
-                </div>
+              <div className="text-center">
+              <Target className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+              <p className="text-gray-600">Bodygraph visualization</p>
+              <p className="text-sm text-gray-500 mt-2">
+                {humanDesign?.type || "Projector"} • {humanDesign?.authority || "Emotional"} Authority
+              </p>
+              </div>
               </div>
             </CardContent>
           </Card>
@@ -540,7 +556,7 @@ This should feel embodied and personal.`;
                     </div>
                     <div className="text-left">
                       <p className="text-xs text-gray-500 uppercase">Type</p>
-                      <p className="font-semibold text-gray-900">{humanDesign.type}</p>
+                      <p className="font-semibold text-gray-900">{humanDesign?.type || "Projector"}</p>
                     </div>
                   </div>
                   {expandedCard === 'type' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
@@ -590,7 +606,7 @@ This should feel embodied and personal.`;
                     </div>
                     <div className="text-left">
                       <p className="text-xs text-gray-500 uppercase">Strategy</p>
-                      <p className="font-semibold text-gray-900">{humanDesign.strategy}</p>
+                      <p className="font-semibold text-gray-900">{humanDesign?.strategy || "Wait for the invitation"}</p>
                     </div>
                   </div>
                   {expandedCard === 'strategy' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
@@ -636,7 +652,7 @@ This should feel embodied and personal.`;
                     </div>
                     <div className="text-left">
                       <p className="text-xs text-gray-500 uppercase">Authority</p>
-                      <p className="font-semibold text-gray-900">{humanDesign.authority}</p>
+                      <p className="font-semibold text-gray-900">{humanDesign?.authority || "Emotional"}</p>
                     </div>
                   </div>
                   {expandedCard === 'authority' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
@@ -682,7 +698,7 @@ This should feel embodied and personal.`;
                     </div>
                     <div className="text-left">
                       <p className="text-xs text-gray-500 uppercase">Profile</p>
-                      <p className="font-semibold text-gray-900">{diagnosticSession.humanDesignProfile?.profile || "2/4"}</p>
+                      <p className="font-semibold text-gray-900">{humanDesign?.profile || "2/4"}</p>
                     </div>
                   </div>
                   {expandedCard === 'profile' ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
@@ -916,7 +932,7 @@ This should feel embodied and personal.`;
                   <Heart className="w-5 h-5 text-pink-500" />
                   Recommended For You
                 </CardTitle>
-                <p className="text-sm text-gray-600">Support for {humanDesign.type}s</p>
+                <p className="text-sm text-gray-600">Support for {humanDesign?.type || "Projector"}s</p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
