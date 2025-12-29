@@ -650,6 +650,63 @@ RESPONSE REQUIREMENTS:
                     <div className="bg-gradient-to-r from-pink-500/90 to-rose-500/90 rounded-full py-3 px-8 text-center backdrop-blur-sm shadow-lg">
                       <p className="text-white font-light text-sm tracking-wide">Less effort. More alignment.</p>
                     </div>
+
+                    {/* Ask LaurAI - Integrated */}
+                    <div className="border-t border-white/10 pt-8 mt-8">
+                      <div className="text-center mb-6">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400/20 to-purple-500/20 backdrop-blur-md flex items-center justify-center mx-auto mb-4 shadow-lg border border-white/10">
+                          <Sparkles className="w-6 h-6 text-white/90" strokeWidth={1.5} />
+                        </div>
+                        <h3 className="text-lg font-light text-white mb-2 tracking-tight">Ask LaurAI</h3>
+                        <p className="text-xs text-white/60 font-light">Design-aware guidance just for you</p>
+                      </div>
+
+                      <div className="flex flex-wrap justify-center gap-3 mb-6">
+                        {getFocusPrompts().map((prompt, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleQuickQuestion(prompt)}
+                            className="text-xs text-white/70 hover:text-white font-light transition-colors"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex gap-2 max-w-2xl mx-auto">
+                        <Input
+                          value={lauraiQuestion}
+                          onChange={(e) => setLauraiQuestion(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleCustomQuestion()}
+                          placeholder="Or ask your own question..."
+                          className="flex-1 bg-white/10 backdrop-blur-md border-0 text-white placeholder:text-white/40 rounded-full px-5 h-12 font-light"
+                          disabled={isLauraiThinking}
+                        />
+                        <Button
+                          onClick={handleCustomQuestion}
+                          disabled={isLauraiThinking || !lauraiQuestion.trim()}
+                          className="bg-white/20 hover:bg-white/30 text-white rounded-full h-12 w-12 p-0 shadow-md"
+                        >
+                          {isLauraiThinking ? (
+                            <div className="animate-spin w-4 h-4 border border-white/20 border-t-white rounded-full" />
+                          ) : (
+                            <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
+                          )}
+                        </Button>
+                      </div>
+
+                      {lauraiResponse && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-6 bg-white/15 backdrop-blur-md rounded-2xl p-5 shadow-lg max-w-2xl mx-auto"
+                        >
+                          <p className="text-sm text-white/90 whitespace-pre-line leading-relaxed font-light">
+                            {lauraiResponse}
+                          </p>
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-12">
@@ -657,46 +714,6 @@ RESPONSE REQUIREMENTS:
                       Generate Today&apos;s Snapshot
                     </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Ask LaurAI */}
-            <Card className="bg-white/70 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-400/90 to-purple-500/90 flex items-center justify-center flex-shrink-0 shadow-md">
-                    <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 text-sm tracking-tight">Ask LaurAI about today</h3>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {getFocusPrompts().map((prompt, idx) => (
-                    <Button
-                      key={idx}
-                      onClick={() => handleQuickQuestion(prompt)}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-8 px-4 rounded-full border-gray-200/50 hover:bg-gray-50/50 font-light"
-                    >
-                      {prompt}
-                    </Button>
-                  ))}
-                </div>
-
-                {lauraiResponse && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-sm"
-                  >
-                    <p className="text-xs text-gray-700 whitespace-pre-line leading-relaxed font-light">
-                      {lauraiResponse}
-                    </p>
-                  </motion.div>
                 )}
               </CardContent>
             </Card>
