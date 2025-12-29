@@ -625,9 +625,9 @@ Format: JSON with keys: summary, guidance, helps (array), avoid (array)`;
               </button>
 
               {/* My Astrology */}
-              <button 
-                onClick={() => handleSystemClick('astrology')}
-                className="w-full bg-amber-50 rounded-lg p-4 border border-amber-200 hover:shadow-md transition-shadow text-left"
+              <Link 
+                to={createPageUrl("MyAstrology")}
+                className="block w-full bg-amber-50 rounded-lg p-4 border border-amber-200 hover:shadow-md transition-shadow text-left"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
@@ -643,7 +643,7 @@ Format: JSON with keys: summary, guidance, helps (array), avoid (array)`;
                 <p className="text-xs text-gray-500 mb-2">
                   {diagnosticSession?.astrologyProfile?.currentTransitSummary?.slice(0, 80) || "Current transits support vision and refinement"}...
                 </p>
-              </button>
+              </Link>
             </CardContent>
             </Card>
             </motion.div>
