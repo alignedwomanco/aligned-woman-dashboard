@@ -132,7 +132,6 @@ export default function Classroom() {
   };
 
   const filteredModules = allModules
-    .filter((module) => module.isPublished) // Only show published modules
     .filter((module) => {
       const phaseMatch = activePhase === "all"; // Show all for now since we're not using phases
       const searchMatch = 
