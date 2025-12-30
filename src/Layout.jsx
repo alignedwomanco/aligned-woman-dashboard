@@ -145,13 +145,53 @@ export default function Layout({ children, currentPageName }) {
               />
             </Link>
 
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              {isAuthenticated && user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                      <div className="w-8 h-8 rounded-full border-2 border-gray-300 overflow-hidden">
+                        {user?.profile_picture ? (
+                          <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-purple-100 flex items-center justify-center">
+                            <span className="text-purple-700 text-xs font-medium">
+                              {user?.full_name?.[0] || user?.email?.[0] || "U"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Go to Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
+                        <Settings className="w-4 h-4" />
+                        Profile Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
