@@ -30,6 +30,7 @@ import Settings from './pages/Settings';
 import Support from './pages/Support';
 import ToolsHub from './pages/ToolsHub';
 import _1Home from './pages/1Home';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +67,7 @@ export const PAGES = {
     "Support": Support,
     "ToolsHub": ToolsHub,
     "1Home": _1Home,
+    "Home": Home,
 }
 
 export const pagesConfig = {
