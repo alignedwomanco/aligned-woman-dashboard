@@ -11,7 +11,6 @@ import Dashboard from './pages/Dashboard';
 import DefineMyPurpose from './pages/DefineMyPurpose';
 import Experts from './pages/Experts';
 import ExpertsDirectory from './pages/ExpertsDirectory';
-import Home from './pages/Home';
 import Journal from './pages/Journal';
 import Members from './pages/Members';
 import Messages from './pages/Messages';
@@ -30,6 +29,7 @@ import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import Support from './pages/Support';
 import ToolsHub from './pages/ToolsHub';
+import _1Home from './pages/1Home';
 import __Layout from './Layout.jsx';
 
 
@@ -47,7 +47,6 @@ export const PAGES = {
     "DefineMyPurpose": DefineMyPurpose,
     "Experts": Experts,
     "ExpertsDirectory": ExpertsDirectory,
-    "Home": Home,
     "Journal": Journal,
     "Members": Members,
     "Messages": Messages,
@@ -66,6 +65,7 @@ export const PAGES = {
     "Settings": Settings,
     "Support": Support,
     "ToolsHub": ToolsHub,
+    "1Home": _1Home,
 }
 
 export const pagesConfig = {
