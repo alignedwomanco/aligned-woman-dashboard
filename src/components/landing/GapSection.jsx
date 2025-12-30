@@ -46,8 +46,8 @@ export default function GapSection() {
             className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border-0 shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-[#C67793]" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(169, 98, 233, 0.2)' }}>
+                <AlertCircle className="w-5 h-5" style={{ color: '#A962E9' }} />
               </div>
               <h3 className="text-xl font-light text-white">There is no single environment where a woman can:</h3>
             </div>
@@ -61,7 +61,7 @@ export default function GapSection() {
                   transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
                   className="flex items-start gap-3"
                 >
-                  <div className="w-2 h-2 bg-[#C67793] rounded-full mt-2.5 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full mt-2.5 flex-shrink-0" style={{ backgroundColor: '#A962E9' }} />
                   <span className="text-white/80 font-light">{gap}</span>
                 </motion.li>
               ))}
@@ -92,7 +92,7 @@ export default function GapSection() {
                 </div>
                 <div className="text-white/40">instead of</div>
                 <div className="flex-1 text-right">
-                  <span className="text-[#C67793] font-light">{item.to}</span>
+                  <span className="font-light" style={{ color: '#A962E9' }}>{item.to}</span>
                 </div>
               </motion.div>
             ))}

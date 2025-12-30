@@ -28,20 +28,20 @@ const phases = [
     title: "INTENTION",
     icon: Target,
     description: "Aligned action without self-betrayal — money, career, boundaries, leadership, advocacy.",
-    color: "from-[#6B1B3D] to-[#8B2E4D]",
+    color: "from-[#7340B9] to-[#8B4FC9]",
     bgColor: "bg-pink-50",
     borderColor: "border-pink-200",
-    textColor: "text-[#6B1B3D]",
+    textColor: "text-[#7340B9]",
   },
   {
     letter: "V+E",
     title: "VISION & EMBODIMENT",
     icon: Compass,
     description: "Living the woman you are becoming — identity expansion, visibility, systems, sustainable integration.",
-    color: "from-rose-500 to-[#C67793]",
+    color: "from-[#A962E9] to-[#8B4FC9]",
     bgColor: "bg-rose-50",
     borderColor: "border-rose-200",
-    textColor: "text-rose-700",
+    textColor: "text-[#7340B9]",
   },
 ];
 
@@ -56,11 +56,11 @@ export default function ALIVEMethodSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
-          <div className="inline-flex items-center gap-2 bg-pink-100 border border-pink-200 rounded-full px-5 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-[#6B1B3D]" />
-            <span className="text-[#6B1B3D] text-sm font-medium">The Framework</span>
+          <div className="inline-flex items-center gap-2 bg-purple-100 border border-purple-200 rounded-full px-5 py-2 mb-6">
+            <Sparkles className="w-4 h-4" style={{ color: '#7340B9' }} />
+            <span style={{ color: '#7340B9' }} className="text-sm font-medium">The Framework</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#4A1228] tracking-tight mb-6">
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#3B224E] tracking-tight mb-6">
             THE ALIVE METHOD™
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -101,12 +101,12 @@ export default function ALIVEMethodSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="bg-gradient-to-r from-pink-50 via-white to-pink-50 rounded-2xl p-8 text-center border border-pink-100"
+          className="bg-gradient-to-r from-purple-50 via-white to-purple-50 rounded-2xl p-8 text-center border border-purple-100"
         >
-          <p className="text-xl text-[#6B1B3D] font-medium">
+          <p className="text-xl font-medium" style={{ color: '#7340B9' }}>
             Learning always happens in this order.
             <br />
-            <span className="text-[#C67793]">No bypassing. No forcing. No burnout disguised as growth.</span>
+            <span style={{ color: '#A962E9' }}>No bypassing. No forcing. No burnout disguised as growth.</span>
           </p>
         </motion.div>
       </div>
