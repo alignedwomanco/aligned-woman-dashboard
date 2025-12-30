@@ -195,7 +195,7 @@ export default function OnboardingForm() {
       case 8:
         return !answers.enableDeepPersonalisation || answers.dob !== "";
       case 9:
-        return answers.values.length > 0;
+        return true; // Optional step, can proceed anytime
       case 10:
         return true; // Snapshot prefs have defaults
       default:
