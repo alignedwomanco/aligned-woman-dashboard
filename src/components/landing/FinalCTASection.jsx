@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function FinalCTASection() {
@@ -42,7 +42,7 @@ export default function FinalCTASection() {
             className="pt-4"
           >
             <Button
-              onClick={() => base44.auth.redirectToLogin()}
+              onClick={() => window.location.href = createPageUrl("OnboardingForm")}
               size="lg"
               className="bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] hover:from-[#4A1228] hover:to-[#6B1B3D] text-white px-12 py-7 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
             >

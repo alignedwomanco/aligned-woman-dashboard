@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 
@@ -78,7 +78,7 @@ export default function HeroSection() {
             className="pt-4"
           >
             <Button
-              onClick={() => base44.auth.redirectToLogin()}
+              onClick={() => window.location.href = createPageUrl("OnboardingForm")}
               size="lg"
               className="bg-white text-[#3D2250] hover:bg-rose-100 px-10 py-6 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
             >
