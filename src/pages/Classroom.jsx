@@ -88,23 +88,9 @@ export default function Classroom() {
         const badges = await base44.entities.UserBadge.list("-earnedDate");
         setUserBadges(badges);
 
-        // Load leaderboard
-        const allUsers = await base44.entities.User.list();
-        const allPoints = await base44.entities.UserPoints.list("-points");
-        
-        const leaderboardData = allPoints
-          .map((pts) => {
-            const usr = allUsers.find((u) => u.email === pts.created_by);
-            return {
-              ...pts,
-              email: pts.created_by,
-              full_name: usr?.full_name,
-              profile_picture: usr?.profile_picture,
-            };
-          })
-          .slice(0, 10);
-        
-        setLeaderboard(leaderboardData);
+        // Load leaderboard via backend function
+        const leaderboardResponse = await base44.functions.invoke('getLeaderboard');
+        setLeaderboard(leaderboardResponse.data.leaderboard || []);
       } catch (error) {
         console.error("Error loading classroom data:", error);
       }
