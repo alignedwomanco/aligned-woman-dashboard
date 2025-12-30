@@ -1,7 +1,6 @@
 import ALIVEMethod from './pages/ALIVEMethod';
 import AdminSettings from './pages/AdminSettings';
 import Apply from './pages/Apply';
-import Blueprint from './pages/Blueprint';
 import CheckIn from './pages/CheckIn';
 import Classroom from './pages/Classroom';
 import Community from './pages/Community';
@@ -31,6 +30,7 @@ import Support from './pages/Support';
 import ToolsHub from './pages/ToolsHub';
 import _1Home from './pages/1Home';
 import Home from './pages/Home';
+import AWBlueprint from './pages/AWBlueprint';
 import __Layout from './Layout.jsx';
 
 
@@ -38,7 +38,6 @@ export const PAGES = {
     "ALIVEMethod": ALIVEMethod,
     "AdminSettings": AdminSettings,
     "Apply": Apply,
-    "Blueprint": Blueprint,
     "CheckIn": CheckIn,
     "Classroom": Classroom,
     "Community": Community,
@@ -68,6 +67,7 @@ export const PAGES = {
     "ToolsHub": ToolsHub,
     "1Home": _1Home,
     "Home": Home,
+    "AWBlueprint": AWBlueprint,
 }
 
 export const pagesConfig = {

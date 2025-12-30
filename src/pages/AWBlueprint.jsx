@@ -8,7 +8,7 @@ import TopicsSection from "@/components/landing/TopicsSection";
 import WhoIsForSection from "@/components/landing/WhoIsForSection";
 import FinalCTASection from "@/components/landing/FinalCTASection";
 
-export default function Blueprint() {
+export default function AWBlueprint() {
   return (
     <div className="bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-indigo-50/30">
       <HeroSection />
