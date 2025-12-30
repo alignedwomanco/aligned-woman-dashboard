@@ -137,7 +137,7 @@ export default function Layout({ children, currentPageName }) {
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <Link to={createPageUrl("Home")}>
               <img
-                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
+                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                 alt="The Aligned Woman"
                 className="object-contain w-auto"
                 style={{ 
@@ -171,7 +171,7 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b">
                       <img
-                      src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/3a7061782_AlignedWomanLogoWhite.png"}
+                      src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                       alt="AW"
                       className="object-contain w-auto"
                       style={{ 
@@ -201,7 +201,7 @@ export default function Layout({ children, currentPageName }) {
                       window.location.href = createPageUrl("Dashboard");
                     }}
                     className="w-full mb-4 text-white"
-                    style={{ backgroundColor: '#6C1A3E' }}>
+                    style={{ backgroundColor: '#7340B9' }}>
 
                         Go to Dashboard
                       </Button>
