@@ -206,6 +206,10 @@ export default function OnboardingForm() {
   const handleNext = async () => {
     if (step < totalSteps - 1) {
       setStep(step + 1);
+      // Scroll to bottom to show new question
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 100);
     } else {
       await handleComplete();
     }
@@ -426,8 +430,21 @@ Be warm, specific, and action-oriented.`;
     setTimeout(() => {
       if (step < totalSteps - 1) {
         setStep(step + 1);
+        // Scroll to bottom to show new question
+        setTimeout(() => {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 100);
       }
     }, 300);
+  };
+
+  // Auto-advance when certain questions are answered
+  const handleAutoAdvance = () => {
+    if (canProceed() && step < totalSteps - 1) {
+      setTimeout(() => {
+        handleNext();
+      }, 500);
+    }
   };
 
   // Get LaurAI help for questions
@@ -526,34 +543,44 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
         </div>
 
         {/* Question Content */}
-        <div>
-          <AnimatePresence mode="wait">
+        <div className="space-y-4">
+          {/* Render all questions up to current step */}
+          {Array.from({ length: step + 1 }, (_, i) => (
             <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.05 }}
+              className={i < step ? "opacity-60" : ""}
             >
               {/* Step 0: Welcome */}
-              {step === 0 && (
+              {i === 0 && (
                 <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-12 space-y-6 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Sparkles className="w-10 h-10 text-purple-500" />
-                  </div>
-                  <h2 className="text-4xl font-light text-gray-900 mb-4 tracking-tight">Welcome</h2>
-                  <p className="text-xl text-gray-700 mb-4 font-light">
-                    This platform adapts to you.
-                  </p>
-                  <p className="text-gray-500 max-w-md mx-auto font-light leading-relaxed">
-                    Answer a few questions so we can personalise your daily guidance. 
-                    You can skip anything and update later.
-                  </p>
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-10 h-10 text-purple-500" />
+                </div>
+                <h2 className="text-4xl font-light text-gray-900 mb-4 tracking-tight">Welcome</h2>
+                <p className="text-xl text-gray-700 mb-4 font-light">
+                  This platform adapts to you.
+                </p>
+                <p className="text-gray-500 max-w-md mx-auto font-light leading-relaxed">
+                  Answer a few questions so we can personalise your daily guidance. 
+                  You can skip anything and update later.
+                </p>
+                {i === step && (
+                  <Button
+                    onClick={handleNext}
+                    size="lg"
+                    className="mt-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl px-8 py-6 text-lg font-light shadow-lg"
+                  >
+                    Start My Journey
+                  </Button>
+                )}
                 </div>
               )}
 
               {/* Step 1: Name & Email */}
-              {step === 1 && (
+              {i === 1 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -576,17 +603,27 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                           type="email"
                           value={answers.email}
                           onChange={(e) => updateAnswer("email", e.target.value)}
+                          onBlur={handleAutoAdvance}
                           className="bg-white/80 border-gray-200 text-gray-900 placeholder:text-gray-400"
                           placeholder="your@email.com"
                         />
                       </div>
+                      {i === step && canProceed() && (
+                        <Button
+                          onClick={handleNext}
+                          size="lg"
+                          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-4"
+                        >
+                          Continue →
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Step 2: Concerns */}
-              {step === 2 && (
+              {i === 2 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -622,12 +659,21 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                         );
                       })}
                     </div>
+                    {i === step && canProceed() && (
+                      <Button
+                        onClick={handleNext}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-6"
+                      >
+                        Continue →
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Step 3: Current Feeling */}
-              {step === 3 && (
+              {i === 3 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -654,7 +700,7 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
               )}
 
               {/* Step 4: Time Available */}
-              {step === 4 && (
+              {i === 4 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -682,7 +728,7 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
               )}
 
               {/* Step 5: Capacity */}
-              {step === 5 && (
+              {i === 5 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -707,12 +753,21 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                         <span className="text-2xl text-gray-400 font-light">/10</span>
                       </div>
                     </div>
+                    {i === step && (
+                      <Button
+                        onClick={handleNext}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-6"
+                      >
+                        Continue →
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Step 6: Free Text Context */}
-              {step === 6 && (
+              {i === 6 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -756,12 +811,21 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                         </motion.div>
                       )}
                     </div>
+                    {i === step && canProceed() && (
+                      <Button
+                        onClick={handleNext}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-4"
+                      >
+                        Continue →
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Step 7: Cycle Profile */}
-              {step === 7 && (
+              {i === 7 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -811,12 +875,21 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                         </>
                       )}
                     </div>
+                    {i === step && canProceed() && (
+                      <Button
+                        onClick={handleNext}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-6"
+                      >
+                        Continue →
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Step 8: Birth Details */}
-              {step === 8 && (
+              {i === 8 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -914,12 +987,21 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                       </>
                       )}
                     </div>
+                    {i === step && canProceed() && (
+                      <Button
+                        onClick={handleNext}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-6"
+                      >
+                        Continue →
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Step 9: Values, Identity, Boundaries */}
-              {step === 9 && (
+              {i === 9 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-8 tracking-tight">
@@ -1078,12 +1160,21 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                         </div>
                       </div>
                     </div>
+                    {i === step && canProceed() && (
+                      <Button
+                        onClick={handleNext}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-6"
+                      >
+                        Continue →
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Step 10: Snapshot Preferences */}
-              {step === 10 && (
+              {i === 10 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8">
                     <h2 className="text-3xl font-light text-gray-900 mb-2 tracking-tight">
@@ -1126,12 +1217,21 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                         />
                       </div>
                     </div>
+                    {i === step && (
+                      <Button
+                        onClick={handleNext}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-4 font-light shadow-lg mt-6"
+                      >
+                        Continue →
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Step 11: Summary */}
-              {step === 11 && (
+              {i === 11 && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-8 text-center">
                     <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -1176,34 +1276,22 @@ Give 2-3 specific boundary examples related to their context. Like: "no meetings
                 </div>
               )}
             </motion.div>
-          </AnimatePresence>
+          ))}
         </div>
 
-        {/* Buttons stick to content */}
-        <div className="mt-8 pb-6">
-          <div className="flex gap-3">
-            {step > 0 && (
-              <Button
-                onClick={() => setStep(step - 1)}
-                variant="outline"
-                size="lg"
-                className="bg-white/80 border-gray-200 text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-md font-light"
-              >
-                Back
-              </Button>
-            )}
-            {needsNextButton() && (
-              <Button
-                onClick={handleNext}
-                disabled={!canProceed()}
-                size="lg"
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-6 text-lg font-light disabled:opacity-40 shadow-lg"
-              >
-                {step === 0 ? "Start My Journey" : step < totalSteps - 1 ? "Next →" : "Go to Dashboard"}
-              </Button>
-            )}
+        {/* Buttons - Only show when on question that needs manual next */}
+        {needsNextButton() && step === totalSteps - 1 && (
+          <div className="mt-8 pb-6">
+            <Button
+              onClick={handleNext}
+              disabled={!canProceed()}
+              size="lg"
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl py-6 text-lg font-light disabled:opacity-40 shadow-lg"
+            >
+              Go to Dashboard
+            </Button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
