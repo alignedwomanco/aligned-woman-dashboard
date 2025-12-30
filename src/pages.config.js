@@ -28,7 +28,6 @@ import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import Support from './pages/Support';
 import ToolsHub from './pages/ToolsHub';
-import _1Home from './pages/1Home';
 import Home from './pages/Home';
 import AWBlueprint from './pages/AWBlueprint';
 import __Layout from './Layout.jsx';
@@ -65,7 +64,6 @@ export const PAGES = {
     "Settings": Settings,
     "Support": Support,
     "ToolsHub": ToolsHub,
-    "1Home": _1Home,
     "Home": Home,
     "AWBlueprint": AWBlueprint,
 }
