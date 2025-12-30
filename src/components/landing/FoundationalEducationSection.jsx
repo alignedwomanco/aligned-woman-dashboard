@@ -32,10 +32,10 @@ export default function FoundationalEducationSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
-          <h2 className="text-4xl sm:text-5xl font-light text-[#3B224E] tracking-tight mb-6">
-            We exist to teach women what should have been taught in school
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#3B224E] tracking-tight mb-6">
+            What should have been taught in school
             <br />
-            <span className="font-semibold text-[#6B1B3D]">but never was</span>
+            <span className="font-bold" style={{ color: '#7340B9' }}>but never was</span>
           </h2>
         </motion.div>
 
@@ -87,7 +87,7 @@ export default function FoundationalEducationSection() {
             </p>
             <div className="h-1 w-24 bg-gradient-to-r from-[#A962E9] to-[#8B4FC9] mb-8" />
             <p className="text-xl text-gray-700 mb-4">This is not self-help</p>
-            <p className="text-2xl font-semibold text-[#6B1B3D]">
+            <p className="text-2xl font-semibold" style={{ color: '#7340B9' }}>
               This is foundational education for real life
             </p>
           </motion.div>

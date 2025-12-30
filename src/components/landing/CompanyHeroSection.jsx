@@ -5,16 +5,35 @@ import { createPageUrl } from "@/utils";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function CompanyHeroSection() {
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth) * 100,
+        y: (e.clientY / window.innerHeight) * 100,
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1557683316-973673baf926?w=1920&q=80"
-          alt="Abstract gradient background"
+          src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1920&q=80"
+          alt="Serene background"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#3D2250]/85 via-[#5B2E84]/75 to-[#7340B9]/80" />
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-[#3D2250]/85 via-[#5B2E84]/75 to-[#7340B9]/80 transition-all duration-700 ease-out"
+          style={{
+            background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(169, 98, 233, 0.4) 0%, rgba(91, 46, 132, 0.75) 50%, rgba(61, 34, 80, 0.85) 100%)`
+          }}
+        />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">

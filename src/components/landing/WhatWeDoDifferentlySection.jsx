@@ -41,7 +41,7 @@ export default function WhatWeDoDifferentlySection() {
             <p className="text-xl text-gray-600 leading-relaxed">
               The Aligned Woman is built on one core belief:
             </p>
-            <p className="text-2xl font-semibold text-[#6B1B3D]">
+            <p className="text-2xl font-semibold" style={{ color: '#7340B9' }}>
               Women do not need more information.
             </p>
             <p className="text-xl text-gray-700">
@@ -58,9 +58,9 @@ export default function WhatWeDoDifferentlySection() {
           className="bg-white rounded-3xl p-8 lg:p-12 shadow-xl mb-16 border border-pink-100"
         >
           <p className="text-xl text-gray-700 mb-6 text-center">
-            We bring together <span className="font-semibold text-[#6B1B3D]">expert-led education</span>,{" "}
-            <span className="font-semibold text-[#6B1B3D]">ethical AI</span>, and{" "}
-            <span className="font-semibold text-[#6B1B3D]">nervous system-informed design</span> into one unified learning environment.
+          We bring together <span className="font-semibold" style={{ color: '#7340B9' }}>expert-led education</span>,{" "}
+          <span className="font-semibold" style={{ color: '#7340B9' }}>ethical AI</span>, and{" "}
+          <span className="font-semibold" style={{ color: '#7340B9' }}>nervous system-informed design</span> into one unified learning environment.
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 mt-10">
@@ -113,7 +113,7 @@ export default function WhatWeDoDifferentlySection() {
         >
           <p className="text-lg text-gray-600">This is not therapy.</p>
           <p className="text-lg text-gray-600">This is not coaching dependency.</p>
-          <p className="text-xl font-semibold text-[#6B1B3D]">
+          <p className="text-xl font-semibold" style={{ color: '#7340B9' }}>
             This is education designed to restore self-trust.
           </p>
         </motion.div>

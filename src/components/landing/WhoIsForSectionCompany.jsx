@@ -31,7 +31,7 @@ export default function WhoIsForSectionCompany() {
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
             The Aligned Woman is for the woman who knows she is capable of more, but{" "}
-            <span className="font-semibold text-[#6B1B3D]">no longer wants to sacrifice herself to get there.</span>
+            <span className="font-semibold" style={{ color: '#7340B9' }}>no longer wants to sacrifice herself to get there.</span>
           </p>
         </motion.div>
 
