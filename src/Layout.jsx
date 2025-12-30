@@ -141,13 +141,7 @@ export default function Layout({ children, currentPageName }) {
                 src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                 alt="The Aligned Woman"
                 className="object-contain w-auto"
-                style={{ 
-                  height: siteSettings?.logo_size === "small" ? "24px" : 
-                         siteSettings?.logo_size === "medium" ? "32px" : 
-                         siteSettings?.logo_size === "large" ? "40px" : 
-                         siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.67)}px` : "32px",
-                  maxWidth: "180px"
-                }}
+                style={{ height: '40px' }}
               />
             </Link>
 
@@ -175,13 +169,7 @@ export default function Layout({ children, currentPageName }) {
                       src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                       alt="AW"
                       className="object-contain w-auto"
-                      style={{ 
-                        height: siteSettings?.logo_size === "small" ? "24px" : 
-                               siteSettings?.logo_size === "medium" ? "32px" : 
-                               siteSettings?.logo_size === "large" ? "40px" : 
-                               siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.67)}px` : "32px",
-                        maxWidth: "160px"
-                      }} />
+                      style={{ height: '40px' }} />
 
                   <button
                   onClick={() => setShowMobileMenu(false)}
@@ -310,24 +298,20 @@ export default function Layout({ children, currentPageName }) {
 
                 {/* Left Sidebar */}
                 <aside className={`fixed left-0 top-0 bottom-0 bg-[#3C224F] text-white flex flex-col z-50 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
-        {/* Logo */}
-        <div className="p-6 border-b border-white/10">
-          {!sidebarCollapsed && (
-            <Link to={createPageUrl("Home")}>
-              <img
-                src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
-                alt="The Aligned Woman"
-                className="object-contain w-auto max-w-full"
-                style={{ 
-                  height: siteSettings?.logo_size === "small" ? "28px" : 
-                         siteSettings?.logo_size === "medium" ? "40px" : 
-                         siteSettings?.logo_size === "large" ? "56px" : 
-                         siteSettings?.logo_size === "custom" ? `${Math.floor(siteSettings.custom_logo_height * 0.83)}px` : "40px"
-                }}
-              />
-            </Link>
-          )}
-        </div>
+                        {/* Logo */}
+                        <div className="p-6 border-b border-white/10 flex items-center justify-center">
+                          <Link to={createPageUrl("Home")}>
+                            <img
+                              src={sidebarCollapsed 
+                                ? "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6954540bfe3123205d5d3139/0e0b20571_AlignedWomanFaviconPurple.png"
+                                : (siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png")
+                              }
+                              alt="The Aligned Woman"
+                              className="object-contain w-auto"
+                              style={{ height: sidebarCollapsed ? '32px' : '40px' }}
+                            />
+                          </Link>
+                        </div>
 
         {/* Search */}
         <div className={`px-4 py-4 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>

@@ -37,22 +37,22 @@ export default function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="space-y-8"
+          className="space-y-6 sm:space-y-8"
         >
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2"
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 sm:px-5 py-2"
           >
-            <Sparkles className="w-4 h-4" style={{ color: '#a861e9' }} />
-            <span className="text-white/90 text-sm font-medium tracking-wide">Powered by Adaptive Pathway OS</span>
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: '#a861e9' }} />
+            <span className="text-white/90 text-xs sm:text-sm font-medium tracking-wide">Powered by Adaptive Pathway OS</span>
           </motion.div>
 
           {/* Headline */}
@@ -60,7 +60,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-6xl sm:text-7xl lg:text-8xl font-extrabold text-white tracking-tight leading-none px-8 sm:px-12"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-white tracking-tight leading-tight px-4"
           >
             THE ALIGNED WOMAN
             <br />
@@ -72,7 +72,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-2xl sm:text-3xl text-white/80 font-light max-w-3xl mx-auto px-8 sm:px-12"
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/80 font-light max-w-3xl mx-auto px-4"
           >
             Your personal operating system for embodied success
             <br />
@@ -84,7 +84,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="max-w-2xl mx-auto text-white/70 text-lg leading-relaxed px-8 sm:px-12"
+            className="max-w-2xl mx-auto text-white/70 text-base sm:text-lg leading-relaxed px-4"
           >
             You were never meant to force yourself into systems that exhaust you. This is education, embodiment, and action — unified into one intelligent system that adapts to you.
           </motion.p>
@@ -94,17 +94,17 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
-            className="pt-4"
+            className="pt-4 px-4"
           >
             <Button
               onClick={() => window.location.href = createPageUrl("OnboardingForm")}
               size="lg"
-              className="bg-white text-[#3D2250] hover:bg-rose-100 px-10 py-6 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
+              className="bg-white text-[#3D2250] hover:bg-rose-100 px-8 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group w-full sm:w-auto"
             >
               Create Your Free Account
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <p className="text-white/50 text-sm mt-4">
+            <p className="text-white/50 text-xs sm:text-sm mt-4">
               No guesswork. No overwhelm. Your pathway is built after onboarding.
             </p>
           </motion.div>

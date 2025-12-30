@@ -36,23 +36,23 @@ export default function CompanyHeroSection() {
         />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="space-y-8"
+          className="space-y-6 sm:space-y-8"
         >
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-2 mb-4">
-            <Sparkles className="w-4 h-4" style={{ color: '#a861e9' }} />
-            <span className="text-white text-sm font-medium">The Education Women Were Never Given</span>
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 sm:px-6 py-2 mb-2 sm:mb-4">
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: '#a861e9' }} />
+            <span className="text-white text-xs sm:text-sm font-medium">The Education Women Were Never Given</span>
           </div>
 
-          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extrabold text-white tracking-tight leading-none">
-            THE ALIGNED WOMAN<sup className="text-3xl">™</sup>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-white tracking-tight leading-tight">
+            THE ALIGNED WOMAN<sup className="text-lg sm:text-2xl lg:text-3xl">™</sup>
           </h1>
 
-          <p className="text-2xl sm:text-3xl text-white/90 max-w-4xl mx-auto font-light leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 max-w-4xl mx-auto font-light leading-relaxed px-4">
             The education women were never given
             <br />
             <span className="text-white/70">And the system they have been trying to build alone ever since</span>
@@ -62,7 +62,7 @@ export default function CompanyHeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-xl text-white/80 max-w-4xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg lg:text-xl text-white/80 max-w-4xl mx-auto leading-relaxed px-4"
           >
             A modern education company for women who want{" "}
             <span style={{ color: '#a861e9' }} className="font-semibold">clarity, confidence, and success</span>{" "}
@@ -73,22 +73,22 @@ export default function CompanyHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center pt-8"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 sm:pt-8 px-4"
           >
             <Button
               onClick={() => window.location.href = createPageUrl("OnboardingForm")}
               size="lg"
-              className="bg-white text-[#3D2250] hover:bg-white/90 px-12 py-7 text-lg font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group"
+              className="bg-white text-[#3D2250] hover:bg-white/90 px-8 sm:px-12 py-5 sm:py-7 text-base sm:text-lg font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group w-full sm:w-auto"
             >
               Create Your Free Account
-              <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="ml-2 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
 
             <Button
               onClick={() => window.location.href = createPageUrl("AWBlueprint")}
               size="lg"
               variant="outline"
-              className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white hover:text-[#3D2250] px-10 py-7 text-lg font-semibold rounded-full transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white hover:text-[#3D2250] px-8 sm:px-10 py-5 sm:py-7 text-base sm:text-lg font-semibold rounded-full transition-all duration-300 w-full sm:w-auto"
             >
               Explore The Blueprint
             </Button>
