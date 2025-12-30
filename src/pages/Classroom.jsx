@@ -57,15 +57,16 @@ export default function Classroom() {
 
         // Load courses and modules from Course Builder
         const courses = await base44.entities.Course.list();
-        const publishedCourses = courses.filter(c => c.isPublished);
+        console.log("All courses:", courses);
         const allModulesData = [];
         
-        for (const course of publishedCourses) {
+        for (const course of courses) {
           const modules = await base44.entities.CourseModule.filter({ courseId: course.id }, "order");
-          const publishedModules = modules.filter(m => m.isPublished !== false);
-          allModulesData.push(...publishedModules.map(m => ({ ...m, courseTitle: course.title })));
+          console.log(`Modules for course ${course.title}:`, modules);
+          allModulesData.push(...modules.map(m => ({ ...m, courseTitle: course.title })));
         }
         
+        console.log("All modules loaded:", allModulesData);
         setAllModules(allModulesData);
 
         // Load module progress (using CourseProgress)
@@ -131,14 +132,13 @@ export default function Classroom() {
     return Math.round((completedPages / pages.length) * 100);
   };
 
-  const filteredModules = allModules
-    .filter((module) => {
-      const phaseMatch = activePhase === "all"; // Show all for now since we're not using phases
-      const searchMatch = 
-        module.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        module.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      return phaseMatch && searchMatch;
-    });
+  const filteredModules = allModules.filter((module) => {
+    if (!searchQuery) return true;
+    const searchMatch = 
+      module.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      module.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    return searchMatch;
+  });
 
   const getStatusIcon = (status) => {
     switch (status) {
