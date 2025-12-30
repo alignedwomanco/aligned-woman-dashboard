@@ -441,19 +441,39 @@ Be warm, specific, and action-oriented.`;
     setLoadingHelp(questionKey);
     
     try {
-      const prompt = `You are LaurAI, helping someone fill out an onboarding form. They're stuck on this question:
+      let contextPrompt = `You are LaurAI, helping someone fill out an onboarding form. They're stuck on this question:
 
 "${questionText}"
 
-Provide brief, warm guidance with:
-1. A gentle reframe (1 sentence)
-2. 2-3 concrete examples
-3. An encouraging nudge
+`;
 
-Keep it under 3 sentences total. Be specific, not generic.`;
+      // Add specific context based on question
+      if (questionKey === 'context') {
+        contextPrompt += `They selected these concerns: ${answers.concerns.map(c => concernOptions.find(opt => opt.id === c)?.label).join(", ") || "none yet"}
+They're feeling: ${answers.currentFeeling || "not specified"}
+Capacity: ${answers.capacityScore}/10
+
+Give 2-3 sentence starters or prompts they can use to share what's happening. For example: "You could start with 'Right now I'm struggling with...' or 'What's been hardest is...'"`;
+      } else if (questionKey === 'releasing') {
+        contextPrompt += `They're working on: ${answers.concerns.map(c => concernOptions.find(opt => opt.id === c)?.label).join(", ") || "general wellbeing"}
+
+Give 2-3 specific examples of what 'heavy' might mean in this context. Examples like: "people-pleasing behaviors", "old identity as someone who never says no", "belief that rest equals laziness"`;
+      } else if (questionKey === 'becoming') {
+        contextPrompt += `They're releasing: ${answers.releasing || "not specified yet"}
+They're working on: ${answers.concerns.map(c => concernOptions.find(opt => opt.id === c)?.label).join(", ") || "general wellbeing"}
+
+Give 2-3 examples of qualities/feelings they might want more of. Like: "more ease in decision-making", "more trust in your intuition", "more space to think"`;
+      } else if (questionKey === 'boundaries') {
+        contextPrompt += `They're working on: ${answers.concerns.map(c => concernOptions.find(opt => opt.id === c)?.label).join(", ") || "general wellbeing"}
+Capacity: ${answers.capacityScore}/10
+
+Give 2-3 specific boundary examples related to their context. Like: "no meetings before 9am", "stop explaining my choices to others", "distance from conversations about [topic]"`;
+      }
+
+      contextPrompt += `\n\nBe warm, specific, and practical. Keep it under 3 sentences.`;
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt
+        prompt: contextPrompt
       });
 
       setLauraiHelp(prev => ({ ...prev, [questionKey]: response }));
