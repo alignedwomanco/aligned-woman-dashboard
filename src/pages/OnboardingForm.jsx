@@ -672,14 +672,39 @@ Be warm, specific, and action-oriented.`;
                         : "Share as much or as little as you'd like"}
                     </p>
                   </div>
-                  <Textarea
-                    value={answers.userContextText}
-                    onChange={(e) => updateAnswer("userContextText", e.target.value)}
-                    placeholder={answers.concerns.length > 0 
-                      ? `What's happening with ${answers.concerns.slice(0, 2).map(c => concernOptions.find(opt => opt.id === c)?.label.toLowerCase()).join(" and ")}...`
-                      : "I've been feeling... I'm working on... I need support with..."}
-                    className="min-h-[200px] bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-2xl text-lg p-6"
-                  />
+                  <div className="space-y-3">
+                    <Textarea
+                      value={answers.userContextText}
+                      onChange={(e) => updateAnswer("userContextText", e.target.value)}
+                      placeholder={answers.concerns.length > 0 
+                        ? `What's happening with ${answers.concerns.slice(0, 2).map(c => concernOptions.find(opt => opt.id === c)?.label.toLowerCase()).join(" and ")}...`
+                        : "I've been feeling... I'm working on... I need support with..."}
+                      className="min-h-[200px] bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-2xl text-lg p-6"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => getLaurAIHelp('context', 'Tell us what\'s happening for you')}
+                      className="text-sm text-white/60 hover:text-white/90 transition-colors flex items-center gap-1"
+                    >
+                      {loadingHelp === 'context' ? (
+                        <>
+                          <div className="animate-spin w-3 h-3 border border-white/20 border-t-white rounded-full" />
+                          <span>Getting help...</span>
+                        </>
+                      ) : (
+                        <>Not sure what to write? Ask LaurAI →</>
+                      )}
+                    </button>
+                    {lauraiHelp.context && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white/80 text-sm leading-relaxed"
+                      >
+                        {lauraiHelp.context}
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -872,29 +897,102 @@ Be warm, specific, and action-oriented.`;
                   <div>
                     <Label className="text-white mb-2 block">Letting go (what feels heavy right now)</Label>
                     <p className="text-white/60 text-sm mb-3">This can be a habit, a belief, a role you're playing, or something that's draining you.</p>
-                    <Input
-                      value={answers.releasing}
-                      onChange={(e) => updateAnswer("releasing", e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-                      placeholder="For example: people-pleasing, overworking, self-doubt, a relationship pattern, unrealistic expectations…"
-                    />
+                    <div className="space-y-3">
+                      <Input
+                        value={answers.releasing}
+                        onChange={(e) => updateAnswer("releasing", e.target.value)}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                        placeholder="For example: people-pleasing, overworking, self-doubt, a relationship pattern, unrealistic expectations…"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => getLaurAIHelp('releasing', 'What feels heavy right now that you want to let go of?')}
+                        className="text-sm text-white/60 hover:text-white/90 transition-colors flex items-center gap-1"
+                      >
+                        {loadingHelp === 'releasing' ? (
+                          <>
+                            <div className="animate-spin w-3 h-3 border border-white/20 border-t-white rounded-full" />
+                            <span>Getting help...</span>
+                          </>
+                        ) : (
+                          <>Not sure what to write? Ask LaurAI →</>
+                        )}
+                      </button>
+                      {lauraiHelp.releasing && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white/80 text-sm leading-relaxed"
+                        >
+                          {lauraiHelp.releasing}
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
                     <Label className="text-white mb-2 block">What do you want more of in your life?</Label>
                     <p className="text-white/60 text-sm mb-1">You don't need a full answer, just a direction.</p>
                     <p className="text-white/50 text-xs mb-3">Think in feelings or qualities, not labels.</p>
-                    <Input
-                      value={answers.becoming}
-                      onChange={(e) => updateAnswer("becoming", e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-                      placeholder="For example: more calm, more confidence, more honesty, more ease, more self-trust…"
-                    />
+                    <div className="space-y-3">
+                      <Input
+                        value={answers.becoming}
+                        onChange={(e) => updateAnswer("becoming", e.target.value)}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                        placeholder="For example: more calm, more confidence, more honesty, more ease, more self-trust…"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => getLaurAIHelp('becoming', 'What do you want more of in your life?')}
+                        className="text-sm text-white/60 hover:text-white/90 transition-colors flex items-center gap-1"
+                      >
+                        {loadingHelp === 'becoming' ? (
+                          <>
+                            <div className="animate-spin w-3 h-3 border border-white/20 border-t-white rounded-full" />
+                            <span>Getting help...</span>
+                          </>
+                        ) : (
+                          <>Not sure what to write? Ask LaurAI →</>
+                        )}
+                      </button>
+                      {lauraiHelp.becoming && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white/80 text-sm leading-relaxed"
+                        >
+                          {lauraiHelp.becoming}
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
                     <Label className="text-white mb-2 block">Where do you need better boundaries right now?</Label>
                     <p className="text-white/60 text-sm mb-3">This helps protect your energy while you're growing.</p>
+                    <button
+                      type="button"
+                      onClick={() => getLaurAIHelp('boundaries', 'Where do you need better boundaries?')}
+                      className="text-sm text-white/60 hover:text-white/90 transition-colors flex items-center gap-1 mb-3"
+                    >
+                      {loadingHelp === 'boundaries' ? (
+                        <>
+                          <div className="animate-spin w-3 h-3 border border-white/20 border-t-white rounded-full" />
+                          <span>Getting help...</span>
+                        </>
+                      ) : (
+                        <>Not sure what to write? Ask LaurAI →</>
+                      )}
+                    </button>
+                    {lauraiHelp.boundaries && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white/80 text-sm leading-relaxed mb-3"
+                      >
+                        {lauraiHelp.boundaries}
+                      </motion.div>
+                    )}
                     <div className="space-y-2">
                       {answers.boundaries.map((boundary, index) => (
                         <div key={index} className="flex gap-2">
