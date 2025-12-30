@@ -17,7 +17,7 @@ const communitySpaces = [
     description: "A grounded space for women experiencing this chapter.",
     members: 128,
     isPrivate: true,
-    gradient: "from-rose-400 to-pink-500"
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80"
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const communitySpaces = [
     description: "For high-capacity women in a low-energy season.",
     members: 256,
     isPrivate: true,
-    gradient: "from-purple-400 to-indigo-500"
+    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80"
   },
   {
     id: 3,
@@ -35,7 +35,7 @@ const communitySpaces = [
     description: "Understanding your body's rhythm in real time.",
     members: 189,
     isPrivate: false,
-    gradient: "from-amber-400 to-orange-500"
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80"
   },
   {
     id: 4,
@@ -44,7 +44,7 @@ const communitySpaces = [
     description: "A space for women redesigning their relationships.",
     members: 94,
     isPrivate: true,
-    gradient: "from-teal-400 to-cyan-500"
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80"
   },
   {
     id: 5,
@@ -53,7 +53,7 @@ const communitySpaces = [
     description: "For ambitious women navigating depletion.",
     members: 312,
     isPrivate: true,
-    gradient: "from-violet-400 to-purple-500"
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80"
   },
   {
     id: 6,
@@ -62,7 +62,7 @@ const communitySpaces = [
     description: "Processing the shifts before your period.",
     members: 203,
     isPrivate: false,
-    gradient: "from-pink-400 to-rose-500"
+    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80"
   }
 ];
 
@@ -74,7 +74,7 @@ const recommendedSpaces = [
     description: "Based on your recent check-ins and cycle phase.",
     members: 203,
     isPrivate: false,
-    gradient: "from-blue-400 to-indigo-500"
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80"
   },
   {
     id: 8,
@@ -83,7 +83,7 @@ const recommendedSpaces = [
     description: "Based on your nervous system state.",
     members: 167,
     isPrivate: true,
-    gradient: "from-emerald-400 to-teal-500"
+    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800&q=80"
   },
   {
     id: 9,
@@ -92,7 +92,7 @@ const recommendedSpaces = [
     description: "A space to rebuild trust and stability.",
     members: 142,
     isPrivate: true,
-    gradient: "from-fuchsia-400 to-pink-500"
+    image: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80"
   }
 ];
 
@@ -242,10 +242,16 @@ export default function Community() {
                   transition={{ delay: idx * 0.05 }}
                 >
                   <Card className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
-                    {/* Gradient Header */}
-                    <div className={`h-32 bg-gradient-to-br ${space.gradient} relative`}>
+                    {/* Image Header */}
+                    <div className="h-32 relative overflow-hidden">
+                      <img 
+                        src={space.image} 
+                        alt={space.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                       <div className="absolute top-3 left-3">
-                        <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 font-light text-xs">
+                        <Badge className="bg-white/90 backdrop-blur-sm text-gray-700 border-0 font-light text-xs">
                           {space.tag.split(' • ')[0]}
                         </Badge>
                       </div>
@@ -296,7 +302,14 @@ export default function Community() {
                     transition={{ delay: idx * 0.08 }}
                   >
                     <Card className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow bg-white/60 backdrop-blur-sm">
-                      <div className={`h-24 bg-gradient-to-br ${space.gradient}`} />
+                      <div className="h-24 relative overflow-hidden">
+                        <img 
+                          src={space.image} 
+                          alt={space.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      </div>
                       <div className="p-4 space-y-2">
                         <h4 className="font-medium text-gray-900 text-sm">{space.title}</h4>
                         <p className="text-xs text-gray-600 font-light line-clamp-2">{space.description}</p>
