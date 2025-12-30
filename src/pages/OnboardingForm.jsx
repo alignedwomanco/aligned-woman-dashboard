@@ -85,6 +85,8 @@ export default function OnboardingForm() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lauraiHelp, setLauraiHelp] = useState({});
+  const [loadingHelp, setLoadingHelp] = useState(null);
   const [answers, setAnswers] = useState({
     fullName: "",
     email: "",
@@ -427,6 +429,39 @@ Be warm, specific, and action-oriented.`;
         setStep(step + 1);
       }
     }, 300);
+  };
+
+  // Get LaurAI help for questions
+  const getLaurAIHelp = async (questionKey, questionText) => {
+    if (lauraiHelp[questionKey]) {
+      setLauraiHelp(prev => ({ ...prev, [questionKey]: null }));
+      return;
+    }
+
+    setLoadingHelp(questionKey);
+    
+    try {
+      const prompt = `You are LaurAI, helping someone fill out an onboarding form. They're stuck on this question:
+
+"${questionText}"
+
+Provide brief, warm guidance with:
+1. A gentle reframe (1 sentence)
+2. 2-3 concrete examples
+3. An encouraging nudge
+
+Keep it under 3 sentences total. Be specific, not generic.`;
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt
+      });
+
+      setLauraiHelp(prev => ({ ...prev, [questionKey]: response }));
+    } catch (error) {
+      console.error("LaurAI help error:", error);
+    } finally {
+      setLoadingHelp(null);
+    }
   };
 
   // Determine if current step needs manual next button
