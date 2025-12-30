@@ -214,10 +214,9 @@ export default function OnboardingForm() {
   const handleComplete = async () => {
     setIsProcessing(true);
 
-    // Update user profile with name and email
+    // Update user profile with name
     await base44.auth.updateMe({
       full_name: answers.fullName,
-      email: answers.email,
     });
 
     const result = await analyzeAnswers(answers);
