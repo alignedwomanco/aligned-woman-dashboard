@@ -134,14 +134,14 @@ export default function Layout({ children, currentPageName }) {
           .bg-burgundy { background-color: var(--burgundy); }
         `}</style>
 
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm px-4 sm:px-6 lg:px-8 py-4">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm px-4 sm:px-6 lg:px-8 py-2">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <Link to={createPageUrl("Home")}>
               <img
                 src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                 alt="The Aligned Woman"
                 className="object-contain w-auto"
-                style={{ height: '40px' }}
+                style={{ height: '35px' }}
               />
             </Link>
 
