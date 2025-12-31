@@ -146,11 +146,11 @@ export default function ExpertsDirectory() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-6">
+    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: '#E4CAFB' }}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#4A1228] mb-2">Expert Directory</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#3B224E] mb-2">Expert Directory</h1>
           <p className="text-gray-600">
             Connect with our certified coaches, mentors, and specialists
           </p>
@@ -175,24 +175,24 @@ export default function ExpertsDirectory() {
           {filteredExperts.map((expert) => (
             <Card
               key={expert.id}
-              className="hover:shadow-xl transition-shadow border-2 border-pink-100 overflow-hidden"
+              className="hover:shadow-xl transition-shadow border-2 border-purple-100 overflow-hidden"
             >
-              <div className="h-24 bg-gradient-to-br from-[#6B1B3D] to-[#8B2E4D]" />
+              <div className="h-24 bg-gradient-to-br from-[#7340B9] to-[#5B2D83]" />
               <CardContent className="relative pt-0 pb-6 px-6">
                 <div className="flex flex-col items-center -mt-12 mb-4">
                   <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
                     <AvatarImage src={expert.profile_picture} />
-                    <AvatarFallback className="bg-[#6B1B3D] text-white text-2xl">
+                    <AvatarFallback className="bg-[#7340B9] text-white text-2xl">
                       {expert.full_name?.[0] || expert.email?.[0]}
                     </AvatarFallback>
                   </Avatar>
                 </div>
 
                 <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold text-[#4A1228] mb-1">
+                  <h3 className="text-xl font-bold text-[#3B224E] mb-1">
                     {expert.full_name}
                   </h3>
-                  <Badge className="bg-[#6B1B3D] text-white mb-3">
+                  <Badge className="bg-[#7340B9] text-white mb-3">
                     {expert.role === "master_admin"
                       ? "Master Coach"
                       : expert.role === "admin"
@@ -216,7 +216,7 @@ export default function ExpertsDirectory() {
                         <Badge
                           key={index}
                           variant="outline"
-                          className="text-xs border-pink-200 text-gray-700"
+                          className="text-xs border-purple-200 text-gray-700"
                         >
                           {area}
                         </Badge>
@@ -227,8 +227,8 @@ export default function ExpertsDirectory() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                  <div className="bg-pink-50 rounded-lg p-2">
-                    <div className="text-lg font-bold text-[#6B1B3D]">
+                  <div className="bg-purple-50 rounded-lg p-2">
+                    <div className="text-lg font-bold text-[#7340B9]">
                       {expert.years_experience || "5+"}
                     </div>
                     <div className="text-xs text-gray-600">Years</div>
@@ -283,7 +283,7 @@ export default function ExpertsDirectory() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button
-                          className="w-full bg-[#6B1B3D] hover:bg-[#4A1228]"
+                          className="w-full bg-[#7340B9] hover:bg-[#5B2D83]"
                           onClick={() => handleConnect(expert)}
                         >
                           <UserCheck className="w-4 h-4 mr-2" />
@@ -311,7 +311,7 @@ export default function ExpertsDirectory() {
                           <Button
                             onClick={submitConnection}
                             disabled={!connectionNote.trim() || requestConnectionMutation.isPending}
-                            className="w-full bg-[#6B1B3D] hover:bg-[#4A1228]"
+                            className="w-full bg-[#7340B9] hover:bg-[#5B2D83]"
                           >
                             {requestConnectionMutation.isPending ? "Sending..." : "Send Connection Request"}
                           </Button>

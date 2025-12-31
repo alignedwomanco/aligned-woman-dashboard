@@ -136,7 +136,7 @@ export default function Classroom() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-6">
+    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: '#E4CAFB' }}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -144,7 +144,7 @@ export default function Classroom() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-[#4A1228] mb-2">Classroom</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#3B224E] mb-2">Classroom</h1>
           <p className="text-gray-600">
             Browse all available modules across the ALIVE Method phases.
           </p>

@@ -413,11 +413,11 @@ RESPONSE REQUIREMENTS:
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-indigo-50/30 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-indigo-50/30 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           {/* Left Sidebar - Your Inner Systems */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="lg:col-span-3 space-y-4 order-2 lg:order-1">
             {/* Your Inner Systems */}
             <Card className="bg-white/60 backdrop-blur-xl border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl">
               <CardHeader className="pb-5">
@@ -534,7 +534,7 @@ RESPONSE REQUIREMENTS:
           </div>
 
           {/* Main Content - Center */}
-          <div className="lg:col-span-6 space-y-6">
+          <div className="lg:col-span-6 space-y-4 sm:space-y-6 order-1 lg:order-2">
             {/* Daily ALIVE Snapshot */}
             <Card className="bg-gradient-to-br from-[#2A1A3C]/95 via-[#3B224E]/95 to-[#4A2B5E]/95 text-white border-0 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl rounded-3xl overflow-hidden">
               <CardHeader className="pb-6 pt-7">
@@ -782,7 +782,7 @@ RESPONSE REQUIREMENTS:
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="lg:col-span-3 space-y-4 order-3">
             {/* Community */}
             <Card className="bg-gradient-to-br from-purple-50/60 via-pink-50/40 to-transparent backdrop-blur-xl border-0 shadow-[0_8px_30px_rgba(147,51,234,0.08)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-3 pt-7">
