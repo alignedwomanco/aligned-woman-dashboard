@@ -146,44 +146,51 @@ export default function Layout({ children, currentPageName }) {
             </Link>
 
             <div className="flex items-center gap-3 flex-shrink-0">
-              {isAuthenticated && user && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                      <div className="w-10 h-10 rounded-full border-2 border-purple-300 overflow-hidden">
-                        {user?.profile_picture ? (
-                          <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-purple-100 flex items-center justify-center">
-                            <span className="text-purple-700 text-base font-medium">
-                              {user?.full_name?.[0] || user?.email?.[0] || "U"}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 z-[100]">
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Go to Dashboard
-                      </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                    <div className="w-10 h-10 rounded-full border-2 border-purple-300 overflow-hidden">
+                      {isAuthenticated && user?.profile_picture ? (
+                        <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-purple-100 flex items-center justify-center">
+                          <span className="text-purple-700 text-base font-medium">
+                            {isAuthenticated && user ? (user.full_name?.[0] || user.email?.[0] || "U") : "U"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 z-[100]">
+                  {isAuthenticated && user ? (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          Go to Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
+                          <Settings className="w-4 h-4" />
+                          Profile Settings
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}>
+                      <User className="w-4 h-4 mr-2" />
+                      Sign In
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
-                        <Settings className="w-4 h-4" />
-                        Profile Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
