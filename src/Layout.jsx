@@ -154,9 +154,7 @@ export default function Layout({ children, currentPageName }) {
                         <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-purple-100 flex items-center justify-center">
-                          <span className="text-purple-700 text-base font-medium">
-                            {isAuthenticated && user ? (user.full_name?.[0] || user.email?.[0] || "U") : "U"}
-                          </span>
+                          <User className="w-5 h-5 text-purple-700" />
                         </div>
                       )}
                     </div>
