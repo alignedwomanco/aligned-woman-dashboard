@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Clock, Play, CheckCircle, Lock, BookOpen, Grid2x2 } from "lucide-react";
+import { ArrowLeft, Clock, Play, CheckCircle, Lock, BookOpen, Grid2x2, Star } from "lucide-react";
 
 export default function CourseDetail() {
   const [searchParams] = useSearchParams();
@@ -83,25 +83,35 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E4CAFB" }}>
-      {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link to={createPageUrl("Classroom")}>
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <div className="flex-1">
-              {course.category && (
-                <Badge className="bg-purple-100 text-purple-700 border-purple-200 border mb-1 text-xs">
-                  {course.category}
-                </Badge>
-              )}
-              <h1 className="text-xl font-bold text-[#3B224E]">{course.title}</h1>
-              {course.description && (
-                <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{course.description}</p>
-              )}
+      {/* Banner */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <Link to={createPageUrl("Classroom")} className="inline-block mb-4">
+          <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Classroom
+          </Button>
+        </Link>
+        
+        <div className="rounded-2xl overflow-hidden border-2" style={{ borderColor: "var(--theme-secondary, #5B2E84)" }}>
+          <div className="h-48 bg-gradient-to-br from-[#3B224E] to-[#5B2E84] relative">
+            {course.coverImage && (
+              <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover opacity-60" />
+            )}
+            <div className="absolute inset-0 p-6 flex flex-col justify-end">
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                {course.isPublished ? <Badge className="bg-green-400 text-green-900 border-0">Published</Badge> : <Badge className="bg-gray-200 text-gray-700 border-0">Draft</Badge>}
+                {course.isFeatured && <Badge className="bg-yellow-300 text-yellow-900 border-0"><Star className="w-3 h-3 mr-1" />Featured</Badge>}
+                {course.price > 0 && <Badge className="bg-blue-400 text-blue-900 border-0">${course.price}</Badge>}
+                {course.category && <Badge className="bg-purple-200 text-purple-900 border-0">{course.category}</Badge>}
+              </div>
+              <h1 className="text-3xl font-bold text-white">{course.title}</h1>
+              {course.description && <p className="text-white/80 text-sm mt-1 line-clamp-2">{course.description}</p>}
+            </div>
+          </div>
+          <div className="bg-white px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+            <span className="text-sm text-gray-600">{sections.length} sections · {modules.length} modules</span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline">Edit Course</Button>
+              <Button size="sm" className="text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>Add Section</Button>
             </div>
           </div>
         </div>
