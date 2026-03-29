@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit, Tag } from "lucide-react";
+import { Plus, Trash2, Edit, Tag, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 export default function ExpertCategoryManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -87,6 +88,23 @@ export default function ExpertCategoryManager() {
     }
   };
 
+  const handleReorderCategories = (result) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    if (source.index === destination.index) return;
+
+    const reordered = Array.from(categories);
+    const [moved] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, moved);
+
+    // Update order field for each category
+    reordered.forEach((cat, idx) => {
+      if (cat.order !== idx) {
+        updateMutation.mutate({ id: cat.id, data: { order: idx } });
+      }
+    });
+  };
+
   const handleSave = () => {
     if (editingCategory) {
       updateMutation.mutate({ id: editingCategory.id, data: form });
@@ -116,36 +134,61 @@ export default function ExpertCategoryManager() {
         {categories.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No categories yet. Add one to get started.</p>
         ) : (
-          <div className="flex flex-wrap gap-3">
-            {categories.map((cat) => (
-              <div
-                key={cat.id}
-                className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-white hover:shadow-sm transition-shadow"
-              >
-                <span
-                  className="px-2 py-0.5 rounded-full text-xs font-medium text-white"
-                  style={{ backgroundColor: cat.color || "#7340B9" }}
+          <DragDropContext onDragEnd={handleReorderCategories}>
+            <Droppable droppableId="categories-list">
+              {(provided, snapshot) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className={`space-y-2 ${snapshot.isDraggingOver ? "bg-purple-50 rounded-lg p-2" : ""}`}
                 >
-                  {cat.name}
-                </span>
-                {cat.description && (
-                  <span className="text-xs text-gray-500 hidden sm:inline">— {cat.description}</span>
-                )}
-                <button
-                  onClick={() => openEdit(cat)}
-                  className="ml-1 text-gray-400 hover:text-[#7340B9] transition-colors"
-                >
-                  <Edit className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => deleteMutation.mutate(cat.id)}
-                  className="text-gray-400 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+                  {categories.map((cat, idx) => (
+                    <Draggable key={cat.id} draggableId={cat.id} index={idx}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={`flex items-center gap-2 border rounded-lg px-3 py-2 bg-white transition-all ${
+                            snapshot.isDragging ? "shadow-lg bg-purple-50" : "hover:shadow-sm"
+                          }`}
+                        >
+                          <button
+                            {...provided.dragHandleProps}
+                            className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                            title="Drag to reorder"
+                          >
+                            <GripVertical className="w-4 h-4" />
+                          </button>
+                          <span
+                            className="px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                            style={{ backgroundColor: cat.color || "#7340B9" }}
+                          >
+                            {cat.name}
+                          </span>
+                          {cat.description && (
+                            <span className="text-xs text-gray-500 hidden sm:inline">— {cat.description}</span>
+                          )}
+                          <button
+                            onClick={() => openEdit(cat)}
+                            className="ml-auto text-gray-400 hover:text-[#7340B9] transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteMutation.mutate(cat.id)}
+                            className="text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         )}
       </CardContent>
 
