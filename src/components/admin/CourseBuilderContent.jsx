@@ -61,9 +61,19 @@ export default function CourseBuilderContent() {
 
   const queryClient = useQueryClient();
 
-  const { data: courses = [] } = useQuery({
+  const { data: rawCourses = [] } = useQuery({
     queryKey: ["courses"],
     queryFn: () => base44.entities.Course.list("created_date"),
+  });
+
+  // Sort: items with explicit order by order, then remaining by created_date
+  const courses = [...rawCourses].sort((a, b) => {
+    const aHasOrder = a.order !== undefined && a.order !== null;
+    const bHasOrder = b.order !== undefined && b.order !== null;
+    if (aHasOrder && bHasOrder) return a.order - b.order;
+    if (aHasOrder) return -1;
+    if (bHasOrder) return 1;
+    return (a.created_date || "").localeCompare(b.created_date || "");
   });
 
   const { data: sections = [] } = useQuery({
@@ -139,9 +149,17 @@ export default function CourseBuilderContent() {
     onSuccess: () => queryClient.invalidateQueries(["coursePages"]),
   });
 
-  // Reorder helpers
+  // Reorder helpers — assigns explicit numeric order to all items, then swaps two
   const swapOrder = async (items, indexA, indexB, updateFn, queryKey) => {
-    if (indexA < 0 || indexB >= items.length) return;
+    if (indexA < 0 || indexB < 0 || indexA >= items.length || indexB >= items.length) return;
+    // Give every item an explicit order based on its current position first
+    await Promise.all(
+      items.map((item, i) =>
+        (item.order === undefined || item.order === null)
+          ? updateFn({ id: item.id, data: { order: i } })
+          : Promise.resolve()
+      )
+    );
     const a = items[indexA];
     const b = items[indexB];
     const orderA = a.order ?? indexA;
@@ -154,30 +172,37 @@ export default function CourseBuilderContent() {
   };
 
   const moveCourse = (course, direction) => {
-    const idx = courses.findIndex((c) => c.id === course.id);
+    // Sort by order then created_date (same as display) to get correct index
+    const sorted = [...courses].sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return (a.created_date || "").localeCompare(b.created_date || "");
+    });
+    const idx = sorted.findIndex((c) => c.id === course.id);
     const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    swapOrder(courses, idx, targetIdx, ({ id, data }) => base44.entities.Course.update(id, data), "courses");
+    swapOrder(sorted, idx, targetIdx, ({ id, data }) => base44.entities.Course.update(id, data), "courses");
   };
 
   const moveSection = (section, direction) => {
-    const courseSections = getCourseSections(selectedCourse.id);
-    const idx = courseSections.findIndex((s) => s.id === section.id);
+    const sorted = getCourseSections(selectedCourse.id);
+    const idx = sorted.findIndex((s) => s.id === section.id);
     const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    swapOrder(courseSections, idx, targetIdx, ({ id, data }) => base44.entities.CourseSection.update(id, data), "courseSections");
+    swapOrder(sorted, idx, targetIdx, ({ id, data }) => base44.entities.CourseSection.update(id, data), "courseSections");
   };
 
   const moveModule = (module, sectionId, direction) => {
-    const sectionModules = getSectionModules(sectionId);
-    const idx = sectionModules.findIndex((m) => m.id === module.id);
+    const sorted = getSectionModules(sectionId);
+    const idx = sorted.findIndex((m) => m.id === module.id);
     const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    swapOrder(sectionModules, idx, targetIdx, ({ id, data }) => base44.entities.CourseModule.update(id, data), "courseModules");
+    swapOrder(sorted, idx, targetIdx, ({ id, data }) => base44.entities.CourseModule.update(id, data), "courseModules");
   };
 
   const movePage = (page, moduleId, direction) => {
-    const modulePages = getModulePages(moduleId);
-    const idx = modulePages.findIndex((p) => p.id === page.id);
+    const sorted = getModulePages(moduleId);
+    const idx = sorted.findIndex((p) => p.id === page.id);
     const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    swapOrder(modulePages, idx, targetIdx, ({ id, data }) => base44.entities.CoursePage.update(id, data), "coursePages");
+    swapOrder(sorted, idx, targetIdx, ({ id, data }) => base44.entities.CoursePage.update(id, data), "coursePages");
   };
 
   const resetCourseForm = () => { setCourseForm({ title: "", description: "", coverImage: "", category: "", expertId: "", price: 0, isPublished: false, isComingSoon: false, isFeatured: false }); setEditingCourse(null); };
