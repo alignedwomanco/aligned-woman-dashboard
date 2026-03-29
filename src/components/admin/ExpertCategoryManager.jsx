@@ -105,8 +105,8 @@ export default function ExpertCategoryManager() {
                 className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-white hover:shadow-sm transition-shadow"
               >
                 <span
-                  className="px-2 py-0.5 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: cat.color || "#F3E8FF", color: "#4B0082" }}
+                  className="px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                  style={{ backgroundColor: cat.color || "#7340B9" }}
                 >
                   {cat.name}
                 </span>
@@ -187,10 +187,10 @@ export default function ExpertCategoryManager() {
                     className="font-mono w-28"
                     maxLength={7}
                   />
-                  {/* Badge preview matching screenshot style */}
+                  {/* Badge preview */}
                   <span
-                    className="px-3 py-1 rounded-full text-sm font-medium"
-                    style={{ backgroundColor: form.color, color: "#4B0082" }}
+                    className="px-3 py-1 rounded-full text-sm font-medium text-white"
+                    style={{ backgroundColor: form.color }}
                   >
                     {form.name || "Preview"}
                   </span>
