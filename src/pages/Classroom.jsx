@@ -129,14 +129,12 @@ export default function Classroom() {
                             </Badge>
                           </div>
                         )}
-                        {progress > 0 && (
-                          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/20">
-                            <div
-                              className="h-full bg-green-400 transition-all"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                        )}
+                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-white/20">
+                          <div
+                            className="h-full bg-green-400 transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
                       </div>
 
                       <CardContent className="p-5">

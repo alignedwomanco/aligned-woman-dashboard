@@ -160,14 +160,12 @@ export default function CourseDetail() {
                                  <Grid2x2 className="w-12 h-12 text-white/40" />
                                </div>
                              )}
-                             {sectionProg > 0 && (
-                               <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/20">
-                                 <div
-                                   className="h-full bg-green-400 transition-all"
-                                   style={{ width: `${sectionProg}%` }}
-                                 />
-                               </div>
-                             )}
+                             <div className="absolute bottom-0 left-0 right-0 h-2 bg-white/20">
+                               <div
+                                 className="h-full bg-green-400 transition-all duration-300"
+                                 style={{ width: `${sectionProg}%` }}
+                               />
+                             </div>
                            </div>
 
                            <CardContent className="p-5">
