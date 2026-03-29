@@ -6,14 +6,15 @@
       "type": "string",
       "description": "Category name"
     },
-    "description": {
-      "type": "string",
-      "description": "Short description of this category"
-    },
     "color": {
       "type": "string",
       "description": "Hex color for the badge",
       "default": "#7340B9"
+    },
+    "order": {
+      "type": "number",
+      "description": "Display order",
+      "default": 0
     }
   },
   "required": [

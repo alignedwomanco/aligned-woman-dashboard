@@ -13,7 +13,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 export default function ExpertCategoryManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [form, setForm] = useState({ name: "", description: "", color: "#7A1B33" });
+  const [form, setForm] = useState({ name: "", color: "#7A1B33" });
   const [colorTemplates, setColorTemplates] = useState([
     { label: "Rose", value: "#99526C" },
     { label: "Lavender", value: "#F3E8FF" },
@@ -57,20 +57,20 @@ export default function ExpertCategoryManager() {
 
   const openCreate = () => {
     setEditingCategory(null);
-    setForm({ name: "", description: "", color: "#7A1B33" });
+    setForm({ name: "", color: "#7A1B33" });
     setDialogOpen(true);
   };
 
   const openEdit = (cat) => {
     setEditingCategory(cat);
-    setForm({ name: cat.name, description: cat.description || "", color: cat.color || "#7A1B33" });
+    setForm({ name: cat.name, color: cat.color || "#7A1B33" });
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingCategory(null);
-    setForm({ name: "", description: "", color: "#7A1B33" });
+    setForm({ name: "", color: "#7A1B33" });
     setEditingTemplateIdx(null);
     setTempTemplateColor("");
   };
@@ -164,9 +164,7 @@ export default function ExpertCategoryManager() {
                           <span className="px-2 py-0.5 rounded-full text-xs font-medium text-white" style={{ backgroundColor: "#7A1B33" }}>
                             {cat.name}
                           </span>
-                          {cat.description && (
-                            <span className="text-xs text-gray-500 hidden sm:inline">— {cat.description}</span>
-                          )}
+
                           <button
                             onClick={() => openEdit(cat)}
                             className="ml-auto text-gray-400 hover:text-[#7340B9] transition-colors"
@@ -205,14 +203,7 @@ export default function ExpertCategoryManager() {
                 placeholder="e.g. Nervous System, Business, Nutrition"
               />
             </div>
-            <div>
-              <Label>Description</Label>
-              <Input
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Short description (optional)"
-              />
-            </div>
+
 
             <div className="flex gap-2 pt-2">
               <Button
