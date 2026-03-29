@@ -15,11 +15,11 @@ export default function ExpertCategoryManager() {
   const [form, setForm] = useState({ name: "", description: "", color: "#7A1B33" });
 
   const colorTemplates = [
-    { label: "Founder", value: "#7A1B33" },
-    { label: "Sage", value: "#3D7A5E" },
-    { label: "Indigo", value: "#3D2E7A" },
-    { label: "Amber", value: "#B8600A" },
-    { label: "Steel", value: "#2E5F7A" },
+    { label: "Rose", value: "#99526C" },
+    { label: "Lavender", value: "#F3E8FF" },
+    { label: "Mint", value: "#DCFCE8" },
+    { label: "Sky", value: "#DBE9FE" },
+    { label: "Peach", value: "#FFE4D6" },
   ];
   const queryClient = useQueryClient();
 
@@ -105,10 +105,11 @@ export default function ExpertCategoryManager() {
                 className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-white hover:shadow-sm transition-shadow"
               >
                 <span
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: cat.color || "#7340B9" }}
-                />
-                <span className="font-medium text-sm">{cat.name}</span>
+                  className="px-2 py-0.5 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: cat.color || "#F3E8FF", color: "#4B0082" }}
+                >
+                  {cat.name}
+                </span>
                 {cat.description && (
                   <span className="text-xs text-gray-500 hidden sm:inline">— {cat.description}</span>
                 )}
@@ -155,7 +156,8 @@ export default function ExpertCategoryManager() {
             <div>
               <Label>Badge Colour</Label>
               <div className="mt-2 space-y-3">
-                <div className="flex gap-2">
+                {/* Template swatches */}
+                <div className="flex gap-2 flex-wrap">
                   {colorTemplates.map((t) => (
                     <button
                       key={t.value}
@@ -165,24 +167,33 @@ export default function ExpertCategoryManager() {
                       className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110"
                       style={{
                         backgroundColor: t.value,
-                        borderColor: form.color === t.value ? "#000" : "transparent",
+                        borderColor: form.color === t.value ? "#6B21A8" : "#e5e7eb",
                       }}
                     />
                   ))}
                 </div>
+                {/* Hex input + preview */}
                 <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-full border flex-shrink-0"
-                    style={{ backgroundColor: form.color }}
+                  <input
+                    type="color"
+                    value={form.color}
+                    onChange={(e) => setForm({ ...form, color: e.target.value })}
+                    className="w-8 h-8 rounded-full cursor-pointer border border-gray-200 p-0.5"
                   />
                   <Input
                     value={form.color}
                     onChange={(e) => setForm({ ...form, color: e.target.value })}
-                    placeholder="#7A1B33"
-                    className="font-mono w-32"
+                    placeholder="#F3E8FF"
+                    className="font-mono w-28"
                     maxLength={7}
                   />
-                  <Badge style={{ backgroundColor: form.color, color: "#fff" }}>{form.name || "Preview"}</Badge>
+                  {/* Badge preview matching screenshot style */}
+                  <span
+                    className="px-3 py-1 rounded-full text-sm font-medium"
+                    style={{ backgroundColor: form.color, color: "#4B0082" }}
+                  >
+                    {form.name || "Preview"}
+                  </span>
                 </div>
               </div>
             </div>
