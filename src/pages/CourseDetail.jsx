@@ -53,6 +53,16 @@ export default function CourseDetail() {
   const getSectionModules = (sectionId) =>
     modules.filter((m) => m.sectionId === sectionId);
 
+  const getSectionProgress = (sectionId) => {
+    const sectionMods = getSectionModules(sectionId);
+    if (sectionMods.length === 0) return 0;
+    const completed = sectionMods.filter(m => {
+      const p = progress.find(pr => pr.moduleId === m.id);
+      return p?.status === "completed";
+    }).length;
+    return Math.round((completed / sectionMods.length) * 100);
+  };
+
   const getModuleProgress = (moduleId) => {
     const p = progress.find((p) => p.moduleId === moduleId);
     return p?.progressPercentage || 0;
@@ -125,119 +135,41 @@ export default function CourseDetail() {
              <div className="mb-8">
                <h2 className="text-lg font-semibold text-[#3B224E] mb-4">Course Sections</h2>
                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                 {sections.map((section, idx) => (
-                   <motion.button
-                     key={section.id}
-                     onClick={() => setActiveSection(section.id)}
-                     initial={{ opacity: 0, scale: 0.9 }}
-                     animate={{ opacity: 1, scale: 1 }}
-                     transition={{ delay: idx * 0.05 }}
-                     className={`relative h-32 rounded-2xl overflow-hidden group transition-all ${
-                       activeSection === section.id ? "ring-2 ring-[#3B224E]" : ""
-                     }`}
-                   >
-                     {section.coverImage ? (
-                       <img src={section.coverImage} alt={section.title} className="w-full h-full object-cover" />
-                     ) : (
-                       <div className="w-full h-full bg-gradient-to-br from-purple-300 to-purple-500 flex items-center justify-center">
-                         <Grid2x2 className="w-8 h-8 text-white opacity-60" />
-                       </div>
-                     )}
-                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-end p-3">
-                       <p className="text-white font-medium text-sm leading-tight">{section.title}</p>
-                     </div>
-                   </motion.button>
-                 ))}
+                 {sections.map((section, idx) => {
+                   const sectionProg = getSectionProgress(section.id);
+                   return (
+                     <motion.div
+                       key={section.id}
+                       initial={{ opacity: 0, scale: 0.9 }}
+                       animate={{ opacity: 1, scale: 1 }}
+                       transition={{ delay: idx * 0.05 }}
+                     >
+                       <Link to={createPageUrl("SectionDetail") + `?sectionId=${section.id}&courseId=${courseId}`}>
+                         <div className="relative h-32 rounded-2xl overflow-hidden group transition-all cursor-pointer hover:shadow-lg">
+                           {section.coverImage ? (
+                             <img src={section.coverImage} alt={section.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                           ) : (
+                             <div className="w-full h-full bg-gradient-to-br from-purple-300 to-purple-500 flex items-center justify-center">
+                               <Grid2x2 className="w-8 h-8 text-white opacity-60" />
+                             </div>
+                           )}
+                           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex flex-col items-end justify-between p-3">
+                             <p className="text-white font-medium text-sm leading-tight text-right flex-1 flex items-end">{section.title}</p>
+                             {sectionProg > 0 && (
+                               <div className="w-full h-1.5 bg-white/30 rounded-full mt-2 overflow-hidden">
+                                 <div className="h-full bg-green-400 transition-all" style={{ width: `${sectionProg}%` }} />
+                               </div>
+                             )}
+                           </div>
+                         </div>
+                       </Link>
+                     </motion.div>
+                   );
+                 })}
                </div>
-             </div>
+               </div>
 
-             {/* Modules for Active Section */}
-             {activeSection && sections.length > 0 && (() => {
-               const activeSection_ = sections.find(s => s.id === activeSection);
-               const sectionModules = getSectionModules(activeSection);
-               return (
-                 <div>
-                   {activeSection_.description && (
-                     <p className="text-gray-600 mb-4 text-sm">{activeSection_.description}</p>
-                   )}
-                   {sectionModules.length === 0 ? (
-                     <div className="text-center py-12 bg-white/60 rounded-2xl">
-                       <p className="text-gray-500">No modules in this section yet.</p>
-                     </div>
-                   ) : (
-                     <div className="grid md:grid-cols-2 gap-4">
-                       {sectionModules.map((module, idx) => {
-                         const status = getModuleStatus(module.id);
-                         const prog = getModuleProgress(module.id);
-                         return (
-                           <motion.div
-                             key={module.id}
-                             initial={{ opacity: 0, y: 16 }}
-                             animate={{ opacity: 1, y: 0 }}
-                             transition={{ delay: idx * 0.05 }}
-                           >
-                             <Link
-                               to={createPageUrl("ModulePlayer") + `?moduleId=${module.id}&courseId=${courseId}`}
-                             >
-                               <Card className="h-full hover:shadow-lg transition-all cursor-pointer bg-white">
-                                 <CardContent className="p-5">
-                                   <div className="flex items-start justify-between mb-3">
-                                     <div className="flex-1">
-                                       <h3 className="font-semibold text-[#3B224E] text-base leading-snug">
-                                         {module.title}
-                                       </h3>
-                                       {module.description && (
-                                         <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                                           {module.description}
-                                         </p>
-                                       )}
-                                     </div>
-                                     <div className="ml-3 flex-shrink-0">
-                                       {status === "Complete" ? (
-                                         <CheckCircle className="w-5 h-5 text-green-500" />
-                                       ) : status === "InProgress" ? (
-                                         <Play className="w-5 h-5 text-[#3B224E]" />
-                                       ) : (
-                                         <Play className="w-5 h-5 text-gray-400" />
-                                       )}
-                                     </div>
-                                   </div>
-                                   <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                                     {module.durationMinutes > 0 && (
-                                       <span className="flex items-center gap-1">
-                                         <Clock className="w-3 h-3" />
-                                         {module.durationMinutes} min
-                                       </span>
-                                     )}
-                                   </div>
-                                   <div className="space-y-2">
-                                     <div className="flex justify-between items-center text-xs">
-                                       <Badge
-                                         className={
-                                           status === "Complete"
-                                             ? "bg-green-100 text-green-700 border-0"
-                                             : status === "InProgress"
-                                             ? "bg-purple-100 text-purple-700 border-0"
-                                             : "bg-gray-100 text-gray-700 border-0"
-                                         }
-                                       >
-                                         {status === "Complete" ? "✓ Completed" : status === "InProgress" ? "In Progress" : "Start"}
-                                       </Badge>
-                                       <span className="font-semibold text-gray-700">{prog}%</span>
-                                     </div>
-                                     <Progress value={prog} className="h-2" />
-                                   </div>
-                                 </CardContent>
-                               </Card>
-                             </Link>
-                           </motion.div>
-                         );
-                       })}
-                     </div>
-                   )}
-                 </div>
-               );
-             })()}
+
            </>
          )}
       </div>

@@ -9,6 +9,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CourseDetail from './pages/CourseDetail';
+import SectionDetail from './pages/SectionDetail';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/CourseDetail" element={<LayoutWrapper currentPageName="CourseDetail"><CourseDetail /></LayoutWrapper>} />
+      <Route path="/SectionDetail" element={<LayoutWrapper currentPageName="SectionDetail"><SectionDetail /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
