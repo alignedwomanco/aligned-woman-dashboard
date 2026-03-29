@@ -154,13 +154,15 @@ export default function CourseBuilderContent() {
   const swapOrder = async (items, indexA, indexB, updateFn, queryKey) => {
     if (indexA < 0 || indexB < 0 || indexA >= items.length || indexB >= items.length) return;
     // Give every item an explicit order based on its current position first
-    await Promise.all(
-      items.map((item, i) =>
-        (item.order === undefined || item.order === null)
-          ? updateFn({ id: item.id, data: { order: i } })
-          : Promise.resolve()
-      )
-    );
+    const updates = items.map((item, i) => {
+      const newOrder = (item.order === undefined || item.order === null) ? i : item.order;
+      if (item.order === undefined || item.order === null) {
+        return updateFn({ id: item.id, data: { order: newOrder } });
+      }
+      return Promise.resolve();
+    });
+    await Promise.all(updates);
+    
     const a = items[indexA];
     const b = items[indexB];
     const orderA = a.order ?? indexA;
