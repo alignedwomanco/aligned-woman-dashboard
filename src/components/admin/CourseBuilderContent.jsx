@@ -153,25 +153,30 @@ export default function CourseBuilderContent() {
   // Reorder helpers — assigns explicit numeric order to all items, then swaps two
   const swapOrder = async (items, indexA, indexB, updateFn, queryKey) => {
     if (indexA < 0 || indexB < 0 || indexA >= items.length || indexB >= items.length) return;
-    // Give every item an explicit order based on its current position first
-    const updates = items.map((item, i) => {
-      const newOrder = (item.order === undefined || item.order === null) ? i : item.order;
-      if (item.order === undefined || item.order === null) {
-        return updateFn({ id: item.id, data: { order: newOrder } });
-      }
-      return Promise.resolve();
-    });
-    await Promise.all(updates);
     
+    // First, give every item an explicit order based on its current position
+    const initPromises = [];
+    items.forEach((item, i) => {
+      if (item.order === undefined || item.order === null) {
+        initPromises.push(updateFn({ id: item.id, data: { order: i } }));
+      }
+    });
+    await Promise.all(initPromises);
+    
+    // Now swap the two items
     const a = items[indexA];
     const b = items[indexB];
-    const orderA = a.order ?? indexA;
-    const orderB = b.order ?? indexB;
+    
+    // Recalculate based on current state in case order was just set
+    const aWithOrder = { ...a, order: a.order ?? indexA };
+    const bWithOrder = { ...b, order: b.order ?? indexB };
+    
     await Promise.all([
-      updateFn({ id: a.id, data: { order: orderB } }),
-      updateFn({ id: b.id, data: { order: orderA } }),
+      updateFn({ id: a.id, data: { order: bWithOrder.order } }),
+      updateFn({ id: b.id, data: { order: aWithOrder.order } }),
     ]);
-    queryClient.invalidateQueries([queryKey]);
+    
+    await queryClient.invalidateQueries({ queryKey: [queryKey] });
   };
 
   const moveCourse = (course, direction) => {
