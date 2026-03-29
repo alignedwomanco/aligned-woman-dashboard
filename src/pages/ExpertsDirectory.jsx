@@ -218,17 +218,22 @@ export default function ExpertsDirectory() {
                 <div className="space-y-3">
                   {selectedExpert.services.map((svc, i) => (
                     <div key={i} className="border border-gray-100 rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
                           <p className="font-medium text-gray-800">{svc.name}</p>
                           {svc.description && <p className="text-sm text-gray-500 mt-1">{svc.description}</p>}
                           {svc.duration && <p className="text-xs text-gray-400 mt-1">{svc.duration}</p>}
                         </div>
-                        {svc.price != null && (
-                          <span className="font-semibold text-[#7340B9]">
-                            {svc.price === 0 ? "Free" : `$${svc.price}`}
-                          </span>
-                        )}
+                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                          {svc.price != null && (
+                            <span className="font-semibold text-[#7340B9]">
+                              {svc.price === 0 ? "Free" : `$${svc.price}`}
+                            </span>
+                          )}
+                          <Button size="sm" style={{ backgroundColor: "#7340B9" }}>
+                            Buy Now
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}

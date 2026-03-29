@@ -202,7 +202,7 @@ export default function Experts() {
                             </div>
                           )}
                           <Button className="w-full mt-3 bg-gradient-to-r from-[#3D2250] to-[#5B2E84] hover:from-[#3D2250]/90 hover:to-[#5B2E84]/90">
-                            Book Now
+                            Buy Now
                           </Button>
                         </div>
                       ))}
