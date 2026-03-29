@@ -374,76 +374,53 @@ export default function CourseBuilderContent() {
     );
   }
 
-  // ── COURSES GRID VIEW ────────────────────────────────────────────────────────
-  function renderCourseCard(course, idx, arr) {
+  // ── COURSES LIST VIEW ────────────────────────────────────────────────────────
+  function renderCourseRow(course, idx, arr) {
     const sectionCount = sections.filter((s) => s.courseId === course.id).length;
     const moduleCount = modules.filter((m) => m.courseId === course.id).length;
     return (
-      <div key={course.id} className="relative group">
-        <Card
-          className="cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden border-2 hover:border-purple-300"
-          onClick={() => setSelectedCourse(course)}
-        >
-          {/* Cover */}
-          <div className="h-36 bg-gradient-to-br from-[#3B224E] to-[#5B2E84] relative overflow-hidden">
-            {course.coverImage ? (
-              <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <BookOpen className="w-10 h-10 text-white/30" />
-              </div>
-            )}
-            {/* Reorder arrows on hover */}
-            <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                disabled={idx === 0}
-                onClick={(e) => { e.stopPropagation(); moveCourse(course, "up"); }}
-                className="p-1 bg-white/90 rounded shadow disabled:opacity-30 hover:bg-white"
-                title="Move up"
-              >
-                <ArrowUp className="w-3 h-3 text-gray-700" />
-              </button>
-              <button
-                disabled={idx === arr.length - 1}
-                onClick={(e) => { e.stopPropagation(); moveCourse(course, "down"); }}
-                className="p-1 bg-white/90 rounded shadow disabled:opacity-30 hover:bg-white"
-                title="Move down"
-              >
-                <ArrowDown className="w-3 h-3 text-gray-700" />
-              </button>
-            </div>
-          </div>
+      <div key={course.id} className="flex items-center gap-3 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-200 transition-colors">
+        {/* Reorder */}
+        <div className="flex flex-col gap-1 flex-shrink-0">
+          <button disabled={idx === 0} onClick={() => moveCourse(course, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move up">
+            <ArrowUp className="w-4 h-4 text-gray-400" />
+          </button>
+          <button disabled={idx === arr.length - 1} onClick={() => moveCourse(course, "down")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move down">
+            <ArrowDown className="w-4 h-4 text-gray-400" />
+          </button>
+        </div>
 
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="font-bold text-[#3B224E] leading-snug">{course.title}</h3>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <button
-                  onClick={(e) => { e.stopPropagation(); setEditingCourse(course); setCourseForm(course); setCourseDialogOpen(true); }}
-                  className="p-1 hover:bg-gray-100 rounded"
-                >
-                  <Edit className="w-4 h-4 text-gray-500" />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); if (confirm("Delete this course and all its content?")) deleteCourseMutation.mutate(course.id); }}
-                  className="p-1 hover:bg-gray-100 rounded"
-                >
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </button>
-              </div>
-            </div>
-            {course.description && <p className="text-xs text-gray-500 line-clamp-2 mb-3">{course.description}</p>}
-            <div className="flex items-center gap-2 flex-wrap mb-3">
-              {course.isPublished
-                ? <Badge className="bg-green-100 text-green-700 border-0 text-xs">Published</Badge>
-                : <Badge className="bg-gray-100 text-gray-600 border-0 text-xs">Draft</Badge>}
-              {course.isComingSoon && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Coming Soon</Badge>}
-              {course.isFeatured && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs"><Star className="w-3 h-3 mr-1" />Featured</Badge>}
-              {course.price > 0 && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">${course.price}</Badge>}
-            </div>
-            <p className="text-xs text-gray-400">{sectionCount} sections · {moduleCount} modules</p>
-          </CardContent>
-        </Card>
+        {/* Cover thumbnail */}
+        <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-[#3B224E] to-[#5B2E84] flex-shrink-0 overflow-hidden">
+          {course.coverImage
+            ? <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
+            : <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-6 h-6 text-white/40" /></div>}
+        </div>
+
+        {/* Info — clickable */}
+        <button className="flex-1 text-left min-w-0" onClick={() => setSelectedCourse(course)}>
+          <h3 className="font-bold text-[#3B224E] truncate">{course.title}</h3>
+          {course.description && <p className="text-xs text-gray-500 truncate">{course.description}</p>}
+          <div className="flex items-center gap-2 flex-wrap mt-1">
+            {course.isPublished
+              ? <Badge className="bg-green-100 text-green-700 border-0 text-xs">Published</Badge>
+              : <Badge className="bg-gray-100 text-gray-600 border-0 text-xs">Draft</Badge>}
+            {course.isComingSoon && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Coming Soon</Badge>}
+            {course.isFeatured && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs"><Star className="w-3 h-3 mr-1" />Featured</Badge>}
+            {course.price > 0 && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">${course.price}</Badge>}
+            <span className="text-xs text-gray-400">{sectionCount} sections · {moduleCount} modules</span>
+          </div>
+        </button>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button onClick={() => { setEditingCourse(course); setCourseForm(course); setCourseDialogOpen(true); }} className="p-2 hover:bg-gray-100 rounded" title="Edit">
+            <Edit className="w-4 h-4 text-gray-500" />
+          </button>
+          <button onClick={() => { if (confirm("Delete this course and all its content?")) deleteCourseMutation.mutate(course.id); }} className="p-2 hover:bg-gray-100 rounded" title="Delete">
+            <Trash2 className="w-4 h-4 text-red-500" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -600,8 +577,8 @@ export default function CourseBuilderContent() {
           <p className="text-sm">Click "Create Course" to get started</p>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {courses.map((course, idx, arr) => renderCourseCard(course, idx, arr))}
+        <div className="space-y-3">
+          {courses.map((course, idx, arr) => renderCourseRow(course, idx, arr))}
         </div>
       )}
 
