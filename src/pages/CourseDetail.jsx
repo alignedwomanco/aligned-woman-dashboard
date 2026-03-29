@@ -186,24 +186,34 @@ export default function CourseDetail() {
                              </div>
                            </div>
 
-                           <CardContent className="p-5">
-                             <h3 className="font-bold text-[#3B224E] text-lg leading-snug mb-2 group-hover:text-[#5B2E84] transition-colors">
-                               {section.title}
-                             </h3>
-                             {section.description && (
-                               <p className="text-sm text-gray-500 line-clamp-2 mb-4">
-                                 {section.description}
-                               </p>
-                             )}
+                           <CardContent className="p-5 flex flex-col gap-4">
+                             <div>
+                               <h3 className="font-bold text-[#3B224E] text-lg leading-snug mb-2 group-hover:text-[#5B2E84] transition-colors">
+                                 {section.title}
+                               </h3>
+                               {section.description && (
+                                 <p className="text-sm text-gray-500 line-clamp-2">
+                                   {section.description}
+                                 </p>
+                               )}
+                             </div>
 
-                             <div className="flex items-center justify-between mt-auto">
-                               <span className="text-xs text-gray-500">
-                                 {modulesInSection} modules
-                               </span>
-                               <div className="flex items-center gap-1 text-[#3B224E] text-sm font-medium">
-                                 {sectionProg > 0 ? `${sectionProg}% done` : "Start"}
-                                 <ArrowRight className="w-4 h-4" />
+                             <div className="space-y-2">
+                               <div className="flex items-center justify-between">
+                                 <span className="text-xs text-gray-500">{modulesInSection} modules</span>
+                                 <span className="text-xs font-semibold text-[#3B224E]">{sectionProg}%</span>
                                </div>
+                               <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                 <div
+                                   className="h-full bg-green-400 transition-all duration-300"
+                                   style={{ width: `${sectionProg}%` }}
+                                 />
+                               </div>
+                             </div>
+
+                             <div className="flex items-center gap-1 text-[#3B224E] text-sm font-medium mt-auto">
+                               {sectionProg > 0 ? `Continue` : "Start"}
+                               <ArrowRight className="w-4 h-4" />
                              </div>
                            </CardContent>
                          </Card>
