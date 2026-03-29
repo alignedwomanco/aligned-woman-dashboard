@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Section description"
     },
+    "coverImage": {
+      "type": "string",
+      "description": "Section cover image URL"
+    },
     "order": {
       "type": "number",
       "default": 0,

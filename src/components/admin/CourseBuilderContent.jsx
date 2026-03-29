@@ -56,7 +56,7 @@ export default function CourseBuilderContent() {
     title: "", description: "", coverImage: "", category: "",
     expertId: "", price: 0, isPublished: false, isComingSoon: false, isFeatured: false,
   });
-  const [sectionForm, setSectionForm] = useState({ title: "", description: "", order: 0, isPublished: false, isComingSoon: false });
+  const [sectionForm, setSectionForm] = useState({ title: "", description: "", coverImage: "", order: 0, isPublished: false, isComingSoon: false });
   const [moduleForm, setModuleForm] = useState({ title: "", description: "", expertId: "", durationMinutes: 0, isPublished: false, isComingSoon: false });
   const [pageForm, setPageForm] = useState({ title: "", pageType: "text", content: "", videoUrl: "" });
 
@@ -207,7 +207,7 @@ export default function CourseBuilderContent() {
   };
 
   const resetCourseForm = () => { setCourseForm({ title: "", description: "", coverImage: "", category: "", expertId: "", price: 0, isPublished: false, isComingSoon: false, isFeatured: false }); setEditingCourse(null); };
-  const resetSectionForm = () => { setSectionForm({ title: "", description: "", order: 0, isPublished: false, isComingSoon: false }); setEditingSection(null); };
+  const resetSectionForm = () => { setSectionForm({ title: "", description: "", coverImage: "", order: 0, isPublished: false, isComingSoon: false }); setEditingSection(null); };
   const resetModuleForm = () => { setModuleForm({ title: "", description: "", expertId: "", durationMinutes: 0, isPublished: false, isComingSoon: false }); setEditingModule(null); };
   const resetPageForm = () => { setPageForm({ title: "", pageType: "text", content: "", videoUrl: "" }); setEditingPage(null); };
 
@@ -526,6 +526,32 @@ export default function CourseBuilderContent() {
             <div className="space-y-4">
               <div><Label>Section Title *</Label><Input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} placeholder="e.g., Introduction to ALIVE Method" /></div>
               <div><Label>Description</Label><Textarea value={sectionForm.description} onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })} placeholder="Section description" /></div>
+              <div>
+                <Label>Cover Image</Label>
+                <div className="space-y-3">
+                  {sectionForm.coverImage && (
+                    <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
+                      <img src={sectionForm.coverImage} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer text-sm font-medium text-gray-700">
+                    <Upload className="w-4 h-4" />
+                    {sectionForm.coverImage ? "Change Image" : "Upload Image"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                          setSectionForm({ ...sectionForm, coverImage: file_url });
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
               <div className="flex items-center gap-6 flex-wrap">
                 <div className="flex items-center gap-2">
                   <Switch checked={sectionForm.isPublished} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isPublished: checked })} />
