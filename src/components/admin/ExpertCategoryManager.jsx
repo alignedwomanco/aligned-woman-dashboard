@@ -88,7 +88,7 @@ export default function ExpertCategoryManager() {
     }
   };
 
-  const handleReorderCategories = (result) => {
+  const handleReorderCategories = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
     if (source.index === destination.index) return;
@@ -98,11 +98,19 @@ export default function ExpertCategoryManager() {
     reordered.splice(destination.index, 0, moved);
 
     // Update order field for each category
-    reordered.forEach((cat, idx) => {
-      if (cat.order !== idx) {
-        updateMutation.mutate({ id: cat.id, data: { order: idx } });
-      }
-    });
+    const updates = reordered
+      .map((cat, idx) => {
+        if (cat.order !== idx) {
+          return base44.entities.ExpertCategory.update(cat.id, { order: idx });
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    if (updates.length > 0) {
+      await Promise.all(updates);
+      queryClient.invalidateQueries({ queryKey: ["expertCategories"] });
+    }
   };
 
   const handleSave = () => {
