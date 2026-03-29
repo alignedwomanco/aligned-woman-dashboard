@@ -333,6 +333,7 @@ export default function CourseBuilderContent() {
                       <div className="p-3 flex items-center gap-2">
                         <button onClick={() => toggleModuleExpanded(module.id)} className="flex items-center gap-2 flex-1 text-left">
                           {expandedModules.has(module.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
+                          <span className="inline-block px-2.5 py-1 bg-[#3B224E] text-white rounded-md text-xs font-semibold mr-2">{mIdx + 1}</span>
                           <span className="font-medium text-sm">{module.title}</span>
                           <Badge variant="outline" className="text-xs">{getModulePages(module.id).length} pages</Badge>
                           {module.durationMinutes > 0 && <Badge variant="outline" className="text-xs"><Clock className="w-3 h-3 mr-1" />{module.durationMinutes}m</Badge>}
@@ -362,9 +363,12 @@ export default function CourseBuilderContent() {
                       {expandedModules.has(module.id) && (
                         <div className="bg-gray-50 p-3 space-y-1">
                           {getModulePages(module.id).map((page, pIdx, pArr) => (
-                            <div key={page.id} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
-                              <span>{page.title}</span>
-                              <div className="flex items-center gap-1">
+                            <div key={page.id} className="flex items-center justify-between p-2 bg-white rounded border text-sm gap-3">
+                              <div className="flex items-center gap-2 flex-1">
+                                <span className="inline-block px-2.5 py-1 bg-gray-300 text-gray-800 rounded-md text-xs font-bold">{mIdx + 1}.{pIdx + 1}</span>
+                                <span>{page.title}</span>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
                                 <button disabled={pIdx === 0} onClick={() => movePage(page, module.id, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
                                   <ArrowUp className="w-3 h-3 text-gray-500" />
                                 </button>
