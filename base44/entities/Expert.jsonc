@@ -1,0 +1,63 @@
+{
+  "name": "Expert",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Expert full name"
+    },
+    "title": {
+      "type": "string",
+      "description": "Expert title/role"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Expert biography"
+    },
+    "profile_picture": {
+      "type": "string",
+      "description": "Expert profile picture URL"
+    },
+    "category": {
+      "type": "string",
+      "description": "Expert category ID"
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas of expertise"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "duration": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Services offered by expert"
+    },
+    "isPublished": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether expert is shown on public page"
+    }
+  },
+  "required": [
+    "name",
+    "title"
+  ]
+}

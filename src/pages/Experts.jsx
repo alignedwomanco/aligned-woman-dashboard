@@ -18,6 +18,15 @@ export default function Experts() {
     },
     initialData: [],
   });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["expertCategories"],
+    queryFn: () => base44.entities.ExpertCategory.list(),
+    initialData: [],
+  });
+
+  const getCategoryName = (catId) => categories.find(c => c.id === catId)?.name || "";
+  const getCategoryColor = (catId) => categories.find(c => c.id === catId)?.color || "#7340B9";
   return (
     <div className="pt-20">
       {/* Hero */}
@@ -67,9 +76,21 @@ export default function Experts() {
                   <h3 className="text-xl font-bold text-[#3D2250] mb-1">
                     {expert.name}
                   </h3>
-                  <p className="text-[#C67793] font-medium text-sm mb-3">
+                  <p className="text-[#C67793] font-medium text-sm mb-2">
                     {expert.title}
                   </p>
+                  {expert.category && getCategoryName(expert.category) && (
+                    <span
+                      className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2"
+                      style={{
+                        backgroundColor: getCategoryColor(expert.category) + "22",
+                        color: getCategoryColor(expert.category),
+                        border: `1px solid ${getCategoryColor(expert.category)}55`,
+                      }}
+                    >
+                      {getCategoryName(expert.category)}
+                    </span>
+                  )}
                   <p className="text-gray-600 text-sm leading-relaxed mb-4">
                     {expert.bio}
                   </p>
@@ -120,6 +141,18 @@ export default function Experts() {
                   <div className="flex-1">
                     <DialogTitle className="text-2xl text-[#3D2250]">{selectedExpert.name}</DialogTitle>
                     <p className="text-[#C67793] font-medium mt-1">{selectedExpert.title}</p>
+                    {selectedExpert.category && getCategoryName(selectedExpert.category) && (
+                      <span
+                        className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-1 mb-1"
+                        style={{
+                          backgroundColor: getCategoryColor(selectedExpert.category) + "22",
+                          color: getCategoryColor(selectedExpert.category),
+                          border: `1px solid ${getCategoryColor(selectedExpert.category)}55`,
+                        }}
+                      >
+                        {getCategoryName(selectedExpert.category)}
+                      </span>
+                    )}
                     {selectedExpert.specialties && selectedExpert.specialties.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
                         {selectedExpert.specialties.map((specialty, idx) => (

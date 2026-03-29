@@ -326,6 +326,47 @@ If you did not request this change, please ignore this email.
     return levels[level] || levels[1];
   };
 
+  const { data: expertCategories = [] } = useQuery({
+    queryKey: ["expertCategories"],
+    queryFn: () => base44.entities.ExpertCategory.list(),
+    initialData: [],
+  });
+
+  const { data: myExpertProfile = null } = useQuery({
+    queryKey: ["myExpertProfile", currentUser?.email],
+    queryFn: async () => {
+      const all = await base44.entities.Expert.list();
+      return all.find(e => e.name?.toLowerCase() === currentUser?.full_name?.toLowerCase()) || null;
+    },
+    enabled: !!currentUser && ["expert", "course_creator", "admin", "master_admin"].includes(currentUser?.role),
+  });
+
+  const [expertProfileForm, setExpertProfileForm] = useState({ title: "", bio: "", category: "", specialties: [] });
+
+  useEffect(() => {
+    if (myExpertProfile) {
+      setExpertProfileForm({
+        title: myExpertProfile.title || "",
+        bio: myExpertProfile.bio || "",
+        category: myExpertProfile.category || "",
+        specialties: myExpertProfile.specialties || [],
+      });
+    }
+  }, [myExpertProfile]);
+
+  const saveExpertProfileMutation = useMutation({
+    mutationFn: async (data) => {
+      if (myExpertProfile) {
+        return base44.entities.Expert.update(myExpertProfile.id, data);
+      } else {
+        return base44.entities.Expert.create({ ...data, name: currentUser.full_name, profile_picture: currentUser.profile_picture, isPublished: true });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["myExpertProfile"] });
+    },
+  });
+
   const { data: myFollows = [] } = useQuery({
     queryKey: ["myFollows"],
     queryFn: () => base44.entities.UserFollow.list(),
@@ -420,7 +461,16 @@ If you did not request this change, please ignore this email.
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white border border-gray-200">
+          <TabsList className="bg-white border border-gray-200 flex-wrap h-auto gap-1">
+            {["expert", "course_creator", "admin", "master_admin"].includes(currentUser?.role) && (
+              <TabsTrigger
+                value="expertprofile"
+                className="data-[state=active]:text-white hover:bg-gray-100"
+                style={{ backgroundColor: activeTab === "expertprofile" ? 'var(--theme-secondary, #5B2E84)' : '' }}
+              >
+                Expert Profile
+              </TabsTrigger>
+            )}
             <TabsTrigger 
               value="profile"
               className="data-[state=active]:text-white hover:bg-gray-100"
@@ -457,6 +507,78 @@ If you did not request this change, please ignore this email.
               Analytics
             </TabsTrigger>
           </TabsList>
+
+          {/* Expert Profile Tab */}
+          {["expert", "course_creator", "admin", "master_admin"].includes(currentUser?.role) && (
+            <TabsContent value="expertprofile">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Expert Profile</CardTitle>
+                  <p className="text-gray-600 text-sm">This information appears on the Expert Directory and Experts page</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Title / Role</Label>
+                    <Input
+                      value={expertProfileForm.title}
+                      onChange={(e) => setExpertProfileForm({ ...expertProfileForm, title: e.target.value })}
+                      placeholder="e.g. Nervous System Specialist"
+                    />
+                  </div>
+                  <div>
+                    <Label>Bio</Label>
+                    <Textarea
+                      value={expertProfileForm.bio}
+                      onChange={(e) => setExpertProfileForm({ ...expertProfileForm, bio: e.target.value })}
+                      placeholder="Your expert biography..."
+                      className="min-h-[120px]"
+                    />
+                  </div>
+                  <div>
+                    <Label>Category</Label>
+                    <Select
+                      value={expertProfileForm.category || ""}
+                      onValueChange={(val) => setExpertProfileForm({ ...expertProfileForm, category: val })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={null}>No category</SelectItem>
+                        {expertCategories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Specialties (comma separated)</Label>
+                    <Input
+                      value={(expertProfileForm.specialties || []).join(", ")}
+                      onChange={(e) =>
+                        setExpertProfileForm({
+                          ...expertProfileForm,
+                          specialties: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+                        })
+                      }
+                      placeholder="e.g. Hormones, Sleep, Mindset"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => saveExpertProfileMutation.mutate(expertProfileForm)}
+                    disabled={saveExpertProfileMutation.isPending}
+                    className="text-white"
+                    style={{ backgroundColor: 'var(--theme-secondary, #5B2E84)' }}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {saveExpertProfileMutation.isPending ? "Saving..." : "Save Expert Profile"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
 
           {/* Profile Tab */}
           <TabsContent value="profile">

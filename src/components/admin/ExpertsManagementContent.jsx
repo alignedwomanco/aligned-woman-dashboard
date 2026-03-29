@@ -34,6 +34,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import ImageCropper from "./ImageCropper";
+import ExpertCategoryManager from "./ExpertCategoryManager";
 
 export default function ExpertsManagementContent() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -46,6 +47,7 @@ export default function ExpertsManagementContent() {
     title: "",
     bio: "",
     profile_picture: "",
+    category: "",
     specialties: [],
     services: [],
     isPublished: true,
@@ -53,6 +55,11 @@ export default function ExpertsManagementContent() {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [tempImage, setTempImage] = useState(null);
   const queryClient = useQueryClient();
+
+  const { data: expertCategories = [] } = useQuery({
+    queryKey: ["expertCategories"],
+    queryFn: () => base44.entities.ExpertCategory.list(),
+  });
 
   const { data: expertsProfiles = [] } = useQuery({
     queryKey: ["expertsProfiles"],
@@ -134,6 +141,7 @@ export default function ExpertsManagementContent() {
       title: "",
       bio: "",
       profile_picture: "",
+      category: "",
       specialties: [],
       services: [],
       isPublished: true,
@@ -200,6 +208,9 @@ export default function ExpertsManagementContent() {
 
   return (
     <div className="space-y-6">
+      {/* Category Manager */}
+      <ExpertCategoryManager />
+
       {/* Expert Profiles Management */}
       <Card>
         <CardHeader>
@@ -451,6 +462,26 @@ export default function ExpertsManagementContent() {
                 placeholder="Expert biography"
                 className="min-h-[100px]"
               />
+            </div>
+
+            <div>
+              <Label>Category</Label>
+              <Select
+                value={expertForm.category || ""}
+                onValueChange={(val) => setExpertForm({ ...expertForm, category: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>No category</SelectItem>
+                  {expertCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
