@@ -247,27 +247,6 @@ export default function ExpertsDirectory() {
                   </div>
                 )}
 
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                  <div className="bg-purple-50 rounded-lg p-2">
-                    <div className="text-lg font-bold text-[#7340B9]">
-                      {expert.years_experience || "5+"}
-                    </div>
-                    <div className="text-xs text-gray-600">Years</div>
-                  </div>
-                  <div className="bg-purple-50 rounded-lg p-2">
-                    <div className="text-lg font-bold text-purple-700">
-                      {expert.clients_served || "100+"}
-                    </div>
-                    <div className="text-xs text-gray-600">Clients</div>
-                  </div>
-                  <div className="bg-orange-50 rounded-lg p-2">
-                    <div className="text-lg font-bold text-orange-600">
-                      {expert.rating || "5.0"}
-                    </div>
-                    <div className="text-xs text-gray-600">Rating</div>
-                  </div>
-                </div>
 
                 {/* Action Buttons — only for users with accounts */}
                 <div className="space-y-2">
