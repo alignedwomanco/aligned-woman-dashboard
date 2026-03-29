@@ -10,7 +10,7 @@ import DailyCheckIn from './pages/DailyCheckIn';
 import Dashboard from './pages/Dashboard';
 import DefineMyPurpose from './pages/DefineMyPurpose';
 import Experts from './pages/Experts';
-import ExpertsDirectory from './pages/ExpertsDirectory';
+import ExpertsDirectory from './pages/ExpertsDirectory.jsx';
 import Home from './pages/Home';
 import Journal from './pages/Journal';
 import Members from './pages/Members';
