@@ -4,140 +4,52 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { base44 } from "@/api/base44Client";
-import {
-  Clock,
-  Eye,
-  Unlock,
-  Target,
-  Compass,
-  Search,
-  Play,
-  Lock,
-  CheckCircle,
-  BookOpen,
-} from "lucide-react";
-import GamificationStats from "@/components/classroom/GamificationStats";
-import LeaderboardCard from "@/components/classroom/LeaderboardCard";
-
-const phaseIcons = {
-  Awareness: Eye,
-  Liberation: Unlock,
-  Intention: Target,
-  VisionEmbodiment: Compass,
-};
-
-const phaseColors = {
-  Awareness: "bg-blue-100 text-blue-700 border-blue-200",
-  Liberation: "bg-purple-100 text-purple-700 border-purple-200",
-  Intention: "bg-pink-100 text-[#6B1B3D] border-pink-200",
-  VisionEmbodiment: "bg-rose-100 text-rose-700 border-rose-200",
-};
+import { Search, BookOpen, Clock, Users, ArrowRight, Star } from "lucide-react";
 
 export default function Classroom() {
-  const [activePhase, setActivePhase] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userPoints, setUserPoints] = useState(null);
-  const [userBadges, setUserBadges] = useState([]);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [allModules, setAllModules] = useState([]);
-  const [moduleProgress, setModuleProgress] = useState([]);
-  const [allPages, setAllPages] = useState([]);
-  const [subModuleProgress, setSubModuleProgress] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [enrollment, setEnrollment] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const user = await base44.auth.me();
-        setCurrentUser(user);
+        // Load published courses, sorted by created_date (oldest first)
+        const allCourses = await base44.entities.Course.filter({ isPublished: true }, "created_date");
+        setCourses(allCourses);
 
-        // Load courses and modules from Course Builder
-        const courses = await base44.entities.Course.list();
-        console.log("All courses:", courses);
-        const allModulesData = [];
-        
-        for (const course of courses) {
-          const modules = await base44.entities.CourseModule.filter({ courseId: course.id }, "order");
-          console.log(`Modules for course ${course.title}:`, modules);
-          allModulesData.push(...modules.map(m => ({ ...m, courseTitle: course.title })));
-        }
-        
-        console.log("All modules loaded:", allModulesData);
-        setAllModules(allModulesData);
-
-        // Load module progress (using CourseProgress)
-        const progress = await base44.entities.CourseProgress.filter({ status: { $ne: "not_started" } });
-        setModuleProgress(progress);
-
-        // Load all pages and progress
-        const pages = await base44.entities.CoursePage.list();
-        setAllPages(pages);
-        
-        const subProgress = await base44.entities.CourseProgress.list();
-        setSubModuleProgress(subProgress);
-
-        // Load user points
-        const points = await base44.entities.UserPoints.filter({});
-        setUserPoints(points[0] || null);
-
-        // Load user badges
-        const badges = await base44.entities.UserBadge.list("-earnedDate");
-        setUserBadges(badges);
-
-        // Load leaderboard via backend function
-        const leaderboardResponse = await base44.functions.invoke('getLeaderboard');
-        setLeaderboard(leaderboardResponse.data.leaderboard || []);
-      } catch (error) {
-        console.error("Error loading classroom data:", error);
+        // Load user's enrollment/progress
+        const prog = await base44.entities.CourseProgress.filter({});
+        setEnrollment(prog);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
   }, []);
 
-  const getModuleStatus = (moduleId) => {
-    const progress = moduleProgress.find(p => p.moduleId === moduleId);
-    if (!progress) return "Available";
-    return progress.status;
+  const getCourseProgress = (courseId) => {
+    const courseProgress = enrollment.filter((p) => p.courseId === courseId);
+    if (courseProgress.length === 0) return 0;
+    const completed = courseProgress.filter((p) => p.status === "completed").length;
+    return Math.round((completed / courseProgress.length) * 100);
   };
 
-  const getModuleProgressPercent = (moduleId) => {
-    const pages = allPages.filter(p => p.moduleId === moduleId);
-    if (pages.length === 0) return 0;
-    
-    const completedPages = pages.filter(page => {
-      const pageProgress = subModuleProgress.find(p => 
-        p.pageId === page.id && p.status === "completed"
-      );
-      return pageProgress;
-    }).length;
-    
-    return Math.round((completedPages / pages.length) * 100);
-  };
-
-  const filteredModules = allModules.filter((module) => {
-    if (!searchQuery) return true;
-    const searchMatch = 
-      module.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      module.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return searchMatch;
-  });
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "Complete": return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case "InProgress": return <Play className="w-5 h-5 text-[#6B1B3D]" />;
-      case "Available": return <Play className="w-5 h-5 text-gray-400" />;
-      default: return <Lock className="w-5 h-5 text-gray-300" />;
-    }
-  };
+  const filteredCourses = courses.filter((course) =>
+    !searchQuery ||
+    course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: '#E4CAFB' }}>
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: "#E4CAFB" }}>
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -145,145 +57,134 @@ export default function Classroom() {
           className="mb-8"
         >
           <h1 className="text-2xl sm:text-3xl font-bold text-[#3B224E] mb-2">Classroom</h1>
-          <p className="text-gray-600">
-            Browse all available modules across the ALIVE Method phases.
-          </p>
+          <p className="text-gray-600">Explore your courses and continue your learning journey.</p>
         </motion.div>
 
-        {/* Gamification Stats */}
-        {currentUser && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <GamificationStats userPoints={userPoints} userBadges={userBadges} />
-          </motion.div>
-        )}
-
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-          {/* Left Column - Modules */}
-          <div>
-            {/* Filters */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mb-8 flex flex-col sm:flex-row gap-4"
-            >
-          <div className="relative flex-1">
+        {/* Search */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search modules..."
-              className="pl-10 rounded-xl border-gray-200"
+              placeholder="Search courses..."
+              className="pl-10 rounded-xl border-gray-200 bg-white"
             />
           </div>
-              <Tabs value={activePhase} onValueChange={setActivePhase}>
-                <TabsList className="bg-white border">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="Awareness">Awareness</TabsTrigger>
-                  <TabsTrigger value="Liberation">Liberation</TabsTrigger>
-                  <TabsTrigger value="Intention">Intention</TabsTrigger>
-                  <TabsTrigger value="VisionEmbodiment">Vision</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </motion.div>
+        </motion.div>
 
-            {/* Modules Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-          {filteredModules.map((module, index) => {
-            const status = getModuleStatus(module.id);
-            const isClickable = true; // All published modules are clickable
-
-            const cardContent = (
-              <Card className={`h-full transition-all hover:shadow-lg cursor-pointer`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 border">
-                      <BookOpen className="w-3 h-3 mr-1" />
-                      {module.courseTitle || "Course"}
-                    </Badge>
-                    {getStatusIcon(status)}
-                  </div>
-                  
-                  <h3 className="text-lg font-bold mb-2 text-[#4A1228]">
-                    {module.title}
-                  </h3>
-                  
-                  <p className="text-sm mb-4 line-clamp-2 text-gray-600">
-                    {module.description || "Start learning this module"}
-                  </p>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {module.durationMinutes || 45} min
-                      </span>
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-600">Progress</span>
-                        <span className="text-xs font-medium text-[#6B1B3D]">
-                          {getModuleProgressPercent(module.id)}%
-                        </span>
+        {/* Courses Grid */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin w-8 h-8 border-4 border-[#3B224E] border-t-transparent rounded-full" />
+          </div>
+        ) : filteredCourses.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-white/60 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              {searchQuery ? "No courses found" : "No courses available yet"}
+            </h3>
+            <p className="text-gray-500">
+              {searchQuery ? "Try a different search term." : "Check back soon!"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCourses.map((course, idx) => {
+              const progress = getCourseProgress(course.id);
+              return (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.07 }}
+                >
+                  <Link to={createPageUrl("CourseDetail") + `?courseId=${course.id}`}>
+                    <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer bg-white overflow-hidden group">
+                      {/* Cover Image */}
+                      <div className="h-44 bg-gradient-to-br from-[#3B224E] to-[#5B2E84] relative overflow-hidden">
+                        {course.coverImage ? (
+                          <img
+                            src={course.coverImage}
+                            alt={course.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <BookOpen className="w-12 h-12 text-white/40" />
+                          </div>
+                        )}
+                        {course.isFeatured && (
+                          <div className="absolute top-3 left-3">
+                            <Badge className="bg-amber-400 text-amber-900 border-0 text-xs font-semibold">
+                              <Star className="w-3 h-3 mr-1" />
+                              Featured
+                            </Badge>
+                          </div>
+                        )}
+                        {progress > 0 && (
+                          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/20">
+                            <div
+                              className="h-full bg-green-400 transition-all"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                        )}
                       </div>
-                      <Progress value={getModuleProgressPercent(module.id)} className="h-2" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
 
-            return (
-              <motion.div
-                key={module.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Link to={createPageUrl("ModulePlayer") + `?moduleId=${module.id}&courseId=${module.courseId}`}>
-                  {cardContent}
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+                      <CardContent className="p-5">
+                        {course.category && (
+                          <Badge className="bg-purple-100 text-purple-700 border-purple-200 border text-xs mb-3">
+                            {course.category}
+                          </Badge>
+                        )}
+                        <h3 className="font-bold text-[#3B224E] text-lg leading-snug mb-2 group-hover:text-[#5B2E84] transition-colors">
+                          {course.title}
+                        </h3>
+                        {course.description && (
+                          <p className="text-sm text-gray-500 line-clamp-2 mb-4">
+                            {course.description}
+                          </p>
+                        )}
 
-            {allModules.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-10 h-10 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Modules Yet</h3>
-                <p className="text-gray-500 mb-6">Modules haven't been created yet. Check back soon!</p>
-              </div>
-            ) : filteredModules.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-gray-500">No modules found matching your criteria.</p>
-              </div>
-            ) : null}
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="flex items-center gap-3 text-xs text-gray-500">
+                            {course.enrollmentCount > 0 && (
+                              <span className="flex items-center gap-1">
+                                <Users className="w-3.5 h-3.5" />
+                                {course.enrollmentCount}
+                              </span>
+                            )}
+                            {course.price > 0 ? (
+                              <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">
+                                ${course.price}
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-green-100 text-green-700 border-0 text-xs">
+                                Free
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-[#3B224E] text-sm font-medium">
+                            {progress > 0 ? `${progress}% done` : "Start"}
+                            <ArrowRight className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
-
-          {/* Right Column - Leaderboard */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="sticky top-6"
-            >
-              <LeaderboardCard 
-                leaderboard={leaderboard} 
-                currentUserEmail={currentUser?.email} 
-              />
-            </motion.div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

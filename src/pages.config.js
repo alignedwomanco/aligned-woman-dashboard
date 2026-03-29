@@ -3,7 +3,7 @@ import AWBlueprint from './pages/AWBlueprint';
 import AdminSettings from './pages/AdminSettings';
 import Apply from './pages/Apply';
 import CheckIn from './pages/CheckIn';
-import Classroom from './pages/Classroom';
+import Classroom from './pages/Classroom.jsx';
 import Community from './pages/Community';
 import Contact from './pages/Contact';
 import DailyCheckIn from './pages/DailyCheckIn';
