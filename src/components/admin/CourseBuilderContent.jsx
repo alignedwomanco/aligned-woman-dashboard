@@ -27,11 +27,13 @@ import {
   Edit,
   ChevronDown,
   ChevronRight,
-  ChevronUp,
   BookOpen,
   Users,
   ArrowUp,
   ArrowDown,
+  ArrowLeft,
+  Star,
+  Clock,
 } from "lucide-react";
 
 export default function CourseBuilderContent() {
@@ -51,7 +53,7 @@ export default function CourseBuilderContent() {
 
   const [courseForm, setCourseForm] = useState({
     title: "", description: "", coverImage: "", category: "",
-    expertId: "", price: 0, isPublished: false, isComingSoon: false,
+    expertId: "", price: 0, isPublished: false, isComingSoon: false, isFeatured: false,
   });
   const [sectionForm, setSectionForm] = useState({ title: "", description: "", order: 0, isPublished: false, isComingSoon: false });
   const [moduleForm, setModuleForm] = useState({ title: "", description: "", expertId: "", durationMinutes: 0, isPublished: false, isComingSoon: false });
@@ -137,7 +139,7 @@ export default function CourseBuilderContent() {
     onSuccess: () => queryClient.invalidateQueries(["coursePages"]),
   });
 
-  // Reorder helpers — swap `order` field between two items
+  // Reorder helpers
   const swapOrder = async (items, indexA, indexB, updateFn, queryKey) => {
     if (indexA < 0 || indexB >= items.length) return;
     const a = items[indexA];
@@ -151,40 +153,34 @@ export default function CourseBuilderContent() {
     queryClient.invalidateQueries([queryKey]);
   };
 
+  const moveCourse = (course, direction) => {
+    const idx = courses.findIndex((c) => c.id === course.id);
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    swapOrder(courses, idx, targetIdx, ({ id, data }) => base44.entities.Course.update(id, data), "courses");
+  };
+
   const moveSection = (section, direction) => {
     const courseSections = getCourseSections(selectedCourse.id);
     const idx = courseSections.findIndex((s) => s.id === section.id);
     const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    swapOrder(
-      courseSections, idx, targetIdx,
-      ({ id, data }) => base44.entities.CourseSection.update(id, data),
-      "courseSections"
-    );
+    swapOrder(courseSections, idx, targetIdx, ({ id, data }) => base44.entities.CourseSection.update(id, data), "courseSections");
   };
 
   const moveModule = (module, sectionId, direction) => {
     const sectionModules = getSectionModules(sectionId);
     const idx = sectionModules.findIndex((m) => m.id === module.id);
     const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    swapOrder(
-      sectionModules, idx, targetIdx,
-      ({ id, data }) => base44.entities.CourseModule.update(id, data),
-      "courseModules"
-    );
+    swapOrder(sectionModules, idx, targetIdx, ({ id, data }) => base44.entities.CourseModule.update(id, data), "courseModules");
   };
 
   const movePage = (page, moduleId, direction) => {
     const modulePages = getModulePages(moduleId);
     const idx = modulePages.findIndex((p) => p.id === page.id);
     const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    swapOrder(
-      modulePages, idx, targetIdx,
-      ({ id, data }) => base44.entities.CoursePage.update(id, data),
-      "coursePages"
-    );
+    swapOrder(modulePages, idx, targetIdx, ({ id, data }) => base44.entities.CoursePage.update(id, data), "coursePages");
   };
 
-  const resetCourseForm = () => { setCourseForm({ title: "", description: "", coverImage: "", category: "", expertId: "", price: 0, isPublished: false, isComingSoon: false }); setEditingCourse(null); };
+  const resetCourseForm = () => { setCourseForm({ title: "", description: "", coverImage: "", category: "", expertId: "", price: 0, isPublished: false, isComingSoon: false, isFeatured: false }); setEditingCourse(null); };
   const resetSectionForm = () => { setSectionForm({ title: "", description: "", order: 0, isPublished: false, isComingSoon: false }); setEditingSection(null); };
   const resetModuleForm = () => { setModuleForm({ title: "", description: "", expertId: "", durationMinutes: 0, isPublished: false, isComingSoon: false }); setEditingModule(null); };
   const resetPageForm = () => { setPageForm({ title: "", pageType: "text", content: "", videoUrl: "" }); setEditingPage(null); };
@@ -209,24 +205,379 @@ export default function CourseBuilderContent() {
     else createPageMutation.mutate(data);
   };
 
-  // Sort by order field, fallback to created_date order (index)
   const getCourseSections = (courseId) =>
     sections
       .filter((s) => s.courseId === courseId)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.created_date?.localeCompare(b.created_date || "") || 0);
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.created_date || "").localeCompare(b.created_date || ""));
 
   const getSectionModules = (sectionId) =>
     modules
       .filter((m) => m.sectionId === sectionId)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.created_date?.localeCompare(b.created_date || "") || 0);
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.created_date || "").localeCompare(b.created_date || ""));
 
   const getModulePages = (moduleId) =>
     pages
       .filter((p) => p.moduleId === moduleId)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.created_date?.localeCompare(b.created_date || "") || 0);
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.created_date || "").localeCompare(b.created_date || ""));
 
   const toggleSectionExpanded = (id) => setExpandedSections((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const toggleModuleExpanded = (id) => setExpandedModules((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  // ── COURSE DETAIL VIEW ──────────────────────────────────────────────────────
+  if (selectedCourse) {
+    const courseSections = getCourseSections(selectedCourse.id);
+    return (
+      <div className="space-y-6">
+        {/* Back + Header */}
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => { setSelectedCourse(null); setSelectedSection(null); setSelectedModule(null); }}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> All Courses
+          </Button>
+        </div>
+
+        {/* Course Banner */}
+        <div className="rounded-2xl overflow-hidden border-2" style={{ borderColor: "var(--theme-secondary, #5B2E84)" }}>
+          <div className="h-40 bg-gradient-to-br from-[#3B224E] to-[#5B2E84] relative">
+            {selectedCourse.coverImage && (
+              <img src={selectedCourse.coverImage} alt={selectedCourse.title} className="w-full h-full object-cover opacity-60" />
+            )}
+            <div className="absolute inset-0 p-6 flex flex-col justify-end">
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                {selectedCourse.isPublished ? <Badge className="bg-green-400 text-green-900 border-0">Published</Badge> : <Badge className="bg-gray-200 text-gray-700 border-0">Draft</Badge>}
+                {selectedCourse.isComingSoon && <Badge className="bg-amber-400 text-amber-900 border-0">Coming Soon</Badge>}
+                {selectedCourse.isFeatured && <Badge className="bg-yellow-300 text-yellow-900 border-0"><Star className="w-3 h-3 mr-1" />Featured</Badge>}
+                {selectedCourse.price > 0 && <Badge className="bg-blue-400 text-blue-900 border-0">${selectedCourse.price}</Badge>}
+                {selectedCourse.category && <Badge className="bg-purple-200 text-purple-900 border-0">{selectedCourse.category}</Badge>}
+              </div>
+              <h2 className="text-2xl font-bold text-white">{selectedCourse.title}</h2>
+              {selectedCourse.description && <p className="text-white/80 text-sm mt-1 line-clamp-2">{selectedCourse.description}</p>}
+            </div>
+          </div>
+          <div className="bg-white px-6 py-3 flex items-center gap-3 flex-wrap">
+            <span className="text-sm text-gray-500">{courseSections.length} sections · {modules.filter(m => m.courseId === selectedCourse.id).length} modules</span>
+            <div className="flex-1" />
+            <Button size="sm" variant="outline" onClick={() => { setEditingCourse(selectedCourse); setCourseForm(selectedCourse); setCourseDialogOpen(true); }}>
+              <Edit className="w-4 h-4 mr-1" /> Edit Course
+            </Button>
+            <Button size="sm" className="text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }} onClick={() => { resetSectionForm(); setSectionDialogOpen(true); }}>
+              <Plus className="w-4 h-4 mr-1" /> Add Section
+            </Button>
+          </div>
+        </div>
+
+        {/* Sections */}
+        <div className="space-y-3">
+          {courseSections.length === 0 && (
+            <div className="text-center py-12 text-gray-400 border-2 border-dashed rounded-xl">No sections yet — click "Add Section" to get started</div>
+          )}
+          {courseSections.map((section, sIdx, sArr) => (
+            <div key={section.id} className="border-2 border-gray-200 rounded-xl overflow-hidden">
+              <div className="p-4 bg-white flex items-center gap-3">
+                <button onClick={() => toggleSectionExpanded(section.id)} className="flex items-center gap-2 flex-1 text-left">
+                  {expandedSections.has(section.id) ? <ChevronDown className="w-5 h-5 text-gray-500" /> : <ChevronRight className="w-5 h-5 text-gray-500" />}
+                  <BookOpen className="w-5 h-5" style={{ color: "var(--theme-primary, #3C224F)" }} />
+                  <span className="font-semibold">{section.title}</span>
+                  <Badge variant="outline" className="text-xs">{getSectionModules(section.id).length} modules</Badge>
+                  {section.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
+                  {!section.isPublished && <Badge className="bg-gray-100 text-gray-500 text-xs">Draft</Badge>}
+                </button>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button disabled={sIdx === 0} onClick={() => moveSection(section, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move up">
+                    <ArrowUp className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button disabled={sIdx === sArr.length - 1} onClick={() => moveSection(section, "down")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move down">
+                    <ArrowDown className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <Button size="sm" variant="ghost" onClick={() => { setSelectedSection(section); resetModuleForm(); setModuleDialogOpen(true); }}>
+                    <Plus className="w-4 h-4 mr-1" /> Module
+                  </Button>
+                  <button onClick={() => { setEditingSection(section); setSectionForm(section); setSectionDialogOpen(true); }} className="p-1 hover:bg-gray-100 rounded">
+                    <Edit className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button onClick={() => { if (confirm("Delete this section and all its content?")) deleteSectionMutation.mutate(section.id); }} className="p-1 hover:bg-gray-100 rounded">
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </button>
+                </div>
+              </div>
+
+              {expandedSections.has(section.id) && (
+                <div className="bg-gray-50 p-4 space-y-2">
+                  {getSectionModules(section.id).map((module, mIdx, mArr) => (
+                    <div key={module.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                      <div className="p-3 flex items-center gap-2">
+                        <button onClick={() => toggleModuleExpanded(module.id)} className="flex items-center gap-2 flex-1 text-left">
+                          {expandedModules.has(module.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
+                          <span className="font-medium text-sm">{module.title}</span>
+                          <Badge variant="outline" className="text-xs">{getModulePages(module.id).length} pages</Badge>
+                          {module.durationMinutes > 0 && <Badge variant="outline" className="text-xs"><Clock className="w-3 h-3 mr-1" />{module.durationMinutes}m</Badge>}
+                          {module.expertId && <Badge className="bg-pink-100 text-pink-700 text-xs"><Users className="w-3 h-3 mr-1" />Expert</Badge>}
+                          {module.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
+                          {!module.isPublished && <Badge className="bg-gray-100 text-gray-500 text-xs">Draft</Badge>}
+                        </button>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button disabled={mIdx === 0} onClick={() => moveModule(module, section.id, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
+                            <ArrowUp className="w-3 h-3 text-gray-500" />
+                          </button>
+                          <button disabled={mIdx === mArr.length - 1} onClick={() => moveModule(module, section.id, "down")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
+                            <ArrowDown className="w-3 h-3 text-gray-500" />
+                          </button>
+                          <Button size="sm" variant="ghost" onClick={() => { setSelectedSection(section); setSelectedModule(module); resetPageForm(); setPageDialogOpen(true); }}>
+                            <Plus className="w-3 h-3 mr-1" /> Page
+                          </Button>
+                          <button onClick={() => { setSelectedSection(section); setEditingModule(module); setModuleForm(module); setModuleDialogOpen(true); }} className="p-1 hover:bg-gray-100 rounded">
+                            <Edit className="w-4 h-4 text-gray-500" />
+                          </button>
+                          <button onClick={() => { if (confirm("Delete this module and all its pages?")) deleteModuleMutation.mutate(module.id); }} className="p-1 hover:bg-gray-100 rounded">
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {expandedModules.has(module.id) && (
+                        <div className="bg-gray-50 p-3 space-y-1">
+                          {getModulePages(module.id).map((page, pIdx, pArr) => (
+                            <div key={page.id} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
+                              <span>{page.title}</span>
+                              <div className="flex items-center gap-1">
+                                <button disabled={pIdx === 0} onClick={() => movePage(page, module.id, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
+                                  <ArrowUp className="w-3 h-3 text-gray-500" />
+                                </button>
+                                <button disabled={pIdx === pArr.length - 1} onClick={() => movePage(page, module.id, "down")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
+                                  <ArrowDown className="w-3 h-3 text-gray-500" />
+                                </button>
+                                <Badge variant="outline" className="text-xs">{page.pageType}</Badge>
+                                <button onClick={() => { setSelectedSection(section); setSelectedModule(module); setEditingPage(page); setPageForm(page); setPageDialogOpen(true); }} className="p-1 hover:bg-gray-100 rounded">
+                                  <Edit className="w-3 h-3 text-gray-500" />
+                                </button>
+                                <button onClick={() => { if (confirm("Delete this page?")) deletePageMutation.mutate(page.id); }} className="p-1 hover:bg-gray-100 rounded">
+                                  <Trash2 className="w-3 h-3 text-red-500" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {getSectionModules(section.id).length === 0 && (
+                    <p className="text-center text-sm text-gray-400 py-4">No modules yet</p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Dialogs shared with detail view */}
+        {renderDialogs()}
+      </div>
+    );
+  }
+
+  // ── COURSES GRID VIEW ────────────────────────────────────────────────────────
+  function renderCourseCard(course, idx, arr) {
+    const sectionCount = sections.filter((s) => s.courseId === course.id).length;
+    const moduleCount = modules.filter((m) => m.courseId === course.id).length;
+    return (
+      <div key={course.id} className="relative group">
+        <Card
+          className="cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden border-2 hover:border-purple-300"
+          onClick={() => setSelectedCourse(course)}
+        >
+          {/* Cover */}
+          <div className="h-36 bg-gradient-to-br from-[#3B224E] to-[#5B2E84] relative overflow-hidden">
+            {course.coverImage ? (
+              <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <BookOpen className="w-10 h-10 text-white/30" />
+              </div>
+            )}
+            {/* Reorder arrows on hover */}
+            <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                disabled={idx === 0}
+                onClick={(e) => { e.stopPropagation(); moveCourse(course, "up"); }}
+                className="p-1 bg-white/90 rounded shadow disabled:opacity-30 hover:bg-white"
+                title="Move up"
+              >
+                <ArrowUp className="w-3 h-3 text-gray-700" />
+              </button>
+              <button
+                disabled={idx === arr.length - 1}
+                onClick={(e) => { e.stopPropagation(); moveCourse(course, "down"); }}
+                className="p-1 bg-white/90 rounded shadow disabled:opacity-30 hover:bg-white"
+                title="Move down"
+              >
+                <ArrowDown className="w-3 h-3 text-gray-700" />
+              </button>
+            </div>
+          </div>
+
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h3 className="font-bold text-[#3B224E] leading-snug">{course.title}</h3>
+              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setEditingCourse(course); setCourseForm(course); setCourseDialogOpen(true); }}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <Edit className="w-4 h-4 text-gray-500" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); if (confirm("Delete this course and all its content?")) deleteCourseMutation.mutate(course.id); }}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            </div>
+            {course.description && <p className="text-xs text-gray-500 line-clamp-2 mb-3">{course.description}</p>}
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              {course.isPublished
+                ? <Badge className="bg-green-100 text-green-700 border-0 text-xs">Published</Badge>
+                : <Badge className="bg-gray-100 text-gray-600 border-0 text-xs">Draft</Badge>}
+              {course.isComingSoon && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Coming Soon</Badge>}
+              {course.isFeatured && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs"><Star className="w-3 h-3 mr-1" />Featured</Badge>}
+              {course.price > 0 && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">${course.price}</Badge>}
+            </div>
+            <p className="text-xs text-gray-400">{sectionCount} sections · {moduleCount} modules</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  function renderDialogs() {
+    return (
+      <>
+        {/* Course Dialog */}
+        <Dialog open={courseDialogOpen} onOpenChange={setCourseDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>{editingCourse ? "Edit Course" : "Create New Course"}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div><Label>Course Title *</Label><Input value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} placeholder="e.g., The Aligned Woman Blueprint" /></div>
+              <div><Label>Description</Label><Textarea value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} placeholder="Course description" className="min-h-[80px]" /></div>
+              <div><Label>Cover Image URL</Label><Input value={courseForm.coverImage} onChange={(e) => setCourseForm({ ...courseForm, coverImage: e.target.value })} placeholder="https://..." /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Category</Label><Input value={courseForm.category} onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })} placeholder="e.g., Personal Development" /></div>
+                <div><Label>Price ($)</Label><Input type="number" value={courseForm.price} onChange={(e) => setCourseForm({ ...courseForm, price: Number(e.target.value) })} placeholder="0 for free" /></div>
+              </div>
+              <div>
+                <Label>Course Creator / Expert</Label>
+                <Select value={courseForm.expertId} onValueChange={(value) => setCourseForm({ ...courseForm, expertId: value })}>
+                  <SelectTrigger><SelectValue placeholder="Select expert (optional)" /></SelectTrigger>
+                  <SelectContent>{experts.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Switch checked={courseForm.isPublished} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isPublished: checked })} />
+                  <Label>Published</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={courseForm.isComingSoon} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isComingSoon: checked })} />
+                  <Label>Coming Soon</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={courseForm.isFeatured} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isFeatured: checked })} />
+                  <Label>Featured</Label>
+                </div>
+              </div>
+              <Button onClick={handleSaveCourse} disabled={!courseForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
+                {editingCourse ? "Update Course" : "Create Course"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Section Dialog */}
+        <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{editingSection ? "Edit Section" : "Add Section"}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div><Label>Section Title *</Label><Input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} placeholder="e.g., Introduction to ALIVE Method" /></div>
+              <div><Label>Description</Label><Textarea value={sectionForm.description} onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })} placeholder="Section description" /></div>
+              <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Switch checked={sectionForm.isPublished} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isPublished: checked })} />
+                  <Label>Published</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={sectionForm.isComingSoon} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isComingSoon: checked })} />
+                  <Label>Coming Soon</Label>
+                </div>
+              </div>
+              <Button onClick={handleSaveSection} disabled={!sectionForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
+                {editingSection ? "Update Section" : "Create Section"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Module Dialog */}
+        <Dialog open={moduleDialogOpen} onOpenChange={setModuleDialogOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{editingModule ? "Edit Module" : "Add Module"}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div><Label>Module Title *</Label><Input value={moduleForm.title} onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })} placeholder="e.g., Understanding Your Inner Systems" /></div>
+              <div><Label>Description</Label><Textarea value={moduleForm.description} onChange={(e) => setModuleForm({ ...moduleForm, description: e.target.value })} placeholder="Module description" /></div>
+              <div><Label>Duration (minutes)</Label><Input type="number" value={moduleForm.durationMinutes} onChange={(e) => setModuleForm({ ...moduleForm, durationMinutes: Number(e.target.value) })} /></div>
+              <div>
+                <Label>Module Expert/Instructor</Label>
+                <Select value={moduleForm.expertId} onValueChange={(value) => setModuleForm({ ...moduleForm, expertId: value })}>
+                  <SelectTrigger><SelectValue placeholder="Select expert (optional)" /></SelectTrigger>
+                  <SelectContent>{experts.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Switch checked={moduleForm.isPublished} onCheckedChange={(checked) => setModuleForm({ ...moduleForm, isPublished: checked })} />
+                  <Label>Published</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={moduleForm.isComingSoon} onCheckedChange={(checked) => setModuleForm({ ...moduleForm, isComingSoon: checked })} />
+                  <Label>Coming Soon</Label>
+                </div>
+              </div>
+              <Button onClick={handleSaveModule} disabled={!moduleForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
+                {editingModule ? "Update Module" : "Create Module"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Page Dialog */}
+        <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>{editingPage ? "Edit Page" : "Add Page"}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div><Label>Page Title *</Label><Input value={pageForm.title} onChange={(e) => setPageForm({ ...pageForm, title: e.target.value })} placeholder="e.g., Introduction Video" /></div>
+              <div>
+                <Label>Page Type</Label>
+                <Select value={pageForm.pageType} onValueChange={(value) => setPageForm({ ...pageForm, pageType: value })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="text">Text/Article</SelectItem>
+                    <SelectItem value="quiz">Quiz</SelectItem>
+                    <SelectItem value="assignment">Assignment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {pageForm.pageType === "video" && (
+                <div><Label>Video URL</Label><Input value={pageForm.videoUrl} onChange={(e) => setPageForm({ ...pageForm, videoUrl: e.target.value })} placeholder="https://..." /></div>
+              )}
+              <div><Label>Content</Label><Textarea value={pageForm.content} onChange={(e) => setPageForm({ ...pageForm, content: e.target.value })} placeholder="Page content (HTML supported)" className="min-h-[150px]" /></div>
+              <Button onClick={handleSavePage} disabled={!pageForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
+                {editingPage ? "Update Page" : "Create Page"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -234,287 +585,27 @@ export default function CourseBuilderContent() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold" style={{ color: "var(--theme-primary, #3C224F)" }}>Course Builder</h2>
-          <p className="text-gray-600">Create courses with sections, modules, and pages</p>
+          <p className="text-gray-600">Click a course to manage its sections and modules</p>
         </div>
         <Button onClick={() => { resetCourseForm(); setCourseDialogOpen(true); }} className="text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
           <Plus className="w-4 h-4 mr-2" /> Create Course
         </Button>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-6">
-        {/* Courses List */}
-        <Card className="lg:col-span-3">
-          <CardHeader><CardTitle>Courses ({courses.length})</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            {courses.map((course) => (
-              <button
-                key={course.id}
-                onClick={() => { setSelectedCourse(course); setSelectedSection(null); setSelectedModule(null); }}
-                className={`w-full p-4 rounded-xl border-2 transition-all text-left ${selectedCourse?.id === course.id ? "bg-purple-50" : "border-gray-200 hover:border-purple-200"}`}
-                style={{ borderColor: selectedCourse?.id === course.id ? "var(--theme-secondary, #5B2E84)" : "" }}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm">{course.title}</h3>
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{course.description}</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <button onClick={(e) => { e.stopPropagation(); setEditingCourse(course); setCourseForm(course); setCourseDialogOpen(true); }} className="p-1 hover:bg-white rounded">
-                      <Edit className="w-4 h-4 text-gray-500" />
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); if (confirm("Delete this course and all its content?")) deleteCourseMutation.mutate(course.id); }} className="p-1 hover:bg-white rounded">
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {course.isPublished ? <Badge className="bg-green-100 text-green-700 text-xs">Published</Badge> : <Badge className="bg-gray-100 text-gray-600 text-xs">Draft</Badge>}
-                  {course.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
-                  {course.price > 0 && <Badge className="bg-blue-100 text-blue-700 text-xs">${course.price}</Badge>}
-                </div>
-              </button>
-            ))}
-          </CardContent>
-        </Card>
+      {/* Courses Grid */}
+      {courses.length === 0 ? (
+        <div className="text-center py-20 border-2 border-dashed rounded-2xl text-gray-400">
+          <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">No courses yet</p>
+          <p className="text-sm">Click "Create Course" to get started</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {courses.map((course, idx, arr) => renderCourseCard(course, idx, arr))}
+        </div>
+      )}
 
-        {/* Course Content */}
-        <Card className="lg:col-span-9">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>{selectedCourse ? `${selectedCourse.title} — Content` : "Select a course"}</CardTitle>
-              {selectedCourse && (
-                <Button onClick={() => { resetSectionForm(); setSectionDialogOpen(true); }} size="sm" className="text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
-                  <Plus className="w-4 h-4 mr-2" /> Add Section
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {selectedCourse ? (
-              <div className="space-y-3">
-                {getCourseSections(selectedCourse.id).map((section, sIdx, sArr) => (
-                  <div key={section.id} className="border-2 border-gray-200 rounded-xl overflow-hidden">
-                    {/* Section Header */}
-                    <div className="p-4 bg-white flex items-center gap-3">
-                      <button onClick={() => toggleSectionExpanded(section.id)} className="flex items-center gap-2 flex-1">
-                        {expandedSections.has(section.id) ? <ChevronDown className="w-5 h-5 text-gray-500" /> : <ChevronRight className="w-5 h-5 text-gray-500" />}
-                        <BookOpen className="w-5 h-5" style={{ color: "var(--theme-primary, #3C224F)" }} />
-                        <span className="font-semibold">{section.title}</span>
-                        <Badge variant="outline" className="text-xs">{getSectionModules(section.id).length} modules</Badge>
-                        {section.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
-                      </button>
-                      <div className="flex items-center gap-1">
-                        {/* Reorder Section */}
-                        <button disabled={sIdx === 0} onClick={() => moveSection(section, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move up">
-                          <ArrowUp className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <button disabled={sIdx === sArr.length - 1} onClick={() => moveSection(section, "down")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move down">
-                          <ArrowDown className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <Button size="sm" variant="ghost" onClick={() => { setSelectedSection(section); setModuleDialogOpen(true); }}>
-                          <Plus className="w-4 h-4 mr-1" /> Module
-                        </Button>
-                        <button onClick={() => { setEditingSection(section); setSectionForm(section); setSectionDialogOpen(true); }}>
-                          <Edit className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <button onClick={() => { if (confirm("Delete this section and all its content?")) deleteSectionMutation.mutate(section.id); }}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Modules */}
-                    {expandedSections.has(section.id) && (
-                      <div className="bg-gray-50 p-4 space-y-2">
-                        {getSectionModules(section.id).map((module, mIdx, mArr) => (
-                          <div key={module.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                            <div className="p-3 flex items-center gap-2">
-                              <button onClick={() => toggleModuleExpanded(module.id)} className="flex items-center gap-2 flex-1">
-                                {expandedModules.has(module.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
-                                <span className="font-medium text-sm">{module.title}</span>
-                                <Badge variant="outline" className="text-xs">{getModulePages(module.id).length} pages</Badge>
-                                {module.expertId && <Badge className="bg-pink-100 text-pink-700 text-xs"><Users className="w-3 h-3 mr-1" />Expert</Badge>}
-                                {module.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
-                              </button>
-                              <div className="flex items-center gap-1">
-                                {/* Reorder Module */}
-                                <button disabled={mIdx === 0} onClick={() => moveModule(module, section.id, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move up">
-                                  <ArrowUp className="w-3 h-3 text-gray-500" />
-                                </button>
-                                <button disabled={mIdx === mArr.length - 1} onClick={() => moveModule(module, section.id, "down")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30" title="Move down">
-                                  <ArrowDown className="w-3 h-3 text-gray-500" />
-                                </button>
-                                <Button size="sm" variant="ghost" onClick={() => { setSelectedSection(section); setSelectedModule(module); setPageDialogOpen(true); }}>
-                                  <Plus className="w-3 h-3 mr-1" /> Page
-                                </Button>
-                                <button onClick={() => { setSelectedSection(section); setEditingModule(module); setModuleForm(module); setModuleDialogOpen(true); }}>
-                                  <Edit className="w-4 h-4 text-gray-500" />
-                                </button>
-                                <button onClick={() => { if (confirm("Delete this module and all its pages?")) deleteModuleMutation.mutate(module.id); }}>
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Pages */}
-                            {expandedModules.has(module.id) && (
-                              <div className="bg-gray-50 p-3 space-y-1">
-                                {getModulePages(module.id).map((page, pIdx, pArr) => (
-                                  <div key={page.id} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
-                                    <span>{page.title}</span>
-                                    <div className="flex items-center gap-1">
-                                      <button disabled={pIdx === 0} onClick={() => movePage(page, module.id, "up")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
-                                        <ArrowUp className="w-3 h-3 text-gray-500" />
-                                      </button>
-                                      <button disabled={pIdx === pArr.length - 1} onClick={() => movePage(page, module.id, "down")} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
-                                        <ArrowDown className="w-3 h-3 text-gray-500" />
-                                      </button>
-                                      <Badge variant="outline" className="text-xs">{page.pageType}</Badge>
-                                      <button onClick={() => { setSelectedSection(section); setSelectedModule(module); setEditingPage(page); setPageForm(page); setPageDialogOpen(true); }}>
-                                        <Edit className="w-3 h-3 text-gray-500" />
-                                      </button>
-                                      <button onClick={() => { if (confirm("Delete this page?")) deletePageMutation.mutate(page.id); }}>
-                                        <Trash2 className="w-3 h-3 text-red-500" />
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-gray-500">Select a course to view its content</div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Course Dialog */}
-      <Dialog open={courseDialogOpen} onOpenChange={setCourseDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>{editingCourse ? "Edit Course" : "Create New Course"}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>Course Title *</Label><Input value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} placeholder="e.g., The Aligned Woman Blueprint" /></div>
-            <div><Label>Description</Label><Textarea value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} placeholder="Course description" className="min-h-[100px]" /></div>
-            <div><Label>Cover Image URL</Label><Input value={courseForm.coverImage} onChange={(e) => setCourseForm({ ...courseForm, coverImage: e.target.value })} placeholder="https://..." /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Category</Label><Input value={courseForm.category} onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })} placeholder="e.g., Personal Development" /></div>
-              <div><Label>Price ($)</Label><Input type="number" value={courseForm.price} onChange={(e) => setCourseForm({ ...courseForm, price: Number(e.target.value) })} placeholder="0 for free" /></div>
-            </div>
-            <div>
-              <Label>Course Creator / Expert</Label>
-              <Select value={courseForm.expertId} onValueChange={(value) => setCourseForm({ ...courseForm, expertId: value })}>
-                <SelectTrigger><SelectValue placeholder="Select expert (optional)" /></SelectTrigger>
-                <SelectContent>{experts.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <Switch checked={courseForm.isPublished} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isPublished: checked })} />
-                <Label>Published (visible to students)</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={courseForm.isComingSoon} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isComingSoon: checked })} />
-                <Label>Coming Soon</Label>
-              </div>
-            </div>
-            <Button onClick={handleSaveCourse} disabled={!courseForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
-              {editingCourse ? "Update Course" : "Create Course"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Section Dialog */}
-      <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editingSection ? "Edit Section" : "Add Section"}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>Section Title *</Label><Input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} placeholder="e.g., Introduction to ALIVE Method" /></div>
-            <div><Label>Description</Label><Textarea value={sectionForm.description} onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })} placeholder="Section description" /></div>
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <Switch checked={sectionForm.isPublished} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isPublished: checked })} />
-                <Label>Published</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={sectionForm.isComingSoon} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isComingSoon: checked })} />
-                <Label>Coming Soon</Label>
-              </div>
-            </div>
-            <Button onClick={handleSaveSection} disabled={!sectionForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
-              {editingSection ? "Update Section" : "Create Section"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Module Dialog */}
-      <Dialog open={moduleDialogOpen} onOpenChange={setModuleDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editingModule ? "Edit Module" : "Add Module"}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>Module Title *</Label><Input value={moduleForm.title} onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })} placeholder="e.g., Understanding Your Inner Systems" /></div>
-            <div><Label>Description</Label><Textarea value={moduleForm.description} onChange={(e) => setModuleForm({ ...moduleForm, description: e.target.value })} placeholder="Module description" /></div>
-            <div><Label>Duration (minutes)</Label><Input type="number" value={moduleForm.durationMinutes} onChange={(e) => setModuleForm({ ...moduleForm, durationMinutes: Number(e.target.value) })} /></div>
-            <div>
-              <Label>Module Expert/Instructor</Label>
-              <Select value={moduleForm.expertId} onValueChange={(value) => setModuleForm({ ...moduleForm, expertId: value })}>
-                <SelectTrigger><SelectValue placeholder="Select expert (optional)" /></SelectTrigger>
-                <SelectContent>{experts.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <Switch checked={moduleForm.isPublished} onCheckedChange={(checked) => setModuleForm({ ...moduleForm, isPublished: checked })} />
-                <Label>Published</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={moduleForm.isComingSoon} onCheckedChange={(checked) => setModuleForm({ ...moduleForm, isComingSoon: checked })} />
-                <Label>Coming Soon</Label>
-              </div>
-            </div>
-            <Button onClick={handleSaveModule} disabled={!moduleForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
-              {editingModule ? "Update Module" : "Create Module"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Page Dialog */}
-      <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>{editingPage ? "Edit Page" : "Add Page"}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>Page Title *</Label><Input value={pageForm.title} onChange={(e) => setPageForm({ ...pageForm, title: e.target.value })} placeholder="e.g., Introduction Video" /></div>
-            <div>
-              <Label>Page Type</Label>
-              <Select value={pageForm.pageType} onValueChange={(value) => setPageForm({ ...pageForm, pageType: value })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="video">Video</SelectItem>
-                  <SelectItem value="text">Text/Article</SelectItem>
-                  <SelectItem value="quiz">Quiz</SelectItem>
-                  <SelectItem value="assignment">Assignment</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {pageForm.pageType === "video" && (
-              <div><Label>Video URL</Label><Input value={pageForm.videoUrl} onChange={(e) => setPageForm({ ...pageForm, videoUrl: e.target.value })} placeholder="https://..." /></div>
-            )}
-            <div><Label>Content</Label><Textarea value={pageForm.content} onChange={(e) => setPageForm({ ...pageForm, content: e.target.value })} placeholder="Page content (HTML supported)" className="min-h-[150px]" /></div>
-            <Button onClick={handleSavePage} disabled={!pageForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
-              {editingPage ? "Update Page" : "Create Page"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {renderDialogs()}
     </div>
   );
 }
