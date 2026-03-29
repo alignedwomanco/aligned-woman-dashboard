@@ -6,7 +6,7 @@ import { ZoomIn, ZoomOut, RotateCw, Move } from "lucide-react";
 
 export default function ImageCropper({ image, onCrop, onCancel }) {
   const canvasRef = useRef(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.5);
   const [rotation, setRotation] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -172,9 +172,9 @@ export default function ImageCropper({ image, onCrop, onCancel }) {
               <Slider
                 value={[zoom]}
                 onValueChange={(val) => setZoom(val[0])}
-                min={0.5}
+                min={0.1}
                 max={3}
-                step={0.1}
+                step={0.05}
                 className="[&>span:first-child]:bg-[var(--theme-secondary,#5B2E84)]"
               />
             </div>

@@ -47,6 +47,12 @@ export default function ExpertsDirectory() {
     queryFn: () => base44.entities.User.list(),
   });
 
+  // Fetch Expert entity records (managed via admin)
+  const { data: expertProfiles = [] } = useQuery({
+    queryKey: ["expertProfiles"],
+    queryFn: () => base44.entities.Expert.list(),
+  });
+
   // Fetch connection requests
   const { data: connectionRequests = [] } = useQuery({
     queryKey: ["connectionRequests"],
@@ -104,14 +110,30 @@ export default function ExpertsDirectory() {
     },
   });
 
-  const experts = allUsers.filter(
+  const userExperts = allUsers.filter(
     (user) =>
       ["expert", "course_creator", "admin", "master_admin"].includes(user.role) &&
       user.email !== currentUser?.email
   );
 
+  // Merge: user accounts + Expert entity profiles (deduplicate by name)
+  const userExpertNames = userExperts.map(u => u.full_name?.toLowerCase());
+  const standaloneExpertProfiles = expertProfiles
+    .filter(ep => ep.isPublished !== false && !userExpertNames.includes(ep.name?.toLowerCase()))
+    .map(ep => ({
+      id: ep.id,
+      full_name: ep.name,
+      bio: ep.bio,
+      profile_picture: ep.profile_picture,
+      title: ep.title,
+      specialties: ep.specialties,
+      _isExpertProfile: true,
+    }));
+
+  const experts = [...userExperts, ...standaloneExpertProfiles];
+
   const filteredExperts = experts.filter((expert) =>
-    expert.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    (expert.full_name || expert.name)?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const isConnected = (expertEmail) => {
@@ -193,13 +215,13 @@ export default function ExpertsDirectory() {
                     {expert.full_name}
                   </h3>
                   <Badge className="bg-[#7340B9] text-white mb-3">
-                    {expert.role === "master_admin"
+                    {expert.title || (expert.role === "master_admin"
                       ? "Master Coach"
                       : expert.role === "admin"
                       ? "Lead Coach"
                       : expert.role === "course_creator"
                       ? "Course Creator"
-                      : "Expert"}
+                      : "Expert")}
                   </Badge>
                   {expert.bio && (
                     <p className="text-gray-600 text-sm line-clamp-3 mb-4">
@@ -209,10 +231,10 @@ export default function ExpertsDirectory() {
                 </div>
 
                 {/* Expertise Areas */}
-                {expert.expertise && (
+                {(expert.expertise || expert.specialties) && (
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-2 justify-center">
-                      {expert.expertise.slice(0, 3).map((area, index) => (
+                      {(expert.specialties || expert.expertise || []).slice(0, 3).map((area, index) => (
                         <Badge
                           key={index}
                           variant="outline"
@@ -247,9 +269,9 @@ export default function ExpertsDirectory() {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Action Buttons — only for users with accounts */}
                 <div className="space-y-2">
-                  <Button
+                  {!expert._isExpertProfile && <Button
                     onClick={() => followMutation.mutate(expert.email)}
                     variant={isFollowing(expert.email) ? "outline" : "default"}
                     className={`w-full ${
@@ -269,7 +291,7 @@ export default function ExpertsDirectory() {
                     )}
                   </Button>
 
-                  {isConnected(expert.email) ? (
+                  {!expert._isExpertProfile && isConnected(expert.email) ? (
                     <Button disabled className="w-full" variant="outline">
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Connected
@@ -318,9 +340,9 @@ export default function ExpertsDirectory() {
                         </div>
                       </DialogContent>
                     </Dialog>
-                  )}
+                  ) : null}
 
-                  {expert.offerings && expert.offerings.length > 0 && (
+                  {!expert._isExpertProfile && expert.offerings && expert.offerings.length > 0 && (
                     <Button variant="outline" className="w-full">
                       <BookOpen className="w-4 h-4 mr-2" />
                       View Offerings
