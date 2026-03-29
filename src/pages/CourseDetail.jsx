@@ -29,14 +29,33 @@ export default function CourseDetail() {
         const courseData = courses[0];
         setCourse(courseData);
 
-        // Load sections sorted by created_date (oldest first)
-        const courseSections = await base44.entities.CourseSection.filter({ courseId }, "created_date");
-        setSections(courseSections);
-        if (courseSections.length > 0) setActiveSection(courseSections[0].id);
+        // Load sections and modules without pre-sorting
+        const courseSections = await base44.entities.CourseSection.filter({ courseId });
+        const courseModules = await base44.entities.CourseModule.filter({ courseId });
+        
+        // Sort sections by order field, fallback to created_date
+        const sortedSections = courseSections.sort((a, b) => {
+          const aHasOrder = a.order !== undefined && a.order !== null;
+          const bHasOrder = b.order !== undefined && b.order !== null;
+          if (aHasOrder && bHasOrder) return a.order - b.order;
+          if (aHasOrder) return -1;
+          if (bHasOrder) return 1;
+          return (a.created_date || "").localeCompare(b.created_date || "");
+        });
+        
+        setSections(sortedSections);
+        if (sortedSections.length > 0) setActiveSection(sortedSections[0].id);
 
-        // Load all modules for this course sorted by created_date (oldest first)
-        const courseModules = await base44.entities.CourseModule.filter({ courseId }, "created_date");
-        setModules(courseModules);
+        // Sort modules by order field, fallback to created_date
+        const sortedModules = courseModules.sort((a, b) => {
+          const aHasOrder = a.order !== undefined && a.order !== null;
+          const bHasOrder = b.order !== undefined && b.order !== null;
+          if (aHasOrder && bHasOrder) return a.order - b.order;
+          if (aHasOrder) return -1;
+          if (bHasOrder) return 1;
+          return (a.created_date || "").localeCompare(b.created_date || "");
+        });
+        setModules(sortedModules);
 
         // Load progress
         const prog = await base44.entities.CourseProgress.filter({ courseId });
