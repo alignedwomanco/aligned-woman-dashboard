@@ -51,10 +51,10 @@ export default function CourseBuilderContent() {
 
   const [courseForm, setCourseForm] = useState({
     title: "", description: "", coverImage: "", category: "",
-    expertId: "", price: 0, isPublished: false,
+    expertId: "", price: 0, isPublished: false, isComingSoon: false,
   });
-  const [sectionForm, setSectionForm] = useState({ title: "", description: "", order: 0 });
-  const [moduleForm, setModuleForm] = useState({ title: "", description: "", expertId: "", durationMinutes: 0 });
+  const [sectionForm, setSectionForm] = useState({ title: "", description: "", order: 0, isPublished: false, isComingSoon: false });
+  const [moduleForm, setModuleForm] = useState({ title: "", description: "", expertId: "", durationMinutes: 0, isPublished: false, isComingSoon: false });
   const [pageForm, setPageForm] = useState({ title: "", pageType: "text", content: "", videoUrl: "" });
 
   const queryClient = useQueryClient();
@@ -184,9 +184,9 @@ export default function CourseBuilderContent() {
     );
   };
 
-  const resetCourseForm = () => { setCourseForm({ title: "", description: "", coverImage: "", category: "", expertId: "", price: 0, isPublished: false }); setEditingCourse(null); };
-  const resetSectionForm = () => { setSectionForm({ title: "", description: "", order: 0 }); setEditingSection(null); };
-  const resetModuleForm = () => { setModuleForm({ title: "", description: "", expertId: "", durationMinutes: 0 }); setEditingModule(null); };
+  const resetCourseForm = () => { setCourseForm({ title: "", description: "", coverImage: "", category: "", expertId: "", price: 0, isPublished: false, isComingSoon: false }); setEditingCourse(null); };
+  const resetSectionForm = () => { setSectionForm({ title: "", description: "", order: 0, isPublished: false, isComingSoon: false }); setEditingSection(null); };
+  const resetModuleForm = () => { setModuleForm({ title: "", description: "", expertId: "", durationMinutes: 0, isPublished: false, isComingSoon: false }); setEditingModule(null); };
   const resetPageForm = () => { setPageForm({ title: "", pageType: "text", content: "", videoUrl: "" }); setEditingPage(null); };
 
   const handleSaveCourse = () => {
@@ -269,6 +269,7 @@ export default function CourseBuilderContent() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {course.isPublished ? <Badge className="bg-green-100 text-green-700 text-xs">Published</Badge> : <Badge className="bg-gray-100 text-gray-600 text-xs">Draft</Badge>}
+                  {course.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
                   {course.price > 0 && <Badge className="bg-blue-100 text-blue-700 text-xs">${course.price}</Badge>}
                 </div>
               </button>
@@ -300,6 +301,7 @@ export default function CourseBuilderContent() {
                         <BookOpen className="w-5 h-5" style={{ color: "var(--theme-primary, #3C224F)" }} />
                         <span className="font-semibold">{section.title}</span>
                         <Badge variant="outline" className="text-xs">{getSectionModules(section.id).length} modules</Badge>
+                        {section.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
                       </button>
                       <div className="flex items-center gap-1">
                         {/* Reorder Section */}
@@ -332,6 +334,7 @@ export default function CourseBuilderContent() {
                                 <span className="font-medium text-sm">{module.title}</span>
                                 <Badge variant="outline" className="text-xs">{getModulePages(module.id).length} pages</Badge>
                                 {module.expertId && <Badge className="bg-pink-100 text-pink-700 text-xs"><Users className="w-3 h-3 mr-1" />Expert</Badge>}
+                                {module.isComingSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">Coming Soon</Badge>}
                               </button>
                               <div className="flex items-center gap-1">
                                 {/* Reorder Module */}
@@ -411,9 +414,15 @@ export default function CourseBuilderContent() {
                 <SelectContent>{experts.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={courseForm.isPublished} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isPublished: checked })} />
-              <Label>Published (visible to students)</Label>
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Switch checked={courseForm.isPublished} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isPublished: checked })} />
+                <Label>Published (visible to students)</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={courseForm.isComingSoon} onCheckedChange={(checked) => setCourseForm({ ...courseForm, isComingSoon: checked })} />
+                <Label>Coming Soon</Label>
+              </div>
             </div>
             <Button onClick={handleSaveCourse} disabled={!courseForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
               {editingCourse ? "Update Course" : "Create Course"}
@@ -429,6 +438,16 @@ export default function CourseBuilderContent() {
           <div className="space-y-4">
             <div><Label>Section Title *</Label><Input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} placeholder="e.g., Introduction to ALIVE Method" /></div>
             <div><Label>Description</Label><Textarea value={sectionForm.description} onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })} placeholder="Section description" /></div>
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Switch checked={sectionForm.isPublished} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isPublished: checked })} />
+                <Label>Published</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={sectionForm.isComingSoon} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isComingSoon: checked })} />
+                <Label>Coming Soon</Label>
+              </div>
+            </div>
             <Button onClick={handleSaveSection} disabled={!sectionForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
               {editingSection ? "Update Section" : "Create Section"}
             </Button>
@@ -450,6 +469,16 @@ export default function CourseBuilderContent() {
                 <SelectTrigger><SelectValue placeholder="Select expert (optional)" /></SelectTrigger>
                 <SelectContent>{experts.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
               </Select>
+            </div>
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Switch checked={moduleForm.isPublished} onCheckedChange={(checked) => setModuleForm({ ...moduleForm, isPublished: checked })} />
+                <Label>Published</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={moduleForm.isComingSoon} onCheckedChange={(checked) => setModuleForm({ ...moduleForm, isComingSoon: checked })} />
+                <Label>Coming Soon</Label>
+              </div>
             </div>
             <Button onClick={handleSaveModule} disabled={!moduleForm.title} className="w-full text-white" style={{ backgroundColor: "var(--theme-secondary, #5B2E84)" }}>
               {editingModule ? "Update Module" : "Create Module"}

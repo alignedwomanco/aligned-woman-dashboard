@@ -1,0 +1,66 @@
+{
+  "name": "Course",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Course title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Course description"
+    },
+    "coverImage": {
+      "type": "string",
+      "description": "Course cover image URL"
+    },
+    "category": {
+      "type": "string",
+      "description": "Course category"
+    },
+    "expertId": {
+      "type": "string",
+      "description": "Expert who created/owns this course"
+    },
+    "price": {
+      "type": "number",
+      "default": 0,
+      "description": "Course price (0 for free)"
+    },
+    "isPublished": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether course is published"
+    },
+    "isComingSoon": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show as coming soon"
+    },
+    "isFeatured": {
+      "type": "boolean",
+      "default": false
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "enrollmentCount": {
+      "type": "number",
+      "default": 0
+    },
+    "completionCount": {
+      "type": "number",
+      "default": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

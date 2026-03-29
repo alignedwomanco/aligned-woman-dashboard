@@ -1,0 +1,36 @@
+{
+  "name": "CourseSection",
+  "type": "object",
+  "properties": {
+    "courseId": {
+      "type": "string",
+      "description": "Parent course ID"
+    },
+    "title": {
+      "type": "string",
+      "description": "Section title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Section description"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Order within course"
+    },
+    "isPublished": {
+      "type": "boolean",
+      "default": false
+    },
+    "isComingSoon": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show as coming soon"
+    }
+  },
+  "required": [
+    "courseId",
+    "title"
+  ]
+}
