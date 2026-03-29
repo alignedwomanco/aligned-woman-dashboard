@@ -206,17 +206,24 @@ export default function ExpertsManagementContent() {
     };
   };
 
+  // Sort experts: Founder category first, then rest
+  const founderCategory = expertCategories.find(c => c.name?.toLowerCase() === "founder");
+  const sortedExperts = [...expertsProfiles].sort((a, b) => {
+    const aIsFounder = founderCategory && a.category === founderCategory.id;
+    const bIsFounder = founderCategory && b.category === founderCategory.id;
+    if (aIsFounder && !bIsFounder) return -1;
+    if (!aIsFounder && bIsFounder) return 1;
+    return 0;
+  });
+
   return (
     <div className="space-y-6">
-      {/* Category Manager */}
-      <ExpertCategoryManager />
-
-      {/* Expert Profiles Management */}
+      {/* Experts Management */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl mb-2">Expert Profiles</CardTitle>
+              <CardTitle className="text-2xl mb-2">Experts</CardTitle>
               <p className="text-gray-600">Manage expert profiles shown on the Experts page</p>
             </div>
             <Button onClick={() => openEditDialog()} className="bg-[#3D2250] hover:bg-[#5B2E84]">
@@ -227,7 +234,7 @@ export default function ExpertsManagementContent() {
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {expertsProfiles.map((expert) => (
+            {sortedExperts.map((expert) => (
               <div key={expert.id} className="border rounded-xl p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-3 mb-3">
                   <img
@@ -269,6 +276,9 @@ export default function ExpertsManagementContent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Category Manager */}
+      <ExpertCategoryManager />
 
       {/* User Roles Management */}
       <Card>
