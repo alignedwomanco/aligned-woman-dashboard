@@ -207,8 +207,7 @@ export default function Classroom() {
                       {/* Phase header */}
                       <div className="px-5 pt-4 pb-3 flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{phase.label}</p>
-                          <h3 className="font-bold text-[#3B224E] text-base">{section.title || phase.name}</h3>
+                          <h3 className="font-bold text-[#3B224E] text-base">{phase.label} — {section.title || phase.name}</h3>
                           <p className="text-xs text-gray-400 mt-0.5">
                             {sectionCompleted > 0 ? `${sectionCompleted} of ${displayTotal} completed` : `${displayTotal} masterclasses`}
                           </p>
