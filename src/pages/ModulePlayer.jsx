@@ -190,7 +190,7 @@ export default function ModulePlayer() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E4CAFB" }}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5">
+      <div className={`mx-auto px-4 sm:px-6 py-5 ${viewMode === "notes" ? "max-w-6xl" : "max-w-4xl"}`}>
 
         {/* ── 1. Top utility row ── */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -232,21 +232,23 @@ export default function ModulePlayer() {
           </div>
         </div>
 
-        {/* ── 2. Lesson header ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
-          <LessonHeader
-            phaseName={phaseName}
-            masterclassNumber={masterclassNumber}
-            totalInPhase={totalMasterclasses}
-            title={module.title}
-            expertName={expert?.name}
-            durationMinutes={module.durationMinutes}
-          />
-        </motion.div>
+        {/* ── 2. Lesson header (Standard view only) ── */}
+        {viewMode === "standard" && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
+            <LessonHeader
+              phaseName={phaseName}
+              masterclassNumber={masterclassNumber}
+              totalInPhase={totalMasterclasses}
+              title={module.title}
+              expertName={expert?.name}
+              durationMinutes={module.durationMinutes}
+            />
+          </motion.div>
+        )}
 
         {viewMode === "standard" ? (
           <>
-            {/* ── 3. Primary video ── */}
+            {/* ── 3-std. Primary video ── */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-4">
               <VideoEmbed videoUrl={primaryVideoUrl} />
             </motion.div>
