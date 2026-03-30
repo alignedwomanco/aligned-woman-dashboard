@@ -266,7 +266,7 @@ export default function ModulePlayer() {
               className={`flex items-center gap-1.5 text-xs rounded-full px-3 py-1.5 transition-colors ${
                 viewMode === "standard"
                   ? "font-semibold text-[#3B224E] bg-white border border-[#3B224E]/20"
-                  : "text-gray-400 hover:text-gray-600"
+                  : "text-gray-400 hover:text-gray-600 bg-white/40 border border-gray-200"
               }`}
             >
               <Monitor className="w-3.5 h-3.5" />
@@ -277,7 +277,7 @@ export default function ModulePlayer() {
               className={`flex items-center gap-1.5 text-xs rounded-full px-3 py-1.5 transition-colors ${
                 viewMode === "notes"
                   ? "font-semibold text-[#3B224E] bg-white border border-[#3B224E]/20"
-                  : "text-gray-400 hover:text-gray-600"
+                  : "text-gray-400 hover:text-gray-600 bg-white/40 border border-gray-200"
               }`}
             >
               <StickyNote className="w-3.5 h-3.5" />
@@ -285,7 +285,7 @@ export default function ModulePlayer() {
             </button>
             <button
               onClick={() => { setPreFullscreenMode(viewMode); setViewMode("fullscreen"); }}
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 rounded-full px-3 py-1.5 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 bg-white/40 border border-gray-200 rounded-full px-3 py-1.5 transition-colors"
             >
               <Maximize className="w-3.5 h-3.5" />
               Full-screen
