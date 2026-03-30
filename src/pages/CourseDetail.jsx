@@ -213,10 +213,6 @@ export default function CourseDetail() {
 
           {/* ── Right: Phase Map (two-column) ── */}
           <div className="lg:col-span-3" id="phase-map">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-              4 Phases · {CANONICAL_TOTAL} Masterclasses
-            </p>
-
             <div className="grid sm:grid-cols-2 gap-4 mb-5">
               {displayPhases.map(({ canon, section, mods }, idx) => {
                 const sectionCompleted = mods.filter(m => getModuleStatus(m.id) === "completed").length;
@@ -235,7 +231,7 @@ export default function CourseDetail() {
                     <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: canon.color }}>
                       {canon.label}
                     </p>
-                    <p className="font-bold text-[#3B224E] text-sm mb-1">{section?.title || canon.name}</p>
+                    <p className="font-bold text-[#3B224E] text-sm mb-1">{canon.name}</p>
                     <p className="text-xs text-gray-400">
                       {sectionCompleted > 0 ? `${sectionCompleted} of ${displayCount} complete` : `${displayCount} masterclasses`}
                     </p>
