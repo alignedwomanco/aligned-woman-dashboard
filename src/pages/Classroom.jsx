@@ -179,7 +179,7 @@ export default function Classroom() {
             {/* Phase Entry Cards */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <div className="space-y-3">
-                {CANONICAL_PHASES.map((phase) => {
+                {CANONICAL_PHASES.map((phase, index) => {
                   const section = sections.find((s) => {
                     const normalizedTitle = (s.title || "").toLowerCase();
                     const normalizedPhase = (s.phase || "").toLowerCase();
@@ -195,6 +195,23 @@ export default function Classroom() {
                   }).length;
                   const displayTotal = sectionMods.length > 0 ? sectionMods.length : phase.count;
                   const sectionProg = displayTotal > 0 ? Math.round((sectionCompleted / displayTotal) * 100) : 0;
+                  const isLocked = index > 0 && (() => {
+                    const previousPhase = CANONICAL_PHASES[index - 1];
+                    const previousSection = sections.find((s) => {
+                      const normalizedTitle = (s.title || "").toLowerCase();
+                      const normalizedPhase = (s.phase || "").toLowerCase();
+                      const canonicalName = previousPhase.name.toLowerCase();
+                      const canonicalShortName = canonicalName.replace(" & ", " and ");
+                      return normalizedPhase === canonicalName || normalizedTitle.includes(canonicalName) || normalizedTitle.includes(canonicalShortName);
+                    });
+                    if (!previousSection) return true;
+                    const previousModules = modules.filter(m => m.sectionId === previousSection.id);
+                    if (previousModules.length === 0) return true;
+                    return previousModules.some((mod) => {
+                      const p = progress.find(pr => pr.moduleId === mod.id);
+                      return p?.status !== "completed";
+                    });
+                  })();
 
                   const sortedMods = sectionMods
                     .sort((a, b) => {
@@ -209,7 +226,7 @@ export default function Classroom() {
                       className="bg-white rounded-2xl overflow-hidden shadow-sm border-l-4"
                       style={{ borderLeftColor: phase.color }}
                     >
-                      <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+                      <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3">
                         <div>
                           <h3 className="font-bold text-[#3B224E] text-base">{phase.label} — {phase.name}</h3>
                           <p className="text-xs text-gray-400 mt-0.5">
@@ -217,6 +234,14 @@ export default function Classroom() {
                           </p>
                         </div>
 
+                        {isLocked && (
+                          <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-400 flex-shrink-0">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0v4m-9 0h10a2 2 0 012 2v5a2 2 0 01-2 2H7a2 2 0 01-2-2v-5a2 2 0 012-2z" />
+                            </svg>
+                            <span>Locked</span>
+                          </div>
+                        )}
                       </div>
 
                       {sortedMods.length > 0 && (
