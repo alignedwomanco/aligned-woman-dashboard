@@ -116,9 +116,15 @@ export default function CourseDetail() {
     );
   }
 
-  // Build the displayed phases — merge canonical with real section data
-  const displayPhases = CANONICAL_PHASES.map((canon, idx) => {
-    const section = sections[idx] || null;
+  // Build the displayed phases — merge canonical with real section data using canonical phase matching
+  const displayPhases = CANONICAL_PHASES.map((canon) => {
+    const canonicalName = canon.name.toLowerCase();
+    const canonicalShortName = canonicalName.replace(" & ", " and ");
+    const section = sections.find((s) => {
+      const normalizedTitle = (s.title || s.name || "").toLowerCase();
+      const normalizedPhase = (s.phase || "").toLowerCase();
+      return normalizedPhase === canonicalName || normalizedTitle.includes(canonicalName) || normalizedTitle.includes(canonicalShortName);
+    }) || null;
     const mods = section ? getSectionModules(section.id) : [];
     return { canon, section, mods };
   });
