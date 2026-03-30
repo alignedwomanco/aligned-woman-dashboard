@@ -216,16 +216,7 @@ export default function Classroom() {
                             {sectionCompleted > 0 ? `${sectionCompleted} of ${displayTotal} completed` : `${displayTotal} masterclasses`}
                           </p>
                         </div>
-                        {section.id && blueprintCourse && (
-                          <Link
-                            to={createPageUrl("SectionDetail") + `?sectionId=${section.id}&courseId=${blueprintCourse.id}`}
-                            className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-                            style={{ backgroundColor: phase.light, color: phase.color }}
-                          >
-                            <Clock className="w-3 h-3" />
-                            Continue phase
-                          </Link>
-                        )}
+
                       </div>
 
                       {sortedMods.length > 0 && (
