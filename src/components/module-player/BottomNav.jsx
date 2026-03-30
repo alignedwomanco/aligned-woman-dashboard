@@ -10,7 +10,7 @@ export default function BottomNav({ previousModule, nextModule, courseId }) {
       {previousModule ? (
         <Link
           to={createPageUrl("ModulePlayer") + `?moduleId=${previousModule.id}&courseId=${courseId}`}
-          className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors flex-1"
+          className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white/40 text-sm text-gray-600 hover:bg-white/70 transition-colors flex-1"
         >
           <ArrowLeft className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">{previousModule.title}</span>
@@ -22,7 +22,7 @@ export default function BottomNav({ previousModule, nextModule, courseId }) {
       {/* Back to course overview */}
       <Link
         to={createPageUrl("CourseDetail") + `?courseId=${courseId}`}
-        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-[#3B224E] hover:bg-gray-50 transition-colors"
+        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white/40 text-sm font-semibold text-[#3B224E] hover:bg-white/70 transition-colors"
       >
         Back to course overview
       </Link>
@@ -31,7 +31,7 @@ export default function BottomNav({ previousModule, nextModule, courseId }) {
       {nextModule ? (
         <Link
           to={createPageUrl("ModulePlayer") + `?moduleId=${nextModule.id}&courseId=${courseId}`}
-          className="flex items-center justify-end gap-2 px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors flex-1"
+          className="flex items-center justify-end gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white/40 text-sm text-gray-600 hover:bg-white/70 transition-colors flex-1"
         >
           <span className="truncate">{nextModule.title}</span>
           <ArrowRight className="w-4 h-4 flex-shrink-0" />
