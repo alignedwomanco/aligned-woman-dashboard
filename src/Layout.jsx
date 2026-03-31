@@ -392,7 +392,7 @@ export default function Layout({ children, currentPageName }) {
                 : (siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png")
               }
               alt="The Aligned Woman"
-              className="object-contain w-auto"
+              className="object-contain w-auto brightness-0 invert"
               style={{ height: sidebarCollapsed ? "28px" : "40px" }}
             />
           </Link>
