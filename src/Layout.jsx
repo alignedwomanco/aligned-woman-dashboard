@@ -655,7 +655,7 @@ export default function Layout({ children, currentPageName }) {
                 <div className="flex items-center justify-between p-6 border-b border-white/10">
                   <img
                     src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
-                    alt="AW" className="object-contain w-auto" style={{ height: "40px" }}
+                    alt="AW" className="object-contain w-auto brightness-0 invert" style={{ height: "40px" }}
                   />
                   <button onClick={() => setShowMobileMenu(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
