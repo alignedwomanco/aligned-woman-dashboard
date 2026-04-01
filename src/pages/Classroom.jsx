@@ -143,7 +143,7 @@ export default function Classroom() {
                             {course.category}
                           </Badge>
                         )}
-                        <h3 className="font-bold text-[#3B224E] text-lg leading-snug mb-2 group-hover:text-[#5B2E84] transition-colors">
+                        <h3 className="font-bold text-[#6E1D40] text-lg leading-snug mb-2 group-hover:text-[#9B3A6A] transition-colors">
                           {course.title}
                         </h3>
                         {course.description && (
