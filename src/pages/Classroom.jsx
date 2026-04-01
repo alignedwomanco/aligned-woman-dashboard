@@ -48,7 +48,7 @@ export default function Classroom() {
   );
 
   return (
-    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: "#E4CAFB" }}>
+    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: "#DEBECC" }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
