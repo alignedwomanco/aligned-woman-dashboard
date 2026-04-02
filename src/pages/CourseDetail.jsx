@@ -214,7 +214,7 @@ export default function CourseDetail() {
                        <Link to={createPageUrl("SectionDetail") + `?sectionId=${section.id}&courseId=${courseId}`}>
                          <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer bg-white overflow-hidden group">
                            {/* Cover Image */}
-                           <div className="h-44 bg-gradient-to-br from-purple-300 to-purple-500 relative overflow-hidden">
+                           <div className="h-44 bg-gradient-to-br from-[#6E1D40] to-[#943A59] relative overflow-hidden">
                              {section.coverImage ? (
                                <img
                                  src={section.coverImage}
