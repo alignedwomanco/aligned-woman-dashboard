@@ -380,10 +380,12 @@ export default function ModulePlayer() {
                         if (videoId) {
                           return (
                             <iframe
-                              src={`https://www.youtube.com/embed/${videoId}?rel=0`}
+                              src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&origin=${window.location.origin}`}
                               className="absolute top-0 left-0 w-full h-full"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                               allowFullScreen
+                              referrerPolicy="strict-origin-when-cross-origin"
+                              sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
                               style={{ border: 0 }}
                             />
                           );
