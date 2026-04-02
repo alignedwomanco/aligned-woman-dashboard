@@ -143,92 +143,82 @@ export default function SectionDetail() {
             <p className="text-gray-500">No modules in this section yet.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {modules.map((module, idx) => {
               const status = getModuleStatus(module.id);
               const prog = getModuleProgress(module.id);
               const isCompleted = status === "Complete";
+              const expert = module.expertId ? experts.find(e => e.id === module.expertId) : null;
 
               return (
                 <motion.div
                   key={module.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                 >
                   <Link to={createPageUrl("ModulePlayer") + `?moduleId=${module.id}&courseId=${courseId}`}>
-                    <Card className={`hover:shadow-lg transition-all cursor-pointer ${isCompleted ? "bg-green-50 border-green-200" : "bg-white"}`}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          {/* Number Badge */}
-                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#6E1D40] text-white flex items-center justify-center font-bold">
-                            {idx + 1}
-                          </div>
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1">
-                                <h3 className={`font-semibold leading-snug ${isCompleted ? "text-gray-600 line-through" : "text-[#6E1D40]"}`}>
-                                  {module.title}
-                                </h3>
-                                {module.expertId && (() => {
-                                  const expert = experts.find(e => e.id === module.expertId);
-                                  return expert ? (
-                                    <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#F5E8EE] rounded-md border border-[#DEBECC]">
-                                      <User className="w-3 h-3 text-[#6E1D40]" />
-                                      <span className="text-xs font-medium text-[#6E1D40]">{expert.name}</span>
-                                    </div>
-                                  ) : null;
-                                })()}
-                                {module.description && (
-                                  <p className="text-sm text-gray-500 mt-1 line-clamp-1">
-                                    {module.description}
-                                  </p>
-                                )}
-                              </div>
-
-                              {/* Status Icon */}
-                              <div className="flex-shrink-0">
-                                {isCompleted ? (
-                                  <CheckCircle className="w-5 h-5 text-green-500" />
-                                ) : status === "InProgress" ? (
-                                  <Zap className="w-5 h-5 text-[#943A59]" />
-                                ) : (
-                                  <Play className="w-5 h-5 text-gray-400" />
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Progress Bar */}
-                            {!isCompleted && (
-                              <div className="mt-3 space-y-1">
-                                <div className="flex justify-between items-center text-xs text-gray-600">
-                                  <span>
-                                    {module.durationMinutes > 0 && (
-                                      <span className="flex items-center gap-1">
-                                        <Clock className="w-3 h-3" />
-                                        {module.durationMinutes} min
-                                      </span>
-                                    )}
-                                  </span>
-                                  <span className="font-semibold">{prog}%</span>
-                                </div>
-                                <Progress value={prog} className="h-1.5" />
-                              </div>
-                            )}
-
-                            {/* Completed Badge */}
-                            {isCompleted && (
-                              <div className="mt-2 flex items-center gap-1">
-                                <Award className="w-3 h-3 text-green-600" />
-                                <span className="text-xs font-medium text-green-600">Completed</span>
-                              </div>
-                            )}
-                          </div>
+                    <div className={`bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-all cursor-pointer ${isCompleted ? "border-green-200" : "border-[#DEBECC]/60"}`}>
+                      <div className="p-5 flex items-start gap-4">
+                        {/* Number Badge */}
+                        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-[#6E1D40] text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                          {idx + 1}
                         </div>
-                      </CardContent>
-                    </Card>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-bold text-base leading-snug ${isCompleted ? "text-gray-500 line-through" : "text-[#6E1D40]"}`}>
+                            {module.title}
+                          </h3>
+                          {expert && (
+                            <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F5E8EE] rounded-lg border border-[#DEBECC]">
+                              <User className="w-3.5 h-3.5 text-[#6E1D40]" />
+                              <span className="text-xs font-semibold text-[#6E1D40]">{expert.name}</span>
+                            </div>
+                          )}
+                          {module.description && (
+                            <p className="text-sm text-gray-500 mt-2 line-clamp-1">
+                              {module.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Play / Status Icon */}
+                        <div className="flex-shrink-0 mt-1">
+                          {isCompleted ? (
+                            <CheckCircle className="w-7 h-7 text-green-500" />
+                          ) : (
+                            <Play className="w-7 h-7 text-[#6E1D40]" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="px-5 pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width: `${Math.max(prog, 2)}%`,
+                                background: isCompleted
+                                  ? '#22c55e'
+                                  : `repeating-linear-gradient(
+                                      -45deg,
+                                      #6E1D40,
+                                      #6E1D40 4px,
+                                      #943A59 4px,
+                                      #943A59 8px
+                                    )`,
+                              }}
+                            />
+                          </div>
+                          <span className={`text-sm font-bold flex-shrink-0 ${isCompleted ? "text-green-600" : "text-[#6E1D40]"}`}>
+                            {prog}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </Link>
                 </motion.div>
               );
