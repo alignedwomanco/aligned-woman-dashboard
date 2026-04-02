@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Upload } from "lucide-react";
+import { Upload, Youtube, Film, X, Loader2 } from "lucide-react";
 
 export default function PageEditor({ open, onOpenChange, page, moduleId }) {
   const [formData, setFormData] = useState({
@@ -60,11 +60,19 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
     },
   });
 
+  const [videoUploading, setVideoUploading] = useState(false);
+
   const handleVideoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (file.size > 500 * 1024 * 1024) {
+      alert("File size must be under 500MB");
+      return;
+    }
+    setVideoUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setFormData({ ...formData, videoUrl: file_url });
+    setFormData((prev) => ({ ...prev, videoUrl: file_url }));
+    setVideoUploading(false);
   };
 
   const handleResourceUpload = async (e) => {
@@ -126,13 +134,11 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
             </select>
           </div>
 
-          <div>
-            <Label>Video URL</Label>
-            <p className="text-xs text-gray-500 mb-1">Supports YouTube, Google Drive, Wistia, or direct video URLs</p>
-            <div className="mt-1">
-              {formData.videoUrl && (() => {
+          {/* Video Source Preview */}
+          {formData.videoUrl && (
+            <div className="relative rounded-lg overflow-hidden bg-gray-900" style={{ paddingTop: '56.25%' }}>
+              {(() => {
                 const url = formData.videoUrl.trim();
-                // YouTube — show thumbnail preview
                 if (url.includes('youtube.com') || url.includes('youtu.be')) {
                   let videoId = null;
                   try {
@@ -142,57 +148,89 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
                     const match = url.match(/[?&]v=([^&#]+)/);
                     videoId = match ? match[1] : null;
                   }
-                  if (videoId) {
-                    return (
-                      <div className="relative w-full mb-2 rounded-lg overflow-hidden bg-gray-900" style={{ paddingTop: '56.25%' }}>
-                        <img src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`} alt="YouTube thumbnail" className="absolute top-0 left-0 w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                          <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center">
-                            <svg className="w-7 h-7 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                          </div>
+                  if (videoId) return (
+                    <>
+                      <img src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`} alt="YouTube" className="absolute top-0 left-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center">
+                          <svg className="w-7 h-7 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </div>
-                        <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded">YouTube Video</div>
                       </div>
-                    );
-                  }
+                      <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded">YouTube</div>
+                    </>
+                  );
                 }
-                // Google Drive — iframe preview
                 if (url.includes('drive.google.com')) {
                   const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] || url.match(/[-\w]{25,}/)?.[0];
-                  if (fileId) {
-                    return (
-                      <div className="relative w-full mb-2 rounded-lg overflow-hidden bg-gray-900" style={{ paddingTop: '56.25%' }}>
-                        <iframe src={`https://drive.google.com/file/d/${fileId}/preview`} className="absolute top-0 left-0 w-full h-full" allow="autoplay; fullscreen" allowFullScreen style={{ border: 0 }} />
-                      </div>
-                    );
-                  }
+                  if (fileId) return <iframe src={`https://drive.google.com/file/d/${fileId}/preview`} className="absolute top-0 left-0 w-full h-full" allow="autoplay; fullscreen" allowFullScreen style={{ border: 0 }} />;
                 }
-                // Direct video file
-                return <video src={url} controls className="w-full h-64 rounded-lg mb-2" />;
+                return <video src={url} controls className="absolute top-0 left-0 w-full h-full" />;
               })()}
-              <div className="flex gap-2">
-                <Input
-                  value={formData.videoUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, videoUrl: e.target.value })
-                  }
-                  placeholder="Paste YouTube, Google Drive, or Wistia URL..."
-                  className="flex-1"
-                />
-                <Label htmlFor="video-upload" className="cursor-pointer">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors border">
-                    <Upload className="w-4 h-4 text-[#6B1B3D]" />
-                  </div>
-                  <Input
-                    id="video-upload"
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    onChange={handleVideoUpload}
-                  />
-                </Label>
-              </div>
+              <button onClick={() => setFormData({ ...formData, videoUrl: "" })} className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 z-10">
+                <X className="w-4 h-4" />
+              </button>
             </div>
+          )}
+
+          {/* YouTube URL */}
+          <div>
+            <Label className="flex items-center gap-2">
+              <Youtube className="w-4 h-4 text-red-600" />
+              YouTube URL
+            </Label>
+            <Input
+              value={formData.videoUrl?.includes('youtube.com') || formData.videoUrl?.includes('youtu.be') ? formData.videoUrl : ''}
+              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="mt-1"
+            />
+          </div>
+
+          {/* Google Drive / Video URL */}
+          <div>
+            <Label className="flex items-center gap-2">
+              <Film className="w-4 h-4 text-blue-600" />
+              Google Drive / Video URL
+            </Label>
+            <p className="text-xs text-gray-500 mb-1">Paste a Google Drive share link or any other video URL</p>
+            <Input
+              value={formData.videoUrl && !formData.videoUrl.includes('youtube.com') && !formData.videoUrl.includes('youtu.be') && !formData.videoUrl.startsWith('https://qtrypzzcjebvfcihiynt') ? formData.videoUrl : ''}
+              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+              placeholder="https://drive.google.com/file/d/... or any video URL"
+              className="mt-1"
+            />
+          </div>
+
+          {/* Upload Video */}
+          <div>
+            <Label className="flex items-center gap-2">
+              <Upload className="w-4 h-4 text-[#6B1B3D]" />
+              Upload Video
+            </Label>
+            <p className="text-xs text-gray-500 mb-1">Max 500MB • MP4, MOV, WebM</p>
+            <Label htmlFor="video-upload" className="cursor-pointer block mt-1">
+              <div className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed transition-colors ${videoUploading ? 'bg-gray-50 border-gray-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300'}`}>
+                {videoUploading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 text-[#6B1B3D] animate-spin" />
+                    <span className="text-sm text-[#6B1B3D]">Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-5 h-5 text-[#6B1B3D]" />
+                    <span className="text-sm text-[#6B1B3D]">Click to upload video file</span>
+                  </>
+                )}
+              </div>
+              <Input
+                id="video-upload"
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={handleVideoUpload}
+                disabled={videoUploading}
+              />
+            </Label>
           </div>
 
           <div>
