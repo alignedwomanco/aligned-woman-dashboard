@@ -73,7 +73,8 @@ export default function ModulePlayer() {
 
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
-      const existing = moduleProgress[0];
+      // Find the module-level progress record (one without a pageId)
+      const existing = moduleProgress.find(p => !p.pageId);
       if (existing) {
         return base44.entities.CourseProgress.update(existing.id, {
           status,
