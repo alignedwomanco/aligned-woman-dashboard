@@ -35,6 +35,10 @@ import {
   Star,
   Clock,
   Upload,
+  Youtube,
+  Film,
+  X,
+  Loader2,
 } from "lucide-react";
 
 export default function CourseBuilderContent() {
@@ -59,6 +63,7 @@ export default function CourseBuilderContent() {
   const [sectionForm, setSectionForm] = useState({ title: "", description: "", coverImage: "", order: 0, isPublished: false, isComingSoon: false });
   const [moduleForm, setModuleForm] = useState({ title: "", description: "", expertId: "", durationMinutes: 0, isPublished: false, isComingSoon: false });
   const [pageForm, setPageForm] = useState({ title: "", pageType: "text", content: "", videoUrl: "" });
+  const [videoUploading, setVideoUploading] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -606,7 +611,7 @@ export default function CourseBuilderContent() {
 
         {/* Page Dialog */}
         <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editingPage ? "Edit Page" : "Add Page"}</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div><Label>Page Title *</Label><Input value={pageForm.title} onChange={(e) => setPageForm({ ...pageForm, title: e.target.value })} placeholder="e.g., Introduction Video" /></div>
@@ -623,7 +628,98 @@ export default function CourseBuilderContent() {
                 </Select>
               </div>
               {pageForm.pageType === "video" && (
-                <div><Label>Video URL</Label><Input value={pageForm.videoUrl} onChange={(e) => setPageForm({ ...pageForm, videoUrl: e.target.value })} placeholder="https://..." /></div>
+                <>
+                  {/* Video Preview */}
+                  {pageForm.videoUrl && (
+                    <div className="relative rounded-lg overflow-hidden bg-gray-900" style={{ paddingTop: '56.25%' }}>
+                      {(() => {
+                        const url = pageForm.videoUrl.trim();
+                        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                          let videoId = null;
+                          try {
+                            if (url.includes('youtu.be')) videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
+                            else videoId = new URL(url).searchParams.get('v');
+                          } catch (e) {
+                            const match = url.match(/[?&]v=([^&#]+)/);
+                            videoId = match ? match[1] : null;
+                          }
+                          if (videoId) return (
+                            <>
+                              <img src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`} alt="YouTube" className="absolute top-0 left-0 w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center">
+                                  <svg className="w-7 h-7 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                              </div>
+                              <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded">YouTube</div>
+                            </>
+                          );
+                        }
+                        if (url.includes('drive.google.com')) {
+                          const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] || url.match(/[-\w]{25,}/)?.[0];
+                          if (fileId) return <iframe src={`https://drive.google.com/file/d/${fileId}/preview`} className="absolute top-0 left-0 w-full h-full" allow="autoplay; fullscreen" allowFullScreen style={{ border: 0 }} />;
+                        }
+                        return <video src={url} controls className="absolute top-0 left-0 w-full h-full" />;
+                      })()}
+                      <button onClick={() => setPageForm({ ...pageForm, videoUrl: "" })} className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 z-10">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* YouTube URL */}
+                  <div>
+                    <Label className="flex items-center gap-2"><Youtube className="w-4 h-4 text-red-600" />YouTube URL</Label>
+                    <Input
+                      value={pageForm.videoUrl?.includes('youtube.com') || pageForm.videoUrl?.includes('youtu.be') ? pageForm.videoUrl : ''}
+                      onChange={(e) => setPageForm({ ...pageForm, videoUrl: e.target.value })}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Google Drive / Video URL */}
+                  <div>
+                    <Label className="flex items-center gap-2"><Film className="w-4 h-4 text-blue-600" />Google Drive / Video URL</Label>
+                    <p className="text-xs text-gray-500 mb-1">Paste a Google Drive share link or any other video URL</p>
+                    <Input
+                      value={pageForm.videoUrl && !pageForm.videoUrl.includes('youtube.com') && !pageForm.videoUrl.includes('youtu.be') && !pageForm.videoUrl.startsWith('https://qtrypzzcjebvfcihiynt') ? pageForm.videoUrl : ''}
+                      onChange={(e) => setPageForm({ ...pageForm, videoUrl: e.target.value })}
+                      placeholder="https://drive.google.com/file/d/... or any video URL"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Upload Video */}
+                  <div>
+                    <Label className="flex items-center gap-2"><Upload className="w-4 h-4 text-[#6B1B3D]" />Upload Video</Label>
+                    <p className="text-xs text-gray-500 mb-1">Max 500MB · MP4, MOV, WebM</p>
+                    <label className="cursor-pointer block mt-1">
+                      <div className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed transition-colors ${videoUploading ? 'bg-gray-50 border-gray-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300'}`}>
+                        {videoUploading ? (
+                          <><Loader2 className="w-5 h-5 text-[#6B1B3D] animate-spin" /><span className="text-sm text-[#6B1B3D]">Uploading...</span></>
+                        ) : (
+                          <><Upload className="w-5 h-5 text-[#6B1B3D]" /><span className="text-sm text-[#6B1B3D]">Click to upload video file</span></>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        className="hidden"
+                        disabled={videoUploading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 500 * 1024 * 1024) { alert("File size must be under 500MB"); return; }
+                          setVideoUploading(true);
+                          const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                          setPageForm((prev) => ({ ...prev, videoUrl: file_url }));
+                          setVideoUploading(false);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </>
               )}
               <div><Label>Content</Label><Textarea value={pageForm.content} onChange={(e) => setPageForm({ ...pageForm, content: e.target.value })} placeholder="Page content (HTML supported)" className="min-h-[150px]" /></div>
               <Button onClick={handleSavePage} disabled={!pageForm.title} className="w-full text-white" style={{ backgroundColor: "#6E1D40" }}>
