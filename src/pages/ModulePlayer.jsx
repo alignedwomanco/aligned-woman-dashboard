@@ -244,8 +244,6 @@ export default function ModulePlayer() {
     );
   }
 
-  const canMarkComplete = currentProgress.progressPercentage >= 50;
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       {/* Header */}
