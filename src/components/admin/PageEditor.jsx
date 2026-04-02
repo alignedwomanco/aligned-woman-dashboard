@@ -165,7 +165,7 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
                   if (fileId) return <iframe src={`https://drive.google.com/file/d/${fileId}/preview`} className="absolute top-0 left-0 w-full h-full" allow="autoplay; fullscreen" allowFullScreen style={{ border: 0 }} />;
                 }
                 // Direct video file
-                return <video src={url} controls className="absolute top-0 left-0 w-full h-full" />;
+                return <video src={url} controls playsInline className="absolute top-0 left-0 w-full h-full" style={{ backgroundColor: '#000' }} />;
               })()}
               <button onClick={() => setFormData({ ...formData, videoUrl: "" })} className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 z-10">
                 <X className="w-4 h-4" />
