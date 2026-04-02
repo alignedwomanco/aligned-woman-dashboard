@@ -139,7 +139,7 @@ export default function ModulePlayer() {
       isComplete: !isCurrentlyComplete,
     });
 
-    // If marking as complete and it's the last page, complete the module
+    // Check if all pages are now completed
     if (!isCurrentlyComplete) {
       const allPagesCompleted = pages.every(page => {
         if (page.id === selectedPage.id) return true;
@@ -149,7 +149,25 @@ export default function ModulePlayer() {
 
       if (allPagesCompleted) {
         await completeModule();
+      } else {
+        // Update module-level progress percentage
+        const completedCount = pages.filter(page => {
+          if (page.id === selectedPage.id) return true;
+          const p = moduleProgress.find(pr => pr.pageId === page.id);
+          return p?.status === "completed";
+        }).length;
+        const pct = Math.round((completedCount / pages.length) * 100);
+        updateProgressMutation.mutate({ status: "in_progress", progressPercentage: pct });
       }
+    } else {
+      // Unmarking — recalculate
+      const completedCount = pages.filter(page => {
+        if (page.id === selectedPage.id) return false;
+        const p = moduleProgress.find(pr => pr.pageId === page.id);
+        return p?.status === "completed";
+      }).length;
+      const pct = Math.round((completedCount / pages.length) * 100);
+      updateProgressMutation.mutate({ status: pct > 0 ? "in_progress" : "not_started", progressPercentage: pct });
     }
   };
 
@@ -210,8 +228,13 @@ export default function ModulePlayer() {
     });
   };
 
-  const currentProgress = moduleProgress[0] || { progressPercentage: 0, status: "not_started" };
-  const overallProgress = currentProgress.progressPercentage || 0;
+  // Calculate progress from actual page completions
+  const overallProgress = pages.length > 0
+    ? Math.round((pages.filter(page => {
+        const p = moduleProgress.find(pr => pr.pageId === page.id);
+        return p?.status === "completed";
+      }).length / pages.length) * 100)
+    : 0;
 
   if (!module || !selectedPage) {
     return (
