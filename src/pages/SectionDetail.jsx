@@ -203,7 +203,7 @@ export default function SectionDetail() {
                       </div>
 
                       {/* Progress Bar */}
-                      <div className="px-4 pb-4 pt-2">
+                      <div className="px-4 pb-4 pt-2" style={{ paddingLeft: 'calc(1rem + 2.75rem + 1rem)' }}>
                         <div className="flex items-center gap-3">
                           <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                             <div
