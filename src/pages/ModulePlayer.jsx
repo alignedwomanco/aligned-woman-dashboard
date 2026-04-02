@@ -446,7 +446,7 @@ export default function ModulePlayer() {
                       <Button
                         onClick={handleTogglePageComplete}
                         variant={isPageComplete ? "outline" : "default"}
-                        className={isPageComplete ? "border-green-600 text-green-600 hover:bg-green-50" : "bg-green-600 hover:bg-green-700 text-white"}
+                        className={isPageComplete ? "border-[#943A59] text-[#943A59] hover:bg-pink-50" : "bg-[#943A59] hover:bg-[#7a2e49] text-white"}
                       >
                         <span className="font-medium">{isPageComplete ? "Completed" : "Mark Complete"}</span>
                         <CheckCircle className="w-4 h-4 ml-2" />
