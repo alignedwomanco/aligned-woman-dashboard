@@ -144,7 +144,7 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#E4CAFB" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#DEBECD" }}>
       {/* Banner */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <Link to={createPageUrl("Classroom")} className="inline-block mb-4">
