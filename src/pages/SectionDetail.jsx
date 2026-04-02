@@ -143,7 +143,7 @@ export default function SectionDetail() {
             <p className="text-gray-500">No modules in this section yet.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {modules.map((module, idx) => {
               const status = getModuleStatus(module.id);
               const prog = getModuleProgress(module.id);
@@ -158,64 +158,67 @@ export default function SectionDetail() {
                   transition={{ delay: idx * 0.05 }}
                 >
                   <Link to={createPageUrl("ModulePlayer") + `?moduleId=${module.id}&courseId=${courseId}`}>
-                    <div className={`bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-all cursor-pointer ${isCompleted ? "border-green-200" : "border-[#DEBECC]/60"}`}>
-                      <div className="p-5 flex items-start gap-4">
-                        {/* Number Badge */}
-                        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-[#6E1D40] text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                          {idx + 1}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className={`font-bold text-base leading-snug ${isCompleted ? "text-gray-500 line-through" : "text-[#6E1D40]"}`}>
-                            {module.title}
-                          </h3>
-                          {expert && (
-                            <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F5E8EE] rounded-lg border border-[#DEBECC]">
-                              <User className="w-3.5 h-3.5 text-[#6E1D40]" />
-                              <span className="text-xs font-semibold text-[#6E1D40]">{expert.name}</span>
-                            </div>
-                          )}
-                          {module.description && (
-                            <p className="text-sm text-gray-500 mt-2 line-clamp-1">
-                              {module.description}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Play / Status Icon */}
-                        <div className="flex-shrink-0 mt-1">
-                          {isCompleted ? (
-                            <CheckCircle className="w-7 h-7 text-green-500" />
-                          ) : (
-                            <Play className="w-7 h-7 text-[#6E1D40]" />
-                          )}
-                        </div>
+                    <div className="relative pl-6">
+                      {/* Number badge - overlapping left edge */}
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-xl bg-[#6E1D40] text-white flex items-center justify-center font-bold text-lg shadow-md">
+                        {idx + 1}
                       </div>
 
-                      {/* Progress Bar */}
-                      <div className="px-5 pb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-500"
-                              style={{
-                                width: `${Math.max(prog, 2)}%`,
-                                background: isCompleted
-                                  ? '#22c55e'
-                                  : `repeating-linear-gradient(
-                                      -45deg,
-                                      #6E1D40,
-                                      #6E1D40 4px,
-                                      #943A59 4px,
-                                      #943A59 8px
-                                    )`,
-                              }}
-                            />
+                      {/* Card */}
+                      <div className={`bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-all cursor-pointer ml-3 ${isCompleted ? "border-green-200" : "border-[#DEBECC]/60"}`}>
+                        <div className="pl-10 pr-5 pt-4 pb-3 flex items-start gap-3">
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`font-bold text-base leading-snug ${isCompleted ? "text-gray-500 line-through" : "text-[#6E1D40]"}`}>
+                              {module.title}
+                            </h3>
+                            {expert && (
+                              <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#F5E8EE] rounded-md border border-[#DEBECC]">
+                                <User className="w-3 h-3 text-[#6E1D40]" />
+                                <span className="text-xs font-medium text-[#6E1D40]">{expert.name}</span>
+                              </div>
+                            )}
+                            {module.description && (
+                              <p className="text-sm text-gray-500 mt-1.5 line-clamp-1">
+                                {module.description}
+                              </p>
+                            )}
                           </div>
-                          <span className={`text-sm font-bold flex-shrink-0 ${isCompleted ? "text-green-600" : "text-[#6E1D40]"}`}>
-                            {prog}%
-                          </span>
+
+                          {/* Play / Status Icon */}
+                          <div className="flex-shrink-0 mt-0.5">
+                            {isCompleted ? (
+                              <CheckCircle className="w-6 h-6 text-green-500" />
+                            ) : (
+                              <Play className="w-6 h-6 text-[#6E1D40]" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="pl-10 pr-5 pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${Math.max(prog, 2)}%`,
+                                  background: isCompleted
+                                    ? '#22c55e'
+                                    : `repeating-linear-gradient(
+                                        -45deg,
+                                        #6E1D40,
+                                        #6E1D40 4px,
+                                        #943A59 4px,
+                                        #943A59 8px
+                                      )`,
+                                }}
+                              />
+                            </div>
+                            <span className={`text-sm font-bold flex-shrink-0 ${isCompleted ? "text-green-600" : "text-[#6E1D40]"}`}>
+                              {prog}%
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
