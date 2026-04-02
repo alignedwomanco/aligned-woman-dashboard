@@ -309,16 +309,13 @@ export default function ModulePlayer() {
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                               isCompleted ? "bg-green-100" : "bg-gray-200"
                             }`}>
-                              {isCompleted ? (
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <span className="text-xs text-gray-600">{idx + 1}</span>
-                              )}
+                              <span className={`text-xs font-semibold ${isCompleted ? "text-green-600" : "text-gray-600"}`}>{idx + 1}</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
-                                <div className="text-sm font-medium text-[#4A1228] break-words">
+                                <div className="flex items-center gap-1.5 text-sm font-medium text-[#4A1228] break-words">
                                   {page.title}
+                                  {isCompleted && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
                                 </div>
                                 {(page.estimatedMinutes || page.videoDuration) && (
                                   <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 mt-0.5">
