@@ -359,20 +359,26 @@ export default function ModulePlayer() {
                 <div style={{ paddingTop: '56.25%', position: 'relative' }} className="bg-gray-900">
                   {selectedPage.videoUrl ? (
                     (() => {
-                      const url = selectedPage.videoUrl;
+                      const url = selectedPage.videoUrl.trim();
                       let embedUrl = url;
                       
                       // YouTube
                       if (url.includes('youtube.com') || url.includes('youtu.be')) {
                         let videoId = null;
-                        if (url.includes('youtu.be')) {
-                          videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
-                        } else {
-                          const urlObj = new URL(url);
-                          videoId = urlObj.searchParams.get('v');
+                        try {
+                          if (url.includes('youtu.be')) {
+                            videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
+                          } else {
+                            const urlObj = new URL(url);
+                            videoId = urlObj.searchParams.get('v');
+                          }
+                        } catch (e) {
+                          // fallback regex
+                          const match = url.match(/[?&]v=([^&#]+)/);
+                          videoId = match ? match[1] : null;
                         }
                         if (videoId) {
-                          embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+                          embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
                         }
                       }
                       // Wistia
@@ -382,7 +388,7 @@ export default function ModulePlayer() {
                       }
                       // Google Drive
                       else if (url.includes('drive.google.com')) {
-                        const fileId = url.match(/[-\w]{25,}/)?.[0];
+                        const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] || url.match(/[-\w]{25,}/)?.[0];
                         embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
                       }
                       

@@ -115,22 +115,55 @@ export default function PageEditor({ open, onOpenChange, page, moduleId }) {
           </div>
 
           <div>
-            <Label>Video (optional)</Label>
-            <div className="mt-2">
-              {formData.videoUrl && (
-                <video
-                  src={formData.videoUrl}
-                  controls
-                  className="w-full h-64 rounded-lg mb-2"
-                />
-              )}
+            <Label>Page Type</Label>
+            <select
+              value={formData.pageType || "video"}
+              onChange={(e) => setFormData({ ...formData, pageType: e.target.value })}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="video">Video</option>
+              <option value="text">Text Only</option>
+            </select>
+          </div>
+
+          <div>
+            <Label>Video URL</Label>
+            <p className="text-xs text-gray-500 mb-1">Supports YouTube, Google Drive, Wistia, or direct video URLs</p>
+            <div className="mt-1">
+              {formData.videoUrl && (() => {
+                const url = formData.videoUrl.trim();
+                const isExternal = url.includes('youtube.com') || url.includes('youtu.be') || url.includes('drive.google.com') || url.includes('wistia.com');
+                if (isExternal) {
+                  let previewUrl = url;
+                  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    let videoId = null;
+                    try {
+                      if (url.includes('youtu.be')) videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
+                      else videoId = new URL(url).searchParams.get('v');
+                    } catch (e) {
+                      const match = url.match(/[?&]v=([^&#]+)/);
+                      videoId = match ? match[1] : null;
+                    }
+                    if (videoId) previewUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
+                  } else if (url.includes('drive.google.com')) {
+                    const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] || url.match(/[-\w]{25,}/)?.[0];
+                    if (fileId) previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                  }
+                  return (
+                    <div className="relative w-full mb-2 rounded-lg overflow-hidden bg-gray-900" style={{ paddingTop: '56.25%' }}>
+                      <iframe src={previewUrl} className="absolute top-0 left-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen style={{ border: 0 }} />
+                    </div>
+                  );
+                }
+                return <video src={url} controls className="w-full h-64 rounded-lg mb-2" />;
+              })()}
               <div className="flex gap-2">
                 <Input
                   value={formData.videoUrl}
                   onChange={(e) =>
                     setFormData({ ...formData, videoUrl: e.target.value })
                   }
-                  placeholder="Video URL or upload..."
+                  placeholder="Paste YouTube, Google Drive, or Wistia URL..."
                   className="flex-1"
                 />
                 <Label htmlFor="video-upload" className="cursor-pointer">
