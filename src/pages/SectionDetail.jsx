@@ -166,15 +166,15 @@ export default function SectionDetail() {
                   transition={{ delay: idx * 0.05 }}
                 >
                   <Link to={createPageUrl("ModulePlayer") + `?moduleId=${module.id}&courseId=${courseId}`}>
-                    <div className="relative pl-6">
+                    <div className="relative">
                       {/* Number badge - overlapping left edge */}
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-xl bg-[#6E1D40] text-white flex items-center justify-center font-bold text-lg shadow-md">
+                      <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-xl bg-[#6E1D40] text-white flex items-center justify-center font-bold text-lg shadow-md">
                         {idx + 1}
                       </div>
 
                       {/* Card */}
-                      <div className={`bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-all cursor-pointer ml-3 ${isCompleted ? "border-green-200" : "border-[#DEBECC]/60"}`}>
-                        <div className="pl-10 pr-5 pt-5 pb-2 flex items-start gap-3">
+                      <div className={`bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-all cursor-pointer ${isCompleted ? "border-green-200" : "border-[#DEBECC]/60"}`}>
+                        <div className="pl-16 pr-5 pt-5 pb-2 flex items-start gap-3">
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <h3 className={`font-bold text-base leading-snug ${isCompleted ? "text-gray-500 line-through" : "text-[#6E1D40]"}`}>
@@ -204,7 +204,7 @@ export default function SectionDetail() {
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="pl-10 pr-5 pb-4 pt-3">
+                        <div className="pl-16 pr-5 pb-4 pt-3">
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                               <div
