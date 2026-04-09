@@ -1,0 +1,111 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "admin",
+        "user",
+        "master_admin",
+        "educator",
+        "expert",
+        "moderator",
+        "facilitator",
+        "support"
+      ],
+      "default": "user",
+      "description": "User role with different permissions"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "custom_title": {
+      "type": "string",
+      "description": "Custom title like 'Lead Coach', 'Senior Expert'"
+    },
+    "is_expert": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_educator": {
+      "type": "boolean",
+      "default": false
+    },
+    "profile_picture": {
+      "type": "string"
+    },
+    "background_image": {
+      "type": "string"
+    },
+    "expertise": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "years_experience": {
+      "type": "string"
+    },
+    "clients_served": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "string"
+    },
+    "social_links": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "date_of_birth": {
+      "type": "string"
+    },
+    "time_of_birth": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "level": {
+      "type": "number",
+      "default": 1
+    },
+    "total_community_points": {
+      "type": "number",
+      "default": 0
+    },
+    "community_badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Community engagement badges"
+    },
+    "last_active_community_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stripe_account_id": {
+      "type": "string",
+      "description": "Connected Stripe account for experts/educators"
+    },
+    "stripe_api_key": {
+      "type": "string",
+      "description": "Personal Stripe API key"
+    },
+    "access_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Course/product access tags e.g. ['blueprint_paid', 'course_xyz']"
+    }
+  },
+  "required": []
+}

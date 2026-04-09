@@ -1,0 +1,46 @@
+{
+  "name": "CourseEnrollment",
+  "type": "object",
+  "properties": {
+    "courseId": {
+      "type": "string"
+    },
+    "enrolledAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "progressPercentage": {
+      "type": "number",
+      "default": 0,
+      "description": "Overall course progress 0-100"
+    },
+    "lastAccessedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "isPaid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this enrollment is from a paid purchase"
+    },
+    "paymentSource": {
+      "type": "string",
+      "description": "e.g. stripe, payfast, manual, webhook"
+    },
+    "transactionId": {
+      "type": "string",
+      "description": "External payment/transaction reference"
+    },
+    "userEmail": {
+      "type": "string",
+      "description": "Email of the enrolled user (for pre-registration matching)"
+    }
+  },
+  "required": [
+    "courseId"
+  ]
+}
