@@ -147,6 +147,7 @@ export default function ExpertsManagementContent() {
       specialties: [],
       services: [],
       isPublished: true,
+      linked_user_email: "",
     });
   };
 
@@ -217,6 +218,20 @@ export default function ExpertsManagementContent() {
     return aOrder - bOrder;
   });
 
+  const getExpertStatus = (expert) => {
+    if (!expert.linked_user_email) return "not_invited";
+    const linkedUser = allUsers.find(
+      (u) => u.email?.toLowerCase() === expert.linked_user_email?.toLowerCase()
+    );
+    if (linkedUser) return "active";
+    return "invited";
+  };
+
+  const linkUserMutation = useMutation({
+    mutationFn: ({ expertId, email }) => base44.entities.Expert.update(expertId, { linked_user_email: email }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] }),
+  });
+
   return (
     <div className="space-y-6">
       {/* Experts Management */}
@@ -233,48 +248,102 @@ export default function ExpertsManagementContent() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedExperts.map((expert) => (
-              <div key={expert.id} className="border rounded-xl p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start gap-3 mb-3">
-                  <img
-                    src={expert.profile_picture || "https://via.placeholder.com/100"}
-                    alt={expert.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#6E1D40] truncate">{expert.name}</h3>
-                    <p className="text-sm text-gray-600 truncate">{expert.title}</p>
-                    {expert.services && expert.services.length > 0 && (
-                      <Badge className="mt-1 bg-green-100 text-green-800 text-xs">
-                        {expert.services.length} service{expert.services.length > 1 ? 's' : ''}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openEditDialog(expert)}
-                    className="flex-1"
-                  >
-                    <Edit className="w-3 h-3 mr-1" />
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => deleteExpertMutation.mutate(expert.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+        <CardContent className="px-6 pb-4 pt-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Expert</TableHead>
+                <TableHead className="hidden sm:table-cell">Title</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="hidden md:table-cell">Linked Account</TableHead>
+                <TableHead className="hidden lg:table-cell">Services</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedExperts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">No experts added yet.</TableCell>
+                </TableRow>
+              ) : (
+                sortedExperts.map((expert) => {
+                  const status = getExpertStatus(expert);
+                  const linkedUser = expert.linked_user_email
+                    ? allUsers.find((u) => u.email?.toLowerCase() === expert.linked_user_email?.toLowerCase())
+                    : null;
+                  return (
+                    <TableRow key={expert.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-9 h-9 flex-shrink-0">
+                            <AvatarImage src={expert.profile_picture} />
+                            <AvatarFallback className="bg-[#6E1D40] text-white text-xs">
+                              {expert.name?.[0] || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium text-sm text-[#6E1D40]">{expert.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-sm text-gray-600 max-w-[200px] truncate">
+                        {expert.title}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={{
+                          active: "bg-green-100 text-green-800 border-0 text-xs",
+                          invited: "bg-yellow-100 text-yellow-800 border-0 text-xs",
+                          not_invited: "bg-gray-100 text-gray-500 border-0 text-xs",
+                        }[status]}>
+                          {status === "active" ? "Active" : status === "invited" ? "Invited" : "Not Invited"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {linkedUser ? (
+                          <span className="text-sm text-gray-600">{linkedUser.email}</span>
+                        ) : expert.linked_user_email ? (
+                          <span className="text-sm text-yellow-600">{expert.linked_user_email} (pending)</span>
+                        ) : (
+                          <Select
+                            value=""
+                            onValueChange={(email) => linkUserMutation.mutate({ expertId: expert.id, email })}
+                          >
+                            <SelectTrigger className="w-44 h-8 text-xs">
+                              <SelectValue placeholder="Link account..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {allUsers.filter(u => u.email).map((u) => (
+                                <SelectItem key={u.id} value={u.email}>
+                                  {u.full_name || u.email} ({u.role})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {expert.services?.length > 0 ? (
+                          <Badge className="bg-green-100 text-green-800 border-0 text-xs">
+                            {expert.services.length} service{expert.services.length > 1 ? "s" : ""}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-gray-400">None</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(expert)} className="h-8 w-8 p-0">
+                            <Edit className="w-4 h-4 text-blue-600" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Delete ${expert.name}?`)) deleteExpertMutation.mutate(expert.id); }} className="h-8 w-8 p-0">
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
@@ -463,6 +532,27 @@ export default function ExpertsManagementContent() {
                 onChange={(e) => setExpertForm({ ...expertForm, title: e.target.value })}
                 placeholder="e.g., Nervous System Specialist"
               />
+            </div>
+
+            <div>
+              <Label>Link to User Account</Label>
+              <Select
+                value={expertForm.linked_user_email || ""}
+                onValueChange={(val) => setExpertForm({ ...expertForm, linked_user_email: val === "_none" ? "" : val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a user account to link..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">No linked account</SelectItem>
+                  {allUsers.filter(u => u.email).map((u) => (
+                    <SelectItem key={u.id} value={u.email}>
+                      {u.full_name || u.email} ({u.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-400 mt-1">Link this expert profile to a user login account</p>
             </div>
 
             <div>

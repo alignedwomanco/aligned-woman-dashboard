@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,16 +9,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Search, Users, Eye, Edit, Trash2, Tag, UserPlus } from "lucide-react";
+import { Search, Users, Eye, Trash2, Tag, UserPlus, ChevronDown, Check } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import MemberDetailDialog from "./MemberDetailDialog";
 import MemberAccessTagEditor from "./MemberAccessTagEditor";
+import ExistingUserPicker from "./ExistingUserPicker";
 
 export default function MembersManager({ allUsers }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -318,52 +316,14 @@ export default function MembersManager({ allUsers }) {
             </div>
 
             {addMode === "existing" ? (
-              <>
-                <div>
-                  <Label>Search Users</Label>
-                  <div className="relative mt-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      value={existingSearch}
-                      onChange={(e) => { setExistingSearch(e.target.value); setSelectedExistingUser(null); }}
-                      placeholder="Search by name or email..."
-                      className="pl-9"
-                    />
-                  </div>
-                  <div className="mt-2 max-h-48 overflow-y-auto border rounded-lg">
-                    {filteredNonMembers.length === 0 ? (
-                      <p className="text-sm text-gray-400 text-center py-4">
-                        {nonMembers.length === 0 ? "All users are already members" : "No matching users"}
-                      </p>
-                    ) : (
-                      filteredNonMembers.map((u) => (
-                        <button
-                          key={u.id}
-                          type="button"
-                          onClick={() => setSelectedExistingUser(u)}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors border-b last:border-b-0 ${
-                            selectedExistingUser?.id === u.id ? "bg-[#F5E8EE]" : ""
-                          }`}
-                        >
-                          <Avatar className="w-8 h-8 flex-shrink-0">
-                            <AvatarImage src={u.profile_picture} />
-                            <AvatarFallback className="bg-[#6E1D40] text-white text-xs">
-                              {u.full_name?.[0] || u.email?.[0] || "?"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium truncate">{u.full_name || "Unnamed"}</p>
-                            <p className="text-xs text-gray-400 truncate">{u.email}</p>
-                          </div>
-                          <Badge className="bg-gray-100 text-gray-600 border-0 text-xs capitalize flex-shrink-0">
-                            {u.role?.replace("_", " ")}
-                          </Badge>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </>
+              <ExistingUserPicker
+                nonMembers={nonMembers}
+                filteredNonMembers={filteredNonMembers}
+                existingSearch={existingSearch}
+                setExistingSearch={setExistingSearch}
+                selectedExistingUser={selectedExistingUser}
+                setSelectedExistingUser={setSelectedExistingUser}
+              />
             ) : (
               <div>
                 <Label>Email Address</Label>

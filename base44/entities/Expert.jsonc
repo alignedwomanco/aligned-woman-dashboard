@@ -54,6 +54,10 @@
       "type": "boolean",
       "default": true,
       "description": "Whether expert is shown on public page"
+    },
+    "linked_user_email": {
+      "type": "string",
+      "description": "Email of the linked user account"
     }
   },
   "required": [
