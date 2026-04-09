@@ -48,12 +48,16 @@ export default function CourseDetail() {
         const courses = await base44.entities.Course.filter({ id: courseId });
         const courseData = courses[0];
         setCourse(courseData);
-        if (!courseData?.price || courseData.price === 0) {
-          accessGranted = true;
-        }
+
+        // Check user access_tags against course tags
         if (courseData?.tags?.length > 0 && courseData.tags.some(t => userTags.includes(t))) {
           accessGranted = true;
         }
+        // Truly free = no tags AND no price
+        if ((!courseData?.tags || courseData.tags.length === 0) && (!courseData?.price || courseData.price === 0)) {
+          accessGranted = true;
+        }
+        // Block access if coming soon
         if (courseData?.isComingSoon) {
           accessGranted = false;
         }

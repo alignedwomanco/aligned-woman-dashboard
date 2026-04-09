@@ -55,9 +55,10 @@ export default function ModulePlayer() {
           setHasPaidAccess(true); setAccessChecked(true); return;
         }
       }
-      // Check if course is free
-      const courses = await base44.entities.Course.filter({ id: courseId });
-      if (courses[0] && (!courses[0].price || courses[0].price === 0)) {
+      // Truly free = no tags and no price
+      const courses2 = await base44.entities.Course.filter({ id: courseId });
+      const c = courses2[0];
+      if (c && (!c.tags || c.tags.length === 0) && (!c.price || c.price === 0)) {
         setHasPaidAccess(true);
       }
       setAccessChecked(true);

@@ -32,15 +32,20 @@ export default function Classroom() {
         const allCourses = await base44.entities.Course.filter({ isPublished: true }, "created_date");
         setCourses(allCourses);
 
-        // Build paid course IDs from enrollments + access tag matching
+        // Build accessible course IDs from enrollments + access tag matching
+        const enrolledIds = [];
         if (email) {
           const myEnrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, isPaid: true });
-          const enrolledIds = myEnrollments.map(e => e.courseId);
-          const tagMatchedIds = allCourses
-            .filter(c => c.tags?.length > 0 && c.tags.some(t => userTags.includes(t)))
-            .map(c => c.id);
-          setPaidCourseIds([...new Set([...enrolledIds, ...tagMatchedIds])]);
+          enrolledIds.push(...myEnrollments.map(e => e.courseId));
         }
+        const tagMatchedIds = allCourses
+          .filter(c => c.tags?.length > 0 && c.tags.some(t => userTags.includes(t)))
+          .map(c => c.id);
+        // Courses with no tags and price 0 are truly free
+        const freeCourseIds = allCourses
+          .filter(c => (!c.tags || c.tags.length === 0) && (!c.price || c.price === 0))
+          .map(c => c.id);
+        setPaidCourseIds([...new Set([...enrolledIds, ...tagMatchedIds, ...freeCourseIds])]);
 
         const modules = await base44.entities.CourseModule.filter({});
         setAllModules(modules);
@@ -111,7 +116,14 @@ export default function Classroom() {
         </Badge>
       );
     }
-    if (course.price > 0 && !paidCourseIds.includes(course.id)) {
+    if (paidCourseIds.includes(course.id)) {
+      return (
+        <Badge className="bg-green-100 text-green-800 border-0 text-xs">
+          {(!course.tags || course.tags.length === 0) && (!course.price || course.price === 0) ? "Free" : "Purchased"}
+        </Badge>
+      );
+    }
+    if (course.price > 0) {
       return (
         <Badge className="bg-amber-100 text-amber-800 border-0 text-xs flex items-center gap-1">
           <Lock className="w-3 h-3" />
@@ -119,10 +131,12 @@ export default function Classroom() {
         </Badge>
       );
     }
-    if (course.price > 0 && paidCourseIds.includes(course.id)) {
+    // Has tags but user doesn't match — locked
+    if (course.tags?.length > 0) {
       return (
-        <Badge className="bg-green-100 text-green-800 border-0 text-xs">
-          Purchased
+        <Badge className="bg-amber-100 text-amber-800 border-0 text-xs flex items-center gap-1">
+          <Lock className="w-3 h-3" />
+          Members Only
         </Badge>
       );
     }
@@ -299,7 +313,7 @@ export default function Classroom() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.07 }}
                 >
-                  {course.isComingSoon ? (
+                  {course.isComingSoon || (!paidCourseIds.includes(course.id) && (course.tags?.length > 0 || course.price > 0)) ? (
                     renderCourseCard(course, progress)
                   ) : (
                     <Link to={createPageUrl("CourseDetail") + `?courseId=${course.id}`}>
