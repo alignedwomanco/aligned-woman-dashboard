@@ -29,6 +29,11 @@
       "type": "string",
       "description": "Custom title like 'Lead Coach', 'Senior Expert'"
     },
+    "is_member": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this user is also a member (for admins/experts/etc who should appear in members list)"
+    },
     "is_expert": {
       "type": "boolean",
       "default": false

@@ -135,6 +135,7 @@ export default function AdminSettings() {
     setEditData({
       custom_title: user.custom_title || "",
       bio: user.bio || "",
+      is_member: user.is_member || false,
       is_expert: user.is_expert || false,
       is_educator: user.is_educator || false,
       expertise: user.expertise || [],
@@ -149,6 +150,7 @@ export default function AdminSettings() {
   const sendInviteMutation = useMutation({
     mutationFn: async ({ email, role }) => {
       await base44.users.inviteUser(email, role);
+      // Auto-add team roles as members
     },
     onSuccess: () => {
       setInviteDialogOpen(false);
@@ -549,7 +551,11 @@ export default function AdminSettings() {
                       placeholder="Custom title or designation"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="is_member" checked={editData.is_member || false} onChange={(e) => setEditData({ ...editData, is_member: e.target.checked })} className="w-4 h-4" />
+                      <Label htmlFor="is_member" className="cursor-pointer">Also a Member</Label>
+                    </div>
                     <div className="flex items-center gap-2">
                       <input type="checkbox" id="is_expert" checked={editData.is_expert || false} onChange={(e) => setEditData({ ...editData, is_expert: e.target.checked })} className="w-4 h-4" />
                       <Label htmlFor="is_expert" className="cursor-pointer">Mark as Expert</Label>

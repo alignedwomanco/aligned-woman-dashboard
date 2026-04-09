@@ -25,13 +25,20 @@ export default function MembersManager({ allUsers }) {
   const [selectedMember, setSelectedMember] = useState(null);
   const [editTagsMember, setEditTagsMember] = useState(null);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [addMode, setAddMode] = useState("invite"); // "invite" or "existing"
+  const [selectedExistingUser, setSelectedExistingUser] = useState("");
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [newMemberTags, setNewMemberTags] = useState([]);
   const queryClient = useQueryClient();
 
-  // Filter to only user/member roles (non-admin members)
+  // Members = users with role member/user OR is_member flag
   const members = allUsers.filter(
-    (u) => ["user", "member"].includes(u.role)
+    (u) => ["user", "member"].includes(u.role) || u.is_member
+  );
+
+  // Non-member users available to add as members
+  const nonMembers = allUsers.filter(
+    (u) => !["user", "member"].includes(u.role) && !u.is_member
   );
 
   const filtered = members.filter((m) =>
@@ -57,19 +64,32 @@ export default function MembersManager({ allUsers }) {
 
   const inviteMemberMutation = useMutation({
     mutationFn: async ({ email, tags }) => {
-      await base44.users.inviteUser(email, "user");
-      // Tags will need to be applied after user accepts invite
+      await base44.users.inviteUser(email, "member");
       return { email, tags };
     },
     onSuccess: (data) => {
       setAddMemberOpen(false);
       setNewMemberEmail("");
       setNewMemberTags([]);
+      setAddMode("invite");
+      setSelectedExistingUser("");
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      alert(`Invitation sent to ${data.email}! Access tags will be available once they join.`);
+      alert(`Invitation sent to ${data.email}!`);
     },
     onError: (error) => {
       alert(`Failed to send invitation: ${error.message}`);
+    },
+  });
+
+  const addExistingMutation = useMutation({
+    mutationFn: async (userId) => {
+      await base44.entities.User.update(userId, { is_member: true });
+    },
+    onSuccess: () => {
+      setAddMemberOpen(false);
+      setSelectedExistingUser("");
+      setAddMode("invite");
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
     },
   });
 
@@ -115,23 +135,24 @@ export default function MembersManager({ allUsers }) {
       </div>
 
       {/* Search + Add */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex gap-3 items-center">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search members by name or email..."
+            placeholder="Search members..."
             className="pl-9"
           />
         </div>
         <Button
-          onClick={() => setAddMemberOpen(true)}
-          className="text-white w-full sm:w-auto"
+          onClick={() => { setAddMemberOpen(true); setAddMode("invite"); setSelectedExistingUser(""); }}
+          className="text-white flex-shrink-0"
           style={{ backgroundColor: '#6E1D40' }}
         >
           <UserPlus className="w-4 h-4 mr-2" />
-          Add Member
+          <span className="hidden sm:inline">Add Member</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
@@ -144,48 +165,44 @@ export default function MembersManager({ allUsers }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead className="hidden md:table-cell">Email</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="hidden sm:table-cell">Status</TableHead>
+                <TableHead className="hidden md:table-cell">Role</TableHead>
                 <TableHead className="hidden lg:table-cell">Access Tags</TableHead>
-                <TableHead className="hidden sm:table-cell">Level</TableHead>
-                <TableHead className="hidden sm:table-cell">Points</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                     No members found.
                   </TableCell>
                 </TableRow>
               ) : (
                 filtered.map((member) => {
                   const status = getMembershipStatus(member);
+                  const isTeamMember = !["user", "member"].includes(member.role);
                   return (
                     <TableRow key={member.id}>
                       <TableCell>
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="w-8 h-8 flex-shrink-0">
                             <AvatarImage src={member.profile_picture} />
-                            <AvatarFallback className="bg-[#6E1D40] text-white text-xs sm:text-sm">
+                            <AvatarFallback className="bg-[#6E1D40] text-white text-xs">
                               {member.full_name?.[0] || member.email?.[0] || "?"}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
                             <p className="font-medium text-sm truncate">{member.full_name || "Unnamed"}</p>
-                            <p className="text-xs text-gray-400 truncate md:hidden">{member.email}</p>
-                            {member.location && <p className="text-xs text-gray-400 hidden md:block">{member.location}</p>}
+                            <p className="text-xs text-gray-400 truncate">{member.email}</p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell text-sm">{member.email}</TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <Badge className={status === "paid"
                           ? "bg-green-100 text-green-800 border-0 text-xs"
                           : "bg-gray-100 text-gray-600 border-0 text-xs"
@@ -193,32 +210,35 @@ export default function MembersManager({ allUsers }) {
                           {status === "paid" ? "Paid" : "Free"}
                         </Badge>
                       </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {isTeamMember ? (
+                          <Badge className="bg-purple-100 text-purple-800 border-0 text-xs capitalize">
+                            {member.role?.replace("_", " ")}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-gray-400">Member</span>
+                        )}
+                      </TableCell>
                       <TableCell className="hidden lg:table-cell">
                         <div className="flex flex-wrap gap-1 max-w-[200px]">
                           {(member.access_tags || []).length > 0 ? (
-                            (member.access_tags || []).slice(0, 3).map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
+                            (member.access_tags || []).slice(0, 2).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
                             ))
                           ) : (
                             <span className="text-xs text-gray-400">None</span>
                           )}
-                          {(member.access_tags || []).length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{member.access_tags.length - 3}
-                            </Badge>
+                          {(member.access_tags || []).length > 2 && (
+                            <Badge variant="outline" className="text-xs">+{member.access_tags.length - 2}</Badge>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell text-sm">Lv. {member.level || 1}</TableCell>
-                      <TableCell className="hidden sm:table-cell text-sm">{member.total_community_points || 0}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-0.5">
-                          <Button variant="ghost" size="sm" title="View Details" onClick={() => setSelectedMember(member)} className="h-8 w-8 p-0">
+                        <div className="flex items-center justify-end gap-0.5">
+                          <Button variant="ghost" size="sm" title="View" onClick={() => setSelectedMember(member)} className="h-8 w-8 p-0">
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>
-                          <Button variant="ghost" size="sm" title="Edit Tags" onClick={() => setEditTagsMember(member)} className="h-8 w-8 p-0">
+                          <Button variant="ghost" size="sm" title="Tags" onClick={() => setEditTagsMember(member)} className="h-8 w-8 p-0">
                             <Tag className="w-4 h-4 text-blue-600" />
                           </Button>
                           <Button variant="ghost" size="sm" title="Remove" onClick={() => { if (confirm(`Remove ${member.full_name || member.email}?`)) deleteMemberMutation.mutate(member.id); }} className="h-8 w-8 p-0">
@@ -232,7 +252,6 @@ export default function MembersManager({ allUsers }) {
               )}
             </TableBody>
           </Table>
-          </div>
         </CardContent>
       </Card>
 
@@ -251,50 +270,104 @@ export default function MembersManager({ allUsers }) {
       )}
 
       {/* Add Member Dialog */}
-      <Dialog open={addMemberOpen} onOpenChange={setAddMemberOpen}>
+      <Dialog open={addMemberOpen} onOpenChange={(open) => { setAddMemberOpen(open); if (!open) { setAddMode("invite"); setSelectedExistingUser(""); setNewMemberEmail(""); setNewMemberTags([]); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Member</DialogTitle>
+            <DialogTitle>Add Member</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Email Address</Label>
-              <Input
-                type="email"
-                value={newMemberEmail}
-                onChange={(e) => setNewMemberEmail(e.target.value)}
-                placeholder="member@example.com"
-              />
+            {/* Toggle between invite and existing */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setAddMode("invite")}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-all ${
+                  addMode === "invite" ? "bg-[#6E1D40] text-white border-[#6E1D40]" : "bg-white text-gray-600 border-gray-200"
+                }`}
+              >
+                Invite New
+              </button>
+              <button
+                onClick={() => setAddMode("existing")}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-all ${
+                  addMode === "existing" ? "bg-[#6E1D40] text-white border-[#6E1D40]" : "bg-white text-gray-600 border-gray-200"
+                }`}
+              >
+                Existing User
+              </button>
             </div>
-            <div>
-              <Label>Access Tags (optional)</Label>
-              <p className="text-xs text-gray-500 mb-2">Tags will be applied once the member accepts their invitation.</p>
-              <div className="flex flex-wrap gap-2">
-                {accessTags.map((tag) => (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    onClick={() => toggleNewMemberTag(tag.tag_key)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                      newMemberTags.includes(tag.tag_key)
-                        ? "bg-[#6E1D40] text-white border-[#6E1D40]"
-                        : "bg-white text-gray-600 border-gray-200 hover:border-[#DEBECC]"
-                    }`}
-                  >
-                    {tag.label}
-                  </button>
-                ))}
-                {accessTags.length === 0 && <p className="text-xs text-gray-400">No access tags created yet.</p>}
-              </div>
-            </div>
-            <Button
-              onClick={() => inviteMemberMutation.mutate({ email: newMemberEmail, tags: newMemberTags })}
-              disabled={!newMemberEmail || inviteMemberMutation.isPending}
-              className="w-full text-white"
-              style={{ backgroundColor: '#6E1D40' }}
-            >
-              {inviteMemberMutation.isPending ? "Sending Invitation..." : "Send Invitation"}
-            </Button>
+
+            {addMode === "invite" ? (
+              <>
+                <div>
+                  <Label>Email Address</Label>
+                  <Input
+                    type="email"
+                    value={newMemberEmail}
+                    onChange={(e) => setNewMemberEmail(e.target.value)}
+                    placeholder="member@example.com"
+                  />
+                </div>
+                <div>
+                  <Label>Access Tags (optional)</Label>
+                  <p className="text-xs text-gray-500 mb-2">Tags will be applied once the member accepts their invitation.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {accessTags.map((tag) => (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => toggleNewMemberTag(tag.tag_key)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                          newMemberTags.includes(tag.tag_key)
+                            ? "bg-[#6E1D40] text-white border-[#6E1D40]"
+                            : "bg-white text-gray-600 border-gray-200 hover:border-[#DEBECC]"
+                        }`}
+                      >
+                        {tag.label}
+                      </button>
+                    ))}
+                    {accessTags.length === 0 && <p className="text-xs text-gray-400">No access tags created yet.</p>}
+                  </div>
+                </div>
+                <Button
+                  onClick={() => inviteMemberMutation.mutate({ email: newMemberEmail, tags: newMemberTags })}
+                  disabled={!newMemberEmail || inviteMemberMutation.isPending}
+                  className="w-full text-white"
+                  style={{ backgroundColor: '#6E1D40' }}
+                >
+                  {inviteMemberMutation.isPending ? "Sending..." : "Send Invitation"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Label>Select User</Label>
+                  <Select value={selectedExistingUser} onValueChange={setSelectedExistingUser}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a user to add as member..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {nonMembers.length === 0 ? (
+                        <SelectItem value="_none" disabled>All users are already members</SelectItem>
+                      ) : (
+                        nonMembers.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email} ({u.role})
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  onClick={() => addExistingMutation.mutate(selectedExistingUser)}
+                  disabled={!selectedExistingUser || selectedExistingUser === "_none" || addExistingMutation.isPending}
+                  className="w-full text-white"
+                  style={{ backgroundColor: '#6E1D40' }}
+                >
+                  {addExistingMutation.isPending ? "Adding..." : "Add as Member"}
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
