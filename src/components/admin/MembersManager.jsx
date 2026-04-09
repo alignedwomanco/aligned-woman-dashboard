@@ -25,8 +25,9 @@ export default function MembersManager({ allUsers }) {
   const [selectedMember, setSelectedMember] = useState(null);
   const [editTagsMember, setEditTagsMember] = useState(null);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
-  const [addMode, setAddMode] = useState("invite"); // "invite" or "existing"
-  const [selectedExistingUser, setSelectedExistingUser] = useState("");
+  const [addMode, setAddMode] = useState("existing"); // "existing" or "invite"
+  const [selectedExistingUser, setSelectedExistingUser] = useState(null);
+  const [existingSearch, setExistingSearch] = useState("");
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [newMemberTags, setNewMemberTags] = useState([]);
   const queryClient = useQueryClient();
@@ -36,9 +37,15 @@ export default function MembersManager({ allUsers }) {
     (u) => ["user", "member"].includes(u.role) || u.is_member
   );
 
-  // Non-member users available to add as members
+  // Non-member users available to add (any user not already a member)
   const nonMembers = allUsers.filter(
     (u) => !["user", "member"].includes(u.role) && !u.is_member
+  );
+
+  const filteredNonMembers = nonMembers.filter((u) =>
+    !existingSearch ||
+    (u.full_name || "").toLowerCase().includes(existingSearch.toLowerCase()) ||
+    (u.email || "").toLowerCase().includes(existingSearch.toLowerCase())
   );
 
   const filtered = members.filter((m) =>
@@ -82,16 +89,29 @@ export default function MembersManager({ allUsers }) {
   });
 
   const addExistingMutation = useMutation({
-    mutationFn: async (userId) => {
-      await base44.entities.User.update(userId, { is_member: true });
+    mutationFn: async ({ userId, tags }) => {
+      const updateData = { is_member: true };
+      if (tags && tags.length > 0) {
+        const user = allUsers.find(u => u.id === userId);
+        const existing = user?.access_tags || [];
+        updateData.access_tags = [...new Set([...existing, ...tags])];
+      }
+      await base44.entities.User.update(userId, updateData);
     },
     onSuccess: () => {
-      setAddMemberOpen(false);
-      setSelectedExistingUser("");
-      setAddMode("invite");
+      resetAddDialog();
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
     },
   });
+
+  const resetAddDialog = () => {
+    setAddMemberOpen(false);
+    setSelectedExistingUser(null);
+    setExistingSearch("");
+    setNewMemberEmail("");
+    setNewMemberTags([]);
+    setAddMode("existing");
+  };
 
   const getMembershipStatus = (user) => {
     if (user.membership_type === "paid") return "paid";
@@ -270,103 +290,133 @@ export default function MembersManager({ allUsers }) {
       )}
 
       {/* Add Member Dialog */}
-      <Dialog open={addMemberOpen} onOpenChange={(open) => { setAddMemberOpen(open); if (!open) { setAddMode("invite"); setSelectedExistingUser(""); setNewMemberEmail(""); setNewMemberTags([]); } }}>
-        <DialogContent>
+      <Dialog open={addMemberOpen} onOpenChange={(open) => { if (!open) resetAddDialog(); else setAddMemberOpen(true); }}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add Member</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Toggle between invite and existing */}
+            {/* Toggle */}
             <div className="flex gap-2">
               <button
-                onClick={() => setAddMode("invite")}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-all ${
-                  addMode === "invite" ? "bg-[#6E1D40] text-white border-[#6E1D40]" : "bg-white text-gray-600 border-gray-200"
-                }`}
-              >
-                Invite New
-              </button>
-              <button
-                onClick={() => setAddMode("existing")}
+                onClick={() => { setAddMode("existing"); setSelectedExistingUser(null); }}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-all ${
                   addMode === "existing" ? "bg-[#6E1D40] text-white border-[#6E1D40]" : "bg-white text-gray-600 border-gray-200"
                 }`}
               >
                 Existing User
               </button>
+              <button
+                onClick={() => { setAddMode("invite"); setSelectedExistingUser(null); }}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-all ${
+                  addMode === "invite" ? "bg-[#6E1D40] text-white border-[#6E1D40]" : "bg-white text-gray-600 border-gray-200"
+                }`}
+              >
+                Invite New
+              </button>
             </div>
 
-            {addMode === "invite" ? (
+            {addMode === "existing" ? (
               <>
                 <div>
-                  <Label>Email Address</Label>
-                  <Input
-                    type="email"
-                    value={newMemberEmail}
-                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                    placeholder="member@example.com"
-                  />
-                </div>
-                <div>
-                  <Label>Access Tags (optional)</Label>
-                  <p className="text-xs text-gray-500 mb-2">Tags will be applied once the member accepts their invitation.</p>
-                  <div className="flex flex-wrap gap-2">
-                    {accessTags.map((tag) => (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => toggleNewMemberTag(tag.tag_key)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                          newMemberTags.includes(tag.tag_key)
-                            ? "bg-[#6E1D40] text-white border-[#6E1D40]"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-[#DEBECC]"
-                        }`}
-                      >
-                        {tag.label}
-                      </button>
-                    ))}
-                    {accessTags.length === 0 && <p className="text-xs text-gray-400">No access tags created yet.</p>}
+                  <Label>Search Users</Label>
+                  <div className="relative mt-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      value={existingSearch}
+                      onChange={(e) => { setExistingSearch(e.target.value); setSelectedExistingUser(null); }}
+                      placeholder="Search by name or email..."
+                      className="pl-9"
+                    />
+                  </div>
+                  <div className="mt-2 max-h-48 overflow-y-auto border rounded-lg">
+                    {filteredNonMembers.length === 0 ? (
+                      <p className="text-sm text-gray-400 text-center py-4">
+                        {nonMembers.length === 0 ? "All users are already members" : "No matching users"}
+                      </p>
+                    ) : (
+                      filteredNonMembers.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => setSelectedExistingUser(u)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors border-b last:border-b-0 ${
+                            selectedExistingUser?.id === u.id ? "bg-[#F5E8EE]" : ""
+                          }`}
+                        >
+                          <Avatar className="w-8 h-8 flex-shrink-0">
+                            <AvatarImage src={u.profile_picture} />
+                            <AvatarFallback className="bg-[#6E1D40] text-white text-xs">
+                              {u.full_name?.[0] || u.email?.[0] || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{u.full_name || "Unnamed"}</p>
+                            <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                          </div>
+                          <Badge className="bg-gray-100 text-gray-600 border-0 text-xs capitalize flex-shrink-0">
+                            {u.role?.replace("_", " ")}
+                          </Badge>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
-                <Button
-                  onClick={() => inviteMemberMutation.mutate({ email: newMemberEmail, tags: newMemberTags })}
-                  disabled={!newMemberEmail || inviteMemberMutation.isPending}
-                  className="w-full text-white"
-                  style={{ backgroundColor: '#6E1D40' }}
-                >
-                  {inviteMemberMutation.isPending ? "Sending..." : "Send Invitation"}
-                </Button>
               </>
             ) : (
-              <>
-                <div>
-                  <Label>Select User</Label>
-                  <Select value={selectedExistingUser} onValueChange={setSelectedExistingUser}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a user to add as member..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {nonMembers.length === 0 ? (
-                        <SelectItem value="_none" disabled>All users are already members</SelectItem>
-                      ) : (
-                        nonMembers.map((u) => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {u.full_name || u.email} ({u.role})
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+              <div>
+                <Label>Email Address</Label>
+                <Input
+                  type="email"
+                  value={newMemberEmail}
+                  onChange={(e) => setNewMemberEmail(e.target.value)}
+                  placeholder="member@example.com"
+                />
+              </div>
+            )}
+
+            {/* Access Tags - shared for both modes */}
+            {accessTags.length > 0 && (
+              <div>
+                <Label>Access Tags (optional)</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {accessTags.map((tag) => (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => toggleNewMemberTag(tag.tag_key)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                        newMemberTags.includes(tag.tag_key)
+                          ? "bg-[#6E1D40] text-white border-[#6E1D40]"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-[#DEBECC]"
+                      }`}
+                    >
+                      {tag.label}
+                    </button>
+                  ))}
                 </div>
-                <Button
-                  onClick={() => addExistingMutation.mutate(selectedExistingUser)}
-                  disabled={!selectedExistingUser || selectedExistingUser === "_none" || addExistingMutation.isPending}
-                  className="w-full text-white"
-                  style={{ backgroundColor: '#6E1D40' }}
-                >
-                  {addExistingMutation.isPending ? "Adding..." : "Add as Member"}
-                </Button>
-              </>
+              </div>
+            )}
+
+            {/* Action button */}
+            {addMode === "existing" ? (
+              <Button
+                onClick={() => addExistingMutation.mutate({ userId: selectedExistingUser?.id, tags: newMemberTags })}
+                disabled={!selectedExistingUser || addExistingMutation.isPending}
+                className="w-full text-white"
+                style={{ backgroundColor: '#6E1D40' }}
+              >
+                {addExistingMutation.isPending ? "Adding..." : `Add ${selectedExistingUser?.full_name || "User"} as Member`}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => inviteMemberMutation.mutate({ email: newMemberEmail, tags: newMemberTags })}
+                disabled={!newMemberEmail || inviteMemberMutation.isPending}
+                className="w-full text-white"
+                style={{ backgroundColor: '#6E1D40' }}
+              >
+                {inviteMemberMutation.isPending ? "Sending..." : "Send Invitation"}
+              </Button>
             )}
           </div>
         </DialogContent>
