@@ -52,7 +52,8 @@ export default function AdminSettings() {
   const [profileData, setProfileData] = useState({});
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("moderator");
+  const [inviteRole, setInviteRole] = useState("admin");
+  const [invitePermissions, setInvitePermissions] = useState([]);
   const [activeTab, setActiveTab] = useState("members");
   const [editingUser, setEditingUser] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -138,6 +139,7 @@ export default function AdminSettings() {
       is_member: user.is_member || false,
       is_expert: user.is_expert || false,
       is_educator: user.is_educator || false,
+      permissions: user.permissions || [],
       expertise: user.expertise || [],
       years_experience: user.years_experience || "",
       clients_served: user.clients_served || "",
@@ -148,14 +150,16 @@ export default function AdminSettings() {
   };
 
   const sendInviteMutation = useMutation({
-    mutationFn: async ({ email, role }) => {
+    mutationFn: async ({ email, role, permissions }) => {
       await base44.users.inviteUser(email, role);
-      // Auto-add team roles as members
+      // After invite, we'll update permissions when user registers
+      // Store intended permissions for later application
     },
     onSuccess: () => {
       setInviteDialogOpen(false);
       setInviteEmail("");
-      setInviteRole("moderator");
+      setInviteRole("admin");
+      setInvitePermissions([]);
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       alert("Invitation sent successfully!");
     },
@@ -365,19 +369,19 @@ export default function AdminSettings() {
                           />
                         </div>
                         <div>
-                          <Label>Role</Label>
+                          <Label>Primary Role</Label>
                           <Select value={inviteRole} onValueChange={setInviteRole}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="member">Member</SelectItem>
-                              <SelectItem value="expert">Expert</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="moderator">Moderator</SelectItem>
                               <SelectItem value="educator">Educator</SelectItem>
                               <SelectItem value="facilitator">Facilitator</SelectItem>
                               <SelectItem value="support">Support</SelectItem>
-                              <SelectItem value="moderator">Moderator</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="expert">Expert</SelectItem>
+                              <SelectItem value="member">Member</SelectItem>
                               {(currentUser.role === "master_admin" || currentUser.role === "owner") && (
                                 <SelectItem value="master_admin">Master Admin</SelectItem>
                               )}
@@ -387,8 +391,45 @@ export default function AdminSettings() {
                             </SelectContent>
                           </Select>
                         </div>
+                        <div>
+                          <Label>Additional Permissions</Label>
+                          <p className="text-xs text-gray-400 mb-2">Select all that apply — user can have multiple permissions</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { key: "member", label: "Member" },
+                              { key: "expert", label: "Expert" },
+                              { key: "educator", label: "Educator" },
+                              { key: "moderator", label: "Moderator" },
+                              { key: "facilitator", label: "Facilitator" },
+                              { key: "support", label: "Support" },
+                            ].filter(p => p.key !== inviteRole).map((perm) => (
+                              <label
+                                key={perm.key}
+                                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
+                                  invitePermissions.includes(perm.key)
+                                    ? "bg-[#F5E8EE] border-[#6E1D40] text-[#6E1D40]"
+                                    : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={invitePermissions.includes(perm.key)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setInvitePermissions([...invitePermissions, perm.key]);
+                                    } else {
+                                      setInvitePermissions(invitePermissions.filter(p => p !== perm.key));
+                                    }
+                                  }}
+                                  className="w-4 h-4 rounded accent-[#6E1D40]"
+                                />
+                                <span className="text-sm font-medium">{perm.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
                         <Button
-                          onClick={() => sendInviteMutation.mutate({ email: inviteEmail, role: inviteRole })}
+                          onClick={() => sendInviteMutation.mutate({ email: inviteEmail, role: inviteRole, permissions: invitePermissions })}
                           disabled={!inviteEmail || sendInviteMutation.isPending}
                           className="w-full text-white"
                           style={{ backgroundColor: '#6E1D40' }}
@@ -446,9 +487,16 @@ export default function AdminSettings() {
                         <TableCell className="hidden sm:table-cell text-sm">{user.email}</TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            <Badge className={getRoleBadgeColor(user.role) + " text-xs"}>
+                            <Badge className={getRoleBadgeColor(user.role) + " text-xs capitalize"}>
                               {user.role?.replace("_", " ")}
                             </Badge>
+                            {(user.permissions || []).length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {user.permissions.map(p => (
+                                  <Badge key={p} variant="outline" className="text-[10px] capitalize">{p}</Badge>
+                                ))}
+                              </div>
+                            )}
                             {user.custom_title && (
                               <div className="text-xs text-gray-600">{user.custom_title}</div>
                             )}
@@ -551,18 +599,42 @@ export default function AdminSettings() {
                       placeholder="Custom title or designation"
                     />
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className="flex items-center gap-2">
-                      <input type="checkbox" id="is_member" checked={editData.is_member || false} onChange={(e) => setEditData({ ...editData, is_member: e.target.checked })} className="w-4 h-4" />
-                      <Label htmlFor="is_member" className="cursor-pointer">Also a Member</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input type="checkbox" id="is_expert" checked={editData.is_expert || false} onChange={(e) => setEditData({ ...editData, is_expert: e.target.checked })} className="w-4 h-4" />
-                      <Label htmlFor="is_expert" className="cursor-pointer">Mark as Expert</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input type="checkbox" id="is_educator" checked={editData.is_educator || false} onChange={(e) => setEditData({ ...editData, is_educator: e.target.checked })} className="w-4 h-4" />
-                      <Label htmlFor="is_educator" className="cursor-pointer">Mark as Educator</Label>
+                  <div>
+                    <Label>Additional Permissions</Label>
+                    <p className="text-xs text-gray-400 mb-2">Select all that apply</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {[
+                        { key: "member", label: "Member" },
+                        { key: "expert", label: "Expert" },
+                        { key: "educator", label: "Educator" },
+                        { key: "moderator", label: "Moderator" },
+                        { key: "facilitator", label: "Facilitator" },
+                        { key: "support", label: "Support" },
+                      ].map((perm) => (
+                        <label
+                          key={perm.key}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                            (editData.permissions || []).includes(perm.key)
+                              ? "bg-[#F5E8EE] border-[#6E1D40] text-[#6E1D40]"
+                              : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(editData.permissions || []).includes(perm.key)}
+                            onChange={(e) => {
+                              const perms = editData.permissions || [];
+                              if (e.target.checked) {
+                                setEditData({ ...editData, permissions: [...perms, perm.key], is_member: perm.key === "member" ? true : editData.is_member, is_expert: perm.key === "expert" ? true : editData.is_expert, is_educator: perm.key === "educator" ? true : editData.is_educator });
+                              } else {
+                                setEditData({ ...editData, permissions: perms.filter(p => p !== perm.key), is_member: perm.key === "member" ? false : editData.is_member, is_expert: perm.key === "expert" ? false : editData.is_expert, is_educator: perm.key === "educator" ? false : editData.is_educator });
+                              }
+                            }}
+                            className="w-4 h-4 rounded accent-[#6E1D40]"
+                          />
+                          <span className="text-sm font-medium">{perm.label}</span>
+                        </label>
+                      ))}
                     </div>
                   </div>
                   <div>

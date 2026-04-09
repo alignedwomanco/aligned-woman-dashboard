@@ -17,7 +17,14 @@
         "member"
       ],
       "default": "user",
-      "description": "User role with different permissions"
+      "description": "User primary role"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Additional permission flags e.g. ['member', 'expert', 'support']"
     },
     "bio": {
       "type": "string"
@@ -32,7 +39,7 @@
     "is_member": {
       "type": "boolean",
       "default": false,
-      "description": "Whether this user is also a member (for admins/experts/etc who should appear in members list)"
+      "description": "Whether this user is also a member"
     },
     "is_expert": {
       "type": "boolean",
