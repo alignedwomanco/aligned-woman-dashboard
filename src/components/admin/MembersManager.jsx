@@ -178,27 +178,28 @@ export default function MembersManager({ allUsers }) {
 
       {/* Members Table */}
       <Card>
-        <CardHeader>
+        <CardHeader className="px-6 py-5">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Users className="w-5 h-5" />
             Members ({filtered.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="px-6 pb-4 pt-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead className="hidden sm:table-cell">Status</TableHead>
-                <TableHead className="hidden md:table-cell">Role</TableHead>
-                <TableHead className="hidden lg:table-cell">Access Tags</TableHead>
+                <TableHead className="w-[35%]">User</TableHead>
+                <TableHead className="hidden sm:table-cell">Email</TableHead>
+                <TableHead className="hidden md:table-cell">Status</TableHead>
+                <TableHead className="hidden lg:table-cell">Role</TableHead>
+                <TableHead className="hidden xl:table-cell">Access Tags</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                     No members found.
                   </TableCell>
                 </TableRow>
@@ -209,20 +210,20 @@ export default function MembersManager({ allUsers }) {
                   return (
                     <TableRow key={member.id}>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="w-8 h-8 flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-9 h-9 flex-shrink-0">
                             <AvatarImage src={member.profile_picture} />
                             <AvatarFallback className="bg-[#6E1D40] text-white text-xs">
                               {member.full_name?.[0] || member.email?.[0] || "?"}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="min-w-0">
-                            <p className="font-medium text-sm truncate">{member.full_name || "Unnamed"}</p>
-                            <p className="text-xs text-gray-400 truncate">{member.email}</p>
-                          </div>
+                          <span className="font-medium text-sm">{member.full_name || "Unnamed"}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell">
+                      <TableCell className="hidden sm:table-cell text-sm text-gray-600">
+                        {member.email}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <Badge className={status === "paid"
                           ? "bg-green-100 text-green-800 border-0 text-xs"
                           : "bg-gray-100 text-gray-600 border-0 text-xs"
@@ -230,23 +231,23 @@ export default function MembersManager({ allUsers }) {
                           {status === "paid" ? "Paid" : "Free"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
+                      <TableCell className="hidden lg:table-cell">
                         {isTeamMember ? (
                           <Badge className="bg-purple-100 text-purple-800 border-0 text-xs capitalize">
                             {member.role?.replace("_", " ")}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-gray-400">Member</span>
+                          <span className="text-sm text-gray-400">Member</span>
                         )}
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                      <TableCell className="hidden xl:table-cell">
+                        <div className="flex flex-wrap gap-1">
                           {(member.access_tags || []).length > 0 ? (
                             (member.access_tags || []).slice(0, 2).map((tag) => (
                               <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
                             ))
                           ) : (
-                            <span className="text-xs text-gray-400">None</span>
+                            <span className="text-sm text-gray-400">None</span>
                           )}
                           {(member.access_tags || []).length > 2 && (
                             <Badge variant="outline" className="text-xs">+{member.access_tags.length - 2}</Badge>
@@ -254,7 +255,7 @@ export default function MembersManager({ allUsers }) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center justify-end gap-0.5">
+                        <div className="flex items-center justify-end gap-1">
                           <Button variant="ghost" size="sm" title="View" onClick={() => setSelectedMember(member)} className="h-8 w-8 p-0">
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>

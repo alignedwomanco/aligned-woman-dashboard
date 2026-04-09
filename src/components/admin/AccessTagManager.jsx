@@ -81,7 +81,7 @@ export default function AccessTagManager() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-800">Access Tags</h3>
         <Button
@@ -110,7 +110,7 @@ export default function AccessTagManager() {
         </Card>
       ) : (
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="px-6 pb-4 pt-2">
             <Table>
               <TableHeader>
                 <TableRow>
