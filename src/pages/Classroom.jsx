@@ -104,7 +104,7 @@ export default function Classroom() {
   );
 
   return (
-    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: "#F5E9EE" }}>
+    <div className="min-h-screen p-4 sm:p-6" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div

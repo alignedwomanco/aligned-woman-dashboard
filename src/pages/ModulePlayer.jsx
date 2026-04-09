@@ -274,7 +274,7 @@ export default function ModulePlayer() {
 
   if (!hasPaidAccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+      <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
         <div className="max-w-2xl mx-auto p-6 pt-20">
           <button onClick={() => navigate(-1)} className="mb-6">
             <Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" /> Back</Button>
@@ -286,7 +286,7 @@ export default function ModulePlayer() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
       {/* Header */}
       <div className="bg-white border-b sticky top-20 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">

@@ -96,7 +96,7 @@ export default function SectionDetail() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#DEBECC" }}>
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
       {/* Header */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <button onClick={() => navigate(-1)} className="inline-block mb-4">
