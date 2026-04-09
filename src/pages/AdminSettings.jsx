@@ -52,7 +52,7 @@ export default function AdminSettings() {
   const [profileData, setProfileData] = useState({});
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("admin");
+  const [inviteRole, setInviteRole] = useState("member");
   const [invitePermissions, setInvitePermissions] = useState([]);
   const [activeTab, setActiveTab] = useState("members");
   const [editingUser, setEditingUser] = useState(null);
@@ -158,7 +158,7 @@ export default function AdminSettings() {
     onSuccess: () => {
       setInviteDialogOpen(false);
       setInviteEmail("");
-      setInviteRole("admin");
+      setInviteRole("member");
       setInvitePermissions([]);
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       alert("Invitation sent successfully!");
@@ -375,34 +375,31 @@ export default function AdminSettings() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="moderator">Moderator</SelectItem>
-                              <SelectItem value="educator">Educator</SelectItem>
-                              <SelectItem value="facilitator">Facilitator</SelectItem>
-                              <SelectItem value="support">Support</SelectItem>
-                              <SelectItem value="expert">Expert</SelectItem>
-                              <SelectItem value="member">Member</SelectItem>
-                              {(currentUser.role === "master_admin" || currentUser.role === "owner") && (
-                                <SelectItem value="master_admin">Master Admin</SelectItem>
-                              )}
                               {currentUser.role === "owner" && (
                                 <SelectItem value="owner">Owner</SelectItem>
                               )}
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="member">Member</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
-                          <Label>Additional Permissions</Label>
+                          <Label>Permissions</Label>
                           <p className="text-xs text-gray-400 mb-2">Select all that apply — user can have multiple permissions</p>
                           <div className="grid grid-cols-2 gap-2">
                             {[
-                              { key: "member", label: "Member" },
+                              { key: "owner", label: "Owner" },
+                              { key: "admin", label: "Admin" },
                               { key: "expert", label: "Expert" },
+                              { key: "member", label: "Member" },
                               { key: "educator", label: "Educator" },
                               { key: "moderator", label: "Moderator" },
                               { key: "facilitator", label: "Facilitator" },
                               { key: "support", label: "Support" },
-                            ].filter(p => p.key !== inviteRole).map((perm) => (
+                            ].filter(p => {
+                              if (p.key === "owner" && currentUser.role !== "owner") return false;
+                              return true;
+                            }).map((perm) => (
                               <label
                                 key={perm.key}
                                 className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
@@ -416,9 +413,20 @@ export default function AdminSettings() {
                                   checked={invitePermissions.includes(perm.key)}
                                   onChange={(e) => {
                                     if (e.target.checked) {
-                                      setInvitePermissions([...invitePermissions, perm.key]);
+                                      const newPerms = [...invitePermissions, perm.key];
+                                      setInvitePermissions(newPerms);
+                                      // Auto-set primary role: owner > admin > member
+                                      if (perm.key === "owner") setInviteRole("owner");
+                                      else if (perm.key === "admin" && inviteRole !== "owner") setInviteRole("admin");
                                     } else {
-                                      setInvitePermissions(invitePermissions.filter(p => p !== perm.key));
+                                      const newPerms = invitePermissions.filter(p => p !== perm.key);
+                                      setInvitePermissions(newPerms);
+                                      // Re-evaluate primary role
+                                      if (perm.key === "owner" && inviteRole === "owner") {
+                                        setInviteRole(newPerms.includes("admin") ? "admin" : "member");
+                                      } else if (perm.key === "admin" && inviteRole === "admin") {
+                                        setInviteRole(newPerms.includes("owner") ? "owner" : "member");
+                                      }
                                     }
                                   }}
                                   className="w-4 h-4 rounded accent-[#6E1D40]"
