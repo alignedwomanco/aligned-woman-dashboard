@@ -46,6 +46,14 @@ export default function ModulePlayer() {
       if (email) {
         const enrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, courseId, isPaid: true });
         if (enrollments.length > 0) { setHasPaidAccess(true); setAccessChecked(true); return; }
+        // Check user access tags against course tags
+        const userTags = me?.access_tags || [];
+        const courses = await base44.entities.Course.filter({ id: courseId });
+        const courseData = courses[0];
+        if (courseData?.isComingSoon) { setHasPaidAccess(false); setAccessChecked(true); return; }
+        if (courseData?.tags?.length > 0 && courseData.tags.some(t => userTags.includes(t))) {
+          setHasPaidAccess(true); setAccessChecked(true); return;
+        }
       }
       // Check if course is free
       const courses = await base44.entities.Course.filter({ id: courseId });

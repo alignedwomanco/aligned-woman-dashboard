@@ -34,22 +34,30 @@ export default function CourseDetail() {
         const email = me?.email?.toLowerCase();
         const adminUser = ['owner', 'admin', 'master_admin'].includes(me?.role);
         setIsAdmin(adminUser);
+        const userTags = me?.access_tags || [];
+        let accessGranted = false;
 
         if (email) {
           const myEnrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, isPaid: true });
           const paidIds = myEnrollments.map(e => e.courseId);
           if (paidIds.includes(courseId)) {
-            setHasPaidAccess(true);
+            accessGranted = true;
           }
         }
 
         const courses = await base44.entities.Course.filter({ id: courseId });
         const courseData = courses[0];
         setCourse(courseData);
-        // Free courses are always accessible
         if (!courseData?.price || courseData.price === 0) {
-          setHasPaidAccess(true);
+          accessGranted = true;
         }
+        if (courseData?.tags?.length > 0 && courseData.tags.some(t => userTags.includes(t))) {
+          accessGranted = true;
+        }
+        if (courseData?.isComingSoon) {
+          accessGranted = false;
+        }
+        setHasPaidAccess(accessGranted);
 
         // Load sections and modules without pre-sorting
         const courseSections = await base44.entities.CourseSection.filter({ courseId });

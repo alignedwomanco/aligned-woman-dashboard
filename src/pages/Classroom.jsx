@@ -22,31 +22,29 @@ export default function Classroom() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Load current user info
         const me = await base44.auth.me();
         const email = me?.email?.toLowerCase();
         setUserEmail(email);
-        const userAccessTags = me?.access_tags || [];
+        const userTags = me?.access_tags || [];
         setIsAdmin(['owner', 'admin', 'master_admin'].includes(me?.role));
 
-        // Load paid enrollments for this user
-        if (email) {
-          const myEnrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, isPaid: true });
-          const enrolledIds = myEnrollments.map(e => e.courseId);
-          // Also check access tags — load all courses to match tags
-          // We'll match after courses load
-          setPaidCourseIds(enrolledIds);
-        }
-
-        // Load published courses, sorted by created_date (oldest first)
+        // Load published courses
         const allCourses = await base44.entities.Course.filter({ isPublished: true }, "created_date");
         setCourses(allCourses);
 
-        // Load all course modules to know total counts
+        // Build paid course IDs from enrollments + access tag matching
+        if (email) {
+          const myEnrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, isPaid: true });
+          const enrolledIds = myEnrollments.map(e => e.courseId);
+          const tagMatchedIds = allCourses
+            .filter(c => c.tags?.length > 0 && c.tags.some(t => userTags.includes(t)))
+            .map(c => c.id);
+          setPaidCourseIds([...new Set([...enrolledIds, ...tagMatchedIds])]);
+        }
+
         const modules = await base44.entities.CourseModule.filter({});
         setAllModules(modules);
 
-        // Load user's enrollment/progress
         const prog = await base44.entities.CourseProgress.filter({});
         setEnrollment(prog);
       } catch (e) {
@@ -68,10 +66,8 @@ export default function Classroom() {
     return Math.round((completedModules / courseModules.length) * 100);
   };
 
-  // Find most recently accessed module to resume
   const getResumeInfo = () => {
     if (enrollment.length === 0) return null;
-    // Sort by lastAccessedAt or updated_date, most recent first
     const sorted = [...enrollment]
       .filter(p => p.moduleId && p.status !== "completed")
       .sort((a, b) => {
@@ -81,7 +77,6 @@ export default function Classroom() {
       });
     const latest = sorted[0];
     if (!latest) {
-      // All completed — find most recently touched
       const allSorted = [...enrollment]
         .filter(p => p.moduleId)
         .sort((a, b) => {
@@ -105,6 +100,131 @@ export default function Classroom() {
     course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getStatusBadge = (course) => {
+    if (course.isComingSoon) {
+      return (
+        <Badge className="bg-blue-100 text-blue-800 border-0 text-xs flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          Coming Soon
+        </Badge>
+      );
+    }
+    if (course.price > 0 && !paidCourseIds.includes(course.id)) {
+      return (
+        <Badge className="bg-amber-100 text-amber-800 border-0 text-xs flex items-center gap-1">
+          <Lock className="w-3 h-3" />
+          ${course.price}
+        </Badge>
+      );
+    }
+    if (course.price > 0 && paidCourseIds.includes(course.id)) {
+      return (
+        <Badge className="bg-green-100 text-green-800 border-0 text-xs">
+          Purchased
+        </Badge>
+      );
+    }
+    return (
+      <Badge className="bg-green-100 text-green-800 border-0 text-xs">
+        Free
+      </Badge>
+    );
+  };
+
+  const renderCourseCard = (course, progress) => (
+    <Card className={`h-full bg-white overflow-hidden group ${course.isComingSoon ? "opacity-80" : "hover:shadow-xl cursor-pointer"} transition-all duration-300`}>
+      <div className="h-44 bg-gradient-to-br from-[#6E1D40] to-[#9B3A6A] relative overflow-hidden">
+        {course.coverImage ? (
+          <img
+            src={course.coverImage}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <BookOpen className="w-12 h-12 text-white/40" />
+          </div>
+        )}
+        {course.isFeatured && !paidCourseIds.includes(course.id) && (
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-amber-400 text-amber-900 border-0 text-xs font-semibold">
+              <Star className="w-3 h-3 mr-1" />
+              Featured
+            </Badge>
+          </div>
+        )}
+        {course.isComingSoon && (
+          <div className="absolute top-3 right-3">
+            <Badge className="bg-blue-500 text-white border-0 text-xs font-semibold">
+              Coming Soon
+            </Badge>
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 h-2 bg-white/20">
+          <div
+            className="h-full transition-all duration-300"
+            style={{
+              width: `${progress}%`,
+              background: progress >= 100
+                ? '#22c55e'
+                : `repeating-linear-gradient(-45deg, #6E1D40, #6E1D40 4px, #943A59 4px, #943A59 8px)`,
+            }}
+          />
+        </div>
+      </div>
+
+      <CardContent className="p-5">
+        {course.category && (
+          <Badge className="bg-[#943A59]/20 text-[#6E1D40] border-[#943A59]/30 border text-xs mb-3">
+            {course.category}
+          </Badge>
+        )}
+        <h3 className="font-bold text-[#6E1D40] text-lg leading-snug mb-2 group-hover:text-[#9B3A6A] transition-colors">
+          {course.title}
+        </h3>
+        {course.description && (
+          <p className="text-sm text-gray-500 line-clamp-2 mb-4">
+            {course.description}
+          </p>
+        )}
+
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">Progress</span>
+            <span className="text-xs font-semibold text-[#6E1D40]">{progress}%</span>
+          </div>
+          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{
+                width: `${progress}%`,
+                background: progress >= 100
+                  ? '#22c55e'
+                  : `repeating-linear-gradient(-45deg, #6E1D40, #6E1D40 4px, #943A59 4px, #943A59 8px)`,
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-3 text-xs text-gray-500">
+            {course.enrollmentCount > 0 && (
+              <span className="flex items-center gap-1">
+                <Users className="w-3.5 h-3.5" />
+                {course.enrollmentCount}
+              </span>
+            )}
+            {getStatusBadge(course)}
+          </div>
+          <div className="flex items-center gap-1 text-[#6E1D40] text-sm font-medium">
+            {course.isComingSoon ? "" : progress > 0 ? `${progress}% done` : "Start"}
+            {!course.isComingSoon && <ArrowRight className="w-4 h-4" />}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 
   return (
@@ -179,106 +299,13 @@ export default function Classroom() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.07 }}
                 >
-                  <Link to={createPageUrl("CourseDetail") + `?courseId=${course.id}`}>
-                    <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer bg-white overflow-hidden group">
-                      {/* Cover Image */}
-                      <div className="h-44 bg-gradient-to-br from-[#6E1D40] to-[#9B3A6A] relative overflow-hidden">
-                        {course.coverImage ? (
-                          <img
-                            src={course.coverImage}
-                            alt={course.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <BookOpen className="w-12 h-12 text-white/40" />
-                          </div>
-                        )}
-                        {course.isFeatured && !paidCourseIds.includes(course.id) && (
-                          <div className="absolute top-3 left-3">
-                            <Badge className="bg-amber-400 text-amber-900 border-0 text-xs font-semibold">
-                              <Star className="w-3 h-3 mr-1" />
-                              Featured
-                            </Badge>
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-white/20">
-                          <div
-                            className="h-full transition-all duration-300"
-                            style={{
-                              width: `${progress}%`,
-                              background: progress >= 100
-                                ? '#22c55e'
-                                : `repeating-linear-gradient(-45deg, #6E1D40, #6E1D40 4px, #943A59 4px, #943A59 8px)`,
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <CardContent className="p-5">
-                        {course.category && (
-                          <Badge className="bg-[#943A59]/20 text-[#6E1D40] border-[#943A59]/30 border text-xs mb-3">
-                            {course.category}
-                          </Badge>
-                        )}
-                        <h3 className="font-bold text-[#6E1D40] text-lg leading-snug mb-2 group-hover:text-[#9B3A6A] transition-colors">
-                          {course.title}
-                        </h3>
-                        {course.description && (
-                          <p className="text-sm text-gray-500 line-clamp-2 mb-4">
-                            {course.description}
-                          </p>
-                        )}
-
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500">Progress</span>
-                            <span className="text-xs font-semibold text-[#6E1D40]">{progress}%</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-300"
-                              style={{
-                                width: `${progress}%`,
-                                background: progress >= 100
-                                  ? '#22c55e'
-                                  : `repeating-linear-gradient(-45deg, #6E1D40, #6E1D40 4px, #943A59 4px, #943A59 8px)`,
-                              }}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-auto">
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            {course.enrollmentCount > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Users className="w-3.5 h-3.5" />
-                                {course.enrollmentCount}
-                              </span>
-                            )}
-                            {course.price > 0 && !paidCourseIds.includes(course.id) ? (
-                              <Badge className="bg-amber-100 text-amber-800 border-0 text-xs flex items-center gap-1">
-                                <Lock className="w-3 h-3" />
-                                ${course.price}
-                              </Badge>
-                            ) : course.price > 0 && paidCourseIds.includes(course.id) ? (
-                              <Badge className="bg-green-100 text-green-800 border-0 text-xs">
-                                Purchased
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-green-100 text-green-800 border-0 text-xs">
-                                Free
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-[#6E1D40] text-sm font-medium">
-                            {progress > 0 ? `${progress}% done` : "Start"}
-                            <ArrowRight className="w-4 h-4" />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  {course.isComingSoon ? (
+                    renderCourseCard(course, progress)
+                  ) : (
+                    <Link to={createPageUrl("CourseDetail") + `?courseId=${course.id}`}>
+                      {renderCourseCard(course, progress)}
+                    </Link>
+                  )}
                 </motion.div>
               );
             })}
