@@ -1,0 +1,80 @@
+{
+  "name": "Sale",
+  "type": "object",
+  "properties": {
+    "buyer_email": {
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "purchase_type": {
+      "type": "string",
+      "enum": [
+        "self",
+        "friend",
+        "daughter",
+        "bulk",
+        "charity"
+      ]
+    },
+    "age_range": {
+      "type": "string"
+    },
+    "life_stage": {
+      "type": "string"
+    },
+    "work_study_status": {
+      "type": "string"
+    },
+    "instagram_handle": {
+      "type": "string"
+    },
+    "marketing_opt_in": {
+      "type": "boolean",
+      "default": false
+    },
+    "affiliate_id": {
+      "type": "string"
+    },
+    "affiliate_code": {
+      "type": "string"
+    },
+    "commission_percentage": {
+      "type": "number"
+    },
+    "commission_amount": {
+      "type": "number"
+    },
+    "payfast_payment_id": {
+      "type": "string"
+    },
+    "stripe_session_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "refunded",
+        "failed"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "buyer_email",
+    "amount",
+    "status"
+  ]
+}

@@ -36,7 +36,7 @@ import CourseBuilderContent from "@/components/admin/CourseBuilderContent";
 import AdminMetricsContent from "@/components/admin/AdminMetricsContent";
 import AvatarGenerator from "@/components/admin/AvatarGenerator";
 import ExpertsManagementContent from "@/components/admin/ExpertsManagementContent";
-import DashboardConfiguratorContent from "@/components/admin/DashboardConfiguratorContent";
+import PaymentSettingsContent from "@/components/admin/PaymentSettingsContent";
 import { createPageUrl } from "@/utils";
 import BackgroundSelector from "@/components/settings/BackgroundSelector";
 import AIChatWidgetSettings from "@/components/admin/AIChatWidgetSettings";
@@ -288,11 +288,11 @@ export default function AdminSettings() {
               Experts
             </TabsTrigger>
             <TabsTrigger 
-              value="dashboard" 
+              value="payments" 
               className="data-[state=active]:text-white hover:bg-gray-100"
-              style={{ backgroundColor: activeTab === "dashboard" ? '#6E1D40' : '' }}
+              style={{ backgroundColor: activeTab === "payments" ? '#6E1D40' : '' }}
             >
-              Dashboard Configurator
+              Payment Settings
             </TabsTrigger>
             <TabsTrigger 
               value="integrations" 
@@ -775,9 +775,9 @@ export default function AdminSettings() {
             <ExpertsManagementContent />
           </TabsContent>
 
-          {/* Dashboard Configurator Tab */}
-          <TabsContent value="dashboard">
-            <DashboardConfiguratorContent />
+          {/* Payment Settings Tab */}
+          <TabsContent value="payments">
+            <PaymentSettingsContent />
           </TabsContent>
 
           {/* Integrations Tab */}

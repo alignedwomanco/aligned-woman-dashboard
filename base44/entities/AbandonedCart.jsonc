@@ -1,0 +1,69 @@
+{
+  "name": "AbandonedCart",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "source_page": {
+      "type": "string"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "payfast",
+        "link"
+      ]
+    },
+    "purchase_type": {
+      "type": "string",
+      "enum": [
+        "self",
+        "friend",
+        "daughter",
+        "bulk",
+        "charity"
+      ]
+    },
+    "age_range": {
+      "type": "string"
+    },
+    "life_stage": {
+      "type": "string"
+    },
+    "work_study_status": {
+      "type": "string"
+    },
+    "instagram_handle": {
+      "type": "string"
+    },
+    "marketing_opt_in": {
+      "type": "boolean",
+      "default": false
+    },
+    "discount_code": {
+      "type": "string"
+    },
+    "email_sent": {
+      "type": "boolean",
+      "default": false
+    },
+    "converted": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "email"
+  ]
+}
