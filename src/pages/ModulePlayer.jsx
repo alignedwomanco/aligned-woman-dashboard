@@ -20,7 +20,10 @@ import {
   MessageCircle,
   Send,
   Check,
+  Lock,
+  ExternalLink,
 } from "lucide-react";
+import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 
 export default function ModulePlayer() {
   const navigate = useNavigate();
@@ -29,7 +32,31 @@ export default function ModulePlayer() {
   const courseId = searchParams.get("courseId");
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
+  const [hasPaidAccess, setHasPaidAccess] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
   const queryClient = useQueryClient();
+
+  // Check course access
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!courseId) return;
+      const me = await base44.auth.me();
+      const email = me?.email?.toLowerCase();
+      const adminUser = ['owner', 'admin', 'master_admin'].includes(me?.role);
+      if (adminUser) { setHasPaidAccess(true); setAccessChecked(true); return; }
+      if (email) {
+        const enrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, courseId, isPaid: true });
+        if (enrollments.length > 0) { setHasPaidAccess(true); setAccessChecked(true); return; }
+      }
+      // Check if course is free
+      const courses = await base44.entities.Course.filter({ id: courseId });
+      if (courses[0] && (!courses[0].price || courses[0].price === 0)) {
+        setHasPaidAccess(true);
+      }
+      setAccessChecked(true);
+    };
+    checkAccess();
+  }, [courseId]);
 
   const { data: module } = useQuery({
     queryKey: ["courseModule", moduleId],
@@ -237,10 +264,23 @@ export default function ModulePlayer() {
       }).length / pages.length) * 100)
     : 0;
 
-  if (!module || !selectedPage) {
+  if (!module || !selectedPage || !accessChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-[#6B1B3D] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!hasPaidAccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+        <div className="max-w-2xl mx-auto p-6 pt-20">
+          <button onClick={() => navigate(-1)} className="mb-6">
+            <Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" /> Back</Button>
+          </button>
+          <CourseAccessGate course={course} />
+        </div>
       </div>
     );
   }

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
-import { Search, BookOpen, Clock, Users, ArrowRight, Star, Play } from "lucide-react";
+import { Search, BookOpen, Clock, Users, ArrowRight, Star, Play, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Classroom() {
@@ -15,10 +15,25 @@ export default function Classroom() {
   const [enrollment, setEnrollment] = useState([]);
   const [allModules, setAllModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState(null);
+  const [paidCourseIds, setPaidCourseIds] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Load current user info
+        const me = await base44.auth.me();
+        const email = me?.email?.toLowerCase();
+        setUserEmail(email);
+        setIsAdmin(['owner', 'admin', 'master_admin'].includes(me?.role));
+
+        // Load paid enrollments for this user
+        if (email) {
+          const myEnrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, isPaid: true });
+          setPaidCourseIds(myEnrollments.map(e => e.courseId));
+        }
+
         // Load published courses, sorted by created_date (oldest first)
         const allCourses = await base44.entities.Course.filter({ isPublished: true }, "created_date");
         setCourses(allCourses);
@@ -237,9 +252,14 @@ export default function Classroom() {
                                 {course.enrollmentCount}
                               </span>
                             )}
-                            {course.price > 0 ? (
-                              <Badge className="bg-[#943A59]/20 text-[#6E1D40] border-0 text-xs">
+                            {course.price > 0 && !paidCourseIds.includes(course.id) && !isAdmin ? (
+                              <Badge className="bg-amber-100 text-amber-800 border-0 text-xs flex items-center gap-1">
+                                <Lock className="w-3 h-3" />
                                 ${course.price}
+                              </Badge>
+                            ) : course.price > 0 ? (
+                              <Badge className="bg-green-100 text-green-800 border-0 text-xs">
+                                Purchased
                               </Badge>
                             ) : (
                               <Badge className="bg-green-100 text-green-800 border-0 text-xs">

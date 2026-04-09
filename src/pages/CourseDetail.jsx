@@ -8,7 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Clock, Play, CheckCircle, Lock, BookOpen, Grid2x2, Star, ArrowRight } from "lucide-react";
+import { ArrowLeft, Clock, Play, CheckCircle, Lock, BookOpen, Grid2x2, Star, ArrowRight, ExternalLink } from "lucide-react";
+import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 
 export default function CourseDetail() {
   const [searchParams] = useSearchParams();
@@ -20,14 +21,35 @@ export default function CourseDetail() {
   const [progress, setProgress] = useState([]);
   const [activeSection, setActiveSection] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasPaidAccess, setHasPaidAccess] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     if (!courseId) return;
     const loadData = async () => {
       try {
+        // Check user access
+        const me = await base44.auth.me();
+        const email = me?.email?.toLowerCase();
+        const adminUser = ['owner', 'admin', 'master_admin'].includes(me?.role);
+        setIsAdmin(adminUser);
+
+        if (email) {
+          const myEnrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, isPaid: true });
+          const paidIds = myEnrollments.map(e => e.courseId);
+          if (paidIds.includes(courseId) || adminUser) {
+            setHasPaidAccess(true);
+          }
+        }
+
         const courses = await base44.entities.Course.filter({ id: courseId });
         const courseData = courses[0];
         setCourse(courseData);
+        // Free courses are always accessible
+        if (!courseData?.price || courseData.price === 0) {
+          setHasPaidAccess(true);
+        }
 
         // Load sections and modules without pre-sorting
         const courseSections = await base44.entities.CourseSection.filter({ courseId });
@@ -190,6 +212,22 @@ export default function CourseDetail() {
           </div>
 
       <div className="max-w-6xl mx-auto p-4 sm:p-6">
+         {/* Access gate for paid courses */}
+         {!hasPaidAccess && !previewMode && (
+           <div className="mb-6">
+             <CourseAccessGate course={course} onPreview={() => setPreviewMode(true)} />
+           </div>
+         )}
+         {!hasPaidAccess && previewMode && (
+           <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
+             <p className="text-sm text-amber-800"><Lock className="w-4 h-4 inline mr-1" />Preview mode — purchase to unlock all content</p>
+             <a href="https://alignedwomanco.com/blueprint" target="_blank" rel="noopener noreferrer">
+               <Button size="sm" className="bg-[#6E1D40] hover:bg-[#5A1633] text-white gap-1">
+                 <ExternalLink className="w-3 h-3" /> Purchase
+               </Button>
+             </a>
+           </div>
+         )}
          {sections.length === 0 ? (
            <div className="text-center py-16">
              <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />

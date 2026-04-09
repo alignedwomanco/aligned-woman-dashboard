@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, Globe, ShoppingCart, Users, TrendingUp } from "lucide-react";
+import { DollarSign, Globe, ShoppingCart, Users, TrendingUp, Key } from "lucide-react";
 import RegionalPricingManager from "./payments/RegionalPricingManager";
 import SalesOverview from "./payments/SalesOverview";
 import WaitlistManager from "./payments/WaitlistManager";
 import AbandonedCartManager from "./payments/AbandonedCartManager";
+import CourseAccessManager from "./payments/CourseAccessManager";
 
 export default function PaymentSettingsContent() {
   const [subTab, setSubTab] = useState("pricing");
@@ -41,6 +42,9 @@ export default function PaymentSettingsContent() {
               <TabsTrigger value="abandoned" className="gap-1.5">
                 <ShoppingCart className="w-4 h-4" /> Abandoned Carts
               </TabsTrigger>
+              <TabsTrigger value="access" className="gap-1.5">
+                <Key className="w-4 h-4" /> Course Access
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="pricing">
@@ -54,6 +58,9 @@ export default function PaymentSettingsContent() {
             </TabsContent>
             <TabsContent value="abandoned">
               <AbandonedCartManager />
+            </TabsContent>
+            <TabsContent value="access">
+              <CourseAccessManager />
             </TabsContent>
           </Tabs>
         </CardContent>
