@@ -53,7 +53,7 @@ export default function AdminSettings() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("moderator");
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("members");
   const [editingUser, setEditingUser] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editData, setEditData] = useState({});
@@ -269,6 +269,13 @@ export default function AdminSettings() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white border border-gray-200">
             <TabsTrigger 
+              value="members" 
+              className="data-[state=active]:text-white hover:bg-gray-100"
+              style={{ backgroundColor: activeTab === "members" ? '#6E1D40' : '' }}
+            >
+              Members
+            </TabsTrigger>
+            <TabsTrigger 
               value="users" 
               className="data-[state=active]:text-white hover:bg-gray-100"
               style={{ backgroundColor: activeTab === "users" ? '#6E1D40' : '' }}
@@ -325,13 +332,6 @@ export default function AdminSettings() {
               Support Room
             </TabsTrigger>
             <TabsTrigger 
-              value="access-tags" 
-              className="data-[state=active]:text-white hover:bg-gray-100"
-              style={{ backgroundColor: activeTab === "access-tags" ? '#6E1D40' : '' }}
-            >
-              Access Tags
-            </TabsTrigger>
-            <TabsTrigger 
               value="logos" 
               className="data-[state=active]:text-white hover:bg-gray-100"
               style={{ backgroundColor: activeTab === "logos" ? '#6E1D40' : '' }}
@@ -339,6 +339,12 @@ export default function AdminSettings() {
               Logos
             </TabsTrigger>
           </TabsList>
+
+          {/* Members Tab */}
+          <TabsContent value="members" className="space-y-6">
+            <MembersManager allUsers={allUsers} />
+            <AccessTagManager />
+          </TabsContent>
 
           {/* User Management Tab */}
             <TabsContent value="users" className="space-y-6">
@@ -541,9 +547,6 @@ export default function AdminSettings() {
                 </CardContent>
               </Card>
 
-              {/* Members Section */}
-              <MembersManager allUsers={allUsers} />
-
               {/* Edit User Dialog */}
               <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                 <DialogContent className="max-w-2xl">
@@ -703,11 +706,6 @@ export default function AdminSettings() {
           {/* Support Room Tab */}
           <TabsContent value="support">
             <SupportRoomContent currentUser={currentUser} />
-          </TabsContent>
-
-          {/* Access Tags Tab */}
-          <TabsContent value="access-tags">
-            <AccessTagManager />
           </TabsContent>
 
           {/* Logos Tab */}

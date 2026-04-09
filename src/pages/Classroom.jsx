@@ -190,7 +190,7 @@ export default function Classroom() {
                             <BookOpen className="w-12 h-12 text-white/40" />
                           </div>
                         )}
-                        {course.isFeatured && (
+                        {course.isFeatured && !(paidCourseIds.includes(course.id) || isAdmin) && (
                           <div className="absolute top-3 left-3">
                             <Badge className="bg-amber-400 text-amber-900 border-0 text-xs font-semibold">
                               <Star className="w-3 h-3 mr-1" />
