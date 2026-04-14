@@ -123,6 +123,8 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     const loadUser = async () => {
+      const isAuthed = await base44.auth.isAuthenticated();
+      if (!isAuthed) return;
       const user = await base44.auth.me();
       setCurrentUser(user);
       const nameParts = (user.full_name || "").split(" ");
