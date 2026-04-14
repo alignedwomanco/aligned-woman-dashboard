@@ -584,9 +584,9 @@ RESPONSE REQUIREMENTS:
                     {/* Above the Fold - Always Visible */}
                     <div className="space-y-6">
                       {/* System Icons */}
-                      <div className="flex justify-center items-start gap-2 sm:gap-4 flex-wrap">
+                      <div className="grid grid-cols-5 gap-2 sm:gap-4 max-w-sm mx-auto">
                         {snapshotData.astrology?.sunSign && (
-                          <div className="flex flex-col items-center w-16 sm:w-20">
+                          <div className="flex flex-col items-center">
                             <motion.div 
                               className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                               animate={{ rotate: [0, 360] }}
@@ -597,7 +597,7 @@ RESPONSE REQUIREMENTS:
                             <p className="text-xs text-white/70 font-light text-center leading-tight">{snapshotData.astrology.sunSign}</p>
                           </div>
                         )}
-                        <div className="flex flex-col items-center w-16 sm:w-20">
+                        <div className="flex flex-col items-center">
                           <motion.div 
                             className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ rotate: [0, 360] }}
@@ -607,7 +607,7 @@ RESPONSE REQUIREMENTS:
                           </motion.div>
                           <p className="text-xs text-white/70 font-light text-center leading-tight">{snapshotData.humanDesign?.type || "Projector"}</p>
                         </div>
-                        <div className="flex flex-col items-center w-16 sm:w-20">
+                        <div className="flex flex-col items-center">
                           <motion.div 
                             className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ y: [0, -6, 0] }}
@@ -617,7 +617,7 @@ RESPONSE REQUIREMENTS:
                           </motion.div>
                           <p className="text-xs text-white/70 font-light text-center leading-tight">{snapshotData.cyclePhase}</p>
                         </div>
-                        <div className="flex flex-col items-center w-16 sm:w-20">
+                        <div className="flex flex-col items-center">
                           <motion.div 
                             className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ scale: [1, 1.15, 1] }}
@@ -627,7 +627,7 @@ RESPONSE REQUIREMENTS:
                           </motion.div>
                           <p className="text-xs text-white/70 font-light text-center leading-tight">{snapshotData.nervousSystemState}</p>
                         </div>
-                        <div className="flex flex-col items-center w-16 sm:w-20">
+                        <div className="flex flex-col items-center">
                           <motion.div 
                             className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ y: [0, -4, 0], opacity: [1, 0.8, 1] }}
