@@ -555,12 +555,12 @@ RESPONSE REQUIREMENTS:
                 </div>
 
                 {/* Focus Selector */}
-                <div className="flex items-center justify-center gap-2 mb-6 flex-wrap">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 flex-wrap px-2">
                   {["General", "Relationships", "Business", "Money", "Mindset", "Nervous System", "Astrology", "Human Design"].map((focus) => (
                     <button
                       key={focus}
                       onClick={() => setSelectedFocus(focus)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-light transition-all ${
+                      className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-light transition-all ${
                         selectedFocus === focus
                           ? "bg-white/20 text-white shadow-sm"
                           : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
@@ -584,11 +584,11 @@ RESPONSE REQUIREMENTS:
                     {/* Above the Fold - Always Visible */}
                     <div className="space-y-6">
                       {/* System Icons */}
-                      <div className="flex justify-center items-center gap-4">
+                      <div className="flex justify-center items-center gap-2 sm:gap-4 flex-wrap">
                         {snapshotData.astrology?.sunSign && (
                           <div className="text-center">
                             <motion.div 
-                              className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                              className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                               animate={{ rotate: [0, 360] }}
                               transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
                             >
@@ -599,7 +599,7 @@ RESPONSE REQUIREMENTS:
                         )}
                         <div className="text-center">
                           <motion.div 
-                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ rotate: [0, 360] }}
                             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                           >
@@ -609,7 +609,7 @@ RESPONSE REQUIREMENTS:
                         </div>
                         <div className="text-center">
                           <motion.div 
-                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ y: [0, -6, 0] }}
                             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                           >
@@ -619,7 +619,7 @@ RESPONSE REQUIREMENTS:
                         </div>
                         <div className="text-center">
                           <motion.div 
-                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ scale: [1, 1.15, 1] }}
                             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                           >
@@ -629,7 +629,7 @@ RESPONSE REQUIREMENTS:
                         </div>
                         <div className="text-center">
                           <motion.div 
-                            className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
+                            className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center mb-1.5 shadow-lg"
                             animate={{ y: [0, -4, 0], opacity: [1, 0.8, 1] }}
                             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                           >
@@ -640,12 +640,12 @@ RESPONSE REQUIREMENTS:
                       </div>
 
                       {/* Headline - ONE sentence */}
-                      <div className="text-center px-6">
-                        <h3 className="text-2xl font-light tracking-tight leading-relaxed">{snapshotData.guidingPhrase}</h3>
+                      <div className="text-center px-3 sm:px-6">
+                        <h3 className="text-xl sm:text-2xl font-light tracking-tight leading-relaxed">{snapshotData.guidingPhrase}</h3>
                       </div>
 
                       {/* Short Summary - 2-3 lines */}
-                      <div className="text-center px-8">
+                      <div className="text-center px-3 sm:px-8">
                         <p className="text-white/80 leading-relaxed text-sm font-light max-w-xl mx-auto">
                           {snapshotData.narrative.split('\n')[0]}
                         </p>
@@ -670,7 +670,7 @@ RESPONSE REQUIREMENTS:
                             exit={{ opacity: 0, height: 0 }}
                             className="max-h-64 overflow-y-auto scrollbar-hide"
                           >
-                            <div className="px-8 pb-4">
+                            <div className="px-3 sm:px-8 pb-4">
                               <p className="text-white/80 leading-relaxed whitespace-pre-line text-sm font-light">
                                 {snapshotData.narrative}
                               </p>
@@ -681,8 +681,8 @@ RESPONSE REQUIREMENTS:
                     )}
 
                     {/* Ask LaurAI - Integrated */}
-                    <div className="border-t border-white/10 pt-8 mt-8">
-                      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+                    <div className="border-t border-white/10 pt-6 sm:pt-8 mt-6 sm:mt-8">
+                      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-4 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
                         <div className="text-center mb-6">
                           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#943A59]/90 to-[#6E1D40]/90 flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <Sparkles className="w-6 h-6 text-white" strokeWidth={1.5} />
@@ -1018,18 +1018,18 @@ RESPONSE REQUIREMENTS:
                 </div>
 
                 <div>
-                  <div className="flex justify-center gap-4 text-xs mb-2">
+                  <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 text-xs mb-2">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-green-400/90" />
-                      <span className="text-gray-600 font-light">Regulated — calm or steady day</span>
+                      <div className="w-2 h-2 rounded-full bg-green-400/90 flex-shrink-0" />
+                      <span className="text-gray-600 font-light">Regulated</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-pink-400/90" />
-                      <span className="text-gray-600 font-light">Mild Stress — emotional or mental strain</span>
+                      <div className="w-2 h-2 rounded-full bg-pink-400/90 flex-shrink-0" />
+                      <span className="text-gray-600 font-light">Mild Stress</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-red-400/90" />
-                      <span className="text-gray-600 font-light">High Stress — overload, conflict, or depletion</span>
+                      <div className="w-2 h-2 rounded-full bg-red-400/90 flex-shrink-0" />
+                      <span className="text-gray-600 font-light">High Stress</span>
                     </div>
                   </div>
                   <p className="text-xs text-gray-400 text-center font-light">
@@ -1078,7 +1078,7 @@ RESPONSE REQUIREMENTS:
                   animate={{ x: 0, opacity: 1 }}
                   exit={{ x: 400, opacity: 0 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-white h-full w-full max-w-md shadow-2xl overflow-y-auto"
+                  className="bg-white h-full w-full sm:max-w-md shadow-2xl overflow-y-auto"
                 >
                   <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between z-10">
                     <div>

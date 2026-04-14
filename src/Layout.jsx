@@ -117,6 +117,37 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.logout();
   };
 
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [location.pathname]);
+
+  // Close mobile drawer on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setShowMobileMenu(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Close tools dropdown when sidebar collapses
+  useEffect(() => {
+    if (sidebarCollapsed) setShowToolsDropdown(false);
+  }, [sidebarCollapsed]);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [showMobileMenu]);
+
   // Public page layout with hamburger menu
   if (isPublicPage) {
     return (
@@ -330,37 +361,6 @@ export default function Layout({ children, currentPageName }) {
                 </div>);
 
             }
-
-  // Close mobile drawer on route change
-  useEffect(() => {
-    setShowMobileMenu(false);
-  }, [location.pathname]);
-
-  // Close mobile drawer on resize to desktop; reset collapsed tools on collapse
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setShowMobileMenu(false);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Close tools dropdown when sidebar collapses
-  useEffect(() => {
-    if (sidebarCollapsed) setShowToolsDropdown(false);
-  }, [sidebarCollapsed]);
-
-  // Lock body scroll when mobile drawer is open
-  useEffect(() => {
-    if (showMobileMenu) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [showMobileMenu]);
 
   const sidebarW = sidebarCollapsed ? "w-16" : "w-64";
   const contentML = sidebarCollapsed ? "lg:ml-16" : "lg:ml-64";
