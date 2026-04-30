@@ -46,6 +46,7 @@ import EducatorAnalyticsContent from "@/components/admin/EducatorAnalyticsConten
 import LogoManagement from "@/components/admin/LogoManagement";
 import MembersManager from "@/components/admin/MembersManager";
 import AccessTagManager from "@/components/admin/AccessTagManager";
+import WorkbookManagement from "@/components/admin/WorkbookManagement";
 
 export default function AdminSettings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -285,6 +286,7 @@ export default function AdminSettings() {
                   { value: "users", label: "Users", icon: "🛡️" },
                   { value: "courses", label: "Courses", icon: "📚" },
                   { value: "experts", label: "Experts", icon: "⭐" },
+                  { value: "workbooks", label: "Workbooks", icon: "📖" },
                   { value: "payments", label: "Payments", icon: "💳" },
                   { value: "analytics", label: "Analytics", icon: "📊" },
                 ].map((tab) => (
@@ -685,6 +687,11 @@ export default function AdminSettings() {
           {/* Experts Tab */}
           <TabsContent value="experts">
             <ExpertsManagementContent />
+          </TabsContent>
+
+          {/* Workbooks Tab */}
+          <TabsContent value="workbooks">
+            <WorkbookManagement />
           </TabsContent>
 
           {/* Payment Settings Tab */}
