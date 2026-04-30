@@ -1,0 +1,28 @@
+{
+  "name": "WorkbookResponse",
+  "type": "object",
+  "properties": {
+    "workbook_id": {
+      "type": "string",
+      "description": "Relationship \u2192 Workbook"
+    },
+    "answers": {
+      "type": "object",
+      "description": "User's answers, addressable by section_id and field_id. Default: {}",
+      "default": {}
+    },
+    "is_complete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has marked this workbook as complete"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when user marked complete"
+    }
+  },
+  "required": [
+    "workbook_id"
+  ]
+}

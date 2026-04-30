@@ -1,0 +1,62 @@
+{
+  "name": "Workbook",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Workbook title, e.g. 'The Hormones Workbook'"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Optional subtitle, e.g. 'Companion to the Hormones Module'"
+    },
+    "expert_id": {
+      "type": "string",
+      "description": "Relationship \u2192 Expert. One workbook belongs to one expert"
+    },
+    "course_id": {
+      "type": "string",
+      "description": "Relationship \u2192 Course. Workbook belongs to one course"
+    },
+    "schema": {
+      "type": "object",
+      "description": "Structured definition of sections and fields. Default: {}",
+      "default": {}
+    },
+    "blank_pdf_url": {
+      "type": "string",
+      "description": "URL to the original blank PDF for download"
+    },
+    "cover_image_url": {
+      "type": "string",
+      "description": "Thumbnail image URL for workbook cards"
+    },
+    "intro_text": {
+      "type": "string",
+      "description": "How to use this workbook intro text"
+    },
+    "closing_text": {
+      "type": "string",
+      "description": "Closing note shown on completion"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft",
+      "description": "Publication status"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Display order when listed alongside expert's modules"
+    }
+  },
+  "required": [
+    "title",
+    "expert_id",
+    "course_id"
+  ]
+}
