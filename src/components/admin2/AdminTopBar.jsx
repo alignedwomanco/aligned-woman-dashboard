@@ -23,7 +23,7 @@ export default function AdminTopBar({ user, activeTab }) {
   const { title, subtitle } = TAB_TITLES[activeTab] || TAB_TITLES.overview;
 
   return (
-    <header className="bg-white border-b border-[#F0E8E4] px-6 lg:px-10 py-5 flex items-start justify-between gap-4">
+    <header className="bg-white border-b border-gray-100 px-6 lg:px-10 py-5 flex items-start justify-between gap-4">
       <div>
         <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.2em", color: "#C4866C", marginBottom: 4, fontFamily: "Montserrat, sans-serif" }}>
           TODAY · {dateStr}

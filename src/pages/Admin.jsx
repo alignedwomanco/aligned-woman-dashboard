@@ -57,9 +57,9 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex" style={{ fontFamily: "Montserrat, sans-serif" }}>
+    <div className="min-h-screen flex" style={{ fontFamily: "Montserrat, sans-serif", background: "#FAFAFA" }}>
       <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} />
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-60">
         <AdminTopBar user={user} activeTab={activeTab} />
         <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
           {TAB_COMPONENTS[activeTab] || <OverviewTab />}
