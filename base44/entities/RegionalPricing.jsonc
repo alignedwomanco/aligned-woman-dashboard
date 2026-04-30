@@ -7,8 +7,11 @@
       "description": "Region display name (e.g. South Africa)"
     },
     "country_codes": {
-      "type": "string",
-      "description": "Comma-separated ISO country codes (e.g. ZA,ZW)"
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "ISO country codes for this region (e.g. [ZA, ZW])"
     },
     "currency_code": {
       "type": "string",
@@ -21,6 +24,10 @@
     "price_full": {
       "type": "number",
       "description": "Full programme price"
+    },
+    "display_price": {
+      "type": "string",
+      "description": "Formatted display price (e.g. R19,700)"
     },
     "price_payment_plan": {
       "type": "number",

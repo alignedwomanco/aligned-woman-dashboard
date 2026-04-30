@@ -31,7 +31,9 @@ export function useGeoPrice() {
         let matched = null;
         if (cc) {
           matched = pricingList.find((p) => {
-            const codes = (p.country_codes || "").split(",").map((c) => c.trim().toUpperCase());
+            const codes = Array.isArray(p.country_codes)
+              ? p.country_codes.map((c) => c.trim().toUpperCase())
+              : (p.country_codes || "").split(",").map((c) => c.trim().toUpperCase());
             return codes.includes(cc.toUpperCase());
           });
         }

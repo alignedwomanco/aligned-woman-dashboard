@@ -52,7 +52,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login";
+  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete";
 
   // Dashboard has its own layout — render children directly
   const isDashboardPage = currentPageName === "Dashboard";
@@ -280,10 +280,10 @@ export default function Layout({ children, currentPageName }) {
                     </>
                 }
                   <ul className="space-y-2">
-                    {publicPages.map((item) =>
+                    {publicPages.filter(item => !["about-us", "blueprint", "CheckoutComplete"].includes(item.name)).map((item) =>
                   <li key={item.name}>
                         <Link
-                      to={createPageUrl(item.name)}
+                      to={item.href || createPageUrl(item.name)}
                       onClick={() => setShowMobileMenu(false)}
                       className="block px-4 py-3 text-gray-700 hover:bg-[#F5E8EE] hover:text-[#6E1D40] rounded-lg transition-colors font-medium">
 
@@ -291,6 +291,9 @@ export default function Layout({ children, currentPageName }) {
                         </Link>
                       </li>
                   )}
+                    <li>
+                      <a href="/about-us" onClick={() => setShowMobileMenu(false)} className="block px-4 py-3 text-gray-700 hover:bg-[#F5E8EE] hover:text-[#6E1D40] rounded-lg transition-colors font-medium">About Us</a>
+                    </li>
                   </ul>
                 </nav>
 
@@ -334,13 +337,10 @@ export default function Layout({ children, currentPageName }) {
               <div>
                 <h4 className="font-semibold mb-4 text-rose-accent">Navigate</h4>
                 <ul className="space-y-2">
-                  {publicPages.slice(0, 4).map((item) =>
-                  <li key={item.name}>
-                      <Link to={createPageUrl(item.name)} className="text-white/70 hover:text-white transition-colors text-sm">
-                        {item.label}
-                      </Link>
-                    </li>
-                  )}
+                  <li><a href="/" className="text-white/70 hover:text-white transition-colors text-sm">Home</a></li>
+                  <li><a href="/blueprint" className="text-white/70 hover:text-white transition-colors text-sm">Blueprint</a></li>
+                  <li><a href="/about-us" className="text-white/70 hover:text-white transition-colors text-sm">About Us</a></li>
+                  <li><Link to={createPageUrl("Contact")} className="text-white/70 hover:text-white transition-colors text-sm">Contact</Link></li>
                 </ul>
               </div>
               <div>
