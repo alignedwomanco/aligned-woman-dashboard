@@ -175,25 +175,34 @@ export default function Layout({ children, currentPageName }) {
 
         <div className={`fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-3 transition-all duration-300 ${isLandingPage ? "bg-transparent" : "bg-white/95 backdrop-blur-sm shadow-sm"}`}>
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <Link to="/" className="flex-shrink-0">
-              <img
-                src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
-                alt="The Aligned Woman"
-                className={`object-contain w-auto ${isLandingPage ? "brightness-0 invert" : ""}`}
-                style={{ height: '35px' }}
-              />
+            <Link to="/" className="flex-shrink-0 hover:opacity-80 transition-opacity">
+              {isLandingPage ? (
+                <img
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693c1af736e30d6ce22780c4/99e446771_AWBlogo.png"
+                  alt="The Aligned Woman Blueprint"
+                  className="object-contain w-auto drop-shadow-xl"
+                  style={{ height: '52px' }}
+                />
+              ) : (
+                <img
+                  src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                  alt="The Aligned Woman"
+                  className="object-contain w-auto"
+                  style={{ height: '35px' }}
+                />
+              )}
             </Link>
 
             <div className="flex items-center gap-3 flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className={`flex items-center gap-2 p-1 rounded-lg transition-colors ${isLandingPage ? "hover:bg-white/10" : "hover:bg-gray-100"}`}>
-                    <div className={`w-10 h-10 rounded-full border-2 overflow-hidden ${isLandingPage ? "border-white/30" : "border-[#DEBECC]"}`}>
+                  <button className="flex items-center p-1 rounded-full transition-colors hover:opacity-80">
+                    <div className={`w-9 h-9 rounded-full border overflow-hidden ${isLandingPage ? "border-white/20" : "border-[#DEBECC]"}`}>
                       {isAuthenticated && user?.profile_picture ? (
                         <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-[#F5E8EE] flex items-center justify-center">
-                          <User className="w-5 h-5 text-[#6E1D40]" />
+                        <div className={`w-full h-full flex items-center justify-center ${isLandingPage ? "bg-white/10" : "bg-[#F5E8EE]"}`}>
+                          <User className={`w-4 h-4 ${isLandingPage ? "text-white/70" : "text-[#6E1D40]"}`} />
                         </div>
                       )}
                     </div>
@@ -228,12 +237,28 @@ export default function Layout({ children, currentPageName }) {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+              {/* Pill circular hamburger — matches reference site */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="p-2 rounded-lg transition-colors hover:bg-white/10">
-                <svg className={`w-5 h-5 ${isLandingPage ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12h18M3 6h18M3 18h18" />
-                </svg>
+                aria-label="Open menu"
+                style={{
+                  width: 44,
+                  height: 44,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  background: "rgba(255,255,255,0.08)",
+                  border: `1px solid ${isLandingPage ? "rgba(255,255,255,0.15)" : "rgba(107,27,61,0.2)"}`,
+                  borderRadius: "100px",
+                  cursor: "pointer",
+                  transition: "0.3s",
+                }}
+              >
+                <span style={{ width: 18, height: 2, background: isLandingPage ? "rgb(196,132,122)" : "rgb(107,27,61)", transition: "0.3s", borderRadius: 2 }} />
+                <span style={{ width: 18, height: 2, background: isLandingPage ? "rgb(196,132,122)" : "rgb(107,27,61)", transition: "0.3s", borderRadius: 2 }} />
+                <span style={{ width: 18, height: 2, background: isLandingPage ? "rgb(196,132,122)" : "rgb(107,27,61)", transition: "0.3s", borderRadius: 2 }} />
               </button>
             </div>
           </div>
