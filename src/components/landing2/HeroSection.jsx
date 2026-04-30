@@ -112,17 +112,17 @@ export default function HeroSection({ onWaitlist }) {
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
           <Link
             to="/blueprint"
-            className="w-full inline-flex items-center justify-center px-8 py-4 font-bold text-xs tracking-[0.2em] uppercase rounded-full transition-all hover:opacity-90 hover:-translate-y-0.5"
+            className="inline-flex items-center justify-center px-8 py-4 font-bold text-xs tracking-[0.2em] uppercase rounded-full transition-all hover:opacity-90 hover:-translate-y-0.5 whitespace-nowrap"
             style={{ background: "#C4866C", color: "#fff" }}
           >
             Begin Your Blueprint +
           </Link>
           <button
             onClick={scrollToExplore}
-            className="w-full inline-flex items-center justify-center px-8 py-3.5 font-bold text-xs tracking-[0.2em] uppercase rounded-full border text-white transition-all hover:bg-white/10"
+            className="inline-flex items-center justify-center px-8 py-3.5 font-bold text-xs tracking-[0.2em] uppercase rounded-full border text-white transition-all hover:bg-white/10 whitespace-nowrap"
             style={{ borderColor: "rgba(255,255,255,0.35)" }}
           >
             Explore The Programme
