@@ -7,14 +7,19 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import {
-  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function WorkbookList({ onNew, onEdit }) {
+  const queryClient = useQueryClient();
+
   const { data: workbooks = [], isLoading } = useQuery({
     queryKey: ["adminWorkbooks"],
     queryFn: () => base44.entities.Workbook.list("order"),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id) => base44.entities.Workbook.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["adminWorkbooks"] }),
   });
 
   const { data: experts = [] } = useQuery({
@@ -116,20 +121,9 @@ export default function WorkbookList({ onNew, onEdit }) {
                       <Button variant="ghost" size="sm" onClick={() => onEdit(wb)} className="h-8 w-8 p-0">
                         <Edit className="w-4 h-4 text-blue-600" />
                       </Button>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button variant="ghost" size="sm" disabled className="h-8 w-8 p-0 opacity-40 cursor-not-allowed">
-                                <Trash2 className="w-4 h-4 text-red-500" />
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="left">
-                            <p className="text-xs">Delete is not yet supported. Use draft status as soft-delete.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Delete "${wb.title}"?`)) deleteMut.mutate(wb.id); }} className="h-8 w-8 p-0">
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
