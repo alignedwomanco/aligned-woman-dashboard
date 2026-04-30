@@ -74,7 +74,7 @@ export default function CtaRowField({ field, sections, onJumpToSection }) {
 
   return (
     <>
-      <div id={scopeId} className={`flex flex-wrap ${justifyClass}`} style={{ gap: 12 }}>
+      <div id={scopeId} data-field-type="cta_row" className={`flex flex-wrap ${justifyClass}`} style={{ gap: 12 }}>
         {field.buttons?.map((btn, idx) => (
           <button
             key={idx}

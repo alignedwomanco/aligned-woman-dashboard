@@ -217,8 +217,6 @@ export default function WorkbookViewer() {
     );
   }
 
-  const current = sections[activeSection] || null;
-
   return (
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
       {/* Sidebar */}
@@ -245,19 +243,24 @@ export default function WorkbookViewer() {
           onOpenDrawer={() => setDrawerOpen(true)}
         />
 
-        {/* Content area */}
+        {/* Content area — all sections in DOM; only active visible on screen */}
         <div className="flex-1" ref={contentRef}>
-          <div className="wb-page" style={{ maxWidth: 720, margin: "0 auto", padding: "56px 40px 80px" }}>
-            {current && (
-              <WorkbookSectionContent
-                section={current}
-                answers={answers}
-                onAnswerChange={handleAnswerChange}
-                sections={sections}
-                onJumpToSection={jumpTo}
-              />
-            )}
-          </div>
+          {sections.map((section, idx) => (
+            <div
+              key={section.id}
+              className={`wb-section-block ${idx === activeSection ? "wb-section-active" : "wb-section-inactive"}`}
+            >
+              <div className="wb-page" style={{ maxWidth: 720, margin: "0 auto", padding: "56px 40px 80px" }}>
+                <WorkbookSectionContent
+                  section={section}
+                  answers={answers}
+                  onAnswerChange={handleAnswerChange}
+                  sections={sections}
+                  onJumpToSection={jumpTo}
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Bottom bar */}
@@ -269,13 +272,58 @@ export default function WorkbookViewer() {
         />
       </div>
 
-      {/* Responsive layout */}
+      {/* Responsive layout + Print styles */}
       <style>{`
         @media (min-width: 1025px) {
           .wb-main-col { margin-left: 320px; }
         }
         @media (max-width: 720px) {
           .wb-page { padding: 32px 22px 60px !important; }
+        }
+
+        /* Screen: only active section visible */
+        .wb-section-inactive { display: none; }
+        .wb-section-active   { display: block; }
+
+        /* ── Print styles ── */
+        @media print {
+          /* Show all sections */
+          .wb-section-inactive { display: block !important; }
+          .wb-section-active   { display: block !important; }
+
+          /* Page break before each section (except the first) */
+          .wb-section-block + .wb-section-block { break-before: page; }
+
+          /* Hide interactive chrome */
+          .wb-sidebar-desktop,
+          .wb-scrim,
+          .wb-topbar,
+          .wb-bottombar,
+          [data-wb-topbar],
+          [data-wb-bottombar] { display: none !important; }
+
+          /* Hide cta_row buttons (START NOW / DOWNLOAD PDF) */
+          [data-field-type="cta_row"] { display: none !important; }
+
+          /* Remove fixed/sticky positioning, sidebar offset */
+          .wb-main-col {
+            margin-left: 0 !important;
+            min-height: auto !important;
+          }
+          .wb-shell {
+            min-height: auto !important;
+            background: white !important;
+          }
+
+          /* Reset page padding for clean print */
+          .wb-page {
+            max-width: 100% !important;
+            padding: 40px 32px !important;
+            margin: 0 !important;
+          }
+
+          /* Ensure brand typography prints */
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}</style>
     </div>

@@ -25,7 +25,7 @@ export default function WorkbookTopBar({
     : "Auto-saving";
 
   return (
-    <div className="wb-topbar sticky top-0 z-30" style={{ borderBottom: "1px solid var(--aw-border-light)" }}>
+    <div className="wb-topbar sticky top-0 z-30" data-wb-topbar style={{ borderBottom: "1px solid var(--aw-border-light)" }}>
       <div style={{ padding: "14px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}
            className="wb-topbar-inner">
         {/* Left: hamburger (mobile only) + position text */}

@@ -33,7 +33,7 @@ export default function WorkbookBottomBar({
   };
 
   return (
-    <div className="wb-bottombar sticky bottom-0 z-20" style={{ borderTop: "1px solid var(--aw-border-light)" }}>
+    <div className="wb-bottombar sticky bottom-0 z-20" data-wb-bottombar style={{ borderTop: "1px solid var(--aw-border-light)" }}>
       <div className="wb-bottombar-inner" style={{ maxWidth: 720, margin: "0 auto", padding: "14px 40px", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
         {/* Previous */}
         <div className="flex justify-start">
