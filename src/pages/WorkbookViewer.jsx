@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ export default function WorkbookViewer() {
   const workbookId = params.get("id");
 
   const [activeSection, setActiveSection] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [responseId, setResponseId] = useState(null);
+  const saveTimer = useRef(null);
 
   // Fetch workbook
   const { data: workbook, isLoading } = useQuery({
@@ -44,6 +47,39 @@ export default function WorkbookViewer() {
   // Unlock check (skipped for admins)
   const { isUnlocked: rawUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
   const isUnlocked = isAdmin || rawUnlocked;
+
+  // Load existing WorkbookResponse
+  useEffect(() => {
+    if (!workbookId) return;
+    base44.entities.WorkbookResponse.filter({ workbook_id: workbookId }, "-created_date", 1)
+      .then(responses => {
+        if (responses?.length > 0) {
+          setResponseId(responses[0].id);
+          setAnswers(responses[0].answers || {});
+        }
+      }).catch(() => {});
+  }, [workbookId]);
+
+  // Autosave answers
+  const persistAnswers = useCallback((updated) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      if (responseId) {
+        await base44.entities.WorkbookResponse.update(responseId, { answers: updated });
+      } else {
+        const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, answers: updated });
+        setResponseId(created.id);
+      }
+    }, 800);
+  }, [responseId, workbookId]);
+
+  const handleAnswerChange = useCallback((fieldId, value) => {
+    setAnswers(prev => {
+      const updated = { ...prev, [fieldId]: value };
+      persistAnswers(updated);
+      return updated;
+    });
+  }, [persistAnswers]);
 
   // Parse sections from schema
   const sections = useMemo(() => {
@@ -182,7 +218,7 @@ export default function WorkbookViewer() {
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          {current && <WorkbookSectionContent section={current} />}
+          {current && <WorkbookSectionContent section={current} answers={answers} onAnswerChange={handleAnswerChange} />}
 
           {/* Bottom navigation */}
           <div className="flex items-center justify-between mt-12 pt-6 border-t border-gray-200">

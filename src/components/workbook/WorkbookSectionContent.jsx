@@ -1,7 +1,7 @@
 import React from "react";
 import WorkbookFieldRenderer from "./WorkbookFieldRenderer";
 
-export default function WorkbookSectionContent({ section }) {
+export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange }) {
   if (!section) return null;
 
   return (
@@ -24,7 +24,13 @@ export default function WorkbookSectionContent({ section }) {
 
       {/* Fields */}
       {section.fields?.map((field) => (
-        <WorkbookFieldRenderer key={field.id} field={field} />
+        <WorkbookFieldRenderer
+          key={field.id}
+          field={field}
+          answers={answers}
+          onAnswerChange={onAnswerChange}
+          sectionFields={section.fields}
+        />
       ))}
     </div>
   );
