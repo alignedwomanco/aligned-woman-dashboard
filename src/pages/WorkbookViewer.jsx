@@ -31,6 +31,7 @@ export default function WorkbookViewer() {
       return items[0] || null;
     },
     enabled: !!workbookId,
+    initialData: undefined,
   });
 
   // Fetch expert
@@ -177,8 +178,18 @@ export default function WorkbookViewer() {
     return () => document.removeEventListener("keydown", handler);
   }, [sections.length]);
 
-  // Loading
-  if (isLoading || isCheckingUnlock || !adminCheckDone || !responseLoaded) {
+  // If no workbook ID in URL, show error immediately
+  if (!workbookId) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3", color: "var(--aw-mid-grey)" }}>
+        <p>No workbook selected. Please go back and choose a workbook.</p>
+      </div>
+    );
+  }
+
+  // Loading — only wait for unlock/admin/response after workbook has loaded
+  const stillLoading = isLoading || (!workbook && !!workbookId) || isCheckingUnlock || !adminCheckDone || !responseLoaded;
+  if (stillLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#4A0E2E" }} />
