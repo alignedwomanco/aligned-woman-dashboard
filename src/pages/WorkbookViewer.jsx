@@ -11,7 +11,7 @@ import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent
 
 export default function WorkbookViewer() {
   const params = new URLSearchParams(window.location.search);
-  const workbookId = params.get("id");
+  const workbookId = params.get("id") || "69f33599d88c56b89b9545a8";
 
   const [activeSection, setActiveSection] = useState(0);
   const [answers, setAnswers] = useState({});
