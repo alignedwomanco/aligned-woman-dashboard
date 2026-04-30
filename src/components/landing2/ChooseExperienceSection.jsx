@@ -7,100 +7,197 @@ const EXPERIENCES = [
     label: "The Blueprint",
     heading: "Education",
     sub: "for unlearning",
-    desc: "A 12-week self-paced programme designed to give you the foundational knowledge no one ever taught you — about your body, mind, money, and identity.",
+    desc: "Evidence-informed learning designed to help women unlearn outdated narratives and rebuild from the inside out.",
     meta: "12 Weeks • Self-Paced",
     cta: "Read →",
     href: "/blueprint",
-    soon: false,
+    dark: true,
   },
   {
     num: "02",
     label: "The Salon",
     heading: "Conversation",
     sub: "beyond the soundbite",
-    desc: "Monthly live conversations with leading women and experts — exploring the ideas that shape how we live, lead, and relate. Available live and in archive.",
+    desc: "Long-form dialogue with experts, authors and practitioners. No sound-bites. No guru-speak. Just the work.",
     meta: "Monthly • Live + Archive",
     cta: "Read →",
     href: "/blueprint",
-    soon: false,
+    dark: false,
   },
   {
     num: "03",
     label: "The Gatherings",
     heading: "Experience",
     sub: "off the screen",
-    desc: "In-person events, retreats, and gatherings held globally. Designed for women ready to meet their community in real life and create lasting transformation.",
+    desc: "Retreats, supper clubs and intimate workshops. Connection that only happens in person, in real time.",
     meta: "4+ A Year • Global",
     cta: "Coming Soon",
     href: null,
-    soon: true,
+    dark: false,
+    italic: true,
   },
 ];
 
 export default function ChooseExperienceSection() {
   return (
-    <section id="experience" className="py-28 px-4" style={{ background: "#F5E6E0" }}>
-      <div className="max-w-7xl mx-auto">
+    <section id="experience" style={{ background: "#F5E6E0", padding: "clamp(72px,8vw,128px) clamp(20px,5vw,60px)" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+
         {/* Label */}
-        <p className="text-center text-xs font-bold tracking-[0.3em] uppercase mb-8" style={{ color: "#6B1B3D" }}>
+        <p style={{
+          textAlign: "center",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.28em",
+          textTransform: "uppercase",
+          color: "rgba(107,27,61,0.55)",
+          marginBottom: 32,
+        }}>
           Choose Your Aligned Experience
         </p>
 
         {/* Headline */}
-        <div className="text-center mb-6">
-          <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.15 }}>
-            <span className="font-bold" style={{ color: "#6B1B3D" }}>An expert-led education programme</span>
-            <br />
-            <span className="italic font-normal" style={{ color: "#C4866C" }}>for women navigating modern life.</span>
-          </h2>
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <div style={{
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontWeight: 700,
+            fontSize: "clamp(32px,5vw,58px)",
+            color: "#3a0d22",
+            lineHeight: 1.15,
+          }}>
+            An expert-led education programme
+          </div>
+          <div style={{
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontStyle: "italic",
+            fontWeight: 400,
+            fontSize: "clamp(28px,4.5vw,52px)",
+            color: "#C4847A",
+            lineHeight: 1.2,
+            marginTop: 4,
+          }}>
+            for women navigating modern life.
+          </div>
         </div>
 
-        <p className="text-center text-gray-600 max-w-2xl mx-auto mb-16 leading-relaxed">
+        {/* Subtitle */}
+        <p style={{
+          textAlign: "center",
+          fontSize: 14,
+          fontWeight: 300,
+          lineHeight: 1.8,
+          color: "#666",
+          maxWidth: 600,
+          margin: "0 auto",
+          marginBottom: "clamp(36px,5vw,56px)",
+        }}>
           Three distinct rooms. One coherent philosophy. Pick where you need to start — or walk through all three.
         </p>
 
         {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "clamp(16px,3vw,28px)",
+          alignItems: "stretch",
+        }}>
           {EXPERIENCES.map((exp) => (
             <div
               key={exp.num}
-              className="p-8 flex flex-col"
-              style={{ background: "#fdf6f2", border: "1px solid rgba(107,27,61,0.12)" }}
+              style={{
+                borderRadius: 8,
+                background: exp.dark ? "#6B1B3D" : "#fdf6f2",
+                border: exp.dark ? "none" : "1px solid rgba(107,27,61,0.1)",
+                borderTop: exp.dark ? "3px solid #C4847A" : "3px solid rgba(107,27,61,0.18)",
+                padding: "36px 32px 32px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 0,
+              }}
             >
-              <span className="font-bold text-sm mb-4" style={{ color: "#C4866C" }}>{exp.num}</span>
-              <p className="text-xs font-bold tracking-[0.25em] uppercase mb-3" style={{ color: "#6B1B3D" }}>
-                {exp.label}
-              </p>
-              <h3 className="font-bold mb-1" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "2rem", color: "#1a0510", lineHeight: 1.1 }}>
+              {/* Number + Label row */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#C4847A" }}>{exp.num}</span>
+                <span style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: exp.dark ? "rgba(255,255,255,0.7)" : "rgba(107,27,61,0.6)",
+                }}>
+                  {exp.label}
+                </span>
+              </div>
+
+              {/* Heading */}
+              <div style={{
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontWeight: exp.italic ? 400 : 700,
+                fontStyle: exp.italic ? "italic" : "normal",
+                fontSize: "clamp(28px,3.5vw,40px)",
+                color: exp.dark ? "#fff" : "#3a0d22",
+                lineHeight: 1.1,
+                marginBottom: 6,
+              }}>
                 {exp.heading}
-              </h3>
-              <p className="italic mb-5 text-lg" style={{ color: "#C4866C", fontFamily: "'DM Serif Display', Georgia, serif" }}>
+              </div>
+
+              {/* Sub */}
+              <div style={{
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontStyle: "italic",
+                fontSize: "clamp(15px,2vw,19px)",
+                color: exp.dark ? "#C4847A" : "#7a4a4a",
+                marginBottom: 20,
+              }}>
                 {exp.sub}
+              </div>
+
+              {/* Body */}
+              <p style={{
+                fontSize: 14,
+                fontWeight: 300,
+                lineHeight: 1.75,
+                color: exp.dark ? "rgba(255,255,255,0.65)" : "#555",
+                flex: 1,
+                marginBottom: 24,
+              }}>
+                {exp.desc}
               </p>
-              <p className="text-gray-500 text-sm leading-relaxed flex-1 mb-6">{exp.desc}</p>
-              <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: "#6B1B3D" }}>
+
+              {/* Meta */}
+              <p style={{
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: exp.dark ? "rgba(255,255,255,0.4)" : "rgba(107,27,61,0.45)",
+                marginBottom: 14,
+              }}>
                 {exp.meta}
               </p>
-              {exp.soon ? (
-                <span className="text-sm font-semibold" style={{ color: "#C4866C" }}>{exp.cta}</span>
-              ) : (
-                <Link to={exp.href} className="text-sm font-bold hover:underline" style={{ color: "#6B1B3D" }}>
+
+              {/* CTA */}
+              {exp.href ? (
+                <Link to={exp.href} style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: exp.dark ? "#C4847A" : "#6B1B3D",
+                  textDecoration: "none",
+                }}>
                   {exp.cta}
                 </Link>
+              ) : (
+                <span style={{
+                  fontSize: 13,
+                  fontStyle: "italic",
+                  color: exp.dark ? "rgba(196,132,122,0.7)" : "#6B1B3D",
+                }}>
+                  {exp.cta}
+                </span>
               )}
             </div>
           ))}
-        </div>
-
-        {/* Full-width CTA */}
-        <div className="text-center">
-          <Link
-            to="/blueprint"
-            className="inline-block w-full md:w-auto px-12 py-5 font-bold text-sm tracking-[0.2em] uppercase text-white transition-all hover:opacity-90 hover:-translate-y-0.5"
-            style={{ background: "#6B1B3D", display: "block" }}
-          >
-            Sign Up For The Aligned Woman Blueprint →
-          </Link>
         </div>
       </div>
     </section>
