@@ -2,50 +2,32 @@
   "name": "WaitlistSignup",
   "type": "object",
   "properties": {
-    "full_name": {
-      "type": "string"
-    },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email address"
     },
-    "age_range": {
-      "type": "string"
+    "first_name": {
+      "type": "string",
+      "description": "First name"
     },
-    "life_stage": {
-      "type": "string"
+    "last_name": {
+      "type": "string",
+      "description": "Last name"
     },
-    "work_study_status": {
-      "type": "string"
+    "country": {
+      "type": "string",
+      "description": "Detected country code"
     },
-    "instagram_handle": {
-      "type": "string"
-    },
-    "consent": {
-      "type": "boolean",
-      "default": false
-    },
-    "marketing_opt_in": {
-      "type": "boolean",
-      "default": false
-    },
-    "auth_provider": {
-      "type": "string"
+    "affiliate_code": {
+      "type": "string",
+      "description": "Affiliate tracking code from ?aff= parameter"
     },
     "source_page": {
-      "type": "string"
-    },
-    "utm_source": {
-      "type": "string"
-    },
-    "utm_medium": {
-      "type": "string"
-    },
-    "utm_campaign": {
-      "type": "string"
+      "type": "string",
+      "description": "Page where signup occurred"
     }
   },
   "required": [
-    "full_name",
     "email"
   ]
 }

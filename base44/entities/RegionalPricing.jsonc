@@ -4,65 +4,63 @@
   "properties": {
     "region_name": {
       "type": "string",
-      "description": "e.g. South Africa, UK, International"
+      "description": "Region display name (e.g. South Africa)"
     },
     "country_codes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "ISO country codes for this region"
+      "type": "string",
+      "description": "Comma-separated ISO country codes (e.g. ZA,ZW)"
     },
     "currency_code": {
       "type": "string",
-      "description": "e.g. ZAR, GBP, USD"
+      "description": "ISO currency code (e.g. ZAR, USD)"
     },
     "currency_symbol": {
       "type": "string",
-      "description": "e.g. R, \u00a3, $"
+      "description": "Currency symbol (e.g. R, $)"
     },
-    "display_price": {
+    "price_full": {
       "type": "number",
-      "description": "Price shown to user"
+      "description": "Full programme price"
     },
-    "course_value": {
+    "price_payment_plan": {
       "type": "number",
-      "description": "Original/full value for display"
+      "description": "Monthly instalment amount"
     },
-    "stripe_price_id": {
-      "type": "string",
-      "description": "Stripe Price ID for this region"
+    "payment_plan_months": {
+      "type": "integer",
+      "description": "Number of payment plan months"
     },
-    "checkout_link": {
-      "type": "string",
-      "description": "Direct checkout link (PayFast or Stripe Payment Link)"
-    },
-    "success_url": {
-      "type": "string",
-      "description": "Redirect URL after successful payment"
-    },
-    "payment_provider": {
+    "payment_gateway": {
       "type": "string",
       "enum": [
         "stripe",
-        "payfast",
-        "link"
+        "payfast"
       ],
-      "default": "stripe"
+      "description": "Payment gateway to use for this region"
+    },
+    "stripe_price_id": {
+      "type": "string",
+      "description": "Stripe Price ID for full payment"
+    },
+    "stripe_plan_price_id": {
+      "type": "string",
+      "description": "Stripe Price ID for payment plan"
+    },
+    "payfast_item_name": {
+      "type": "string",
+      "description": "PayFast item name"
     },
     "is_active": {
       "type": "boolean",
-      "default": true
-    },
-    "sort_order": {
-      "type": "number",
-      "default": 0
+      "default": true,
+      "description": "Whether this pricing is active"
     }
   },
   "required": [
     "region_name",
     "currency_code",
-    "display_price",
-    "payment_provider"
+    "currency_symbol",
+    "price_full",
+    "payment_gateway"
   ]
 }

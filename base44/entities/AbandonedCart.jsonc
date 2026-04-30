@@ -3,64 +3,47 @@
   "type": "object",
   "properties": {
     "email": {
-      "type": "string"
-    },
-    "full_name": {
-      "type": "string"
-    },
-    "region": {
-      "type": "string"
-    },
-    "source_page": {
-      "type": "string"
-    },
-    "payment_provider": {
       "type": "string",
-      "enum": [
-        "stripe",
-        "payfast",
-        "link"
-      ]
+      "description": "Shopper email"
+    },
+    "first_name": {
+      "type": "string",
+      "description": "First name"
     },
     "purchase_type": {
       "type": "string",
       "enum": [
-        "self",
-        "friend",
-        "daughter",
-        "bulk",
-        "charity"
-      ]
+        "SELF",
+        "FRIEND",
+        "DAUGHTER",
+        "CHARITY"
+      ],
+      "description": "Who the purchase is for"
     },
-    "age_range": {
-      "type": "string"
+    "selected_plan": {
+      "type": "string",
+      "description": "full or payment_plan"
     },
-    "life_stage": {
-      "type": "string"
+    "region": {
+      "type": "string",
+      "description": "Region code"
     },
-    "work_study_status": {
-      "type": "string"
+    "currency": {
+      "type": "string",
+      "description": "Currency code"
     },
-    "instagram_handle": {
-      "type": "string"
+    "price": {
+      "type": "number",
+      "description": "Price shown at abandonment"
     },
-    "marketing_opt_in": {
+    "affiliate_code": {
+      "type": "string",
+      "description": "Affiliate tracking code"
+    },
+    "recovered": {
       "type": "boolean",
-      "default": false
-    },
-    "discount_code": {
-      "type": "string"
-    },
-    "email_sent": {
-      "type": "boolean",
-      "default": false
-    },
-    "converted": {
-      "type": "boolean",
-      "default": false
-    },
-    "notes": {
-      "type": "string"
+      "default": false,
+      "description": "Whether cart was recovered"
     }
   },
   "required": [

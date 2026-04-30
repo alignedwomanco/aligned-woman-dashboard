@@ -1,0 +1,66 @@
+{
+  "name": "Application",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "country_city": {
+      "type": "string"
+    },
+    "instagram_handle": {
+      "type": "string"
+    },
+    "age_range": {
+      "type": "string",
+      "enum": [
+        "18-24",
+        "25-30",
+        "31-35",
+        "36-40",
+        "41-45",
+        "46-50",
+        "50+"
+      ]
+    },
+    "primary_focus": {
+      "type": "string"
+    },
+    "understands_paid_programme": {
+      "type": "boolean",
+      "default": false
+    },
+    "acknowledges_price": {
+      "type": "boolean",
+      "default": false
+    },
+    "payment_preference": {
+      "type": "string",
+      "enum": [
+        "full",
+        "instalment",
+        "not_sure"
+      ]
+    },
+    "confirms_reservation": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "full_name",
+    "email"
+  ]
+}

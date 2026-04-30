@@ -1,0 +1,54 @@
+{
+  "name": "ContactSubmission",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "apply_programme",
+        "apply_expert",
+        "corporate_di",
+        "brand_collab",
+        "press",
+        "general",
+        "newsletter"
+      ],
+      "description": "Type of contact submission"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "extra_field_label": {
+      "type": "string"
+    },
+    "extra_field_value": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "responded"
+      ],
+      "default": "new"
+    }
+  },
+  "required": [
+    "type",
+    "first_name",
+    "email"
+  ]
+}

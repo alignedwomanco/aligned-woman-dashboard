@@ -23,7 +23,10 @@ const publicPages = [
 { name: "ALIVEMethod", label: "ALIVE Method" },
 { name: "Experts", label: "Experts" },
 { name: "Apply", label: "Join" },
-{ name: "Contact", label: "Contact" }];
+{ name: "Contact", label: "Contact" },
+{ name: "about-us", label: "About Us", href: "/about-us" },
+{ name: "blueprint", label: "Blueprint", href: "/blueprint" },
+{ name: "CheckoutComplete", label: "Checkout" }];
 
 
 const appNavigation = [

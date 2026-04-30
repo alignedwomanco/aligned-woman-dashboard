@@ -1,0 +1,57 @@
+{
+  "name": "BlogPost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Blog post title"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly slug"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Awareness",
+        "Liberation",
+        "Intention",
+        "Vision",
+        "Embodiment",
+        "Power & Money"
+      ],
+      "description": "ALIVE method category"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Short summary for listings"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full blog post content (markdown/HTML)"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Cover image URL"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "live",
+        "coming_soon"
+      ],
+      "default": "coming_soon",
+      "description": "Publication status"
+    }
+  },
+  "required": [
+    "title",
+    "category",
+    "status"
+  ]
+}
