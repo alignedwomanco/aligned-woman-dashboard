@@ -253,6 +253,8 @@ export default function WorkbookViewer() {
                 section={current}
                 answers={answers}
                 onAnswerChange={handleAnswerChange}
+                sections={sections}
+                onJumpToSection={jumpTo}
               />
             )}
           </div>

@@ -1,10 +1,13 @@
 import React, { useRef } from "react";
+import TickListField from "./TickListField";
+import CtaRowField from "./CtaRowField";
 
 /**
  * Renders a single field from the workbook schema.
  * Receives answers (object), onAnswerChange (callback), and sectionFields (all fields in section).
+ * Optional: sections (all workbook sections) and onJumpToSection (callback) for cta_row navigation.
  */
-export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerChange, sectionFields = [] }) {
+export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerChange, sectionFields = [], sections, onJumpToSection }) {
   switch (field.type) {
     case "callout":
       return <CalloutField field={field} answers={answers} onAnswerChange={onAnswerChange} sectionFields={sectionFields} />;
@@ -21,6 +24,10 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
       return <GridPlaceholder field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "structured_list":
       return <StructuredListPlaceholder field={field} answers={answers} onAnswerChange={onAnswerChange} />;
+    case "tick_list":
+      return <TickListField field={field} />;
+    case "cta_row":
+      return <CtaRowField field={field} sections={sections} onJumpToSection={onJumpToSection} />;
     default:
       return null;
   }

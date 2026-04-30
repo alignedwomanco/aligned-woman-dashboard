@@ -1,7 +1,7 @@
 import React from "react";
 import WorkbookFieldRenderer from "./WorkbookFieldRenderer";
 
-export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange }) {
+export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection }) {
   if (!section) return null;
 
   // Split title to render section_number in italic rose if present
@@ -71,6 +71,8 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
             answers={answers}
             onAnswerChange={onAnswerChange}
             sectionFields={section.fields}
+            sections={sections}
+            onJumpToSection={onJumpToSection}
           />
         ))}
       </div>
