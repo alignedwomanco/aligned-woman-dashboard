@@ -296,11 +296,11 @@ export default function Dashboard() {
               />
 
               <PhaseIndicator
-                section={currentSection}
-                completedModules={completedModulesCount}
-                totalModules={sectionModules.length}
-                phaseIndex={phaseIndex}
-                totalPhases={sections.length}
+                section={continueData.currentSection}
+                completedModules={continueData.completedModulesInSection}
+                totalModules={continueData.totalModulesInSection}
+                phaseIndex={continueData.phaseIndex}
+                totalPhases={continueData.totalSections}
               />
 
               <WhyYouStarted

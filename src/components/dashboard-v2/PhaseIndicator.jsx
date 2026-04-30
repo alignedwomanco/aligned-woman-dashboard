@@ -1,29 +1,19 @@
 import React from "react";
 
-const PHASE_LETTERS = {
-  Awareness: "A",
-  Liberation: "L",
-  Intention: "I",
-  VisionEmbodiment: "V&E",
-};
-
-const PHASE_TAGLINES = {
-  Awareness: "My body isn't working against me… it's speaking to me.",
-  Liberation: "I'm allowed to let go of what no longer serves me.",
-  Intention: "I choose what I'm building — on purpose.",
-  VisionEmbodiment: "I am already becoming who I was always meant to be.",
-};
-
 export default function PhaseIndicator({ section, completedModules, totalModules, phaseIndex, totalPhases }) {
-  const phaseName = section?.phase || section?.name || "Awareness";
-  const letter = PHASE_LETTERS[phaseName] || phaseName?.[0] || "A";
-  const tagline = section?.description || PHASE_TAGLINES[phaseName] || "";
+  if (!section) return null;
+
+  // Derive display name: strip "Phase N - " prefix if present
+  const rawName = section.title || section.name || "";
+  const phaseName = rawName.replace(/^Phase\s*\d+\s*[-–—]\s*/i, "").trim();
+  const letter = phaseName[0] || "?";
+  const tagline = section.description || "";
   const completed = completedModules || 0;
-  const total = totalModules || 9;
+  const total = totalModules || 0;
   const remaining = total - completed;
   const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
   const currentPhaseNum = phaseIndex || 1;
-  const totalPhaseNum = totalPhases || 5;
+  const totalPhaseNum = totalPhases || 0;
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-5 md:p-6 mb-6 shadow-sm">
@@ -46,7 +36,7 @@ export default function PhaseIndicator({ section, completedModules, totalModules
           <h3 className="text-2xl text-[#2A1218] mb-1" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             {phaseName === "VisionEmbodiment" ? "Vision & Embodiment" : phaseName}
           </h3>
-          <p className="text-sm text-[#6B6168] italic">"{tagline}"</p>
+          {tagline && <p className="text-sm text-[#6B6168] italic">"{tagline}"</p>}
         </div>
 
         {/* Right: Progress */}

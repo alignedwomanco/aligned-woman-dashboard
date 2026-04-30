@@ -142,6 +142,22 @@ export default function useContinueModule(currentUser) {
     ? experts.find(e => e.id === inProgressModule.expertId) || null
     : null;
 
+  // Phase / Section data for the PhaseIndicator
+  const currentSection = sortedSections.find(s => s.id === inProgressModule.sectionId) || null;
+  const phaseIndex = currentSection
+    ? sortedSections.findIndex(s => s.id === currentSection.id) + 1
+    : 1;
+  const totalSections = sortedSections.length;
+
+  // Count completed modules in this section (all pages in the module are complete)
+  let completedModulesInSection = 0;
+  for (const mod of sectionModules) {
+    const modPages = pages.filter(p => p.moduleId === mod.id);
+    if (modPages.length > 0 && modPages.every(p => completedPageIds.has(p.id))) {
+      completedModulesInSection++;
+    }
+  }
+
   return {
     module: inProgressModule,
     expert,
@@ -151,5 +167,11 @@ export default function useContinueModule(currentUser) {
     totalModules,
     nextPageId,
     isLoading: false,
+    // Phase data
+    currentSection,
+    phaseIndex,
+    totalSections,
+    completedModulesInSection,
+    totalModulesInSection: sectionModules.length,
   };
 }
