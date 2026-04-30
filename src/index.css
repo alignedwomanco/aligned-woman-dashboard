@@ -90,49 +90,13 @@
     font-size: 18px;
   }
 
-  /* ── Global Font Enforcement ── */
-  /* All text defaults to Montserrat */
-  *,
-  p, span, a, li, td, th, label, input, textarea, select, button,
-  div, section, article, aside, nav, header, footer, main,
-  .text-sm, .text-xs, .text-base, .text-lg {
+  /* ── Global Font Family Enforcement ── */
+  * {
     font-family: 'Montserrat', sans-serif;
   }
 
-  /* All headings use DM Serif Display */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Serif Display', serif;
-  }
-
-  /* ── Global Minimum Font Sizes ── */
-  /* Desktop: minimum 18px for all text */
-  p, span, a, li, label, td, th, div,
-  input, textarea, select, button,
-  .text-xs, .text-sm {
-    font-size: max(18px, 1em);
-  }
-
-  /* Override Tailwind's tiny text utilities globally */
-  .text-xs { font-size: 18px !important; }
-  .text-sm { font-size: 18px !important; }
-  .text-base { font-size: 18px; }
-
-  /* Navigation, badges, captions that use small sizes */
-  nav *, footer *, .badge, .caption, time, small {
-    font-size: max(18px, 1em);
-    font-family: 'Montserrat', sans-serif;
-  }
-
-  /* Mobile: minimum 17px */
-  @media (max-width: 768px) {
-    html, body { font-size: 17px; }
-    p, span, a, li, label, td, th, div,
-    input, textarea, select, button,
-    nav *, footer *, .badge, .caption, time, small {
-      font-size: max(17px, 1em);
-    }
-    .text-xs { font-size: 17px !important; }
-    .text-sm { font-size: 17px !important; }
   }
 }
 

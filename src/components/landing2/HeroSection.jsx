@@ -67,7 +67,7 @@ export default function HeroSection({ onWaitlist }) {
           }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgb(196,132,122)", display: "inline-block", flexShrink: 0 }} />
-          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
+          <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
             The Education Women Should Have Been Given
           </span>
         </div>

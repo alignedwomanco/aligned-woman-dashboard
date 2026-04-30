@@ -34,7 +34,7 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "ALIVEMethod": ALIVEMethod,
-    "AdminSettings": AdminSettings,
+    "dashboardsettings": AdminSettings,
     "Apply": Apply,
     "CheckIn": CheckIn,
     "Classroom": Classroom,

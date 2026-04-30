@@ -15,6 +15,7 @@ import LandingPage from './pages/LandingPage';
 import BlueprintPage from './pages/BlueprintPage';
 import AboutUs from './pages/AboutUs';
 import CheckoutComplete from './pages/CheckoutComplete';
+import AdminSettings from './pages/AdminSettings';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
       <Route path="/blueprint" element={<LayoutWrapper currentPageName="blueprint"><BlueprintPage /></LayoutWrapper>} />
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
+      <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
