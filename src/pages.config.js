@@ -1,5 +1,4 @@
 import ALIVEMethod from './pages/ALIVEMethod';
-import AWBlueprint from './pages/AWBlueprint';
 import AdminSettings from './pages/AdminSettings';
 import Apply from './pages/Apply';
 import CheckIn from './pages/CheckIn';
@@ -11,7 +10,6 @@ import Dashboard from './pages/Dashboard';
 import DefineMyPurpose from './pages/DefineMyPurpose';
 import Experts from './pages/Experts';
 import ExpertsDirectory from './pages/ExpertsDirectory.jsx';
-import Home from './pages/Home';
 import Journal from './pages/Journal';
 import Members from './pages/Members';
 import Messages from './pages/Messages';
@@ -36,7 +34,6 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "ALIVEMethod": ALIVEMethod,
-    "AWBlueprint": AWBlueprint,
     "AdminSettings": AdminSettings,
     "Apply": Apply,
     "CheckIn": CheckIn,
@@ -48,7 +45,6 @@ export const PAGES = {
     "DefineMyPurpose": DefineMyPurpose,
     "Experts": Experts,
     "ExpertsDirectory": ExpertsDirectory,
-    "Home": Home,
     "Journal": Journal,
     "Members": Members,
     "Messages": Messages,
