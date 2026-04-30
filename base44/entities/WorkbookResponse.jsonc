@@ -11,6 +11,10 @@
       "description": "User's answers, addressable by section_id and field_id. Default: {}",
       "default": {}
     },
+    "last_section_id": {
+      "type": "string",
+      "description": "ID of the last-viewed section for resume-on-reload. Null for legacy responses."
+    },
     "is_complete": {
       "type": "boolean",
       "default": false,
@@ -24,5 +28,19 @@
   },
   "required": [
     "workbook_id"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
 }

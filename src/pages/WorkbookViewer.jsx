@@ -7,6 +7,7 @@ import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
 import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
+import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
 
 
 export default function WorkbookViewer() {
@@ -20,6 +21,10 @@ export default function WorkbookViewer() {
   const [lastSaved, setLastSaved] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isComplete, setIsComplete] = useState(false);
+  const [completedAt, setCompletedAt] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const initialSectionId = useRef(null); // stores last_section_id from loaded response
   const saveTimer = useRef(null);
   const contentRef = useRef(null);
 
@@ -66,18 +71,23 @@ export default function WorkbookViewer() {
         if (responses?.length > 0) {
           setResponseId(responses[0].id);
           setAnswers(responses[0].answers || {});
+          setIsComplete(responses[0].is_complete || false);
+          setCompletedAt(responses[0].completed_at || null);
+          // Store last_section_id for resume — will be resolved once sections are available
+          initialSectionId.current = responses[0].last_section_id || null;
         }
       }).catch(() => {}).finally(() => setResponseLoaded(true));
   }, [workbookId]);
 
-  // Autosave answers
-  const persistAnswers = useCallback((updated) => {
+  // Autosave answers (and optionally last_section_id)
+  const persistData = useCallback((updated, extraFields = {}) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
+      const payload = { answers: updated, ...extraFields };
       if (responseId) {
-        await base44.entities.WorkbookResponse.update(responseId, { answers: updated });
+        await base44.entities.WorkbookResponse.update(responseId, payload);
       } else {
-        const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, answers: updated });
+        const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, ...payload });
         setResponseId(created.id);
       }
       setLastSaved(new Date());
@@ -87,16 +97,24 @@ export default function WorkbookViewer() {
   const handleAnswerChange = useCallback((fieldId, value) => {
     setAnswers(prev => {
       const updated = { ...prev, [fieldId]: value };
-      persistAnswers(updated);
+      persistData(updated);
       return updated;
     });
-  }, [persistAnswers]);
+  }, [persistData]);
 
   // Sections
   const sections = useMemo(() => {
     if (!workbook?.schema?.sections) return [];
     return workbook.schema.sections;
   }, [workbook]);
+
+  // Resume on reload: once sections are available, resolve initialSectionId to an index
+  useEffect(() => {
+    if (!sections.length || !initialSectionId.current) return;
+    const idx = sections.findIndex(s => s.id === initialSectionId.current);
+    if (idx > 0) setActiveSection(idx);
+    initialSectionId.current = null; // consume once
+  }, [sections]);
 
   // Progress calculation: count all atomic fillable fields across all sections
   const progressPct = useMemo(() => {
@@ -150,33 +168,46 @@ export default function WorkbookViewer() {
     return Math.round((filled / total) * 100);
   }, [sections, answers]);
 
-  // Section navigation
+  // Section navigation — also persists last_section_id
   const jumpTo = useCallback((idx) => {
     setActiveSection(idx);
     setDrawerOpen(false);
+    // Persist last_section_id along with current answers
+    const sectionId = sections[idx]?.id;
+    if (sectionId) {
+      setAnswers(prev => {
+        persistData(prev, { last_section_id: sectionId });
+        return prev;
+      });
+    }
     if (contentRef.current) {
       contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }, []);
+  }, [sections, persistData]);
 
-  // Keyboard navigation
+  // Keyboard navigation — delegates to jumpTo which handles setActiveSection + persist
+  const activeSectionRef = useRef(0);
+  activeSectionRef.current = activeSection;
+
   useEffect(() => {
     const handler = (e) => {
       const tag = document.activeElement?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
-        setActiveSection(prev => Math.min(prev + 1, sections.length - 1));
+        const next = Math.min(activeSectionRef.current + 1, sections.length - 1);
+        if (next !== activeSectionRef.current) jumpTo(next);
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
-        setActiveSection(prev => Math.max(prev - 1, 0));
+        const next = Math.max(activeSectionRef.current - 1, 0);
+        if (next !== activeSectionRef.current) jumpTo(next);
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [sections.length]);
+  }, [sections.length, jumpTo]);
 
   // If no workbook ID in URL, show error immediately
   if (!workbookId) {
@@ -205,6 +236,25 @@ export default function WorkbookViewer() {
     );
   }
 
+  // Completion flow handlers
+  const handleFinishWorkbook = async () => {
+    const now = new Date().toISOString();
+    if (responseId) {
+      await base44.entities.WorkbookResponse.update(responseId, { is_complete: true, completed_at: now });
+    }
+    setIsComplete(true);
+    setCompletedAt(now);
+    setShowCelebration(true);
+  };
+
+  const handleMarkInProgress = async () => {
+    if (responseId) {
+      await base44.entities.WorkbookResponse.update(responseId, { is_complete: false, completed_at: null });
+    }
+    setIsComplete(false);
+    setCompletedAt(null);
+  };
+
   if (!isUnlocked) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
@@ -217,8 +267,21 @@ export default function WorkbookViewer() {
     );
   }
 
+  // Determine if a section is the last section (summary)
+  const lastSectionIdx = sections.length - 1;
+
   return (
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
+      {/* Celebration overlay */}
+      {showCelebration && (
+        <WorkbookCelebration
+          onBackToWorkbook={() => {
+            setShowCelebration(false);
+            jumpTo(lastSectionIdx);
+          }}
+        />
+      )}
+
       {/* Sidebar */}
       <WorkbookSidebar
         workbook={workbook}
@@ -257,6 +320,11 @@ export default function WorkbookViewer() {
                   onAnswerChange={handleAnswerChange}
                   sections={sections}
                   onJumpToSection={jumpTo}
+                  isLastSection={idx === lastSectionIdx}
+                  isComplete={isComplete}
+                  completedAt={completedAt}
+                  onFinish={handleFinishWorkbook}
+                  onMarkInProgress={handleMarkInProgress}
                 />
               </div>
             </div>

@@ -1,7 +1,8 @@
 import React from "react";
 import WorkbookFieldRenderer from "./WorkbookFieldRenderer";
+import WorkbookFinishButton from "./WorkbookFinishButton";
 
-export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection }) {
+export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress }) {
   if (!section) return null;
 
   // Split title to render section_number in italic rose if present
@@ -76,6 +77,16 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
           />
         ))}
       </div>
+
+      {/* Finish button on the last section */}
+      {isLastSection && (
+        <WorkbookFinishButton
+          isComplete={isComplete}
+          completedAt={completedAt}
+          onFinish={onFinish}
+          onMarkInProgress={onMarkInProgress}
+        />
+      )}
     </div>
   );
 }

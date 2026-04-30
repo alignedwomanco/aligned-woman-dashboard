@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import TickListField from "./TickListField";
 import CtaRowField from "./CtaRowField";
 
@@ -391,7 +391,23 @@ function GridPlaceholder({ field, answers, onAnswerChange }) {
 
 function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
   const listAnswers = answers[field.id] || {};
-  const rowCount = field.min_rows || 3;
+  const minRows = field.min_rows || 3;
+  const colCount = field.columns?.length || 1;
+
+  // Derive saved row count from existing answer keys (highest row index + 1)
+  const savedRowCount = (() => {
+    const keys = Object.keys(listAnswers);
+    if (!keys.length) return minRows;
+    let maxIdx = -1;
+    keys.forEach(k => {
+      const idx = parseInt(k.split("_")[0], 10);
+      if (!isNaN(idx) && idx > maxIdx) maxIdx = idx;
+    });
+    return Math.max(minRows, maxIdx + 1);
+  })();
+
+  const [extraRows, setExtraRows] = useState(0);
+  const rowCount = Math.max(savedRowCount, minRows) + extraRows;
   const rows = Array.from({ length: rowCount });
 
   const handleCellChange = (rIdx, colId, value) => {
@@ -434,6 +450,40 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
           </tbody>
         </table>
       </div>
+      {field.allow_add_rows && (
+        <button
+          type="button"
+          onClick={() => setExtraRows(prev => prev + 1)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+            padding: "8px 16px",
+            borderRadius: 100,
+            background: "transparent",
+            color: "#4A0E2E",
+            border: "1px solid rgba(74,14,46,0.22)",
+            fontFamily: "var(--aw-font-sans)",
+            fontWeight: 600,
+            fontSize: 9,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            transition: "all 180ms ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(74,14,46,0.04)";
+            e.currentTarget.style.borderColor = "rgba(74,14,46,0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.borderColor = "rgba(74,14,46,0.22)";
+          }}
+        >
+          + Add row
+        </button>
+      )}
     </div>
   );
 }
