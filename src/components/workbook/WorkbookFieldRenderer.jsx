@@ -72,19 +72,23 @@ function CalloutField({ field, answers, onAnswerChange }) {
   // Bug 2 fix: evaluate condition before rendering
   if (!evaluateCondition(field.condition, answers)) return null;
 
+  // Plain variant: unstyled flowing prose
+  if (field.variant === "plain" || !field.variant) {
+    return <PlainCallout field={field} answers={answers} onAnswerChange={onAnswerChange} />;
+  }
+
+  // Soft and dark variants: boxed treatment
   const variants = {
-    plain: "bg-white border border-gray-200",
     soft: "bg-[#FDF5F3] border border-[#E8C9C0]",
     dark: "bg-[#4A0E2E] text-white border-transparent",
   };
-  const variant = variants[field.variant] || variants.plain;
+  const boxClass = variants[field.variant] || variants.soft;
   const textColor = field.variant === "dark" ? "text-white/90" : "text-gray-600";
   const labelColor = field.variant === "dark" ? "text-white" : "text-[#4A0E2E]";
   const eyebrowColor = field.variant === "dark" ? "text-white/60" : "text-[#C4847A]";
 
-  // Bug 3 fix: callouts NEVER render checkboxes. Only render an explicit input if field.input exists.
   return (
-    <div className={`rounded-xl px-5 py-4 ${variant}`}>
+    <div className={`rounded-xl px-5 py-4 ${boxClass}`}>
       {field.eyebrow && (
         <p className={`text-[10px] font-semibold uppercase tracking-widest mb-1 ${eyebrowColor}`}>
           {field.eyebrow}
@@ -100,9 +104,47 @@ function CalloutField({ field, answers, onAnswerChange }) {
           {field.body}
         </p>
       )}
-      {/* Embedded input (e.g. date_picker on s7_review_date) */}
       {field.input && (
         <CalloutEmbeddedInput input={field.input} fieldId={field.id} answers={answers} onAnswerChange={onAnswerChange} variant={field.variant} />
+      )}
+    </div>
+  );
+}
+
+function PlainCallout({ field, answers, onAnswerChange }) {
+  const isCredits = field.style === "credits_small_caps";
+  const isItalic = field.emphasis === "italic";
+  const isItalicCentered = field.emphasis === "italic_centered";
+
+  // Body text classes
+  let bodyClass = "text-sm leading-relaxed text-gray-600";
+  if (isCredits) {
+    bodyClass = "text-xs uppercase tracking-widest text-gray-400 text-center";
+  } else if (isItalicCentered) {
+    bodyClass = "text-sm leading-relaxed text-gray-600 italic text-center";
+  } else if (isItalic) {
+    bodyClass = "text-sm leading-relaxed text-gray-600 italic";
+  }
+
+  return (
+    <div>
+      {field.eyebrow && (
+        <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 text-[#C4847A]">
+          {field.eyebrow}
+        </p>
+      )}
+      {field.label && (
+        <p className="text-base font-semibold text-[#4A0E2E] mb-1.5">
+          {field.label}
+        </p>
+      )}
+      {field.body && (
+        <p className={bodyClass}>
+          {field.body}
+        </p>
+      )}
+      {field.input && (
+        <CalloutEmbeddedInput input={field.input} fieldId={field.id} answers={answers} onAnswerChange={onAnswerChange} variant="plain" />
       )}
     </div>
   );
