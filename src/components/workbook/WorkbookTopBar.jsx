@@ -1,5 +1,6 @@
 import React from "react";
 import { Menu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * WorkbookTopBar — position text, saved indicator, progress pill, and progress bar.
@@ -7,6 +8,7 @@ import { Menu } from "lucide-react";
 export default function WorkbookTopBar({
   sections, activeSection, progressPct, lastSaved, onOpenDrawer
 }) {
+  const navigate = useNavigate();
   const section = sections[activeSection];
   const totalSections = sections.length;
 
@@ -53,8 +55,31 @@ export default function WorkbookTopBar({
           </span>
         </div>
 
-        {/* Right: saved indicator + progress pill */}
+        {/* Right: back link + saved indicator + progress pill */}
         <div className="flex items-center gap-4 flex-shrink-0">
+          {/* Back to Dashboard — hidden ≤720px */}
+          <button
+            onClick={() => navigate("/Dashboard")}
+            className="wb-back-link"
+            style={{
+              fontFamily: "var(--aw-font-sans)",
+              fontWeight: 600,
+              fontSize: 11,
+              letterSpacing: "0.04em",
+              color: "#8A7A76",
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              transition: "color 180ms ease",
+              whiteSpace: "nowrap",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#4A0E2E")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#8A7A76")}
+          >
+            ← Back to Dashboard
+          </button>
+
           {/* Saved indicator — hidden ≤720px via CSS class */}
           <div className="wb-saved-indicator flex items-center gap-1.5">
             <span className="wb-save-dot" />
@@ -101,6 +126,7 @@ export default function WorkbookTopBar({
         }
         @media (max-width: 720px) {
           .wb-topbar-inner { padding: 12px 18px !important; }
+          .wb-back-link { display: none !important; }
         }
       `}</style>
     </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { X, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * WorkbookSidebar — 320px rail (desktop) / slide-in drawer (mobile).
@@ -8,6 +9,7 @@ import { X, Check } from "lucide-react";
 export default function WorkbookSidebar({
   workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose
 }) {
+  const navigate = useNavigate();
   // Check if section has any non-empty answer
   const isSectionCompleted = (section) => {
     if (!section?.fields) return false;
@@ -146,6 +148,68 @@ export default function WorkbookSidebar({
               </button>
             );
           })}
+        </div>
+
+        {/* Back to Dashboard — below last section, visually demoted */}
+        <div style={{ padding: "0 14px" }}>
+          <div style={{ height: 1, background: "rgba(74,14,46,0.08)", margin: "12px 0" }} />
+          <button
+            onClick={() => navigate("/Dashboard")}
+            className="wb-nav-item w-full text-left flex items-center gap-3"
+            style={{
+              padding: "10px 14px",
+              borderRadius: "var(--aw-radius-sm)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "background-color 180ms ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--aw-rose-wash)";
+              e.currentTarget.querySelector("[data-back-arrow]").style.color = "#4A0E2E";
+              e.currentTarget.querySelector("[data-back-label]").style.color = "#4A0E2E";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.querySelector("[data-back-arrow]").style.color = "#8A7A76";
+              e.currentTarget.querySelector("[data-back-label]").style.color = "#8A7A76";
+            }}
+          >
+            {/* Empty indicator column */}
+            <div className="flex-shrink-0" style={{ width: 16, height: 16 }} />
+            {/* Arrow */}
+            <span
+              data-back-arrow
+              className="flex-shrink-0"
+              style={{
+                fontFamily: "var(--aw-font-sans)",
+                fontWeight: 600,
+                fontSize: 11,
+                letterSpacing: "0.18em",
+                color: "#8A7A76",
+                width: 18,
+                textAlign: "center",
+                transition: "color 180ms ease",
+              }}
+            >
+              ←
+            </span>
+            {/* Label */}
+            <span
+              data-back-label
+              style={{
+                fontFamily: "var(--aw-font-sans)",
+                fontWeight: 400,
+                fontSize: 13,
+                lineHeight: 1.35,
+                letterSpacing: "0.005em",
+                color: "#8A7A76",
+                transition: "color 180ms ease",
+              }}
+            >
+              Back to Dashboard
+            </span>
+          </button>
         </div>
       </nav>
 
