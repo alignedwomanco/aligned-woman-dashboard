@@ -3,52 +3,79 @@ import React from "react";
 export default function AlignedWomanSection() {
   return (
     <section
-      className="relative py-36 px-4 flex items-center justify-center"
-      style={{ background: "#3a0d22", minHeight: "70vh" }}
+      className="relative overflow-hidden"
+      style={{ background: "#3a0d22", minHeight: "80vh" }}
     >
       {/* Faded portrait overlay */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-10"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&q=80&fit=crop&crop=face')" }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&q=80&fit=crop&crop=face')",
+          opacity: 0.18,
+        }}
       />
 
-      <div className="relative z-10 max-w-3xl mx-auto text-center">
-        <p className="text-xs font-bold tracking-[0.35em] uppercase mb-10 text-white/60">
-          — WHO SHE IS —
-        </p>
+      <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 py-24">
 
+        {/* Label */}
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="h-px w-12 bg-white/30" />
+          <p style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: "0.3em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.5)",
+          }}>
+            WHO SHE IS
+          </p>
+          <div className="h-px w-12 bg-white/30" />
+        </div>
+
+        {/* Big heading */}
         <h2
-          className="text-white uppercase font-bold mb-12"
-          style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2.2rem, 6vw, 4.5rem)", letterSpacing: "0.06em" }}
+          className="text-center text-white uppercase font-bold mb-14 leading-none"
+          style={{
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: "clamp(3rem, 8vw, 6rem)",
+            letterSpacing: "0.02em",
+          }}
         >
-          WHAT IS AN ALIGNED WOMAN?
+          WHAT IS AN<br />ALIGNED WOMAN?
         </h2>
 
-        <div className="text-white/80 leading-relaxed space-y-6" style={{ fontSize: "clamp(1rem, 2vw, 1.15rem)", fontFamily: "Montserrat, sans-serif" }}>
-          <p className="font-bold text-white">
-            An aligned woman is not someone who has it all figured out.
-          </p>
+        {/* Two-column body text */}
+        <div className="grid md:grid-cols-2 gap-x-16 gap-y-6 max-w-5xl mx-auto">
 
-          <p>
-            She is a woman who is learning to listen to herself again.
-          </p>
+          {/* Left column */}
+          <div className="space-y-5 text-center md:text-left">
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", lineHeight: 1.6 }}>
+              An aligned woman is not someone who has it all figured out.
+            </p>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
+              She is a woman who is learning to listen to herself again.
+            </p>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
+              An aligned woman understands that clarity does not come from doing more, but from becoming more honest about what no longer fits. She recognises when her body is tired, when her nervous system is overloaded, and when her life is out of sync with her values.
+            </p>
+          </div>
 
-          <p>
-            An aligned woman understands that clarity does not come from doing more, but from becoming more honest about what no longer fits. She recognises when her body is tired, when her nervous system is overloaded, and when her life is out of sync with her values.
-          </p>
+          {/* Right column */}
+          <div className="space-y-5 text-center md:text-left">
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
+              She makes decisions with awareness, intention, and self-respect.<br />
+              She allows her seasons to change.<br />
+              She leads, works, loves, and rests in ways that honour her biology, emotions, and lived reality.
+            </p>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", lineHeight: 1.6 }}>
+              An aligned woman is not perfect or polished.
+            </p>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", lineHeight: 1.6 }}>
+              She is present, grounded, and willing to choose herself without guilt.
+            </p>
+          </div>
 
-          <p>
-            She makes decisions with awareness, intention, and self-respect.<br />
-            She allows her seasons to change.<br />
-            She leads, works, loves, and rests in ways that honour her biology, emotions, and lived reality.
-          </p>
-
-          <p className="font-bold text-white">
-            An aligned woman is not perfect or polished.
-          </p>
-          <p className="font-bold text-white">
-            She is present, grounded, and willing to choose herself without guilt.
-          </p>
         </div>
       </div>
     </section>
