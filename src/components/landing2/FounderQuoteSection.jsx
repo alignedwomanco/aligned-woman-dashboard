@@ -50,18 +50,26 @@ export default function FounderQuoteSection() {
           — Founder
         </p>
 
-        {/* Video frame */}
+        {/* Video frame — decorative outer border */}
         <div
           style={{
             position: "relative",
             maxWidth: 720,
             margin: "0 auto 20px",
-            borderRadius: 10,
-            border: "1.5px solid rgba(196,134,108,0.28)",
-            overflow: "hidden",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+            borderRadius: 14,
+            border: "1px solid rgba(255,255,255,0.15)",
+            padding: "24px",
+            background: "rgba(255,255,255,0.03)",
           }}
         >
+          {/* Inner video wrapper */}
+          <div
+            style={{
+              borderRadius: 8,
+              overflow: "hidden",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+            }}
+          >
           {!embedError ? (
             <div
               style={{
@@ -135,6 +143,7 @@ export default function FounderQuoteSection() {
               </div>
             </div>
           )}
+          </div>
         </div>
 
         {/* Watch label */}

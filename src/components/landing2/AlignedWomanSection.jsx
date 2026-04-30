@@ -26,28 +26,28 @@ export default function AlignedWomanSection() {
 
         <div className="text-white/80 leading-relaxed space-y-6" style={{ fontSize: "clamp(1rem, 2vw, 1.15rem)", fontFamily: "Montserrat, sans-serif" }}>
           <p className="font-bold text-white">
-            "An aligned woman is not someone who has it all figured out."
+            An aligned woman is not someone who has it all figured out.
           </p>
 
           <p>
-            "She is a woman who is learning to listen to herself again."
+            She is a woman who is learning to listen to herself again.
           </p>
 
           <p>
-            "An aligned woman understands that clarity does not come from doing more, but from becoming more honest about what no longer fits. She recognises when her body is tired, when her nervous system is overloaded, and when her life is out of sync with her values."
+            An aligned woman understands that clarity does not come from doing more, but from becoming more honest about what no longer fits. She recognises when her body is tired, when her nervous system is overloaded, and when her life is out of sync with her values.
           </p>
 
           <p>
-            "She makes decisions with awareness, intention, and self-respect.<br />
+            She makes decisions with awareness, intention, and self-respect.<br />
             She allows her seasons to change.<br />
-            She leads, works, loves, and rests in ways that honour her biology, emotions, and lived reality."
+            She leads, works, loves, and rests in ways that honour her biology, emotions, and lived reality.
           </p>
 
           <p className="font-bold text-white">
-            "An aligned woman is not perfect or polished."
+            An aligned woman is not perfect or polished.
           </p>
           <p className="font-bold text-white">
-            "She is present, grounded, and willing to choose herself without guilt."
+            She is present, grounded, and willing to choose herself without guilt.
           </p>
         </div>
       </div>
