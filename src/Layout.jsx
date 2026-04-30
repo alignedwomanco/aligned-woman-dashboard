@@ -51,6 +51,9 @@ export default function Layout({ children, currentPageName }) {
 
   const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login";
 
+  // Dashboard has its own layout — render children directly
+  const isDashboardPage = currentPageName === "Dashboard";
+
   // Redirect ALIVEMethod to Home as default page
   useEffect(() => {
     if (currentPageName === "ALIVEMethod" && window.location.pathname === "/ALIVEMethod") {
@@ -361,6 +364,11 @@ export default function Layout({ children, currentPageName }) {
                 </div>);
 
             }
+
+  // Dashboard page has its own chrome — render children directly
+  if (isDashboardPage) {
+    return <>{children}</>;
+  }
 
   const sidebarW = sidebarCollapsed ? "w-16" : "w-64";
   const contentML = sidebarCollapsed ? "lg:ml-16" : "lg:ml-64";
