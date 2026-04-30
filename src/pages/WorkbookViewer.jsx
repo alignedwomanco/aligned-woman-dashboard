@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Download, Lock, Loader2 } from "lucide-react";
 import useWorkbookUnlock from "@/hooks/useWorkbookUnlock";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
+import WorkbookWelcome from "@/components/workbook/WorkbookWelcome";
 
 export default function WorkbookViewer() {
   const params = new URLSearchParams(window.location.search);
@@ -13,6 +14,8 @@ export default function WorkbookViewer() {
   const [activeSection, setActiveSection] = useState(0);
   const [answers, setAnswers] = useState({});
   const [responseId, setResponseId] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [responseLoaded, setResponseLoaded] = useState(false);
   const saveTimer = useRef(null);
 
   // Fetch workbook
@@ -48,16 +51,27 @@ export default function WorkbookViewer() {
   const { isUnlocked: rawUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
   const isUnlocked = isAdmin || rawUnlocked;
 
-  // Load existing WorkbookResponse
+  // Load existing WorkbookResponse and determine welcome state
   useEffect(() => {
     if (!workbookId) return;
     base44.entities.WorkbookResponse.filter({ workbook_id: workbookId }, "-created_date", 1)
       .then(responses => {
         if (responses?.length > 0) {
+          const saved = responses[0].answers || {};
           setResponseId(responses[0].id);
-          setAnswers(responses[0].answers || {});
+          setAnswers(saved);
+          // Show welcome if answers object is empty
+          const hasAnswers = Object.keys(saved).length > 0;
+          setShowWelcome(!hasAnswers);
+        } else {
+          // No response record at all — first visit
+          setShowWelcome(true);
         }
-      }).catch(() => {});
+      }).catch(() => {
+        setShowWelcome(true);
+      }).finally(() => {
+        setResponseLoaded(true);
+      });
   }, [workbookId]);
 
   // Autosave answers
@@ -91,8 +105,15 @@ export default function WorkbookViewer() {
   const isFirst = activeSection === 0;
   const isLast = activeSection === sections.length - 1;
 
+  // Handle Begin from welcome state — go to Section 1 (skip Section 0)
+  const handleBeginWorkbook = () => {
+    setShowWelcome(false);
+    // Navigate to Section 1 if it exists, otherwise Section 0
+    setActiveSection(sections.length > 1 ? 1 : 0);
+  };
+
   // Loading state
-  if (isLoading || isCheckingUnlock || !adminCheckDone) {
+  if (isLoading || isCheckingUnlock || !adminCheckDone || !responseLoaded) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-[#6E1D40]" />
@@ -124,6 +145,11 @@ export default function WorkbookViewer() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Welcome overlay for first-time users */}
+      {showWelcome && (
+        <WorkbookWelcome workbook={workbook} expert={expert} onBegin={handleBeginWorkbook} />
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-[#C4847A] mb-1">
