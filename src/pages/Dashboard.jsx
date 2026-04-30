@@ -15,6 +15,7 @@ import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
 import TopBar from "@/components/dashboard-v2/TopBar";
 import LaurAIChatWidget from "@/components/LaurAIChatWidget";
+import useContinueModule from "@/hooks/useContinueModule";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -23,6 +24,9 @@ export default function Dashboard() {
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
+
+  // Continue Where You Left Off — reads from Course → Section → Module → Page hierarchy
+  const continueData = useContinueModule(currentUser);
 
   // Site settings
   const { data: siteSettings } = useQuery({
@@ -282,12 +286,13 @@ export default function Dashboard() {
             {/* Centre column */}
             <div className="flex-1 min-w-0">
               <ContinueHero
-                module={currentModule}
-                expert={currentExpert}
-                pageProgress={currentModulePages.completed}
-                totalPages={currentModulePages.total}
-                moduleIndex={currentModuleIndex}
-                totalModules={sectionModules.length}
+                module={continueData.module}
+                expert={continueData.expert}
+                completedPages={continueData.completedPages}
+                totalPages={continueData.totalPages}
+                moduleIndex={continueData.moduleIndex}
+                totalModules={continueData.totalModules}
+                nextPageId={continueData.nextPageId}
               />
 
               <PhaseIndicator
