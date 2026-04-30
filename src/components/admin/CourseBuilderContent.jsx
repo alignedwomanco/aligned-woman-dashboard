@@ -467,6 +467,52 @@ export default function CourseBuilderContent() {
   function renderDialogs() {
     return (
       <>
+        {/* Section Dialog */}
+        <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{editingSection ? "Edit Section" : "Add Section"}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div><Label>Section Title *</Label><Input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} placeholder="e.g., Phase 1 - Awareness" /></div>
+              <div><Label>Description / Tagline</Label><Textarea value={sectionForm.description} onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })} placeholder="Section description or tagline" /></div>
+              <div>
+                <Label>Cover Image</Label>
+                <div className="space-y-2">
+                  {sectionForm.coverImage && (
+                    <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
+                      <img src={sectionForm.coverImage} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer text-sm font-medium text-gray-700">
+                    <Upload className="w-4 h-4" />
+                    {sectionForm.coverImage ? "Change Image" : "Upload Image"}
+                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        setSectionForm({ ...sectionForm, coverImage: file_url });
+                      }
+                    }} />
+                  </label>
+                </div>
+              </div>
+              <div><Label>Order</Label><Input type="number" value={sectionForm.order} onChange={(e) => setSectionForm({ ...sectionForm, order: Number(e.target.value) })} /></div>
+              <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Switch checked={sectionForm.isPublished} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isPublished: checked })} />
+                  <Label>Published</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={sectionForm.isComingSoon} onCheckedChange={(checked) => setSectionForm({ ...sectionForm, isComingSoon: checked })} />
+                  <Label>Coming Soon</Label>
+                </div>
+              </div>
+              <Button onClick={handleSaveSection} disabled={!sectionForm.title} className="w-full text-white" style={{ backgroundColor: "#6E1D40" }}>
+                {editingSection ? "Update Section" : "Create Section"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Course Dialog */}
         <Dialog open={courseDialogOpen} onOpenChange={setCourseDialogOpen}>
           <DialogContent className="max-w-2xl">
