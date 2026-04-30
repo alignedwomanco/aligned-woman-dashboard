@@ -154,10 +154,12 @@ export default function Layout({ children, currentPageName }) {
     return () => { document.body.style.overflow = ""; };
   }, [showMobileMenu]);
 
+  const isLandingPage = currentPageName === "LandingPage";
+
   // Public page layout with hamburger menu
   if (isPublicPage) {
     return (
-      <div className="min-h-screen bg-pink-50/30">
+      <div className={isLandingPage ? "min-h-screen" : "min-h-screen bg-pink-50/30"}>
         <style>{`
           :root {
             --burgundy: #6E1D40;
@@ -171,22 +173,26 @@ export default function Layout({ children, currentPageName }) {
           .bg-burgundy { background-color: var(--burgundy); }
         `}</style>
 
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm px-4 sm:px-6 lg:px-8 py-2">
+        <div className={`fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-3 transition-all duration-300 ${isLandingPage ? "bg-transparent" : "bg-white/95 backdrop-blur-sm shadow-sm"}`}>
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <Link to={createPageUrl("Home")} className="flex-shrink-0">
-              <img
-                src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
-                alt="The Aligned Woman"
-                className="object-contain w-auto"
-                style={{ height: '35px' }}
-              />
+            <Link to="/" className="flex-shrink-0">
+              {isLandingPage ? (
+                <span className="font-bold italic text-xl" style={{ color: "#C4866C", fontFamily: "'DM Serif Display', Georgia, serif" }}>AW</span>
+              ) : (
+                <img
+                  src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                  alt="The Aligned Woman"
+                  className="object-contain w-auto"
+                  style={{ height: '35px' }}
+                />
+              )}
             </Link>
 
             <div className="flex items-center gap-3 flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                    <div className="w-10 h-10 rounded-full border-2 border-[#DEBECC] overflow-hidden">
+                  <button className={`flex items-center gap-2 p-1 rounded-lg transition-colors ${isLandingPage ? "hover:bg-white/10" : "hover:bg-gray-100"}`}>
+                    <div className={`w-10 h-10 rounded-full border-2 overflow-hidden ${isLandingPage ? "border-white/30" : "border-[#DEBECC]"}`}>
                       {isAuthenticated && user?.profile_picture ? (
                         <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
                       ) : (
@@ -228,8 +234,8 @@ export default function Layout({ children, currentPageName }) {
               </DropdownMenu>
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg className="w-10 h-10 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                className="p-2 rounded-lg transition-colors hover:bg-white/10">
+                <svg className={`w-8 h-8 ${isLandingPage ? "text-white" : "text-gray-900"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
@@ -321,11 +327,11 @@ export default function Layout({ children, currentPageName }) {
           </>
         }
 
-        <main className="pt-20">
+        <main className={isLandingPage ? "" : "pt-20"}>
           {children}
         </main>
 
-        <footer className="bg-[#6E1D40] text-white">
+        {isLandingPage ? null : <footer className="bg-[#6E1D40] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
               <div className="col-span-1 md:col-span-2">
@@ -363,7 +369,7 @@ export default function Layout({ children, currentPageName }) {
                         © {new Date().getFullYear()} The Aligned Woman Blueprint. All rights reserved.
                       </div>
                     </div>
-                  </footer>
+                  </footer>}
                 </div>);
 
             }
