@@ -33,22 +33,24 @@ export default function HeroSection({ onWaitlist }) {
       style={{ minHeight: "100vh" }}
     >
       {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1800&q=80&fit=crop')" }}
+      <img
+        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693c1af736e30d6ce22780c4/19e69afb3_laptop-computer-girl-woman-home-technology-female-2025-01-29-14-44-55-utc.jpg"
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
       />
 
       {/* Base dark maroon overlay */}
       <div
         className="absolute inset-0"
-        style={{ background: "rgba(50, 8, 25, 0.82)" }}
+        style={{ background: "linear-gradient(155deg, rgba(8,1,5,0.92) 0%, rgba(26,5,16,0.88) 40%, rgba(45,8,25,0.85) 70%, rgba(14,2,8,0.92) 100%)" }}
       />
 
       {/* Mouse-tracking radial light gradient */}
       <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse 55% 55% at ${gradientX} ${gradientY}, rgba(180, 60, 80, 0.28) 0%, transparent 70%)`,
+          background: `radial-gradient(55% 45% at ${gradientX} ${gradientY}, rgba(196,132,122,0.25) 0%, rgba(26,5,16,0.08) 55%, transparent 100%)`,
+          transition: "background 0.1s",
         }}
       />
 
