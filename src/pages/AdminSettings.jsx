@@ -271,7 +271,7 @@ export default function AdminSettings() {
     <div className="min-h-screen p-3 sm:p-6 lg:p-12 overflow-x-hidden">
       <div className="max-w-7xl mx-auto w-full">
         <div className="mb-4 sm:mb-10 lg:mb-16">
-          <h1 className="text-xl sm:text-3xl font-bold mb-1" style={{ color: '#6E1D40' }}>Admin Settings</h1>
+          <h1 className="text-xl sm:text-3xl font-bold mb-1" style={{ color: '#6E1D40' }}>Dashboard Settings</h1>
           <p className="text-gray-600 text-xs sm:text-base">Manage system settings and configurations</p>
         </div>
 
