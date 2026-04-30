@@ -34,10 +34,11 @@ export default function WorkbookViewer() {
 
   // Admin bypass for lock check
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminCheckDone, setAdminCheckDone] = useState(false);
   useEffect(() => {
     base44.auth.me().then(u => {
       if (u?.role === "admin" || u?.role === "owner" || u?.role === "master_admin") setIsAdmin(true);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setAdminCheckDone(true));
   }, []);
 
   // Unlock check (skipped for admins)
@@ -55,7 +56,7 @@ export default function WorkbookViewer() {
   const isLast = activeSection === sections.length - 1;
 
   // Loading state
-  if (isLoading || isCheckingUnlock) {
+  if (isLoading || isCheckingUnlock || !adminCheckDone) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-[#6E1D40]" />
