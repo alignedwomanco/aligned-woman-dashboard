@@ -92,3 +92,85 @@
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* ── Workbook Design Tokens & Styles ── */
+:root {
+  --aw-burg-dark: #1A0510;
+  --aw-burg-core: #4A0E2E;
+  --aw-burg-mid: #6B1642;
+  --aw-burg-bright: #8C2057;
+  --aw-rose-deep: #A86460;
+  --aw-rose-core: #C4847A;
+  --aw-rose-light: #E8B4AE;
+  --aw-rose-pale: #F5DDD9;
+  --aw-rose-wash: #FDF5F3;
+  --aw-white: #FFFFFF;
+  --aw-off-white: #FAF5F3;
+  --aw-warm-grey: #C8B8B4;
+  --aw-mid-grey: #8A7A76;
+  --aw-dark-grey: #3A2A28;
+  --aw-border-light: rgba(74,14,46,0.08);
+  --aw-border-rose: rgba(196,132,122,0.25);
+  --aw-shadow-lg: 0 24px 60px rgba(8,1,5,0.16);
+  --aw-grad-rose: linear-gradient(135deg, #C4847A 0%, #E8B4AE 100%);
+  --aw-grad-progress: linear-gradient(90deg, #C4847A, #4A0E2E);
+  --aw-radius-xs: 4px;
+  --aw-radius-sm: 6px;
+  --aw-radius-md: 10px;
+  --aw-radius-pill: 100px;
+  --aw-font-display: 'DM Serif Display', Georgia, serif;
+  --aw-font-sans: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+}
+
+@keyframes wb-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.wb-save-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--aw-rose-core);
+  animation: wb-pulse 1.6s ease-in-out infinite;
+  display: inline-block; flex-shrink: 0;
+}
+.wb-progress-track {
+  height: 2px; background: rgba(74,14,46,0.06); width: 100%;
+}
+.wb-progress-fill {
+  height: 100%; background: var(--aw-grad-progress); transition: width 320ms ease;
+}
+.wb-nav-item { transition: background-color 180ms ease; }
+.wb-nav-item:hover { background-color: var(--aw-rose-wash); }
+.wb-nav-item.wb-nav-current:hover { background-color: var(--aw-rose-wash); }
+.wb-dot-current { box-shadow: 0 0 0 4px rgba(74,14,46,0.1); }
+.wb-bottombar {
+  background: rgba(250,245,243,0.95);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+}
+.wb-topbar {
+  background: rgba(250,245,243,0.94);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+}
+.wb-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 22px; border-radius: var(--aw-radius-pill);
+  font-family: var(--aw-font-sans); font-weight: 700; font-size: 10px;
+  letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer;
+  transition: all 180ms ease; border: 1px solid transparent; line-height: 1; white-space: nowrap;
+}
+.wb-btn--primary {
+  background: var(--aw-rose-core); color: var(--aw-white); border-color: var(--aw-rose-core);
+}
+.wb-btn--primary:hover {
+  background: var(--aw-burg-core); border-color: var(--aw-burg-core);
+}
+.wb-btn--secondary {
+  background: transparent; color: var(--aw-burg-core); border-color: var(--aw-border-light);
+}
+.wb-btn--secondary:hover {
+  background: var(--aw-rose-wash); border-color: var(--aw-border-rose);
+}
+.wb-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+@media (max-width: 480px) { .wb-btn-label { display: none; } }
+@media (max-width: 720px) { .wb-saved-indicator { display: none; } }

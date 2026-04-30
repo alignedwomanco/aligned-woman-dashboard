@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Download, Lock, Loader2 } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
 import useWorkbookUnlock from "@/hooks/useWorkbookUnlock";
+import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
+import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
+import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
-import WorkbookWelcome from "@/components/workbook/WorkbookWelcome";
+
 
 export default function WorkbookViewer() {
   const params = new URLSearchParams(window.location.search);
@@ -14,9 +16,12 @@ export default function WorkbookViewer() {
   const [activeSection, setActiveSection] = useState(0);
   const [answers, setAnswers] = useState({});
   const [responseId, setResponseId] = useState(null);
-  const [showWelcome, setShowWelcome] = useState(false);
   const [responseLoaded, setResponseLoaded] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const saveTimer = useRef(null);
+  const contentRef = useRef(null);
 
   // Fetch workbook
   const { data: workbook, isLoading } = useQuery({
@@ -38,40 +43,30 @@ export default function WorkbookViewer() {
     enabled: !!workbook?.expert_id,
   });
 
-  // Admin bypass for lock check
+  // Admin bypass
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCheckDone, setAdminCheckDone] = useState(false);
   useEffect(() => {
     base44.auth.me().then(u => {
+      setUser(u);
       if (u?.role === "admin" || u?.role === "owner" || u?.role === "master_admin") setIsAdmin(true);
     }).catch(() => {}).finally(() => setAdminCheckDone(true));
   }, []);
 
-  // Unlock check (skipped for admins)
+  // Unlock check
   const { isUnlocked: rawUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
   const isUnlocked = isAdmin || rawUnlocked;
 
-  // Load existing WorkbookResponse and determine welcome state
+  // Load existing WorkbookResponse
   useEffect(() => {
     if (!workbookId) return;
     base44.entities.WorkbookResponse.filter({ workbook_id: workbookId }, "-created_date", 1)
       .then(responses => {
         if (responses?.length > 0) {
-          const saved = responses[0].answers || {};
           setResponseId(responses[0].id);
-          setAnswers(saved);
-          // Show welcome if answers object is empty
-          const hasAnswers = Object.keys(saved).length > 0;
-          setShowWelcome(!hasAnswers);
-        } else {
-          // No response record at all — first visit
-          setShowWelcome(true);
+          setAnswers(responses[0].answers || {});
         }
-      }).catch(() => {
-        setShowWelcome(true);
-      }).finally(() => {
-        setResponseLoaded(true);
-      });
+      }).catch(() => {}).finally(() => setResponseLoaded(true));
   }, [workbookId]);
 
   // Autosave answers
@@ -84,6 +79,7 @@ export default function WorkbookViewer() {
         const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, answers: updated });
         setResponseId(created.id);
       }
+      setLastSaved(new Date());
     }, 800);
   }, [responseId, workbookId]);
 
@@ -95,184 +91,180 @@ export default function WorkbookViewer() {
     });
   }, [persistAnswers]);
 
-  // Parse sections from schema
+  // Sections
   const sections = useMemo(() => {
     if (!workbook?.schema?.sections) return [];
     return workbook.schema.sections;
   }, [workbook]);
 
-  const current = sections[activeSection] || null;
-  const isFirst = activeSection === 0;
-  const isLast = activeSection === sections.length - 1;
+  // Progress calculation: count all atomic fillable fields across all sections
+  const progressPct = useMemo(() => {
+    if (!sections.length) return 0;
+    let total = 0;
+    let filled = 0;
+    sections.forEach(section => {
+      section.fields?.forEach(field => {
+        if (field.type === "checkbox_group") {
+          const optCount = field.options?.length || 0;
+          total += optCount;
+          const checked = answers[field.id];
+          if (checked && typeof checked === "object") {
+            filled += Object.values(checked).filter(Boolean).length;
+          }
+        } else if (field.type === "grid") {
+          const cells = (field.rows?.length || 0) * (field.columns?.length || 0);
+          total += cells;
+          const g = answers[field.id];
+          if (g && typeof g === "object") {
+            filled += Object.values(g).filter(v => v !== "" && v !== undefined && v !== null).length;
+          }
+        } else if (field.type === "structured_list") {
+          const rows = field.min_rows || 3;
+          const cols = field.columns?.length || 1;
+          total += rows * cols;
+          const l = answers[field.id];
+          if (l && typeof l === "object") {
+            filled += Object.values(l).filter(v => typeof v === "string" ? v.trim() !== "" : !!v).length;
+          }
+        } else if (field.type === "numbered_list" && !field.display_only) {
+          const items = field.items?.filter(i => i.field_type) || [];
+          total += items.length;
+          items.forEach((_, idx) => {
+            const key = `${field.id}_item_${idx}`;
+            const v = answers[key];
+            if (v && typeof v === "string" && v.trim() !== "") filled++;
+          });
+        } else if (field.type === "long_text" || field.type === "short_text") {
+          total += 1;
+          const v = answers[field.id];
+          if (v && typeof v === "string" && v.trim() !== "") filled++;
+        } else if (field.type === "callout" && field.input) {
+          total += 1;
+          const v = answers[field.id];
+          if (v && typeof v === "string" && v.trim() !== "") filled++;
+        }
+      });
+    });
+    if (total === 0) return 0;
+    return Math.round((filled / total) * 100);
+  }, [sections, answers]);
 
-  // Handle Begin from welcome state — go to Section 1 (skip Section 0)
-  const handleBeginWorkbook = () => {
-    setShowWelcome(false);
-    // Navigate to Section 1 if it exists, otherwise Section 0
-    setActiveSection(sections.length > 1 ? 1 : 0);
-  };
+  // Section navigation
+  const jumpTo = useCallback((idx) => {
+    setActiveSection(idx);
+    setDrawerOpen(false);
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, []);
 
-  // Loading state
+  // Keyboard navigation
+  useEffect(() => {
+    const handler = (e) => {
+      const tag = document.activeElement?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveSection(prev => Math.min(prev + 1, sections.length - 1));
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveSection(prev => Math.max(prev - 1, 0));
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [sections.length]);
+
+  // Loading
   if (isLoading || isCheckingUnlock || !adminCheckDone || !responseLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6E1D40]" />
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#4A0E2E" }} />
       </div>
     );
   }
 
-  // No workbook found
   if (!workbook) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-gray-500">
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "var(--aw-off-white)", color: "var(--aw-mid-grey)" }}>
         <p>Workbook not found.</p>
       </div>
     );
   }
 
-  // Locked state
   if (!isUnlocked) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <Lock className="w-12 h-12 mx-auto text-[#C4847A] mb-4" />
-        <h2 className="text-2xl font-bold text-[#4A0E2E] mb-2">Workbook Locked</h2>
-        <p className="text-gray-500">
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
+        <Lock className="w-12 h-12 mb-4" style={{ color: "var(--aw-rose-core)" }} />
+        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "var(--aw-burg-core)", marginBottom: 8 }}>Workbook Locked</h2>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)" }}>
           Complete all modules for this course to unlock this workbook.
         </p>
       </div>
     );
   }
 
+  const current = sections[activeSection] || null;
+
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Welcome overlay for first-time users */}
-      {showWelcome && (
-        <WorkbookWelcome workbook={workbook} expert={expert} onBegin={handleBeginWorkbook} />
-      )}
+    <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
+      {/* Sidebar */}
+      <WorkbookSidebar
+        workbook={workbook}
+        expert={expert}
+        user={user}
+        sections={sections}
+        activeSection={activeSection}
+        answers={answers}
+        onJumpTo={jumpTo}
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
 
-      {/* Header */}
-      <div className="mb-8">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-[#C4847A] mb-1">
-          Workbook
-        </p>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#4A0E2E]">
-          {workbook.title}
-        </h1>
-        {workbook.subtitle && (
-          <p className="text-gray-500 mt-1">{workbook.subtitle}</p>
-        )}
-        {expert && (
-          <div className="flex items-center gap-2 mt-3">
-            {expert.profile_picture && (
-              <img src={expert.profile_picture} alt={expert.name} className="w-7 h-7 rounded-full object-cover" />
-            )}
-            <span className="text-sm font-medium text-gray-600">
-              {expert.name}{expert.title ? ` · ${expert.title}` : ""}
-            </span>
-          </div>
-        )}
-        {workbook.blank_pdf_url && (
-          <a href={workbook.blank_pdf_url} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg border border-[#4A0E2E] text-[#4A0E2E] text-sm font-medium hover:bg-[#F5E8EE] transition-colors">
-            <Download className="w-4 h-4" /> Download Blank PDF
-          </a>
-        )}
-      </div>
+      {/* Main column — offset by sidebar width on desktop */}
+      <div className="wb-main-col flex flex-col min-h-screen">
+        {/* Top bar */}
+        <WorkbookTopBar
+          sections={sections}
+          activeSection={activeSection}
+          progressPct={progressPct}
+          lastSaved={lastSaved}
+          onOpenDrawer={() => setDrawerOpen(true)}
+        />
 
-      {/* Mobile section tabs */}
-      <div className="lg:hidden overflow-x-auto scrollbar-hide pb-4">
-        <div className="flex gap-2">
-          {sections.map((section, idx) => {
-            const isActive = idx === activeSection;
-            const label = section.section_number
-              ? `${section.section_number}. ${section.title}`
-              : section.title;
-            return (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(idx)}
-                className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all border whitespace-nowrap ${
-                  isActive
-                    ? "bg-[#4A0E2E] text-white border-transparent"
-                    : "bg-white text-[#6B6168] border-gray-200 hover:border-[#C4847A]"
-                }`}
-              >
-                <span className={`w-2 h-2 rounded-full border-2 flex-shrink-0 ${isActive ? "border-white" : "border-gray-300"}`} />
-                {label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex gap-8">
-        {/* Desktop sidebar nav */}
-        <div className="hidden lg:block w-56 flex-shrink-0">
-          <div className="sticky top-24 space-y-1 max-h-[calc(100vh-120px)] overflow-y-auto pr-2 pb-8">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3 px-3">
-              Sections
-            </p>
-            {sections.map((section, idx) => {
-              const isActive = idx === activeSection;
-              const num = section.section_number || "";
-              return (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(idx)}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-all flex items-center gap-3 ${
-                    isActive
-                      ? "bg-[#F5E8EE] text-[#4A0E2E]"
-                      : "text-[#6B6168] hover:bg-gray-50 hover:text-[#4A0E2E]"
-                  }`}
-                >
-                  <span className={`w-2.5 h-2.5 rounded-full border-2 flex-shrink-0 ${isActive ? "border-[#C4847A] bg-[#C4847A]" : "border-gray-300"}`} />
-                  <div className="min-w-0 flex-1">
-                    {num && (
-                      <span className="text-[10px] font-semibold uppercase tracking-widest block" style={{ color: isActive ? "#C4847A" : "#999" }}>
-                        Section {num}
-                      </span>
-                    )}
-                    <span className={`text-sm block truncate ${isActive ? "font-semibold" : "font-medium"}`}>
-                      {section.title}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          {current && <WorkbookSectionContent section={current} answers={answers} onAnswerChange={handleAnswerChange} />}
-
-          {/* Bottom navigation */}
-          <div className="flex items-center justify-between mt-12 pt-6 border-t border-gray-200">
-            {!isFirst ? (
-              <Button
-                variant="outline"
-                onClick={() => setActiveSection((p) => p - 1)}
-                className="border-[#4A0E2E] text-[#4A0E2E] hover:bg-[#F5E8EE]"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" /> Previous
-              </Button>
-            ) : (
-              <div />
-            )}
-            {!isLast ? (
-              <Button
-                variant="outline"
-                onClick={() => setActiveSection((p) => p + 1)}
-                className="border-[#4A0E2E] text-[#4A0E2E] hover:bg-[#F5E8EE]"
-              >
-                Next <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <div />
+        {/* Content area */}
+        <div className="flex-1" ref={contentRef}>
+          <div className="wb-page" style={{ maxWidth: 720, margin: "0 auto", padding: "56px 40px 80px" }}>
+            {current && (
+              <WorkbookSectionContent
+                section={current}
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+              />
             )}
           </div>
         </div>
+
+        {/* Bottom bar */}
+        <WorkbookBottomBar
+          sections={sections}
+          activeSection={activeSection}
+          onPrev={() => jumpTo(Math.max(0, activeSection - 1))}
+          onNext={() => jumpTo(Math.min(sections.length - 1, activeSection + 1))}
+        />
       </div>
+
+      {/* Responsive layout */}
+      <style>{`
+        @media (min-width: 1025px) {
+          .wb-main-col { margin-left: 320px; }
+        }
+        @media (max-width: 720px) {
+          .wb-page { padding: 32px 22px 60px !important; }
+        }
+      `}</style>
     </div>
   );
 }

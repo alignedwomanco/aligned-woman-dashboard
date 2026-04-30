@@ -365,8 +365,8 @@ export default function Layout({ children, currentPageName }) {
 
             }
 
-  // Dashboard page has its own chrome — render children directly
-  if (isDashboardPage) {
+  // Dashboard and Workbook pages have their own chrome — render children directly
+  if (isDashboardPage || currentPageName === "Workbook") {
     return <>{children}</>;
   }
 
