@@ -16,6 +16,8 @@ import BlueprintPage from './pages/BlueprintPage';
 import AboutUs from './pages/AboutUs';
 import CheckoutComplete from './pages/CheckoutComplete';
 import AdminSettings from './pages/AdminSettings';
+import Admin from './pages/Admin';
+import { PaymentProvider } from './context/PaymentContext';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -75,6 +77,7 @@ const AuthenticatedApp = () => {
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
       <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
+      <Route path="/admin" element={<Admin />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -86,12 +89,14 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
+        <PaymentProvider>
         <Router>
           <NavigationTracker />
           <AuthenticatedApp />
         </Router>
         <Toaster />
         <VisualEditAgent />
+        </PaymentProvider>
       </QueryClientProvider>
     </AuthProvider>
   )

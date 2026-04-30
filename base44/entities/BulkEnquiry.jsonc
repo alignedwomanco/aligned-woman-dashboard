@@ -12,7 +12,8 @@
       "type": "string"
     },
     "work_email": {
-      "type": "string"
+      "type": "string",
+      "format": "email"
     },
     "phone": {
       "type": "string"
@@ -38,6 +39,7 @@
   },
   "required": [
     "organisation_name",
+    "contact_person",
     "work_email"
   ]
 }

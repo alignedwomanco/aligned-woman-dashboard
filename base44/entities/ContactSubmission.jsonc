@@ -12,8 +12,7 @@
         "press",
         "general",
         "newsletter"
-      ],
-      "description": "Type of contact submission"
+      ]
     },
     "first_name": {
       "type": "string"
@@ -22,7 +21,8 @@
       "type": "string"
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "format": "email"
     },
     "country": {
       "type": "string"
@@ -48,7 +48,6 @@
   },
   "required": [
     "type",
-    "first_name",
     "email"
   ]
 }

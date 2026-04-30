@@ -5,32 +5,49 @@
     "campaign_id": {
       "type": "string"
     },
-    "recipient_email": {
+    "campaign_name": {
       "type": "string"
     },
-    "recipient_name": {
+    "to_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "to_name": {
       "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "campaign",
+        "abandoned_cart",
+        "welcome",
+        "one_time",
+        "follow_up"
+      ],
+      "default": "campaign"
     },
     "status": {
       "type": "string",
       "enum": [
         "sent",
         "failed",
-        "bounced",
-        "opened"
+        "bounced"
       ],
       "default": "sent"
+    },
+    "error_message": {
+      "type": "string"
     },
     "sent_at": {
       "type": "string",
       "format": "date-time"
-    },
-    "error_message": {
-      "type": "string"
     }
   },
   "required": [
-    "campaign_id",
-    "recipient_email"
+    "to_email",
+    "subject"
   ]
 }

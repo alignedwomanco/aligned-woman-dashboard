@@ -8,40 +8,67 @@
     "subject": {
       "type": "string"
     },
-    "body_html": {
+    "html_body": {
       "type": "string"
     },
-    "target_audience": {
+    "type": {
       "type": "string",
       "enum": [
-        "all_waitlist",
-        "all_members",
-        "abandoned_carts",
-        "applications",
-        "custom"
+        "blast",
+        "one_time",
+        "automation"
       ],
-      "default": "all_waitlist"
+      "default": "blast"
     },
     "status": {
       "type": "string",
       "enum": [
         "draft",
+        "sent",
         "scheduled",
-        "sent"
+        "sending"
       ],
       "default": "draft"
     },
-    "scheduled_at": {
+    "audience": {
       "type": "string",
-      "format": "date-time"
+      "enum": [
+        "all_opted_in",
+        "waitlist",
+        "abandoned_carts",
+        "buyers",
+        "custom"
+      ],
+      "default": "all_opted_in"
+    },
+    "custom_emails": {
+      "type": "string"
+    },
+    "sent_count": {
+      "type": "number",
+      "default": 0
+    },
+    "failed_count": {
+      "type": "number",
+      "default": 0
     },
     "sent_at": {
       "type": "string",
       "format": "date-time"
     },
-    "sent_count": {
-      "type": "number",
-      "default": 0
+    "scheduled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "from_name": {
+      "type": "string",
+      "default": "Laura | The Aligned Woman"
+    },
+    "reply_to": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
     }
   },
   "required": [

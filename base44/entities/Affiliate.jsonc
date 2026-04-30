@@ -1,0 +1,35 @@
+{
+  "name": "Affiliate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Affiliate full name"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "commission_percentage": {
+      "type": "number",
+      "description": "Commission percentage (e.g. 20)"
+    },
+    "unique_code": {
+      "type": "string",
+      "description": "Lowercase slug used in ?aff= URL param"
+    },
+    "total_sales": {
+      "type": "number",
+      "default": 0
+    },
+    "total_commission": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "commission_percentage",
+    "unique_code"
+  ]
+}

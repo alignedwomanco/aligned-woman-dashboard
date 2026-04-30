@@ -6,7 +6,8 @@
       "type": "string"
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "format": "email"
     },
     "country_city": {
       "type": "string"
@@ -17,37 +18,36 @@
     "age_range": {
       "type": "string",
       "enum": [
-        "18-24",
-        "25-30",
-        "31-35",
-        "36-40",
-        "41-45",
-        "46-50",
-        "50+"
+        "Under 20",
+        "20\u201325",
+        "26\u201330",
+        "31\u201335",
+        "36\u201340",
+        "41\u201345",
+        "46+"
       ]
     },
     "primary_focus": {
       "type": "string"
     },
+    "primary_focus_other": {
+      "type": "string"
+    },
     "understands_paid_programme": {
-      "type": "boolean",
-      "default": false
+      "type": "boolean"
     },
     "acknowledges_price": {
-      "type": "boolean",
-      "default": false
+      "type": "boolean"
     },
     "payment_preference": {
       "type": "string",
       "enum": [
-        "full",
-        "instalment",
-        "not_sure"
+        "Pay in full",
+        "Payment plan"
       ]
     },
     "confirms_reservation": {
-      "type": "boolean",
-      "default": false
+      "type": "boolean"
     },
     "status": {
       "type": "string",
