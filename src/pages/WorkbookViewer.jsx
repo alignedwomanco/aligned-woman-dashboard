@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,17 @@ export default function WorkbookViewer() {
     enabled: !!workbook?.expert_id,
   });
 
-  // Unlock check
-  const { isUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
+  // Admin bypass for lock check
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      if (u?.role === "admin" || u?.role === "owner" || u?.role === "master_admin") setIsAdmin(true);
+    }).catch(() => {});
+  }, []);
+
+  // Unlock check (skipped for admins)
+  const { isUnlocked: rawUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
+  const isUnlocked = isAdmin || rawUnlocked;
 
   // Parse sections from schema
   const sections = useMemo(() => {
