@@ -3,7 +3,8 @@ import React, { useState } from "react";
 const DOMAINS = [
   {
     num: "01",
-    title: "Mindset & Behaviour",
+    title: "MINDSET & BEHAVIOUR",
+    heading: "Your mind stops working against you.",
     outcomes: [
       "Identify and rewire subconscious limiting beliefs",
       "Build a daily practice that supports clarity and confidence",
@@ -13,7 +14,8 @@ const DOMAINS = [
   },
   {
     num: "02",
-    title: "Nervous System",
+    title: "NERVOUS SYSTEM",
+    heading: "Your body becomes an asset, not an obstacle.",
     outcomes: [
       "Understand your unique stress response patterns",
       "Learn regulation techniques that actually work for women",
@@ -23,7 +25,8 @@ const DOMAINS = [
   },
   {
     num: "03",
-    title: "Health & Hormones",
+    title: "HEALTH & HORMONES",
+    heading: "You stop fighting your body and start working with it.",
     outcomes: [
       "Sync your energy and ambition to your natural cycle",
       "Understand how hormones shape your mood, focus, and drive",
@@ -33,7 +36,8 @@ const DOMAINS = [
   },
   {
     num: "04",
-    title: "Money",
+    title: "MONEY",
+    heading: "You build wealth without shame or scarcity.",
     outcomes: [
       "Heal your relationship with money at the root",
       "Build financial confidence and earning capacity",
@@ -43,7 +47,8 @@ const DOMAINS = [
   },
   {
     num: "05",
-    title: "Leadership & Authority",
+    title: "LEADERSHIP & AUTHORITY",
+    heading: "You claim your voice and your place.",
     outcomes: [
       "Claim your voice without apology",
       "Lead in rooms that weren't designed for you",
@@ -53,7 +58,8 @@ const DOMAINS = [
   },
   {
     num: "06",
-    title: "Relationships",
+    title: "RELATIONSHIPS",
+    heading: "You stop shrinking to keep the peace.",
     outcomes: [
       "Understand your attachment patterns and how to shift them",
       "Set boundaries from a place of self-worth",
@@ -63,7 +69,8 @@ const DOMAINS = [
   },
   {
     num: "07",
-    title: "Identity & Visibility",
+    title: "IDENTITY & VISIBILITY",
+    heading: "You become someone you actually recognise.",
     outcomes: [
       "Define who you are outside of roles and expectations",
       "Build a personal identity that is fully your own",
@@ -75,6 +82,7 @@ const DOMAINS = [
 
 export default function WhatChangesSection() {
   const [active, setActive] = useState(0);
+  const domain = DOMAINS[active];
 
   return (
     <section className="py-28 px-4" style={{ background: "#0a0a0a" }}>
@@ -102,33 +110,77 @@ export default function WhatChangesSection() {
               <button
                 key={d.num}
                 onClick={() => setActive(i)}
-                className="w-full flex items-center justify-between py-5 px-2 text-left border-b transition-all group"
-                style={{ borderColor: "rgba(196,134,108,0.2)", background: i === active ? "rgba(196,134,108,0.07)" : "transparent" }}
+                className="w-full flex items-center justify-between py-5 px-4 text-left border-b transition-all"
+                style={{
+                  borderColor: "rgba(196,134,108,0.2)",
+                  background: i === active ? "rgba(196,134,108,0.1)" : "transparent",
+                }}
               >
-                <div className="flex items-center gap-5">
-                  <span className="text-xs font-bold" style={{ color: "#C4866C" }}>{d.num}</span>
-                  <span className="font-semibold text-sm tracking-wide" style={{ color: i === active ? "#fff" : "rgba(255,255,255,0.55)" }}>
-                    {d.title}
+                <div className="flex items-center gap-4">
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#C4866C", fontFamily: "Montserrat, sans-serif" }}>{d.num}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", color: i === active ? "#fff" : "rgba(255,255,255,0.5)", fontFamily: "Montserrat, sans-serif" }}>
+                    — {d.title}
                   </span>
                 </div>
-                <span style={{ color: "#C4866C", fontSize: "1.2rem" }}>{i === active ? "↓" : "→"}</span>
+                <span style={{ color: "#C4866C", fontSize: "1rem" }}>{i === active ? "↓" : "→"}</span>
               </button>
             ))}
           </div>
 
           {/* Right: Detail panel */}
-          <div className="p-10 flex flex-col justify-center" style={{ background: "#3a0d22", minHeight: "320px" }}>
-            <p className="text-xs font-bold tracking-[0.25em] uppercase mb-4" style={{ color: "#C4866C" }}>
-              {DOMAINS[active].num} — {DOMAINS[active].title}
+          <div
+            className="p-10 flex flex-col justify-center relative overflow-hidden"
+            style={{ background: "#3a0d22", minHeight: "380px" }}
+          >
+            {/* Large watermark number */}
+            <div
+              style={{
+                position: "absolute",
+                right: -10,
+                bottom: -20,
+                fontSize: "clamp(100px, 14vw, 160px)",
+                fontWeight: 900,
+                color: "rgba(255,255,255,0.04)",
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                lineHeight: 1,
+                userSelect: "none",
+                pointerEvents: "none",
+              }}
+            >
+              {domain.num}
+            </div>
+
+            {/* Label */}
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#C4866C", marginBottom: 16, fontFamily: "Montserrat, sans-serif" }}>
+              {domain.title}
             </p>
-            <h3 className="text-white font-bold text-xl mb-8" style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}>
-              What shifts when you do this work:
+
+            {/* Heading */}
+            <h3
+              style={{
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: "clamp(1.4rem, 2.5vw, 2rem)",
+                color: "#fff",
+                fontWeight: 400,
+                fontStyle: "italic",
+                lineHeight: 1.3,
+                marginBottom: 28,
+              }}
+            >
+              "{domain.heading}"
             </h3>
-            <div className="space-y-4">
-              {DOMAINS[active].outcomes.map((o, i) => (
+
+            {/* Sub-label */}
+            <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(196,134,108,0.6)", marginBottom: 16, fontFamily: "Montserrat, sans-serif" }}>
+              WHAT THIS MEANS IN PRACTICE
+            </p>
+
+            {/* Outcomes */}
+            <div className="space-y-4 relative z-10">
+              {domain.outcomes.map((o, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <span className="text-xs font-bold mt-0.5 flex-shrink-0" style={{ color: "#C4866C" }}>0{i + 1}</span>
-                  <p className="text-white/70 text-sm leading-relaxed">{o}</p>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#C4866C", flexShrink: 0, marginTop: 2, fontFamily: "Montserrat, sans-serif" }}>0{i + 1}</span>
+                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, lineHeight: 1.7 }}>{o}</p>
                 </div>
               ))}
             </div>
@@ -137,8 +189,14 @@ export default function WhatChangesSection() {
 
         {/* Bottom quote */}
         <div className="text-center mt-20">
-          <p className="italic text-white/40 max-w-xl mx-auto" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "1.3rem" }}>
+          <p
+            className="italic mb-4"
+            style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(1.2rem, 2.5vw, 1.5rem)", color: "rgba(255,255,255,0.55)" }}
+          >
             "You were meant to rewrite the rules. On your own terms."
+          </p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", fontFamily: "Montserrat, sans-serif", maxWidth: 520, margin: "0 auto" }}>
+            If you recognised yourself in any of these seven domains, the Blueprint was built for you.
           </p>
         </div>
       </div>

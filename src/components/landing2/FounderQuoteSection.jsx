@@ -56,11 +56,10 @@ export default function FounderQuoteSection() {
             position: "relative",
             maxWidth: 720,
             margin: "0 auto 20px",
-            padding: 3,
             borderRadius: 10,
-            background: "rgba(255,255,255,0.08)",
             border: "1.5px solid rgba(196,134,108,0.28)",
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.3)",
+            overflow: "hidden",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
           }}
         >
           {!embedError ? (
@@ -69,8 +68,6 @@ export default function FounderQuoteSection() {
                 position: "relative",
                 paddingBottom: "56.25%",
                 height: 0,
-                borderRadius: 8,
-                overflow: "hidden",
               }}
             >
               <iframe
@@ -81,7 +78,6 @@ export default function FounderQuoteSection() {
                   width: "100%",
                   height: "100%",
                   border: "none",
-                  borderRadius: 8,
                   display: "block",
                 }}
                 src={EMBED_URL}

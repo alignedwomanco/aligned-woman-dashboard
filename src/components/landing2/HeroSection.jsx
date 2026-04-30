@@ -95,8 +95,8 @@ export default function HeroSection({ onWaitlist }) {
           </p>
         </div>
 
-        {/* CTAs — stacked */}
-        <div className="flex flex-col items-center gap-3">
+        {/* CTAs — side by side */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             to="/blueprint"
             style={{
@@ -112,6 +112,8 @@ export default function HeroSection({ onWaitlist }) {
               textDecoration: "none",
               display: "inline-block",
               transition: "background 0.2s",
+              minWidth: 220,
+              textAlign: "center",
             }}
           >
             Begin Your Blueprint +
@@ -125,11 +127,12 @@ export default function HeroSection({ onWaitlist }) {
               fontWeight: 500,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              padding: "18px 32px",
+              padding: "18px 44px",
               borderRadius: "100px",
               border: "1px solid rgba(255,255,255,0.2)",
               cursor: "pointer",
               transition: "border-color 0.2s, color 0.2s",
+              minWidth: 220,
             }}
           >
             Explore The Programme
