@@ -176,16 +176,12 @@ export default function Layout({ children, currentPageName }) {
         <div className={`fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-3 transition-all duration-300 ${isLandingPage ? "bg-transparent" : "bg-white/95 backdrop-blur-sm shadow-sm"}`}>
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <Link to="/" className="flex-shrink-0">
-              {isLandingPage ? (
-                <span className="font-bold italic text-xl" style={{ color: "#C4866C", fontFamily: "'DM Serif Display', Georgia, serif" }}>AW</span>
-              ) : (
-                <img
-                  src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
-                  alt="The Aligned Woman"
-                  className="object-contain w-auto"
-                  style={{ height: '35px' }}
-                />
-              )}
+              <img
+                src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                alt="The Aligned Woman"
+                className={`object-contain w-auto ${isLandingPage ? "brightness-0 invert" : ""}`}
+                style={{ height: '35px' }}
+              />
             </Link>
 
             <div className="flex items-center gap-3 flex-shrink-0">
@@ -235,8 +231,8 @@ export default function Layout({ children, currentPageName }) {
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 className="p-2 rounded-lg transition-colors hover:bg-white/10">
-                <svg className={`w-8 h-8 ${isLandingPage ? "text-white" : "text-gray-900"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg className={`w-6 h-6 ${isLandingPage ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
             </div>
