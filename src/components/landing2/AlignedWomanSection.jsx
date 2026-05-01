@@ -58,7 +58,7 @@ export default function AlignedWomanSection() {
               fontStyle: "italic",
               textTransform: "none",
               letterSpacing: "0.01em",
-              color: "#F5E8E6",
+              color: "#A96B6D",
             }}
           >
             Aligned Woman?
