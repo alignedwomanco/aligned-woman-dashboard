@@ -55,43 +55,65 @@ export default function HeroSection({ onWaitlist }) {
       />
 
       {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 pt-24 md:pt-28 text-center w-full">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 text-center w-full" style={{ paddingTop: "clamp(80px, 14vw, 120px)", paddingBottom: 0 }}>
+
         {/* Badge */}
         <div
           className="inline-flex items-center gap-2"
-          style={{
-            background: "rgba(196,132,122,0.1)",
-            border: "1px solid rgba(196,132,122,0.25)",
-            borderRadius: "100px",
-            padding: "10px 20px",
-            marginBottom: 8,
-          }}
+          style={{ marginBottom: 20 }}
         >
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgb(196,132,122)", display: "inline-block", flexShrink: 0 }} />
-          <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
-            The Education Women Should Have Been Given
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,180,174,0.85)" }}>
+            ✦ The Education Women Should Have Been Given
           </span>
         </div>
 
-        {/* Logo Image */}
-        <div style={{ marginBottom: 0, marginTop: 0 }}>
-          <img
-            src="https://media.base44.com/images/public/695980c2c3913565a9515787/4fce16830_Untitleddesign1.png"
-            alt="The Aligned Woman Co."
-            style={{ width: "clamp(340px, 58vw, 640px)", height: "auto", margin: "0 auto", display: "block" }}
-          />
+        {/* Typographic hero title */}
+        <div style={{ marginBottom: 20, lineHeight: 1 }}>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(52px, 10vw, 110px)",
+            textTransform: "uppercase",
+            letterSpacing: "-0.02em",
+            color: "#ffffff",
+            lineHeight: 1.0,
+          }}>
+            THE ALIGNED
+          </div>
+          <div style={{
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontWeight: 400,
+            fontStyle: "italic",
+            fontSize: "clamp(64px, 13vw, 140px)",
+            color: "#C4847A",
+            lineHeight: 0.95,
+            letterSpacing: "-0.01em",
+          }}>
+            Woman
+          </div>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(36px, 7vw, 80px)",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            color: "#ffffff",
+            lineHeight: 1.1,
+          }}>
+            CO.
+          </div>
         </div>
 
         {/* Sub copy */}
         <div style={{ marginBottom: 6 }}>
-          <p style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
+          <p style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.75, color: "rgba(255,255,255,0.8)" }}>
             Join a global community of women doing the inner and outer work,<br />
             with access to programmes, events, and tools designed for real life.
           </p>
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
+          <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.75, color: "rgba(255,255,255,0.7)" }}>
             Learn about our flagship course, The Aligned Woman Blueprint
           </p>
         </div>
@@ -107,13 +129,12 @@ export default function HeroSection({ onWaitlist }) {
               fontWeight: 700,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              padding: "19px 44px",
+              padding: "16px 36px",
               borderRadius: "100px",
               boxShadow: "rgba(196,132,122,0.28) 0px 8px 32px",
               textDecoration: "none",
               display: "inline-block",
               transition: "background 0.2s",
-              minWidth: 220,
               textAlign: "center",
             }}
           >
@@ -123,17 +144,16 @@ export default function HeroSection({ onWaitlist }) {
             onClick={scrollToExplore}
             style={{
               background: "transparent",
-              color: "rgba(255,255,255,0.55)",
+              color: "rgba(255,255,255,0.6)",
               fontSize: 11,
               fontWeight: 500,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              padding: "18px 44px",
+              padding: "15px 36px",
               borderRadius: "100px",
               border: "1px solid rgba(255,255,255,0.2)",
               cursor: "pointer",
               transition: "border-color 0.2s, color 0.2s",
-              minWidth: 220,
             }}
           >
             Explore The Programme
