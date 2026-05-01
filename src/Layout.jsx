@@ -669,15 +669,17 @@ export default function Layout({ children, currentPageName }) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/dashboardsettings" className="flex items-center gap-2">
+                    <Link to={createPageUrl("AdminSettings")} className="flex items-center gap-2">
                       <Settings className="w-4 h-4" /> Dashboard Settings
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin-panel" className="flex items-center gap-2">
-                      <Settings className="w-4 h-4" /> Admin Settings
-                    </Link>
-                  </DropdownMenuItem>
+                  {["owner", "admin", "master_admin", "moderator"].includes(user?.role) && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin-panel" className="flex items-center gap-2">
+                        <Settings className="w-4 h-4" /> Admin Settings
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                     <LogOut className="w-4 h-4 mr-2" /> Sign Out
