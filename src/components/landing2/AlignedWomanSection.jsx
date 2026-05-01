@@ -34,15 +34,34 @@ export default function AlignedWomanSection() {
         </div>
 
         {/* Big heading */}
-        <h2
-          className="text-center text-white uppercase font-bold mb-14 leading-none"
-          style={{
-            fontFamily: "'DM Serif Display', Georgia, serif",
-            fontSize: "clamp(3rem, 8vw, 6rem)",
-            letterSpacing: "0.02em",
-          }}
-        >
-          WHAT IS AN<br />ALIGNED WOMAN?
+        <h2 className="text-center mb-14 leading-none">
+          <span
+            style={{
+              display: "block",
+              fontFamily: "Montserrat, sans-serif",
+              fontSize: "clamp(40px, 7vw, 64px)",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              color: "#ffffff",
+            }}
+          >
+            WHAT IS AN
+          </span>
+          <span
+            style={{
+              display: "block",
+              fontFamily: "'DM Serif Display', Georgia, serif",
+              fontSize: "clamp(40px, 7vw, 64px)",
+              fontWeight: 400,
+              fontStyle: "italic",
+              textTransform: "none",
+              letterSpacing: "0.01em",
+              color: "#F5E8E6",
+            }}
+          >
+            Aligned Woman?
+          </span>
         </h2>
 
         {/* Two-column body text */}
