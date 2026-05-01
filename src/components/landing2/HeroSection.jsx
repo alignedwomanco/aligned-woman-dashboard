@@ -64,17 +64,17 @@ export default function HeroSection({ onWaitlist }) {
             border: "1px solid rgba(196,132,122,0.25)",
             borderRadius: "100px",
             padding: "10px 20px",
-            marginBottom: 8,
+            marginBottom: 4,
           }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgb(196,132,122)", display: "inline-block", flexShrink: 0 }} />
-          <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
+          <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
             The Education Women Should Have Been Given
           </span>
         </div>
 
         {/* Logo Image */}
-        <div style={{ marginBottom: 2, marginTop: "-4%" }}>
+        <div style={{ marginBottom: 0, marginTop: 0 }}>
           <img
             src="https://media.base44.com/images/public/695980c2c3913565a9515787/4fce16830_Untitleddesign1.png"
             alt="The Aligned Woman Co."
@@ -83,14 +83,14 @@ export default function HeroSection({ onWaitlist }) {
         </div>
 
         {/* Sub copy */}
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 6 }}>
           <p style={{ fontSize: 18, fontWeight: 400, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
             Join a global community of women doing the inner and outer work,<br />
             with access to programmes, events, and tools designed for real life.
           </p>
         </div>
 
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 10 }}>
           <p style={{ fontSize: "clamp(13px, 1.5vw, 16px)", fontWeight: 500, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
             Learn about our flagship course, The Aligned Woman Blueprint
           </p>
