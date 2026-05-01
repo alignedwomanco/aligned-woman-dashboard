@@ -55,15 +55,16 @@ export default function HeroSection({ onWaitlist }) {
       />
 
       {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-20 pt-28 md:pt-36 text-center w-full">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 sm:py-12 lg:py-16 pt-24 md:pt-28 text-center w-full">
         {/* Badge */}
         <div
-          className="inline-flex items-center gap-2 mb-8"
+          className="inline-flex items-center gap-2"
           style={{
             background: "rgba(196,132,122,0.1)",
             border: "1px solid rgba(196,132,122,0.25)",
             borderRadius: "100px",
             padding: "10px 20px",
+            marginBottom: 16,
           }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgb(196,132,122)", display: "inline-block", flexShrink: 0 }} />
@@ -73,7 +74,7 @@ export default function HeroSection({ onWaitlist }) {
         </div>
 
         {/* Logo Image */}
-        <div className="mb-8" style={{ marginTop: "-4%" }}>
+        <div style={{ marginBottom: 12, marginTop: "-2%" }}>
           <img
             src="https://media.base44.com/images/public/695980c2c3913565a9515787/4fce16830_Untitleddesign1.png"
             alt="The Aligned Woman Co."
@@ -82,21 +83,21 @@ export default function HeroSection({ onWaitlist }) {
         </div>
 
         {/* Sub copy */}
-        <div className="mb-8">
+        <div style={{ marginBottom: "clamp(16px, 2.5vw, 24px)" }}>
           <p style={{ fontSize: "clamp(14px, 2vw, 18px)", fontWeight: 400, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
             Join a global community of women doing the inner and outer work,<br />
             with access to programmes, events, and tools designed for real life.
           </p>
         </div>
 
-        <div className="mb-10">
+        <div style={{ marginBottom: "clamp(16px, 2.5vw, 24px)" }}>
           <p style={{ fontSize: "clamp(13px, 1.5vw, 16px)", fontWeight: 500, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
             Learn about our flagship course, The Aligned Woman Blueprint
           </p>
         </div>
 
         {/* CTAs — side by side */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-row items-center justify-center flex-wrap gap-2">
           <Link
             to="/blueprint"
             style={{
