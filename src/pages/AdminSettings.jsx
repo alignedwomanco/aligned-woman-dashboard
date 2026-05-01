@@ -314,6 +314,7 @@ export default function AdminSettings() {
                   { value: "ai-chat", label: "AI Chat", icon: "🤖" },
                   { value: "support", label: "Support", icon: "🎧" },
                   { value: "logos", label: "Logos", icon: "🎨" },
+                  { value: "access-tags", label: "Access Tags", icon: "🏷️" },
                 ].map((tab) => (
                   <button
                     key={tab.value}
@@ -335,7 +336,6 @@ export default function AdminSettings() {
           {/* Members Tab */}
           <TabsContent value="members" className="space-y-6">
             <MembersManager allUsers={allUsers} />
-            <AccessTagManager />
           </TabsContent>
 
           {/* User Management Tab */}
@@ -726,6 +726,11 @@ export default function AdminSettings() {
           {/* Logos Tab */}
           <TabsContent value="logos">
             <LogoManagement />
+          </TabsContent>
+
+          {/* Access Tags Tab */}
+          <TabsContent value="access-tags">
+            <AccessTagManager />
           </TabsContent>
         </Tabs>
       </div>
