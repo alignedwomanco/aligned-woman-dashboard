@@ -78,41 +78,13 @@ export default function HeroSection({ onWaitlist }) {
           </span>
         </div>
 
-        {/* Typographic hero title */}
-        <div style={{ marginBottom: 20, lineHeight: 1, maxWidth: "clamp(280px, 48vw, 520px)", margin: "0 auto 20px" }}>
-          <div style={{
-            fontFamily: "Montserrat, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(52px, 10vw, 110px)",
-            textTransform: "uppercase",
-            letterSpacing: "-0.02em",
-            color: "#ffffff",
-            lineHeight: 1.0,
-          }}>
-            THE ALIGNED
-          </div>
-          <div style={{
-            fontFamily: "'DM Serif Display', Georgia, serif",
-            fontWeight: 400,
-            fontStyle: "italic",
-            fontSize: "clamp(64px, 13vw, 140px)",
-            color: "#C4847A",
-            lineHeight: 0.95,
-            letterSpacing: "-0.01em",
-          }}>
-            Woman
-          </div>
-          <div style={{
-            fontFamily: "Montserrat, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(36px, 7vw, 80px)",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: "#ffffff",
-            lineHeight: 1.1,
-          }}>
-            CO.
-          </div>
+        {/* Logo image */}
+        <div style={{ marginBottom: 4 }}>
+          <img
+            src="https://media.base44.com/images/public/695980c2c3913565a9515787/4fce16830_Untitleddesign1.png"
+            alt="The Aligned Woman Co."
+            style={{ width: "clamp(280px, 48vw, 520px)", height: "auto", margin: "0 auto", display: "block" }}
+          />
         </div>
 
         {/* Sub copy */}
