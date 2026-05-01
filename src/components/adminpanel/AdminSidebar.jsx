@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { ChevronLeft, Home } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AdminSidebar({ navItems, activeTab, setActiveTab, user }) {
@@ -24,6 +26,26 @@ export default function AdminSidebar({ navItems, activeTab, setActiveTab, user }
       <div className="px-6 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
         <p style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>{user?.full_name || "Admin"}</p>
         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", textTransform: "capitalize" }}>{user?.role}</p>
+      </div>
+
+      {/* Quick Nav - Back to Dashboard & Home */}
+      <div className="px-6 py-4 space-y-2 border-b" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+          style={{ color: "rgba(255,255,255,0.7)", background: "rgba(255,255,255,0.05)" }}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+          style={{ color: "rgba(255,255,255,0.7)", background: "rgba(255,255,255,0.05)" }}
+        >
+          <Home className="w-4 h-4" />
+          Home
+        </Link>
       </div>
 
       {/* Nav */}
