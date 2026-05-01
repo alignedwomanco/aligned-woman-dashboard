@@ -72,7 +72,7 @@ export default function HeroSection({ onWaitlist }) {
           <div style={{
             fontFamily: "Montserrat, sans-serif",
             fontWeight: 800,
-            fontSize: "clamp(52px, 10vw, 110px)",
+            fontSize: "clamp(36px, 7vw, 80px)",
             textTransform: "uppercase",
             letterSpacing: "-0.02em",
             color: "#ffffff",
