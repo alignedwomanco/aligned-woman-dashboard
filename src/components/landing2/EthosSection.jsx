@@ -20,7 +20,7 @@ const PILLARS = [
 
 export default function EthosSection() {
   return (
-    <section className="py-28 px-4" style={{ background: "#000" }}>
+    <section className="py-28 px-4" style={{ background: "#F6E6E0" }}>
       <div className="max-w-6xl mx-auto">
         {/* Label */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 32 }}>
@@ -33,27 +33,27 @@ export default function EthosSection() {
 
         {/* Headline */}
         <h2 className="mb-20 max-w-4xl leading-tight" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(1.8rem, 4vw, 3rem)" }}>
-          <span className="text-white font-bold">This is education designed for </span>
-          <span className="italic" style={{ color: "#C4866C" }}>self-authority, agency </span>
-          <span className="text-white font-bold">and </span>
-          <span className="italic" style={{ color: "#C4866C" }}>long-term empowerment.</span>
+          <span style={{ color: "#374151", fontWeight: 700 }}>This is education designed for </span>
+          <span className="italic" style={{ color: "#A86B6C" }}>self-authority, agency </span>
+          <span style={{ color: "#374151", fontWeight: 700 }}>and </span>
+          <span className="italic" style={{ color: "#A86B6C" }}>long-term empowerment.</span>
         </h2>
 
         {/* Pillars */}
-        <div className="grid md:grid-cols-3 gap-0 border-t" style={{ borderColor: "rgba(196,134,108,0.2)" }}>
+        <div className="grid md:grid-cols-3 gap-0 border-t" style={{ borderColor: "rgba(168,107,108,0.25)" }}>
           {PILLARS.map((p, i) => (
             <div
               key={p.num}
               className="py-10 pr-10"
               style={{
-                borderRight: i < 2 ? "1px solid rgba(196,134,108,0.2)" : "none",
+                borderRight: i < 2 ? "1px solid rgba(168,107,108,0.25)" : "none",
                 paddingLeft: i === 0 ? 0 : "2.5rem",
               }}
             >
-              <p className="text-xs font-bold tracking-[0.25em] uppercase mb-4" style={{ color: "#C4866C" }}>
+              <p className="text-xs font-bold tracking-[0.25em] uppercase mb-4" style={{ color: "#A86B6C" }}>
                 {p.num} {p.title}
               </p>
-              <p className="text-white/50 leading-relaxed text-sm">{p.desc}</p>
+              <p className="leading-relaxed text-sm" style={{ color: "#374151" }}>{p.desc}</p>
             </div>
           ))}
         </div>
