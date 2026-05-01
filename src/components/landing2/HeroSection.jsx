@@ -30,7 +30,7 @@ export default function HeroSection({ onWaitlist }) {
     <section
       ref={sectionRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{ minHeight: "100vh", paddingBottom: 32 }}
+      style={{ minHeight: "100vh" }}
     >
       {/* Background Image */}
       <img
@@ -58,33 +58,50 @@ export default function HeroSection({ onWaitlist }) {
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center w-full" style={{ paddingTop: "clamp(80px, 14vw, 120px)", paddingBottom: 0 }}>
 
         {/* Badge */}
-        <div className="inline-flex items-center justify-center" style={{ marginBottom: 20 }}>
-          <span style={{
-            fontSize: 14,
-            fontWeight: 600,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "rgba(232,180,174,0.9)",
-            background: "rgba(196,132,122,0.1)",
-            border: "1px solid rgba(196,132,122,0.25)",
-            borderRadius: "100px",
-            padding: "10px 20px",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-          }}>
-            <span style={{ color: "rgba(196,132,122,0.8)", fontSize: 10 }}>●</span>
-            The Education Women Should Have Been Given
+        <div
+          className="inline-flex items-center gap-2"
+          style={{ marginBottom: 20 }}
+        >
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,180,174,0.85)" }}>
+            ✦ The Education Women Should Have Been Given
           </span>
         </div>
 
-        {/* Logo image */}
-        <div style={{ marginBottom: 4 }}>
-          <img
-            src="https://media.base44.com/images/public/695980c2c3913565a9515787/4fce16830_Untitleddesign1.png"
-            alt="The Aligned Woman Co."
-            style={{ width: "clamp(280px, 48vw, 520px)", height: "auto", margin: "0 auto", display: "block" }}
-          />
+        {/* Typographic hero title */}
+        <div style={{ marginBottom: 20, lineHeight: 1 }}>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(52px, 10vw, 110px)",
+            textTransform: "uppercase",
+            letterSpacing: "-0.02em",
+            color: "#ffffff",
+            lineHeight: 1.0,
+          }}>
+            THE ALIGNED
+          </div>
+          <div style={{
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontWeight: 400,
+            fontStyle: "italic",
+            fontSize: "clamp(64px, 13vw, 140px)",
+            color: "#C4847A",
+            lineHeight: 0.95,
+            letterSpacing: "-0.01em",
+          }}>
+            Woman
+          </div>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(36px, 7vw, 80px)",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            color: "#ffffff",
+            lineHeight: 1.1,
+          }}>
+            CO.
+          </div>
         </div>
 
         {/* Sub copy */}
@@ -145,7 +162,7 @@ export default function HeroSection({ onWaitlist }) {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
         <div className="w-6 h-9 border-2 border-white/40 rounded-full flex justify-center pt-1.5">
           <div className="w-1 h-2 bg-white/60 rounded-full animate-bounce" />
         </div>
