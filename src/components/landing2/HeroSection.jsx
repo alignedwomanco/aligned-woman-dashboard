@@ -56,6 +56,23 @@ export default function HeroSection({ onWaitlist }) {
 
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 sm:py-12 lg:py-16 pt-24 md:pt-28 text-center w-full">
+        {/* Badge */}
+        <div
+          className="inline-flex items-center gap-2"
+          style={{
+            background: "rgba(196,132,122,0.1)",
+            border: "1px solid rgba(196,132,122,0.25)",
+            borderRadius: "100px",
+            padding: "10px 20px",
+            marginBottom: 4,
+          }}
+        >
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgb(196,132,122)", display: "inline-block", flexShrink: 0 }} />
+          <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
+            The Education Women Should Have Been Given
+          </span>
+        </div>
+
         {/* Logo Image */}
         <div style={{ marginBottom: 0, marginTop: 0 }}>
           <img
@@ -77,23 +94,6 @@ export default function HeroSection({ onWaitlist }) {
           <p style={{ fontSize: "clamp(13px, 1.5vw, 16px)", fontWeight: 500, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
             Learn about our flagship course, The Aligned Woman Blueprint
           </p>
-        </div>
-
-        {/* Badge */}
-        <div
-          className="inline-flex items-center gap-2"
-          style={{
-            background: "rgba(196,132,122,0.1)",
-            border: "1px solid rgba(196,132,122,0.25)",
-            borderRadius: "100px",
-            padding: "8px 18px",
-            marginBottom: 16,
-          }}
-        >
-          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "rgb(196,132,122)", display: "inline-block", flexShrink: 0 }} />
-          <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
-            The Education Women Should Have Been Given
-          </span>
         </div>
 
         {/* CTAs — side by side */}
