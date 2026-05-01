@@ -196,17 +196,21 @@ export default function WhatChangesSection() {
           transition={{ duration: 0.7 }}
           style={{ marginBottom: "clamp(48px,8vw,80px)" }}
         >
-          <p style={{
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.4)",
-            marginBottom: 24,
-            fontFamily: "Montserrat, sans-serif",
-          }}>
-            WHAT CHANGES
-          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 24 }}>
+            <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
+            <p style={{
+              fontSize: 16,
+              fontWeight: 700,
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: "#A86B6C",
+              fontFamily: "Montserrat, sans-serif",
+              margin: 0,
+            }}>
+              WHAT CHANGES
+            </p>
+            <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
+          </div>
 
           <div>
             <p style={{

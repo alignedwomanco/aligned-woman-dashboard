@@ -18,19 +18,20 @@ export default function AlignedWomanSection() {
       <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 py-24">
 
         {/* Label */}
-        <div className="flex items-center justify-center gap-4 mb-8">
-          <div className="h-px w-12 bg-white/30" />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 32 }}>
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
           <p style={{
             fontFamily: "Montserrat, sans-serif",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.3em",
+            fontSize: 16,
+            fontWeight: 700,
+            letterSpacing: "0.28em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.5)",
+            color: "#A86B6C",
+            margin: 0,
           }}>
             WHO SHE IS
           </p>
-          <div className="h-px w-12 bg-white/30" />
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
         </div>
 
         {/* Big heading */}

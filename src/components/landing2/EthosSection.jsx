@@ -23,9 +23,13 @@ export default function EthosSection() {
     <section className="py-28 px-4" style={{ background: "#000" }}>
       <div className="max-w-6xl mx-auto">
         {/* Label */}
-        <p className="text-xs font-bold tracking-[0.3em] uppercase mb-8" style={{ color: "#C4866C" }}>
-          Our Ethos
-        </p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 32 }}>
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
+          <p style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#A86B6C", margin: 0 }}>
+            Our Ethos
+          </p>
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
+        </div>
 
         {/* Headline */}
         <h2 className="mb-20 max-w-4xl leading-tight" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(1.8rem, 4vw, 3rem)" }}>

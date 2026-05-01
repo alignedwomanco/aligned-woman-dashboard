@@ -6,11 +6,11 @@ export default function RealityCheckSection() {
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         {/* Label */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 32 }}>
-          <div style={{ width: 36, height: 1, background: "rgba(196,132,122,0.4)" }} />
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(196,132,122,0.6)" }}>
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
+          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#A86B6C" }}>
             The Reality Check
           </span>
-          <div style={{ width: 36, height: 1, background: "rgba(196,132,122,0.4)" }} />
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
         </div>
 
         {/* Headline */}

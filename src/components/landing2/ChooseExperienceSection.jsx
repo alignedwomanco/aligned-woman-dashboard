@@ -47,9 +47,11 @@ export default function ChooseExperienceSection() {
 
         {/* Label */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 32 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(107,27,61,0.5)", textAlign: "center" }}>
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
+          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#A86B6C" }}>
             Choose Your Aligned Experience
           </span>
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
         </div>
 
         {/* Headline */}
