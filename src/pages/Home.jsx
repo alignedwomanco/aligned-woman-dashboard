@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import HeroSection from "@/components/landing2/HeroSection";
-import RealityCheckSection from "@/components/landing2/RealityCheckSection";
-import ChooseExperienceSection from "@/components/landing2/ChooseExperienceSection";
-import AlignedWomanSection from "@/components/landing2/AlignedWomanSection";
-import FounderQuoteSection from "@/components/landing2/FounderQuoteSection";
-import BlueprintIntroSection from "@/components/landing2/BlueprintIntroSection";
-import WhatChangesSection from "@/components/landing2/WhatChangesSection";
-import EthosSection from "@/components/landing2/EthosSection";
-import LandingFooter from "@/components/landing2/LandingFooter";
+import HeroSection from "@/components/home/HeroSection";
+import RealityCheckSection from "@/components/home/RealityCheckSection";
+import ChooseExperienceSection from "@/components/home/ChooseExperienceSection";
+import AlignedWomanSection from "@/components/home/AlignedWomanSection";
+import FounderQuoteSection from "@/components/home/FounderQuoteSection";
+import BlueprintIntroSection from "@/components/home/BlueprintIntroSection";
+import WhatChangesSection from "@/components/home/WhatChangesSection";
+import EthosSection from "@/components/home/EthosSection";
+import LandingFooter from "@/components/home/LandingFooter";
 
 export default function Home() {
   const [affiliateCode, setAffiliateCode] = useState("");

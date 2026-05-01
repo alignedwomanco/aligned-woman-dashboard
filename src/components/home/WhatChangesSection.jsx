@@ -111,66 +111,25 @@ function DetailPane({ domain }) {
         {domain.num}
       </div>
 
-      {/* Domain label */}
-      <p style={{
-        fontSize: 9,
-        fontWeight: 700,
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
-        color: "rgba(255,255,255,0.4)",
-        marginBottom: 20,
-        fontFamily: "Montserrat, sans-serif",
-      }}>
+      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 20, fontFamily: "Montserrat, sans-serif" }}>
         {domain.title}
       </p>
 
-      {/* Transformation */}
-      <p style={{
-        fontFamily: "'DM Serif Display', Georgia, serif",
-        fontStyle: "italic",
-        fontSize: "clamp(28px, 5vw, 40px)",
-        color: "#fff",
-        lineHeight: 1.25,
-        marginBottom: 36,
-      }}>
+      <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontStyle: "italic", fontSize: "clamp(28px, 5vw, 40px)", color: "#fff", lineHeight: 1.25, marginBottom: 36 }}>
         "{domain.transformation}"
       </p>
 
-      {/* Practice label */}
-      <p style={{
-        fontSize: 9,
-        fontWeight: 700,
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
-        color: "rgba(255,255,255,0.4)",
-        marginBottom: 20,
-        fontFamily: "Montserrat, sans-serif",
-      }}>
+      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 20, fontFamily: "Montserrat, sans-serif" }}>
         WHAT THIS MEANS IN PRACTICE
       </p>
 
-      {/* Outcomes */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16, position: "relative", zIndex: 1 }}>
         {domain.outcomes.map((o, i) => (
           <div key={i} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-            <span style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#C4847A",
-              flexShrink: 0,
-              marginTop: 2,
-              fontFamily: "Montserrat, sans-serif",
-            }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#C4847A", flexShrink: 0, marginTop: 2, fontFamily: "Montserrat, sans-serif" }}>
               0{i + 1}
             </span>
-            <p style={{
-              fontSize: 13,
-              fontWeight: 300,
-              color: "rgba(255,255,255,0.55)",
-              lineHeight: 1.7,
-              margin: 0,
-              fontFamily: "Montserrat, sans-serif",
-            }}>
+            <p style={{ fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, margin: 0, fontFamily: "Montserrat, sans-serif" }}>
               {o}
             </p>
           </div>
@@ -181,7 +140,7 @@ function DetailPane({ domain }) {
 }
 
 export default function WhatChangesSection() {
-  const [selected, setSelected] = useState(1); // Default: 02 NERVOUS SYSTEM
+  const [selected, setSelected] = useState(1);
   const [openMobile, setOpenMobile] = useState(1);
 
   return (
@@ -198,53 +157,20 @@ export default function WhatChangesSection() {
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 24 }}>
             <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
-            <p style={{
-              fontSize: 16,
-              fontWeight: 700,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: "#A86B6C",
-              fontFamily: "Montserrat, sans-serif",
-              margin: 0,
-            }}>
+            <p style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#A86B6C", fontFamily: "Montserrat, sans-serif", margin: 0 }}>
               WHAT CHANGES
             </p>
             <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
           </div>
 
           <div>
-            <p style={{
-              fontFamily: "Montserrat, sans-serif",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "-0.03em",
-              fontSize: "clamp(48px, 8vw, 72px)",
-              color: "#fff",
-              lineHeight: 1.05,
-              margin: 0,
-            }}>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, textTransform: "uppercase", letterSpacing: "-0.03em", fontSize: "clamp(48px, 8vw, 72px)", color: "#fff", lineHeight: 1.05, margin: 0 }}>
               NOT WHAT YOU
             </p>
-            <p style={{
-              fontFamily: "Montserrat, sans-serif",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "-0.03em",
-              fontSize: "clamp(48px, 8vw, 72px)",
-              color: "#fff",
-              lineHeight: 1.05,
-              margin: 0,
-            }}>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, textTransform: "uppercase", letterSpacing: "-0.03em", fontSize: "clamp(48px, 8vw, 72px)", color: "#fff", lineHeight: 1.05, margin: 0 }}>
               WILL LEARN.
             </p>
-            <p style={{
-              fontFamily: "'DM Serif Display', Georgia, serif",
-              fontStyle: "italic",
-              fontSize: "clamp(52px, 9vw, 88px)",
-              color: "#C4847A",
-              lineHeight: 1.05,
-              margin: 0,
-            }}>
+            <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontStyle: "italic", fontSize: "clamp(52px, 9vw, 88px)", color: "#C4847A", lineHeight: 1.05, margin: 0 }}>
               What you will become.
             </p>
           </div>
@@ -256,13 +182,10 @@ export default function WhatChangesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.15 }}
-          style={{
-            display: "none",
-          }}
+          style={{ display: "none" }}
           className="wc-desktop"
         >
           <div style={{ display: "grid", gridTemplateColumns: "0.9fr 1.4fr", gap: 48 }}>
-            {/* Left list */}
             <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, overflow: "hidden" }}>
               {DOMAINS.map((d, i) => {
                 const active = selected === i;
@@ -285,33 +208,17 @@ export default function WhatChangesSection() {
                       textAlign: "left",
                       transition: "all 0.2s",
                     }}
-                    onMouseEnter={e => { if (!active) { e.currentTarget.style.background = "rgba(196,132,122,0.04)"; e.currentTarget.style.borderColor = "rgba(196,132,122,0.15)"; } }}
+                    onMouseEnter={e => { if (!active) { e.currentTarget.style.background = "rgba(196,132,122,0.04)"; } }}
                     onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; } }}
                   >
-                    <span style={{
-                      fontSize: 9,
-                      fontWeight: 700,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: active ? "#C4847A" : "rgba(255,255,255,0.3)",
-                      fontFamily: "Montserrat, sans-serif",
-                    }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: active ? "#C4847A" : "rgba(255,255,255,0.3)", fontFamily: "Montserrat, sans-serif" }}>
                       {d.num} · {d.title}
                     </span>
-                    <span style={{
-                      color: active ? "#C4847A" : "rgba(255,255,255,0.15)",
-                      fontSize: 14,
-                      flexShrink: 0,
-                      marginLeft: 12,
-                    }}>
-                      →
-                    </span>
+                    <span style={{ color: active ? "#C4847A" : "rgba(255,255,255,0.15)", fontSize: 14, flexShrink: 0, marginLeft: 12 }}>→</span>
                   </button>
                 );
               })}
             </div>
-
-            {/* Right detail */}
             <DetailPane domain={DOMAINS[selected]} />
           </div>
         </motion.div>
@@ -332,38 +239,12 @@ export default function WhatChangesSection() {
                 <div key={d.num} style={{ borderBottom: i < DOMAINS.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
                   <button
                     onClick={() => setOpenMobile(open ? -1 : i)}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "18px 24px",
-                      background: open ? "rgba(74,14,46,0.35)" : "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      textAlign: "left",
-                    }}
+                    style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", background: open ? "rgba(74,14,46,0.35)" : "transparent", border: "none", cursor: "pointer", textAlign: "left" }}
                   >
-                    <span style={{
-                      fontSize: 9,
-                      fontWeight: 700,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: open ? "#C4847A" : "rgba(255,255,255,0.3)",
-                      fontFamily: "Montserrat, sans-serif",
-                    }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: open ? "#C4847A" : "rgba(255,255,255,0.3)", fontFamily: "Montserrat, sans-serif" }}>
                       {d.num} · {d.title}
                     </span>
-                    <span style={{
-                      color: open ? "#C4847A" : "rgba(255,255,255,0.15)",
-                      fontSize: 14,
-                      transform: open ? "rotate(90deg)" : "rotate(0deg)",
-                      transition: "transform 0.25s",
-                      flexShrink: 0,
-                      marginLeft: 12,
-                    }}>
-                      →
-                    </span>
+                    <span style={{ color: open ? "#C4847A" : "rgba(255,255,255,0.15)", fontSize: 14, transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.25s", flexShrink: 0, marginLeft: 12 }}>→</span>
                   </button>
                   {open && (
                     <div style={{ padding: "0 8px 8px" }}>
@@ -384,25 +265,11 @@ export default function WhatChangesSection() {
           transition={{ duration: 0.7, delay: 0.2 }}
           style={{ marginTop: 64, textAlign: "center" }}
         >
-          <p style={{
-            fontFamily: "'DM Serif Display', Georgia, serif",
-            fontStyle: "italic",
-            fontSize: "clamp(18px, 3vw, 24px)",
-            color: "rgba(255,255,255,0.65)",
-            marginBottom: 12,
-          }}>
+          <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontStyle: "italic", fontSize: "clamp(18px, 3vw, 24px)", color: "rgba(255,255,255,0.65)", marginBottom: 12 }}>
             You were meant to rewrite the rules.{" "}
             <span style={{ color: "#C4847A" }}>On your own terms.</span>
           </p>
-          <p style={{
-            fontSize: 13,
-            fontWeight: 300,
-            color: "rgba(255,255,255,0.35)",
-            fontFamily: "Montserrat, sans-serif",
-            maxWidth: 540,
-            margin: "0 auto",
-            lineHeight: 1.7,
-          }}>
+          <p style={{ fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,0.35)", fontFamily: "Montserrat, sans-serif", maxWidth: 540, margin: "0 auto", lineHeight: 1.7 }}>
             If you recognised yourself in any of these seven domains, the Blueprint was built for you.
           </p>
         </motion.div>
