@@ -1,6 +1,22 @@
-import React, { useState } from "react";
-import { useGeoPrice } from "@/components/landing/useGeoPrice";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+
+function useGeoPrice() {
+  const [pricing, setPricing] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    base44.entities.RegionalPricing.list()
+      .then((items) => {
+        const active = items.find(p => p.is_active) || items[0] || null;
+        setPricing(active);
+      })
+      .catch(() => setPricing(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { pricing, loading };
+}
 import { Loader2, Shield, Star, Gift, Heart, Users } from "lucide-react";
 
 const PURCHASE_TYPES = [

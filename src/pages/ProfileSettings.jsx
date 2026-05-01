@@ -24,7 +24,6 @@ import BackgroundSelector from "@/components/settings/BackgroundSelector";
 import ThemeSelector from "@/components/settings/ThemeSelector";
 import { createPageUrl } from "@/utils";
 import AdminMetricsContent from "@/components/admin/AdminMetricsContent";
-import MessageInbox from "@/components/messages/MessageInbox";
 
 export default function ProfileSettings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -837,11 +836,6 @@ If you did not request this change, please ignore this email.
           </TabsContent>
 
           {/* Social & Connections Tab */}
-          {/* Messages Tab */}
-          <TabsContent value="messages">
-            <MessageInbox currentUser={currentUser} />
-          </TabsContent>
-
           {/* Social & Connections Tab */}
           <TabsContent value="social" className="space-y-6">
             {/* Stats Overview */}

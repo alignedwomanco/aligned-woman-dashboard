@@ -8,10 +8,8 @@ import BlueprintIntroSection from "@/components/landing2/BlueprintIntroSection";
 import WhatChangesSection from "@/components/landing2/WhatChangesSection";
 import EthosSection from "@/components/landing2/EthosSection";
 import LandingFooter from "@/components/landing2/LandingFooter";
-import WaitlistModal from "@/components/landing/WaitlistModal";
 
 export default function LandingPage() {
-  const [showWaitlist, setShowWaitlist] = useState(false);
   const [affiliateCode, setAffiliateCode] = useState("");
 
   useEffect(() => {
@@ -28,8 +26,7 @@ export default function LandingPage() {
 
   return (
     <div className="overflow-x-hidden scroll-smooth">
-      {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} affiliateCode={affiliateCode} />}
-      <HeroSection onWaitlist={() => setShowWaitlist(true)} />
+      <HeroSection onWaitlist={() => {}} />
       <RealityCheckSection />
       <ChooseExperienceSection />
       <AlignedWomanSection />

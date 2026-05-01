@@ -12,13 +12,10 @@ import Experts from './pages/Experts';
 import ExpertsDirectory from './pages/ExpertsDirectory.jsx';
 import Journal from './pages/Journal';
 import Members from './pages/Members';
-import Messages from './pages/Messages';
 import ModuleFrameworkBuilder from './pages/ModuleFrameworkBuilder';
 import ModulePlayer from './pages/ModulePlayer';
 import MyALIVEJourney from './pages/MyALIVEJourney';
-import MyAstrology from './pages/MyAstrology';
 import MyCycle from './pages/MyCycle';
-import MyHumanDesign from './pages/MyHumanDesign';
 import MyMetrics from './pages/MyMetrics';
 import MyPathway from './pages/MyPathway';
 import OnboardingForm from './pages/OnboardingForm';
@@ -47,13 +44,10 @@ export const PAGES = {
     "ExpertsDirectory": ExpertsDirectory,
     "Journal": Journal,
     "Members": Members,
-    "Messages": Messages,
     "ModuleFrameworkBuilder": ModuleFrameworkBuilder,
     "ModulePlayer": ModulePlayer,
     "MyALIVEJourney": MyALIVEJourney,
-    "MyAstrology": MyAstrology,
     "MyCycle": MyCycle,
-    "MyHumanDesign": MyHumanDesign,
     "MyMetrics": MyMetrics,
     "MyPathway": MyPathway,
     "OnboardingForm": OnboardingForm,
