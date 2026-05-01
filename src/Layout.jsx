@@ -52,7 +52,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete";
+  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete";
 
   // Dashboard has its own layout — render children directly
   const isDashboardPage = currentPageName === "Dashboard";
@@ -154,7 +154,7 @@ export default function Layout({ children, currentPageName }) {
     return () => { document.body.style.overflow = ""; };
   }, [showMobileMenu]);
 
-  const isLandingPage = currentPageName === "LandingPage";
+  const isLandingPage = currentPageName === "LandingPage" || currentPageName === "Home";
 
   // Public page layout with hamburger menu
   if (isPublicPage) {

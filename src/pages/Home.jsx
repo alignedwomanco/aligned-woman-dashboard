@@ -9,7 +9,7 @@ import WhatChangesSection from "@/components/landing2/WhatChangesSection";
 import EthosSection from "@/components/landing2/EthosSection";
 import LandingFooter from "@/components/landing2/LandingFooter";
 
-export default function LandingPage() {
+export default function Home() {
   const [affiliateCode, setAffiliateCode] = useState("");
 
   useEffect(() => {

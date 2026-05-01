@@ -11,7 +11,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CourseDetail from './pages/CourseDetail';
 import SectionDetail from './pages/SectionDetail';
 import WorkbookViewer from './pages/WorkbookViewer';
-import LandingPage from './pages/LandingPage';
+import Home from './pages/Home';
 import BlueprintPage from './pages/BlueprintPage';
 import AboutUs from './pages/AboutUs';
 import CheckoutComplete from './pages/CheckoutComplete';
@@ -72,8 +72,8 @@ const AuthenticatedApp = () => {
       <Route path="/CourseDetail" element={<LayoutWrapper currentPageName="CourseDetail"><CourseDetail /></LayoutWrapper>} />
       <Route path="/SectionDetail" element={<LayoutWrapper currentPageName="SectionDetail"><SectionDetail /></LayoutWrapper>} />
       <Route path="/Workbook" element={<LayoutWrapper currentPageName="Workbook"><WorkbookViewer /></LayoutWrapper>} />
-      <Route path="/" element={<LayoutWrapper currentPageName="LandingPage"><LandingPage /></LayoutWrapper>} />
-      <Route path="/home" element={<LayoutWrapper currentPageName="LandingPage"><LandingPage /></LayoutWrapper>} />
+      <Route path="/" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
+      <Route path="/home" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       <Route path="/blueprint" element={<LayoutWrapper currentPageName="blueprint"><BlueprintPage /></LayoutWrapper>} />
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
