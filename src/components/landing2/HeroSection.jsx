@@ -55,7 +55,7 @@ export default function HeroSection({ onWaitlist }) {
       />
 
       {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 sm:py-12 lg:py-16 pt-24 md:pt-28 text-center w-full">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 pt-24 md:pt-28 text-center w-full">
         {/* Badge */}
         <div
           className="inline-flex items-center gap-2"
@@ -64,11 +64,11 @@ export default function HeroSection({ onWaitlist }) {
             border: "1px solid rgba(196,132,122,0.25)",
             borderRadius: "100px",
             padding: "10px 20px",
-            marginBottom: 4,
+            marginBottom: 8,
           }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgb(196,132,122)", display: "inline-block", flexShrink: 0 }} />
-          <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
+          <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgb(232,180,174)" }}>
             The Education Women Should Have Been Given
           </span>
         </div>
@@ -84,20 +84,20 @@ export default function HeroSection({ onWaitlist }) {
 
         {/* Sub copy */}
         <div style={{ marginBottom: 6 }}>
-          <p style={{ fontSize: 18, fontWeight: 400, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
+          <p style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
             Join a global community of women doing the inner and outer work,<br />
             with access to programmes, events, and tools designed for real life.
           </p>
         </div>
 
-        <div style={{ marginBottom: 10 }}>
-          <p style={{ fontSize: "clamp(13px, 1.5vw, 16px)", fontWeight: 500, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
+        <div style={{ marginBottom: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.85, color: "rgba(255,255,255,0.8)" }}>
             Learn about our flagship course, The Aligned Woman Blueprint
           </p>
         </div>
 
         {/* CTAs — side by side */}
-        <div className="flex flex-row items-center justify-center flex-wrap gap-2" style={{ marginBottom: 24 }}>
+        <div className="flex flex-row items-center justify-center flex-wrap" style={{ gap: 12, marginBottom: 20 }}>
           <Link
             to="/blueprint"
             style={{
@@ -142,7 +142,7 @@ export default function HeroSection({ onWaitlist }) {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
         <div className="w-6 h-9 border-2 border-white/40 rounded-full flex justify-center pt-1.5">
           <div className="w-1 h-2 bg-white/60 rounded-full animate-bounce" />
         </div>
