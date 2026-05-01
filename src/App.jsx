@@ -17,6 +17,7 @@ import AboutUs from './pages/AboutUs';
 import CheckoutComplete from './pages/CheckoutComplete';
 import AdminSettings from './pages/AdminSettings';
 import Admin from './pages/Admin';
+import AdminPanel from './pages/AdminPanel';
 import { PaymentProvider } from './context/PaymentContext';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
       <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="/admin-panel" element={<AdminPanel />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

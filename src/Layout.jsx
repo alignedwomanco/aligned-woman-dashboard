@@ -674,7 +674,7 @@ export default function Layout({ children, currentPageName }) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/admin" className="flex items-center gap-2">
+                    <Link to="/admin-panel" className="flex items-center gap-2">
                       <Settings className="w-4 h-4" /> Admin Settings
                     </Link>
                   </DropdownMenuItem>
