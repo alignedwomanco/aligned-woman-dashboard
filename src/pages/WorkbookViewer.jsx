@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Lock, Loader2, BookOpen } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import useWorkbookUnlock from "@/hooks/useWorkbookUnlock";
 import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
@@ -104,8 +104,8 @@ function WorkbookPicker() {
 
 // ── Main Workbook Viewer ───────────────────────────────────────────────────────
 export default function WorkbookViewer() {
-  const params = new URLSearchParams(window.location.search);
-  const workbookId = params.get("id") || null;
+  const { search } = useLocation();
+  const workbookId = new URLSearchParams(search).get("id") || null;
 
   // No ID in URL — delegate to picker
   if (!workbookId) {
