@@ -80,6 +80,7 @@ export default function CtaRowField({ field, sections, onJumpToSection }) {
             key={idx}
             style={styles[btn.style] || styles.primary}
             onClick={() => handleAction(btn.action)}
+            type="button"
             onMouseEnter={(e) => {
               if (btn.style === "primary") {
                 e.currentTarget.style.background = "#4A0E2E";
@@ -99,7 +100,7 @@ export default function CtaRowField({ field, sections, onJumpToSection }) {
               }
             }}
           >
-            {btn.label}
+            {btn.action?.type === "print" ? btn.label?.replace(/download pdf/i, "Print PDF") : btn.label}
           </button>
         ))}
       </div>

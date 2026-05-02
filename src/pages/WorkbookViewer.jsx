@@ -173,15 +173,14 @@ function WorkbookViewerInner({ workbookId }) {
       }).catch(() => {}).finally(() => setResponseLoaded(true));
   }, [workbookId]);
 
-  // Autosave
-  const persistData = useCallback((updated, extraFields = {}) => {
+  // Autosave answers only (last_section_id is saved separately in jumpTo)
+  const persistData = useCallback((updated) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
-      const payload = { answers: updated, ...extraFields };
       if (responseId) {
-        await base44.entities.WorkbookResponse.update(responseId, payload);
+        await base44.entities.WorkbookResponse.update(responseId, { answers: updated });
       } else {
-        const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, ...payload });
+        const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, answers: updated });
         setResponseId(created.id);
       }
       setLastSaved(new Date());
@@ -195,6 +194,7 @@ function WorkbookViewerInner({ workbookId }) {
       return updated;
     });
   }, [persistData]);
+
 
   // Sections
   const sections = useMemo(() => {
@@ -262,23 +262,26 @@ function WorkbookViewerInner({ workbookId }) {
     return Math.round((filled / total) * 100);
   }, [sections, answers]);
 
-  // Section navigation
+  // Section navigation — persists last_section_id on every section change
   const jumpTo = useCallback((idx) => {
     setActiveSection(idx);
     setDrawerOpen(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
     const sectionId = sections[idx]?.id;
     if (sectionId) {
-      setAnswers(prev => {
-        persistData(prev, { last_section_id: sectionId });
-        return prev;
-      });
+      // Persist last_section_id independently of field autosave
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(async () => {
+        if (responseId) {
+          await base44.entities.WorkbookResponse.update(responseId, { last_section_id: sectionId });
+        } else {
+          const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, answers: {}, last_section_id: sectionId });
+          setResponseId(created.id);
+        }
+        setLastSaved(new Date());
+      }, 800);
     }
-    if (contentRef.current) {
-      contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [sections, persistData]);
+  }, [sections, responseId, workbookId]);
 
   // Keyboard navigation
   const activeSectionRef = useRef(0);

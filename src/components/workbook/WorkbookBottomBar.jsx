@@ -12,9 +12,9 @@ export default function WorkbookBottomBar({
   const isLast = activeSection === total - 1;
   const isSecondToLast = activeSection === total - 2;
 
-  // Next button label: "Review" before summary, "Save PDF" on summary
+  // Next button label: "Review" before summary, "Print PDF" on summary
   const getNextLabel = () => {
-    if (isLast) return "Save PDF";
+    if (isLast) return "Print PDF";
     if (isSecondToLast) return "Review";
     return "Next";
   };

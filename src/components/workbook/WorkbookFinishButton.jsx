@@ -42,6 +42,15 @@ export default function WorkbookFinishButton({ isComplete, completedAt, onFinish
 
   return (
     <div className="mt-10" data-field-type="cta_row">
+      <p style={{
+        fontFamily: "var(--aw-font-sans)",
+        fontSize: 13,
+        color: "var(--aw-mid-grey)",
+        marginBottom: 16,
+        lineHeight: 1.6,
+      }}>
+        Your answers are automatically saved to your dashboard. You can return any time to continue or update them.
+      </p>
       <button
         onClick={onFinish}
         style={{
