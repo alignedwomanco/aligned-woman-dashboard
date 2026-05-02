@@ -210,56 +210,22 @@ function WorkbookViewerInner({ workbookId }) {
     initialSectionId.current = null;
   }, [sections]);
 
-  // Progress calculation
+  // Progress calculation — section-based
+  // Denominator: sections where display_only !== true
+  // Numerator: fillable sections where at least one field has a non-empty answer
   const progressPct = useMemo(() => {
-    if (!sections.length) return 0;
-    let total = 0;
-    let filled = 0;
-    sections.forEach(section => {
-      section.fields?.forEach(field => {
-        if (field.type === "checkbox_group") {
-          const optCount = field.options?.length || 0;
-          total += optCount;
-          const checked = answers[field.id];
-          if (checked && typeof checked === "object") {
-            filled += Object.values(checked).filter(Boolean).length;
-          }
-        } else if (field.type === "grid") {
-          const cells = (field.rows?.length || 0) * (field.columns?.length || 0);
-          total += cells;
-          const g = answers[field.id];
-          if (g && typeof g === "object") {
-            filled += Object.values(g).filter(v => v !== "" && v !== undefined && v !== null).length;
-          }
-        } else if (field.type === "structured_list") {
-          const rows = field.min_rows || 3;
-          const cols = field.columns?.length || 1;
-          total += rows * cols;
-          const l = answers[field.id];
-          if (l && typeof l === "object") {
-            filled += Object.values(l).filter(v => typeof v === "string" ? v.trim() !== "" : !!v).length;
-          }
-        } else if (field.type === "numbered_list" && !field.display_only) {
-          const items = field.items?.filter(i => i.field_type) || [];
-          total += items.length;
-          items.forEach((_, idx) => {
-            const key = `${field.id}_item_${idx}`;
-            const v = answers[key];
-            if (v && typeof v === "string" && v.trim() !== "") filled++;
-          });
-        } else if (field.type === "long_text" || field.type === "short_text") {
-          total += 1;
-          const v = answers[field.id];
-          if (v && typeof v === "string" && v.trim() !== "") filled++;
-        } else if (field.type === "callout" && field.input) {
-          total += 1;
-          const v = answers[field.id];
-          if (v && typeof v === "string" && v.trim() !== "") filled++;
-        }
-      });
-    });
-    if (total === 0) return 0;
-    return Math.round((filled / total) * 100);
+    const fillable = sections.filter(s => s.display_only !== true);
+    if (!fillable.length) return 0;
+    const answered = fillable.filter(section =>
+      section.fields?.some(f => {
+        const v = answers[f.id];
+        if (v === undefined || v === null) return false;
+        if (typeof v === "string") return v.trim() !== "";
+        if (typeof v === "object") return Object.keys(v).length > 0 && Object.values(v).some(Boolean);
+        return true;
+      })
+    );
+    return Math.round((answered.length / fillable.length) * 100);
   }, [sections, answers]);
 
   // Section navigation — persists last_section_id on every section change

@@ -217,27 +217,29 @@ export default function WorkbookSidebar({
       <div style={{ padding: "18px 28px 22px", borderTop: "1px solid var(--aw-border-light)" }}>
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="rounded-full flex items-center justify-center flex-shrink-0"
+          <div className="rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
                style={{ width: 34, height: 34, background: "var(--aw-grad-rose)" }}>
             {expert?.profile_picture ? (
               <img src={expert.profile_picture} alt={expert?.name} className="w-full h-full rounded-full object-cover" />
-            ) : user?.profile_picture ? (
-              <img src={user.profile_picture} alt={user?.full_name} className="w-full h-full rounded-full object-cover" />
-            ) : (
+            ) : expert?.name ? (
               <span style={{ fontFamily: "var(--aw-font-display)", fontStyle: "italic", fontSize: 15, color: "var(--aw-white)" }}>
-                {(user?.full_name || expert?.name || "U")[0]}
+                {expert.name[0]}
               </span>
-            )}
+            ) : null}
           </div>
-          <div className="min-w-0">
-            <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 600, fontSize: 12, lineHeight: 1.2, color: "var(--aw-burg-core)", margin: 0 }}
-               className="truncate">
-              {user?.full_name || expert?.name || "User"}
-            </p>
-            <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-mid-grey)", margin: 0 }}>
-              Practitioner
-            </p>
-          </div>
+          {expert && (
+            <div className="min-w-0">
+              <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 600, fontSize: 12, lineHeight: 1.2, color: "var(--aw-burg-core)", margin: 0 }}
+                 className="truncate">
+                {expert.name}
+              </p>
+              {expert.title && (
+                <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-mid-grey)", margin: 0 }}>
+                  {expert.title}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
