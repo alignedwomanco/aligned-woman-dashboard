@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Lock, Loader2 } from "lucide-react";
+import { Lock, Loader2, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
 import useWorkbookUnlock from "@/hooks/useWorkbookUnlock";
 import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
@@ -9,11 +10,112 @@ import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
 import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
 
+// ── No-ID picker: shown when /Workbook has no ?id= param ──────────────────────
+function WorkbookPicker() {
+  const { data: workbooks, isLoading } = useQuery({
+    queryKey: ["publishedWorkbooks"],
+    queryFn: () => base44.entities.Workbook.filter({ status: "published" }),
+  });
 
+  useEffect(() => {
+    if (workbooks?.length === 1) {
+      window.location.replace(`/Workbook?id=${workbooks[0].id}`);
+    }
+  }, [workbooks]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#4A0E2E" }} />
+      </div>
+    );
+  }
+
+  // Single workbook: redirect is handled above; show spinner while navigating
+  if (workbooks?.length === 1) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#4A0E2E" }} />
+      </div>
+    );
+  }
+
+  // No workbooks
+  if (!workbooks?.length) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "#FAF5F3" }}>
+        <BookOpen className="w-12 h-12 mb-4" style={{ color: "#C4847A" }} />
+        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "#4A0E2E", marginBottom: 8 }}>
+          No workbooks available
+        </h2>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "#8A7A76", marginBottom: 24 }}>
+          No workbooks are currently available.
+        </p>
+        <Link
+          to="/Dashboard"
+          style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
+            color: "#fff", background: "#C4847A", padding: "12px 28px", borderRadius: 100,
+            textDecoration: "none", fontFamily: "var(--aw-font-sans)" }}
+        >
+          Back to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
+  // Multiple workbooks — show picker
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16" style={{ background: "#FAF5F3" }}>
+      <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 32, color: "#4A0E2E", marginBottom: 8, textAlign: "center" }}>
+        Your Workbooks
+      </h2>
+      <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "#8A7A76", marginBottom: 40 }}>
+        Choose a workbook to open.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 480 }}>
+        {workbooks.map(wb => (
+          <a
+            key={wb.id}
+            href={`/Workbook?id=${wb.id}`}
+            style={{
+              display: "flex", alignItems: "center", gap: 16, padding: "20px 24px",
+              background: "#fff", borderRadius: 12, border: "1px solid rgba(74,14,46,0.08)",
+              textDecoration: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              transition: "box-shadow 0.15s",
+            }}
+          >
+            {wb.cover_image_url ? (
+              <img src={wb.cover_image_url} alt="" style={{ width: 56, height: 56, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+            ) : (
+              <div style={{ width: 56, height: 56, borderRadius: 8, background: "linear-gradient(135deg,#C4847A,#4A0E2E)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <BookOpen style={{ width: 24, height: 24, color: "#fff" }} />
+              </div>
+            )}
+            <div>
+              <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 15, color: "#1a1a1a", margin: 0 }}>{wb.title}</p>
+              {wb.subtitle && <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 12, color: "#8A7A76", margin: "2px 0 0" }}>{wb.subtitle}</p>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Main Workbook Viewer ───────────────────────────────────────────────────────
 export default function WorkbookViewer() {
   const params = new URLSearchParams(window.location.search);
-  const workbookId = params.get("id") || "69f33599d88c56b89b9545a8";
+  const workbookId = params.get("id") || null;
 
+  // No ID in URL — delegate to picker
+  if (!workbookId) {
+    return <WorkbookPicker />;
+  }
+
+  return <WorkbookViewerInner workbookId={workbookId} />;
+}
+
+function WorkbookViewerInner({ workbookId }) {
   const [activeSection, setActiveSection] = useState(0);
   const [answers, setAnswers] = useState({});
   const [responseId, setResponseId] = useState(null);
@@ -24,7 +126,7 @@ export default function WorkbookViewer() {
   const [isComplete, setIsComplete] = useState(false);
   const [completedAt, setCompletedAt] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
-  const initialSectionId = useRef(null); // stores last_section_id from loaded response
+  const initialSectionId = useRef(null);
   const saveTimer = useRef(null);
   const contentRef = useRef(null);
 
@@ -49,23 +151,16 @@ export default function WorkbookViewer() {
     enabled: !!workbook?.expert_id,
   });
 
-  // Admin bypass
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminCheckDone, setAdminCheckDone] = useState(false);
+  // Auth: load user for display (admin check is now inside the hook)
   useEffect(() => {
-    base44.auth.me().then(u => {
-      setUser(u);
-      if (u?.role === "admin" || u?.role === "owner" || u?.role === "master_admin") setIsAdmin(true);
-    }).catch(() => {}).finally(() => setAdminCheckDone(true));
+    base44.auth.me().then(u => setUser(u)).catch(() => {});
   }, []);
 
-  // Unlock check
-  const { isUnlocked: rawUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
-  const isUnlocked = isAdmin || rawUnlocked;
+  // Unlock check (hook now handles admin bypass internally)
+  const { isUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
 
   // Load existing WorkbookResponse
   useEffect(() => {
-    if (!workbookId) return;
     base44.entities.WorkbookResponse.filter({ workbook_id: workbookId }, "-created_date", 1)
       .then(responses => {
         if (responses?.length > 0) {
@@ -73,13 +168,12 @@ export default function WorkbookViewer() {
           setAnswers(responses[0].answers || {});
           setIsComplete(responses[0].is_complete || false);
           setCompletedAt(responses[0].completed_at || null);
-          // Store last_section_id for resume — will be resolved once sections are available
           initialSectionId.current = responses[0].last_section_id || null;
         }
       }).catch(() => {}).finally(() => setResponseLoaded(true));
   }, [workbookId]);
 
-  // Autosave answers (and optionally last_section_id)
+  // Autosave
   const persistData = useCallback((updated, extraFields = {}) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
@@ -108,15 +202,15 @@ export default function WorkbookViewer() {
     return workbook.schema.sections;
   }, [workbook]);
 
-  // Resume on reload: once sections are available, resolve initialSectionId to an index
+  // Resume on reload
   useEffect(() => {
     if (!sections.length || !initialSectionId.current) return;
     const idx = sections.findIndex(s => s.id === initialSectionId.current);
     if (idx > 0) setActiveSection(idx);
-    initialSectionId.current = null; // consume once
+    initialSectionId.current = null;
   }, [sections]);
 
-  // Progress calculation: count all atomic fillable fields across all sections
+  // Progress calculation
   const progressPct = useMemo(() => {
     if (!sections.length) return 0;
     let total = 0;
@@ -168,11 +262,10 @@ export default function WorkbookViewer() {
     return Math.round((filled / total) * 100);
   }, [sections, answers]);
 
-  // Section navigation — also persists last_section_id
+  // Section navigation
   const jumpTo = useCallback((idx) => {
     setActiveSection(idx);
     setDrawerOpen(false);
-    // Persist last_section_id along with current answers
     const sectionId = sections[idx]?.id;
     if (sectionId) {
       setAnswers(prev => {
@@ -187,7 +280,7 @@ export default function WorkbookViewer() {
     }
   }, [sections, persistData]);
 
-  // Keyboard navigation — delegates to jumpTo which handles setActiveSection + persist
+  // Keyboard navigation
   const activeSectionRef = useRef(0);
   activeSectionRef.current = activeSection;
 
@@ -209,17 +302,9 @@ export default function WorkbookViewer() {
     return () => document.removeEventListener("keydown", handler);
   }, [sections.length, jumpTo]);
 
-  // If no workbook ID in URL, show error immediately
-  if (!workbookId) {
-    return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3", color: "var(--aw-mid-grey)" }}>
-        <p>No workbook selected. Please go back and choose a workbook.</p>
-      </div>
-    );
-  }
-
-  // Loading — wait for workbook, then also for unlock/admin/response checks
-  const stillLoading = isLoading || !adminCheckDone || !responseLoaded || (!!workbook && isCheckingUnlock);
+  // ── Loading state ──
+  // Wait for: workbook query + response load + unlock check (only once workbook is known)
+  const stillLoading = isLoading || !responseLoaded || (!!workbook && isCheckingUnlock);
   if (stillLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
@@ -228,15 +313,28 @@ export default function WorkbookViewer() {
     );
   }
 
+  // ── Workbook not found ──
   if (!workbook) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: "var(--aw-off-white)", color: "var(--aw-mid-grey)" }}>
-        <p>Workbook not found.</p>
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
+        <BookOpen className="w-12 h-12 mb-4" style={{ color: "#C4847A" }} />
+        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "#4A0E2E", marginBottom: 8 }}>Workbook not found</h2>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "#8A7A76", marginBottom: 24 }}>
+          This workbook does not exist or has been removed.
+        </p>
+        <Link
+          to="/Dashboard"
+          style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
+            color: "#fff", background: "#C4847A", padding: "12px 28px", borderRadius: 100,
+            textDecoration: "none", fontFamily: "var(--aw-font-sans)" }}
+        >
+          Back to Dashboard
+        </Link>
       </div>
     );
   }
 
-  // Completion flow handlers
+  // ── Completion handlers ──
   const handleFinishWorkbook = async () => {
     const now = new Date().toISOString();
     if (responseId) {
@@ -255,6 +353,7 @@ export default function WorkbookViewer() {
     setCompletedAt(null);
   };
 
+  // ── Locked ──
   if (!isUnlocked) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
@@ -267,12 +366,10 @@ export default function WorkbookViewer() {
     );
   }
 
-  // Determine if a section is the last section (summary)
   const lastSectionIdx = sections.length - 1;
 
   return (
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
-      {/* Celebration overlay */}
       {showCelebration && (
         <WorkbookCelebration
           onBackToWorkbook={() => {
@@ -282,7 +379,6 @@ export default function WorkbookViewer() {
         />
       )}
 
-      {/* Sidebar */}
       <WorkbookSidebar
         workbook={workbook}
         expert={expert}
@@ -295,9 +391,7 @@ export default function WorkbookViewer() {
         onClose={() => setDrawerOpen(false)}
       />
 
-      {/* Main column — offset by sidebar width on desktop */}
       <div className="wb-main-col flex flex-col min-h-screen">
-        {/* Top bar */}
         <WorkbookTopBar
           sections={sections}
           activeSection={activeSection}
@@ -306,7 +400,6 @@ export default function WorkbookViewer() {
           onOpenDrawer={() => setDrawerOpen(true)}
         />
 
-        {/* Content area — all sections in DOM; only active visible on screen */}
         <div className="flex-1" ref={contentRef}>
           {sections.map((section, idx) => (
             <div
@@ -331,7 +424,6 @@ export default function WorkbookViewer() {
           ))}
         </div>
 
-        {/* Bottom bar */}
         <WorkbookBottomBar
           sections={sections}
           activeSection={activeSection}
@@ -340,57 +432,21 @@ export default function WorkbookViewer() {
         />
       </div>
 
-      {/* Responsive layout + Print styles */}
       <style>{`
-        @media (min-width: 1025px) {
-          .wb-main-col { margin-left: 320px; }
-        }
-        @media (max-width: 720px) {
-          .wb-page { padding: 32px 22px 60px !important; }
-        }
-
-        /* Screen: only active section visible */
+        @media (min-width: 1025px) { .wb-main-col { margin-left: 320px; } }
+        @media (max-width: 720px) { .wb-page { padding: 32px 22px 60px !important; } }
         .wb-section-inactive { display: none; }
         .wb-section-active   { display: block; }
-
-        /* ── Print styles ── */
         @media print {
-          /* Show all sections */
           .wb-section-inactive { display: block !important; }
           .wb-section-active   { display: block !important; }
-
-          /* Page break before each section (except the first) */
           .wb-section-block + .wb-section-block { break-before: page; }
-
-          /* Hide interactive chrome */
-          .wb-sidebar-desktop,
-          .wb-scrim,
-          .wb-topbar,
-          .wb-bottombar,
-          [data-wb-topbar],
-          [data-wb-bottombar] { display: none !important; }
-
-          /* Hide cta_row buttons (START NOW / DOWNLOAD PDF) */
+          .wb-sidebar-desktop, .wb-scrim, .wb-topbar, .wb-bottombar,
+          [data-wb-topbar], [data-wb-bottombar] { display: none !important; }
           [data-field-type="cta_row"] { display: none !important; }
-
-          /* Remove fixed/sticky positioning, sidebar offset */
-          .wb-main-col {
-            margin-left: 0 !important;
-            min-height: auto !important;
-          }
-          .wb-shell {
-            min-height: auto !important;
-            background: white !important;
-          }
-
-          /* Reset page padding for clean print */
-          .wb-page {
-            max-width: 100% !important;
-            padding: 40px 32px !important;
-            margin: 0 !important;
-          }
-
-          /* Ensure brand typography prints */
+          .wb-main-col { margin-left: 0 !important; min-height: auto !important; }
+          .wb-shell { min-height: auto !important; background: white !important; }
+          .wb-page { max-width: 100% !important; padding: 40px 32px !important; margin: 0 !important; }
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}</style>

@@ -4,14 +4,14 @@ import { base44 } from "@/api/base44Client";
 /**
  * Determines whether a Workbook is unlocked for the current user.
  *
- * A Workbook is unlocked when the user has completed ALL Modules where:
- *   Module.expertId === Workbook.expert_id
- *   AND Module.courseId === Workbook.course_id  (via section → course link)
+ * Admin/owner/master_admin roles are always unlocked.
  *
- * Completion means every CoursePage in the Module has a CourseProgress record
- * with status === "completed" for the current user.
+ * For regular users: a Workbook is unlocked when the user has completed ALL
+ * published CourseModules where expertId === workbook.expert_id AND
+ * courseId === workbook.course_id. Completion means every CoursePage in the
+ * module has a CourseProgress record with status === "completed".
  *
- * Returns { isUnlocked, isLoading } for each workbook_id.
+ * Returns { isUnlocked, isLoading }.
  */
 export default function useWorkbookUnlock(workbook) {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -29,7 +29,18 @@ export default function useWorkbookUnlock(workbook) {
     async function check() {
       setIsLoading(true);
 
-      // 1. Get all modules by this expert in this course
+      // Admin bypass — checked before any DB queries
+      try {
+        const me = await base44.auth.me();
+        if (me && ["admin", "owner", "master_admin"].includes(me.role)) {
+          if (!cancelled) { setIsUnlocked(true); setIsLoading(false); }
+          return;
+        }
+      } catch {
+        // auth.me() failed — fall through to normal check
+      }
+
+      // 1. Get all published modules for this expert + course
       const allModules = await base44.entities.CourseModule.filter({
         expertId: workbook.expert_id,
         courseId: workbook.course_id,
@@ -42,12 +53,12 @@ export default function useWorkbookUnlock(workbook) {
         return;
       }
 
-      // 2. Get all pages for those modules
+      // 2. Get all pages for this course
       const allPages = await base44.entities.CoursePage.filter({
         courseId: workbook.course_id,
       });
 
-      // 3. Get all user progress
+      // 3. Get all user progress for this course
       const allProgress = await base44.entities.CourseProgress.filter({
         courseId: workbook.course_id,
       });
@@ -58,11 +69,11 @@ export default function useWorkbookUnlock(workbook) {
           .map(p => p.pageId)
       );
 
-      // 4. Check every module: all its pages must be completed
+      // 4. Every module must have all pages completed
       let unlocked = true;
       for (const mod of allModules) {
         const modPages = allPages.filter(p => p.moduleId === mod.id);
-        if (modPages.length === 0) continue; // no pages = counts as done
+        if (modPages.length === 0) continue;
         const allDone = modPages.every(p => completedPageIds.has(p.id));
         if (!allDone) { unlocked = false; break; }
       }
