@@ -218,8 +218,8 @@ export default function WorkbookViewer() {
     );
   }
 
-  // Loading — only wait for unlock/admin/response after workbook has loaded
-  const stillLoading = isLoading || (!workbook && !!workbookId) || isCheckingUnlock || !adminCheckDone || !responseLoaded;
+  // Loading — wait for workbook, then also for unlock/admin/response checks
+  const stillLoading = isLoading || !adminCheckDone || !responseLoaded || (!!workbook && isCheckingUnlock);
   if (stillLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
