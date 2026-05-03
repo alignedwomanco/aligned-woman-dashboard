@@ -44,7 +44,8 @@ export async function getDashboardState() {
 
   // Step 3: Derive flags.
   const accessTags = Array.isArray(user.access_tags) ? user.access_tags : [];
-  const isPaid = accessTags.includes("blueprint_paid");
+  // Admins and owners are always treated as paid for testing purposes.
+  const isPaid = accessTags.includes("blueprint_paid") || ["admin", "owner", "master_admin"].includes(user.role);
 
   const hasSeenWelcome = profile.has_seen_welcome === true;
   const archetypeKey = profile.computed_archetype_key ?? null;
