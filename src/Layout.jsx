@@ -54,7 +54,7 @@ export default function Layout({ children, currentPageName }) {
 
   const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete";
 
-  // Dashboard has its own layout — render children directly
+  // Dashboard has its own layout - render children directly
   const isDashboardPage = currentPageName === "Dashboard";
 
   // Redirect ALIVEMethod to Home as default page
@@ -197,14 +197,14 @@ export default function Layout({ children, currentPageName }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center p-1 rounded-full transition-colors hover:opacity-80">
-                    <div className={`w-9 h-9 rounded-full border overflow-hidden ${isLandingPage ? "border-white/20" : "border-[#DEBECC]"}`}>
-                      {isAuthenticated && user?.profile_picture ? (
-                        <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className={`w-full h-full flex items-center justify-center ${isLandingPage ? "bg-white/10" : "bg-[#F5E8EE]"}`}>
-                          <User className={`w-4 h-4 ${isLandingPage ? "text-white/70" : "text-[#6E1D40]"}`} />
-                        </div>
-                      )}
+                    <div className={`w-9 h-9 rounded-full border overflow-hidden ${isLandingPage ? "border-white/20" : "border-awrose-light"}`}>
+                     {isAuthenticated && user?.profile_picture ? (
+                       <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
+                     ) : (
+                       <div className={`w-full h-full flex items-center justify-center ${isLandingPage ? "bg-white/10" : "bg-awrose-pale"}`}>
+                         <User className={`w-4 h-4 ${isLandingPage ? "text-white/70" : "text-awburg-core"}`} />
+                       </div>
+                     )}
                     </div>
                   </button>
                 </DropdownMenuTrigger>
@@ -237,7 +237,7 @@ export default function Layout({ children, currentPageName }) {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-              {/* Pill circular hamburger — matches reference site */}
+              {/* Pill circular hamburger - matches reference site */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 aria-label="Open menu"
@@ -256,9 +256,9 @@ export default function Layout({ children, currentPageName }) {
                   transition: "0.3s",
                 }}
               >
-                <span style={{ width: 18, height: 2, background: isLandingPage ? "rgb(196,132,122)" : "rgb(107,27,61)", transition: "0.3s", borderRadius: 2 }} />
-                <span style={{ width: 18, height: 2, background: isLandingPage ? "rgb(196,132,122)" : "rgb(107,27,61)", transition: "0.3s", borderRadius: 2 }} />
-                <span style={{ width: 18, height: 2, background: isLandingPage ? "rgb(196,132,122)" : "rgb(107,27,61)", transition: "0.3s", borderRadius: 2 }} />
+                <span className={`block transition-all duration-300 rounded-sm ${isLandingPage ? "bg-awrose-core" : "bg-awburg-core"}`} style={{ width: 18, height: 2 }} />
+                <span className={`block transition-all duration-300 rounded-sm ${isLandingPage ? "bg-awrose-core" : "bg-awburg-core"}`} style={{ width: 18, height: 2 }} />
+                <span className={`block transition-all duration-300 rounded-sm ${isLandingPage ? "bg-awrose-core" : "bg-awburg-core"}`} style={{ width: 18, height: 2 }} />
               </button>
             </div>
           </div>
@@ -298,8 +298,7 @@ export default function Layout({ children, currentPageName }) {
                       setShowMobileMenu(false);
                       window.location.href = createPageUrl("Dashboard");
                     }}
-                    className="w-full mb-4 text-white"
-                    style={{ backgroundColor: '#6E1D40' }}>
+                    className="w-full mb-4 bg-awburg-core hover:bg-awburg-mid text-paper">
 
                         Go to Dashboard
                       </Button>
@@ -312,14 +311,14 @@ export default function Layout({ children, currentPageName }) {
                         <Link
                       to={item.href || createPageUrl(item.name)}
                       onClick={() => setShowMobileMenu(false)}
-                      className="block px-4 py-3 text-gray-700 hover:bg-[#F5E8EE] hover:text-[#6E1D40] rounded-lg transition-colors font-medium">
+                      className="block px-4 py-3 text-awburg-core hover:bg-awrose-pale hover:text-awburg-dark rounded-lg transition-colors font-body font-medium">
 
                           {item.label}
                         </Link>
                       </li>
                   )}
                     <li>
-                      <a href="/about-us" onClick={() => setShowMobileMenu(false)} className="block px-4 py-3 text-gray-700 hover:bg-[#F5E8EE] hover:text-[#6E1D40] rounded-lg transition-colors font-medium">About Us</a>
+                      <a href="/about-us" onClick={() => setShowMobileMenu(false)} className="block px-4 py-3 text-awburg-core hover:bg-awrose-pale hover:text-awburg-dark rounded-lg transition-colors font-body font-medium">About Us</a>
                     </li>
                   </ul>
                 </nav>
@@ -328,16 +327,14 @@ export default function Layout({ children, currentPageName }) {
                   {isAuthenticated ?
                 <Button
                   onClick={handleLogout}
-                  className="w-full text-white"
-                  style={{ backgroundColor: '#6E1D40' }}>
+                   className="w-full bg-awburg-core hover:bg-awburg-mid text-paper">
 
                       Sign Out
                     </Button> :
 
-                <Button
+                  <Button
                   onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                  className="w-full text-white"
-                  style={{ backgroundColor: '#6E1D40' }}>
+                  className="w-full bg-awburg-core hover:bg-awburg-mid text-paper">
 
                       Sign In
                     </Button>
@@ -352,7 +349,7 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
 
-        {isLandingPage ? null : <footer className="bg-[#6E1D40] text-white">
+        {isLandingPage ? null : <footer className="bg-awburg-core text-paper">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
               <div className="col-span-1 md:col-span-2">
@@ -395,7 +392,7 @@ export default function Layout({ children, currentPageName }) {
 
             }
 
-  // Dashboard and Workbook pages have their own chrome — render children directly
+  // Dashboard and Workbook pages have their own chrome - render children directly
   if (isDashboardPage || currentPageName === "Workbook") {
     return <>{children}</>;
   }
@@ -406,33 +403,35 @@ export default function Layout({ children, currentPageName }) {
   // Shared nav link builder
   const navLinkClass = (active) =>
     `flex items-center ${sidebarCollapsed ? "justify-center px-2" : "gap-3 px-4"} py-3 rounded-lg transition-colors flex-shrink-0 ${
-      active ? "bg-white/20 text-white" : "text-white hover:bg-white/10"
+      active ? "bg-awburg-dark text-paper" : "text-paper/80 hover:bg-awburg-dark/40 hover:text-paper"
     }`;
 
   // Authenticated app layout with left sidebar
   return (
     <div className="min-h-screen flex">
-      <style>{`
-        :root {
-          --burgundy: #6E1D40;
-          --burgundy-deep: #5A1633;
-        }
-      `}</style>
 
       {/* Left Sidebar - Hidden on mobile */}
-      <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 bg-[#6E1D3F] text-white flex-col z-50 transition-all duration-300 ${sidebarW}`}>
+      <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 bg-awburg-core text-paper flex-col z-50 transition-all duration-300 ${sidebarW}`}>
         {/* Logo */}
-        <div className={`border-b border-white/10 flex items-center justify-center ${sidebarCollapsed ? "p-3" : "p-6"}`}>
+        <div className={`border-b border-awburg-dark/30 flex items-center justify-center ${sidebarCollapsed ? "p-3" : "p-6"}`}>
           <Link to={createPageUrl("Home")}>
-            <img
-              src={sidebarCollapsed
-                ? "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6954540bfe3123205d5d3139/0e0b20571_AlignedWomanFaviconPurple.png"
-                : (siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png")
-              }
-              alt="The Aligned Woman"
-              className="object-contain w-auto brightness-0 invert"
-              style={{ height: sidebarCollapsed ? "28px" : "40px" }}
-            />
+            {siteSettings?.dark_logo ? (
+              <img
+                src={siteSettings.dark_logo}
+                alt="The Aligned Woman"
+                className="h-10 w-auto object-contain brightness-0 invert"
+              />
+            ) : (
+              <img
+                src={sidebarCollapsed
+                  ? "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6954540bfe3123205d5d3139/0e0b20571_AlignedWomanFaviconPurple.png"
+                  : "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"
+                }
+                alt="The Aligned Woman"
+                className="object-contain w-auto brightness-0 invert"
+                style={{ height: sidebarCollapsed ? "28px" : "40px" }}
+              />
+            )}
           </Link>
         </div>
 
@@ -440,18 +439,18 @@ export default function Layout({ children, currentPageName }) {
         <div className={`${sidebarCollapsed ? "px-2 py-3 flex justify-center" : "px-4 py-4"}`}>
           {!sidebarCollapsed ? (
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-paper/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
                 type="text"
                 placeholder="Search"
-                className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full bg-awburg-dark/30 border border-awburg-dark/40 rounded-lg pl-10 pr-4 py-2 text-sm text-paper placeholder-paper/50 focus:outline-none focus:ring-2 focus:ring-paper/20"
               />
             </div>
           ) : (
-            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors" title="Search">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button className="p-2 hover:bg-awburg-dark/40 rounded-lg transition-colors" title="Search">
+              <svg className="w-5 h-5 text-paper/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
@@ -463,139 +462,46 @@ export default function Layout({ children, currentPageName }) {
           <ul className="space-y-1">
             <li>
               <Link to={createPageUrl("Dashboard")} className={navLinkClass(currentPageName === "Dashboard")} title={sidebarCollapsed ? "Dashboard" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
-                {!sidebarCollapsed && <span className="font-medium">Dashboard</span>}
-              </Link>
-            </li>
-            <li>
-              <Link to={createPageUrl("MyMetrics")} className={navLinkClass(currentPageName === "MyMetrics")} title={sidebarCollapsed ? "Insights" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                {!sidebarCollapsed && <span className="font-medium">Insights</span>}
-              </Link>
-            </li>
-            <li>
-              <Link to={createPageUrl("Journal")} className={navLinkClass(currentPageName === "Journal")} title={sidebarCollapsed ? "Journal" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                {!sidebarCollapsed && <span className="font-medium">Journal</span>}
+                {!sidebarCollapsed && <span className="font-body font-medium">Dashboard</span>}
               </Link>
             </li>
             <li>
               <Link to={createPageUrl("Classroom")} className={navLinkClass(currentPageName === "Classroom")} title={sidebarCollapsed ? "Classroom" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
                 </svg>
-                {!sidebarCollapsed && <span className="font-medium">Classroom</span>}
+                {!sidebarCollapsed && <span className="font-body font-medium">Classroom</span>}
               </Link>
             </li>
             <li>
               <Link to={createPageUrl("Community")} className={navLinkClass(currentPageName === "Community")} title={sidebarCollapsed ? "Community" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                {!sidebarCollapsed && <span className="font-medium">Community</span>}
-              </Link>
-            </li>
-            <li>
-              <Link to={createPageUrl("Members")} className={navLinkClass(currentPageName === "Members")} title={sidebarCollapsed ? "Members" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                {!sidebarCollapsed && <span className="font-medium">Members</span>}
+                {!sidebarCollapsed && <span className="font-body font-medium">Community</span>}
               </Link>
             </li>
             <li>
               <Link to={createPageUrl("ExpertsDirectory")} className={navLinkClass(currentPageName === "ExpertsDirectory")} title={sidebarCollapsed ? "Experts" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
-                {!sidebarCollapsed && <span className="font-medium">Experts</span>}
+                {!sidebarCollapsed && <span className="font-body font-medium">Experts</span>}
               </Link>
-            </li>
-
-            {/* Tools - icon only when collapsed, expandable when open */}
-            <li>
-              {sidebarCollapsed ? (
-                <Link to={createPageUrl("ToolsHub")} className={navLinkClass(["ToolsHub", "CheckIn"].includes(currentPageName))} title="Tools">
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                  </svg>
-                </Link>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setShowToolsDropdown(!showToolsDropdown)}
-                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      ["ToolsHub", "CheckIn"].includes(currentPageName)
-                        ? "bg-white/20 text-white"
-                        : "text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                      </svg>
-                      <span className="font-medium">Tools</span>
-                    </div>
-                    <svg
-                      className={`w-4 h-4 text-white transition-transform ${showToolsDropdown ? "rotate-180" : ""}`}
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {showToolsDropdown && (
-                    <ul className="mt-1 ml-8 space-y-1">
-                      <li>
-                        <Link to={createPageUrl("Journal")} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                          Reflect
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to={createPageUrl("CheckIn")} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                          Regulate
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to={createPageUrl("DefineMyPurpose")} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                          Define My Purpose
-                        </Link>
-                      </li>
-                      <li>
-                        <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                          Cycle
-                        </button>
-                      </li>
-                      <li>
-                        <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#FAF5FF"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                          Sleep
-                        </button>
-                      </li>
-                    </ul>
-                  )}
-                </>
-              )}
             </li>
           </ul>
         </nav>
 
         {/* Toggle Button */}
-        <div className={`border-t border-white/10 ${sidebarCollapsed ? "p-2" : "p-4"}`}>
+        <div className={`border-t border-awburg-dark/30 ${sidebarCollapsed ? "p-2" : "p-4"}`}>
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors ${sidebarCollapsed ? "px-2" : "px-4"}`}
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-awburg-dark/30 hover:bg-awburg-dark/50 transition-colors text-paper/80 hover:text-paper ${sidebarCollapsed ? "px-2" : "px-4"}`}
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {sidebarCollapsed ? (
@@ -610,23 +516,23 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </aside>
 
-      {/* Main Content Area — deterministic margin class */}
+      {/* Main Content Area - deterministic margin class */}
       <div className={`flex-1 transition-all duration-300 ${contentML} overflow-x-hidden`}>
         {/* Top Header */}
-        <header className="sticky top-0 z-40 border-b border-gray-200" style={{ backgroundColor: '#933a59' }}>
+        <header className="sticky top-0 z-40 border-b border-awburg-dark/20 bg-awburg-mid">
           <div className="flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-8 py-3 sm:py-4">
             {/* Left: Hamburger + Greeting */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <button
                 onClick={() => setShowMobileMenu(true)}
-                className="lg:hidden p-1.5 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
+                className="lg:hidden p-1.5 hover:bg-awburg-dark/30 rounded-lg transition-colors flex-shrink-0"
               >
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-paper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               <div className="min-w-0">
-                <h1 className="text-sm sm:text-xl font-bold text-white truncate">
+                <h1 className="text-sm sm:text-xl font-body font-bold text-paper truncate">
                   {(() => {
                     const hour = new Date().getHours();
                     if (hour < 12) return "Good Morning";
@@ -634,48 +540,48 @@ export default function Layout({ children, currentPageName }) {
                     return "Good Evening";
                   })()}, {user?.full_name?.split(" ")[0] || "there"} 👋
                 </h1>
-                <p className="text-white/80 text-xs sm:text-sm hidden sm:block">Hope you feel centered today.</p>
+                <p className="text-paper/85 text-xs sm:text-sm hidden sm:block">Hope you feel centered today.</p>
               </div>
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-              <button onClick={() => setShowMessages(!showMessages)} className="relative p-2 hover:bg-white/10 rounded-lg transition-colors">
-                <MessageCircle className="w-5 h-5 text-white" />
+              <button onClick={() => setShowMessages(!showMessages)} className="relative p-2 hover:bg-awburg-dark/30 rounded-lg transition-colors">
+                <MessageCircle className="w-5 h-5 text-paper hover:text-paper/80" />
               </button>
-              <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 hover:bg-white/10 rounded-lg transition-colors">
-                <Bell className="w-5 h-5 text-white" />
+              <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 hover:bg-awburg-dark/30 rounded-lg transition-colors">
+                <Bell className="w-5 h-5 text-paper hover:text-paper/80" />
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 sm:gap-2 p-1 hover:bg-white/10 rounded-lg transition-colors">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/30 overflow-hidden flex-shrink-0">
+                  <button className="flex items-center gap-1.5 sm:gap-2 p-1 hover:bg-awburg-dark/30 rounded-lg transition-colors">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-paper/30 ring-2 ring-transparent hover:ring-paper/40 overflow-hidden flex-shrink-0 bg-paper">
                       {user?.profile_picture ? (
                         <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-white/20 flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">{user?.full_name?.[0] || user?.email?.[0] || "U"}</span>
+                        <div className="w-full h-full bg-paper flex items-center justify-center">
+                          <span className="text-awburg-core text-sm font-body font-medium">{user?.full_name?.[0] || user?.email?.[0] || "U"}</span>
                         </div>
                       )}
                     </div>
-                    <span className="hidden sm:inline text-sm font-medium text-white max-w-[120px] truncate">{user?.full_name?.split(" ")[0] || "User"}</span>
-                    <ChevronDown className="w-4 h-4 text-white" />
+                    <span className="hidden sm:inline text-sm font-body font-medium text-paper max-w-[120px] truncate">{user?.full_name?.split(" ")[0] || "User"}</span>
+                    <ChevronDown className="w-4 h-4 text-paper" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 bg-paper border-awburg-core/10">
                   <DropdownMenuItem asChild>
-                    <Link to="/profilesettings" className="flex items-center gap-2">
+                    <Link to="/profilesettings" className="flex items-center gap-2 text-awburg-core hover:bg-awrose-pale">
                       <User className="w-4 h-4" /> Profile Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/dashboardsettings" className="flex items-center gap-2">
+                    <Link to="/dashboardsettings" className="flex items-center gap-2 text-awburg-core hover:bg-awrose-pale">
                       <Settings className="w-4 h-4" /> Dashboard Settings
                     </Link>
                   </DropdownMenuItem>
                   {["owner", "admin", "master_admin", "moderator"].includes(user?.role) && (
                     <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center gap-2">
+                      <Link to="/admin" className="flex items-center gap-2 text-awburg-core hover:bg-awrose-pale">
                         <Settings className="w-4 h-4" /> Admin Settings
                       </Link>
                     </DropdownMenuItem>
@@ -694,15 +600,15 @@ export default function Layout({ children, currentPageName }) {
         {showMobileMenu && (
           <>
             <div className="lg:hidden fixed inset-0 bg-black/50 z-[60]" onClick={() => setShowMobileMenu(false)} />
-            <div className="lg:hidden fixed top-0 left-0 bottom-0 w-80 bg-[#6E1D3F] z-[70] shadow-2xl overflow-y-auto">
-              <div className="flex flex-col h-full text-white">
-                <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <div className="lg:hidden fixed top-0 left-0 bottom-0 w-80 bg-awburg-core z-[70] shadow-2xl overflow-y-auto">
+              <div className="flex flex-col h-full text-paper">
+                <div className="flex items-center justify-between p-6 border-b border-awburg-dark/30">
                   <img
-                    src={siteSettings?.light_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                    src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                     alt="AW" className="object-contain w-auto brightness-0 invert" style={{ height: "40px" }}
                   />
-                  <button onClick={() => setShowMobileMenu(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button onClick={() => setShowMobileMenu(false)} className="p-2 hover:bg-awburg-dark/30 rounded-lg transition-colors">
+                    <svg className="w-6 h-6 text-paper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -712,57 +618,29 @@ export default function Layout({ children, currentPageName }) {
                   <ul className="space-y-1">
                     {[
                       { name: "Dashboard", label: "Dashboard" },
-                      { name: "MyMetrics", label: "Insights" },
-                      { name: "Journal", label: "Journal" },
                       { name: "Classroom", label: "Classroom" },
                       { name: "Community", label: "Community" },
-                      { name: "Members", label: "Members" },
                       { name: "ExpertsDirectory", label: "Experts" },
                     ].map((item) => (
                       <li key={item.name}>
                         <Link
                           to={createPageUrl(item.name)}
                           onClick={() => setShowMobileMenu(false)}
-                          className={`block px-4 py-3 rounded-lg transition-colors font-medium ${
+                          className={`block px-4 py-3 rounded-lg transition-colors font-body font-medium ${
                             currentPageName === item.name
-                              ? "bg-white/20 text-white"
-                              : "text-white/80 hover:bg-white/10 hover:text-white"
+                              ? "bg-awburg-dark text-paper"
+                              : "text-paper/80 hover:bg-awburg-dark/40 hover:text-paper"
                           }`}
                         >
                           {item.label}
                         </Link>
                       </li>
                     ))}
-                    {/* Tools section in mobile */}
-                    <li>
-                      <button
-                        onClick={() => setShowToolsDropdown(!showToolsDropdown)}
-                        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors font-medium ${
-                          ["ToolsHub", "CheckIn"].includes(currentPageName)
-                            ? "bg-white/20 text-white"
-                            : "text-white/80 hover:bg-white/10 hover:text-white"
-                        }`}
-                      >
-                        Tools
-                        <svg className={`w-4 h-4 transition-transform ${showToolsDropdown ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      {showToolsDropdown && (
-                        <ul className="mt-1 ml-4 space-y-1">
-                          <li><Link to={createPageUrl("Journal")} onClick={() => setShowMobileMenu(false)} className="block px-4 py-2 text-sm text-white/70 hover:bg-white/10 rounded-lg">Reflect</Link></li>
-                          <li><Link to={createPageUrl("CheckIn")} onClick={() => setShowMobileMenu(false)} className="block px-4 py-2 text-sm text-white/70 hover:bg-white/10 rounded-lg">Regulate</Link></li>
-                          <li><Link to={createPageUrl("DefineMyPurpose")} onClick={() => setShowMobileMenu(false)} className="block px-4 py-2 text-sm text-white/70 hover:bg-white/10 rounded-lg">Define My Purpose</Link></li>
-                          <li><span className="block px-4 py-2 text-sm text-white/50 rounded-lg">Cycle</span></li>
-                          <li><span className="block px-4 py-2 text-sm text-white/50 rounded-lg">Sleep</span></li>
-                        </ul>
-                      )}
-                    </li>
                   </ul>
                 </nav>
 
-                <div className="p-4 border-t border-white/10">
-                  <Button onClick={handleLogout} className="w-full bg-white/10 hover:bg-white/20 text-white">
+                <div className="p-4 border-t border-awburg-dark/30">
+                  <Button onClick={handleLogout} className="w-full bg-awburg-dark/30 hover:bg-awburg-dark/50 text-paper">
                     <LogOut className="w-4 h-4 mr-2" /> Sign Out
                   </Button>
                 </div>
