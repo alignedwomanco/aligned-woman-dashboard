@@ -1,10 +1,25 @@
 import React from "react";
-import { FileText } from "lucide-react";
+import { ArrowDownToLine } from "lucide-react";
 
 const STATUS_CONFIG = {
-  completed: { label: "COMPLETED", dotClass: "bg-green-500", textClass: "text-green-700" },
-  in_progress: { label: "IN PROGRESS", dotClass: "bg-awrose-core", textClass: "text-awburg-core" },
-  not_started: { label: "NOT STARTED", dotClass: "bg-awburg-core/20", textClass: "text-awburg-core/60" },
+  completed: {
+    label: "COMPLETED",
+    dotClass: "bg-green-500",
+    textClass: "text-green-700",
+    pillClass: "bg-green-50",
+  },
+  in_progress: {
+    label: "IN PROGRESS",
+    dotClass: "bg-awrose-deep",
+    textClass: "text-awburg-core",
+    pillClass: "bg-awrose-pale",
+  },
+  not_started: {
+    label: "NOT STARTED",
+    dotClass: "bg-awburg-core/40",
+    textClass: "text-awburg-core/60",
+    pillClass: "bg-awburg-core/8",
+  },
 };
 
 function WorkbookCard({ title, expert, status }) {
@@ -12,32 +27,34 @@ function WorkbookCard({ title, expert, status }) {
   const actionLabel = status === "completed" ? "REVIEW" : status === "in_progress" ? "CONTINUE" : "BEGIN";
 
   return (
-    <div className="bg-paper rounded-xl border border-awburg-core/8 p-4 flex flex-col h-full">
-      <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 bg-awrose-pale rounded-lg flex items-center justify-center flex-shrink-0">
-          <FileText className="w-5 h-5 text-awburg-core" />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className={`w-2 h-2 rounded-full ${cfg.dotClass}`} />
-          <span className={`font-body font-bold text-[9px] tracking-eyebrow uppercase ${cfg.textClass}`}>
+    <div className="bg-paper rounded-xl border border-awburg-core/8 p-5 flex flex-col h-full">
+      {/* Status pill */}
+      <div className="mb-5">
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 ${cfg.pillClass}`}>
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dotClass}`} />
+          <span className={`font-body font-bold text-[10px] tracking-eyebrow uppercase ${cfg.textClass}`}>
             {cfg.label}
           </span>
-        </div>
+        </span>
       </div>
 
-      <h4 className="font-display text-awburg-core text-base mb-1 leading-snug flex-1">
+      {/* Title */}
+      <h4 className="font-display text-awburg-core text-xl leading-snug flex-1 mb-2">
         {title}
       </h4>
 
-      <p className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/55 uppercase mb-3">
+      {/* Expert */}
+      <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase mb-5">
         {expert}
       </p>
 
-      <div className="border-t border-awburg-core/8 pt-3 flex items-center justify-between">
-        <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase transition-colors">
+      {/* Footer */}
+      <div className="border-t border-awburg-core/8 pt-4 flex items-center justify-between">
+        <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark hover:underline uppercase transition-colors">
           {actionLabel} →
         </button>
-        <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase transition-colors">
+        <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase transition-colors flex items-center gap-1">
+          <ArrowDownToLine className="w-3 h-3" />
           PDF
         </button>
       </div>
@@ -60,7 +77,7 @@ export default function WorkbooksSection({ workbooks, phaseIndex }) {
           YOUR WORKBOOKS · PHASE {String(phaseIndex || 1).padStart(2, "0")}
         </p>
         <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors">
-          ALL WORKBOOKS →
+          ALL WORKBOOKS +
         </button>
       </div>
 
