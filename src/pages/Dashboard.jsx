@@ -21,7 +21,8 @@ function formatJoinedDate(timestamp) {
 
 function getMembershipLabel(user) {
   const tags = Array.isArray(user?.access_tags) ? user.access_tags : [];
-  return tags.includes("blueprint_paid") ? "Blueprint owner" : "Free member";
+  const isPaid = user?.membership_type === "paid" || tags.includes("blueprint_paid");
+  return isPaid ? "Blueprint owner" : "Free member";
 }
 
 function DashboardSkeleton() {
