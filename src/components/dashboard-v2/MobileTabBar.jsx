@@ -19,7 +19,7 @@ export default function MobileTabBar() {
   };
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 safe-area-bottom">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-paper border-t border-awburg-core/8 z-50 safe-area-bottom">
       <div className="flex items-center justify-around py-2">
         {TABS.map((tab) => {
           const active = isActive(tab.path);
@@ -29,14 +29,14 @@ export default function MobileTabBar() {
               key={tab.name}
               to={createPageUrl(tab.path)}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors relative ${
-                active ? "text-[#5C1A2E]" : "text-[#6B6168]"
+                active ? "text-awburg-core" : "text-awburg-core/60"
               }`}
             >
               {active && (
-                <div className="absolute -top-1 w-1.5 h-1.5 rounded-full bg-[#C77B85]" />
+                <div className="absolute -top-1 w-1.5 h-1.5 rounded-full bg-awrose-core" />
               )}
               <Icon className="w-5 h-5" strokeWidth={active ? 2 : 1.5} />
-              <span className="text-[9px] tracking-[0.1em] uppercase font-medium">{tab.name}</span>
+              <span className="font-body font-bold text-[9px] tracking-[0.18em] uppercase">{tab.name}</span>
             </Link>
           );
         })}
