@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import DefineMyPurpose from './pages/DefineMyPurpose';
 import Experts from './pages/Experts';
 import ExpertsDirectory from './pages/ExpertsDirectory.jsx';
+import ExpertProfile from './pages/ExpertProfile.jsx';
 import Journal from './pages/Journal';
 import Members from './pages/Members';
 import ModuleFrameworkBuilder from './pages/ModuleFrameworkBuilder';
@@ -42,6 +43,7 @@ export const PAGES = {
     "DefineMyPurpose": DefineMyPurpose,
     "Experts": Experts,
     "ExpertsDirectory": ExpertsDirectory,
+    "ExpertProfile": ExpertProfile,
     "Journal": Journal,
     "Members": Members,
     "ModuleFrameworkBuilder": ModuleFrameworkBuilder,
