@@ -22,9 +22,9 @@ function ExpertCard({ expert, categoryName }) {
   const lastName = nameParts[nameParts.length - 1];
 
   return (
-    <div className="bg-paper rounded-xl border border-awburg-core/8 overflow-hidden flex flex-col">
+    <div className="bg-paper rounded-lg border border-awburg-core/8 overflow-hidden flex flex-col">
       {/* Portrait */}
-      <div className="relative aspect-[3/4] bg-gradient-to-br from-awrose-pale to-awrose-wash flex items-center justify-center overflow-hidden">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-awrose-pale to-awrose-wash flex items-center justify-center overflow-hidden">
         {expert.profile_picture ? (
           <img
             src={expert.profile_picture}
@@ -33,42 +33,42 @@ function ExpertCard({ expert, categoryName }) {
           />
         ) : (
           <>
-            <span className="font-display italic text-awburg-core select-none" style={{ fontSize: "clamp(48px, 8vw, 80px)" }}>
+            <span className="font-display italic text-awburg-core select-none" style={{ fontSize: "clamp(28px, 4vw, 48px)" }}>
               {initials}
             </span>
-            <span className="absolute bottom-3 left-4 font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/40 uppercase">
-              PORTRAIT . PLACEHOLDER
+            <span className="absolute bottom-2 left-3 font-body font-bold text-[8px] tracking-eyebrow text-awburg-core/30 uppercase">
+              PORTRAIT · PLACEHOLDER
             </span>
           </>
         )}
       </div>
 
       {/* Body */}
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-3 flex flex-col flex-1">
         {categoryName && (
-          <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-2">
+          <p className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-deep uppercase mb-1">
             {categoryName}
           </p>
         )}
 
-        <h3 className="font-display text-awburg-core text-2xl leading-tight mb-1">
+        <h3 className="font-display text-awburg-core text-base leading-tight mb-0.5">
           {firstName && <span>{firstName} </span>}
           <span className="italic text-awrose-deep">{lastName}</span>
         </h3>
 
         {expert.title && (
-          <p className="font-body text-sm text-awburg-core/70 mb-3">{expert.title}</p>
+          <p className="font-body text-xs text-awburg-core/70 mb-2">{expert.title}</p>
         )}
 
         {expert.bio && (
-          <p className="font-body font-light text-sm text-awburg-core/65 leading-relaxed line-clamp-4 flex-1 mb-4">
+          <p className="font-body font-light text-xs text-awburg-core/65 leading-relaxed line-clamp-3 flex-1 mb-3">
             {expert.bio}
           </p>
         )}
 
         <Link
           to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
-          className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase transition-colors inline-flex items-center gap-1"
+          className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase transition-colors inline-flex items-center gap-1"
         >
           VIEW PROFILE +
         </Link>
@@ -112,8 +112,8 @@ export default function ExpertsDirectory() {
   });
 
   return (
-    <div className="min-h-screen bg-off-white px-6 md:px-10 py-12">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-off-white px-8 md:px-16 py-16">
+      <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div className="mb-10">
@@ -172,7 +172,7 @@ export default function ExpertsDirectory() {
 
         {/* Grid */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filtered.map((expert) => (
               <ExpertCard
                 key={expert.id}
