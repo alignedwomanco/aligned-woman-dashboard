@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 
-const ROTATION_INTERVAL_MS = 10 * 1000;
+const ROTATION_INTERVAL_MS = 5 * 60 * 1000;
 
 function buildDisplayExpert(rawExpert) {
   if (!rawExpert) return null;
@@ -92,10 +92,7 @@ export default function ExpertSpotlight() {
     <div className="rounded-xl border border-awburg-core/8 overflow-hidden mb-4">
       <div className="relative bg-awrose-pale h-44 flex items-center justify-center">
         <span className="absolute top-3 left-4 font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase">
-          EXPERT · THIS WEEK
-        </span>
-        <span className="absolute top-3 right-4 font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase">
-          FORBES
+          EXPERT SPOTLIGHT
         </span>
         {expert.profilePicture ? (
           <img src={expert.profilePicture} alt={expert.name} className="w-full h-full object-cover" />
