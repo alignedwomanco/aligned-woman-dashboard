@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 
-const ROTATION_INTERVAL_MS = 5 * 60 * 1000;
+const ROTATION_INTERVAL_MS = 10 * 1000;
 
 function buildDisplayExpert(rawExpert) {
   if (!rawExpert) return null;
