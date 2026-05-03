@@ -2,7 +2,7 @@ import React from "react";
 import { Lock } from "lucide-react";
 
 const PHASES = [
-  { letter: "L", name: "LIBERATION", caption: "I do not have to live in survival mode anymore." },
+  { letter: "L", name: "LIBERATION", caption: "I don't have to live in survival mode anymore." },
   { letter: "I", name: "INTENTIONAL ACTION", caption: "I think differently, so I choose differently." },
   { letter: "V", name: "VISION", caption: "What do I actually want?" },
   { letter: "E", name: "EMBODIMENT", caption: "This is who I am now." },
@@ -15,7 +15,7 @@ export default function AlivePhasePeek() {
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase">
           WHAT'S UPCOMING
         </p>
-        <p className="font-body font-light italic text-[11px] text-awburg-core/55">
+        <p className="font-body font-light italic text-[12px] text-awburg-core/45">
           Each phase unlocks once the previous phase is complete.
         </p>
       </div>
@@ -24,19 +24,22 @@ export default function AlivePhasePeek() {
         {PHASES.map((phase) => (
           <div
             key={phase.letter}
-            className="bg-paper rounded-lg border border-awburg-core/8 p-4 flex gap-3 items-start"
+            className="bg-paper rounded-xl border border-awburg-core/10 p-5 flex gap-3 items-start"
           >
-            <span className="font-display italic text-awrose-core/60 text-[40px] leading-none flex-shrink-0">
+            {/* Large italic phase letter */}
+            <span className="font-display italic text-awrose-core/50 text-[52px] leading-none flex-shrink-0 select-none">
               {phase.letter}
             </span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <p className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/55 uppercase">
+
+            {/* Name + lock + caption */}
+            <div className="flex-1 min-w-0 pt-1">
+              <div className="flex items-start justify-between gap-1 mb-1.5">
+                <p className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/65 uppercase leading-tight">
                   {phase.name}
                 </p>
-                <Lock className="w-3 h-3 text-awburg-core/40 flex-shrink-0" />
+                <Lock className="w-3 h-3 text-awburg-core/30 flex-shrink-0 mt-px" />
               </div>
-              <p className="font-display italic text-awburg-core/70 text-[12px] leading-snug">
+              <p className="font-display italic text-awburg-core/60 text-[13px] leading-snug">
                 {phase.caption}
               </p>
             </div>
