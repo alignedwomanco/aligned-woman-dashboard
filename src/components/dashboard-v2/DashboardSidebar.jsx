@@ -18,8 +18,7 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
   };
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-white border-r border-gray-100 flex-col z-40">
-      {/* Logo */}
+    <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-paper border-r border-awburg-core/8 flex-col z-40">
       <div className="p-6 pb-8">
         <Link to={createPageUrl("Home")}>
           <img
@@ -30,7 +29,6 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-4">
         <ul className="space-y-1">
           {NAV_ITEMS.map((item) => {
@@ -41,12 +39,12 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
                   to={createPageUrl(item.path)}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
                     active
-                      ? "bg-[#F5E6E8] text-[#5C1A2E] font-medium"
-                      : "text-[#6B6168] hover:text-[#2A1218] hover:bg-gray-50"
+                      ? "bg-awrose-pale text-awburg-core font-medium"
+                      : "text-awburg-core/70 hover:text-awburg-core hover:bg-awrose-wash"
                   }`}
                 >
-                  {active && <div className="w-1.5 h-1.5 rounded-full bg-[#C77B85] flex-shrink-0" />}
-                  <span className="text-[11px] tracking-[0.15em] uppercase">{item.name}</span>
+                  {active && <div className="w-1.5 h-1.5 rounded-full bg-awrose-core flex-shrink-0" />}
+                  <span className="font-body font-bold text-[11px] tracking-eyebrow uppercase">{item.name}</span>
                 </Link>
               </li>
             );
@@ -54,9 +52,8 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
         </ul>
       </nav>
 
-      {/* Account status footer */}
       <div className="p-6 pt-4">
-        <p className="text-[9px] tracking-[0.1em] text-[#6B6168] uppercase leading-relaxed">
+        <p className="font-body font-bold text-[9px] tracking-[0.18em] text-awburg-core/55 uppercase leading-relaxed">
           MEMBER SINCE {memberSince || "APRIL 2026"}
           {isBlueprintOwner && " · BLUEPRINT OWNER"}
         </p>
