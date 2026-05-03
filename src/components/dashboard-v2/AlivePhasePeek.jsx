@@ -34,12 +34,12 @@ export default function AlivePhasePeek() {
             {/* Name + lock + caption */}
             <div className="flex-1 min-w-0 pt-1">
               <div className="flex items-start justify-between gap-1 mb-1.5">
-                <p className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/65 uppercase leading-tight">
+                <p className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-deep uppercase leading-tight">
                   {phase.name}
                 </p>
-                <Lock className="w-3 h-3 text-awburg-core/30 flex-shrink-0 mt-px" />
+                <Lock className="w-3 h-3 text-awrose-core/50 flex-shrink-0 mt-px" />
               </div>
-              <p className="font-display italic text-awburg-core/60 text-[13px] leading-snug">
+              <p className="font-display italic text-awrose-deep/80 text-[13px] leading-snug">
                 {phase.caption}
               </p>
             </div>
