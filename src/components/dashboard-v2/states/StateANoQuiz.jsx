@@ -44,7 +44,7 @@ export default function StateANoQuiz({ user, profile }) {
 
         <Link
           to="/quiz"
-          className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
+          className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200"
         >
           TAKE THE QUIZ
           <ArrowRight className="w-4 h-4" />

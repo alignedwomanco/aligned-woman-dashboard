@@ -90,7 +90,7 @@ export default function StateC({ user, profile }) {
           </button>
         </div>
 
-        <button className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors">
+        <button className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
           BEGIN THE 30-MINUTE RESET
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -110,7 +110,7 @@ export default function StateC({ user, profile }) {
 
         <Link
           to="/blueprint"
-          className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-colors mb-8"
+          className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200 mb-8"
         >
           BEGIN THE BLUEPRINT
           <ArrowRight className="w-4 h-4" />

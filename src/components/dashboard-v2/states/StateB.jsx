@@ -24,7 +24,7 @@ export default function StateB({ user, profile }) {
         </p>
         <Link
           to={createPageUrl("Classroom")}
-          className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-colors"
+          className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
         >
           BEGIN PHASE 1: AWARENESS
           <ArrowRight className="w-4 h-4" />
@@ -63,7 +63,7 @@ export default function StateB({ user, profile }) {
         </p>
         <Link
           to="/quiz"
-          className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase inline-flex items-center gap-2 transition-colors"
+          className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core hover:underline uppercase inline-flex items-center gap-2 transition-colors"
         >
           TAKE THE QUIZ
           <ArrowRight className="w-3.5 h-3.5" />
