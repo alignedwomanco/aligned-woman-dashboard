@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
-import { Bell, MessageCircle, LogOut, User, Settings, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Bell, LogOut, User, Settings, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger } from
 "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import NotificationsDropdown from "../components/navigation/NotificationsDropdown";
 import MessagesDrawer from "../components/navigation/MessagesDrawer";
 import LaurAIChatWidget from "../components/LaurAIChatWidget";
@@ -44,7 +43,6 @@ export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [siteSettings, setSiteSettings] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -397,191 +395,114 @@ export default function Layout({ children, currentPageName }) {
     return <>{children}</>;
   }
 
-  const sidebarW = sidebarCollapsed ? "w-16" : "w-64";
-  const contentML = sidebarCollapsed ? "lg:ml-16" : "lg:ml-64";
+  const NAV_ITEMS = [
+    { name: "Dashboard", path: "Dashboard" },
+    { name: "Classroom", path: "Classroom" },
+    { name: "Community", path: "Community" },
+    { name: "Experts", path: "ExpertsDirectory" },
+  ];
 
-  // Shared nav link builder
-  const navLinkClass = (active) =>
-    `flex items-center ${sidebarCollapsed ? "justify-center px-2" : "gap-3 px-4"} py-3 rounded-lg transition-colors flex-shrink-0 ${
-      active ? "bg-awburg-dark text-paper" : "text-paper/80 hover:bg-awburg-dark/40 hover:text-paper"
-    }`;
+  const isActive = (pageName) => currentPageName === pageName;
 
-  // Authenticated app layout with left sidebar
+  // Authenticated app layout with left sidebar - matches Dashboard chrome
   return (
     <div className="min-h-screen flex">
 
-      {/* Left Sidebar - Hidden on mobile */}
-      <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 bg-awburg-core text-paper flex-col z-50 transition-all duration-300 ${sidebarW}`}>
-        {/* Logo */}
-        <div className={`border-b border-awburg-dark/30 flex items-center justify-center ${sidebarCollapsed ? "p-3" : "p-6"}`}>
+      {/* Left Sidebar - matches DashboardSidebar exactly */}
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-paper border-r border-awburg-core/8 flex-col z-40">
+        <div className="p-6 pb-8">
           <Link to={createPageUrl("Home")}>
-            {siteSettings?.dark_logo ? (
-              <img
-                src={siteSettings.dark_logo}
-                alt="The Aligned Woman"
-                className="h-10 w-auto object-contain brightness-0 invert"
-              />
-            ) : (
-              <img
-                src={sidebarCollapsed
-                  ? "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6954540bfe3123205d5d3139/0e0b20571_AlignedWomanFaviconPurple.png"
-                  : "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"
-                }
-                alt="The Aligned Woman"
-                className="object-contain w-auto brightness-0 invert"
-                style={{ height: sidebarCollapsed ? "28px" : "40px" }}
-              />
-            )}
+            <img
+              src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+              alt="The Aligned Woman"
+              className="h-10 w-auto object-contain"
+            />
           </Link>
         </div>
 
-        {/* Search */}
-        <div className={`${sidebarCollapsed ? "px-2 py-3 flex justify-center" : "px-4 py-4"}`}>
-          {!sidebarCollapsed ? (
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-paper/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-full bg-awburg-dark/30 border border-awburg-dark/40 rounded-lg pl-10 pr-4 py-2 text-sm text-paper placeholder-paper/50 focus:outline-none focus:ring-2 focus:ring-paper/20"
-              />
-            </div>
-          ) : (
-            <button className="p-2 hover:bg-awburg-dark/40 rounded-lg transition-colors" title="Search">
-              <svg className="w-5 h-5 text-paper/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <nav className={`flex-1 ${sidebarCollapsed ? "px-2" : "px-4"} py-2 overflow-y-auto`}>
+        <nav className="flex-1 px-4">
           <ul className="space-y-1">
-            <li>
-              <Link to={createPageUrl("Dashboard")} className={navLinkClass(currentPageName === "Dashboard")} title={sidebarCollapsed ? "Dashboard" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                {!sidebarCollapsed && <span className="font-body font-medium">Dashboard</span>}
-              </Link>
-            </li>
-            <li>
-              <Link to={createPageUrl("Classroom")} className={navLinkClass(currentPageName === "Classroom")} title={sidebarCollapsed ? "Classroom" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-                </svg>
-                {!sidebarCollapsed && <span className="font-body font-medium">Classroom</span>}
-              </Link>
-            </li>
-            <li>
-              <Link to={createPageUrl("Community")} className={navLinkClass(currentPageName === "Community")} title={sidebarCollapsed ? "Community" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                {!sidebarCollapsed && <span className="font-body font-medium">Community</span>}
-              </Link>
-            </li>
-            <li>
-              <Link to={createPageUrl("ExpertsDirectory")} className={navLinkClass(currentPageName === "ExpertsDirectory")} title={sidebarCollapsed ? "Experts" : ""}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                {!sidebarCollapsed && <span className="font-body font-medium">Experts</span>}
-              </Link>
-            </li>
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.path);
+              return (
+                <li key={item.name}>
+                  <Link
+                    to={createPageUrl(item.path)}
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                      active
+                        ? "bg-awrose-pale text-awburg-core font-medium"
+                        : "text-awburg-core/70 hover:text-awburg-core hover:bg-awrose-wash"
+                    }`}
+                  >
+                    {active && <div className="w-1.5 h-1.5 rounded-full bg-awrose-core flex-shrink-0" />}
+                    <span className="font-body font-bold text-[11px] tracking-eyebrow uppercase">{item.name}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
-        {/* Toggle Button */}
-        <div className={`border-t border-awburg-dark/30 ${sidebarCollapsed ? "p-2" : "p-4"}`}>
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-awburg-dark/30 hover:bg-awburg-dark/50 transition-colors text-paper/80 hover:text-paper ${sidebarCollapsed ? "px-2" : "px-4"}`}
-            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronLeft className="w-5 h-5" />
-                <span className="text-sm font-medium">Collapse</span>
-              </>
-            )}
-          </button>
+        <div className="p-6 pt-4">
+          <p className="font-body font-bold text-[9px] tracking-[0.18em] text-awburg-core/55 uppercase leading-relaxed">
+            THE ALIGNED WOMAN
+          </p>
         </div>
       </aside>
 
-      {/* Main Content Area - deterministic margin class */}
-      <div className={`flex-1 transition-all duration-300 ${contentML} overflow-x-hidden`}>
-        {/* Top Header */}
-        <header className="sticky top-0 z-40 border-b border-awburg-dark/20 bg-awburg-mid">
-          <div className="flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-8 py-3 sm:py-4">
-            {/* Left: Hamburger + Greeting */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <button
-                onClick={() => setShowMobileMenu(true)}
-                className="lg:hidden p-1.5 hover:bg-awburg-dark/30 rounded-lg transition-colors flex-shrink-0"
-              >
-                <svg className="w-5 h-5 text-paper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-xl font-body font-bold text-paper truncate">
-                  {(() => {
-                    const hour = new Date().getHours();
-                    if (hour < 12) return "Good Morning";
-                    if (hour < 18) return "Good Afternoon";
-                    return "Good Evening";
-                  })()}, {user?.full_name?.split(" ")[0] || "there"} 👋
-                </h1>
-                <p className="text-paper/85 text-xs sm:text-sm hidden sm:block">Hope you feel centered today.</p>
-              </div>
-            </div>
+      {/* Main Content Area */}
+      <div className="flex-1 lg:ml-60 overflow-x-hidden">
+        {/* Top Header - matches Dashboard TopBar style */}
+        <header className="sticky top-0 z-40 border-b border-awburg-core/8 bg-paper">
+          <div className="flex items-center justify-between gap-4 px-6 py-3">
+            {/* Left: mobile hamburger */}
+            <button
+              onClick={() => setShowMobileMenu(true)}
+              className="lg:hidden p-1.5 hover:bg-awrose-wash rounded-lg transition-colors flex-shrink-0"
+            >
+              <svg className="w-5 h-5 text-awburg-core" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-              <button onClick={() => setShowMessages(!showMessages)} className="relative p-2 hover:bg-awburg-dark/30 rounded-lg transition-colors">
-                <MessageCircle className="w-5 h-5 text-paper hover:text-paper/80" />
+            {/* Right Actions - matches TopBar */}
+            <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 hover:bg-awrose-wash rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5 text-awburg-core/70" />
               </button>
-              <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 hover:bg-awburg-dark/30 rounded-lg transition-colors">
-                <Bell className="w-5 h-5 text-paper hover:text-paper/80" />
-              </button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 sm:gap-2 p-1 hover:bg-awburg-dark/30 rounded-lg transition-colors">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-paper/30 ring-2 ring-transparent hover:ring-paper/40 overflow-hidden flex-shrink-0 bg-paper">
+                  <button className="flex items-center gap-1.5 p-1 hover:bg-awrose-wash rounded-lg transition-colors">
+                    <div className="w-9 h-9 rounded-full bg-awburg-core flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {user?.profile_picture ? (
                         <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-paper flex items-center justify-center">
-                          <span className="text-awburg-core text-sm font-body font-medium">{user?.full_name?.[0] || user?.email?.[0] || "U"}</span>
-                        </div>
+                        <span className="text-paper text-sm font-medium">
+                          {user?.full_name?.[0] || user?.email?.[0] || "U"}
+                        </span>
                       )}
                     </div>
-                    <span className="hidden sm:inline text-sm font-body font-medium text-paper max-w-[120px] truncate">{user?.full_name?.split(" ")[0] || "User"}</span>
-                    <ChevronDown className="w-4 h-4 text-paper" />
+                    <ChevronDown className="w-3.5 h-3.5 text-awburg-core/60" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-paper border-awburg-core/10">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link to="/profilesettings" className="flex items-center gap-2 text-awburg-core hover:bg-awrose-pale">
+                    <Link to="/profilesettings" className="flex items-center gap-2">
                       <User className="w-4 h-4" /> Profile Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/dashboardsettings" className="flex items-center gap-2 text-awburg-core hover:bg-awrose-pale">
+                    <Link to="/dashboardsettings" className="flex items-center gap-2">
                       <Settings className="w-4 h-4" /> Dashboard Settings
                     </Link>
                   </DropdownMenuItem>
                   {["owner", "admin", "master_admin", "moderator"].includes(user?.role) && (
                     <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center gap-2 text-awburg-core hover:bg-awrose-pale">
+                      <Link to="/admin" className="flex items-center gap-2">
                         <Settings className="w-4 h-4" /> Admin Settings
                       </Link>
                     </DropdownMenuItem>
@@ -596,19 +517,19 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </header>
 
-        {/* Mobile Drawer */}
+        {/* Mobile Drawer - matches Dashboard mobile drawer style */}
         {showMobileMenu && (
           <>
             <div className="lg:hidden fixed inset-0 bg-black/50 z-[60]" onClick={() => setShowMobileMenu(false)} />
-            <div className="lg:hidden fixed top-0 left-0 bottom-0 w-80 bg-awburg-core z-[70] shadow-2xl overflow-y-auto">
-              <div className="flex flex-col h-full text-paper">
-                <div className="flex items-center justify-between p-6 border-b border-awburg-dark/30">
+            <div className="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-paper z-[70] shadow-2xl overflow-y-auto border-r border-awburg-core/8">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between p-6 border-b border-awburg-core/8">
                   <img
                     src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
-                    alt="AW" className="object-contain w-auto brightness-0 invert" style={{ height: "40px" }}
+                    alt="AW" className="object-contain w-auto h-9"
                   />
-                  <button onClick={() => setShowMobileMenu(false)} className="p-2 hover:bg-awburg-dark/30 rounded-lg transition-colors">
-                    <svg className="w-6 h-6 text-paper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button onClick={() => setShowMobileMenu(false)} className="p-2 hover:bg-awrose-wash rounded-lg transition-colors">
+                    <svg className="w-5 h-5 text-awburg-core" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -616,33 +537,35 @@ export default function Layout({ children, currentPageName }) {
 
                 <nav className="flex-1 p-4">
                   <ul className="space-y-1">
-                    {[
-                      { name: "Dashboard", label: "Dashboard" },
-                      { name: "Classroom", label: "Classroom" },
-                      { name: "Community", label: "Community" },
-                      { name: "ExpertsDirectory", label: "Experts" },
-                    ].map((item) => (
-                      <li key={item.name}>
-                        <Link
-                          to={createPageUrl(item.name)}
-                          onClick={() => setShowMobileMenu(false)}
-                          className={`block px-4 py-3 rounded-lg transition-colors font-body font-medium ${
-                            currentPageName === item.name
-                              ? "bg-awburg-dark text-paper"
-                              : "text-paper/80 hover:bg-awburg-dark/40 hover:text-paper"
-                          }`}
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    ))}
+                    {NAV_ITEMS.map((item) => {
+                      const active = isActive(item.path);
+                      return (
+                        <li key={item.name}>
+                          <Link
+                            to={createPageUrl(item.path)}
+                            onClick={() => setShowMobileMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                              active
+                                ? "bg-awrose-pale text-awburg-core font-medium"
+                                : "text-awburg-core/70 hover:text-awburg-core hover:bg-awrose-wash"
+                            }`}
+                          >
+                            {active && <div className="w-1.5 h-1.5 rounded-full bg-awrose-core flex-shrink-0" />}
+                            <span className="font-body font-bold text-[11px] tracking-eyebrow uppercase">{item.name}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </nav>
 
-                <div className="p-4 border-t border-awburg-dark/30">
-                  <Button onClick={handleLogout} className="w-full bg-awburg-dark/30 hover:bg-awburg-dark/50 text-paper">
-                    <LogOut className="w-4 h-4 mr-2" /> Sign Out
-                  </Button>
+                <div className="p-4 border-t border-awburg-core/8">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-awburg-core/70 hover:text-awburg-core hover:bg-awrose-wash transition-colors font-body font-bold text-[11px] tracking-eyebrow uppercase"
+                  >
+                    <LogOut className="w-4 h-4" /> Sign Out
+                  </button>
                 </div>
               </div>
             </div>
@@ -650,7 +573,6 @@ export default function Layout({ children, currentPageName }) {
         )}
 
         {showNotifications && <NotificationsDropdown onClose={() => setShowNotifications(false)} />}
-        {showMessages && <MessagesDrawer onClose={() => setShowMessages(false)} />}
 
         <main>{children}</main>
         <LaurAIChatWidget />
