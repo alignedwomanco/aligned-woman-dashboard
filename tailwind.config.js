@@ -60,7 +60,29 @@ module.exports = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+  			awburg: {
+  				dark: 'var(--aw-burg-dark)',
+  				core: 'var(--aw-burg-core)',
+  				mid: 'var(--aw-burg-mid)',
+  				bright: 'var(--aw-burg-bright)'
+  			},
+  			awrose: {
+  				deep: 'var(--aw-rose-deep)',
+  				core: 'var(--aw-rose-core)',
+  				light: 'var(--aw-rose-light)',
+  				pale: 'var(--aw-rose-pale)',
+  				wash: 'var(--aw-rose-wash)'
+  			},
+  			'off-white': 'var(--aw-off-white)',
+  			paper: 'var(--aw-white)'
+  		},
+  		fontFamily: {
+  			display: ['DM Serif Display', 'Cormorant Garamond', 'Georgia', 'serif'],
+  			body: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif']
+  		},
+  		letterSpacing: {
+  			eyebrow: '0.22em'
   		},
   		keyframes: {
   			'accordion-down': {
