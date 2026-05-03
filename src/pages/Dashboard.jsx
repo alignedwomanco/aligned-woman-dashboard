@@ -1,208 +1,198 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import IntakeCard from "@/components/dashboard/IntakeCard";
-import ContinueCard from "@/components/dashboard/ContinueCard";
-import CommunityCard from "@/components/dashboard/CommunityCard";
-import ExpertCard from "@/components/dashboard/ExpertCard";
-import LaurAIChatWidget from "@/components/LaurAIChatWidget";
+import { getDashboardState } from "@/lib/dashboardState";
+import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
+import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
+import DashboardHeader from "@/components/dashboard-v2/DashboardHeader";
+import CommunityCard from "@/components/dashboard-v2/CommunityCard";
+import ExpertSpotlight from "@/components/dashboard-v2/ExpertSpotlight";
+import AccountStatusFooter from "@/components/dashboard-v2/AccountStatusFooter";
+import StateB from "@/components/dashboard-v2/states/StateB";
+import StateANoQuiz from "@/components/dashboard-v2/states/StateANoQuiz";
+import StateAWithQuiz from "@/components/dashboard-v2/states/StateAWithQuiz";
+import StateC from "@/components/dashboard-v2/states/StateC";
+
+function formatJoinedDate(timestamp) {
+  if (!timestamp) return "";
+  const d = new Date(timestamp);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+}
+
+function getMembershipLabel(user) {
+  const tags = Array.isArray(user?.access_tags) ? user.access_tags : [];
+  return tags.includes("blueprint_paid") ? "Blueprint owner" : "Free member";
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-12 w-2/3 bg-awburg-core/8 rounded" />
+      <div className="h-64 bg-awburg-core/8 rounded-xl" />
+      <div className="h-40 bg-awburg-core/8 rounded-xl" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-awburg-core/8 rounded-lg" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-44 bg-awburg-core/8 rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DashboardError({ message, onRetry }) {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="bg-paper rounded-xl border border-awburg-core/8 p-8 max-w-md text-center">
+        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-3">
+          SOMETHING WENT WRONG
+        </p>
+        <h2 className="font-display text-awburg-core text-2xl leading-tight mb-3">
+          We could not load your dashboard.
+        </h2>
+        <p className="font-body font-light text-awburg-core/75 text-sm leading-relaxed mb-6">
+          {message || "Please try again, or sign out and back in."}
+        </p>
+        <button
+          onClick={onRetry}
+          className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
+        >
+          REFRESH
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [status, setStatus] = useState("loading");
+  const [data, setData] = useState({ state: null, user: null, profile: null });
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const load = async () => {
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      const result = await getDashboardState();
+      setData(result);
+      setStatus("ready");
+    } catch (err) {
+      setErrorMsg(err?.message || "Unknown error");
+      setStatus("error");
+    }
+  };
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    load();
   }, []);
 
-  // Diagnostic session (intake data)
-  const { data: diagnosticSession } = useQuery({
-    queryKey: ["diagnosticSession"],
-    queryFn: async () => {
-      const sessions = await base44.entities.DiagnosticSession.filter({ isComplete: true }, "-created_date", 1);
-      return sessions[0] || null;
-    },
-  });
+  // Side effect: when state_b is rendered, flip has_seen_welcome to true.
+  // Runs after render so the welcome UI is visible to the user before the flag
+  // changes. Does not block render or re-trigger if it fails.
+  useEffect(() => {
+    if (status !== "ready") return;
+    if (data.state !== "state_b") return;
+    if (!data.profile?.id) return;
 
-  // Get course progress data
-  const { data: modules } = useQuery({
-    queryKey: ["modules"],
-    queryFn: () => base44.entities.Module.list("-updated_date", 10),
-    initialData: [],
-  });
+    base44.entities.MemberProfile
+      .update(data.profile.id, { has_seen_welcome: true })
+      .catch((err) => {
+        console.error("[Dashboard] Failed to flip has_seen_welcome:", err);
+      });
+  }, [status, data.state, data.profile?.id]);
 
-  const { data: userModuleProgress } = useQuery({
-    queryKey: ["userModuleProgress"],
-    queryFn: () => base44.entities.UserModuleProgress.list(),
-    initialData: [],
-  });
-
-  const { data: experts } = useQuery({
-    queryKey: ["experts"],
-    queryFn: () => base44.entities.Expert.filter({ isPublished: true }),
-    initialData: [],
-  });
-
-  const { data: communityPosts } = useQuery({
-    queryKey: ["communityPosts"],
-    queryFn: () => base44.entities.CommunityPost.list("-created_date", 3),
-    initialData: [],
-  });
-
-  // Get first incomplete module or default
-  const currentModuleData = useMemo(() => {
-    if (!modules.length) return { module: null, expert: null, completedPages: 0, totalPages: 0 };
-    
-    const incompleteModule = modules.find(m => {
-      const progress = userModuleProgress.find(p => p.moduleId === m.id);
-      return !progress || progress.status !== "Complete";
-    }) || modules[0];
-
-    const progress = userModuleProgress.find(p => p.moduleId === incompleteModule.id);
-    const expert = incompleteModule.expertId ? experts.find(e => e.id === incompleteModule.expertId) : experts[0];
-
-    return {
-      module: incompleteModule,
-      expert: expert || null,
-      completedPages: progress?.videoWatchedPercent || 0,
-      totalPages: 4,
-    };
-  }, [modules, userModuleProgress, experts]);
-
-  // Member since date
-  const memberSince = currentUser?.created_date
-    ? new Date(currentUser.created_date).toLocaleDateString("en-US", { month: "long", year: "numeric" }).toUpperCase()
-    : "MAY 2026";
-
-  // Random expert for spotlight
-  const spotlightExpert = useMemo(() => {
-    if (!experts.length) return null;
-    return experts[Math.floor(Math.random() * experts.length)];
-  }, [experts]);
-
-  return (
-    <div style={{ minHeight: "100vh", background: "white" }}>
-      {/* Main container with left sidebar space */}
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "clamp(24px, 5vw, 40px)", paddingLeft: "clamp(24px, 5vw, 40px)" }}>
-        
-        {/* Header */}
-        <DashboardHeader user={currentUser} />
-
-        {/* Two-column layout: Left ~65%, Right ~35% */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "32px", alignItems: "start" }}>
-          
-          {/* LEFT COLUMN */}
-          <div>
-            {/* 1. Intake Card */}
-            <IntakeCard
-              diagnosticSession={diagnosticSession}
-              onEdit={() => console.log("Edit intake")}
-              onRetake={() => console.log("Retake quiz")}
-            />
-
-            {/* 2. Continue Where You Left Off */}
-            <ContinueCard
-              module={currentModuleData.module}
-              expert={currentModuleData.expert}
-              completedPages={currentModuleData.completedPages}
-              totalPages={currentModuleData.totalPages}
-              onContinue={() => console.log("Continue")}
-            />
-
-            {/* 3. Current Phase Card */}
-            {diagnosticSession && (
-              <div style={{ background: "white", border: "1px solid #f0f0f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", marginBottom: "24px" }}>
-                <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B1B3D", marginBottom: "12px", fontFamily: "Montserrat, sans-serif" }}>
-                  <span style={{ display: "inline-block", width: "12px", height: "1px", background: "#6B1B3D", marginRight: "8px" }} />
-                  CURRENT PHASE . 04 OF 04
-                </p>
-                <div className="flex items-start gap-6">
-                  <div>
-                    <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "28px", color: "#1a1a1a", marginBottom: "4px", fontWeight: 400 }}>
-                      {diagnosticSession.primaryPhase || "Embodiment"}
-                    </h3>
-                    <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontStyle: "italic", fontSize: "14px", color: "#888", marginBottom: "12px" }}>
-                      Integration & mastery phase
-                    </p>
-                  </div>
-                  <div style={{ marginLeft: "auto", textAlign: "center" }}>
-                    <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6B1B3D", marginBottom: "4px", fontFamily: "Montserrat, sans-serif" }}>
-                      MODULES COMPLETE
-                    </p>
-                    <p style={{ fontSize: "24px", fontWeight: 700, color: "#1a1a1a", fontFamily: "Montserrat, sans-serif" }}>
-                      0 / 4
-                    </p>
-                    <p style={{ fontSize: "11px", color: "#888", marginTop: "4px", fontFamily: "Montserrat, sans-serif" }}>
-                      4 remaining
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 4. Your Workbooks */}
-            <div style={{ background: "white", border: "1px solid #f0f0f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-              <div className="flex items-center justify-between mb-6">
-                <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B1B3D", fontFamily: "Montserrat, sans-serif" }}>
-                  <span style={{ display: "inline-block", width: "12px", height: "1px", background: "#6B1B3D", marginRight: "8px" }} />
-                  YOUR WORKBOOKS . PHASE 01
-                </p>
-                <a href="#" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6B1B3D", textDecoration: "none", fontFamily: "Montserrat, sans-serif" }}>
-                  ALL WORKBOOKS →
-                </a>
-              </div>
-              
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
-                {[1, 2, 3].map((i) => (
-                  <div key={i} style={{ background: "#FAF5F3", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
-                    <p style={{ fontSize: "24px", marginBottom: "8px" }}>📖</p>
-                    <span style={{ display: "inline-block", fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", background: "#C4847A", color: "white", padding: "4px 8px", borderRadius: "4px", marginBottom: "8px", fontFamily: "Montserrat, sans-serif" }}>
-                      IN PROGRESS
-                    </span>
-                    <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a1a", marginBottom: "4px", fontFamily: "Montserrat, sans-serif" }}>
-                      Workbook {i}
-                    </p>
-                    <p style={{ fontSize: "10px", color: "#888", marginBottom: "8px", fontFamily: "Montserrat, sans-serif" }}>
-                      EXPERT NAME
-                    </p>
-                    <div className="flex items-center justify-center gap-2">
-                      <a href="#" style={{ fontSize: "10px", fontWeight: 700, color: "#6B1B3D", textDecoration: "none", fontFamily: "Montserrat, sans-serif" }}>
-                        CONTINUE
-                      </a>
-                      <span style={{ fontSize: "10px", color: "#aaa" }}>•</span>
-                      <a href="#" style={{ fontSize: "10px", fontWeight: 700, color: "#6B1B3D", textDecoration: "none", fontFamily: "Montserrat, sans-serif" }}>
-                        PDF
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <DashboardSidebar />
+        <MobileTabBar />
+        <div className="lg:pl-60 pb-20 lg:pb-0">
+          <main className="px-6 md:px-10 py-10 max-w-[1400px]">
+            <div className="mb-10">
+              <div className="h-3 w-32 bg-awburg-core/8 rounded mb-4 animate-pulse" />
+              <div className="h-12 w-2/3 bg-awburg-core/8 rounded animate-pulse" />
             </div>
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div>
-            {/* Community Card */}
-            <CommunityCard />
-
-            {/* Expert This Week */}
-            <ExpertCard expert={spotlightExpert} />
-
-            {/* Member Since Badge */}
-            <div style={{ textAlign: "center", marginTop: "32px", paddingTop: "24px", borderTop: "1px solid #f0f0f0" }}>
-              <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", marginBottom: "4px", fontFamily: "Montserrat, sans-serif" }}>
-                MEMBER SINCE {memberSince}
-              </p>
-              <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#C4847A", fontFamily: "Montserrat, sans-serif" }}>
-                BLUEPRINT OWNER
-              </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <section className="lg:col-span-8">
+                <DashboardSkeleton />
+              </section>
+              <aside className="lg:col-span-4 space-y-4">
+                <div className="h-60 bg-awburg-core/8 rounded-xl animate-pulse" />
+                <div className="h-72 bg-awburg-core/8 rounded-xl animate-pulse" />
+              </aside>
             </div>
-          </div>
+          </main>
         </div>
       </div>
+    );
+  }
 
-      {/* LaurAI Chat Widget */}
-      <LaurAIChatWidget />
+  if (status === "error") {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <DashboardSidebar />
+        <MobileTabBar />
+        <div className="lg:pl-60 pb-20 lg:pb-0">
+          <main className="px-6 md:px-10 py-10 max-w-[1400px]">
+            <DashboardError message={errorMsg} onRetry={load} />
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  const { state, user, profile } = data;
+  const joinedDate = formatJoinedDate(profile?.signup_timestamp);
+  const membershipLabel = getMembershipLabel(user);
+  const isBlueprintOwner = membershipLabel === "Blueprint owner";
+
+  let StateComponent = null;
+  if (state === "state_b") StateComponent = StateB;
+  else if (state === "state_a_no_quiz") StateComponent = StateANoQuiz;
+  else if (state === "state_a_with_quiz") StateComponent = StateAWithQuiz;
+  else if (state === "state_c") StateComponent = StateC;
+
+  return (
+    <div className="min-h-screen bg-off-white">
+      <DashboardSidebar
+        memberSince={joinedDate.toUpperCase()}
+        isBlueprintOwner={isBlueprintOwner}
+      />
+      <MobileTabBar />
+
+      <div className="lg:pl-60 pb-20 lg:pb-0">
+        <main className="px-6 md:px-10 py-10 max-w-[1400px]">
+          <DashboardHeader firstName={profile?.first_name} user={user} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <section className="lg:col-span-8 order-1">
+              {StateComponent ? (
+                <StateComponent user={user} profile={profile} />
+              ) : (
+                <DashboardError
+                  message={`Unrecognised dashboard state: ${state}`}
+                  onRetry={load}
+                />
+              )}
+            </section>
+
+            <aside className="lg:col-span-4 order-2 flex flex-col gap-4">
+              <CommunityCard />
+              <ExpertSpotlight />
+              <div className="pt-2">
+                <AccountStatusFooter
+                  joinedDate={joinedDate}
+                  membershipLabel={membershipLabel}
+                />
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
