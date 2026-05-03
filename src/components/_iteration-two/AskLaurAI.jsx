@@ -1,3 +1,4 @@
+// Deferred to iteration two per Workstream Three brief. Not imported anywhere in iteration one.
 import React, { useState } from "react";
 import { Send, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
