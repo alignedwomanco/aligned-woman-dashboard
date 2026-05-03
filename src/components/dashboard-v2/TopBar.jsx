@@ -18,31 +18,33 @@ export default function TopBar({ user, hasUnreadNotifications }) {
   return (
     <>
       <div className="flex items-center gap-2 flex-shrink-0">
-        {/* Notification bell */}
         <button
           onClick={() => setShowNotifications(!showNotifications)}
-          className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors"
+          className="relative p-2 hover:bg-awrose-wash rounded-lg transition-colors"
+          aria-label="Notifications"
         >
-          <Bell className="w-5 h-5 text-[#6B6168]" />
+          <Bell className="w-5 h-5 text-awburg-core/70" />
           {hasUnreadNotifications && (
-            <div className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#C77B85] border-2 border-white" />
+            <div className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-awrose-core border-2 border-paper" />
           )}
         </button>
 
-        {/* Avatar dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 p-1 hover:bg-gray-50 rounded-lg transition-colors">
-              <div className="w-9 h-9 rounded-full bg-[#5C1A2E] flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <button
+              className="flex items-center gap-1.5 p-1 hover:bg-awrose-wash rounded-lg transition-colors"
+              aria-label="Account menu"
+            >
+              <div className="w-9 h-9 rounded-full bg-awburg-core flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {user?.profile_picture ? (
                   <img src={user.profile_picture} alt={user.full_name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-white text-sm font-medium">
+                  <span className="text-paper text-sm font-medium">
                     {user?.full_name?.[0] || user?.email?.[0] || "U"}
                   </span>
                 )}
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#6B6168]" />
+              <ChevronDown className="w-3.5 h-3.5 text-awburg-core/60" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
