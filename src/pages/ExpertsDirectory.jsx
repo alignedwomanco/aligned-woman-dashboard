@@ -19,9 +19,9 @@ function ExpertCard({ expert, categoryName }) {
   const initials = getInitials(expert.name);
 
   return (
-    <div className="bg-paper overflow-hidden flex flex-col">
+    <div className="bg-paper rounded-2xl overflow-hidden flex flex-col border border-awburg-core/8 shadow-sm">
       {/* Portrait */}
-      <div className="relative bg-gradient-to-br from-awrose-pale to-awrose-wash flex items-center justify-center overflow-hidden" style={{ aspectRatio: "4/3" }}>
+      <div className="relative bg-gradient-to-br from-awrose-pale to-awrose-wash flex items-center justify-center overflow-hidden" style={{ aspectRatio: "3/2.2" }}>
         {expert.profile_picture ? (
           <img
             src={expert.profile_picture}
@@ -30,10 +30,10 @@ function ExpertCard({ expert, categoryName }) {
           />
         ) : (
           <>
-            <span className="font-display italic text-awburg-core/70 select-none text-6xl md:text-7xl">
+            <span className="font-display italic text-awburg-core select-none" style={{ fontSize: "clamp(56px, 8vw, 88px)" }}>
               {initials}
             </span>
-            <span className="absolute bottom-3 left-4 font-body font-bold text-[8px] tracking-eyebrow text-awburg-core/30 uppercase">
+            <span className="absolute bottom-4 left-5 font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/40 uppercase">
               PORTRAIT · PLACEHOLDER
             </span>
           </>
@@ -41,30 +41,30 @@ function ExpertCard({ expert, categoryName }) {
       </div>
 
       {/* Body */}
-      <div className="pt-4 pb-6 flex flex-col flex-1">
+      <div className="px-5 pt-4 pb-6 flex flex-col flex-1">
         {categoryName && (
-          <p className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-deep uppercase mb-2">
+          <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-3">
             {categoryName}
           </p>
         )}
 
-        <h3 className="font-display italic text-awburg-core text-2xl leading-tight mb-1">
+        <h3 className="font-display italic text-awburg-core text-2xl leading-snug mb-2">
           {expert.name}
         </h3>
 
         {expert.title && (
-          <p className="font-body text-xs text-awburg-core/60 mb-3">{expert.title}</p>
+          <p className="font-body font-semibold text-sm text-awburg-core/80 mb-3">{expert.title}</p>
         )}
 
         {expert.bio && (
-          <p className="font-body font-light text-sm text-awburg-core/65 leading-relaxed line-clamp-4 flex-1 mb-4">
+          <p className="font-body text-sm text-awburg-core/65 leading-relaxed line-clamp-5 flex-1 mb-5">
             {expert.bio}
           </p>
         )}
 
         <Link
           to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
-          className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase transition-colors inline-flex items-center gap-1"
+          className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase transition-colors inline-flex items-center gap-1.5"
         >
           VIEW PROFILE →
         </Link>
