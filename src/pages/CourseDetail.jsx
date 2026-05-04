@@ -8,6 +8,26 @@ import { useCourseAccess } from "@/hooks/useCourseAccess";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 
 // ---------------------------------------------------------------------------
+// Phase Quotes (A.L.I.V.E. framework - hardcoded, not from data)
+// ---------------------------------------------------------------------------
+
+const PHASE_QUOTES = {
+  awareness: "My body is not working against me, it is speaking to me.",
+  liberation: "I do not have to live in survival mode anymore.",
+  intention: "I think differently, so I choose differently.",
+  "intentional action": "I think differently, so I choose differently.",
+  vision: "What do I actually want?",
+  embodiment: "This is who I am now.",
+  "vision & embodiment": "What do I actually want?",
+};
+
+function getPhaseKey(section) {
+  if (!section?.title) return null;
+  const stripped = section.title.replace(/^Phase \d+\s*[-:]\s*/i, "").trim().toLowerCase();
+  return stripped;
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -133,13 +153,21 @@ function ResumeBar({ profile, modules, sections, courses }) {
   );
 }
 
-function WelcomeSection({ welcomeSection, modules, hasAccess }) {
+function WelcomeSection({ welcomeSection, modules, pages, hasAccess }) {
   const navigate = useNavigate();
   const welcomeMod = modules.filter((m) => m.sectionId === welcomeSection?.id)[0];
 
   const handlePlay = () => {
     if (!welcomeMod) return;
-    navigate(createPageUrl("ModulePlayer") + `?moduleId=${welcomeMod.id}`);
+    // Navigate to the first page of the welcome module if it exists
+    const modPages = pages
+      .filter((p) => p.moduleId === welcomeMod.id)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const firstPage = modPages[0];
+    const url = firstPage
+      ? createPageUrl("ModulePlayer") + `?moduleId=${welcomeMod.id}&pageId=${firstPage.id}`
+      : createPageUrl("ModulePlayer") + `?moduleId=${welcomeMod.id}`;
+    navigate(url);
   };
 
   return (
@@ -316,31 +344,32 @@ function CollapsedModule({ mod, pages, progressMap, modIndex, isLocked }) {
   );
 }
 
-function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentModuleId, workbooks, prevPhaseComplete, isWelcomeComplete }) {
+function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentModuleId, workbooks, currentPhaseIndex }) {
   const phaseLetter = stripPhasePrefix(section.title)?.[0]?.toUpperCase() || String.fromCharCode(65 + sectionIndex);
   const phaseName = stripPhasePrefix(section.title);
 
-  // Determine phase state
-  const isUnlocked = isWelcomeComplete && (sectionIndex === 0 || prevPhaseComplete);
-  const isPhaseCompleted = isUnlocked && mods.every((m) => isModuleComplete(m.id, pages.filter((p) => p.moduleId === m.id), progressMap));
-  const isCurrent = isUnlocked && !isPhaseCompleted;
+  // Phase state derived from currentPhaseIndex
+  // index < current = COMPLETED, index === current = CURRENT, index > current = LOCKED
+  const isCompleted = sectionIndex < currentPhaseIndex;
+  const isCurrent = sectionIndex === currentPhaseIndex;
+  const isLocked = sectionIndex > currentPhaseIndex;
 
-  // Find current module within this phase
+  // Find the expanded module in the current phase
   const currentModIndexInPhase = mods.findIndex((m) => m.id === currentModuleId);
   const expandedModId = isCurrent
     ? (currentModIndexInPhase !== -1 ? mods[currentModIndexInPhase].id : mods[0]?.id)
     : null;
 
   // Visual treatment
-  const letterOpacity = !isUnlocked ? "opacity-30" : isPhaseCompleted ? "text-awrose-core" : "text-awrose-deep";
-  const quoteOpacity = !isUnlocked ? "text-awburg-core/30" : "text-awburg-core";
+  const letterClass = isLocked ? "text-awburg-core/30" : isCompleted ? "text-awrose-core" : "text-awrose-deep";
+  const quoteOpacity = isLocked ? "text-awburg-core/60" : "text-awburg-core";
 
   return (
-    <div className={`flex gap-6 md:gap-10 mb-10 ${!isUnlocked ? "opacity-60" : ""}`}>
+    <div className={`flex gap-6 md:gap-10 mb-10 ${isLocked ? "opacity-60" : ""}`}>
       {/* Large letter */}
       <div className="flex-shrink-0 select-none" style={{ width: 80 }}>
         <span
-          className={`font-display italic leading-none ${letterOpacity}`}
+          className={`font-display italic leading-none ${letterClass}`}
           style={{ fontSize: "clamp(80px, 12vw, 160px)", lineHeight: 1 }}
         >
           {phaseLetter}
@@ -359,26 +388,30 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
               CURRENT
             </span>
           )}
-          {!isUnlocked && (
+          {isLocked && (
             <span className="flex items-center gap-1 font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/50 uppercase">
               <Lock className="w-3 h-3" /> LOCKED
             </span>
           )}
         </div>
 
-        {/* Phase quote */}
-        {section.description && (
-          <p className={`font-display italic text-xl md:text-2xl leading-snug mb-5 ${quoteOpacity}`}>
-            &ldquo;{section.description}&rdquo;
-          </p>
-        )}
+        {/* Phase quote - hardcoded A.L.I.V.E. quotes take priority over section.description */}
+        {(() => {
+          const quote = PHASE_QUOTES[getPhaseKey(section)] || section.description || "";
+          return quote ? (
+            <p className={`font-display italic text-xl md:text-2xl leading-snug mb-5 ${quoteOpacity}`}>
+              &ldquo;{quote}&rdquo;
+            </p>
+          ) : null;
+        })()}
 
-        {/* Modules - only show if unlocked */}
-        {isUnlocked && (
+        {/* Modules - only show for current and completed phases, not locked */}
+        {!isLocked && (
           <div>
             {mods.map((mod, mi) => {
-              const isExpanded = mod.id === expandedModId;
-              const isModLocked = mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap) && !isPhaseCompleted;
+              const isExpanded = isCurrent && mod.id === expandedModId;
+              // In completed phases all modules are accessible; in current phase gate sequentially
+              const isModLocked = isCurrent && mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap);
 
               return isExpanded ? (
                 <ExpandedModule
@@ -531,13 +564,6 @@ export default function CourseDetail() {
   );
   const nonWelcomeSections = sections.filter((s) => s.id !== welcomeSection?.id);
 
-  // Is welcome complete?
-  const welcomeMods = modules.filter((m) => m.sectionId === welcomeSection?.id);
-  const welcomePages = pages.filter((p) => welcomeMods.some((m) => m.id === p.moduleId));
-  const isWelcomeComplete =
-    !welcomeSection ||
-    (welcomePages.length > 0 && welcomePages.every((p) => progressMap[p.id] === "completed"));
-
   // Overall progress
   const totalPages = pages.length;
   const completedPages = pages.filter((p) => progressMap[p.id] === "completed").length;
@@ -615,41 +641,46 @@ export default function CourseDetail() {
           <WelcomeSection
             welcomeSection={welcomeSection}
             modules={modules}
+            pages={pages}
             hasAccess={hasAccess || previewMode}
           />
         )}
 
         {/* Phase Journey */}
-        <div className="space-y-2">
-          {nonWelcomeSections.map((section, idx) => {
-            const sectionMods = modules.filter((m) => m.sectionId === section.id);
+        {(() => {
+          // Determine currentPhaseIndex:
+          // If last_module_id is set, find which phase section that module belongs to.
+          // If not set (brand new user), default to index 0 (Awareness).
+          let currentPhaseIndex = 0;
+          if (profile?.last_module_id) {
+            const lastMod = modules.find((m) => m.id === profile.last_module_id);
+            if (lastMod) {
+              const idx = nonWelcomeSections.findIndex((s) => s.id === lastMod.sectionId);
+              if (idx !== -1) currentPhaseIndex = idx;
+            }
+          }
 
-            // Compute prev phase completeness for gating
-            const prevSection = nonWelcomeSections[idx - 1];
-            const prevMods = prevSection ? modules.filter((m) => m.sectionId === prevSection.id) : [];
-            const prevPhaseComplete =
-              idx === 0 ||
-              (prevMods.length > 0 &&
-                prevMods.every((m) =>
-                  isModuleComplete(m.id, pages.filter((p) => p.moduleId === m.id), progressMap)
-                ));
-
-            return (
-              <PhaseBlock
-                key={section.id}
-                section={section}
-                sectionIndex={idx}
-                mods={sectionMods}
-                pages={pages}
-                progressMap={progressMap}
-                currentModuleId={profile?.last_module_id}
-                workbooks={workbooks}
-                prevPhaseComplete={prevPhaseComplete}
-                isWelcomeComplete={isWelcomeComplete}
-              />
-            );
-          })}
-        </div>
+          return (
+            <div className="space-y-2">
+              {nonWelcomeSections.map((section, idx) => {
+                const sectionMods = modules.filter((m) => m.sectionId === section.id);
+                return (
+                  <PhaseBlock
+                    key={section.id}
+                    section={section}
+                    sectionIndex={idx}
+                    mods={sectionMods}
+                    pages={pages}
+                    progressMap={progressMap}
+                    currentModuleId={profile?.last_module_id}
+                    workbooks={workbooks}
+                    currentPhaseIndex={currentPhaseIndex}
+                  />
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-awburg-core/8 flex items-center justify-between">
