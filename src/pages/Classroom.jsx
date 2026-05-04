@@ -317,7 +317,7 @@ export default function Classroom() {
     progressRecords.some((p) => p.courseId === courseId);
 
   const isLockedCourse = (course) =>
-    course.isComingSoon || !hasAccess(course);
+    !isAdmin && (course.isComingSoon || !hasAccess(course));
 
   // Filter logic
   const filteredCourses = useMemo(() => {
