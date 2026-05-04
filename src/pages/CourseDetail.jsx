@@ -26,7 +26,10 @@ export default function CourseDetail() {
   const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
-    if (!courseId) return;
+    if (!courseId) {
+      setLoading(false);
+      return;
+    }
     const loadData = async () => {
       try {
         // Check user access
@@ -169,7 +172,7 @@ export default function CourseDetail() {
     );
   }
 
-  if (!course) {
+  if (!courseId || !course) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500">Course not found.</p>
