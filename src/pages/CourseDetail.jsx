@@ -474,8 +474,8 @@ export default function CourseDetail() {
         const email = me?.email?.toLowerCase();
 
         // Course
-        const courseArr = await base44.entities.Course.filter({ id: courseId });
-        const courseData = courseArr[0];
+        const allCourses = await base44.entities.Course.list();
+        const courseData = allCourses.find((c) => c.id === courseId);
         setCourse(courseData);
 
         // Sections sorted by order
