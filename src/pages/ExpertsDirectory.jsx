@@ -17,14 +17,11 @@ function getInitials(name) {
 
 function ExpertCard({ expert, categoryName }) {
   const initials = getInitials(expert.name);
-  const nameParts = expert.name ? expert.name.trim().split(" ") : [""];
-  const firstName = nameParts.slice(0, -1).join(" ");
-  const lastName = nameParts[nameParts.length - 1];
 
   return (
-    <div className="bg-paper rounded-lg border border-awburg-core/8 overflow-hidden flex flex-col">
+    <div className="bg-paper overflow-hidden flex flex-col">
       {/* Portrait */}
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-awrose-pale to-awrose-wash flex items-center justify-center overflow-hidden">
+      <div className="relative bg-gradient-to-br from-awrose-pale to-awrose-wash flex items-center justify-center overflow-hidden" style={{ aspectRatio: "4/3" }}>
         {expert.profile_picture ? (
           <img
             src={expert.profile_picture}
@@ -33,10 +30,10 @@ function ExpertCard({ expert, categoryName }) {
           />
         ) : (
           <>
-            <span className="font-display italic text-awburg-core select-none" style={{ fontSize: "clamp(28px, 4vw, 48px)" }}>
+            <span className="font-display italic text-awburg-core/70 select-none text-6xl md:text-7xl">
               {initials}
             </span>
-            <span className="absolute bottom-2 left-3 font-body font-bold text-[8px] tracking-eyebrow text-awburg-core/30 uppercase">
+            <span className="absolute bottom-3 left-4 font-body font-bold text-[8px] tracking-eyebrow text-awburg-core/30 uppercase">
               PORTRAIT · PLACEHOLDER
             </span>
           </>
@@ -44,24 +41,23 @@ function ExpertCard({ expert, categoryName }) {
       </div>
 
       {/* Body */}
-      <div className="p-3 flex flex-col flex-1">
+      <div className="pt-4 pb-6 flex flex-col flex-1">
         {categoryName && (
-          <p className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-deep uppercase mb-1">
+          <p className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-deep uppercase mb-2">
             {categoryName}
           </p>
         )}
 
-        <h3 className="font-display text-awburg-core text-base leading-tight mb-0.5">
-          {firstName && <span>{firstName} </span>}
-          <span className="italic text-awrose-deep">{lastName}</span>
+        <h3 className="font-display italic text-awburg-core text-2xl leading-tight mb-1">
+          {expert.name}
         </h3>
 
         {expert.title && (
-          <p className="font-body text-xs text-awburg-core/70 mb-2">{expert.title}</p>
+          <p className="font-body text-xs text-awburg-core/60 mb-3">{expert.title}</p>
         )}
 
         {expert.bio && (
-          <p className="font-body font-light text-xs text-awburg-core/65 leading-relaxed line-clamp-3 flex-1 mb-3">
+          <p className="font-body font-light text-sm text-awburg-core/65 leading-relaxed line-clamp-4 flex-1 mb-4">
             {expert.bio}
           </p>
         )}
@@ -70,7 +66,7 @@ function ExpertCard({ expert, categoryName }) {
           to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
           className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase transition-colors inline-flex items-center gap-1"
         >
-          VIEW PROFILE +
+          VIEW PROFILE →
         </Link>
       </div>
     </div>
@@ -113,7 +109,7 @@ export default function ExpertsDirectory() {
 
   return (
     <div className="min-h-screen bg-off-white px-8 md:px-16 py-16">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
 
         {/* Header */}
         <div className="mb-10">
@@ -126,13 +122,13 @@ export default function ExpertsDirectory() {
           <h1 className="font-display italic text-awburg-core text-5xl md:text-6xl leading-tight mb-4">
             The women teaching you.
           </h1>
-          <p className="font-body font-light text-awburg-core/70 text-base max-w-xl leading-relaxed">
+          <p className="font-body font-light italic text-awburg-core/70 text-base max-w-xl leading-relaxed">
             Fourteen specialists across hormones, nervous-system regulation, money, mindset and identity. Browse the full council, or filter by what you're working on.
           </p>
         </div>
 
         {/* Search */}
-        <div className="relative mb-6 max-w-md">
+        <div className="relative mb-6 max-w-lg">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" />
           <input
             type="text"
@@ -144,7 +140,7 @@ export default function ExpertsDirectory() {
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap gap-2 mb-10">
+        <div className="flex flex-wrap gap-2 mb-12">
           <button
             onClick={() => setSelectedCategory("all")}
             className={`px-4 py-2 rounded-full text-xs font-body font-bold tracking-eyebrow uppercase border transition-colors ${
@@ -172,7 +168,7 @@ export default function ExpertsDirectory() {
 
         {/* Grid */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {filtered.map((expert) => (
               <ExpertCard
                 key={expert.id}
