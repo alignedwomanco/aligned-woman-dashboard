@@ -219,11 +219,10 @@ export default function CourseDetail() {
                }}
              />
            </div>
-          </div>
-          </div>
-          </div>
+           </div>
+           </div>
 
-      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+           <div className="max-w-6xl mx-auto p-4 sm:p-6">
          {/* Access gate for paid courses */}
          {!hasPaidAccess && !previewMode && (
            <div className="mb-6">
@@ -336,6 +335,7 @@ export default function CourseDetail() {
            </>
          )}
       </div>
-    </div>
-  );
-}
+      </div>
+      </div>
+      );
+      }
