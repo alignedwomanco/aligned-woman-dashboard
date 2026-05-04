@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Lock, CheckCircle2, Play, BookOpen, ChevronRight } from "lucide-react";
+import { ArrowLeft, Lock, CheckCircle2, Play, BookOpen, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 
@@ -208,165 +208,181 @@ function WelcomeSection({ welcomeSection, modules, pages, hasAccess }) {
   );
 }
 
-function LessonRow({ page, index, progressMap, isLocked, moduleId }) {
+// CORRECTION 2: LessonRow accepts isCurrentModule to differentiate WATCH LESSON vs locked display
+function LessonRow({ page, index, progressMap, isLocked, moduleId, isCurrentModule }) {
   const navigate = useNavigate();
   const status = progressMap[page.id];
   const isComplete = status === "completed";
-  const isAvailable = !isLocked && (isComplete || index === 0 || status === "in_progress");
 
   const handleClick = () => {
-    if (isLocked) return;
+    if (isLocked || !isCurrentModule) return;
     navigate(createPageUrl("ModulePlayer") + `?moduleId=${moduleId}&pageId=${page.id}`);
   };
 
+  const canClick = isCurrentModule && !isLocked;
+
   return (
     <div
-      onClick={isLocked ? undefined : handleClick}
-      role={isLocked ? undefined : "button"}
-      tabIndex={isLocked ? -1 : 0}
-      onKeyDown={(e) => { if (!isLocked && e.key === "Enter") handleClick(); }}
-      aria-label={isLocked ? undefined : `Open lesson: ${page.title}`}
+      onClick={canClick ? handleClick : undefined}
+      role={canClick ? "button" : undefined}
+      tabIndex={canClick ? 0 : -1}
+      onKeyDown={(e) => { if (canClick && e.key === "Enter") handleClick(); }}
+      aria-label={canClick ? `Open lesson: ${page.title}` : undefined}
       className={`flex items-center gap-4 px-4 py-3 border-b border-awburg-core/6 last:border-0 transition-colors ${
-        isLocked ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-awrose-wash rounded-lg"
+        isLocked || !isCurrentModule
+          ? "cursor-not-allowed opacity-60"
+          : "cursor-pointer hover:bg-awrose-wash"
       }`}
     >
       <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">
         {pad(index + 1)}
       </span>
       <span className="font-body text-sm text-awburg-core flex-1 leading-snug">{page.title}</span>
-      {page.pageType && (
-        <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">
-          {page.pageType.toUpperCase()}
-        </span>
-      )}
-      <div className="flex-shrink-0 ml-2">
-        {isLocked ? (
-          <Lock className="w-4 h-4 text-awburg-core/30" />
+      <div className="flex-shrink-0 ml-2 flex items-center gap-2">
+        {isLocked || !isCurrentModule ? (
+          <>
+            <Lock className="w-3.5 h-3.5 text-awburg-core/30" />
+            <span className="font-body font-bold text-xs tracking-eyebrow text-awburg-core/40 uppercase">Locked</span>
+          </>
         ) : isComplete ? (
-          <CheckCircle2 className="w-4 h-4 text-awrose-core" />
+          <>
+            <CheckCircle2 className="w-4 h-4 text-awrose-core" />
+            <span className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase">COMPLETED</span>
+          </>
         ) : (
-          <ChevronRight className="w-4 h-4 text-awburg-core/50" />
+          <span className="font-body font-bold text-xs tracking-eyebrow text-awburg-core uppercase border border-awburg-core/20 rounded-full px-4 py-2 hover:border-awburg-core/40 hover:bg-awrose-pale transition-colors">
+            WATCH LESSON &rarr;
+          </span>
         )}
       </div>
     </div>
   );
 }
 
-function ExpandedModule({ mod, pages, progressMap, modIndex, isLocked, workbooks }) {
+// CORRECTION 1 + 2 + 3: unified module item with expand/collapse toggle
+function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isCurrentModule, workbooks, isExpanded, onToggle, courseId }) {
   const navigate = useNavigate();
   const modPages = pages.filter((p) => p.moduleId === mod.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  const workbook = workbooks.find((w) => w.expert_id === mod.expertId && w.course_id === mod.courseId);
-
-  return (
-    <div className="mb-6">
-      {/* Module header */}
-      <div className="flex items-start gap-4 mb-3">
-        <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 mt-1 flex-shrink-0">
-          {pad(modIndex + 1)}
-        </span>
-        <div>
-          <h4 className="font-display text-awburg-core text-xl leading-tight">{mod.title}</h4>
-        </div>
-      </div>
-      {/* Lesson rows */}
-      <div className="bg-paper border border-awburg-core/8 rounded-xl overflow-hidden ml-8">
-        {modPages.map((page, i) => (
-          <LessonRow
-            key={page.id}
-            page={page}
-            index={i}
-            progressMap={progressMap}
-            isLocked={isLocked}
-            moduleId={mod.id}
-          />
-        ))}
-        {modPages.length === 0 && (
-          <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>
-        )}
-        {/* Workbook row */}
-        {workbook && (
-          <div
-            onClick={() => navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`); }}
-            aria-label={`Open workbook: ${workbook.title}`}
-            className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors"
-          >
-            <BookOpen className="w-4 h-4 text-awrose-core flex-shrink-0" />
-            <span className="font-body text-sm text-awburg-core flex-1">{workbook.title}</span>
-            <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">
-              WORKBOOK
-            </span>
-            <ChevronRight className="w-4 h-4 text-awburg-core/50" />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function CollapsedModule({ mod, pages, progressMap, modIndex, isLocked }) {
-  const navigate = useNavigate();
-  const modPages = pages.filter((p) => p.moduleId === mod.id);
+  const workbook = workbooks.find((w) => w.expert_id === mod.expertId && w.course_id === (mod.courseId || courseId));
   const isComplete = isModuleComplete(mod.id, modPages, progressMap);
 
-  const handleClick = () => {
-    if (isLocked) return;
-    navigate(createPageUrl("ModulePlayer") + `?moduleId=${mod.id}`);
+  const handleHeaderClick = () => {
+    if (isModLocked) return;
+    onToggle(mod.id);
   };
 
   return (
-    <div
-      onClick={isLocked ? undefined : handleClick}
-      role={isLocked ? undefined : "button"}
-      tabIndex={isLocked ? -1 : 0}
-      onKeyDown={(e) => { if (!isLocked && e.key === "Enter") handleClick(); }}
-      aria-label={isLocked ? undefined : `Open module: ${mod.title}`}
-      className={`flex items-center gap-4 py-3 border-b border-awburg-core/6 last:border-0 transition-colors ${
-        isLocked ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-awrose-wash px-2 rounded-lg"
-      }`}
-    >
-      <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">
-        {pad(modIndex + 1)}
-      </span>
-      <span className="font-display text-awburg-core text-base flex-1 leading-snug">{mod.title}</span>
-      <div className="flex-shrink-0">
-        {isLocked ? (
-          <Lock className="w-4 h-4 text-awburg-core/30" />
-        ) : isComplete ? (
-          <CheckCircle2 className="w-4 h-4 text-awrose-core" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-awburg-core/50" />
-        )}
+    <div className="mb-3">
+      {/* Module header bar - clickable to expand/collapse (unless locked) */}
+      <div
+        onClick={handleHeaderClick}
+        role={isModLocked ? undefined : "button"}
+        tabIndex={isModLocked ? -1 : 0}
+        onKeyDown={(e) => { if (!isModLocked && e.key === "Enter") handleHeaderClick(); }}
+        aria-expanded={isExpanded}
+        className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-awburg-core/8 transition-colors ${
+          isModLocked
+            ? "cursor-not-allowed opacity-50 bg-paper"
+            : "cursor-pointer bg-paper hover:bg-awrose-wash"
+        }`}
+      >
+        <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">
+          {pad(modIndex + 1)}
+        </span>
+        <span className="font-display text-awburg-core text-base flex-1 leading-snug">{mod.title}</span>
+        <div className="flex-shrink-0 flex items-center gap-2">
+          {isModLocked ? (
+            <Lock className="w-4 h-4 text-awburg-core/30" />
+          ) : isComplete ? (
+            <CheckCircle2 className="w-4 h-4 text-awrose-core" />
+          ) : null}
+          {!isModLocked && (
+            isExpanded
+              ? <ChevronUp className="w-4 h-4 text-awburg-core/50" />
+              : <ChevronDown className="w-4 h-4 text-awburg-core/50" />
+          )}
+        </div>
       </div>
+
+      {/* Expanded lesson list */}
+      {isExpanded && !isModLocked && (
+        <div className="bg-paper border border-awburg-core/8 rounded-xl overflow-hidden ml-8 mt-2">
+          {modPages.map((page, i) => (
+            <LessonRow
+              key={page.id}
+              page={page}
+              index={i}
+              progressMap={progressMap}
+              isLocked={isModLocked}
+              moduleId={mod.id}
+              isCurrentModule={isCurrentModule}
+            />
+          ))}
+          {modPages.length === 0 && (
+            <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>
+          )}
+          {/* Workbook row - CORRECTION 3 */}
+          {workbook && (
+            isCurrentModule ? (
+              <div
+                onClick={() => navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`); }}
+                aria-label={`Open workbook: ${workbook.title}`}
+                className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors"
+              >
+                <BookOpen className="w-4 h-4 text-awrose-core flex-shrink-0" />
+                <span className="font-body text-sm text-awburg-core flex-1">{workbook.title}</span>
+                <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">
+                  WORKBOOK
+                </span>
+                <ChevronRight className="w-4 h-4 text-awburg-core/50" />
+              </div>
+            ) : (
+              <div className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 opacity-60 cursor-not-allowed rounded-b-xl">
+                <BookOpen className="w-4 h-4 text-awburg-core/30 flex-shrink-0" />
+                <span className="font-body text-sm text-awburg-core/50 flex-1">{workbook.title}</span>
+                <Lock className="w-3.5 h-3.5 text-awburg-core/30" />
+                <span className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/40 uppercase">WORKBOOK</span>
+              </div>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentModuleId, workbooks, currentPhaseIndex }) {
+function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentModuleId, workbooks, currentPhaseIndex, courseId }) {
   const phaseLetter = stripPhasePrefix(section.title)?.[0]?.toUpperCase() || String.fromCharCode(65 + sectionIndex);
   const phaseName = stripPhasePrefix(section.title);
 
-  // Phase state derived from currentPhaseIndex
-  // index < current = COMPLETED, index === current = CURRENT, index > current = LOCKED
   const isCompleted = sectionIndex < currentPhaseIndex;
   const isCurrent = sectionIndex === currentPhaseIndex;
   const isLocked = sectionIndex > currentPhaseIndex;
 
-  // Find the expanded module in the current phase
-  const currentModIndexInPhase = mods.findIndex((m) => m.id === currentModuleId);
-  const expandedModId = isCurrent
-    ? (currentModIndexInPhase !== -1 ? mods[currentModIndexInPhase].id : mods[0]?.id)
-    : null;
+  // CORRECTION 1: expandedModules set, initialized with currentModuleId
+  const initialExpanded = new Set(currentModuleId ? [currentModuleId] : (mods[0] ? [mods[0].id] : []));
+  const [expandedModules, setExpandedModules] = React.useState(initialExpanded);
 
-  // Visual treatment
+  const toggleModule = (modId) => {
+    setExpandedModules((prev) => {
+      const next = new Set(prev);
+      if (next.has(modId)) {
+        next.delete(modId);
+      } else {
+        next.add(modId);
+      }
+      return next;
+    });
+  };
+
   const letterClass = isLocked ? "text-awburg-core/30" : isCompleted ? "text-awrose-core" : "text-awrose-deep";
   const quoteOpacity = isLocked ? "text-awburg-core/60" : "text-awburg-core";
 
   return (
     <div className={`flex gap-6 md:gap-10 mb-10 ${isLocked ? "opacity-60" : ""}`}>
-      {/* Large letter */}
       <div className="flex-shrink-0 select-none" style={{ width: 80 }}>
         <span
           className={`font-display italic leading-none ${letterClass}`}
@@ -376,9 +392,7 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
         </span>
       </div>
 
-      {/* Phase content */}
       <div className="flex-1 pt-2">
-        {/* Phase meta row */}
         <div className="flex items-center gap-3 mb-2 flex-wrap">
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 uppercase">
             PHASE {section.order ?? (sectionIndex + 1)} · {phaseName.toUpperCase()}
@@ -395,7 +409,6 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
           )}
         </div>
 
-        {/* Phase quote - hardcoded A.L.I.V.E. quotes take priority over section.description */}
         {(() => {
           const quote = PHASE_QUOTES[getPhaseKey(section)] || section.description || "";
           return quote ? (
@@ -405,32 +418,27 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
           ) : null;
         })()}
 
-        {/* Modules - only show for current and completed phases, not locked */}
+        {/* Modules - only show for current and completed phases */}
         {!isLocked && (
           <div>
             {mods.map((mod, mi) => {
-              const isExpanded = isCurrent && mod.id === expandedModId;
-              // In completed phases all modules are accessible; in current phase gate sequentially
               const isModLocked = isCurrent && mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap);
+              const isCurrentModule = isCurrent && mod.id === currentModuleId;
+              const isExpanded = expandedModules.has(mod.id);
 
-              return isExpanded ? (
-                <ExpandedModule
+              return (
+                <ModuleItem
                   key={mod.id}
                   mod={mod}
                   pages={pages}
                   progressMap={progressMap}
                   modIndex={mi}
-                  isLocked={isModLocked}
+                  isModLocked={isModLocked}
+                  isCurrentModule={isCurrentModule}
                   workbooks={workbooks}
-                />
-              ) : (
-                <CollapsedModule
-                  key={mod.id}
-                  mod={mod}
-                  pages={pages}
-                  progressMap={progressMap}
-                  modIndex={mi}
-                  isLocked={isModLocked}
+                  isExpanded={isExpanded}
+                  onToggle={toggleModule}
+                  courseId={courseId}
                 />
               );
             })}
@@ -675,6 +683,7 @@ export default function CourseDetail() {
                     currentModuleId={profile?.last_module_id}
                     workbooks={workbooks}
                     currentPhaseIndex={currentPhaseIndex}
+                    courseId={courseId}
                   />
                 );
               })}
