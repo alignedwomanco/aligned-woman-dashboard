@@ -1,0 +1,92 @@
+{
+  "name": "Page",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Page title"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL path like /claritysprint"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "page_type": {
+      "type": "string",
+      "enum": [
+        "landing",
+        "sales",
+        "about",
+        "contact",
+        "legal",
+        "custom"
+      ],
+      "default": "custom"
+    },
+    "template": {
+      "type": "string",
+      "enum": [
+        "blank",
+        "landing",
+        "sales",
+        "about",
+        "blog_index"
+      ],
+      "default": "blank"
+    },
+    "content": {
+      "type": "string",
+      "description": "HTML content"
+    },
+    "meta_title": {
+      "type": "string",
+      "description": "SEO title"
+    },
+    "meta_description": {
+      "type": "string",
+      "description": "SEO description"
+    },
+    "og_image": {
+      "type": "string"
+    },
+    "featured_image": {
+      "type": "string"
+    },
+    "show_navbar": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_footer": {
+      "type": "boolean",
+      "default": true
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_homepage": {
+      "type": "boolean",
+      "default": false
+    },
+    "created_by_ai": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "slug"
+  ]
+}

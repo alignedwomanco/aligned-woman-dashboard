@@ -17,6 +17,7 @@ import AboutUs from './pages/AboutUs';
 import CheckoutComplete from './pages/CheckoutComplete';
 import AdminSettings from './pages/AdminSettings';
 import PdfTest from './pages/PdfTest';
+import ClaritySprintPage from './pages/ClaritySprintPage';
 import Admin from './pages/Admin';
 import { PaymentProvider } from './context/PaymentContext';
 
@@ -81,6 +82,7 @@ const AuthenticatedApp = () => {
       <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/pdf-test" element={<PdfTest />} />
+      <Route path="/claritysprint" element={<ClaritySprintPage />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

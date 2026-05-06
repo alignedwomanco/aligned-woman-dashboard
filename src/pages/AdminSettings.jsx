@@ -47,6 +47,9 @@ import LogoManagement from "@/components/admin/LogoManagement";
 import MembersManager from "@/components/admin/MembersManager";
 import AccessTagManager from "@/components/admin/AccessTagManager";
 import WorkbookManagement from "@/components/admin/WorkbookManagement";
+import PagesManagerContent from "@/components/admin/PagesManagerContent";
+import BlogManagementContent from "@/components/admin/BlogManagementContent";
+import IntegrationsContent from "@/components/admin/IntegrationsContent";
 
 export default function AdminSettings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -287,6 +290,8 @@ export default function AdminSettings() {
                   { value: "courses", label: "Courses", icon: "📚" },
                   { value: "experts", label: "Experts", icon: "⭐" },
                   { value: "workbooks", label: "Workbooks", icon: "📖" },
+                  { value: "pages", label: "Pages", icon: "🌐" },
+                  { value: "blog", label: "Blog", icon: "✍️" },
                   { value: "payments", label: "Payments", icon: "💳" },
                   { value: "analytics", label: "Analytics", icon: "📊" },
                 ].map((tab) => (
@@ -699,8 +704,23 @@ export default function AdminSettings() {
             <PaymentSettingsContent />
           </TabsContent>
 
+          {/* Pages Tab */}
+          <TabsContent value="pages">
+            <PagesManagerContent />
+          </TabsContent>
+
+          {/* Blog Tab */}
+          <TabsContent value="blog">
+            <BlogManagementContent />
+          </TabsContent>
+
           {/* Integrations Tab */}
           <TabsContent value="integrations">
+            <IntegrationsContent />
+          </TabsContent>
+
+          {/* Stripe Tab (legacy, keep for reference) */}
+          <TabsContent value="stripe">
             <StripeIntegrationContent currentUser={currentUser} />
           </TabsContent>
 
