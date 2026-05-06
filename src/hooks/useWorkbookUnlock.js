@@ -18,8 +18,16 @@ export default function useWorkbookUnlock(workbook) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!workbook?.expert_id || !workbook?.course_id) {
+    if (!workbook) {
       setIsUnlocked(false);
+      setIsLoading(false);
+      return;
+    }
+
+    // If workbook has no course/expert requirements, check only admin/role
+    if (!workbook?.expert_id || !workbook?.course_id) {
+      // No module requirements = unlocked for everyone
+      setIsUnlocked(true);
       setIsLoading(false);
       return;
     }
@@ -32,7 +40,7 @@ export default function useWorkbookUnlock(workbook) {
       // Admin bypass — checked before any DB queries
       try {
         const me = await base44.auth.me();
-        if (me && ["admin", "owner", "master_admin"].includes(me.role)) {
+        if (me && ["admin", "owner", "master_admin", "moderator"].includes(me.role)) {
           if (!cancelled) { setIsUnlocked(true); setIsLoading(false); }
           return;
         }
