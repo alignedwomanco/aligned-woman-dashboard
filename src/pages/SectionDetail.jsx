@@ -7,17 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Clock, CheckCircle, Play, Zap, Award, User } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle, Play, Zap, Award, User, Lock } from "lucide-react";
+
+// Known entity IDs
+const WELCOME_SECTION_ID = "69f489b6873a93ae61729b8e";
+const PHASE_1_SECTION_ID = "69f4886c850c814862817d6b";
+const MODULE_1_ID = "69f48883716034047de26b98";
 
 export default function SectionDetail() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const sectionId = searchParams.get("sectionId");
   const courseId = searchParams.get("courseId");
-  
+
   const [section, setSection] = useState(null);
   const [course, setCourse] = useState(null);
   const [modules, setModules] = useState([]);
+  const [pages, setPages] = useState([]);
   const [progress, setProgress] = useState([]);
   const [experts, setExperts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +43,6 @@ export default function SectionDetail() {
 
         // Load modules for this section
         const sectionModules = await base44.entities.CourseModule.filter({ sectionId });
-        // Sort: items with explicit order first (by order), then by created_date
         const sorted = sectionModules.sort((a, b) => {
           const aHasOrder = a.order !== undefined && a.order !== null;
           const bHasOrder = b.order !== undefined && b.order !== null;
@@ -47,6 +52,12 @@ export default function SectionDetail() {
           return (a.created_date || "").localeCompare(b.created_date || "");
         });
         setModules(sorted);
+
+        // Load all pages for modules in this section (for unlock logic)
+        if (courseId) {
+          const allPages = await base44.entities.CoursePage.filter({ courseId }, "order");
+          setPages(allPages);
+        }
 
         // Load experts
         const allExperts = await base44.entities.Expert.list();
@@ -76,8 +87,55 @@ export default function SectionDetail() {
     return "InProgress";
   };
 
-  const completedCount = modules.filter(m => getModuleStatus(m.id) === "Complete").length;
-  const sectionProgress = modules.length > 0 ? Math.round((completedCount / modules.length) * 100) : 0;
+  // Check if all published pages in a module are completed
+  const isModuleFullyComplete = (moduleId) => {
+    const modulePages = pages.filter(
+      (p) => p.moduleId === moduleId && p.isPublished !== false
+    );
+    if (modulePages.length === 0) return false;
+    return modulePages.every((page) => {
+      const prog = progress.find(
+        (p) => p.pageId === page.id && p.status === "completed"
+      );
+      return !!prog;
+    });
+  };
+
+  // Determine if a module is accessible based on unlock rules:
+  //  - Welcome section: all modules always accessible
+  //  - Phase 1, Module 1 (Hormones): always accessible to enrolled users
+  //  - Phase 1, Modules 2+: require previous module to be completed
+  //  - Phase 2+: would require all Phase 1 modules to be completed (handled by section-level gating)
+  const isModuleAccessible = (module, idx) => {
+    // If module is unpublished or coming soon, lock it
+    if (!module.isPublished || module.isComingSoon) return false;
+
+    // Welcome section modules are always accessible
+    if (sectionId === WELCOME_SECTION_ID) return true;
+
+    // Module 1 (Hormones) is always accessible in Phase 1
+    if (module.id === MODULE_1_ID) return true;
+
+    // Phase 1: first module in the sorted list is always accessible
+    if (sectionId === PHASE_1_SECTION_ID && idx === 0) return true;
+
+    // For subsequent modules in any section, require the previous module to be completed
+    if (idx > 0) {
+      const previousModule = modules[idx - 1];
+      return isModuleFullyComplete(previousModule.id);
+    }
+
+    // Default: accessible (first module in any section)
+    return true;
+  };
+
+  const completedCount = modules.filter(
+    (m) => getModuleStatus(m.id) === "Complete" || isModuleFullyComplete(m.id)
+  ).length;
+  const sectionProgress =
+    modules.length > 0
+      ? Math.round((completedCount / modules.length) * 100)
+      : 0;
 
   if (loading) {
     return (
@@ -96,27 +154,47 @@ export default function SectionDetail() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)",
+      }}
+    >
       {/* Header */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <button onClick={() => navigate(-1)} className="inline-block mb-4">
-          <Button variant="ghost" size="sm" className="text-[#6E1D40] hover:text-[#6E1D40]/80">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[#6E1D40] hover:text-[#6E1D40]/80"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
         </button>
 
         {/* Section Banner */}
-        <div className="rounded-2xl overflow-hidden border-2" style={{ borderColor: "#6E1D40" }}>
+        <div
+          className="rounded-2xl overflow-hidden border-2"
+          style={{ borderColor: "#6E1D40" }}
+        >
           <div className="h-48 bg-gradient-to-br from-[#6E1D40] to-[#943A59] relative">
             {section.coverImage ? (
-              <img src={section.coverImage} alt={section.title} className="w-full h-full object-cover opacity-70" />
+              <img
+                src={section.coverImage}
+                alt={section.title}
+                className="w-full h-full object-cover opacity-70"
+              />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[#6E1D40] to-[#943A59]" />
             )}
             <div className="absolute inset-0 p-6 flex flex-col justify-end">
-              <h1 className="text-3xl font-bold text-white">{section.title}</h1>
+              <h1 className="text-3xl font-bold text-white">
+                {section.title}
+              </h1>
               {section.description && (
-                <p className="text-white/80 text-sm mt-1">{section.description}</p>
+                <p className="text-white/80 text-sm mt-1">
+                  {section.description}
+                </p>
               )}
             </div>
           </div>
@@ -124,17 +202,22 @@ export default function SectionDetail() {
           {/* Progress Info */}
           <div className="bg-white px-6 py-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">{modules.length} modules</span>
+              <span className="text-sm text-gray-600">
+                {modules.length} modules
+              </span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-[#6E1D40]">{sectionProgress}% Complete</span>
+                <span className="text-sm font-semibold text-[#6E1D40]">
+                  {sectionProgress}% Complete
+                </span>
                 <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${sectionProgress}%`,
-                      background: sectionProgress >= 100
-                        ? '#22c55e'
-                        : `repeating-linear-gradient(-45deg, #6E1D40, #6E1D40 4px, #943A59 4px, #943A59 8px)`,
+                      background:
+                        sectionProgress >= 100
+                          ? "#22c55e"
+                          : `repeating-linear-gradient(-45deg, #6E1D40, #6E1D40 4px, #943A59 4px, #943A59 8px)`,
                     }}
                   />
                 </div>
@@ -155,8 +238,126 @@ export default function SectionDetail() {
             {modules.map((module, idx) => {
               const status = getModuleStatus(module.id);
               const prog = getModuleProgress(module.id);
-              const isCompleted = status === "Complete";
-              const expert = module.expertId ? experts.find(e => e.id === module.expertId) : null;
+              const isCompleted =
+                status === "Complete" || isModuleFullyComplete(module.id);
+              const expert = module.expertId
+                ? experts.find((e) => e.id === module.expertId)
+                : null;
+              const accessible = isModuleAccessible(module, idx);
+
+              // Determine page count for display
+              const modulePages = pages.filter(
+                (p) => p.moduleId === module.id && p.isPublished !== false
+              );
+              const completedPages = modulePages.filter((p) => {
+                const pr = progress.find(
+                  (pr) => pr.pageId === p.id && pr.status === "completed"
+                );
+                return !!pr;
+              }).length;
+
+              const moduleCard = (
+                <div
+                  className={`bg-white rounded-2xl border overflow-hidden transition-all ${
+                    isCompleted
+                      ? "border-green-200 bg-green-50/30"
+                      : accessible
+                      ? "border-[#DEBECC] hover:shadow-lg cursor-pointer"
+                      : "border-gray-200 opacity-60"
+                  }`}
+                >
+                  <div className="p-6 flex items-start gap-4">
+                    {/* Module number / status icon */}
+                    <div
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                        isCompleted
+                          ? "bg-green-100"
+                          : accessible
+                          ? "bg-gradient-to-br from-[#6E1D40] to-[#943A59]"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle className="w-6 h-6 text-green-600" />
+                      ) : accessible ? (
+                        <Play className="w-6 h-6 text-white" />
+                      ) : (
+                        <Lock className="w-5 h-5 text-gray-400" />
+                      )}
+                    </div>
+
+                    {/* Module info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <h3
+                          className={`text-lg font-semibold ${
+                            accessible ? "text-[#4A1228]" : "text-gray-400"
+                          }`}
+                        >
+                          {module.title}
+                        </h3>
+                        {isCompleted && (
+                          <Badge className="bg-green-100 text-green-700 border-0 text-xs">
+                            Complete
+                          </Badge>
+                        )}
+                        {!accessible && (
+                          <Badge className="bg-gray-100 text-gray-500 border-0 text-xs">
+                            Locked
+                          </Badge>
+                        )}
+                        {module.isComingSoon && (
+                          <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
+                            Coming Soon
+                          </Badge>
+                        )}
+                      </div>
+
+                      {module.description && (
+                        <p className="text-sm text-gray-500 mb-2 line-clamp-2">
+                          {module.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-4 flex-wrap">
+                        {module.durationMinutes > 0 && (
+                          <span className="text-xs text-gray-500 flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            {module.durationMinutes} min
+                          </span>
+                        )}
+                        {modulePages.length > 0 && (
+                          <span className="text-xs text-gray-500">
+                            {completedPages} / {modulePages.length} lessons
+                          </span>
+                        )}
+                        {expert && (
+                          <span className="text-xs text-[#6E1D40] flex items-center gap-1">
+                            <User className="w-3.5 h-3.5" />
+                            {expert.name}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Progress bar for in-progress modules */}
+                      {accessible && modulePages.length > 0 && !isCompleted && (
+                        <div className="mt-3">
+                          <Progress
+                            value={
+                              modulePages.length > 0
+                                ? Math.round(
+                                    (completedPages / modulePages.length) * 100
+                                  )
+                                : 0
+                            }
+                            className="h-1.5"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
 
               return (
                 <motion.div
@@ -165,70 +366,18 @@ export default function SectionDetail() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                 >
-                  <Link to={createPageUrl("ModulePlayer") + `?moduleId=${module.id}&courseId=${courseId}`}>
-                    <div className={`bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-all cursor-pointer ${isCompleted ? "border-green-200" : "border-[#DEBECC]/60"}`}>
-                      {/* Top row: number + content + play icon */}
-                      <div className="flex items-start gap-4 p-4 pb-2">
-                        {/* Number badge */}
-                        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-[#6E1D40] text-white flex items-center justify-center font-bold text-lg shadow-md mt-0.5">
-                          {idx + 1}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className={`font-bold text-base leading-snug ${isCompleted ? "text-gray-500 line-through" : "text-[#6E1D40]"}`}>
-                            {module.title}
-                          </h3>
-                          {expert && (
-                            <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#F5E8EE] rounded-md border border-[#DEBECC]">
-                              <User className="w-3 h-3 text-[#6E1D40]" />
-                              <span className="text-xs font-medium text-[#6E1D40]">{expert.name}</span>
-                            </div>
-                          )}
-                          {module.description && (
-                            <p className="text-sm text-gray-500 mt-2 line-clamp-1">
-                              {module.description}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Play / Status Icon */}
-                        <div className="flex-shrink-0 mt-1">
-                          {isCompleted ? (
-                            <CheckCircle className="w-8 h-8 text-green-500" />
-                          ) : (
-                            <Play className="w-8 h-8 text-[#6E1D40]" />
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="px-4 pb-4 pt-2" style={{ paddingLeft: 'calc(1rem + 2.75rem + 1rem)' }}>
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-500"
-                              style={{
-                                width: `${Math.max(prog, 2)}%`,
-                                background: isCompleted
-                                  ? '#22c55e'
-                                  : `repeating-linear-gradient(
-                                      -45deg,
-                                      #6E1D40,
-                                      #6E1D40 5px,
-                                      #943A59 5px,
-                                      #943A59 10px
-                                    )`,
-                              }}
-                            />
-                          </div>
-                          <span className={`text-base font-bold flex-shrink-0 ${isCompleted ? "text-green-600" : "text-[#6E1D40]"}`}>
-                            {prog}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  {accessible ? (
+                    <Link
+                      to={
+                        createPageUrl("ModulePlayer") +
+                        `?moduleId=${module.id}&courseId=${courseId}`
+                      }
+                    >
+                      {moduleCard}
+                    </Link>
+                  ) : (
+                    moduleCard
+                  )}
                 </motion.div>
               );
             })}
