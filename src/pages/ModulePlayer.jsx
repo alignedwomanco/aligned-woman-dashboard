@@ -39,29 +39,71 @@ export default function ModulePlayer() {
   // Check course access
   useEffect(() => {
     const checkAccess = async () => {
-      if (!courseId) return;
-      const me = await base44.auth.me();
-      const email = me?.email?.toLowerCase();
-      const adminUser = ['owner', 'admin', 'master_admin'].includes(me?.role);
-      if (email) {
-        const enrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, courseId, isPaid: true });
-        if (enrollments.length > 0) { setHasPaidAccess(true); setAccessChecked(true); return; }
-        // Check user access tags against course tags
-        const userTags = me?.access_tags || [];
-        const courses = await base44.entities.Course.filter({ id: courseId });
-        const courseData = courses[0];
-        if (courseData?.isComingSoon) { setHasPaidAccess(false); setAccessChecked(true); return; }
-        if (courseData?.tags?.length > 0 && courseData.tags.some(t => userTags.includes(t))) {
-          setHasPaidAccess(true); setAccessChecked(true); return;
+      try {
+        const me = await base44.auth.me();
+        const email = me?.email?.toLowerCase();
+        const adminUser = ["owner", "admin", "master_admin"].includes(me?.role);
+
+        // FIX: Admin bypass. Admins always have access.
+        if (adminUser) {
+          setHasPaidAccess(true);
+          setAccessChecked(true);
+          return;
         }
+
+        // If no courseId, we cannot check enrollment, but still mark checked
+        // so the page does not loop forever on the spinner.
+        if (!courseId) {
+          setAccessChecked(true);
+          return;
+        }
+
+        if (email) {
+          const enrollments = await base44.entities.CourseEnrollment.filter({
+            userEmail: email,
+            courseId,
+            isPaid: true,
+          });
+          if (enrollments.length > 0) {
+            setHasPaidAccess(true);
+            setAccessChecked(true);
+            return;
+          }
+
+          // Check user access tags against course tags
+          const userTags = me?.access_tags || [];
+          const courses = await base44.entities.Course.filter({ id: courseId });
+          const courseData = courses[0];
+          if (courseData?.isComingSoon) {
+            setHasPaidAccess(false);
+            setAccessChecked(true);
+            return;
+          }
+          if (
+            courseData?.tags?.length > 0 &&
+            courseData.tags.some((t) => userTags.includes(t))
+          ) {
+            setHasPaidAccess(true);
+            setAccessChecked(true);
+            return;
+          }
+        }
+
+        // Truly free = no tags and no price
+        const courses2 = await base44.entities.Course.filter({ id: courseId });
+        const c = courses2[0];
+        if (
+          c &&
+          (!c.tags || c.tags.length === 0) &&
+          (!c.price || c.price === 0)
+        ) {
+          setHasPaidAccess(true);
+        }
+        setAccessChecked(true);
+      } catch (err) {
+        console.error("[ModulePlayer] Access check failed:", err);
+        setAccessChecked(true);
       }
-      // Truly free = no tags and no price
-      const courses2 = await base44.entities.Course.filter({ id: courseId });
-      const c = courses2[0];
-      if (c && (!c.tags || c.tags.length === 0) && (!c.price || c.price === 0)) {
-        setHasPaidAccess(true);
-      }
-      setAccessChecked(true);
     };
     checkAccess();
   }, [courseId]);
@@ -69,7 +111,9 @@ export default function ModulePlayer() {
   const { data: module } = useQuery({
     queryKey: ["courseModule", moduleId],
     queryFn: async () => {
-      const modules = await base44.entities.CourseModule.filter({ id: moduleId });
+      const modules = await base44.entities.CourseModule.filter({
+        id: moduleId,
+      });
       return modules[0];
     },
     enabled: !!moduleId,
@@ -99,21 +143,18 @@ export default function ModulePlayer() {
   const { data: comments = [] } = useQuery({
     queryKey: ["comments", moduleId],
     queryFn: () =>
-      base44.entities.ModuleComment.filter(
-        { moduleId },
-        "-created_date"
-      ),
+      base44.entities.ModuleComment.filter({ moduleId }, "-created_date"),
     enabled: !!moduleId,
   });
 
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
-      // Find the module-level progress record (one without a pageId)
-      const existing = moduleProgress.find(p => !p.pageId);
+      const existing = moduleProgress.find((p) => !p.pageId);
       if (existing) {
         return base44.entities.CourseProgress.update(existing.id, {
           status,
-          progressPercentage: progressPercentage || existing.progressPercentage || 0,
+          progressPercentage:
+            progressPercentage || existing.progressPercentage || 0,
         });
       } else {
         return base44.entities.CourseProgress.create({
@@ -139,7 +180,7 @@ export default function ModulePlayer() {
 
   const togglePageCompleteMutation = useMutation({
     mutationFn: async ({ pageId, isComplete }) => {
-      const existing = moduleProgress.find(p => p.pageId === pageId);
+      const existing = moduleProgress.find((p) => p.pageId === pageId);
       if (existing) {
         return base44.entities.CourseProgress.update(existing.id, {
           status: isComplete ? "completed" : "in_progress",
@@ -167,43 +208,48 @@ export default function ModulePlayer() {
   }, [pages]);
 
   const handleTogglePageComplete = async () => {
-    const pageProgress = moduleProgress.find(p => p.pageId === selectedPage.id);
+    const pageProgress = moduleProgress.find(
+      (p) => p.pageId === selectedPage.id
+    );
     const isCurrentlyComplete = pageProgress?.status === "completed" || false;
-    
+
     await togglePageCompleteMutation.mutateAsync({
       pageId: selectedPage.id,
       isComplete: !isCurrentlyComplete,
     });
 
-    // Check if all pages are now completed
     if (!isCurrentlyComplete) {
-      const allPagesCompleted = pages.every(page => {
+      const allPagesCompleted = pages.every((page) => {
         if (page.id === selectedPage.id) return true;
-        const progress = moduleProgress.find(p => p.pageId === page.id);
+        const progress = moduleProgress.find((p) => p.pageId === page.id);
         return progress?.status === "completed";
       });
 
       if (allPagesCompleted) {
         await completeModule();
       } else {
-        // Update module-level progress percentage
-        const completedCount = pages.filter(page => {
+        const completedCount = pages.filter((page) => {
           if (page.id === selectedPage.id) return true;
-          const p = moduleProgress.find(pr => pr.pageId === page.id);
+          const p = moduleProgress.find((pr) => pr.pageId === page.id);
           return p?.status === "completed";
         }).length;
         const pct = Math.round((completedCount / pages.length) * 100);
-        updateProgressMutation.mutate({ status: "in_progress", progressPercentage: pct });
+        updateProgressMutation.mutate({
+          status: "in_progress",
+          progressPercentage: pct,
+        });
       }
     } else {
-      // Unmarking — recalculate
-      const completedCount = pages.filter(page => {
+      const completedCount = pages.filter((page) => {
         if (page.id === selectedPage.id) return false;
-        const p = moduleProgress.find(pr => pr.pageId === page.id);
+        const p = moduleProgress.find((pr) => pr.pageId === page.id);
         return p?.status === "completed";
       }).length;
       const pct = Math.round((completedCount / pages.length) * 100);
-      updateProgressMutation.mutate({ status: pct > 0 ? "in_progress" : "not_started", progressPercentage: pct });
+      updateProgressMutation.mutate({
+        status: pct > 0 ? "in_progress" : "not_started",
+        progressPercentage: pct,
+      });
     }
   };
 
@@ -212,8 +258,6 @@ export default function ModulePlayer() {
       status: "completed",
       progressPercentage: 100,
     });
-
-    // Award points for module completion
     await awardModuleCompletion();
   };
 
@@ -221,27 +265,27 @@ export default function ModulePlayer() {
     try {
       const pointsRecords = await base44.entities.UserPoints.filter({});
       const currentPoints = pointsRecords[0];
-      
-      const modulePoints = 50; // Base points for module completion
+
+      const modulePoints = 50;
       const streakBonus = (currentPoints?.currentStreak || 0) >= 3 ? 5 : 0;
-      const totalPoints = (currentPoints?.points || 0) + modulePoints + streakBonus;
+      const totalPoints =
+        (currentPoints?.points || 0) + modulePoints + streakBonus;
       const newLevel = Math.floor(totalPoints / 100) + 1;
 
       if (currentPoints) {
         await base44.entities.UserPoints.update(currentPoints.id, {
           points: totalPoints,
           level: newLevel,
-          lastActivityDate: new Date().toISOString().split('T')[0],
+          lastActivityDate: new Date().toISOString().split("T")[0],
         });
       } else {
         await base44.entities.UserPoints.create({
           points: totalPoints,
           level: newLevel,
-          lastActivityDate: new Date().toISOString().split('T')[0],
+          lastActivityDate: new Date().toISOString().split("T")[0],
         });
       }
 
-      // Award badge for module completion
       await base44.entities.UserBadge.create({
         badgeId: `module-${moduleId}`,
         badgeName: `${module.title} Complete`,
@@ -253,8 +297,6 @@ export default function ModulePlayer() {
     }
   };
 
-
-
   const handleAddComment = () => {
     if (!newComment.trim()) return;
     addCommentMutation.mutate({
@@ -264,13 +306,17 @@ export default function ModulePlayer() {
     });
   };
 
-  // Calculate progress from actual page completions
-  const overallProgress = pages.length > 0
-    ? Math.round((pages.filter(page => {
-        const p = moduleProgress.find(pr => pr.pageId === page.id);
-        return p?.status === "completed";
-      }).length / pages.length) * 100)
-    : 0;
+  const overallProgress =
+    pages.length > 0
+      ? Math.round(
+          (pages.filter((page) => {
+            const p = moduleProgress.find((pr) => pr.pageId === page.id);
+            return p?.status === "completed";
+          }).length /
+            pages.length) *
+            100
+        )
+      : 0;
 
   if (!module || !selectedPage || !accessChecked) {
     return (
@@ -282,10 +328,17 @@ export default function ModulePlayer() {
 
   if (!hasPaidAccess) {
     return (
-      <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
+      <div
+        className="min-h-screen"
+        style={{
+          background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)",
+        }}
+      >
         <div className="max-w-2xl mx-auto p-6 pt-20">
           <button onClick={() => navigate(-1)} className="mb-6">
-            <Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" /> Back</Button>
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Back
+            </Button>
           </button>
           <CourseAccessGate course={course} />
         </div>
@@ -294,7 +347,12 @@ export default function ModulePlayer() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)",
+      }}
+    >
       {/* Header */}
       <div className="bg-white border-b sticky top-20 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
@@ -312,7 +370,9 @@ export default function ModulePlayer() {
                     <span className="truncate">{course.title}</span>
                   </Badge>
                 )}
-                <h1 className="text-base sm:text-xl font-bold text-[#4A1228] break-words">{module?.title}</h1>
+                <h1 className="text-base sm:text-xl font-bold text-[#4A1228] break-words">
+                  {module?.title}
+                </h1>
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
@@ -321,7 +381,9 @@ export default function ModulePlayer() {
                 {module.durationMinutes} min
               </span>
               <Progress value={overallProgress} className="w-20 sm:w-32" />
-              <span className="text-sm font-medium text-[#6B1B3D]">{overallProgress}%</span>
+              <span className="text-sm font-medium text-[#6B1B3D]">
+                {overallProgress}%
+              </span>
             </div>
           </div>
         </div>
@@ -329,7 +391,7 @@ export default function ModulePlayer() {
 
       <div className="max-w-7xl mx-auto p-4 sm:p-6 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 overflow-hidden">
-          {/* Left Sidebar - Pages List & Resources */}
+          {/* Left Sidebar */}
           <div className="space-y-6">
             <Card>
               <CardHeader className="pb-3">
@@ -340,8 +402,11 @@ export default function ModulePlayer() {
                 <ScrollArea className="h-[calc(100vh-300px)]">
                   <div className="space-y-1 p-4">
                     {pages.map((page, idx) => {
-                      const pageProgress = moduleProgress.find(p => p.pageId === page.id);
-                      const isCompleted = pageProgress?.status === "completed" || false;
+                      const pageProgress = moduleProgress.find(
+                        (p) => p.pageId === page.id
+                      );
+                      const isCompleted =
+                        pageProgress?.status === "completed" || false;
                       return (
                         <button
                           key={page.id}
@@ -353,22 +418,37 @@ export default function ModulePlayer() {
                           }`}
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              isCompleted ? "bg-green-100" : "bg-gray-200"
-                            }`}>
-                              <span className={`text-xs font-semibold ${isCompleted ? "text-green-600" : "text-gray-600"}`}>{idx + 1}</span>
+                            <div
+                              className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                isCompleted ? "bg-green-100" : "bg-gray-200"
+                              }`}
+                            >
+                              <span
+                                className={`text-xs font-semibold ${
+                                  isCompleted
+                                    ? "text-green-600"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                {idx + 1}
+                              </span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-1.5 text-sm font-medium text-[#4A1228] break-words">
                                   {page.title}
-                                  {isCompleted && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
+                                  {isCompleted && (
+                                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                  )}
                                 </div>
-                                {(page.estimatedMinutes || page.videoDuration) && (
+                                {(page.estimatedMinutes ||
+                                  page.videoDuration) && (
                                   <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 mt-0.5">
                                     {page.estimatedMinutes
                                       ? `${page.estimatedMinutes} min`
-                                      : `${Math.round(page.videoDuration / 60)} min`}
+                                      : `${Math.round(
+                                          page.videoDuration / 60
+                                        )} min`}
                                   </span>
                                 )}
                               </div>
@@ -382,7 +462,7 @@ export default function ModulePlayer() {
               </CardContent>
             </Card>
 
-            {/* Resources Section */}
+            {/* Resources */}
             {selectedPage.downloads && selectedPage.downloads.length > 0 && (
               <Card>
                 <CardHeader className="pb-3">
@@ -393,7 +473,10 @@ export default function ModulePlayer() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {selectedPage.downloads.map((download, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
+                    >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <Download className="w-4 h-4 text-[#6B1B3D] flex-shrink-0" />
                         <span className="text-sm font-medium text-[#4A1228] truncate">
@@ -426,19 +509,27 @@ export default function ModulePlayer() {
               animate={{ opacity: 1, y: 0 }}
             >
               <Card className="overflow-hidden">
-                <div style={{ paddingTop: '56.25%', position: 'relative' }} className="bg-gray-900">
+                <div
+                  style={{ paddingTop: "56.25%", position: "relative" }}
+                  className="bg-gray-900"
+                >
                   {selectedPage.videoUrl ? (
                     (() => {
                       const url = selectedPage.videoUrl.trim();
-                      
-                      // YouTube — embed directly
-                      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+
+                      // YouTube
+                      if (
+                        url.includes("youtube.com") ||
+                        url.includes("youtu.be")
+                      ) {
                         let videoId = null;
                         try {
-                          if (url.includes('youtu.be')) {
-                            videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
+                          if (url.includes("youtu.be")) {
+                            videoId = url
+                              .split("youtu.be/")[1]
+                              ?.split(/[?&#]/)[0];
                           } else {
-                            videoId = new URL(url).searchParams.get('v');
+                            videoId = new URL(url).searchParams.get("v");
                           }
                         } catch (e) {
                           const match = url.match(/[?&]v=([^&#]+)/);
@@ -458,33 +549,46 @@ export default function ModulePlayer() {
                           );
                         }
                       }
-                      
-                      // Google Drive (only drive.google.com, NOT docs.google.com)
+
+                      // Google Drive
                       let embedUrl = url;
-                      if (url.includes('drive.google.com') && !url.includes('docs.google.com')) {
-                        const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] || url.match(/[-\w]{25,}/)?.[0];
-                        if (fileId) embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                      if (
+                        url.includes("drive.google.com") &&
+                        !url.includes("docs.google.com")
+                      ) {
+                        const fileId =
+                          url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] ||
+                          url.match(/[-\w]{25,}/)?.[0];
+                        if (fileId)
+                          embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
                       }
                       // Wistia
-                      else if (url.includes('wistia.com')) {
-                        const videoId = url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] || url.split('/').pop();
+                      else if (url.includes("wistia.com")) {
+                        const videoId =
+                          url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] ||
+                          url.split("/").pop();
                         embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
                       }
-                      
-                      // Check if it's a direct video file (mp4, webm, mov, ogg, etc.) or hosted upload
-                      const isDirectVideo = /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(embedUrl) || embedUrl.includes('supabase.co/storage') || embedUrl.includes('base44.app/api/apps');
+
+                      // Direct video file
+                      const isDirectVideo =
+                        /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(
+                          embedUrl
+                        ) ||
+                        embedUrl.includes("supabase.co/storage") ||
+                        embedUrl.includes("base44.app/api/apps");
                       if (isDirectVideo) {
                         return (
                           <video
                             src={embedUrl}
                             controls
                             className="absolute top-0 left-0 w-full h-full"
-                            style={{ backgroundColor: '#000' }}
+                            style={{ backgroundColor: "#000" }}
                           />
                         );
                       }
 
-                      // For Google Drive, Wistia, Vimeo, and other embed URLs — use iframe
+                      // Fallback iframe
                       return (
                         <iframe
                           src={embedUrl}
@@ -508,18 +612,26 @@ export default function ModulePlayer() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                <CardTitle>{selectedPage.title}</CardTitle>
-                {(() => {
-                  const pageProgress = moduleProgress.find(p => p.pageId === selectedPage.id);
-                  const isPageComplete = pageProgress?.status === "completed" || false;
-                    
+                  <CardTitle>{selectedPage.title}</CardTitle>
+                  {(() => {
+                    const pageProgress = moduleProgress.find(
+                      (p) => p.pageId === selectedPage.id
+                    );
+                    const isPageComplete =
+                      pageProgress?.status === "completed" || false;
                     return (
                       <Button
                         onClick={handleTogglePageComplete}
                         variant={isPageComplete ? "outline" : "default"}
-                        className={isPageComplete ? "border-[#943A59] text-[#943A59] hover:bg-pink-50" : "bg-[#943A59] hover:bg-[#7a2e49] text-white"}
+                        className={
+                          isPageComplete
+                            ? "border-[#943A59] text-[#943A59] hover:bg-pink-50"
+                            : "bg-[#943A59] hover:bg-[#7a2e49] text-white"
+                        }
                       >
-                        <span className="font-medium">{isPageComplete ? "Completed" : "Mark Complete"}</span>
+                        <span className="font-medium">
+                          {isPageComplete ? "Completed" : "Mark Complete"}
+                        </span>
                         <CheckCircle className="w-4 h-4 ml-2" />
                       </Button>
                     );
@@ -527,9 +639,11 @@ export default function ModulePlayer() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div 
-                  className="prose max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: selectedPage.content || '' }}
+                <div
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: selectedPage.content || "",
+                  }}
                 />
               </CardContent>
             </Card>
@@ -539,7 +653,9 @@ export default function ModulePlayer() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   {(() => {
-                    const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
+                    const currentIndex = pages.findIndex(
+                      (p) => p.id === selectedPage.id
+                    );
                     const nextPage = pages[currentIndex + 1];
                     return nextPage ? (
                       <Button
@@ -571,7 +687,6 @@ export default function ModulePlayer() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Add Comment */}
                   <div className="flex gap-3">
                     <Textarea
                       value={newComment}
@@ -586,14 +701,14 @@ export default function ModulePlayer() {
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>
-
                   <Separator />
-
-                  {/* Comments List */}
                   <ScrollArea className="h-[300px]">
                     <div className="space-y-4">
                       {comments.map((comment) => (
-                        <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
+                        <div
+                          key={comment.id}
+                          className="p-4 bg-gray-50 rounded-lg"
+                        >
                           <div className="flex items-center gap-2 mb-2">
                             <div className="w-8 h-8 bg-[#6B1B3D] rounded-full flex items-center justify-center text-white text-sm">
                               {comment.created_by?.[0]}
@@ -602,7 +717,9 @@ export default function ModulePlayer() {
                               {comment.created_by}
                             </span>
                             <span className="text-xs text-gray-500">
-                              {new Date(comment.created_date).toLocaleDateString()}
+                              {new Date(
+                                comment.created_date
+                              ).toLocaleDateString()}
                             </span>
                           </div>
                           <p className="text-gray-700">{comment.comment}</p>
