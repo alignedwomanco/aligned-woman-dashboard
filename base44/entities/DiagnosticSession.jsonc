@@ -1,0 +1,265 @@
+{
+  "name": "DiagnosticSession",
+  "type": "object",
+  "properties": {
+    "concerns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Main concerns/focus areas selected"
+    },
+    "currentFeeling": {
+      "type": "string",
+      "description": "What feels hardest this week"
+    },
+    "moodCheck": {
+      "type": "string",
+      "description": "Quick mood emoji selection"
+    },
+    "capacityScore": {
+      "type": "number",
+      "description": "1-10 capacity right now"
+    },
+    "timeAvailable": {
+      "type": "string",
+      "description": "Daily time commitment"
+    },
+    "userContextText": {
+      "type": "string",
+      "description": "Free-form context about what's happening"
+    },
+    "cycleProfile": {
+      "type": "object",
+      "properties": {
+        "lastPeriodDate": {
+          "type": "string"
+        },
+        "cycleLength": {
+          "type": "number"
+        },
+        "cycleStage": {
+          "type": "string",
+          "enum": [
+            "Cycling",
+            "Perimenopausal",
+            "Menopausal",
+            "Prefer not to say"
+          ]
+        }
+      }
+    },
+    "dob": {
+      "type": "string",
+      "description": "Date of birth"
+    },
+    "tob": {
+      "type": "string",
+      "description": "Time of birth (optional)"
+    },
+    "pob": {
+      "type": "string",
+      "description": "Place of birth"
+    },
+    "enableDeepPersonalisation": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable Human Design + Astrology insights"
+    },
+    "values": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Core values"
+    },
+    "releasing": {
+      "type": "string",
+      "description": "What they're releasing in identity evolution"
+    },
+    "becoming": {
+      "type": "string",
+      "description": "What they're becoming in identity evolution"
+    },
+    "boundaries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Active boundaries"
+    },
+    "snapshotFrequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "manual"
+      ],
+      "default": "daily",
+      "description": "Preferred snapshot frequency"
+    },
+    "dailyUpdateEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Send daily update"
+    },
+    "primaryPhase": {
+      "type": "string",
+      "enum": [
+        "Awareness",
+        "Liberation",
+        "Intention",
+        "VisionEmbodiment"
+      ]
+    },
+    "secondaryPhase": {
+      "type": "string",
+      "enum": [
+        "Awareness",
+        "Liberation",
+        "Intention",
+        "VisionEmbodiment"
+      ]
+    },
+    "aliveNarrative": {
+      "type": "string",
+      "description": "Human-readable explanation of ALIVE phase"
+    },
+    "phaseFocusAdvice": {
+      "type": "string",
+      "description": "What to focus on in current phase"
+    },
+    "astrologyProfile": {
+      "type": "object",
+      "properties": {
+        "sunSign": {
+          "type": "string"
+        },
+        "moonSign": {
+          "type": "string"
+        },
+        "risingSign": {
+          "type": "string"
+        },
+        "currentTransitSummary": {
+          "type": "string"
+        }
+      }
+    },
+    "humanDesignProfile": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "authority": {
+          "type": "string"
+        },
+        "strategy": {
+          "type": "string"
+        },
+        "energyPattern": {
+          "type": "string"
+        }
+      }
+    },
+    "dailySnapshot": {
+      "type": "object",
+      "properties": {
+        "mainNarrative": {
+          "type": "string",
+          "description": "Integrated synthesis of all systems"
+        },
+        "todayIsAbout": {
+          "type": "string",
+          "description": "One clear statement"
+        },
+        "energyGuidance": {
+          "type": "string",
+          "description": "Based on actual energy today"
+        },
+        "movementRecommendation": {
+          "type": "string",
+          "description": "Type and intensity"
+        },
+        "nutritionRecommendation": {
+          "type": "string",
+          "description": "What to prioritize"
+        },
+        "focusReminder": {
+          "type": "string",
+          "description": "What to prioritize or avoid"
+        },
+        "aliveLens": {
+          "type": "string",
+          "description": "How today connects to growth arc"
+        },
+        "recommendedModules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Aligned with today's needs"
+        }
+      }
+    },
+    "lastCheckInDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time user completed daily check-in"
+    },
+    "weeklySnapshotSummary": {
+      "type": "string"
+    },
+    "monthlySnapshotSummary": {
+      "type": "string"
+    },
+    "riskFlags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "condensedTopics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendedModules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "firstWeekPlan": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isComplete": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "concerns",
+    "capacityScore"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
