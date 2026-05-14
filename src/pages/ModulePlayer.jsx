@@ -293,7 +293,7 @@ export default function ModulePlayer() {
         {moduleWorkbook && (
           <Button
             className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white gap-2"
-            onClick={() => navigate(createPageUrl("WorkbookViewer") + `?workbookId=${moduleWorkbook.id}`)}
+            onClick={() => navigate(createPageUrl("WorkbookViewer") + `?id=${moduleWorkbook.id}`)}
           >
             <BookOpen className="w-4 h-4" />
             Continue to Workbook
