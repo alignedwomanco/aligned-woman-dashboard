@@ -1,0 +1,61 @@
+{
+  "name": "CourseProgress",
+  "type": "object",
+  "properties": {
+    "courseId": {
+      "type": "string"
+    },
+    "sectionId": {
+      "type": "string"
+    },
+    "moduleId": {
+      "type": "string"
+    },
+    "pageId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed"
+      ],
+      "default": "not_started"
+    },
+    "progressPercentage": {
+      "type": "number",
+      "default": 0,
+      "description": "Progress for this specific item"
+    },
+    "videoWatchedSeconds": {
+      "type": "number",
+      "default": 0
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastAccessedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "courseId"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
