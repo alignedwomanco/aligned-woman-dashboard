@@ -10,7 +10,7 @@ import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
 import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
 
-// ── No-ID picker: shown when /Workbook has no ?id= param ──────────────────────
+// ── No-ID picker: shown when /WorkbookViewer has no ?id= param ────────────────
 function WorkbookPicker() {
   const { data: workbooks, isLoading } = useQuery({
     queryKey: ["publishedWorkbooks"],
@@ -19,7 +19,7 @@ function WorkbookPicker() {
 
   useEffect(() => {
     if (workbooks?.length === 1) {
-      window.location.replace(`/Workbook?id=${workbooks[0].id}`);
+      window.location.replace(`/WorkbookViewer?id=${workbooks[0].id}`);
     }
   }, [workbooks]);
 
@@ -31,7 +31,6 @@ function WorkbookPicker() {
     );
   }
 
-  // Single workbook: redirect is handled above; show spinner while navigating
   if (workbooks?.length === 1) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
@@ -40,7 +39,6 @@ function WorkbookPicker() {
     );
   }
 
-  // No workbooks
   if (!workbooks?.length) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "#FAF5F3" }}>
@@ -63,7 +61,6 @@ function WorkbookPicker() {
     );
   }
 
-  // Multiple workbooks — show picker
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16" style={{ background: "#FAF5F3" }}>
       <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 32, color: "#4A0E2E", marginBottom: 8, textAlign: "center" }}>
@@ -76,7 +73,7 @@ function WorkbookPicker() {
         {workbooks.map(wb => (
           <a
             key={wb.id}
-            href={`/Workbook?id=${wb.id}`}
+            href={`/WorkbookViewer?id=${wb.id}`}
             style={{
               display: "flex", alignItems: "center", gap: 16, padding: "20px 24px",
               background: "#fff", borderRadius: 12, border: "1px solid rgba(74,14,46,0.08)",
@@ -107,7 +104,6 @@ export default function WorkbookViewer() {
   const { search } = useLocation();
   const workbookId = new URLSearchParams(search).get("id") || null;
 
-  // No ID in URL — delegate to picker
   if (!workbookId) {
     return <WorkbookPicker />;
   }
@@ -130,7 +126,6 @@ function WorkbookViewerInner({ workbookId }) {
   const saveTimer = useRef(null);
   const contentRef = useRef(null);
 
-  // Fetch workbook
   const { data: workbook, isLoading } = useQuery({
     queryKey: ["workbook", workbookId],
     queryFn: async () => {
@@ -141,7 +136,6 @@ function WorkbookViewerInner({ workbookId }) {
     initialData: undefined,
   });
 
-  // Fetch expert
   const { data: expert } = useQuery({
     queryKey: ["workbookExpert", workbook?.expert_id],
     queryFn: async () => {
@@ -151,15 +145,12 @@ function WorkbookViewerInner({ workbookId }) {
     enabled: !!workbook?.expert_id,
   });
 
-  // Auth: load user for display (admin check is now inside the hook)
   useEffect(() => {
     base44.auth.me().then(u => setUser(u)).catch(() => {});
   }, []);
 
-  // Unlock check (hook now handles admin bypass internally)
   const { isUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
 
-  // Load existing WorkbookResponse
   useEffect(() => {
     base44.entities.WorkbookResponse.filter({ workbook_id: workbookId }, "-created_date", 1)
       .then(responses => {
@@ -173,7 +164,6 @@ function WorkbookViewerInner({ workbookId }) {
       }).catch(() => {}).finally(() => setResponseLoaded(true));
   }, [workbookId]);
 
-  // Autosave answers only (last_section_id is saved separately in jumpTo)
   const persistData = useCallback((updated) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
@@ -195,14 +185,11 @@ function WorkbookViewerInner({ workbookId }) {
     });
   }, [persistData]);
 
-
-  // Sections
   const sections = useMemo(() => {
     if (!workbook?.schema?.sections) return [];
     return workbook.schema.sections;
   }, [workbook]);
 
-  // Resume on reload
   useEffect(() => {
     if (!sections.length || !initialSectionId.current) return;
     const idx = sections.findIndex(s => s.id === initialSectionId.current);
@@ -210,9 +197,6 @@ function WorkbookViewerInner({ workbookId }) {
     initialSectionId.current = null;
   }, [sections]);
 
-  // Progress calculation — section-based
-  // Denominator: sections where display_only !== true
-  // Numerator: fillable sections where at least one field has a non-empty answer
   const progressPct = useMemo(() => {
     const fillable = sections.filter(s => s.display_only !== true);
     if (!fillable.length) return 0;
@@ -228,14 +212,12 @@ function WorkbookViewerInner({ workbookId }) {
     return Math.round((answered.length / fillable.length) * 100);
   }, [sections, answers]);
 
-  // Section navigation — persists last_section_id on every section change
   const jumpTo = useCallback((idx) => {
     setActiveSection(idx);
     setDrawerOpen(false);
     window.scrollTo({ top: 0, behavior: "instant" });
     const sectionId = sections[idx]?.id;
     if (sectionId) {
-      // Persist last_section_id independently of field autosave
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(async () => {
         if (responseId) {
@@ -249,7 +231,6 @@ function WorkbookViewerInner({ workbookId }) {
     }
   }, [sections, responseId, workbookId]);
 
-  // Keyboard navigation
   const activeSectionRef = useRef(0);
   activeSectionRef.current = activeSection;
 
@@ -271,8 +252,6 @@ function WorkbookViewerInner({ workbookId }) {
     return () => document.removeEventListener("keydown", handler);
   }, [sections.length, jumpTo]);
 
-  // ── Loading state ──
-  // Wait for: workbook query + response load + unlock check (only once workbook is known)
   const stillLoading = isLoading || !responseLoaded || (!!workbook && isCheckingUnlock);
   if (stillLoading) {
     return (
@@ -282,7 +261,6 @@ function WorkbookViewerInner({ workbookId }) {
     );
   }
 
-  // ── Workbook not found ──
   if (!workbook) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
@@ -303,7 +281,6 @@ function WorkbookViewerInner({ workbookId }) {
     );
   }
 
-  // ── Completion handlers ──
   const handleFinishWorkbook = async () => {
     const now = new Date().toISOString();
     if (responseId) {
@@ -322,7 +299,6 @@ function WorkbookViewerInner({ workbookId }) {
     setCompletedAt(null);
   };
 
-  // ── Locked ──
   if (!isUnlocked) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
