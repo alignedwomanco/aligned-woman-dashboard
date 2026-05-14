@@ -1,0 +1,48 @@
+{
+  "name": "CheckIn",
+  "type": "object",
+  "properties": {
+    "energy": {
+      "type": "number",
+      "description": "1 to 10 scale"
+    },
+    "mood": {
+      "type": "number",
+      "description": "1 to 10 scale"
+    },
+    "stress": {
+      "type": "number",
+      "description": "1 to 10 scale"
+    },
+    "capacity": {
+      "type": "number",
+      "description": "1 to 10 scale"
+    },
+    "bodySignals": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "energy",
+    "mood",
+    "stress",
+    "capacity"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
