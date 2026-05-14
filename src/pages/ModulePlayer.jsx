@@ -37,7 +37,6 @@ export default function ModulePlayer() {
   const [accessChecked, setAccessChecked] = useState(false);
   const queryClient = useQueryClient();
 
-  // Access check with admin bypass
   useEffect(() => {
     const checkAccess = async () => {
       try {
@@ -97,7 +96,6 @@ export default function ModulePlayer() {
     enabled: !!moduleId,
   });
 
-  // All modules in this course (to find next module)
   const { data: allCourseModules = [] } = useQuery({
     queryKey: ["allCourseModules", courseId],
     queryFn: async () => {
@@ -111,7 +109,6 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
-  // Sections for this course (to sort modules correctly across sections)
   const { data: allSections = [] } = useQuery({
     queryKey: ["allSections", courseId],
     queryFn: async () => {
@@ -124,19 +121,16 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
-  // Workbooks for this course
   const { data: workbooks = [] } = useQuery({
     queryKey: ["workbooks", courseId],
     queryFn: () => base44.entities.Workbook.filter({ course_id: courseId }),
     enabled: !!courseId,
   });
 
-  // Find workbook for the current module (matched by expertId)
   const moduleWorkbook = module?.expertId
     ? workbooks.find(w => w.expert_id === module.expertId && w.course_id === courseId)
     : null;
 
-  // Find the next module in section order
   const getNextModule = () => {
     if (!module || allSections.length === 0) return null;
     const orderedModules = [];
@@ -185,13 +179,12 @@ export default function ModulePlayer() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["courseProgress"] }); },
   });
 
-  // FIX: Reset selected page when switching to a different module
-  // Without this, stale content from the previous module is displayed
+  // Reset selected page when switching modules
   useEffect(() => {
     setSelectedPage(null);
   }, [moduleId]);
 
-  // Set first page as selected when pages load (or after reset above)
+  // Set first page when pages load or after module switch reset
   useEffect(() => {
     if (pages.length > 0 && !selectedPage) { setSelectedPage(pages[0]); }
   }, [pages, selectedPage]);
@@ -271,7 +264,6 @@ export default function ModulePlayer() {
     );
   }
 
-  // End-of-module action: workbook, next module, or back to course
   const renderEndOfModuleAction = () => {
     const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
     const nextPage = pages[currentIndex + 1];
@@ -293,7 +285,7 @@ export default function ModulePlayer() {
         {moduleWorkbook && (
           <Button
             className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white gap-2"
-            onClick={() => navigate(createPageUrl("WorkbookViewer") + `?id=${moduleWorkbook.id}`)}
+            onClick={() => navigate(`/WorkbookViewer?id=${moduleWorkbook.id}`)}
           >
             <BookOpen className="w-4 h-4" />
             Continue to Workbook
@@ -316,7 +308,6 @@ export default function ModulePlayer() {
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
-      {/* Header */}
       <div className="bg-white border-b sticky top-20 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <div className="flex items-center justify-between gap-2">
@@ -347,7 +338,6 @@ export default function ModulePlayer() {
 
       <div className="max-w-7xl mx-auto p-4 sm:p-6 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 overflow-hidden">
-          {/* Left Sidebar */}
           <div className="space-y-6">
             <Card>
               <CardHeader className="pb-3">
@@ -414,7 +404,6 @@ export default function ModulePlayer() {
             )}
           </div>
 
-          {/* Main Content */}
           <div className="space-y-6">
             <motion.div key={selectedPage.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="overflow-hidden">
