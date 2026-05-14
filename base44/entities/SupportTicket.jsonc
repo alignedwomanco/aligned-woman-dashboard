@@ -1,0 +1,114 @@
+{
+  "name": "SupportTicket",
+  "type": "object",
+  "properties": {
+    "subject": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "technical",
+        "billing",
+        "account",
+        "feature_request",
+        "bug",
+        "other"
+      ],
+      "default": "other"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "resolved",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "adminResponse": {
+      "type": "string"
+    },
+    "respondedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assignedTo": {
+      "type": "string",
+      "description": "Admin email assigned to ticket"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "internalNotes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "addedBy": {
+            "type": "string"
+          },
+          "addedAt": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "subject",
+    "message"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
