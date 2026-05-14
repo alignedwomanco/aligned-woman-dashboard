@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { createPageUrl } from "@/utils";
 
+const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
+
 const PHASE_CONFIG = {
   awareness: {
     letter: "A",
@@ -66,9 +68,16 @@ export default function ContinueHero({
   const eyebrow = eyebrowOverride || `CURRENT PHASE · ${phaseNumber} OF ${TOTAL_PHASES}`;
   const title = titleOverride || module?.title || phase.ctaLabel.replace("CONTINUE ", "").replace("BEGIN ", "");
 
+  // FIX: When module is null (new user, no progress), navigate to CourseDetail
+  // instead of "#" so the button always has a working destination.
+  const courseDetailUrl = `${createPageUrl("CourseDetail")}?courseId=${BLUEPRINT_COURSE_ID}`;
   const playerUrl = module?.id
     ? `${createPageUrl("ModulePlayer")}?moduleId=${module.id}${nextPageId ? `&pageId=${nextPageId}` : ""}`
-    : "#";
+    : courseDetailUrl;
+
+  const overviewUrl = module?.id
+    ? `${createPageUrl("ModulePlayer")}?moduleId=${module.id}`
+    : courseDetailUrl;
 
   const completedModules = moduleIndex ? moduleIndex - 1 : 0;
   const totalModulesCount = totalModules || 4;
@@ -125,7 +134,7 @@ export default function ContinueHero({
             </Link>
 
             <Link
-              to={module?.id ? `${createPageUrl("ModulePlayer")}?moduleId=${module.id}` : "#"}
+              to={overviewUrl}
               className="block font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase mt-3 transition-colors"
             >
               MODULE OVERVIEW +
