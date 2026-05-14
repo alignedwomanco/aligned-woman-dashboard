@@ -49,7 +49,16 @@
       }
     },
     "read": {
-      "data.target_user_email": "{{user.email}}"
+      "$or": [
+        {
+          "data.target_user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
       "data.target_user_email": "{{user.email}}"
