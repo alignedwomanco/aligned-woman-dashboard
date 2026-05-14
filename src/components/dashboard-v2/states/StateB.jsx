@@ -6,6 +6,8 @@ import ContinueHero from "@/components/dashboard-v2/ContinueHero";
 import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 import AlivePhasePeek from "@/components/dashboard-v2/AlivePhasePeek";
 
+const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
+
 export default function StateB({ user, profile }) {
   return (
     <div className="space-y-6">
@@ -23,7 +25,7 @@ export default function StateB({ user, profile }) {
           The Blueprint is not a course you finish. It is a practice you return to. Each phase opens when the one before it has settled. You set the pace.
         </p>
         <Link
-          to={createPageUrl("Classroom")}
+          to={`${createPageUrl("CourseDetail")}?courseId=${BLUEPRINT_COURSE_ID}`}
           className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
         >
           BEGIN PHASE 1: AWARENESS
