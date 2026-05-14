@@ -1,0 +1,41 @@
+{
+  "name": "DirectMessage",
+  "type": "object",
+  "properties": {
+    "recipientEmail": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "isRead": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "recipientEmail",
+    "message"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.recipientEmail": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "data.recipientEmail": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
