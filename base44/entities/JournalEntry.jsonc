@@ -1,0 +1,41 @@
+{
+  "name": "JournalEntry",
+  "type": "object",
+  "properties": {
+    "phase": {
+      "type": "string",
+      "enum": [
+        "Awareness",
+        "Liberation",
+        "Intention",
+        "VisionEmbodiment"
+      ]
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "entry": {
+      "type": "string"
+    },
+    "aiResponse": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "entry"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
