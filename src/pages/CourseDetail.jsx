@@ -159,7 +159,6 @@ function WelcomeSection({ welcomeSection, modules, pages, hasAccess }) {
 
   const handlePlay = () => {
     if (!welcomeMod) return;
-    // Navigate to the first page of the welcome module if it exists
     const modPages = pages
       .filter((p) => p.moduleId === welcomeMod.id)
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -177,9 +176,9 @@ function WelcomeSection({ welcomeSection, modules, pages, hasAccess }) {
         <span className="inline-block w-5 h-px bg-awrose-core flex-shrink-0" />
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase">WELCOME</p>
       </div>
-      {/* Headline with em dash in customer-facing copy */}
+      {/* Headline */}
       <h2 className="font-display text-awburg-core text-3xl md:text-4xl leading-tight mb-6">
-        An <span className="italic text-awrose-deep">introduction</span> to the programme &mdash; and to this module.
+        An <span className="italic text-awrose-deep">introduction</span> to the programme, and to this module.
       </h2>
       {/* Video placeholder */}
       <div
@@ -208,18 +207,17 @@ function WelcomeSection({ welcomeSection, modules, pages, hasAccess }) {
   );
 }
 
-// CORRECTION 2: LessonRow accepts isCurrentModule to differentiate WATCH LESSON vs locked display
-function LessonRow({ page, index, progressMap, isLocked, moduleId, isCurrentModule }) {
+function LessonRow({ page, index, progressMap, isLocked, moduleId, isModuleAccessible }) {
   const navigate = useNavigate();
   const status = progressMap[page.id];
   const isComplete = status === "completed";
 
   const handleClick = () => {
-    if (isLocked || !isCurrentModule) return;
+    if (isLocked || !isModuleAccessible) return;
     navigate(createPageUrl("ModulePlayer") + `?moduleId=${moduleId}&pageId=${page.id}`);
   };
 
-  const canClick = isCurrentModule && !isLocked;
+  const canClick = isModuleAccessible && !isLocked;
 
   return (
     <div
@@ -229,7 +227,7 @@ function LessonRow({ page, index, progressMap, isLocked, moduleId, isCurrentModu
       onKeyDown={(e) => { if (canClick && e.key === "Enter") handleClick(); }}
       aria-label={canClick ? `Open lesson: ${page.title}` : undefined}
       className={`flex items-center gap-4 px-4 py-3 border-b border-awburg-core/6 last:border-0 transition-colors ${
-        isLocked || !isCurrentModule
+        isLocked || !isModuleAccessible
           ? "cursor-not-allowed opacity-60"
           : "cursor-pointer hover:bg-awrose-wash"
       }`}
@@ -239,7 +237,7 @@ function LessonRow({ page, index, progressMap, isLocked, moduleId, isCurrentModu
       </span>
       <span className="font-body text-sm text-awburg-core flex-1 leading-snug">{page.title}</span>
       <div className="flex-shrink-0 ml-2 flex items-center gap-2">
-        {isLocked || !isCurrentModule ? (
+        {isLocked || !isModuleAccessible ? (
           <>
             <Lock className="w-3.5 h-3.5 text-awburg-core/30" />
             <span className="font-body font-bold text-xs tracking-eyebrow text-awburg-core/40 uppercase">Locked</span>
@@ -259,8 +257,7 @@ function LessonRow({ page, index, progressMap, isLocked, moduleId, isCurrentModu
   );
 }
 
-// CORRECTION 1 + 2 + 3: unified module item with expand/collapse toggle
-function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isCurrentModule, workbooks, isExpanded, onToggle, courseId }) {
+function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isModuleAccessible, workbooks, isExpanded, onToggle, courseId }) {
   const navigate = useNavigate();
   const modPages = pages.filter((p) => p.moduleId === mod.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const workbook = workbooks.find((w) => w.expert_id === mod.expertId && w.course_id === (mod.courseId || courseId));
@@ -273,7 +270,7 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isCurrentM
 
   return (
     <div className="mb-3">
-      {/* Module header bar - clickable to expand/collapse (unless locked) */}
+      {/* Module header bar */}
       <div
         onClick={handleHeaderClick}
         role={isModLocked ? undefined : "button"}
@@ -315,15 +312,15 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isCurrentM
               progressMap={progressMap}
               isLocked={isModLocked}
               moduleId={mod.id}
-              isCurrentModule={isCurrentModule}
+              isModuleAccessible={isModuleAccessible}
             />
           ))}
           {modPages.length === 0 && (
             <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>
           )}
-          {/* Workbook row - CORRECTION 3 */}
+          {/* Workbook row */}
           {workbook && (
-            isCurrentModule ? (
+            isModuleAccessible ? (
               <div
                 onClick={() => navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`)}
                 role="button"
@@ -362,8 +359,9 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
   const isCurrent = sectionIndex === currentPhaseIndex;
   const isLocked = sectionIndex > currentPhaseIndex;
 
-  // CORRECTION 1: expandedModules set, initialized with currentModuleId
-  const initialExpanded = new Set(currentModuleId ? [currentModuleId] : (mods[0] ? [mods[0].id] : []));
+  // Expand the current module by default, or the first module if no current
+  const firstModId = mods[0]?.id;
+  const initialExpanded = new Set(currentModuleId ? [currentModuleId] : (firstModId ? [firstModId] : []));
   const [expandedModules, setExpandedModules] = React.useState(initialExpanded);
 
   const toggleModule = (modId) => {
@@ -418,12 +416,21 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
           ) : null;
         })()}
 
-        {/* Modules - only show for current and completed phases */}
+        {/* Modules: show for current and completed phases */}
         {!isLocked && (
           <div>
             {mods.map((mod, mi) => {
-              const isModLocked = isCurrent && mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap);
-              const isCurrentModule = isCurrent && mod.id === currentModuleId;
+              // Module is locked if the previous module in this phase is not complete
+              // First module (mi === 0) is never locked within an accessible phase
+              const isModLocked = mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap);
+
+              // BUG FIX: A module is "accessible" (lessons clickable, not showing LOCKED)
+              // when the phase is not locked AND the module itself is not locked.
+              // Previously this was: isCurrent && mod.id === currentModuleId
+              // which meant only ONE module (the last-accessed one) was ever accessible,
+              // and for new users with no last_module_id, NOTHING was accessible.
+              const isModuleAccessible = !isModLocked;
+
               const isExpanded = expandedModules.has(mod.id);
 
               return (
@@ -434,7 +441,7 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
                   progressMap={progressMap}
                   modIndex={mi}
                   isModLocked={isModLocked}
-                  isCurrentModule={isCurrentModule}
+                  isModuleAccessible={isModuleAccessible}
                   workbooks={workbooks}
                   isExpanded={isExpanded}
                   onToggle={toggleModule}
