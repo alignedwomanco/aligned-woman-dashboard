@@ -179,12 +179,10 @@ export default function ModulePlayer() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["courseProgress"] }); },
   });
 
-  // Reset selected page when switching modules
   useEffect(() => {
     setSelectedPage(null);
   }, [moduleId]);
 
-  // Set first page when pages load or after module switch reset
   useEffect(() => {
     if (pages.length > 0 && !selectedPage) { setSelectedPage(pages[0]); }
   }, [pages, selectedPage]);
@@ -285,7 +283,7 @@ export default function ModulePlayer() {
         {moduleWorkbook && (
           <Button
             className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white gap-2"
-            onClick={() => navigate(`/WorkbookViewer?id=${moduleWorkbook.id}`)}
+            onClick={() => { window.location.href = `/WorkbookViewer?id=${moduleWorkbook.id}`; }}
           >
             <BookOpen className="w-4 h-4" />
             Continue to Workbook
