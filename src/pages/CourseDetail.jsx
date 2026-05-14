@@ -58,13 +58,19 @@ function getEmbedUrl(url) {
   return url;
 }
 
+function buildPlayerUrl(moduleId, pageId, courseId) {
+  let url = createPageUrl("ModulePlayer") + `?moduleId=${moduleId}`;
+  if (courseId) url += `&courseId=${courseId}`;
+  if (pageId) url += `&pageId=${pageId}`;
+  return url;
+}
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
 
 function HeroBanner({ course, sections, modules, hasAccess, onResume, onBegin, resumeModuleId }) {
   const { main, italic } = splitTitle(course.title);
-  const totalMods = modules.length;
   return (
     <div className="relative rounded-2xl overflow-hidden mb-6" style={{ minHeight: 180 }}>
       <div className="absolute inset-0 bg-awburg-core">
@@ -92,14 +98,14 @@ function HeroBanner({ course, sections, modules, hasAccess, onResume, onBegin, r
         </div>
         <div className="flex-shrink-0 text-right">
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-paper/60 uppercase mb-1">MODULES</p>
-          <p className="font-display text-paper text-4xl leading-none">{totalMods}</p>
+          <p className="font-display text-paper text-4xl leading-none">{modules.length}</p>
         </div>
       </div>
     </div>
   );
 }
 
-function ResumeBar({ profile, modules, sections }) {
+function ResumeBar({ profile, modules, sections, courseId }) {
   const navigate = useNavigate();
   if (!profile?.last_module_id) return null;
   const mod = modules.find((m) => m.id === profile.last_module_id);
@@ -107,12 +113,12 @@ function ResumeBar({ profile, modules, sections }) {
   if (!mod) return null;
   const secMods = modules.filter((m) => m.sectionId === mod.sectionId);
   const modNum = secMods.findIndex((m) => m.id === mod.id) + 1;
+  const url = buildPlayerUrl(profile.last_module_id, null, courseId);
   return (
     <div
       className="bg-awrose-pale border border-awrose-light/40 rounded-xl px-6 py-4 mb-8 flex items-center justify-between cursor-pointer hover:bg-awrose-wash transition-colors"
-      onClick={() => navigate(createPageUrl("ModulePlayer") + `?moduleId=${profile.last_module_id}`)}
-      role="button" tabIndex={0}
-      onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("ModulePlayer") + `?moduleId=${profile.last_module_id}`); }}
+      onClick={() => navigate(url)} role="button" tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter") navigate(url); }}
       aria-label="Resume course"
     >
       <div>
@@ -131,9 +137,7 @@ function ResumeBar({ profile, modules, sections }) {
 function WelcomeSection({ welcomeSection, modules, pages }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const welcomeMod = modules.filter((m) => m.sectionId === welcomeSection?.id)[0];
-  const welcomePages = pages
-    .filter((p) => p.moduleId === welcomeMod?.id)
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const welcomePages = pages.filter((p) => p.moduleId === welcomeMod?.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const welcomePage = welcomePages[0];
   const videoUrl = welcomePage?.videoUrl || welcomePage?.content || null;
   const embedUrl = getEmbedUrl(videoUrl);
@@ -149,22 +153,9 @@ function WelcomeSection({ welcomeSection, modules, pages }) {
       </h2>
       <div className="relative w-full rounded-2xl overflow-hidden bg-awburg-core" style={{ aspectRatio: "16/9" }}>
         {isPlaying && embedUrl ? (
-          <iframe
-            src={embedUrl}
-            className="absolute inset-0 w-full h-full"
-            frameBorder="0"
-            allow="autoplay; encrypted-media; fullscreen"
-            allowFullScreen
-            title="Welcome video"
-          />
+          <iframe src={embedUrl} className="absolute inset-0 w-full h-full" frameBorder="0" allow="autoplay; encrypted-media; fullscreen" allowFullScreen title="Welcome video" />
         ) : (
-          <div
-            className="absolute inset-0 cursor-pointer group"
-            onClick={() => { if (embedUrl) setIsPlaying(true); }}
-            role="button" tabIndex={0}
-            onKeyDown={(e) => { if (e.key === "Enter" && embedUrl) setIsPlaying(true); }}
-            aria-label="Play welcome video"
-          >
+          <div className="absolute inset-0 cursor-pointer group" onClick={() => { if (embedUrl) setIsPlaying(true); }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" && embedUrl) setIsPlaying(true); }} aria-label="Play welcome video">
             <div className="absolute inset-0 bg-gradient-to-br from-awburg-mid/60 via-awburg-core to-awburg-dark" />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-16 h-16 rounded-full bg-paper/20 group-hover:bg-paper/30 backdrop-blur-sm flex items-center justify-center transition-colors">
@@ -182,13 +173,13 @@ function WelcomeSection({ welcomeSection, modules, pages }) {
   );
 }
 
-function LessonRow({ page, index, progressMap, isLocked, moduleId, isModuleAccessible }) {
+function LessonRow({ page, index, progressMap, isLocked, moduleId, courseId, isModuleAccessible }) {
   const navigate = useNavigate();
   const isComplete = progressMap[page.id] === "completed";
   const canClick = isModuleAccessible && !isLocked;
   const handleClick = () => {
     if (!canClick) return;
-    navigate(createPageUrl("ModulePlayer") + `?moduleId=${moduleId}&pageId=${page.id}`);
+    navigate(buildPlayerUrl(moduleId, page.id, courseId));
   };
   return (
     <div
@@ -197,9 +188,7 @@ function LessonRow({ page, index, progressMap, isLocked, moduleId, isModuleAcces
       tabIndex={canClick ? 0 : -1}
       onKeyDown={(e) => { if (canClick && e.key === "Enter") handleClick(); }}
       aria-label={canClick ? `Open lesson: ${page.title}` : undefined}
-      className={`flex items-center gap-4 px-4 py-3 border-b border-awburg-core/6 last:border-0 transition-colors ${
-        !canClick ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-awrose-wash"
-      }`}
+      className={`flex items-center gap-4 px-4 py-3 border-b border-awburg-core/6 last:border-0 transition-colors ${!canClick ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-awrose-wash"}`}
     >
       <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">{pad(index + 1)}</span>
       <span className="font-body text-sm text-awburg-core flex-1 leading-snug">{page.title}</span>
@@ -237,9 +226,7 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isModuleAc
         tabIndex={isModLocked ? -1 : 0}
         onKeyDown={(e) => { if (!isModLocked && e.key === "Enter") onToggle(mod.id); }}
         aria-expanded={isExpanded}
-        className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-awburg-core/8 transition-colors ${
-          isModLocked ? "cursor-not-allowed opacity-50 bg-paper" : "cursor-pointer bg-paper hover:bg-awrose-wash"
-        }`}
+        className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-awburg-core/8 transition-colors ${isModLocked ? "cursor-not-allowed opacity-50 bg-paper" : "cursor-pointer bg-paper hover:bg-awrose-wash"}`}
       >
         <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">{pad(modIndex + 1)}</span>
         <span className="font-display text-awburg-core text-base flex-1 leading-snug">{mod.title}</span>
@@ -251,17 +238,12 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isModuleAc
       {isExpanded && !isModLocked && (
         <div className="bg-paper border border-awburg-core/8 rounded-xl overflow-hidden ml-8 mt-2">
           {modPages.map((page, i) => (
-            <LessonRow key={page.id} page={page} index={i} progressMap={progressMap} isLocked={isModLocked} moduleId={mod.id} isModuleAccessible={isModuleAccessible} />
+            <LessonRow key={page.id} page={page} index={i} progressMap={progressMap} isLocked={isModLocked} moduleId={mod.id} courseId={courseId} isModuleAccessible={isModuleAccessible} />
           ))}
           {modPages.length === 0 && <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>}
           {workbook && (
             isModuleAccessible ? (
-              <div
-                onClick={() => navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`)}
-                role="button" tabIndex={0}
-                onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`); }}
-                className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors"
-              >
+              <div onClick={() => navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`); }} className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors">
                 <BookOpen className="w-4 h-4 text-awrose-core flex-shrink-0" />
                 <span className="font-body text-sm text-awburg-core flex-1">{workbook.title}</span>
                 <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">WORKBOOK</span>
@@ -293,11 +275,7 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
   const initialExpanded = new Set(currentModuleId ? [currentModuleId] : (firstModId ? [firstModId] : []));
   const [expandedModules, setExpandedModules] = React.useState(initialExpanded);
   const toggleModule = (modId) => {
-    setExpandedModules((prev) => {
-      const next = new Set(prev);
-      next.has(modId) ? next.delete(modId) : next.add(modId);
-      return next;
-    });
+    setExpandedModules((prev) => { const next = new Set(prev); next.has(modId) ? next.delete(modId) : next.add(modId); return next; });
   };
 
   const letterClass = isLocked ? "text-awburg-core/30" : isCompleted ? "text-awrose-core" : "text-awrose-deep";
@@ -324,13 +302,8 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
           <div>
             {mods.map((mod, mi) => {
               const isModLocked = mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap);
-              const isModuleAccessible = !isModLocked;
               return (
-                <ModuleItem
-                  key={mod.id} mod={mod} pages={pages} progressMap={progressMap} modIndex={mi}
-                  isModLocked={isModLocked} isModuleAccessible={isModuleAccessible} workbooks={workbooks}
-                  isExpanded={expandedModules.has(mod.id)} onToggle={toggleModule} courseId={courseId}
-                />
+                <ModuleItem key={mod.id} mod={mod} pages={pages} progressMap={progressMap} modIndex={mi} isModLocked={isModLocked} isModuleAccessible={!isModLocked} workbooks={workbooks} isExpanded={expandedModules.has(mod.id)} onToggle={toggleModule} courseId={courseId} />
               );
             })}
           </div>
@@ -433,11 +406,11 @@ export default function CourseDetail() {
 
   const handleBegin = () => {
     const firstMod = modules[0];
-    if (firstMod) navigate(createPageUrl("ModulePlayer") + `?moduleId=${firstMod.id}`);
+    if (firstMod) navigate(buildPlayerUrl(firstMod.id, null, courseId));
   };
 
   const handleResume = () => {
-    if (profile?.last_module_id) navigate(createPageUrl("ModulePlayer") + `?moduleId=${profile.last_module_id}`);
+    if (profile?.last_module_id) navigate(buildPlayerUrl(profile.last_module_id, null, courseId));
   };
 
   return (
@@ -453,9 +426,9 @@ export default function CourseDetail() {
           <div className="mb-8"><CourseAccessGate course={course} onPreview={() => setPreviewMode(true)} /></div>
         )}
 
-        {hasAccess && <ResumeBar profile={profile} modules={modules} sections={sections} courses={[course]} />}
+        {hasAccess && <ResumeBar profile={profile} modules={modules} sections={sections} courseId={courseId} />}
 
-        {welcomeSection && <WelcomeSection welcomeSection={welcomeSection} modules={modules} pages={pages} hasAccess={hasAccess || previewMode} />}
+        {welcomeSection && <WelcomeSection welcomeSection={welcomeSection} modules={modules} pages={pages} />}
 
         {(() => {
           let currentPhaseIndex = 0;
