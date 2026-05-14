@@ -1,0 +1,61 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "comment",
+        "mention",
+        "reply",
+        "tool_complete",
+        "module_unlock",
+        "like",
+        "follow",
+        "new_badge",
+        "level_up",
+        "post_reshare"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "linkTo": {
+      "type": "string"
+    },
+    "isRead": {
+      "type": "boolean",
+      "default": false
+    },
+    "source_user_email": {
+      "type": "string",
+      "description": "Who triggered this notification"
+    },
+    "target_post_id": {
+      "type": "string"
+    },
+    "target_comment_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "message"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "data.target_user_email": "{{user.email}}"
+    },
+    "update": {
+      "data.target_user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.target_user_email": "{{user.email}}"
+    }
+  }
+}
