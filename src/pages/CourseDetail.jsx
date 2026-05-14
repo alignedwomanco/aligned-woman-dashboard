@@ -7,10 +7,6 @@ import { ArrowLeft, Lock, CheckCircle2, Play, BookOpen, ChevronRight, ChevronDow
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 
-// ---------------------------------------------------------------------------
-// Phase Quotes (A.L.I.V.E. framework - hardcoded, not from data)
-// ---------------------------------------------------------------------------
-
 const PHASE_QUOTES = {
   awareness: "My body is not working against me, it is speaking to me.",
   liberation: "I do not have to live in survival mode anymore.",
@@ -23,13 +19,8 @@ const PHASE_QUOTES = {
 
 function getPhaseKey(section) {
   if (!section?.title) return null;
-  const stripped = section.title.replace(/^Phase \d+\s*[-:]\s*/i, "").trim().toLowerCase();
-  return stripped;
+  return section.title.replace(/^Phase \d+\s*[-:]\s*/i, "").trim().toLowerCase();
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function splitTitle(title) {
   if (!title) return { main: "", italic: "" };
@@ -42,28 +33,29 @@ function splitTitle(title) {
   };
 }
 
-function pad(n) {
-  return String(n).padStart(2, "0");
-}
+function pad(n) { return String(n).padStart(2, "0"); }
 
 function stripPhasePrefix(t) {
   return (t || "").replace(/^Phase\s+\d+\s*[-:]\s*/i, "").trim();
-}
-
-function isPhaseComplete(sectionId, mods, pagesByCourse, progressMap) {
-  const sectionMods = mods.filter((m) => m.sectionId === sectionId);
-  if (sectionMods.length === 0) return false;
-  return sectionMods.every((m) => {
-    const modPages = (pagesByCourse[m.courseId] || []).filter((p) => p.moduleId === m.id);
-    if (modPages.length === 0) return false;
-    return modPages.every((p) => progressMap[p.id] === "completed");
-  });
 }
 
 function isModuleComplete(moduleId, pages, progressMap) {
   const modPages = pages.filter((p) => p.moduleId === moduleId);
   if (modPages.length === 0) return false;
   return modPages.every((p) => progressMap[p.id] === "completed");
+}
+
+function getEmbedUrl(url) {
+  if (!url) return null;
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (driveMatch) return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?#]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+  const loomMatch = url.match(/loom\.com\/share\/([^?#]+)/);
+  if (loomMatch) return `https://www.loom.com/embed/${loomMatch[1]}?autoplay=1`;
+  return url;
 }
 
 // ---------------------------------------------------------------------------
@@ -73,46 +65,31 @@ function isModuleComplete(moduleId, pages, progressMap) {
 function HeroBanner({ course, sections, modules, hasAccess, onResume, onBegin, resumeModuleId }) {
   const { main, italic } = splitTitle(course.title);
   const totalMods = modules.length;
-
   return (
     <div className="relative rounded-2xl overflow-hidden mb-6" style={{ minHeight: 180 }}>
-      {/* Background */}
       <div className="absolute inset-0 bg-awburg-core">
-        {course.coverImage && (
-          <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover opacity-40" />
-        )}
+        {course.coverImage && <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover opacity-40" />}
         <div className="absolute inset-0 bg-gradient-to-br from-awburg-core/80 to-awburg-mid/60" />
       </div>
-
       <div className="relative z-10 p-8 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
         <div className="flex-1">
-          {/* Eyebrow */}
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-light uppercase mb-3">
             {course.category ? `${course.category} · ` : ""}{sections.length} PHASES
           </p>
-          {/* Title */}
           <h1 className="font-display text-paper text-3xl md:text-4xl leading-tight mb-3">
             {main}{italic && <span className="italic text-awrose-light"> {italic}</span>}
           </h1>
-          {/* Description */}
           {course.description && (
-            <p className="font-body font-light text-paper/75 text-sm leading-relaxed max-w-xl line-clamp-3 mb-5">
-              {course.description}
-            </p>
+            <p className="font-body font-light text-paper/75 text-sm leading-relaxed max-w-xl line-clamp-3 mb-5">{course.description}</p>
           )}
-          {/* CTA buttons */}
           <div className="flex items-center gap-3 flex-wrap">
             {hasAccess ? (
-              <button
-                onClick={resumeModuleId ? onResume : onBegin}
-                className="bg-paper text-awburg-core font-body font-bold text-[10px] tracking-eyebrow uppercase px-6 py-3 rounded-full hover:bg-awrose-pale transition-colors"
-              >
+              <button onClick={resumeModuleId ? onResume : onBegin} className="bg-paper text-awburg-core font-body font-bold text-[10px] tracking-eyebrow uppercase px-6 py-3 rounded-full hover:bg-awrose-pale transition-colors">
                 {resumeModuleId ? "RESUME →" : "BEGIN COURSE →"}
               </button>
             ) : null}
           </div>
         </div>
-        {/* Module count chip */}
         <div className="flex-shrink-0 text-right">
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-paper/60 uppercase mb-1">MODULES</p>
           <p className="font-display text-paper text-4xl leading-none">{totalMods}</p>
@@ -122,7 +99,7 @@ function HeroBanner({ course, sections, modules, hasAccess, onResume, onBegin, r
   );
 }
 
-function ResumeBar({ profile, modules, sections, courses }) {
+function ResumeBar({ profile, modules, sections }) {
   const navigate = useNavigate();
   if (!profile?.last_module_id) return null;
   const mod = modules.find((m) => m.id === profile.last_module_id);
@@ -130,13 +107,11 @@ function ResumeBar({ profile, modules, sections, courses }) {
   if (!mod) return null;
   const secMods = modules.filter((m) => m.sectionId === mod.sectionId);
   const modNum = secMods.findIndex((m) => m.id === mod.id) + 1;
-
   return (
     <div
       className="bg-awrose-pale border border-awrose-light/40 rounded-xl px-6 py-4 mb-8 flex items-center justify-between cursor-pointer hover:bg-awrose-wash transition-colors"
       onClick={() => navigate(createPageUrl("ModulePlayer") + `?moduleId=${profile.last_module_id}`)}
-      role="button"
-      tabIndex={0}
+      role="button" tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("ModulePlayer") + `?moduleId=${profile.last_module_id}`); }}
       aria-label="Resume course"
     >
@@ -153,55 +128,55 @@ function ResumeBar({ profile, modules, sections, courses }) {
   );
 }
 
-function WelcomeSection({ welcomeSection, modules, pages, hasAccess }) {
-  const navigate = useNavigate();
+function WelcomeSection({ welcomeSection, modules, pages }) {
+  const [isPlaying, setIsPlaying] = useState(false);
   const welcomeMod = modules.filter((m) => m.sectionId === welcomeSection?.id)[0];
-
-  const handlePlay = () => {
-    if (!welcomeMod) return;
-    const modPages = pages
-      .filter((p) => p.moduleId === welcomeMod.id)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const firstPage = modPages[0];
-    const url = firstPage
-      ? createPageUrl("ModulePlayer") + `?moduleId=${welcomeMod.id}&pageId=${firstPage.id}`
-      : createPageUrl("ModulePlayer") + `?moduleId=${welcomeMod.id}`;
-    navigate(url);
-  };
+  const welcomePages = pages
+    .filter((p) => p.moduleId === welcomeMod?.id)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const welcomePage = welcomePages[0];
+  const videoUrl = welcomePage?.videoUrl || welcomePage?.content || null;
+  const embedUrl = getEmbedUrl(videoUrl);
 
   return (
     <div className="mb-12">
-      {/* Eyebrow */}
       <div className="flex items-center gap-3 mb-3">
         <span className="inline-block w-5 h-px bg-awrose-core flex-shrink-0" />
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase">WELCOME</p>
       </div>
-      {/* Headline */}
       <h2 className="font-display text-awburg-core text-3xl md:text-4xl leading-tight mb-6">
         An <span className="italic text-awrose-deep">introduction</span> to the programme, and to this module.
       </h2>
-      {/* Video placeholder */}
-      <div
-        className="relative w-full rounded-2xl overflow-hidden bg-awburg-core cursor-pointer group"
-        style={{ aspectRatio: "16/9" }}
-        onClick={handlePlay}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === "Enter") handlePlay(); }}
-        aria-label="Play welcome video"
-      >
-        {/* Subtle radial glow */}
-        <div className="absolute inset-0 bg-gradient-to-br from-awburg-mid/60 via-awburg-core to-awburg-dark" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-paper/20 group-hover:bg-paper/30 backdrop-blur-sm flex items-center justify-center transition-colors">
-            <Play className="w-7 h-7 text-paper fill-paper" />
+      <div className="relative w-full rounded-2xl overflow-hidden bg-awburg-core" style={{ aspectRatio: "16/9" }}>
+        {isPlaying && embedUrl ? (
+          <iframe
+            src={embedUrl}
+            className="absolute inset-0 w-full h-full"
+            frameBorder="0"
+            allow="autoplay; encrypted-media; fullscreen"
+            allowFullScreen
+            title="Welcome video"
+          />
+        ) : (
+          <div
+            className="absolute inset-0 cursor-pointer group"
+            onClick={() => { if (embedUrl) setIsPlaying(true); }}
+            role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter" && embedUrl) setIsPlaying(true); }}
+            aria-label="Play welcome video"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-awburg-mid/60 via-awburg-core to-awburg-dark" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-paper/20 group-hover:bg-paper/30 backdrop-blur-sm flex items-center justify-center transition-colors">
+                <Play className="w-7 h-7 text-paper fill-paper" />
+              </div>
+            </div>
+            <div className="absolute bottom-5 left-6">
+              <p className="font-body font-bold text-[9px] tracking-eyebrow text-paper/60 uppercase mb-1">FROM LAURA</p>
+              <p className="font-display italic text-paper text-xl leading-tight">Before you begin</p>
+            </div>
           </div>
-        </div>
-        {/* Bottom label */}
-        <div className="absolute bottom-5 left-6">
-          <p className="font-body font-bold text-[9px] tracking-eyebrow text-paper/60 uppercase mb-1">FROM LAURA</p>
-          <p className="font-display italic text-paper text-xl leading-tight">Before you begin</p>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -209,16 +184,12 @@ function WelcomeSection({ welcomeSection, modules, pages, hasAccess }) {
 
 function LessonRow({ page, index, progressMap, isLocked, moduleId, isModuleAccessible }) {
   const navigate = useNavigate();
-  const status = progressMap[page.id];
-  const isComplete = status === "completed";
-
+  const isComplete = progressMap[page.id] === "completed";
+  const canClick = isModuleAccessible && !isLocked;
   const handleClick = () => {
-    if (isLocked || !isModuleAccessible) return;
+    if (!canClick) return;
     navigate(createPageUrl("ModulePlayer") + `?moduleId=${moduleId}&pageId=${page.id}`);
   };
-
-  const canClick = isModuleAccessible && !isLocked;
-
   return (
     <div
       onClick={canClick ? handleClick : undefined}
@@ -227,17 +198,13 @@ function LessonRow({ page, index, progressMap, isLocked, moduleId, isModuleAcces
       onKeyDown={(e) => { if (canClick && e.key === "Enter") handleClick(); }}
       aria-label={canClick ? `Open lesson: ${page.title}` : undefined}
       className={`flex items-center gap-4 px-4 py-3 border-b border-awburg-core/6 last:border-0 transition-colors ${
-        isLocked || !isModuleAccessible
-          ? "cursor-not-allowed opacity-60"
-          : "cursor-pointer hover:bg-awrose-wash"
+        !canClick ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-awrose-wash"
       }`}
     >
-      <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">
-        {pad(index + 1)}
-      </span>
+      <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">{pad(index + 1)}</span>
       <span className="font-body text-sm text-awburg-core flex-1 leading-snug">{page.title}</span>
       <div className="flex-shrink-0 ml-2 flex items-center gap-2">
-        {isLocked || !isModuleAccessible ? (
+        {!canClick ? (
           <>
             <Lock className="w-3.5 h-3.5 text-awburg-core/30" />
             <span className="font-body font-bold text-xs tracking-eyebrow text-awburg-core/40 uppercase">Locked</span>
@@ -262,78 +229,42 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isModuleAc
   const modPages = pages.filter((p) => p.moduleId === mod.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const workbook = workbooks.find((w) => w.expert_id === mod.expertId && w.course_id === (mod.courseId || courseId));
   const isComplete = isModuleComplete(mod.id, modPages, progressMap);
-
-  const handleHeaderClick = () => {
-    if (isModLocked) return;
-    onToggle(mod.id);
-  };
-
   return (
     <div className="mb-3">
-      {/* Module header bar */}
       <div
-        onClick={handleHeaderClick}
+        onClick={isModLocked ? undefined : () => onToggle(mod.id)}
         role={isModLocked ? undefined : "button"}
         tabIndex={isModLocked ? -1 : 0}
-        onKeyDown={(e) => { if (!isModLocked && e.key === "Enter") handleHeaderClick(); }}
+        onKeyDown={(e) => { if (!isModLocked && e.key === "Enter") onToggle(mod.id); }}
         aria-expanded={isExpanded}
         className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-awburg-core/8 transition-colors ${
-          isModLocked
-            ? "cursor-not-allowed opacity-50 bg-paper"
-            : "cursor-pointer bg-paper hover:bg-awrose-wash"
+          isModLocked ? "cursor-not-allowed opacity-50 bg-paper" : "cursor-pointer bg-paper hover:bg-awrose-wash"
         }`}
       >
-        <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">
-          {pad(modIndex + 1)}
-        </span>
+        <span className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 w-6 flex-shrink-0">{pad(modIndex + 1)}</span>
         <span className="font-display text-awburg-core text-base flex-1 leading-snug">{mod.title}</span>
         <div className="flex-shrink-0 flex items-center gap-2">
-          {isModLocked ? (
-            <Lock className="w-4 h-4 text-awburg-core/30" />
-          ) : isComplete ? (
-            <CheckCircle2 className="w-4 h-4 text-awrose-core" />
-          ) : null}
-          {!isModLocked && (
-            isExpanded
-              ? <ChevronUp className="w-4 h-4 text-awburg-core/50" />
-              : <ChevronDown className="w-4 h-4 text-awburg-core/50" />
-          )}
+          {isModLocked ? <Lock className="w-4 h-4 text-awburg-core/30" /> : isComplete ? <CheckCircle2 className="w-4 h-4 text-awrose-core" /> : null}
+          {!isModLocked && (isExpanded ? <ChevronUp className="w-4 h-4 text-awburg-core/50" /> : <ChevronDown className="w-4 h-4 text-awburg-core/50" />)}
         </div>
       </div>
-
-      {/* Expanded lesson list */}
       {isExpanded && !isModLocked && (
         <div className="bg-paper border border-awburg-core/8 rounded-xl overflow-hidden ml-8 mt-2">
           {modPages.map((page, i) => (
-            <LessonRow
-              key={page.id}
-              page={page}
-              index={i}
-              progressMap={progressMap}
-              isLocked={isModLocked}
-              moduleId={mod.id}
-              isModuleAccessible={isModuleAccessible}
-            />
+            <LessonRow key={page.id} page={page} index={i} progressMap={progressMap} isLocked={isModLocked} moduleId={mod.id} isModuleAccessible={isModuleAccessible} />
           ))}
-          {modPages.length === 0 && (
-            <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>
-          )}
-          {/* Workbook row */}
+          {modPages.length === 0 && <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>}
           {workbook && (
             isModuleAccessible ? (
               <div
                 onClick={() => navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`)}
-                role="button"
-                tabIndex={0}
+                role="button" tabIndex={0}
                 onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("WorkbookViewer") + `?workbookId=${workbook.id}`); }}
-                aria-label={`Open workbook: ${workbook.title}`}
                 className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors"
               >
                 <BookOpen className="w-4 h-4 text-awrose-core flex-shrink-0" />
                 <span className="font-body text-sm text-awburg-core flex-1">{workbook.title}</span>
-                <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">
-                  WORKBOOK
-                </span>
+                <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">WORKBOOK</span>
                 <ChevronRight className="w-4 h-4 text-awburg-core/50" />
               </div>
             ) : (
@@ -354,24 +285,17 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isModuleAc
 function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentModuleId, workbooks, currentPhaseIndex, courseId }) {
   const phaseLetter = stripPhasePrefix(section.title)?.[0]?.toUpperCase() || String.fromCharCode(65 + sectionIndex);
   const phaseName = stripPhasePrefix(section.title);
-
   const isCompleted = sectionIndex < currentPhaseIndex;
   const isCurrent = sectionIndex === currentPhaseIndex;
   const isLocked = sectionIndex > currentPhaseIndex;
 
-  // Expand the current module by default, or the first module if no current
   const firstModId = mods[0]?.id;
   const initialExpanded = new Set(currentModuleId ? [currentModuleId] : (firstModId ? [firstModId] : []));
   const [expandedModules, setExpandedModules] = React.useState(initialExpanded);
-
   const toggleModule = (modId) => {
     setExpandedModules((prev) => {
       const next = new Set(prev);
-      if (next.has(modId)) {
-        next.delete(modId);
-      } else {
-        next.add(modId);
-      }
+      next.has(modId) ? next.delete(modId) : next.add(modId);
       return next;
     });
   };
@@ -382,70 +306,30 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
   return (
     <div className={`flex gap-6 md:gap-10 mb-10 ${isLocked ? "opacity-60" : ""}`}>
       <div className="flex-shrink-0 select-none" style={{ width: 80 }}>
-        <span
-          className={`font-display italic leading-none ${letterClass}`}
-          style={{ fontSize: "clamp(80px, 12vw, 160px)", lineHeight: 1 }}
-        >
-          {phaseLetter}
-        </span>
+        <span className={`font-display italic leading-none ${letterClass}`} style={{ fontSize: "clamp(80px, 12vw, 160px)", lineHeight: 1 }}>{phaseLetter}</span>
       </div>
-
       <div className="flex-1 pt-2">
         <div className="flex items-center gap-3 mb-2 flex-wrap">
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 uppercase">
             PHASE {section.order ?? (sectionIndex + 1)} · {phaseName.toUpperCase()}
           </p>
-          {isCurrent && (
-            <span className="bg-awrose-core text-paper font-body font-bold text-[9px] tracking-eyebrow uppercase rounded-full px-2 py-0.5">
-              CURRENT
-            </span>
-          )}
-          {isLocked && (
-            <span className="flex items-center gap-1 font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/50 uppercase">
-              <Lock className="w-3 h-3" /> LOCKED
-            </span>
-          )}
+          {isCurrent && <span className="bg-awrose-core text-paper font-body font-bold text-[9px] tracking-eyebrow uppercase rounded-full px-2 py-0.5">CURRENT</span>}
+          {isLocked && <span className="flex items-center gap-1 font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/50 uppercase"><Lock className="w-3 h-3" /> LOCKED</span>}
         </div>
-
         {(() => {
           const quote = PHASE_QUOTES[getPhaseKey(section)] || section.description || "";
-          return quote ? (
-            <p className={`font-display italic text-xl md:text-2xl leading-snug mb-5 ${quoteOpacity}`}>
-              &ldquo;{quote}&rdquo;
-            </p>
-          ) : null;
+          return quote ? <p className={`font-display italic text-xl md:text-2xl leading-snug mb-5 ${quoteOpacity}`}>&ldquo;{quote}&rdquo;</p> : null;
         })()}
-
-        {/* Modules: show for current and completed phases */}
         {!isLocked && (
           <div>
             {mods.map((mod, mi) => {
-              // Module is locked if the previous module in this phase is not complete
-              // First module (mi === 0) is never locked within an accessible phase
               const isModLocked = mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap);
-
-              // BUG FIX: A module is "accessible" (lessons clickable, not showing LOCKED)
-              // when the phase is not locked AND the module itself is not locked.
-              // Previously this was: isCurrent && mod.id === currentModuleId
-              // which meant only ONE module (the last-accessed one) was ever accessible,
-              // and for new users with no last_module_id, NOTHING was accessible.
               const isModuleAccessible = !isModLocked;
-
-              const isExpanded = expandedModules.has(mod.id);
-
               return (
                 <ModuleItem
-                  key={mod.id}
-                  mod={mod}
-                  pages={pages}
-                  progressMap={progressMap}
-                  modIndex={mi}
-                  isModLocked={isModLocked}
-                  isModuleAccessible={isModuleAccessible}
-                  workbooks={workbooks}
-                  isExpanded={isExpanded}
-                  onToggle={toggleModule}
-                  courseId={courseId}
+                  key={mod.id} mod={mod} pages={pages} progressMap={progressMap} modIndex={mi}
+                  isModLocked={isModLocked} isModuleAccessible={isModuleAccessible} workbooks={workbooks}
+                  isExpanded={expandedModules.has(mod.id)} onToggle={toggleModule} courseId={courseId}
                 />
               );
             })}
@@ -478,108 +362,55 @@ export default function CourseDetail() {
   const { hasAccess, isLoading: accessLoading } = useCourseAccess(course);
 
   useEffect(() => {
-    if (!courseId) {
-      setLoading(false);
-      return;
-    }
-
+    if (!courseId) { setLoading(false); return; }
     const loadData = async () => {
       try {
         const me = await base44.auth.me();
         const email = me?.email?.toLowerCase();
-
-        // Course
         const allCourses = await base44.entities.Course.list();
-        const courseData = allCourses.find((c) => c.id === courseId);
-        setCourse(courseData);
+        setCourse(allCourses.find((c) => c.id === courseId));
 
-        // Sections sorted by order
         const rawSections = await base44.entities.CourseSection.filter({ courseId });
-        const sortedSections = rawSections.sort((a, b) => {
-          const ao = a.order ?? 9999, bo = b.order ?? 9999;
-          if (ao !== bo) return ao - bo;
-          return (a.created_date || "").localeCompare(b.created_date || "");
-        });
-        setSections(sortedSections);
+        setSections(rawSections.sort((a, b) => { const ao = a.order ?? 9999, bo = b.order ?? 9999; return ao !== bo ? ao - bo : (a.created_date || "").localeCompare(b.created_date || ""); }));
 
-        // Modules sorted by order
         const rawModules = await base44.entities.CourseModule.filter({ courseId });
-        const sortedModules = rawModules.sort((a, b) => {
-          const ao = a.order ?? 9999, bo = b.order ?? 9999;
-          if (ao !== bo) return ao - bo;
-          return (a.created_date || "").localeCompare(b.created_date || "");
-        });
-        setModules(sortedModules);
+        setModules(rawModules.sort((a, b) => { const ao = a.order ?? 9999, bo = b.order ?? 9999; return ao !== bo ? ao - bo : (a.created_date || "").localeCompare(b.created_date || ""); }));
 
-        // Pages sorted by order
         const rawPages = await base44.entities.CoursePage.filter({ courseId });
-        const sortedPages = rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-        setPages(sortedPages);
+        setPages(rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
-        // Progress for this user
         if (email) {
           const prog = await base44.entities.CourseProgress.filter({ courseId, created_by: email });
           setProgress(prog);
-
-          // Member profile
           const profileArr = await base44.entities.MemberProfile.filter({ user_id: me.id }, "-created_date", 1);
           setProfile(profileArr[0] ?? null);
         }
 
-        // Workbooks for this course
         const wb = await base44.entities.Workbook.filter({ course_id: courseId });
         setWorkbooks(wb);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
+      } catch (e) { console.error(e); } finally { setLoading(false); }
     };
-
     loadData();
 
-    // Realtime subscriptions for live admin reordering
     const unsubSections = base44.entities.CourseSection.subscribe((event) => {
       if (event.data?.courseId === courseId) {
-        base44.entities.CourseSection.filter({ courseId }).then((s) => {
-          setSections(s.sort((a, b) => {
-            const ao = a.order ?? 9999, bo = b.order ?? 9999;
-            return ao !== bo ? ao - bo : (a.created_date || "").localeCompare(b.created_date || "");
-          }));
-        });
+        base44.entities.CourseSection.filter({ courseId }).then((s) => setSections(s.sort((a, b) => { const ao = a.order ?? 9999, bo = b.order ?? 9999; return ao !== bo ? ao - bo : (a.created_date || "").localeCompare(b.created_date || ""); })));
       }
     });
-
     const unsubModules = base44.entities.CourseModule.subscribe((event) => {
       if (event.data?.courseId === courseId) {
-        base44.entities.CourseModule.filter({ courseId }).then((m) => {
-          setModules(m.sort((a, b) => {
-            const ao = a.order ?? 9999, bo = b.order ?? 9999;
-            return ao !== bo ? ao - bo : (a.created_date || "").localeCompare(b.created_date || "");
-          }));
-        });
+        base44.entities.CourseModule.filter({ courseId }).then((m) => setModules(m.sort((a, b) => { const ao = a.order ?? 9999, bo = b.order ?? 9999; return ao !== bo ? ao - bo : (a.created_date || "").localeCompare(b.created_date || ""); })));
       }
     });
-
-    return () => {
-      unsubSections();
-      unsubModules();
-    };
+    return () => { unsubSections(); unsubModules(); };
   }, [courseId]);
 
-  // Build a flat progress map: pageId -> status
   const progressMap = {};
-  progress.forEach((p) => {
-    if (p.pageId) progressMap[p.pageId] = p.status;
-  });
+  progress.forEach((p) => { if (p.pageId) progressMap[p.pageId] = p.status; });
 
-  // Identify Welcome section (order === 0 or titled "Welcome")
-  const welcomeSection = sections.find(
-    (s) => s.order === 0 || s.title?.toLowerCase().includes("welcome")
-  );
+  const welcomeSection = sections.find((s) => s.order === 0 || s.title?.toLowerCase().includes("welcome"));
   const nonWelcomeSections = sections.filter((s) => s.id !== welcomeSection?.id);
 
-  // Overall progress
   const totalPages = pages.length;
   const completedPages = pages.filter((p) => progressMap[p.id] === "completed").length;
   const overallPct = totalPages > 0 ? Math.round((completedPages / totalPages) * 100) : 0;
@@ -606,111 +437,46 @@ export default function CourseDetail() {
   };
 
   const handleResume = () => {
-    if (profile?.last_module_id) {
-      navigate(createPageUrl("ModulePlayer") + `?moduleId=${profile.last_module_id}`);
-    }
+    if (profile?.last_module_id) navigate(createPageUrl("ModulePlayer") + `?moduleId=${profile.last_module_id}`);
   };
 
   return (
     <div className="min-h-screen bg-off-white px-6 md:px-10 py-8">
       <div className="max-w-4xl mx-auto">
-
-        {/* Back link */}
-        <Link
-          to={createPageUrl("Classroom")}
-          className="inline-flex items-center gap-2 font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase mb-6 transition-colors"
-        >
+        <Link to={createPageUrl("Classroom")} className="inline-flex items-center gap-2 font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase mb-6 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> CLASSROOM
         </Link>
 
-        {/* Hero Banner */}
-        <HeroBanner
-          course={course}
-          sections={nonWelcomeSections}
-          modules={modules}
-          hasAccess={hasAccess}
-          onResume={handleResume}
-          onBegin={handleBegin}
-          resumeModuleId={profile?.last_module_id}
-        />
+        <HeroBanner course={course} sections={nonWelcomeSections} modules={modules} hasAccess={hasAccess} onResume={handleResume} onBegin={handleBegin} resumeModuleId={profile?.last_module_id} />
 
-        {/* Access gate for non-access users */}
         {!hasAccess && !previewMode && (
-          <div className="mb-8">
-            <CourseAccessGate course={course} onPreview={() => setPreviewMode(true)} />
-          </div>
+          <div className="mb-8"><CourseAccessGate course={course} onPreview={() => setPreviewMode(true)} /></div>
         )}
 
-        {/* Resume Bar */}
-        {hasAccess && (
-          <ResumeBar
-            profile={profile}
-            modules={modules}
-            sections={sections}
-            courses={[course]}
-          />
-        )}
+        {hasAccess && <ResumeBar profile={profile} modules={modules} sections={sections} courses={[course]} />}
 
-        {/* Welcome Section */}
-        {welcomeSection && (
-          <WelcomeSection
-            welcomeSection={welcomeSection}
-            modules={modules}
-            pages={pages}
-            hasAccess={hasAccess || previewMode}
-          />
-        )}
+        {welcomeSection && <WelcomeSection welcomeSection={welcomeSection} modules={modules} pages={pages} hasAccess={hasAccess || previewMode} />}
 
-        {/* Phase Journey */}
         {(() => {
-          // Determine currentPhaseIndex:
-          // If last_module_id is set, find which phase section that module belongs to.
-          // If not set (brand new user), default to index 0 (Awareness).
           let currentPhaseIndex = 0;
           if (profile?.last_module_id) {
             const lastMod = modules.find((m) => m.id === profile.last_module_id);
-            if (lastMod) {
-              const idx = nonWelcomeSections.findIndex((s) => s.id === lastMod.sectionId);
-              if (idx !== -1) currentPhaseIndex = idx;
-            }
+            if (lastMod) { const idx = nonWelcomeSections.findIndex((s) => s.id === lastMod.sectionId); if (idx !== -1) currentPhaseIndex = idx; }
           }
-
           return (
             <div className="space-y-2">
               {nonWelcomeSections.map((section, idx) => {
                 const sectionMods = modules.filter((m) => m.sectionId === section.id);
-                return (
-                  <PhaseBlock
-                    key={section.id}
-                    section={section}
-                    sectionIndex={idx}
-                    mods={sectionMods}
-                    pages={pages}
-                    progressMap={progressMap}
-                    currentModuleId={profile?.last_module_id}
-                    workbooks={workbooks}
-                    currentPhaseIndex={currentPhaseIndex}
-                    courseId={courseId}
-                  />
-                );
+                return <PhaseBlock key={section.id} section={section} sectionIndex={idx} mods={sectionMods} pages={pages} progressMap={progressMap} currentModuleId={profile?.last_module_id} workbooks={workbooks} currentPhaseIndex={currentPhaseIndex} courseId={courseId} />;
               })}
             </div>
           );
         })()}
 
-        {/* Footer */}
         <div className="mt-16 pt-8 border-t border-awburg-core/8 flex items-center justify-between">
-          <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase">
-            {course.title} · {overallPct}%
-          </p>
-          <Link
-            to={createPageUrl("Classroom")}
-            className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase transition-colors"
-          >
-            ALL COURSES →
-          </Link>
+          <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase">{course.title} · {overallPct}%</p>
+          <Link to={createPageUrl("Classroom")} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase transition-colors">ALL COURSES →</Link>
         </div>
-
       </div>
     </div>
   );
