@@ -243,7 +243,7 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isModuleAc
           {modPages.length === 0 && <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>}
           {workbook && (
             isModuleAccessible ? (
-              <div onClick={() => navigate(createPageUrl("WorkbookViewer") + `?id=${workbook.id}`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate(createPageUrl("WorkbookViewer") + `?id=${workbook.id}`); }} className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors">
+              <div onClick={() => navigate(`/WorkbookViewer?id=${workbook.id}`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate(`/WorkbookViewer?id=${workbook.id}`); }} className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors">
                 <BookOpen className="w-4 h-4 text-awrose-core flex-shrink-0" />
                 <span className="font-body text-sm text-awburg-core flex-1">{workbook.title}</span>
                 <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">WORKBOOK</span>
