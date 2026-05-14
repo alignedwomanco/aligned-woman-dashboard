@@ -103,9 +103,7 @@ export default function ModulePlayer() {
     queryFn: async () => {
       const mods = await base44.entities.CourseModule.filter({ courseId });
       return mods.sort((a, b) => {
-        if (a.sectionId !== b.sectionId) {
-          return (a.sectionId || "").localeCompare(b.sectionId || "");
-        }
+        if (a.sectionId !== b.sectionId) return (a.sectionId || "").localeCompare(b.sectionId || "");
         const ao = a.order ?? 9999, bo = b.order ?? 9999;
         return ao !== bo ? ao - bo : (a.created_date || "").localeCompare(b.created_date || "");
       });
@@ -133,7 +131,7 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
-  // Find the workbook for the current module (matched by expertId)
+  // Find workbook for the current module (matched by expertId)
   const moduleWorkbook = module?.expertId
     ? workbooks.find(w => w.expert_id === module.expertId && w.course_id === courseId)
     : null;
@@ -141,7 +139,6 @@ export default function ModulePlayer() {
   // Find the next module in section order
   const getNextModule = () => {
     if (!module || allSections.length === 0) return null;
-    // Build a flat ordered list of modules following section order
     const orderedModules = [];
     for (const sec of allSections) {
       const secMods = allCourseModules
@@ -188,9 +185,16 @@ export default function ModulePlayer() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["courseProgress"] }); },
   });
 
+  // FIX: Reset selected page when switching to a different module
+  // Without this, stale content from the previous module is displayed
+  useEffect(() => {
+    setSelectedPage(null);
+  }, [moduleId]);
+
+  // Set first page as selected when pages load (or after reset above)
   useEffect(() => {
     if (pages.length > 0 && !selectedPage) { setSelectedPage(pages[0]); }
-  }, [pages]);
+  }, [pages, selectedPage]);
 
   const handleTogglePageComplete = async () => {
     const pageProgress = moduleProgress.find(p => p.pageId === selectedPage.id);
@@ -267,12 +271,11 @@ export default function ModulePlayer() {
     );
   }
 
-  // Build the end-of-module action
+  // End-of-module action: workbook, next module, or back to course
   const renderEndOfModuleAction = () => {
     const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
     const nextPage = pages[currentIndex + 1];
 
-    // Not on last page: show "Next Lesson"
     if (nextPage) {
       return (
         <Button className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white" onClick={() => setSelectedPage(nextPage)}>
@@ -281,14 +284,12 @@ export default function ModulePlayer() {
       );
     }
 
-    // Last page of module: show workbook or next module
     const courseDetailUrl = courseId
       ? `${createPageUrl("CourseDetail")}?courseId=${courseId}`
       : createPageUrl("Classroom");
 
     return (
       <div className="space-y-3">
-        {/* Primary: Workbook (if exists) */}
         {moduleWorkbook && (
           <Button
             className="w-full bg-[#6B1B3D] hover:bg-[#4A1228] text-white gap-2"
@@ -298,8 +299,6 @@ export default function ModulePlayer() {
             Continue to Workbook
           </Button>
         )}
-
-        {/* Secondary: Next module */}
         {nextModule && (
           <Button
             className={`w-full gap-2 ${moduleWorkbook ? "bg-white text-[#6B1B3D] border border-[#6B1B3D] hover:bg-pink-50" : "bg-[#6B1B3D] hover:bg-[#4A1228] text-white"}`}
@@ -308,13 +307,7 @@ export default function ModulePlayer() {
             {moduleWorkbook ? "Skip to Next Module →" : "Next Module →"}
           </Button>
         )}
-
-        {/* Fallback: Back to course overview */}
-        <Button
-          variant="ghost"
-          className="w-full text-[#6B1B3D] hover:bg-pink-50"
-          onClick={() => navigate(courseDetailUrl)}
-        >
+        <Button variant="ghost" className="w-full text-[#6B1B3D] hover:bg-pink-50" onClick={() => navigate(courseDetailUrl)}>
           Back to Course Overview
         </Button>
       </div>
@@ -423,7 +416,6 @@ export default function ModulePlayer() {
 
           {/* Main Content */}
           <div className="space-y-6">
-            {/* Video Player */}
             <motion.div key={selectedPage.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="overflow-hidden">
                 <div style={{ paddingTop: "56.25%", position: "relative" }} className="bg-gray-900">
@@ -451,7 +443,6 @@ export default function ModulePlayer() {
               </Card>
             </motion.div>
 
-            {/* Lesson Content */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -473,14 +464,12 @@ export default function ModulePlayer() {
               </CardContent>
             </Card>
 
-            {/* End of module actions */}
             <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
               <CardContent className="p-6">
                 {renderEndOfModuleAction()}
               </CardContent>
             </Card>
 
-            {/* Comments */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg"><MessageCircle className="w-5 h-5" />Questions & Comments</CardTitle>
