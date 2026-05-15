@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { getDashboardState } from "@/lib/dashboardState";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
@@ -11,6 +12,8 @@ import StateB from "@/components/dashboard-v2/states/StateB";
 import StateANoQuiz from "@/components/dashboard-v2/states/StateANoQuiz";
 import StateAWithQuiz from "@/components/dashboard-v2/states/StateAWithQuiz";
 import StateC from "@/components/dashboard-v2/states/StateC";
+
+const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
 
 function formatJoinedDate(timestamp) {
   if (!timestamp) return "";
@@ -91,9 +94,47 @@ export default function Dashboard() {
     load();
   }, []);
 
-  // Side effect: when state_b is rendered, flip has_seen_welcome to true.
-  // Runs after render so the welcome UI is visible to the user before the flag
-  // changes. Does not block render or re-trigger if it fails.
+  // Workbook queries at Dashboard level so ALL states can use them
+  const { data: workbooks = [] } = useQuery({
+    queryKey: ["dashboard-workbooks"],
+    queryFn: () => base44.entities.Workbook.filter({ course_id: BLUEPRINT_COURSE_ID, status: "published" }),
+    initialData: [],
+  });
+
+  const { data: workbookResponses = [] } = useQuery({
+    queryKey: ["dashboard-workbook-responses"],
+    queryFn: () => base44.entities.WorkbookResponse.filter({}),
+    initialData: [],
+  });
+
+  const { data: allExperts = [] } = useQuery({
+    queryKey: ["dashboard-experts"],
+    queryFn: () => base44.entities.Expert.filter({}),
+    initialData: [],
+  });
+
+  // Build workbook data with real completion status
+  const workbookData = workbooks.map(wb => {
+    const response = workbookResponses.find(r => r.workbook_id === wb.id);
+    const expert = wb.expert_id ? allExperts.find(e => e.id === wb.expert_id) : null;
+
+    let wbStatus = "not_started";
+    if (response?.is_complete) {
+      wbStatus = "completed";
+    } else if (response) {
+      const hasAnswers = response.answers && Object.keys(response.answers).length > 0;
+      wbStatus = hasAnswers ? "in_progress" : "not_started";
+    }
+
+    return {
+      id: wb.id,
+      title: wb.title,
+      expert: expert?.name || "",
+      status: wbStatus,
+    };
+  });
+
+  // Side effect: flip has_seen_welcome when state_b renders
   useEffect(() => {
     if (status !== "ready") return;
     if (data.state !== "state_b") return;
@@ -172,7 +213,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <section className="lg:col-span-8 order-1">
               {StateComponent ? (
-                <StateComponent user={user} profile={profile} />
+                <StateComponent user={user} profile={profile} workbookData={workbookData} />
               ) : (
                 <DashboardError
                   message={`Unrecognised dashboard state: ${state}`}
