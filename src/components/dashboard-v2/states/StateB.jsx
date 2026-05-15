@@ -8,7 +8,7 @@ import AlivePhasePeek from "@/components/dashboard-v2/AlivePhasePeek";
 
 const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
 
-export default function StateB({ user, profile }) {
+export default function StateB({ user, profile, workbookData = [] }) {
   return (
     <div className="space-y-6">
       <section className="bg-awrose-pale rounded-xl p-8 md:p-10">
@@ -45,11 +45,7 @@ export default function StateB({ user, profile }) {
       <AlivePhasePeek />
 
       <WorkbooksSection
-        workbooks={[
-          { title: "Hormones & Stress Audit", expert: "Dr Shirley Du Plessis", status: "not_started" },
-          { title: "Nutrition, Energy & Metabolic Health", expert: "Danielle Venter", status: "not_started" },
-          { title: "Women's Body Literacy", expert: "Dr Candice Morrison", status: "not_started" },
-        ]}
+        workbooks={workbookData}
         phaseIndex={1}
       />
 
