@@ -90,10 +90,18 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
-  const { data: pages = [] } = useQuery({
+  const { data: rawPages = [] } = useQuery({
     queryKey: ["coursePages", moduleId],
-    queryFn: () => base44.entities.CoursePage.filter({ moduleId }, "order"),
+    queryFn: () => base44.entities.CoursePage.filter({ moduleId }),
     enabled: !!moduleId,
+  });
+
+  // Sort pages client-side using the same logic as the admin Course Builder
+  const pages = [...rawPages].sort((a, b) => {
+    const aOrder = a.order ?? Infinity;
+    const bOrder = b.order ?? Infinity;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return (a.created_date || "").localeCompare(b.created_date || "");
   });
 
   const { data: moduleProgress = [] } = useQuery({
