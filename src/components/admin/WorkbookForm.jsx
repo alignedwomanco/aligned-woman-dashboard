@@ -8,7 +8,184 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Upload, X, Eye } from "lucide-react";
+import { ArrowLeft, Upload, X, Eye, Image, Plus, Trash2, Copy, Check } from "lucide-react";
+
+/* ------------------------------------------------------------------ */
+/*  Workbook Assets sub-component                                     */
+/* ------------------------------------------------------------------ */
+
+function WorkbookAssets({ assets, onChange }) {
+  const [uploading, setUploading] = useState(null); // index being uploaded
+  const [copiedKey, setCopiedKey] = useState(null);
+
+  const nextKey = () => {
+    if (!assets.length) return "asset_01";
+    const nums = assets.map((a) => {
+      const m = a.key.match(/asset_(\d+)/);
+      return m ? parseInt(m[1], 10) : 0;
+    });
+    const next = Math.max(...nums) + 1;
+    return `asset_${String(next).padStart(2, "0")}`;
+  };
+
+  const handleUpload = async (e, index) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(index);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const updated = [...assets];
+      updated[index] = { ...updated[index], url: file_url };
+      onChange(updated);
+    } catch (err) {
+      console.error("Asset upload failed:", err);
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const addRow = () => {
+    onChange([...assets, { key: nextKey(), label: "", url: "" }]);
+  };
+
+  const removeRow = (index) => {
+    onChange(assets.filter((_, i) => i !== index));
+  };
+
+  const updateLabel = (index, label) => {
+    const updated = [...assets];
+    updated[index] = { ...updated[index], label };
+    onChange(updated);
+  };
+
+  const copyKey = (key) => {
+    navigator.clipboard.writeText(`"asset_key": "${key}"`).then(() => {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    });
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <Label className="text-sm font-semibold">Workbook Assets</Label>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Upload images, then reference them in the schema using <code className="bg-gray-100 px-1 py-0.5 rounded text-[11px]">asset_key</code>
+          </p>
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={addRow}>
+          <Plus className="w-3 h-3 mr-1" /> Add Image
+        </Button>
+      </div>
+
+      {assets.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+          <Image className="w-8 h-8 text-gray-300 mb-2" />
+          <p className="text-sm text-gray-400">No assets yet. Click "Add Image" to upload diagrams and figures.</p>
+        </div>
+      )}
+
+      {assets.length > 0 && (
+        <div className="space-y-3">
+          {assets.map((asset, idx) => (
+            <div
+              key={idx}
+              className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50/60"
+            >
+              {/* Thumbnail / upload area */}
+              <div className="flex-shrink-0">
+                {asset.url ? (
+                  <div className="relative group">
+                    <img
+                      src={asset.url}
+                      alt={asset.label || asset.key}
+                      className="w-20 h-20 rounded-lg object-cover border border-gray-200"
+                    />
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                      <span className="text-[10px] font-semibold text-white tracking-wide uppercase">Replace</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleUpload(e, idx)}
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 bg-white cursor-pointer hover:border-gray-400 transition-colors">
+                    {uploading === idx ? (
+                      <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-gray-400 mb-1" />
+                        <span className="text-[10px] text-gray-400 font-medium">Upload</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleUpload(e, idx)}
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Key + label */}
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex items-center gap-2">
+                  <code className="text-xs font-mono bg-white border border-gray-200 rounded px-2 py-1 text-[#6E1D40] select-all flex-shrink-0">
+                    {asset.key}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => copyKey(asset.key)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                    title="Copy schema reference"
+                  >
+                    {copiedKey === asset.key ? (
+                      <Check className="w-3.5 h-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                </div>
+                <Input
+                  value={asset.label}
+                  onChange={(e) => updateLabel(idx, e.target.value)}
+                  placeholder="Label, e.g. Reticular Activating System diagram"
+                  className="text-sm h-8"
+                />
+              </div>
+
+              {/* Delete */}
+              <button
+                type="button"
+                onClick={() => removeRow(idx)}
+                className="flex-shrink-0 mt-1 p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {assets.length > 0 && (
+        <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
+          To display an image in your workbook, add a <code className="bg-gray-100 px-1 py-0.5 rounded">content_block</code> field
+          to the schema with <code className="bg-gray-100 px-1 py-0.5 rounded">"asset_key": "{assets[0]?.key}"</code>. Click the copy icon next to any key to copy the reference.
+        </p>
+      )}
+    </div>
+  );
+}
+
+
+/* ------------------------------------------------------------------ */
+/*  Main form                                                         */
+/* ------------------------------------------------------------------ */
 
 export default function WorkbookForm({ workbook, onBack }) {
   const isNew = !workbook;
@@ -46,19 +223,27 @@ export default function WorkbookForm({ workbook, onBack }) {
     status: "draft",
   });
 
-  const [schemaPreview, setSchemaPreview] = useState(null); // { ok, message }
+  // Assets managed separately from the schema text, merged on save
+  const [assets, setAssets] = useState([]);
+
+  const [schemaPreview, setSchemaPreview] = useState(null);
   const [saveError, setSaveError] = useState(null);
   const [savedId, setSavedId] = useState(workbook?.id || null);
 
   // Init form from workbook or defaults
   useEffect(() => {
     if (workbook) {
+      // Extract assets from the stored schema if present
+      const storedAssets = workbook.schema?.assets || [];
+
       setForm({
         title: workbook.title || "",
         subtitle: workbook.subtitle || "",
         expert_id: workbook.expert_id || "",
         course_id: workbook.course_id || "",
-        schema: workbook.schema ? JSON.stringify(workbook.schema, null, 2) : "{}",
+        schema: workbook.schema
+          ? JSON.stringify(stripAssets(workbook.schema), null, 2)
+          : "{}",
         blank_pdf_url: workbook.blank_pdf_url || "",
         cover_image_url: workbook.cover_image_url || "",
         intro_text: workbook.intro_text || "",
@@ -66,10 +251,19 @@ export default function WorkbookForm({ workbook, onBack }) {
         order: workbook.order ?? 0,
         status: workbook.status || "draft",
       });
+
+      setAssets(storedAssets);
     } else {
       setForm((f) => ({ ...f, order: nextOrder }));
     }
   }, [workbook, nextOrder]);
+
+  // Strip the "assets" key from a schema object for display in the text editor
+  function stripAssets(schema) {
+    if (!schema || typeof schema !== "object") return schema;
+    const { assets: _removed, ...rest } = schema;
+    return rest;
+  }
 
   const set = (key, val) => {
     setForm((f) => ({ ...f, [key]: val }));
@@ -88,10 +282,24 @@ export default function WorkbookForm({ workbook, onBack }) {
       const sections = Array.isArray(obj.sections) ? obj.sections : [];
       const fields = sections.flatMap((s) => (Array.isArray(s.fields) ? s.fields : []));
       const types = [...new Set(fields.map((f) => f.type).filter(Boolean))];
-      return {
-        ok: true,
-        message: `Schema parsed. Sections: ${sections.length}. Fields: ${fields.length}. Field types referenced: ${types.length ? types.join(", ") : "none"}.`,
-      };
+
+      // Count content_block fields referencing assets
+      const assetRefs = fields.filter(
+        (f) => f.type === "content_block" && f.asset_key
+      );
+      const unresolvedRefs = assetRefs.filter(
+        (f) => !assets.find((a) => a.key === f.asset_key)
+      );
+
+      let message = `Schema parsed. Sections: ${sections.length}. Fields: ${fields.length}. Field types: ${types.length ? types.join(", ") : "none"}.`;
+      if (assetRefs.length) {
+        message += ` Asset references: ${assetRefs.length}.`;
+      }
+      if (unresolvedRefs.length) {
+        message += ` WARNING: ${unresolvedRefs.length} asset reference(s) have no matching upload (${unresolvedRefs.map((f) => f.asset_key).join(", ")}).`;
+        return { ok: true, message, warning: true };
+      }
+      return { ok: true, message };
     } catch (e) {
       let msg = e.message || "Unknown parse error";
       return { ok: false, message: `Invalid JSON: ${msg}` };
@@ -104,8 +312,6 @@ export default function WorkbookForm({ workbook, onBack }) {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["adminWorkbooks"] });
       setSavedId(result.id);
-      // Navigate to edit view
-      setForm((f) => ({ ...f })); // keep state
     },
   });
 
@@ -128,7 +334,18 @@ export default function WorkbookForm({ workbook, onBack }) {
     }
 
     let schemaObj;
-    try { schemaObj = JSON.parse(form.schema); } catch { return; }
+    try {
+      schemaObj = JSON.parse(form.schema);
+    } catch {
+      return;
+    }
+
+    // Merge assets into the schema object before saving
+    if (assets.length > 0) {
+      schemaObj.assets = assets.filter((a) => a.url); // only save assets that have a URL
+    } else {
+      delete schemaObj.assets;
+    }
 
     // Uniqueness constraint: max one published per expert+course
     if (form.status === "published") {
@@ -258,14 +475,23 @@ export default function WorkbookForm({ workbook, onBack }) {
           {schemaPreview && (
             <div
               className={`mt-2 px-4 py-3 rounded-lg text-sm ${
-                schemaPreview.ok
+                schemaPreview.ok && !schemaPreview.warning
                   ? "bg-green-50 text-green-800 border border-green-200"
+                  : schemaPreview.ok && schemaPreview.warning
+                  ? "bg-yellow-50 text-yellow-800 border border-yellow-300"
                   : "bg-red-50 text-red-700 border-2 border-red-400"
               }`}
             >
               {schemaPreview.message}
             </div>
           )}
+        </div>
+
+        {/* ============================================================ */}
+        {/*  WORKBOOK ASSETS - NEW SECTION                               */}
+        {/* ============================================================ */}
+        <div className="border-t border-gray-100 pt-5">
+          <WorkbookAssets assets={assets} onChange={setAssets} />
         </div>
 
         {/* Blank PDF */}
@@ -319,7 +545,7 @@ export default function WorkbookForm({ workbook, onBack }) {
         {/* Intro text */}
         <div>
           <Label>Intro text</Label>
-          <Textarea value={form.intro_text} onChange={(e) => set("intro_text", e.target.value)} placeholder="How to use this workbook…" className="min-h-[80px]" />
+          <Textarea value={form.intro_text} onChange={(e) => set("intro_text", e.target.value)} placeholder="How to use this workbook..." className="min-h-[80px]" />
         </div>
 
         {/* Closing text */}
@@ -360,7 +586,7 @@ export default function WorkbookForm({ workbook, onBack }) {
           className="w-full text-white"
           style={{ backgroundColor: "#6E1D40" }}
         >
-          {isSaving ? "Saving…" : savedId ? "Save Changes" : "Create Workbook"}
+          {isSaving ? "Saving..." : savedId ? "Save Changes" : "Create Workbook"}
         </Button>
       </div>
     </div>
