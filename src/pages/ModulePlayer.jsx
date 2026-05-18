@@ -43,6 +43,12 @@ export default function ModulePlayer() {
       const me = await base44.auth.me();
       const email = me?.email?.toLowerCase();
       const adminUser = ['owner', 'admin', 'master_admin'].includes(me?.role);
+      // Admin/owner bypass: always grant access
+      if (adminUser) {
+        setHasPaidAccess(true);
+        setAccessChecked(true);
+        return;
+      }
       if (email) {
         const enrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, courseId, isPaid: true });
         if (enrollments.length > 0) { setHasPaidAccess(true); setAccessChecked(true); return; }
