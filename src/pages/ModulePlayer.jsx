@@ -388,7 +388,7 @@ export default function ModulePlayer() {
     <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
       {/* Header */}
       <div className="bg-white border-b sticky top-20 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 py-4 sm:py-6">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <button onClick={() => navigate(-1)} className="flex-shrink-0">
@@ -418,8 +418,8 @@ export default function ModulePlayer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 overflow-hidden">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 py-6 sm:py-8 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 overflow-hidden">
           {/* Left Sidebar - Pages List & Resources */}
           <div className="space-y-6">
             <Card>
@@ -509,7 +509,7 @@ export default function ModulePlayer() {
           </div>
 
           {/* Main Content */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Video Player */}
             <motion.div
               key={selectedPage.id}
