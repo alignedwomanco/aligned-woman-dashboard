@@ -133,6 +133,23 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
+  // All pages across all course modules (to identify which modules have content)
+  const { data: allCoursePages = [] } = useQuery({
+    queryKey: ["allCoursePages", courseId],
+    queryFn: async () => {
+      const results = await Promise.all(
+        allCourseModules.map(m => base44.entities.CoursePage.filter({ moduleId: m.id }))
+      );
+      return results.flat();
+    },
+    enabled: allCourseModules.length > 0,
+  });
+
+  // Reset selectedPage when navigating to a different module
+  useEffect(() => {
+    setSelectedPage(null);
+  }, [moduleId]);
+
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
       // Find the module-level progress record (one without a pageId)
@@ -350,7 +367,11 @@ export default function ModulePlayer() {
       })
   );
   const currentModuleIndex = sortedCourseModules.findIndex(m => m.id === moduleId);
-  const nextModule = sortedCourseModules[currentModuleIndex + 1] || null;
+  // Skip modules that have no pages (e.g. placeholder "Assessment" modules)
+  const modulesWithPages = new Set(allCoursePages.map(p => p.moduleId));
+  const nextModule = sortedCourseModules
+    .slice(currentModuleIndex + 1)
+    .find(m => modulesWithPages.has(m.id)) || null;
 
   // Find the first workbook for this course
   const courseWorkbook = workbooks.length > 0 ? workbooks[0] : null;
