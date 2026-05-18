@@ -112,6 +112,27 @@ export default function ModulePlayer() {
     enabled: !!moduleId,
   });
 
+  // All modules in this course (for next module navigation)
+  const { data: allCourseModules = [] } = useQuery({
+    queryKey: ["allCourseModules", courseId],
+    queryFn: () => base44.entities.CourseModule.filter({ courseId }),
+    enabled: !!courseId,
+  });
+
+  // All sections in this course (for cross-section ordering)
+  const { data: allCourseSections = [] } = useQuery({
+    queryKey: ["allCourseSections", courseId],
+    queryFn: () => base44.entities.CourseSection.filter({ courseId }),
+    enabled: !!courseId,
+  });
+
+  // Workbooks for this course
+  const { data: workbooks = [] } = useQuery({
+    queryKey: ["courseWorkbooks", courseId],
+    queryFn: () => base44.entities.Workbook.filter({ courseId }),
+    enabled: !!courseId,
+  });
+
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
       // Find the module-level progress record (one without a pageId)
@@ -310,6 +331,29 @@ export default function ModulePlayer() {
 
   // Helper: check if the currently selected page is completed
   const isCurrentPageComplete = isPageCompleted(selectedPage?.id);
+
+  // Compute the next module in the course (cross-section ordering)
+  const sortedSections = [...allCourseSections].sort((a, b) => {
+    const aOrder = a.order ?? Infinity;
+    const bOrder = b.order ?? Infinity;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return (a.created_date || "").localeCompare(b.created_date || "");
+  });
+  const sortedCourseModules = sortedSections.flatMap(section =>
+    [...allCourseModules]
+      .filter(m => m.sectionId === section.id)
+      .sort((a, b) => {
+        const aOrd = a.order ?? Infinity;
+        const bOrd = b.order ?? Infinity;
+        if (aOrd !== bOrd) return aOrd - bOrd;
+        return (a.created_date || "").localeCompare(b.created_date || "");
+      })
+  );
+  const currentModuleIndex = sortedCourseModules.findIndex(m => m.id === moduleId);
+  const nextModule = sortedCourseModules[currentModuleIndex + 1] || null;
+
+  // Find the first workbook for this course
+  const courseWorkbook = workbooks.length > 0 ? workbooks[0] : null;
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
@@ -568,13 +612,13 @@ export default function ModulePlayer() {
             {/* Next/Complete Actions */}
             <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
               <CardContent className="p-6">
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {(() => {
                     const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
                     const nextPage = pages[currentIndex + 1];
 
+                    // Not the last page: show Next Lesson
                     if (nextPage) {
-                      // CHANGE 3a: Disable Next Lesson until current page is marked complete
                       return (
                         <Button
                           className={`w-full ${
@@ -594,23 +638,56 @@ export default function ModulePlayer() {
                       );
                     }
 
-                    // Last page: CHANGE 3b: Disable until ALL pages are complete
+                    // Last page: show Workbook + Next Module + Back to Classroom
                     return (
-                      <Button
-                        className={`w-full ${
-                          allPagesCompleted
-                            ? "bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white"
-                            : "bg-gradient-to-r from-[#6B1B3D] to-[#8B2E4D] text-white opacity-50 cursor-not-allowed"
-                        }`}
-                        onClick={() => {
-                          if (allPagesCompleted) {
-                            navigate(createPageUrl("Classroom"));
-                          }
-                        }}
-                        disabled={!allPagesCompleted}
-                      >
-                        Back to Classroom
-                      </Button>
+                      <>
+                        {/* Continue to Workbook (if one exists for this course) */}
+                        {courseWorkbook && (
+                          <Button
+                            className={`w-full ${
+                              allPagesCompleted
+                                ? "bg-[#943A59] hover:bg-[#7a2e49] text-white"
+                                : "bg-[#943A59] text-white opacity-50 cursor-not-allowed"
+                            }`}
+                            onClick={() => {
+                              if (allPagesCompleted) {
+                                navigate(createPageUrl("WorkbookViewer") + `?workbookId=${courseWorkbook.id}`);
+                              }
+                            }}
+                            disabled={!allPagesCompleted}
+                          >
+                            Continue to Workbook →
+                          </Button>
+                        )}
+
+                        {/* Next Module (if one exists in the course) */}
+                        {nextModule && (
+                          <Button
+                            className={`w-full ${
+                              allPagesCompleted
+                                ? "bg-[#6B1B3D] hover:bg-[#4A1228] text-white"
+                                : "bg-[#6B1B3D] text-white opacity-50 cursor-not-allowed"
+                            }`}
+                            onClick={() => {
+                              if (allPagesCompleted) {
+                                navigate(createPageUrl("ModulePlayer") + `?moduleId=${nextModule.id}&courseId=${courseId}`);
+                              }
+                            }}
+                            disabled={!allPagesCompleted}
+                          >
+                            Next Module: {nextModule.title} →
+                          </Button>
+                        )}
+
+                        {/* Back to Classroom (always available) */}
+                        <Button
+                          variant="outline"
+                          className="w-full border-[#6B1B3D] text-[#6B1B3D] hover:bg-pink-50"
+                          onClick={() => navigate(createPageUrl("Classroom"))}
+                        >
+                          Back to Classroom
+                        </Button>
+                      </>
                     );
                   })()}
                 </div>
