@@ -17,10 +17,12 @@ import { ArrowLeft, Upload, X, Eye, Image, Plus, Trash2, Copy, Check } from "luc
 function WorkbookAssets({ assets, onChange }) {
   const [uploading, setUploading] = useState(null); // index being uploaded
   const [copiedKey, setCopiedKey] = useState(null);
+  const [zoneDragOver, setZoneDragOver] = useState(false);
+  const [rowDragOver, setRowDragOver] = useState(null); // index of row being dragged over
 
-  const nextKey = () => {
-    if (!assets.length) return "asset_01";
-    const nums = assets.map((a) => {
+  const getNextKey = (currentAssets) => {
+    if (!currentAssets.length) return "asset_01";
+    const nums = currentAssets.map((a) => {
       const m = a.key.match(/asset_(\d+)/);
       return m ? parseInt(m[1], 10) : 0;
     });
@@ -28,9 +30,11 @@ function WorkbookAssets({ assets, onChange }) {
     return `asset_${String(next).padStart(2, "0")}`;
   };
 
-  const handleUpload = async (e, index) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const nextKey = () => getNextKey(assets);
+
+  // Upload a File object for a specific asset index
+  const uploadFile = async (file, index) => {
+    if (!file || !file.type.startsWith("image/")) return;
     setUploading(index);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -43,6 +47,59 @@ function WorkbookAssets({ assets, onChange }) {
       setUploading(null);
     }
   };
+
+  const handleUpload = async (e, index) => {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file, index);
+  };
+
+  // Drag-and-drop: bulk drop onto the zone (empty state or bottom area)
+  const handleZoneDrop = async (e) => {
+    e.preventDefault();
+    setZoneDragOver(false);
+    const files = [...(e.dataTransfer.files || [])].filter((f) => f.type.startsWith("image/"));
+    if (!files.length) return;
+
+    // Create new rows for each dropped file and upload them
+    let updatedAssets = [...assets];
+    const newIndices = [];
+
+    for (const file of files) {
+      const key = getNextKey(updatedAssets);
+      const newIndex = updatedAssets.length;
+      updatedAssets.push({ key, label: file.name.replace(/\.[^.]+$/, ""), url: "" });
+      newIndices.push({ index: newIndex, file });
+    }
+
+    onChange(updatedAssets);
+
+    // Upload each file sequentially
+    for (const { index, file } of newIndices) {
+      setUploading(index);
+      try {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        updatedAssets = [...updatedAssets];
+        updatedAssets[index] = { ...updatedAssets[index], url: file_url };
+        onChange(updatedAssets);
+      } catch (err) {
+        console.error("Asset upload failed:", err);
+      }
+    }
+    setUploading(null);
+  };
+
+  // Drag-and-drop: single drop onto an existing row thumbnail
+  const handleRowDrop = async (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setRowDragOver(null);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      uploadFile(file, index);
+    }
+  };
+
+  const preventDefaults = (e) => { e.preventDefault(); e.stopPropagation(); };
 
   const addRow = () => {
     onChange([...assets, { key: nextKey(), label: "", url: "" }]);
@@ -71,7 +128,7 @@ function WorkbookAssets({ assets, onChange }) {
         <div>
           <Label className="text-sm font-semibold">Workbook Assets</Label>
           <p className="text-xs text-gray-400 mt-0.5">
-            Upload images, then reference them in the schema using <code className="bg-gray-100 px-1 py-0.5 rounded text-[11px]">asset_key</code>
+            Upload or drag and drop images, then reference them in the schema using <code className="bg-gray-100 px-1 py-0.5 rounded text-[11px]">asset_key</code>
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={addRow}>
@@ -79,13 +136,59 @@ function WorkbookAssets({ assets, onChange }) {
         </Button>
       </div>
 
+      {/* Empty state / drop zone */}
       {assets.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-          <Image className="w-8 h-8 text-gray-300 mb-2" />
-          <p className="text-sm text-gray-400">No assets yet. Click "Add Image" to upload diagrams and figures.</p>
-        </div>
+        <label
+          className={`flex flex-col items-center justify-center py-10 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+            zoneDragOver
+              ? "border-[#6E1D40] bg-[#F5E8EE]/40"
+              : "border-gray-200 bg-gray-50/50 hover:border-gray-300"
+          }`}
+          onDragOver={(e) => { preventDefaults(e); setZoneDragOver(true); }}
+          onDragEnter={(e) => { preventDefaults(e); setZoneDragOver(true); }}
+          onDragLeave={(e) => { preventDefaults(e); setZoneDragOver(false); }}
+          onDrop={handleZoneDrop}
+        >
+          <Image className={`w-8 h-8 mb-2 transition-colors ${zoneDragOver ? "text-[#6E1D40]" : "text-gray-300"}`} />
+          <p className={`text-sm transition-colors ${zoneDragOver ? "text-[#6E1D40] font-medium" : "text-gray-400"}`}>
+            {zoneDragOver ? "Drop images here" : "Drag and drop images here, or click to browse"}
+          </p>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={async (e) => {
+              const files = [...(e.target.files || [])].filter((f) => f.type.startsWith("image/"));
+              if (!files.length) return;
+              // Simulate a drop
+              const fakeEvent = { preventDefault: () => {}, dataTransfer: { files } };
+              // Reuse zone drop logic
+              let updatedAssets = [...assets];
+              for (const file of files) {
+                const key = getNextKey(updatedAssets);
+                updatedAssets.push({ key, label: file.name.replace(/\.[^.]+$/, ""), url: "" });
+              }
+              onChange(updatedAssets);
+              for (let i = 0; i < files.length; i++) {
+                const idx = assets.length + i;
+                setUploading(idx);
+                try {
+                  const { file_url } = await base44.integrations.Core.UploadFile({ file: files[i] });
+                  updatedAssets = [...updatedAssets];
+                  updatedAssets[idx] = { ...updatedAssets[idx], url: file_url };
+                  onChange(updatedAssets);
+                } catch (err) {
+                  console.error("Asset upload failed:", err);
+                }
+              }
+              setUploading(null);
+            }}
+          />
+        </label>
       )}
 
+      {/* Asset rows */}
       {assets.length > 0 && (
         <div className="space-y-3">
           {assets.map((asset, idx) => (
@@ -93,14 +196,22 @@ function WorkbookAssets({ assets, onChange }) {
               key={idx}
               className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50/60"
             >
-              {/* Thumbnail / upload area */}
+              {/* Thumbnail / upload area with drop support */}
               <div className="flex-shrink-0">
                 {asset.url ? (
-                  <div className="relative group">
+                  <div
+                    className="relative group"
+                    onDragOver={(e) => { preventDefaults(e); setRowDragOver(idx); }}
+                    onDragEnter={(e) => { preventDefaults(e); setRowDragOver(idx); }}
+                    onDragLeave={(e) => { preventDefaults(e); setRowDragOver(null); }}
+                    onDrop={(e) => handleRowDrop(e, idx)}
+                  >
                     <img
                       src={asset.url}
                       alt={asset.label || asset.key}
-                      className="w-20 h-20 rounded-lg object-cover border border-gray-200"
+                      className={`w-20 h-20 rounded-lg object-cover border transition-all ${
+                        rowDragOver === idx ? "border-[#6E1D40] ring-2 ring-[#6E1D40]/30" : "border-gray-200"
+                      }`}
                     />
                     <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                       <span className="text-[10px] font-semibold text-white tracking-wide uppercase">Replace</span>
@@ -113,13 +224,25 @@ function WorkbookAssets({ assets, onChange }) {
                     </label>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 bg-white cursor-pointer hover:border-gray-400 transition-colors">
+                  <label
+                    className={`flex flex-col items-center justify-center w-20 h-20 rounded-lg border-2 border-dashed bg-white cursor-pointer transition-all ${
+                      rowDragOver === idx
+                        ? "border-[#6E1D40] bg-[#F5E8EE]/30"
+                        : "border-gray-300 hover:border-gray-400"
+                    }`}
+                    onDragOver={(e) => { preventDefaults(e); setRowDragOver(idx); }}
+                    onDragEnter={(e) => { preventDefaults(e); setRowDragOver(idx); }}
+                    onDragLeave={(e) => { preventDefaults(e); setRowDragOver(null); }}
+                    onDrop={(e) => handleRowDrop(e, idx)}
+                  >
                     {uploading === idx ? (
                       <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
-                        <Upload className="w-4 h-4 text-gray-400 mb-1" />
-                        <span className="text-[10px] text-gray-400 font-medium">Upload</span>
+                        <Upload className={`w-4 h-4 mb-1 ${rowDragOver === idx ? "text-[#6E1D40]" : "text-gray-400"}`} />
+                        <span className={`text-[10px] font-medium ${rowDragOver === idx ? "text-[#6E1D40]" : "text-gray-400"}`}>
+                          {rowDragOver === idx ? "Drop" : "Upload"}
+                        </span>
                       </>
                     )}
                     <input
@@ -169,6 +292,52 @@ function WorkbookAssets({ assets, onChange }) {
               </button>
             </div>
           ))}
+
+          {/* Drop zone below existing rows for adding more */}
+          <label
+            className={`flex items-center justify-center py-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+              zoneDragOver
+                ? "border-[#6E1D40] bg-[#F5E8EE]/40"
+                : "border-gray-200 bg-gray-50/30 hover:border-gray-300"
+            }`}
+            onDragOver={(e) => { preventDefaults(e); setZoneDragOver(true); }}
+            onDragEnter={(e) => { preventDefaults(e); setZoneDragOver(true); }}
+            onDragLeave={(e) => { preventDefaults(e); setZoneDragOver(false); }}
+            onDrop={handleZoneDrop}
+          >
+            <p className={`text-xs transition-colors ${zoneDragOver ? "text-[#6E1D40] font-medium" : "text-gray-400"}`}>
+              {zoneDragOver ? "Drop to add more images" : "Drag more images here, or click to browse"}
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={async (e) => {
+                const files = [...(e.target.files || [])].filter((f) => f.type.startsWith("image/"));
+                if (!files.length) return;
+                let updatedAssets = [...assets];
+                for (const file of files) {
+                  const key = getNextKey(updatedAssets);
+                  updatedAssets.push({ key, label: file.name.replace(/\.[^.]+$/, ""), url: "" });
+                }
+                onChange(updatedAssets);
+                for (let i = 0; i < files.length; i++) {
+                  const idx = assets.length + i;
+                  setUploading(idx);
+                  try {
+                    const { file_url } = await base44.integrations.Core.UploadFile({ file: files[i] });
+                    updatedAssets = [...updatedAssets];
+                    updatedAssets[idx] = { ...updatedAssets[idx], url: file_url };
+                    onChange(updatedAssets);
+                  } catch (err) {
+                    console.error("Asset upload failed:", err);
+                  }
+                }
+                setUploading(null);
+              }}
+            />
+          </label>
         </div>
       )}
 
