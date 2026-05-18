@@ -62,9 +62,9 @@ export default function Members() {
   const { data: connectionRequests = [] } = useQuery({
     queryKey: ["connectionRequests"],
     queryFn: async () => {
-      const requests = await base44.entities.UserFollow.filter({ 
+      const requests = await base44.entities.UserFollow.filter({
         followingEmail: currentUser?.email,
-        status: "pending" 
+        status: "pending"
       });
       return requests;
     },
@@ -107,37 +107,30 @@ export default function Members() {
 
   const requestConnectionMutation = useMutation({
     mutationFn: async ({ userEmail, note }) => {
-      // Create connection request
       const newRequest = await base44.entities.UserFollow.create({
         followingEmail: userEmail,
         status: "pending",
       });
-      
-      // Send in-app notification
+
       await base44.entities.Notification.create({
         type: "connection_request",
         message: `${currentUser.full_name} wants to connect: ${note}`,
         linkTo: `/members`,
       });
 
-      // Send email notification
       await base44.integrations.Core.SendEmail({
         to: userEmail,
         subject: "New Connection Request",
         body: `${currentUser.full_name} (${currentUser.email}) wants to connect with you.\n\nMessage: ${note}\n\nView your connection requests at ${window.location.origin}${createPageUrl("Members")}`,
       });
-      
+
       return { newRequest, userEmail };
     },
     onSuccess: async ({ newRequest }) => {
-      // Immediately update cache with new request
       queryClient.setQueryData(["myFollows"], (old = []) => [...old, newRequest]);
-      
-      // Then refetch to ensure consistency
       await queryClient.refetchQueries({ queryKey: ["myFollows"] });
       await queryClient.refetchQueries({ queryKey: ["connections"] });
       await queryClient.refetchQueries({ queryKey: ["connectionRequests"] });
-      
       setConnectionNote("");
       setSelectedMember(null);
       setDialogOpen(false);
@@ -164,15 +157,15 @@ export default function Members() {
   };
 
   const isConnected = (userEmail) => {
-    return connections.some(c => 
-      (c.followingEmail === userEmail || c.created_by === userEmail) && 
+    return connections.some(c =>
+      (c.followingEmail === userEmail || c.created_by === userEmail) &&
       c.status === "connected"
     );
   };
 
   const isPending = (userEmail) => {
-    return myFollows.some(f => 
-      f.followingEmail === userEmail && 
+    return myFollows.some(f =>
+      f.followingEmail === userEmail &&
       f.status === "pending"
     );
   };
@@ -191,7 +184,6 @@ export default function Members() {
       if (filterBy === "all") return true;
       if (filterBy === "connections") return isConnected(u.email);
       if (filterBy === "followers") {
-        // Users who follow current user
         return myFollows.some(f => f.created_by === u.email);
       }
       if (filterBy === "following") return isFollowing(u.email);
@@ -200,13 +192,13 @@ export default function Members() {
     .filter(u => u.email !== currentUser?.email);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_350px] gap-6">
+    <div className="min-h-screen bg-gray-50 px-6 sm:px-10 py-6">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_300px] gap-8">
         {/* Left Column - Members List */}
         <div>
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-[#2F1B3E] mb-4">Members</h1>
-            
+
             {/* Search Bar */}
             <div className="relative mb-6">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -235,142 +227,142 @@ export default function Members() {
 
           {/* Members Grid */}
           <div className="grid md:grid-cols-2 gap-6">
-          {filteredUsers.map((user) => (
-            <Card key={user.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="w-20 h-20 mb-4">
-                    <AvatarImage src={user.profile_picture} />
-                    <AvatarFallback className="bg-[#2F1B3E] text-white text-2xl">
-                      {user.full_name?.[0] || user.email?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
+            {filteredUsers.map((user) => (
+              <Card key={user.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center">
+                    <Avatar className="w-20 h-20 mb-4">
+                      <AvatarImage src={user.profile_picture} />
+                      <AvatarFallback className="bg-[#2F1B3E] text-white text-2xl">
+                        {user.full_name?.[0] || user.email?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
 
-                  <h3 className="font-semibold text-lg mb-1">{user.full_name || "Anonymous"}</h3>
-                  
-                  {user.role && ["admin", "expert", "moderator", "contributor"].includes(user.role) && (
-                    <Badge className="mb-3 bg-[#2F1B3E] text-white">
-                      {user.role}
-                    </Badge>
-                  )}
+                    <h3 className="font-semibold text-lg mb-1">{user.full_name || "Anonymous"}</h3>
 
-                  {user.bio && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {user.bio}
-                    </p>
-                  )}
+                    {user.role && ["admin", "expert", "moderator", "contributor"].includes(user.role) && (
+                      <Badge className="mb-3 bg-[#2F1B3E] text-white">
+                        {user.role}
+                      </Badge>
+                    )}
 
-                  <div className="space-y-2 w-full mt-auto">
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => followMutation.mutate(user.email)}
-                        variant={isFollowing(user.email) ? "outline" : "default"}
-                        className={`flex-1 ${
-                          !isFollowing(user.email) && "bg-[#2F1B3E] hover:bg-[#2F1B3E]"
-                        }`}
-                        size="sm"
-                      >
-                        {isFollowing(user.email) ? (
-                          <>
-                            <UserMinus className="w-4 h-4 mr-1" />
-                            Unfollow
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="w-4 h-4 mr-1" />
-                            Follow
-                          </>
+                    {user.bio && (
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        {user.bio}
+                      </p>
+                    )}
+
+                    <div className="space-y-2 w-full mt-auto">
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => followMutation.mutate(user.email)}
+                          variant={isFollowing(user.email) ? "outline" : "default"}
+                          className={`flex-1 ${
+                            !isFollowing(user.email) && "bg-[#2F1B3E] hover:bg-[#2F1B3E]"
+                          }`}
+                          size="sm"
+                        >
+                          {isFollowing(user.email) ? (
+                            <>
+                              <UserMinus className="w-4 h-4 mr-1" />
+                              Unfollow
+                            </>
+                          ) : (
+                            <>
+                              <UserPlus className="w-4 h-4 mr-1" />
+                              Follow
+                            </>
+                          )}
+                        </Button>
+
+                        {isConnected(user.email) && (
+                          <Link to={createPageUrl("Messages") + `?user=${user.email}`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                            </Button>
+                          </Link>
                         )}
-                      </Button>
-                      
-                      {isConnected(user.email) && (
-                        <Link to={createPageUrl("Messages") + `?user=${user.email}`}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                          >
-                            <MessageCircle className="w-4 h-4" />
-                          </Button>
-                        </Link>
+                      </div>
+
+                      {isConnected(user.email) ? (
+                        <Button disabled className="w-full" variant="outline" size="sm">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Connected
+                        </Button>
+                      ) : isPending(user.email) ? (
+                        <Button
+                          onClick={() => cancelConnectionMutation.mutate(user.email)}
+                          className="w-full"
+                          variant="outline"
+                          size="sm"
+                        >
+                          <UserCheck className="w-4 h-4 mr-2" />
+                          Requested
+                        </Button>
+                      ) : (
+                        <Dialog open={dialogOpen && selectedMember?.email === user.email} onOpenChange={(open) => {
+                          setDialogOpen(open);
+                          if (!open) {
+                            setConnectionNote("");
+                            setSelectedMember(null);
+                          }
+                        }}>
+                          <DialogTrigger asChild>
+                            <Button
+                              className="w-full bg-gradient-to-r from-[#2F1B3E] to-[#8B2E4D]"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedMember(user);
+                                setDialogOpen(true);
+                              }}
+                            >
+                              <UserCheck className="w-4 h-4 mr-2" />
+                              Connect
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Connect with {user.full_name}</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <label className="text-sm font-medium mb-2 block">
+                                  Why would you like to connect?
+                                </label>
+                                <Textarea
+                                  value={connectionNote}
+                                  onChange={(e) => setConnectionNote(e.target.value)}
+                                  placeholder="Share what you'd like to connect about..."
+                                  className="min-h-[120px]"
+                                />
+                              </div>
+                              <Button
+                                onClick={() => {
+                                  if (selectedMember && connectionNote.trim()) {
+                                    requestConnectionMutation.mutate({
+                                      userEmail: selectedMember.email,
+                                      note: connectionNote
+                                    });
+                                  }
+                                }}
+                                disabled={!connectionNote.trim() || requestConnectionMutation.isPending}
+                                className="w-full bg-[#2F1B3E] hover:bg-[#2F1B3E]"
+                              >
+                                {requestConnectionMutation.isPending ? "Sending..." : "Send Connection Request"}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       )}
                     </div>
-
-                    {isConnected(user.email) ? (
-                      <Button disabled className="w-full" variant="outline" size="sm">
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Connected
-                      </Button>
-                    ) : isPending(user.email) ? (
-                      <Button 
-                        onClick={() => cancelConnectionMutation.mutate(user.email)}
-                        className="w-full" 
-                        variant="outline" 
-                        size="sm"
-                      >
-                        <UserCheck className="w-4 h-4 mr-2" />
-                        Requested
-                      </Button>
-                    ) : (
-                      <Dialog open={dialogOpen && selectedMember?.email === user.email} onOpenChange={(open) => {
-                        setDialogOpen(open);
-                        if (!open) {
-                          setConnectionNote("");
-                          setSelectedMember(null);
-                        }
-                      }}>
-                        <DialogTrigger asChild>
-                          <Button
-                            className="w-full bg-gradient-to-r from-[#2F1B3E] to-[#8B2E4D]"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedMember(user);
-                              setDialogOpen(true);
-                            }}
-                          >
-                            <UserCheck className="w-4 h-4 mr-2" />
-                            Connect
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Connect with {user.full_name}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <label className="text-sm font-medium mb-2 block">
-                                Why would you like to connect?
-                              </label>
-                              <Textarea
-                                value={connectionNote}
-                                onChange={(e) => setConnectionNote(e.target.value)}
-                                placeholder="Share what you'd like to connect about..."
-                                className="min-h-[120px]"
-                              />
-                            </div>
-                            <Button
-                              onClick={() => {
-                                if (selectedMember && connectionNote.trim()) {
-                                  requestConnectionMutation.mutate({ 
-                                    userEmail: selectedMember.email, 
-                                    note: connectionNote 
-                                  });
-                                }
-                              }}
-                              disabled={!connectionNote.trim() || requestConnectionMutation.isPending}
-                              className="w-full bg-[#2F1B3E] hover:bg-[#2F1B3E]"
-                            >
-                              {requestConnectionMutation.isPending ? "Sending..." : "Send Connection Request"}
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           {filteredUsers.length === 0 && (
             <Card>
