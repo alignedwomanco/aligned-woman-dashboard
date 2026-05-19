@@ -2,29 +2,14 @@ import React from "react";
 import WorkbookFieldRenderer from "./WorkbookFieldRenderer";
 import WorkbookFinishButton from "./WorkbookFinishButton";
 
-export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [] }) {
+export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress }) {
   if (!section) return null;
-
-  // Split title to render section_number in italic rose if present
-  const renderTitle = () => {
-    const num = section.section_number;
-    const title = section.title || "";
-    if (num) {
-      return (
-        <>
-          <span style={{ fontStyle: "italic", color: "var(--aw-rose-core)" }}>{num}.</span>{" "}
-          {title}
-        </>
-      );
-    }
-    return title;
-  };
 
   return (
     <div>
-      {/* Section head — 36px margin-bottom per spec */}
+      {/* Section head -- 36px margin-bottom per spec */}
       <div style={{ marginBottom: 36 }}>
-        {section.eyebrow && (
+        {section.part_label && (
           <p style={{
             fontFamily: "var(--aw-font-sans)",
             fontWeight: 700,
@@ -35,21 +20,36 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
             color: "var(--aw-rose-core)",
             margin: "0 0 8px",
           }}>
-            {section.eyebrow}
+            {section.part_label}
           </p>
         )}
-        <h1 style={{
-          fontFamily: "var(--aw-font-display)",
-          fontWeight: 400,
-          fontSize: "clamp(34px, 4.6vw, 52px)",
-          lineHeight: 1.05,
-          letterSpacing: "-0.015em",
-          color: "var(--aw-burg-core)",
-          margin: 0,
-        }}>
-          {renderTitle()}
-        </h1>
-        {section.intro && (
+        {section.heading && (
+          <h1 style={{
+            fontFamily: "var(--aw-font-display)",
+            fontWeight: 400,
+            fontSize: "clamp(34px, 4.6vw, 52px)",
+            lineHeight: 1.05,
+            letterSpacing: "-0.015em",
+            color: "var(--aw-burg-core)",
+            margin: 0,
+          }}>
+            {section.heading}
+          </h1>
+        )}
+        {section.theme_line && (
+          <p style={{
+            fontFamily: "var(--aw-font-display)",
+            fontStyle: "italic",
+            fontWeight: 400,
+            fontSize: "clamp(18px, 2.4vw, 22px)",
+            lineHeight: 1.4,
+            color: "var(--aw-rose-core)",
+            margin: "12px 0 0",
+          }}>
+            {section.theme_line}
+          </p>
+        )}
+        {section.intro_text && (
           <p style={{
             fontFamily: "var(--aw-font-sans)",
             fontWeight: 300,
@@ -58,7 +58,7 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
             color: "var(--aw-dark-grey)",
             margin: "18px 0 0",
           }}>
-            {section.intro}
+            {section.intro_text}
           </p>
         )}
       </div>
@@ -74,7 +74,6 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
             sectionFields={section.fields}
             sections={sections}
             onJumpToSection={onJumpToSection}
-            assets={assets}
           />
         ))}
       </div>
