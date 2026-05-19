@@ -65,6 +65,34 @@ function buildPlayerUrl(moduleId, pageId, courseId) {
   return url;
 }
 
+/**
+ * Compute the furthest unlocked phase index based on actual page completion.
+ * A phase unlocks when ALL modules in EVERY prior phase are complete.
+ * If all phases are complete, returns the last index.
+ */
+function computeCurrentPhaseIndex(phaseSections, modules, pages, progressMap) {
+  let unlocked = 0;
+  for (let i = 0; i < phaseSections.length; i++) {
+    const sectionMods = modules.filter((m) => m.sectionId === phaseSections[i].id);
+    if (sectionMods.length === 0) {
+      // Empty phase counts as complete, unlock the next one
+      if (i >= unlocked) unlocked = i + 1;
+      continue;
+    }
+    const allComplete = sectionMods.every((mod) =>
+      isModuleComplete(mod.id, pages, progressMap)
+    );
+    if (allComplete) {
+      unlocked = i + 1;
+    } else {
+      // This is the first phase with incomplete work; user is here
+      return i;
+    }
+  }
+  // Everything complete: keep the last phase as "current" (not locked)
+  return Math.max(0, phaseSections.length - 1);
+}
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
@@ -91,7 +119,7 @@ function HeroBanner({ course, sections, modules, hasAccess, onResume, onBegin, r
           <div className="flex items-center gap-3 flex-wrap">
             {hasAccess ? (
               <button onClick={resumeModuleId ? onResume : onBegin} className="bg-paper text-awburg-core font-body font-bold text-[10px] tracking-eyebrow uppercase px-6 py-3 rounded-full hover:bg-awrose-pale transition-colors">
-                {resumeModuleId ? "RESUME →" : "BEGIN COURSE →"}
+                {resumeModuleId ? "RESUME \u2192" : "BEGIN COURSE \u2192"}
               </button>
             ) : null}
           </div>
@@ -243,7 +271,7 @@ function ModuleItem({ mod, pages, progressMap, modIndex, isModLocked, isModuleAc
           {modPages.length === 0 && <div className="px-4 py-3 text-sm font-body text-awburg-core/40">No lessons yet.</div>}
           {workbook && (
             isModuleAccessible ? (
-              <div onClick={() => navigate(`/Workbook?id=${workbook.id}`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate(`/WorkbookViewer?id=${workbook.id}`); }} className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors">
+              <div onClick={() => navigate(`/Workbook?id=${workbook.id}`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate(`/Workbook?id=${workbook.id}`); }} className="flex items-center gap-4 px-4 py-3 border-t border-awburg-core/6 cursor-pointer hover:bg-awrose-wash rounded-b-xl transition-colors">
                 <BookOpen className="w-4 h-4 text-awrose-core flex-shrink-0" />
                 <span className="font-body text-sm text-awburg-core flex-1">{workbook.title}</span>
                 <span className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase border border-awrose-light/60 rounded px-2 py-0.5 flex-shrink-0">WORKBOOK</span>
@@ -353,7 +381,10 @@ export default function CourseDetail() {
         setPages(rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
         if (email) {
-          const prog = await base44.entities.CourseProgress.filter({ courseId, created_by: email });
+          // FIX: filter by created_by only. Some CourseProgress records have
+          // null courseId (legacy writes). Page IDs are unique across courses
+          // so filtering without courseId is safe and catches all records.
+          const prog = await base44.entities.CourseProgress.filter({ created_by: email });
           setProgress(prog);
           const profileArr = await base44.entities.MemberProfile.filter({ user_id: me.id }, "-created_date", 1);
           setProfile(profileArr[0] ?? null);
@@ -378,6 +409,7 @@ export default function CourseDetail() {
     return () => { unsubSections(); unsubModules(); };
   }, [courseId]);
 
+  // Build a lookup from pageId to status using only page-level records
   const progressMap = {};
   progress.forEach((p) => { if (p.pageId) progressMap[p.pageId] = p.status; });
 
@@ -387,6 +419,13 @@ export default function CourseDetail() {
   const totalPages = pages.length;
   const completedPages = pages.filter((p) => progressMap[p.id] === "completed").length;
   const overallPct = totalPages > 0 ? Math.round((completedPages / totalPages) * 100) : 0;
+
+  // FIX: derive currentPhaseIndex from actual completion, not from
+  // profile.last_module_id. A phase unlocks when every module in all
+  // preceding phases has all its pages completed.
+  const currentPhaseIndex = computeCurrentPhaseIndex(
+    nonWelcomeSections, modules, pages, progressMap
+  );
 
   if (loading || accessLoading) {
     return (
@@ -430,25 +469,16 @@ export default function CourseDetail() {
 
         {welcomeSection && <WelcomeSection welcomeSection={welcomeSection} modules={modules} pages={pages} />}
 
-        {(() => {
-          let currentPhaseIndex = 0;
-          if (profile?.last_module_id) {
-            const lastMod = modules.find((m) => m.id === profile.last_module_id);
-            if (lastMod) { const idx = nonWelcomeSections.findIndex((s) => s.id === lastMod.sectionId); if (idx !== -1) currentPhaseIndex = idx; }
-          }
-          return (
-            <div className="space-y-2">
-              {nonWelcomeSections.map((section, idx) => {
-                const sectionMods = modules.filter((m) => m.sectionId === section.id);
-                return <PhaseBlock key={section.id} section={section} sectionIndex={idx} mods={sectionMods} pages={pages} progressMap={progressMap} currentModuleId={profile?.last_module_id} workbooks={workbooks} currentPhaseIndex={currentPhaseIndex} courseId={courseId} />;
-              })}
-            </div>
-          );
-        })()}
+        <div className="space-y-2">
+          {nonWelcomeSections.map((section, idx) => {
+            const sectionMods = modules.filter((m) => m.sectionId === section.id);
+            return <PhaseBlock key={section.id} section={section} sectionIndex={idx} mods={sectionMods} pages={pages} progressMap={progressMap} currentModuleId={profile?.last_module_id} workbooks={workbooks} currentPhaseIndex={currentPhaseIndex} courseId={courseId} />;
+          })}
+        </div>
 
         <div className="mt-16 pt-8 border-t border-awburg-core/8 flex items-center justify-between">
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase">{course.title} · {overallPct}%</p>
-          <Link to={createPageUrl("Classroom")} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase transition-colors">ALL COURSES →</Link>
+          <Link to={createPageUrl("Classroom")} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase transition-colors">ALL COURSES &rarr;</Link>
         </div>
       </div>
     </div>
