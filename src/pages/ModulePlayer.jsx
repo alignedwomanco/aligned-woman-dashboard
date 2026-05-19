@@ -134,10 +134,10 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
-  // Workbooks for this course
+  // FIX: Workbook entity uses snake_case course_id, not camelCase courseId
   const { data: workbooks = [] } = useQuery({
     queryKey: ["courseWorkbooks", courseId],
-    queryFn: () => base44.entities.Workbook.filter({ courseId }),
+    queryFn: () => base44.entities.Workbook.filter({ course_id: courseId }),
     enabled: !!courseId,
   });
 
@@ -248,7 +248,7 @@ export default function ModulePlayer() {
         updateProgressMutation.mutate({ status: "in_progress", progressPercentage: pct });
       }
     } else {
-      // Unmarking — recalculate
+      // Unmarking: recalculate
       const completedCount = pages.filter(page => {
         if (page.id === selectedPage.id) return false;
         const p = moduleProgress.find(pr => pr.pageId === page.id);
@@ -259,11 +259,17 @@ export default function ModulePlayer() {
     }
   };
 
+  // FIX: use mutateAsync so the module-level write is awaited and errors
+  // surface instead of silently leaving the record as "in_progress"
   const completeModule = async () => {
-    updateProgressMutation.mutate({
-      status: "completed",
-      progressPercentage: 100,
-    });
+    try {
+      await updateProgressMutation.mutateAsync({
+        status: "completed",
+        progressPercentage: 100,
+      });
+    } catch (error) {
+      console.error("Failed to mark module complete:", error);
+    }
 
     // Award points for module completion
     await awardModuleCompletion();
@@ -297,7 +303,7 @@ export default function ModulePlayer() {
       await base44.entities.UserBadge.create({
         badgeId: `module-${moduleId}`,
         badgeName: `${module.title} Complete`,
-        badgeIcon: "🎓",
+        badgeIcon: "\uD83C\uDF93",
         earnedDate: new Date().toISOString(),
       });
     } catch (error) {
@@ -598,7 +604,7 @@ export default function ModulePlayer() {
                     
                     return (
                       <div className="flex flex-col items-end">
-                        {/* CHANGE 1: Helper text above Mark Complete (only when not completed) */}
+                        {/* Helper text above Mark Complete (only when not completed) */}
                         {!isPageComplete && (
                           <p
                             className="text-xs italic mb-2 text-right max-w-[220px]"
@@ -607,7 +613,7 @@ export default function ModulePlayer() {
                             You must press this button in order to move onto the next module.
                           </p>
                         )}
-                        {/* CHANGE 2: Pulse animation on Mark Complete when not completed */}
+                        {/* Pulse animation on Mark Complete when not completed */}
                         <Button
                           onClick={handleTogglePageComplete}
                           variant={isPageComplete ? "outline" : "default"}
@@ -662,7 +668,7 @@ export default function ModulePlayer() {
                           }}
                           disabled={!isCurrentPageComplete}
                         >
-                          Next Lesson →
+                          Next Lesson &rarr;
                         </Button>
                       );
                     }
@@ -680,12 +686,13 @@ export default function ModulePlayer() {
                             }`}
                             onClick={() => {
                               if (allPagesCompleted) {
-                                navigate(createPageUrl("WorkbookViewer") + `?workbookId=${courseWorkbook.id}`);
+                                // FIX: use the registered /Workbook route with ?id= param
+                                window.location.href = `/Workbook?id=${courseWorkbook.id}`;
                               }
                             }}
                             disabled={!allPagesCompleted}
                           >
-                            Continue to Workbook →
+                            Continue to Workbook &rarr;
                           </Button>
                         )}
 
@@ -704,7 +711,7 @@ export default function ModulePlayer() {
                             }}
                             disabled={!allPagesCompleted}
                           >
-                            Next Module: {nextModule.title} →
+                            Next Module: {nextModule.title} &rarr;
                           </Button>
                         )}
 
