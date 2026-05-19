@@ -3,7 +3,7 @@ import { X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 /**
- * WorkbookSidebar — 320px rail (desktop) / slide-in drawer (mobile).
+ * WorkbookSidebar -- 320px rail (desktop) / slide-in drawer (mobile).
  * Props: workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose
  */
 export default function WorkbookSidebar({
@@ -23,8 +23,8 @@ export default function WorkbookSidebar({
   };
 
   const getNumberDisplay = (section, idx) => {
-    if (idx === 0) return "—";
-    if (idx === sections.length - 1) return "✦";
+    if (idx === 0) return "\u2014";
+    if (idx === sections.length - 1) return "\u2726";
     return String(section.section_number || idx).padStart(2, "0");
   };
 
@@ -61,7 +61,7 @@ export default function WorkbookSidebar({
             </span>
           </div>
         </div>
-        {/* Close button — only shows on mobile via parent */}
+        {/* Close button -- only shows on mobile via parent */}
         <button
           onClick={onClose}
           className="wb-mobile-only p-1.5 rounded-full hover:bg-gray-100 transition-colors"
@@ -131,7 +131,7 @@ export default function WorkbookSidebar({
                   {num}
                 </span>
 
-                {/* Label */}
+                {/* Label -- uses section.heading as nav text */}
                 <span style={{
                   fontFamily: "var(--aw-font-sans)",
                   fontWeight: isCurrent ? 600 : 400,
@@ -143,14 +143,14 @@ export default function WorkbookSidebar({
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}>
-                  {section.title}
+                  {section.heading}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Back to Dashboard — below last section, visually demoted */}
+        {/* Back to Dashboard -- below last section, visually demoted */}
         <div style={{ padding: "0 14px" }}>
           <div style={{ height: 1, background: "rgba(74,14,46,0.08)", margin: "12px 0" }} />
           <button
@@ -192,7 +192,7 @@ export default function WorkbookSidebar({
                 transition: "color 180ms ease",
               }}
             >
-              ←
+              &#8592;
             </span>
             {/* Label */}
             <span
@@ -213,7 +213,7 @@ export default function WorkbookSidebar({
         </div>
       </nav>
 
-      {/* Practitioner tile — sticky bottom */}
+      {/* Practitioner tile -- sticky bottom */}
       <div style={{ padding: "18px 28px 22px", borderTop: "1px solid var(--aw-border-light)" }}>
         <div className="flex items-center gap-3">
           {/* Avatar */}
@@ -247,7 +247,7 @@ export default function WorkbookSidebar({
 
   return (
     <>
-      {/* Desktop sidebar — always visible ≥1025px */}
+      {/* Desktop sidebar -- always visible >=1025px */}
       <aside className="wb-sidebar-desktop hidden" style={{
         position: "fixed", top: 0, left: 0, bottom: 0,
         width: 320, zIndex: 40,
@@ -257,7 +257,7 @@ export default function WorkbookSidebar({
         {sidebarContent}
       </aside>
 
-      {/* Mobile drawer — only ≤1024px */}
+      {/* Mobile drawer -- only <=1024px */}
       {isOpen && (
         <>
           <div
