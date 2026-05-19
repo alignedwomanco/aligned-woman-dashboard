@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import TickListField from "./TickListField";
 import CtaRowField from "./CtaRowField";
 
@@ -530,6 +530,54 @@ function TextInputField({ field, answers, onAnswerChange }) {
   );
 }
 
+/* ─── Auto-resize textarea for grid cells ─── */
+
+function AutoResizeCell({ value, onChange, placeholder }) {
+  const ref = useRef(null);
+
+  const resize = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.max(36, el.scrollHeight) + "px";
+  }, []);
+
+  useEffect(() => { resize(); }, [value, resize]);
+
+  return (
+    <textarea
+      ref={ref}
+      rows={1}
+      value={value}
+      onChange={(e) => { onChange(e.target.value); resize(); }}
+      placeholder={placeholder || "..."}
+      style={{
+        width: "100%",
+        minHeight: 36,
+        resize: "none",
+        overflow: "hidden",
+        borderRadius: 6,
+        border: "1px solid #e5e7eb",
+        backgroundColor: "#fff",
+        padding: "6px 12px",
+        fontSize: 14,
+        lineHeight: 1.6,
+        color: "#374151",
+        outline: "none",
+        transition: "border-color 150ms ease, box-shadow 150ms ease",
+      }}
+      onFocus={(e) => {
+        e.target.style.borderColor = "#C4847A";
+        e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.15)";
+      }}
+      onBlur={(e) => {
+        e.target.style.borderColor = "#e5e7eb";
+        e.target.style.boxShadow = "none";
+      }}
+    />
+  );
+}
+
 function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
   const listAnswers = answers[field.id] || {};
   const minRows = field.min_rows || 3;
@@ -623,13 +671,11 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
                   }
 
                   return (
-                    <td key={colKey} className="px-3 py-2">
-                      <input
-                        type="text"
+                    <td key={colKey} className="px-3 py-2 align-top">
+                      <AutoResizeCell
                         value={listAnswers[`${rIdx}_${colKey}`] || ""}
-                        onChange={(e) => handleCellChange(rIdx, colKey, e.target.value)}
+                        onChange={(val) => handleCellChange(rIdx, colKey, val)}
                         placeholder="..."
-                        className="w-full rounded border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4847A]/40 focus:border-[#C4847A]"
                       />
                     </td>
                   );
