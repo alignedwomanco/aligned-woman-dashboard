@@ -24,7 +24,9 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
     case "short_text":
       return <TextInputField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "grid":
-      return <GridPlaceholder field={field} answers={answers} onAnswerChange={onAnswerChange} />;
+      /* FIX 1: Route grid to StructuredListPlaceholder which supports
+         columns with key, fixed_label, min_rows, max_rows, prefilled_examples */
+      return <StructuredListPlaceholder field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "structured_list":
       return <StructuredListPlaceholder field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "tick_list":
@@ -36,10 +38,88 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
   }
 }
 
-/* ─── Content Block (NEW) ─── */
+/* ─── Content Block ─── */
 
 function ContentBlockField({ field, assets }) {
   const variant = field.variant || "body";
+
+  /* FIX 2: Handle callout variant inside content_block */
+  if (variant === "callout") {
+    const paragraphs = (field.body || "").split("\n\n").filter(Boolean);
+    return (
+      <div style={{
+        borderRadius: 12,
+        padding: "16px 20px",
+        backgroundColor: "#FDF5F3",
+        border: "1px solid #E8C9C0",
+      }}>
+        {field.attribution && (
+          <p style={{
+            fontFamily: "var(--aw-font-sans)",
+            fontWeight: 700,
+            fontSize: 10,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#C4847A",
+            margin: "0 0 8px",
+          }}>
+            {field.attribution}
+          </p>
+        )}
+        {paragraphs.map((p, i) => (
+          <p key={i} style={{
+            fontFamily: "var(--aw-font-sans)",
+            fontWeight: 300,
+            fontSize: 14,
+            lineHeight: 1.8,
+            color: "#3a3a3a",
+            margin: i < paragraphs.length - 1 ? "0 0 10px" : 0,
+            whiteSpace: "pre-line",
+          }}>
+            {p}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  /* FIX 3: Handle quote variant inside content_block */
+  if (variant === "quote") {
+    return (
+      <blockquote style={{
+        borderLeft: "4px solid #C4847A",
+        paddingLeft: 20,
+        paddingTop: 12,
+        paddingBottom: 12,
+        margin: "16px 0",
+      }}>
+        <p style={{
+          fontFamily: "var(--aw-font-display, Georgia, serif)",
+          fontWeight: 400,
+          fontSize: 18,
+          fontStyle: "italic",
+          lineHeight: 1.6,
+          color: "#4A0E2E",
+          margin: 0,
+        }}>
+          "{field.body}"
+        </p>
+        {field.attribution && (
+          <footer style={{
+            marginTop: 8,
+            fontFamily: "var(--aw-font-sans)",
+            fontWeight: 700,
+            fontSize: 10,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#C4847A",
+          }}>
+            {field.attribution}
+          </footer>
+        )}
+      </blockquote>
+    );
+  }
 
   if (variant === "image") {
     // Resolve asset_key to URL
@@ -133,6 +213,7 @@ function ContentBlockField({ field, assets }) {
             lineHeight: 1.85,
             color: "var(--aw-dark-grey, #3a3a3a)",
             margin: 0,
+            whiteSpace: "pre-line",
           }}
         >
           {p}
@@ -193,7 +274,7 @@ function CalloutField({ field, answers, onAnswerChange }) {
   };
   const boxClass = variants[field.variant] || variants.soft;
   const textColor = field.variant === "dark" ? "text-white/90" : "text-gray-600";
-  const labelColor = field.variant === "dark" ? "text-white" : "text-[#4A0E2E]";
+  const labelColor = field.variant === "dark" ? "text-[#4A0E2E]" : "text-[#4A0E2E]";
   const eyebrowColor = field.variant === "dark" ? "text-white/60" : "text-[#C4847A]";
 
   return (
@@ -449,57 +530,6 @@ function TextInputField({ field, answers, onAnswerChange }) {
   );
 }
 
-function GridPlaceholder({ field, answers, onAnswerChange }) {
-  const gridAnswers = answers[field.id] || {};
-
-  const handleCellChange = (rowId, colId, value) => {
-    const updated = { ...gridAnswers, [`${rowId}_${colId}`]: value };
-    onAnswerChange?.(field.id, updated);
-  };
-
-  return (
-    <div className="space-y-2">
-      {field.label && (
-        <p className="text-sm font-semibold text-[#4A0E2E]">{field.label}</p>
-      )}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr>
-              <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 border-b border-gray-200" />
-              {field.columns?.map((col) => (
-                <th key={col.id || col.key} className="text-center px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 border-b border-gray-200">
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {field.rows?.map((row) => (
-              <tr key={row.id} className="border-b border-gray-100">
-                <td className="px-3 py-2 font-medium text-gray-700">{row.label}</td>
-                {field.columns?.map((col) => (
-                  <td key={col.id || col.key} className="px-3 py-2 text-center">
-                    <input
-                      type="number"
-                      min={field.cell_options?.min}
-                      max={field.cell_options?.max}
-                      value={gridAnswers[`${row.id}_${col.id || col.key}`] || ""}
-                      onChange={(e) => handleCellChange(row.id, col.id || col.key, e.target.value)}
-                      placeholder={field.cell_options?.placeholder || "---"}
-                      className="w-14 text-center rounded border border-gray-200 bg-white py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#C4847A]/40 focus:border-[#C4847A]"
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
 function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
   const listAnswers = answers[field.id] || {};
   const minRows = field.min_rows || 3;
@@ -516,7 +546,8 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
   })();
 
   const [extraRows, setExtraRows] = useState(0);
-  const rowCount = Math.max(savedRowCount, minRows) + extraRows;
+  const maxRows = field.max_rows || 20;
+  const rowCount = Math.min(Math.max(savedRowCount, minRows) + extraRows, maxRows);
   const rows = Array.from({ length: rowCount });
 
   const handleCellChange = (rIdx, colId, value) => {
@@ -582,7 +613,7 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
                 {field.columns?.map((col) => {
                   const colKey = col.id || col.key;
 
-                  // Fixed label column (e.g. row numbers)
+                  // Fixed label column (e.g. row numbers or labels)
                   if (col.type === "fixed_label") {
                     return (
                       <td key={colKey} className="px-3 py-2 text-sm font-semibold text-[#C4847A]">
@@ -608,7 +639,7 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
           </tbody>
         </table>
       </div>
-      {field.allow_add_rows && (
+      {(field.allow_add_rows !== false && rowCount < maxRows) && (
         <button
           type="button"
           onClick={() => setExtraRows(prev => prev + 1)}
