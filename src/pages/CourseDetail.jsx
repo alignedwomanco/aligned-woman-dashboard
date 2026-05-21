@@ -39,9 +39,14 @@ function stripPhasePrefix(t) {
   return (t || "").replace(/^Phase\s+\d+\s*[-:]\s*/i, "").trim();
 }
 
+/**
+ * A module is complete when every page in it has status "completed".
+ * Modules with zero pages are treated as complete (placeholder modules
+ * like "Assessment" should not block phase progression).
+ */
 function isModuleComplete(moduleId, pages, progressMap) {
   const modPages = pages.filter((p) => p.moduleId === moduleId);
-  if (modPages.length === 0) return false;
+  if (modPages.length === 0) return true;
   return modPages.every((p) => progressMap[p.id] === "completed");
 }
 
@@ -68,6 +73,7 @@ function buildPlayerUrl(moduleId, pageId, courseId) {
 /**
  * Compute the furthest unlocked phase index based on actual page completion.
  * A phase unlocks when ALL modules in EVERY prior phase are complete.
+ * Modules with zero pages count as complete (they are placeholders).
  * If all phases are complete, returns the last index.
  */
 function computeCurrentPhaseIndex(phaseSections, modules, pages, progressMap) {
@@ -329,7 +335,8 @@ function PhaseBlock({ section, sectionIndex, mods, pages, progressMap, currentMo
         {!isLocked && (
           <div>
             {mods.map((mod, mi) => {
-              const isModLocked = mi > 0 && !isModuleComplete(mods[mi - 1].id, pages.filter((p) => p.moduleId === mods[mi - 1].id), progressMap);
+              const prevModPages = mi > 0 ? pages.filter((p) => p.moduleId === mods[mi - 1].id) : [];
+              const isModLocked = mi > 0 && !isModuleComplete(mods[mi - 1].id, prevModPages, progressMap);
               return (
                 <ModuleItem key={mod.id} mod={mod} pages={pages} progressMap={progressMap} modIndex={mi} isModLocked={isModLocked} isModuleAccessible={!isModLocked} workbooks={workbooks} isExpanded={expandedModules.has(mod.id)} onToggle={toggleModule} courseId={courseId} />
               );
@@ -381,10 +388,12 @@ export default function CourseDetail() {
         setPages(rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
         if (email) {
-          // FIX: filter by created_by only. Some CourseProgress records have
-          // null courseId (legacy writes). Page IDs are unique across courses
-          // so filtering without courseId is safe and catches all records.
-          const prog = await base44.entities.CourseProgress.filter({ created_by: email });
+          // FIX: use filter({}) with no params. Base44 RLS scopes to
+          // the current user automatically. This catches progress records
+          // that have null courseId (legacy writes) without breaking on
+          // created_by filter edge cases. Same pattern as Classroom.jsx
+          // and SectionDetail.jsx.
+          const prog = await base44.entities.CourseProgress.filter({});
           setProgress(prog);
           const profileArr = await base44.entities.MemberProfile.filter({ user_id: me.id }, "-created_date", 1);
           setProfile(profileArr[0] ?? null);
@@ -420,9 +429,9 @@ export default function CourseDetail() {
   const completedPages = pages.filter((p) => progressMap[p.id] === "completed").length;
   const overallPct = totalPages > 0 ? Math.round((completedPages / totalPages) * 100) : 0;
 
-  // FIX: derive currentPhaseIndex from actual completion, not from
-  // profile.last_module_id. A phase unlocks when every module in all
-  // preceding phases has all its pages completed.
+  // Derive currentPhaseIndex from actual completion, not MemberProfile.
+  // A phase unlocks when every module in all preceding phases is complete.
+  // Modules with zero pages count as complete (placeholders).
   const currentPhaseIndex = computeCurrentPhaseIndex(
     nonWelcomeSections, modules, pages, progressMap
   );
