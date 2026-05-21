@@ -387,8 +387,9 @@ export default function ModulePlayer() {
     .slice(currentModuleIndex + 1)
     .find(m => modulesWithPages.has(m.id)) || null;
 
-  // Find the first workbook for this course
-  const courseWorkbook = workbooks.length > 0 ? workbooks[0] : null;
+  // FIX: Find the workbook matching this module's expert, not just the first one
+  const courseWorkbook = workbooks.find(w => w.expert_id === module?.expertId)
+    || (workbooks.length > 0 ? workbooks[0] : null);
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
@@ -676,7 +677,7 @@ export default function ModulePlayer() {
                     // Last page: show Workbook + Next Module + Back to Classroom
                     return (
                       <>
-                        {/* Continue to Workbook (if one exists for this course) */}
+                        {/* Continue to Workbook (if one exists for this module's expert) */}
                         {courseWorkbook && (
                           <Button
                             className={`w-full ${
