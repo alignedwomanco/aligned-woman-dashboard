@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardState } from "@/lib/dashboardState";
+import useContinueModule from "@/hooks/useContinueModule";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
 import DashboardHeader from "@/components/dashboard-v2/DashboardHeader";
@@ -93,6 +94,9 @@ export default function Dashboard() {
   useEffect(() => {
     load();
   }, []);
+
+  // Real course progress data from useContinueModule
+  const continueData = useContinueModule(data.user);
 
   // Workbook queries at Dashboard level so ALL states can use them
   const { data: workbooks = [] } = useQuery({
@@ -213,7 +217,12 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <section className="lg:col-span-8 order-1">
               {StateComponent ? (
-                <StateComponent user={user} profile={profile} workbookData={workbookData} />
+                <StateComponent
+                  user={user}
+                  profile={profile}
+                  workbookData={workbookData}
+                  continueData={continueData}
+                />
               ) : (
                 <DashboardError
                   message={`Unrecognised dashboard state: ${state}`}
