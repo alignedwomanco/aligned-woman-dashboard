@@ -1,0 +1,84 @@
+{
+  "name": "CoursePage",
+  "type": "object",
+  "properties": {
+    "courseId": {
+      "type": "string"
+    },
+    "sectionId": {
+      "type": "string"
+    },
+    "moduleId": {
+      "type": "string",
+      "description": "Parent module ID"
+    },
+    "title": {
+      "type": "string"
+    },
+    "pageType": {
+      "type": "string",
+      "enum": [
+        "video",
+        "text",
+        "quiz",
+        "assignment"
+      ],
+      "default": "text"
+    },
+    "content": {
+      "type": "string",
+      "description": "Page content (HTML, video URL, etc.)"
+    },
+    "videoUrl": {
+      "type": "string"
+    },
+    "videoDuration": {
+      "type": "number",
+      "description": "Video duration in seconds"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "isPublished": {
+      "type": "boolean",
+      "default": false
+    },
+    "downloads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "moduleId",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
