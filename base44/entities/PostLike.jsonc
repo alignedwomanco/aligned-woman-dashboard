@@ -1,0 +1,25 @@
+{
+  "name": "PostLike",
+  "type": "object",
+  "properties": {
+    "postId": {
+      "type": "string"
+    },
+    "commentId": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
