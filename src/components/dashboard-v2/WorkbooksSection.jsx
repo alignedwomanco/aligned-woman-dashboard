@@ -1,144 +1,161 @@
 import React from "react";
-import { ArrowDownToLine } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import base44 from "@/api/base44";
+import { FileText, Download, Loader2 } from "lucide-react";
 
-const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
+// Danielle Venter's expert ID: routes to /NutritionWorkbook instead of /Workbook
+const DANIELLE_EXPERT_ID = "69f48ab57e6d6614129172d8";
 
 const STATUS_CONFIG = {
-  completed: {
-    label: "COMPLETED",
-    dotClass: "bg-green-500",
-    textClass: "text-green-700",
-    pillClass: "bg-green-50",
-  },
-  in_progress: {
-    label: "IN PROGRESS",
-    dotClass: "bg-awrose-deep",
-    textClass: "text-awburg-core",
-    pillClass: "bg-awrose-pale",
-  },
-  not_started: {
-    label: "NOT STARTED",
-    dotClass: "bg-awburg-core/40",
-    textClass: "text-awburg-core/60",
-    pillClass: "bg-awburg-core/8",
-  },
+  completed: { label: "COMPLETED", dotColor: "bg-green-500", textColor: "text-green-700" },
+  in_progress: { label: "IN PROGRESS", dotColor: "bg-[#C77B85]", textColor: "text-[#5C1A2E]" },
+  not_started: { label: "NOT STARTED", dotColor: "bg-gray-300", textColor: "text-[#6B6168]" },
 };
 
-function WorkbookCard({ id, title, expert, status }) {
+function getWorkbookUrl(wb) {
+  if (wb.expert_id === DANIELLE_EXPERT_ID) {
+    return `/NutritionWorkbook?id=${wb.id}`;
+  }
+  return `/Workbook?id=${wb.id}`;
+}
+
+function WorkbookCard({ workbook, expertName, status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.not_started;
   const actionLabel = status === "completed" ? "REVIEW" : status === "in_progress" ? "CONTINUE" : "BEGIN";
-
-  const handleClick = () => {
-    if (id) {
-      window.location.href = `/Workbook?id=${id}`;
-    }
-  };
+  const url = getWorkbookUrl(workbook);
 
   return (
-    <div className="bg-paper rounded-xl border border-awburg-core/8 p-5 flex flex-col h-full">
-      <div className="mb-5">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 ${cfg.pillClass}`}>
-          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dotClass}`} />
-          <span className={`font-body font-bold text-[10px] tracking-eyebrow uppercase ${cfg.textClass}`}>
+    <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-col h-full">
+      {/* Top row */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-10 h-10 bg-[#F5E6E8] rounded-lg flex items-center justify-center flex-shrink-0">
+          <FileText className="w-5 h-5 text-[#5C1A2E]" />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className={`w-2 h-2 rounded-full ${cfg.dotColor}`} />
+          <span className={`text-[9px] tracking-[0.15em] font-medium uppercase ${cfg.textColor}`}>
             {cfg.label}
           </span>
-        </span>
+        </div>
       </div>
 
-      <h4 className="font-display text-awburg-core text-xl leading-snug flex-1 mb-2">
-        {title}
+      {/* Title */}
+      <h4 className="text-base text-[#2A1218] mb-1 leading-snug flex-1" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+        <em>{workbook.title}</em>
       </h4>
 
-      <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase mb-5">
-        {expert}
+      {/* Expert */}
+      <p className="text-[9px] tracking-[0.15em] text-[#6B6168] uppercase mb-3">
+        {expertName}
       </p>
 
-      <div className="border-t border-awburg-core/8 pt-4 flex items-center justify-between">
-        <button
-          onClick={handleClick}
-          className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark hover:underline uppercase transition-colors"
+      {/* Divider */}
+      <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
+        <Link
+          to={url}
+          className="text-[10px] tracking-[0.15em] text-[#5C1A2E] hover:text-[#3D0F1F] font-medium uppercase transition-colors"
         >
           {actionLabel} →
-        </button>
-        <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 hover:text-awburg-core uppercase transition-colors flex items-center gap-1">
-          <ArrowDownToLine className="w-3 h-3" />
-          PDF
-        </button>
+        </Link>
+        {workbook.blank_pdf_url ? (
+          <a
+            href={workbook.blank_pdf_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[10px] tracking-[0.15em] text-[#6B6168] hover:text-[#5C1A2E] font-medium uppercase transition-colors"
+          >
+            <Download className="w-3 h-3" />
+            PDF
+          </a>
+        ) : (
+          <span className="text-[10px] tracking-[0.15em] text-[#6B6168] font-medium uppercase opacity-40">
+            PDF
+          </span>
+        )}
       </div>
     </div>
   );
 }
 
 export default function WorkbooksSection({ phaseIndex }) {
-  // Fetch real workbooks for the Blueprint course
-  const { data: workbooks = [] } = useQuery({
-    queryKey: ["workbooks-section-list"],
+  // Fetch all published workbooks
+  const { data: workbooks = [], isLoading: loadingWb } = useQuery({
+    queryKey: ["dashboardWorkbooks"],
     queryFn: async () => {
-      const all = await base44.entities.Workbook.filter({ course_id: BLUEPRINT_COURSE_ID });
-      return all.filter(wb => wb.status === "published");
+      const items = await base44.entities.Workbook.filter({ status: "published" });
+      return items || [];
     },
-    initialData: [],
   });
 
-  // Fetch user's workbook responses
-  const { data: responses = [] } = useQuery({
-    queryKey: ["workbooks-section-responses"],
-    queryFn: () => base44.entities.WorkbookResponse.filter({}),
-    initialData: [],
-  });
-
-  // Fetch experts for display names
+  // Fetch experts for name lookup
   const { data: experts = [] } = useQuery({
-    queryKey: ["workbooks-section-experts"],
-    queryFn: () => base44.entities.Expert.filter({}),
-    initialData: [],
+    queryKey: ["dashboardExperts"],
+    queryFn: async () => {
+      const items = await base44.entities.Expert.list();
+      return items || [];
+    },
   });
 
-  // Build live workbook cards from database
-  const liveCards = workbooks.map(wb => {
-    const response = responses.find(r => r.workbook_id === wb.id);
-    const expert = wb.expert_id ? experts.find(e => e.id === wb.expert_id) : null;
-
-    let status = "not_started";
-    if (response?.is_complete) {
-      status = "completed";
-    } else if (response) {
-      const hasAnswers = response.answers && Object.keys(response.answers).length > 0;
-      status = hasAnswers ? "in_progress" : "not_started";
-    }
-
-    return {
-      id: wb.id,
-      title: wb.title,
-      expert: expert?.name || "",
-      status,
-    };
+  // Fetch user's WorkbookResponses for status
+  const { data: responses = [] } = useQuery({
+    queryKey: ["dashboardWbResponses"],
+    queryFn: async () => {
+      const items = await base44.entities.WorkbookResponse.filter({});
+      return items || [];
+    },
   });
 
-  // Use live data if available, otherwise fall back to design placeholders
-  const items = liveCards.length > 0 ? liveCards : [
-    { id: null, title: "Hormones & Stress Audit", expert: "Dr Shirley Du Plessis", status: "not_started" },
-    { id: null, title: "Nutrition, Energy & Metabolic Health", expert: "Danielle Venter", status: "not_started" },
-    { id: null, title: "Women's Body Literacy", expert: "Dr Candice Morrison", status: "not_started" },
-  ];
+  // Build lookup maps
+  const expertMap = {};
+  experts.forEach(e => { expertMap[e.id] = e; });
+
+  const responseMap = {};
+  responses.forEach(r => { responseMap[r.workbook_id] = r; });
+
+  const getStatus = (wb) => {
+    const resp = responseMap[wb.id];
+    if (!resp) return "not_started";
+    if (resp.is_complete) return "completed";
+    return "in_progress";
+  };
+
+  // Sort by order field
+  const sorted = [...workbooks].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  if (loadingWb) {
+    return (
+      <div className="mb-6 flex items-center justify-center py-8">
+        <Loader2 className="w-5 h-5 animate-spin text-[#C77B85]" />
+      </div>
+    );
+  }
+
+  if (!sorted.length) return null;
 
   return (
-    <div className="mb-6">
+    <div style={{ background: "white", border: "1px solid #f0f0f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", marginBottom: "24px" }}>
       <div className="flex items-center justify-between mb-4">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase">
-          <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />
+        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B1B3D", fontFamily: "Montserrat, sans-serif" }}>
+          <span style={{ display: "inline-block", width: "12px", height: "1px", background: "#6B1B3D", marginRight: "8px" }} />
           YOUR WORKBOOKS · PHASE {String(phaseIndex || 1).padStart(2, "0")}
         </p>
-        <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors">
-          ALL WORKBOOKS +
-        </button>
+        <Link
+          to="/Workbook"
+          className="text-[10px] tracking-[0.15em] text-[#6B6168] hover:text-[#5C1A2E] font-medium uppercase transition-colors"
+        >
+          ALL WORKBOOKS →
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {items.map((wb, i) => (
-          <WorkbookCard key={wb.id || i} id={wb.id} title={wb.title} expert={wb.expert} status={wb.status} />
+        {sorted.map(wb => (
+          <WorkbookCard
+            key={wb.id}
+            workbook={wb}
+            expertName={expertMap[wb.expert_id]?.name || "Expert"}
+            status={getStatus(wb)}
+          />
         ))}
       </div>
     </div>
