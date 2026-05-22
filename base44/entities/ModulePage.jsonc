@@ -1,0 +1,66 @@
+{
+  "name": "ModulePage",
+  "type": "object",
+  "properties": {
+    "moduleId": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number"
+    },
+    "content": {
+      "type": "string",
+      "description": "Rich text HTML content"
+    },
+    "videoUrl": {
+      "type": "string"
+    },
+    "requireCompletion": {
+      "type": "boolean",
+      "default": false
+    },
+    "estimatedMinutes": {
+      "type": "number"
+    },
+    "downloads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "moduleId",
+    "title",
+    "order"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
