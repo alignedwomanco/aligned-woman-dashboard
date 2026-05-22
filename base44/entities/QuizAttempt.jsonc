@@ -1,0 +1,88 @@
+{
+  "name": "QuizAttempt",
+  "type": "object",
+  "properties": {
+    "quizId": {
+      "type": "string"
+    },
+    "subModuleId": {
+      "type": "string"
+    },
+    "moduleId": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number",
+      "description": "Score percentage"
+    },
+    "answers": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "User's answers"
+    },
+    "passed": {
+      "type": "boolean",
+      "default": false
+    },
+    "pointsEarned": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "quizId",
+    "score"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
