@@ -139,6 +139,14 @@ function WorkbookViewerInner({ workbookId }) {
     enabled: !!workbook?.expert_id,
   });
 
+  // Redirect to interactive NutritionWorkbook for Danielle Venter
+  const DANIELLE_EXPERT_ID = "69f48ab57e6d6614129172d8";
+  useEffect(() => {
+    if (workbook && workbook.expert_id === DANIELLE_EXPERT_ID) {
+      window.location.href = "/NutritionWorkbook?id=" + workbookId;
+    }
+  }, [workbook, workbookId]);
+
   useEffect(() => {
     base44.auth.me().then(u => setUser(u)).catch(() => {});
   }, []);
