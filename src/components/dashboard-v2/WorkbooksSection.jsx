@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import base44 from "@/api/base44";
+import { base44 } from "@/api/base44Client";
 import { FileText, Download, Loader2 } from "lucide-react";
 
 // Danielle Venter's expert ID: routes to /NutritionWorkbook instead of /Workbook
