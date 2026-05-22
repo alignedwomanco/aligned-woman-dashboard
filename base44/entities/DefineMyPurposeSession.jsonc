@@ -1,0 +1,141 @@
+{
+  "name": "DefineMyPurposeSession",
+  "type": "object",
+  "properties": {
+    "toolRunId": {
+      "type": "string"
+    },
+    "currentStep": {
+      "type": "number",
+      "default": 1
+    },
+    "dyp_q1": {
+      "type": "string"
+    },
+    "dyp_ans1": {
+      "type": "string"
+    },
+    "dyp_q2": {
+      "type": "string"
+    },
+    "dyp_ans2": {
+      "type": "string"
+    },
+    "dyp_q3": {
+      "type": "string"
+    },
+    "dyp_ans3": {
+      "type": "string"
+    },
+    "dyp_q4": {
+      "type": "string"
+    },
+    "dyp_ans4": {
+      "type": "string"
+    },
+    "dyp_q5": {
+      "type": "string"
+    },
+    "dyp_ans5": {
+      "type": "string"
+    },
+    "dyp_q6": {
+      "type": "string"
+    },
+    "dyp_ans6": {
+      "type": "string"
+    },
+    "dyp_q7": {
+      "type": "string"
+    },
+    "dyp_ans7": {
+      "type": "string"
+    },
+    "dyp_q8": {
+      "type": "string"
+    },
+    "dyp_ans8": {
+      "type": "string"
+    },
+    "dyp_q9": {
+      "type": "string"
+    },
+    "dyp_ans9": {
+      "type": "string"
+    },
+    "dyp_q10": {
+      "type": "string"
+    },
+    "dyp_ans10": {
+      "type": "string"
+    },
+    "mirrorSummaryHtml": {
+      "type": "string"
+    },
+    "finalQuestionHtml": {
+      "type": "string"
+    },
+    "finalResultHtml": {
+      "type": "string"
+    },
+    "transcript": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": [
+    "toolRunId"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
