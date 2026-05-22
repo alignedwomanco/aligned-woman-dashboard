@@ -1,0 +1,41 @@
+{
+  "name": "SiteSettings",
+  "type": "object",
+  "properties": {
+    "light_logo": {
+      "type": "string",
+      "description": "Logo URL for light backgrounds (dark text)"
+    },
+    "dark_logo": {
+      "type": "string",
+      "description": "Logo URL for dark backgrounds (white text)"
+    },
+    "light_favicon": {
+      "type": "string",
+      "description": "Favicon URL for light theme (dark icon)"
+    },
+    "dark_favicon": {
+      "type": "string",
+      "description": "Favicon URL for dark theme (white icon)"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
