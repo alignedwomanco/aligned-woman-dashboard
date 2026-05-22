@@ -1,0 +1,77 @@
+{
+  "name": "ToolRun",
+  "type": "object",
+  "properties": {
+    "toolSlug": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "InProgress",
+        "Complete"
+      ],
+      "default": "InProgress"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outputs": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "toolSlug"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
