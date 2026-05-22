@@ -1,0 +1,60 @@
+{
+  "name": "NutritionProfile",
+  "type": "object",
+  "properties": {
+    "age": {
+      "type": "number",
+      "description": "User's age in years"
+    },
+    "weight_kg": {
+      "type": "number",
+      "description": "Weight in kilograms"
+    },
+    "height_cm": {
+      "type": "number",
+      "description": "Height in centimeters"
+    },
+    "activity_level": {
+      "type": "string",
+      "enum": [
+        "sedentary",
+        "lightly_active",
+        "moderately_active",
+        "very_active"
+      ],
+      "description": "Activity level for protein calculation"
+    },
+    "protein_target_g": {
+      "type": "number",
+      "description": "Calculated daily protein target in grams"
+    },
+    "calorie_target": {
+      "type": "number",
+      "description": "Calculated daily calorie target"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes from the user"
+    }
+  },
+  "required": [
+    "age",
+    "weight_kg",
+    "height_cm",
+    "activity_level"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
