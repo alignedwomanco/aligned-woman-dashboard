@@ -1,0 +1,48 @@
+{
+  "name": "NutritionPillarAudit",
+  "type": "object",
+  "properties": {
+    "pillar": {
+      "type": "string",
+      "enum": [
+        "protein",
+        "blood_sugar",
+        "gut_health",
+        "rhythm",
+        "awareness"
+      ],
+      "description": "Which pillar this audit belongs to"
+    },
+    "meals": {
+      "type": "object",
+      "default": {},
+      "description": "JSON object of meal audit entries per meal (breakfast, lunch, dinner) with food description and estimated protein"
+    },
+    "reflection": {
+      "type": "string",
+      "description": "Free text reflection answer for this pillar"
+    },
+    "additional_answers": {
+      "type": "object",
+      "default": {},
+      "description": "JSON object for any extra pillar-specific form fields"
+    }
+  },
+  "required": [
+    "pillar"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
