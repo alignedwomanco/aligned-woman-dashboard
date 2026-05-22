@@ -1,0 +1,56 @@
+{
+  "name": "UserBadge",
+  "type": "object",
+  "properties": {
+    "badgeId": {
+      "type": "string",
+      "description": "Badge identifier"
+    },
+    "badgeName": {
+      "type": "string",
+      "description": "Badge name"
+    },
+    "badgeIcon": {
+      "type": "string",
+      "description": "Badge icon identifier"
+    },
+    "earnedDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date badge was earned"
+    }
+  },
+  "required": [
+    "badgeId",
+    "badgeName"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
