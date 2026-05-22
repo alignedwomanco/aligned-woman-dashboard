@@ -1,0 +1,72 @@
+{
+  "name": "ChatWidgetSettings",
+  "type": "object",
+  "properties": {
+    "chatbot_name": {
+      "type": "string",
+      "default": "LaurAI",
+      "description": "Display name of the chatbot"
+    },
+    "chatbot_profile_picture": {
+      "type": "string",
+      "description": "URL to chatbot avatar image"
+    },
+    "greeting_message": {
+      "type": "string",
+      "default": "Hi there! I'm LaurAI, your personal guide to The Aligned Woman Blueprint. How can I help you today?",
+      "description": "Initial greeting message"
+    },
+    "knowledge_base": {
+      "type": "string",
+      "description": "Custom knowledge base content for the chatbot"
+    },
+    "temperature": {
+      "type": "number",
+      "default": 0.7,
+      "description": "LLM temperature (0-1)"
+    },
+    "max_tokens": {
+      "type": "number",
+      "default": 500,
+      "description": "Maximum response length"
+    },
+    "is_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable chatbot"
+    },
+    "allowed_pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Pages where chatbot appears (empty = all pages)"
+    },
+    "theme_color": {
+      "type": "string",
+      "default": "#6B1B3D",
+      "description": "Primary color for chatbot UI"
+    }
+  },
+  "required": [
+    "chatbot_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
