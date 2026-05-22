@@ -1,0 +1,90 @@
+{
+  "name": "ModuleEngagement",
+  "type": "object",
+  "properties": {
+    "moduleId": {
+      "type": "string",
+      "description": "Module ID"
+    },
+    "subModuleId": {
+      "type": "string",
+      "description": "Sub-module ID (optional)"
+    },
+    "sessionDuration": {
+      "type": "number",
+      "description": "Session duration in seconds"
+    },
+    "activityType": {
+      "type": "string",
+      "enum": [
+        "video_view",
+        "lesson_read",
+        "assessment_taken",
+        "module_complete"
+      ],
+      "description": "Type of activity"
+    },
+    "completionPercentage": {
+      "type": "number",
+      "description": "Percentage of content consumed"
+    },
+    "deviceType": {
+      "type": "string",
+      "description": "desktop, mobile, tablet"
+    }
+  },
+  "required": [
+    "moduleId",
+    "activityType"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
