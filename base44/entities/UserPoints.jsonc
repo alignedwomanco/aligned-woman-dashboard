@@ -1,0 +1,63 @@
+{
+  "name": "UserPoints",
+  "type": "object",
+  "properties": {
+    "points": {
+      "type": "number",
+      "default": 0,
+      "description": "Total points earned"
+    },
+    "level": {
+      "type": "number",
+      "default": 1,
+      "description": "User level based on points"
+    },
+    "currentStreak": {
+      "type": "number",
+      "default": 0,
+      "description": "Current daily engagement streak"
+    },
+    "longestStreak": {
+      "type": "number",
+      "default": 0,
+      "description": "Longest streak achieved"
+    },
+    "lastActivityDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Last date of activity"
+    }
+  },
+  "required": [
+    "points"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
