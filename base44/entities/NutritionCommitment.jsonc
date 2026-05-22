@@ -1,0 +1,34 @@
+{
+  "name": "NutritionCommitment",
+  "type": "object",
+  "properties": {
+    "commitments": {
+      "type": "object",
+      "default": {},
+      "description": "JSON object of commitment entries the user has made"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free text notes from the user"
+    },
+    "pillar_focus": {
+      "type": "string",
+      "description": "Which pillar the user chose to start with"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
