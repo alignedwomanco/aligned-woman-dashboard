@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import base44 from "@/api/base44";
+import { base44 } from "@/api/base44Client";
 import { Loader2, BookOpen, ArrowLeft, ArrowRight, Download, ChevronLeft, ChevronRight, Check, Lock, Zap, UtensilsCrossed, BarChart3, TrendingUp, X, Menu } from "lucide-react";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
