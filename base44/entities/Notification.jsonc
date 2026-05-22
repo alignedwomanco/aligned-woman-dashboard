@@ -43,28 +43,15 @@
     "message"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
+    "create": {},
     "read": {
-      "$or": [
-        {
-          "data.target_user_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "created_by": "{{user.email}}"
     },
     "update": {
-      "data.target_user_email": "{{user.email}}"
+      "created_by": "{{user.email}}"
     },
     "delete": {
-      "data.target_user_email": "{{user.email}}"
+      "created_by": "{{user.email}}"
     }
   }
 }
