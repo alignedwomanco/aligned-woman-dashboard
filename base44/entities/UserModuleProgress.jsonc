@@ -1,0 +1,87 @@
+{
+  "name": "UserModuleProgress",
+  "type": "object",
+  "properties": {
+    "moduleId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Locked",
+        "Available",
+        "InProgress",
+        "Complete"
+      ],
+      "default": "Locked"
+    },
+    "videoWatchedPercent": {
+      "type": "number",
+      "default": 0
+    },
+    "assessmentScore": {
+      "type": "number"
+    },
+    "reflectionSubmitted": {
+      "type": "boolean",
+      "default": false
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "moduleId"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
