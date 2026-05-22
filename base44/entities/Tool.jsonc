@@ -1,0 +1,66 @@
+{
+  "name": "Tool",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "Awareness",
+        "Liberation",
+        "Intention",
+        "VisionEmbodiment"
+      ]
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "inputsSpec": {
+      "type": "object"
+    },
+    "outputSpec": {
+      "type": "object"
+    },
+    "uiType": {
+      "type": "string",
+      "enum": [
+        "form",
+        "journal",
+        "tracker",
+        "planner",
+        "builder"
+      ]
+    },
+    "unlockRule": {
+      "type": "string",
+      "description": "Description of what unlocks this tool"
+    },
+    "unlockedByModuleId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "phase"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
