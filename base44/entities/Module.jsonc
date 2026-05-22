@@ -1,0 +1,86 @@
+{
+  "name": "Module",
+  "type": "object",
+  "properties": {
+    "sectionId": {
+      "type": "string",
+      "description": "Parent section ID"
+    },
+    "title": {
+      "type": "string"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "Awareness",
+        "Liberation",
+        "Intention",
+        "VisionEmbodiment"
+      ]
+    },
+    "order": {
+      "type": "number",
+      "description": "Order within the section"
+    },
+    "isEnabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether module is active"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "outcomes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "durationMinutes": {
+      "type": "number"
+    },
+    "unlockRequirements": {
+      "type": "object",
+      "properties": {
+        "requiredModuleIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "minimumCapacity": {
+          "type": "number"
+        }
+      }
+    },
+    "toolUnlocks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "phase",
+    "order"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
