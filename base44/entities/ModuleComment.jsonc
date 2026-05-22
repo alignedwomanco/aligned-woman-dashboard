@@ -1,0 +1,75 @@
+{
+  "name": "ModuleComment",
+  "type": "object",
+  "properties": {
+    "moduleId": {
+      "type": "string"
+    },
+    "subModuleId": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    },
+    "isQuestion": {
+      "type": "boolean",
+      "default": false
+    },
+    "isResolved": {
+      "type": "boolean",
+      "default": false
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "response": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "moduleId",
+    "comment"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
