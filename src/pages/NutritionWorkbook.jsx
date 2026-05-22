@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import base44 from "@/api/base44";
 import { Loader2, BookOpen, ArrowLeft, ArrowRight, Download, ChevronLeft, ChevronRight, Check, Lock, Zap, UtensilsCrossed, BarChart3, TrendingUp, X, Menu } from "lucide-react";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -283,6 +283,184 @@ function ToolPlaceholder({ kicker, title, emphasis, icon: Icon, description }) {
         <p className="text-sm font-medium mb-1" style={{ color: "var(--aw-burg-core)" }}>Coming Soon</p>
         <p className="text-xs" style={{ color: "var(--aw-mid-grey)", fontWeight: 300 }}>{description}</p>
       </div>
+    </div>
+  );
+}
+
+// ── Meal Builder Tool ──────────────────────────────────────────────────────────
+
+function MealBuilderTool({ proteinTarget, mealPlans, onSave, isSaving }) {
+  const emptyMeals = {
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+    snack: [],
+  };
+
+  const [meals, setMeals] = useState(() => {
+    const latest = mealPlans?.[0];
+    if (latest?.meals && typeof latest.meals === "object" && !Array.isArray(latest.meals)) {
+      return { ...emptyMeals, ...latest.meals };
+    }
+    return emptyMeals;
+  });
+  const [planId, setPlanId] = useState(mealPlans?.[0]?.id || null);
+  const [newItem, setNewItem] = useState({ meal: "breakfast", name: "", protein: "" });
+
+  const addItem = () => {
+    if (!newItem.name.trim()) return;
+    const protein = parseFloat(newItem.protein) || 0;
+    setMeals(prev => ({
+      ...prev,
+      [newItem.meal]: [...(prev[newItem.meal] || []), { name: newItem.name.trim(), protein }],
+    }));
+    setNewItem(prev => ({ ...prev, name: "", protein: "" }));
+  };
+
+  const removeItem = (meal, idx) => {
+    setMeals(prev => ({
+      ...prev,
+      [meal]: prev[meal].filter((_, i) => i !== idx),
+    }));
+  };
+
+  const mealLabels = [
+    { key: "breakfast", label: "Breakfast", emoji: "🌅" },
+    { key: "lunch", label: "Lunch", emoji: "☀️" },
+    { key: "dinner", label: "Dinner", emoji: "🌙" },
+    { key: "snack", label: "Snacks", emoji: "🥜" },
+  ];
+
+  const mealProtein = (key) => (meals[key] || []).reduce((sum, item) => sum + (item.protein || 0), 0);
+  const totalProtein = mealLabels.reduce((sum, m) => sum + mealProtein(m.key), 0);
+  const pct = proteinTarget ? Math.min(100, Math.round((totalProtein / proteinTarget) * 100)) : 0;
+
+  const handleSave = () => {
+    onSave({
+      id: planId,
+      name: "My Meal Plan",
+      meals,
+      total_protein_g: totalProtein,
+    });
+  };
+
+  return (
+    <div>
+      <p className="text-[9px] tracking-[0.22em] font-bold uppercase mb-1.5" style={{ color: "var(--aw-rose-core)" }}>Meal Builder</p>
+      <h3 className="text-lg mb-1" style={{ fontFamily: "var(--aw-font-display)", color: "var(--aw-burg-core)" }}>
+        Build Your <em style={{ color: "var(--aw-rose-core)" }}>Plate.</em>
+      </h3>
+      <div className="w-8 h-0.5 mb-4" style={{ background: "var(--aw-rose-core)" }} />
+
+      {/* Progress bar */}
+      {proteinTarget && (
+        <div className="mb-4">
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-2xl" style={{ fontFamily: "var(--aw-font-display)", fontStyle: "italic", color: "var(--aw-burg-core)" }}>
+              {totalProtein}g
+            </span>
+            <span className="text-[11px]" style={{ color: "var(--aw-mid-grey)" }}>of {proteinTarget}g target</span>
+          </div>
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--aw-rose-pale)" }}>
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${pct}%`, background: pct >= 90 ? "#6B8E5E" : "linear-gradient(90deg, var(--aw-rose-core), var(--aw-burg-core))" }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Add item row */}
+      <div className="flex gap-1.5 mb-4">
+        <select
+          value={newItem.meal}
+          onChange={e => setNewItem(prev => ({ ...prev, meal: e.target.value }))}
+          className="px-2 py-1.5 text-[10px] rounded-md border"
+          style={{ borderColor: "var(--aw-rose-pale)", color: "var(--aw-burg-core)", fontFamily: "var(--aw-font-sans)", background: "var(--aw-white)" }}
+        >
+          {mealLabels.map(m => (
+            <option key={m.key} value={m.key}>{m.label}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          value={newItem.name}
+          onChange={e => setNewItem(prev => ({ ...prev, name: e.target.value }))}
+          onKeyDown={e => { if (e.key === "Enter") addItem(); }}
+          placeholder="Food item"
+          className="flex-[2] px-2 py-1.5 text-[11px] rounded-md border outline-none"
+          style={{ borderColor: "var(--aw-rose-pale)", color: "var(--aw-dark-grey)", fontFamily: "var(--aw-font-sans)" }}
+        />
+        <input
+          type="number"
+          value={newItem.protein}
+          onChange={e => setNewItem(prev => ({ ...prev, protein: e.target.value }))}
+          onKeyDown={e => { if (e.key === "Enter") addItem(); }}
+          placeholder="g"
+          className="w-14 px-2 py-1.5 text-[11px] rounded-md border outline-none text-center"
+          style={{ borderColor: "var(--aw-rose-pale)", color: "var(--aw-dark-grey)", fontFamily: "var(--aw-font-sans)" }}
+        />
+        <button
+          onClick={addItem}
+          className="px-3 py-1.5 rounded-md text-[10px] font-bold"
+          style={{ background: "var(--aw-burg-core)", color: "var(--aw-white)" }}
+        >
+          +
+        </button>
+      </div>
+
+      {/* Meal slots */}
+      <div className="space-y-3 mb-4">
+        {mealLabels.map(m => {
+          const items = meals[m.key] || [];
+          const mp = mealProtein(m.key);
+          return (
+            <div key={m.key} className="rounded-lg border overflow-hidden" style={{ borderColor: "var(--aw-rose-pale)" }}>
+              <div className="flex items-center justify-between px-3 py-1.5" style={{ background: "var(--aw-rose-wash)" }}>
+                <span className="text-[10px] font-semibold" style={{ color: "var(--aw-burg-core)" }}>
+                  {m.emoji} {m.label}
+                </span>
+                <span className="text-[10px] font-semibold" style={{ color: "var(--aw-rose-core)" }}>
+                  {mp}g
+                </span>
+              </div>
+              {items.length === 0 ? (
+                <div className="px-3 py-2">
+                  <p className="text-[10px] italic" style={{ color: "var(--aw-warm-grey)" }}>No items yet</p>
+                </div>
+              ) : (
+                <div>
+                  {items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between px-3 py-1.5" style={{ borderTop: "1px solid var(--aw-rose-pale)" }}>
+                      <span className="text-[11px]" style={{ color: "var(--aw-dark-grey)", fontWeight: 300 }}>{item.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold" style={{ color: "var(--aw-burg-core)" }}>{item.protein}g</span>
+                        <button
+                          onClick={() => removeItem(m.key, idx)}
+                          className="w-4 h-4 rounded-full flex items-center justify-center transition-colors"
+                          style={{ color: "var(--aw-warm-grey)" }}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Save */}
+      <button
+        onClick={handleSave}
+        disabled={isSaving}
+        className="w-full py-2.5 rounded-full text-xs font-semibold tracking-wide uppercase transition-all disabled:opacity-40"
+        style={{ background: "var(--aw-rose-core)", color: "var(--aw-white)", fontFamily: "var(--aw-font-sans)" }}
+      >
+        {isSaving ? "Saving..." : "Save Meal Plan"}
+      </button>
     </div>
   );
 }
@@ -861,6 +1039,14 @@ export default function NutritionWorkbook() {
     },
   });
 
+  const { data: mealPlans = [] } = useQuery({
+    queryKey: ["mealPlans"],
+    queryFn: async () => {
+      const items = await base44.entities.MealPlan.filter({});
+      return items || [];
+    },
+  });
+
   // ── Mutations ──
 
   const saveProfileMutation = useMutation({
@@ -910,6 +1096,17 @@ export default function NutritionWorkbook() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["nutritionCommitments"] }),
   });
 
+  const saveMealPlanMutation = useMutation({
+    mutationFn: async (data) => {
+      const payload = { name: data.name, meals: data.meals, total_protein_g: data.total_protein_g };
+      if (data.id) {
+        return base44.entities.MealPlan.update(data.id, payload);
+      }
+      return base44.entities.MealPlan.create(payload);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mealPlans"] }),
+  });
+
   const handleSaveAudit = useCallback((pillar, data) => {
     saveAuditMutation.mutate({ pillar, data });
   }, [saveAuditMutation]);
@@ -949,7 +1146,7 @@ export default function NutritionWorkbook() {
     const pt = nutritionProfile?.protein_target_g || null;
     switch (activeToolTab) {
       case "calculator": return <ProteinCalculator profile={nutritionProfile} onSave={d => saveProfileMutation.mutate(d)} isSaving={saveProfileMutation.isPending} />;
-      case "mealbuilder": return <ToolPlaceholder kicker="Meal Builder" title="Build Your" emphasis="Plate." icon={UtensilsCrossed} description={`Build balanced meals that hit your ${pt ? pt + "g" : ""} protein target.`} />;
+      case "mealbuilder": return <MealBuilderTool proteinTarget={pt} mealPlans={mealPlans} onSave={d => saveMealPlanMutation.mutate(d)} isSaving={saveMealPlanMutation.isPending} />;
       case "tracker": return <ToolPlaceholder kicker="Daily Log" title="Track Your" emphasis="Day." icon={BarChart3} description="Log daily food intake, track protein, and check in on your five pillars." />;
       case "dashboard": return <ToolPlaceholder kicker="Your Dashboard" title="Progress" emphasis="Overview." icon={TrendingUp} description="Weekly protein averages, pillar alignment scores, and tracking streaks." />;
       default: return null;
