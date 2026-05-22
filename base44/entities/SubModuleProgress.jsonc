@@ -1,0 +1,80 @@
+{
+  "name": "SubModuleProgress",
+  "type": "object",
+  "properties": {
+    "subModuleId": {
+      "type": "string"
+    },
+    "moduleId": {
+      "type": "string"
+    },
+    "watchedPercent": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage of video watched"
+    },
+    "isComplete": {
+      "type": "boolean",
+      "default": false
+    },
+    "lastWatchPosition": {
+      "type": "number",
+      "default": 0,
+      "description": "Last position in seconds"
+    }
+  },
+  "required": [
+    "subModuleId",
+    "moduleId"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
