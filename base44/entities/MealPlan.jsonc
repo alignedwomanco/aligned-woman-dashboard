@@ -1,0 +1,47 @@
+{
+  "name": "MealPlan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Meal plan name e.g. Weekday Breakfast"
+    },
+    "meals": {
+      "type": "object",
+      "default": {},
+      "description": "JSON object of meal entries with food items, protein grams, and calories per item"
+    },
+    "total_protein_g": {
+      "type": "number",
+      "default": 0,
+      "description": "Total protein in grams for this meal plan"
+    },
+    "total_calories": {
+      "type": "number",
+      "default": 0,
+      "description": "Total calories for this meal plan"
+    },
+    "is_template": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a saved reusable template"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
