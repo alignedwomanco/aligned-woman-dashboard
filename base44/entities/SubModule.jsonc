@@ -1,0 +1,67 @@
+{
+  "name": "SubModule",
+  "type": "object",
+  "properties": {
+    "moduleId": {
+      "type": "string",
+      "description": "Parent module ID"
+    },
+    "title": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number"
+    },
+    "videoUrl": {
+      "type": "string"
+    },
+    "videoDuration": {
+      "type": "number",
+      "description": "Duration in seconds"
+    },
+    "lessonContent": {
+      "type": "string"
+    },
+    "downloads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "isAssessment": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "moduleId",
+    "title",
+    "order"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
