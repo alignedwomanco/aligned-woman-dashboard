@@ -1,0 +1,70 @@
+{
+  "name": "Section",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Section name (e.g., A - Awareness)"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "Awareness",
+        "Liberation",
+        "Intention",
+        "VisionEmbodiment"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "coverImage": {
+      "type": "string"
+    },
+    "accessType": {
+      "type": "string",
+      "enum": [
+        "open",
+        "level_unlock",
+        "buy_now",
+        "time_unlock",
+        "private"
+      ],
+      "default": "open"
+    },
+    "accessLevel": {
+      "type": "number",
+      "default": 1
+    },
+    "isPublished": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "phase"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
