@@ -1,0 +1,69 @@
+{
+  "name": "Quiz",
+  "type": "object",
+  "properties": {
+    "subModuleId": {
+      "type": "string",
+      "description": "Associated sub-module"
+    },
+    "moduleId": {
+      "type": "string",
+      "description": "Parent module"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "correctAnswer": {
+            "type": "number",
+            "description": "Index of correct answer"
+          }
+        }
+      },
+      "description": "Quiz questions"
+    },
+    "passingScore": {
+      "type": "number",
+      "default": 70,
+      "description": "Minimum score to pass"
+    },
+    "pointsReward": {
+      "type": "number",
+      "default": 10,
+      "description": "Points awarded for passing"
+    }
+  },
+  "required": [
+    "subModuleId",
+    "moduleId",
+    "questions"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
