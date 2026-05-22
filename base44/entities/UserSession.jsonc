@@ -1,0 +1,73 @@
+{
+  "name": "UserSession",
+  "type": "object",
+  "properties": {
+    "loginTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Login timestamp"
+    },
+    "logoutTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Logout timestamp"
+    },
+    "sessionDuration": {
+      "type": "number",
+      "description": "Total session time in seconds"
+    },
+    "pagesVisited": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Pages visited during session"
+    },
+    "deviceType": {
+      "type": "string",
+      "description": "desktop, mobile, tablet"
+    }
+  },
+  "required": [
+    "loginTime"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
