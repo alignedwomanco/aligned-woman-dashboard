@@ -1,0 +1,47 @@
+{
+  "name": "NutritionDailyLog",
+  "type": "object",
+  "properties": {
+    "log_date": {
+      "type": "string",
+      "description": "Date string in YYYY-MM-DD format"
+    },
+    "entries": {
+      "type": "object",
+      "default": {},
+      "description": "JSON object of food entries logged for this day, each with name, protein_g, and calories"
+    },
+    "total_protein_g": {
+      "type": "number",
+      "default": 0,
+      "description": "Total protein consumed in grams"
+    },
+    "total_calories": {
+      "type": "number",
+      "default": 0,
+      "description": "Total calories consumed"
+    },
+    "pillar_checkins": {
+      "type": "object",
+      "default": {},
+      "description": "JSON object with 5 boolean keys: protein_every_meal, carbs_paired, five_cups_veg, consistent_rhythm, ate_with_awareness"
+    }
+  },
+  "required": [
+    "log_date"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
