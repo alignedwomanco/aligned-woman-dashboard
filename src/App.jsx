@@ -18,6 +18,7 @@ import CheckoutComplete from './pages/CheckoutComplete';
 import AdminSettings from './pages/AdminSettings';
 import PdfTest from './pages/PdfTest';
 import ClaritySprintPage from './pages/ClaritySprintPage';
+import NutritionWorkbook from './pages/NutritionWorkbook';
 import Admin from './pages/Admin';
 import { PaymentProvider } from './context/PaymentContext';
 
@@ -84,6 +85,7 @@ const AuthenticatedApp = () => {
       <Route path="/admin" element={<Admin />} />
       <Route path="/pdf-test" element={<PdfTest />} />
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
+      <Route path="/NutritionWorkbook" element={<LayoutWrapper currentPageName="NutritionWorkbook"><NutritionWorkbook /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
