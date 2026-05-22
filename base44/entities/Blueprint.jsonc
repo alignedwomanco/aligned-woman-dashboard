@@ -1,0 +1,63 @@
+{
+  "name": "Blueprint",
+  "type": "object",
+  "properties": {
+    "sections": {
+      "type": "object",
+      "properties": {
+        "awareness": {
+          "type": "object"
+        },
+        "liberation": {
+          "type": "object"
+        },
+        "intention": {
+          "type": "object"
+        },
+        "visionEmbodiment": {
+          "type": "object"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "identity": {
+          "type": "object"
+        },
+        "boundaries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
