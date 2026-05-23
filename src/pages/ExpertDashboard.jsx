@@ -18,6 +18,9 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
+  Edit,
+  Save,
+  Upload,
 } from "lucide-react";
 
 const SITE_URL = "https://app.alignedwomanco.com";
@@ -47,6 +50,7 @@ function useExpertData() {
 
   return {
     user,
+    userEmail,
     expert: experts[0] || null,
     affiliate: affiliates[0] || null,
     sales,
@@ -396,44 +400,285 @@ function SalesTable({ sales }) {
   );
 }
 
-function ProfileTab({ expert }) {
+function ProfileTab({ expert, onExpertUpdate }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    title: "",
+    bio: "",
+    specialties: "",
+    profile_picture: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (expert) {
+      setFormData({
+        name: expert.name || "",
+        title: expert.title || "",
+        bio: expert.bio || "",
+        specialties: expert.specialties?.join(", ") || "",
+        profile_picture: expert.profile_picture || "",
+      });
+    }
+  }, [expert]);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setSuccess(false);
+    setError(null);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setFormData({
+      name: expert.name || "",
+      title: expert.title || "",
+      bio: expert.bio || "",
+      specialties: expert.specialties?.join(", ") || "",
+      profile_picture: expert.profile_picture || "",
+    });
+    setSuccess(false);
+    setError(null);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const specialtiesArray = formData.specialties
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+      await base44.entities.Expert.update(expert.id, {
+        name: formData.name,
+        title: formData.title,
+        bio: formData.bio,
+        specialties: specialtiesArray,
+        profile_picture: formData.profile_picture,
+      });
+
+      setSuccess(true);
+      setIsEditing(false);
+      setTimeout(() => setSuccess(false), 3000);
+
+      if (onExpertUpdate) {
+        onExpertUpdate();
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleProfilePictureUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, profile_picture: file_url });
+    } catch (err) {
+      setError("Failed to upload image");
+    }
+  };
+
   if (!expert) return null;
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl p-6" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.06)", boxShadow: "0 2px 12px rgba(74,14,46,0.04)" }}>
-        <div className="flex items-start gap-5">
-          <div className="w-20 h-20 rounded-full overflow-hidden shrink-0" style={{ background: "#FDF5F3" }}>
-            {expert.profile_picture ? (
-              <img src={expert.profile_picture} alt={expert.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 28, color: "#C4847A" }}>
-                {expert.name?.[0] || "?"}
-              </div>
-            )}
-          </div>
-          <div>
-            <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 24, color: "#4A0E2E", marginBottom: 4 }}>
-              {expert.name}
-            </h2>
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 14, color: "#C4847A", marginBottom: 8 }}>
-              {expert.title}
-            </p>
-            {expert.specialties?.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {expert.specialties.map((s, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs" style={{ background: "#FDF5F3", color: "#4A0E2E", fontFamily: "Montserrat, sans-serif", fontWeight: 500 }}>
-                    {s}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+      {success && (
+        <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(45,106,79,0.08)" }}>
+          <CheckCircle2 style={{ width: 14, height: 14, color: "#2D6A4F" }} />
+          <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#2D6A4F" }}>Profile updated successfully</span>
         </div>
-        {expert.bio && (
-          <p className="mt-5" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.7 }}>
-            {expert.bio}
-          </p>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(192,57,43,0.08)" }}>
+          <AlertCircle style={{ width: 14, height: 14, color: "#C0392B" }} />
+          <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#C0392B" }}>{error}</span>
+        </div>
+      )}
+
+      <div className="rounded-xl p-6" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.06)", boxShadow: "0 2px 12px rgba(74,14,46,0.04)" }}>
+        {!isEditing ? (
+          <>
+            <div className="flex items-start gap-5">
+              <div className="w-20 h-20 rounded-full overflow-hidden shrink-0" style={{ background: "#FDF5F3" }}>
+                {formData.profile_picture ? (
+                  <img src={formData.profile_picture} alt={formData.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 28, color: "#C4847A" }}>
+                    {formData.name?.[0] || "?"}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 24, color: "#4A0E2E", marginBottom: 4 }}>
+                  {formData.name}
+                </h2>
+                <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 14, color: "#C4847A", marginBottom: 8 }}>
+                  {formData.title}
+                </p>
+                {formData.specialties && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {formData.specialties.split(",").map((s, i) => (
+                      <span key={i} className="px-3 py-1 rounded-full text-xs" style={{ background: "#FDF5F3", color: "#4A0E2E", fontFamily: "Montserrat, sans-serif", fontWeight: 500 }}>
+                        {s.trim()}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
+                  style={{
+                    background: "#4A0E2E",
+                    color: "#FFFFFF",
+                    fontFamily: "Montserrat, sans-serif",
+                    fontWeight: 600,
+                    fontSize: 12,
+                  }}
+                >
+                  <Edit style={{ width: 14, height: 14 }} /> Edit Profile
+                </button>
+              </div>
+            </div>
+            {formData.bio && (
+              <p className="mt-5" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.7 }}>
+                {formData.bio}
+              </p>
+            )}
+          </>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-20 h-20 rounded-full overflow-hidden shrink-0" style={{ background: "#FDF5F3" }}>
+                {formData.profile_picture ? (
+                  <img src={formData.profile_picture} alt={formData.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 28, color: "#C4847A" }}>
+                    {formData.name?.[0] || "?"}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+                  Profile Picture
+                </label>
+                <label htmlFor="profile-pic-upload" className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.15)", fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E" }}>
+                  <Upload style={{ width: 14, height: 14 }} />
+                  {formData.profile_picture ? "Change Photo" : "Upload Photo"}
+                </label>
+                <input
+                  id="profile-pic-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleProfilePictureUpload}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+                Name
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border outline-none"
+                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+                Title
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border outline-none"
+                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+                Specialties (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={formData.specialties}
+                onChange={(e) => setFormData({ ...formData, specialties: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border outline-none"
+                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+                placeholder="e.g. Hormone Health, Nutrition, Wellness"
+              />
+            </div>
+
+            <div>
+              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+                Bio
+              </label>
+              <textarea
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border outline-none min-h-[120px]"
+                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+                placeholder="Write your biography..."
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all"
+                style={{
+                  background: "#4A0E2E",
+                  color: "#FFFFFF",
+                  fontFamily: "Montserrat, sans-serif",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  opacity: saving ? 0.6 : 1,
+                  cursor: saving ? "wait" : "pointer",
+                }}
+              >
+                {saving ? (
+                  <><Loader2 className="animate-spin" style={{ width: 16, height: 16 }} /> Saving...</>
+                ) : (
+                  <><Save style={{ width: 16, height: 16 }} /> Save Changes</>
+                )}
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={saving}
+                className="px-5 py-2.5 rounded-lg transition-all"
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid rgba(74,14,46,0.15)",
+                  fontFamily: "Montserrat, sans-serif",
+                  fontWeight: 500,
+                  fontSize: 13,
+                  color: "#4A0E2E",
+                  cursor: saving ? "not-allowed" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
@@ -441,10 +686,10 @@ function ProfileTab({ expert }) {
         <div>
           <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 13, color: "#4A0E2E" }}>Your public profile</span>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#8A7A76", marginTop: 2 }}>
-            This is how you appear on the Blueprint sales page and Experts directory. Contact the admin team to update your profile.
+            This is how you appear on the Blueprint sales page and Experts directory.
           </p>
         </div>
-        <a href="/Experts" className="flex items-center gap-1.5 px-4 py-2 rounded-lg" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}>
+        <a href="/experts" className="flex items-center gap-1.5 px-4 py-2 rounded-lg" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}>
           View <ExternalLink style={{ width: 12, height: 12 }} />
         </a>
       </div>
@@ -453,7 +698,7 @@ function ProfileTab({ expert }) {
 }
 
 export default function ExpertDashboard() {
-  const { user, expert, affiliate, sales, isLoading } = useExpertData();
+  const { user, userEmail, expert, affiliate, sales, isLoading } = useExpertData();
   const [activeTab, setActiveTab] = useState("earnings");
   const queryClient = useQueryClient();
 
@@ -570,7 +815,12 @@ export default function ExpertDashboard() {
             </div>
           )}
 
-          {activeTab === "profile" && <ProfileTab expert={expert} />}
+          {activeTab === "profile" && (
+            <ProfileTab
+              expert={expert}
+              onExpertUpdate={() => queryClient.invalidateQueries({ queryKey: ["expert-profile", userEmail] })}
+            />
+          )}
         </motion.div>
       </div>
     </div>
