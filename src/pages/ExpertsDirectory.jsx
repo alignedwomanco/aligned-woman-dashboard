@@ -332,8 +332,14 @@ export default function ExpertsDirectory() {
     base44.analytics.track({ eventName: "view_experts_page" });
   }, []);
 
-  // Use live DB data, mapped to card shape
-  const experts = dbExperts.map(mapDbExpert);
+  // Use live DB data, mapped to card shape — Laura Thomas always first
+  const experts = [...dbExperts]
+    .sort((a, b) => {
+      const aIsLaura = a.name?.toLowerCase().includes("laura") ? -1 : 0;
+      const bIsLaura = b.name?.toLowerCase().includes("laura") ? -1 : 0;
+      return aIsLaura - bIsLaura;
+    })
+    .map(mapDbExpert);
 
   const filtered = activeFilter === "All"
     ? experts
