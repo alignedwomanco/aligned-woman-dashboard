@@ -859,53 +859,48 @@ function Faculty() {
         </SectionReveal>
 
         {/* Faculty grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
           {filtered.map((expert) => (
             <SectionReveal key={expert.id}>
               <div
-                className="bg-white rounded-lg overflow-hidden h-full flex flex-col"
+                className="bg-white rounded-lg p-4 h-full flex flex-col items-center text-center"
                 style={{ border: `1px solid rgba(74,14,46,0.06)` }}
               >
-                {/* Photo */}
+                {/* Circular photo */}
                 <div
-                  className="w-full flex items-center justify-center overflow-hidden flex-shrink-0"
-                  style={{ aspectRatio: "3/2.2", background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseWash})` }}
+                  className="w-20 h-20 rounded-full mb-4 flex-shrink-0 overflow-hidden flex items-center justify-center"
+                  style={{ background: `linear-gradient(135deg, ${C.roseLight}, ${C.rosePale})` }}
                 >
                   {expert.profile_picture ? (
                     <img src={expert.profile_picture} alt={expert.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 48, color: C.burgCore, opacity: 0.4 }}>
-                      {getInitials(expert.name)}
-                    </span>
-                  )}
+                  ) : null}
                 </div>
 
-                {/* Body */}
-                <div className="p-5 flex flex-col flex-1">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.2em] mb-1 block" style={{ fontFamily: sans, color: C.roseDeep }}>
-                    {getCategoryName(expert.category)}
-                  </span>
-                  <span className="text-[15px] font-semibold mb-1 block" style={{ fontFamily: sans, color: C.burgCore }}>
-                    {expert.name}
-                  </span>
-                  {expert.title && (
-                    <p className="text-[12px] font-medium mb-2" style={{ fontFamily: sans, color: C.burgCore + "99" }}>
-                      {expert.title}
-                    </p>
-                  )}
-                  {expert.bio && (
-                    <p className="text-[12px] font-light leading-[1.7] mb-3 flex-1 line-clamp-3" style={{ fontFamily: sans, color: C.midGrey }}>
-                      {expert.bio}
-                    </p>
-                  )}
-                  <Link
-                    to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
-                    className="text-[10px] font-medium uppercase tracking-[0.12em] hover:opacity-70 transition-opacity mt-auto"
-                    style={{ fontFamily: sans, color: C.burgCore }}
-                  >
-                    VIEW PROFILE &rarr;
-                  </Link>
-                </div>
+                {/* Category */}
+                <span className="text-[8px] font-semibold uppercase tracking-[0.18em] mb-1 block" style={{ fontFamily: sans, color: C.midGrey }}>
+                  {getCategoryName(expert.category)}
+                </span>
+
+                {/* Name */}
+                <span className="text-[13px] font-bold leading-snug mb-2 block" style={{ fontFamily: sans, color: C.burgCore }}>
+                  {expert.name}
+                </span>
+
+                {/* Bio snippet */}
+                {expert.bio && (
+                  <p className="text-[11px] font-light leading-[1.6] mb-3 flex-1 line-clamp-4" style={{ fontFamily: sans, color: C.midGrey }}>
+                    {expert.bio}
+                  </p>
+                )}
+
+                {/* CTA */}
+                <Link
+                  to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
+                  className="text-[9px] font-bold uppercase tracking-[0.18em] hover:opacity-60 transition-opacity mt-auto pt-1"
+                  style={{ fontFamily: sans, color: C.burgCore }}
+                >
+                  VIEW PROFILE &rarr;
+                </Link>
               </div>
             </SectionReveal>
           ))}
