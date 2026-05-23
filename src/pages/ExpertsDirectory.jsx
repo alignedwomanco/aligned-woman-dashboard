@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
@@ -318,10 +318,15 @@ function ExpertCard({ expert, onConnect, onView }) {
   );
 }
 
+function slugify(name) {
+  return name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "";
+}
+
 // ─── MAIN PAGE ───
 export default function ExpertsDirectory() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [modal, setModal] = useState(null); // { expert, mode }
+  const navigate = useNavigate();
 
   const { data: dbExperts = [], isLoading } = useQuery({
     queryKey: ["experts-directory-db"],
@@ -359,8 +364,8 @@ export default function ExpertsDirectory() {
   };
 
   const openView = (expert) => {
-    base44.analytics.track({ eventName: "expert_modal_open", properties: { expert: expert.name, mode: "viewOnly" } });
-    setModal({ expert, mode: "viewOnly" });
+    base44.analytics.track({ eventName: "expert_profile_view", properties: { expert: expert.name } });
+    navigate(`/experts/${slugify(expert.name)}`);
   };
 
   return (
