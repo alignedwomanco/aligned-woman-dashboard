@@ -128,20 +128,10 @@ function ConnectionForm({ expertName, formRef }) {
         {/* Left */}
         <div>
           <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 16 }}>Connect</p>
-          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 32, color: C.burgCore, lineHeight: 1.2, margin: "0 0 20px" }}>Request an introduction.</h2>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, marginBottom: 32 }}>
-            If you would like to connect with {firstName} directly, submit a request below. We will review your enquiry and facilitate an introduction where appropriate. Please note that expert availability varies and not all requests can be accommodated.
+          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 32, color: C.burgCore, lineHeight: 1.2, margin: "0 0 20px" }}>Get in touch.</h2>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, marginBottom: 0 }}>
+            Send a message directly to {expertName}.
           </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {["Requests are reviewed within 48 hours", "You will receive a confirmation email", "If approved, the introduction is made via email"].map((item) => (
-              <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 20, height: 20, borderRadius: "50%", background: C.rosePale, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Check size={11} style={{ color: C.roseCore }} />
-                </div>
-                <span style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.midGrey }}>{item}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Right — Form */}
@@ -231,13 +221,13 @@ function ConnectionForm({ expertName, formRef }) {
                 {errors.message && <p style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.message}</p>}
               </div>
               <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 11, color: C.midGrey, lineHeight: 1.6 }}>
-                Your details will be shared only with {firstName} and The Aligned Woman Co team for the purpose of facilitating this introduction.
+                Your message will be shared with {expertName} directly.
               </p>
               <button
                 type="submit"
                 style={{ width: "100%", height: 48, background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", cursor: "pointer" }}
               >
-                Send Request
+                Send Message
               </button>
             </form>
           )}
@@ -424,7 +414,7 @@ export default function ExpertProfile() {
                 onClick={scrollToForm}
                 style={{ background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, padding: "14px 32px", fontFamily: sans, fontWeight: 600, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer", minHeight: 48 }}
               >
-                Request a Connection
+                Send a Message
               </button>
               <a
                 href="/blueprint"
