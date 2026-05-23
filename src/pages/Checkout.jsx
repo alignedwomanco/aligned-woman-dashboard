@@ -7,7 +7,7 @@ import { Lock, Shield, ChevronDown, ChevronUp } from "lucide-react";
 /*  CONSTANTS                                                          */
 /* ------------------------------------------------------------------ */
 
-const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oUbJ36Rg6xPftf4l3eME05";
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU7sN7Vkg8p1Cp5p7eME06";
 
 const PURCHASE_TYPES = [
   { id: "self", label: "Purchase for myself", sub: "Secure your place in the founding cohort." },
