@@ -1,10 +1,89 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Play, Plus, Check, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
+
+// ─── SCROLL REVEAL HOOK ───
+function useScrollReveal(threshold = 0.15) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("is-visible");
+          observer.unobserve(el);
+        }
+      },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+  return ref;
+}
+
+// ─── COUNTER ANIMATION HOOK ───
+function useCounter(target, duration = 1200, prefix = "", suffix = "", enabled = true) {
+  const [value, setValue] = useState(0);
+  const [struck, setStruck] = useState(false);
+  const triggered = useRef(false);
+
+  const start = useCallback(() => {
+    if (triggered.current || !enabled) return;
+    triggered.current = true;
+    const startTime = performance.now();
+    const update = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(target * eased));
+      if (progress < 1) requestAnimationFrame(update);
+      else {
+        setValue(target);
+        if (suffix === "__strike") setTimeout(() => setStruck(true), 300);
+      }
+    };
+    requestAnimationFrame(update);
+  }, [target, duration, enabled, suffix]);
+
+  return { value, struck, start };
+}
+
+// ─── ALIVE PARALLAX HOOK ───
+function useAliveParallax() {
+  useEffect(() => {
+    const isMobile = () => window.innerWidth < 768;
+    let ticking = false;
+    const handle = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          if (!isMobile()) {
+            document.querySelectorAll(".alive-letter").forEach((letter) => {
+              const section = letter.closest(".alive-phase");
+              if (!section) return;
+              const rect = section.getBoundingClientRect();
+              const vh = window.innerHeight;
+              if (rect.top < vh && rect.bottom > 0) {
+                const progress = (vh - rect.top) / (vh + rect.height);
+                const offset = (progress - 0.5) * 60;
+                letter.style.transform = `translateY(${offset}px)`;
+              }
+            });
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handle, { passive: true });
+    return () => window.removeEventListener("scroll", handle);
+  }, []);
+}
 
 // ─── BRAND TOKENS (CSS custom properties not in tailwind.config) ───
 const C = {
@@ -174,18 +253,16 @@ const COMPARISON_ROWS = [
 
 // ─── SHARED COMPONENTS ───
 
-function SectionReveal({ children, className = "", style = {} }) {
+function SectionReveal({ children, className = "", style = {}, delay = 0 }) {
+  const ref = useScrollReveal(0.15);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
-      className={className}
-      style={style}
+    <div
+      ref={ref}
+      className={`animate-on-scroll ${className}`}
+      style={{ ...style, transitionDelay: `${delay}ms` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -220,18 +297,14 @@ function PrimaryCTA({ large = false, label = "Begin Your Blueprint +", className
     <a
       href="#enrol"
       onClick={onClick}
-      className={`inline-block rounded-full font-bold uppercase text-center transition-all duration-200 hover:scale-[1.02] ${className}`}
+      className={`cta-primary inline-block rounded-full font-bold uppercase text-center ${className}`}
       style={{
         fontFamily: sans,
         fontSize: large ? 14 : 12,
         letterSpacing: large ? "0.18em" : "0.14em",
         padding: large ? "22px 56px" : "18px 40px",
-        background: C.roseCore,
-        color: C.burgDeep,
         minHeight: 48,
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = C.roseDeep)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = C.roseCore)}
     >
       {label}
     </a>
@@ -242,16 +315,15 @@ function SecondaryCTA({ label = "Explore The Programme", dark = true, className 
   return (
     <a
       href="#enrol"
-      className={`inline-block rounded-full font-bold uppercase text-center transition-all duration-200 hover:opacity-80 ${className}`}
+      className={`cta-secondary inline-block rounded-full font-bold uppercase text-center ${className}`}
       style={{
         fontFamily: sans,
         fontSize: 12,
         letterSpacing: "0.14em",
         padding: "18px 40px",
-        background: "transparent",
+        minHeight: 48,
         color: dark ? C.white : C.burgCore,
         border: dark ? "1px solid rgba(255,255,255,0.3)" : `1px solid ${C.burgCore}`,
-        minHeight: 48,
       }}
     >
       {label}
@@ -277,6 +349,60 @@ function AnnouncementBar() {
         FOUNDING PRICE R3,997 &middot; DOORS OPEN 1 JUNE 2026 &middot; PRICE RISES AT LAUNCH
       </p>
     </div>
+  );
+}
+
+
+// ─── STAT BAR (with counter animation) ───
+function StatBar() {
+  const containerRef = useRef(null);
+  const [triggered, setTriggered] = useState(false);
+
+  const c14 = useCounter(14, 1200, "", "", triggered);
+  const c7 = useCounter(7, 1200, "", "", triggered);
+  const c116200 = useCounter(116200, 1200, "R", "__strike", triggered);
+  const c3997 = useCounter(3997, 1200, "R", "", triggered);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTriggered(true);
+          c14.start(); c7.start(); c116200.start(); c3997.start();
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const stats = [
+    { label: "Specialists", display: `${c14.value}`, style: { color: C.white } },
+    { label: "Life Domains", display: `${c7.value}`, style: { color: C.white } },
+    { label: "Private Value", display: `R${c116200.value.toLocaleString()}`, struck: c116200.struck, style: { color: C.roseLight } },
+    { label: "Your Investment", display: `R${c3997.value.toLocaleString()}`, style: { color: C.white } },
+  ];
+
+  return (
+    <dl ref={containerRef} className="grid grid-cols-2 md:grid-cols-4 gap-0 max-w-[700px] mx-auto mb-10">
+      {stats.map((s, i) => (
+        <div key={i} className="flex flex-col items-center py-4 md:py-0">
+          <dt className="order-2 text-[9px] font-semibold uppercase tracking-[0.2em] mt-1" style={{ fontFamily: sans, color: "rgba(255,255,255,0.5)" }}>
+            {s.label}
+          </dt>
+          <dd className="order-1" style={{ fontFamily: serif, fontStyle: "italic", fontSize: 36, ...s.style }}>
+            {s.struck
+              ? <s style={{ color: C.roseLight, textDecoration: "line-through" }}>{s.display}</s>
+              : s.display
+            }
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -395,45 +521,7 @@ function Hero() {
         </motion.p>
 
         {/* Stat bar */}
-        <motion.dl
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-0 max-w-[700px] mx-auto mb-10"
-        >
-          {[
-            { num: "14", label: "Specialists" },
-            { num: "7", label: "Life Domains" },
-            { num: null, label: "Private Value", strikethrough: "R116,200" },
-            { num: "R3,997", label: "Your Investment" },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center py-4 md:py-0 ${
-                i < 2 ? "border-b md:border-b-0" : ""
-              } ${i % 2 === 0 ? "" : ""}`}
-              style={{
-                borderColor: "rgba(255,255,255,0.1)",
-                borderRightWidth: i < 3 && i % 2 === 0 ? 0 : 0,
-              }}
-            >
-              <div
-                className="hidden md:block absolute right-0 top-1/4 h-1/2"
-                style={{ width: 1, background: i < 3 ? "rgba(255,255,255,0.1)" : "transparent" }}
-              />
-              <dt className="order-2 text-[9px] font-semibold uppercase tracking-[0.2em] mt-1" style={{ fontFamily: sans, color: "rgba(255,255,255,0.5)" }}>
-                {stat.label}
-              </dt>
-              <dd className="order-1" style={{ fontFamily: serif, fontStyle: "italic", fontSize: 36 }}>
-                {stat.strikethrough ? (
-                  <s style={{ color: C.roseLight }}>{stat.strikethrough}</s>
-                ) : (
-                  <span style={{ color: C.white }}>{stat.num}</span>
-                )}
-              </dd>
-            </div>
-          ))}
-        </motion.dl>
+        <StatBar />
 
         {/* CTA row */}
         <motion.div
@@ -1050,6 +1138,44 @@ function WhatChanges() {
 }
 
 
+// ─── ALIVE PHASE (per-phase IO trigger) ───
+function AlivePhase({ phase }) {
+  const ref = useScrollReveal(0.15);
+  return (
+    <div
+      ref={ref}
+      className="animate-on-scroll alive-phase relative rounded-lg p-8 md:p-10 overflow-hidden"
+      style={{ background: C.white, border: `1px solid rgba(74,14,46,0.06)`, minHeight: 200 }}
+    >
+      <span
+        className="alive-letter absolute top-4 right-4 md:right-8 pointer-events-none select-none"
+        style={{
+          fontFamily: serif,
+          fontStyle: "italic",
+          fontSize: "clamp(120px, 15vw, 200px)",
+          color: C.rosePale,
+          lineHeight: 1,
+          opacity: 0.6,
+        }}
+      >
+        {phase.letter}
+      </span>
+      <div className="relative z-10">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3 block" style={{ fontFamily: sans, color: C.burgCore }}>
+          {phase.letter} &middot; {phase.name}
+        </span>
+        <h3 className="text-[24px] mb-4" style={{ fontFamily: serif, fontStyle: "italic", color: C.burgCore }}>
+          &ldquo;{phase.quote}&rdquo;
+        </h3>
+        <p className="text-[14px] font-light leading-[1.8] max-w-[600px]" style={{ fontFamily: sans, color: C.darkGrey }}>
+          {phase.body}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
 // ═══════════════════════════════════════════════
 // SECTION 09: THE ALIVE METHOD
 // ═══════════════════════════════════════════════
@@ -1076,42 +1202,10 @@ function ALIVEMethod() {
           </p>
         </SectionReveal>
 
-        {/* 5 phases */}
+        {/* 5 phases — each triggers independently */}
         <div className="space-y-6">
           {ALIVE_PHASES.map((phase, i) => (
-            <SectionReveal key={i}>
-              <div
-                className="relative rounded-lg p-8 md:p-10 overflow-hidden"
-                style={{ background: C.white, border: `1px solid rgba(74,14,46,0.06)`, minHeight: 200 }}
-              >
-                {/* Decorative letter */}
-                <span
-                  className="absolute top-4 right-4 md:right-8 pointer-events-none select-none"
-                  style={{
-                    fontFamily: serif,
-                    fontStyle: "italic",
-                    fontSize: "clamp(120px, 15vw, 200px)",
-                    color: C.rosePale,
-                    lineHeight: 1,
-                    opacity: 0.6,
-                  }}
-                >
-                  {phase.letter}
-                </span>
-
-                <div className="relative z-10">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3 block" style={{ fontFamily: sans, color: C.burgCore }}>
-                    {phase.letter} &middot; {phase.name}
-                  </span>
-                  <h3 className="text-[24px] mb-4" style={{ fontFamily: serif, fontStyle: "italic", color: C.burgCore }}>
-                    &ldquo;{phase.quote}&rdquo;
-                  </h3>
-                  <p className="text-[14px] font-light leading-[1.8] max-w-[600px]" style={{ fontFamily: sans, color: C.darkGrey }}>
-                    {phase.body}
-                  </p>
-                </div>
-              </div>
-            </SectionReveal>
+            <AlivePhase key={i} phase={phase} />
           ))}
         </div>
       </div>
@@ -1145,7 +1239,7 @@ function Testimonials() {
           {visible.map((t, i) => (
             <SectionReveal key={i}>
               <div
-                className="break-inside-avoid rounded p-8"
+                className="testimonial-card break-inside-avoid rounded p-8"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 <p className="text-[16px] leading-[1.7] mb-4" style={{ fontFamily: serif, fontStyle: "italic", color: C.white }}>
@@ -1475,6 +1569,51 @@ function Pricing() {
 }
 
 
+// ─── CLOSING SEQUENCE ───
+function ClosingSequence() {
+  const ref = useScrollReveal(0.15);
+  return (
+    <div
+      ref={ref}
+      className="closing-sequence animate-on-scroll text-center max-w-[760px] mx-auto pt-20"
+      style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+    >
+      <span className="closing-label animate-on-scroll text-[10px] font-semibold uppercase tracking-[0.22em] mb-6 block" style={{ fontFamily: sans, color: C.roseCore }}>
+        ONE LAST THING
+      </span>
+      <h2 className="closing-line-1 animate-on-scroll text-[clamp(28px,4vw,40px)] mb-2" style={{ fontFamily: serif, fontStyle: "italic", color: C.white }}>
+        You have been waiting for a quieter season...
+      </h2>
+      <h2 className="closing-line-2 animate-on-scroll text-[clamp(28px,4vw,40px)] mb-8" style={{ fontFamily: serif, fontStyle: "italic", color: C.roseCore }}>
+        It was never coming.
+      </h2>
+      <div className="closing-body animate-on-scroll">
+        <p className="text-[15px] font-light leading-[1.88] mb-2" style={{ fontFamily: sans, color: "rgba(255,255,255,0.65)" }}>
+          You are not late. You are not too far gone. You are not too busy, too tired, or too complicated to change.
+        </p>
+        <p className="text-[15px] font-light leading-[1.88] mb-8" style={{ fontFamily: sans, color: "rgba(255,255,255,0.65)" }}>
+          You are just operating without the foundations you were never given.
+        </p>
+      </div>
+      <div className="closing-directive animate-on-scroll">
+        <p className="text-[24px] mb-8" style={{ fontFamily: serif, fontStyle: "italic", color: "rgba(255,255,255,0.5)" }}>
+          That ends here.
+        </p>
+        <p className="text-[16px] font-bold uppercase tracking-[0.08em] mb-6" style={{ fontFamily: sans, color: C.white }}>
+          Begin your Blueprint.
+        </p>
+      </div>
+      <div className="closing-cta animate-on-scroll">
+        <PrimaryCTA />
+      </div>
+      <p className="closing-guarantee animate-on-scroll mt-6 text-[11px] font-light" style={{ fontFamily: sans, color: "rgba(255,255,255,0.5)" }}>
+        30-day completion guarantee &middot; R3,997 founding price &middot; Closes at launch
+      </p>
+    </div>
+  );
+}
+
+
 // ═══════════════════════════════════════════════
 // SECTION 14: FINAL CLOSE
 // ═══════════════════════════════════════════════
@@ -1529,36 +1668,8 @@ function FinalClose() {
           </div>
         </div>
 
-        {/* Bottom block */}
-        <SectionReveal>
-          <div className="text-center max-w-[760px] mx-auto pt-20" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] mb-6 block" style={{ fontFamily: sans, color: C.roseCore }}>
-              ONE LAST THING
-            </span>
-            <h2 className="text-[clamp(28px,4vw,40px)] mb-2" style={{ fontFamily: serif, fontStyle: "italic", color: C.white }}>
-              You have been waiting for a quieter season...
-            </h2>
-            <h2 className="text-[clamp(28px,4vw,40px)] mb-8" style={{ fontFamily: serif, fontStyle: "italic", color: C.roseCore }}>
-              It was never coming.
-            </h2>
-            <p className="text-[15px] font-light leading-[1.88] mb-2" style={{ fontFamily: sans, color: "rgba(255,255,255,0.65)" }}>
-              You are not late. You are not too far gone. You are not too busy, too tired, or too complicated to change.
-            </p>
-            <p className="text-[15px] font-light leading-[1.88] mb-8" style={{ fontFamily: sans, color: "rgba(255,255,255,0.65)" }}>
-              You are just operating without the foundations you were never given.
-            </p>
-            <p className="text-[24px] mb-8" style={{ fontFamily: serif, fontStyle: "italic", color: "rgba(255,255,255,0.5)" }}>
-              That ends here.
-            </p>
-            <p className="text-[16px] font-bold uppercase tracking-[0.08em] mb-6" style={{ fontFamily: sans, color: C.white }}>
-              Begin your Blueprint.
-            </p>
-            <PrimaryCTA />
-            <p className="mt-6 text-[11px] font-light" style={{ fontFamily: sans, color: "rgba(255,255,255,0.5)" }}>
-              30-day completion guarantee &middot; R3,997 founding price &middot; Closes at launch
-            </p>
-          </div>
-        </SectionReveal>
+        {/* Bottom block — closing sequence */}
+        <ClosingSequence />
       </div>
     </section>
   );
@@ -1596,45 +1707,38 @@ function FAQSection() {
         </SectionReveal>
 
         <div>
-          {FAQS.map((faq, i) => (
-            <div key={i} style={{ borderBottom: `1px solid rgba(74,14,46,0.08)` }}>
-              <button
-                onClick={() => toggle(i)}
-                className="w-full flex items-center justify-between text-left py-5 px-2 transition-colors hover:opacity-80"
-                aria-expanded={openIndex === i}
-                aria-controls={`faq-panel-${i}`}
-                style={{ minHeight: 56 }}
-              >
-                <span className="text-[15px] font-medium pr-4" style={{ fontFamily: sans, color: C.burgCore }}>
-                  {faq.q}
-                </span>
-                <span
-                  className="flex-shrink-0 w-6 h-6 flex items-center justify-center transition-transform duration-200"
-                  style={{ transform: openIndex === i ? "rotate(45deg)" : "rotate(0deg)" }}
+          {FAQS.map((faq, i) => {
+            const isOpen = openIndex === i;
+            return (
+              <div key={i} className={`faq-item${isOpen ? " is-open" : ""}`} style={{ borderBottom: `1px solid rgba(74,14,46,0.08)` }}>
+                <button
+                  onClick={() => toggle(i)}
+                  className="w-full flex items-center justify-between text-left py-5 px-2 hover:opacity-80"
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-panel-${i}`}
+                  style={{ minHeight: 56 }}
                 >
-                  <Plus className="w-4 h-4" style={{ color: C.burgCore }} />
-                </span>
-              </button>
-              <AnimatePresence>
-                {openIndex === i && (
-                  <motion.div
-                    id={`faq-panel-${i}`}
-                    role="region"
-                    aria-labelledby={`faq-btn-${i}`}
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="overflow-hidden"
-                  >
+                  <span className="text-[15px] font-medium pr-4" style={{ fontFamily: sans, color: C.burgCore }}>
+                    {faq.q}
+                  </span>
+                  <span className="faq-icon flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                    <Plus className="w-4 h-4" style={{ color: C.burgCore }} />
+                  </span>
+                </button>
+                <div
+                  id={`faq-panel-${i}`}
+                  role="region"
+                  className={`faq-answer${isOpen ? " is-open" : ""}`}
+                >
+                  <div className="faq-answer-inner">
                     <p className="px-2 pb-5 text-[14px] font-light leading-[1.8]" style={{ fontFamily: sans, color: C.darkGrey }}>
                       {faq.a}
                     </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <p className="text-center mt-10 text-[14px] font-light" style={{ fontFamily: sans, color: C.midGrey }}>
@@ -1741,12 +1845,107 @@ function StickyMobileCTA() {
 // ═══════════════════════════════════════════════
 
 export default function AWBlueprint() {
+  useAliveParallax();
+
   return (
     <div style={{ fontFamily: sans }}>
       <style>{`
         html { scroll-behavior: smooth; }
+
+        /* ── SCROLL REVEAL BASE ── */
+        .animate-on-scroll {
+          opacity: 0;
+          transform: translateY(16px);
+          transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0),
+                      transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+        }
+        .animate-on-scroll.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* ── CTA STYLES ── */
+        .cta-primary {
+          background: #C4847A;
+          color: #0E0208;
+          transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.1s ease;
+        }
+        @media (hover: hover) {
+          .cta-primary:hover {
+            background: #A86460;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
+          }
+        }
+        .cta-primary:active { transform: translateY(1px); background: #8C5550; }
+        .cta-primary:focus-visible { outline: 2px solid #E8B4AE; outline-offset: 3px; box-shadow: 0 0 0 4px rgba(232,180,174,0.3); }
+
+        .cta-secondary {
+          background: transparent;
+          transition: border-color 0.25s ease, color 0.25s ease;
+        }
+        @media (hover: hover) {
+          .cta-secondary:hover { border-color: rgba(255,255,255,0.6) !important; }
+        }
+        .cta-secondary:active { border-color: rgba(255,255,255,0.8) !important; }
+
+        /* ── FAQ ACCORDION ── */
+        .faq-answer {
+          display: grid;
+          grid-template-rows: 0fr;
+          opacity: 0;
+          transition: grid-template-rows 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .faq-answer.is-open {
+          grid-template-rows: 1fr;
+          opacity: 1;
+        }
+        .faq-answer-inner { overflow: hidden; }
+        .faq-icon {
+          transition: transform 0.3s ease-out;
+          display: inline-flex;
+        }
+        .faq-item.is-open .faq-icon { transform: rotate(45deg); }
+
+        /* ── TESTIMONIAL CARD HOVER ── */
+        @media (hover: hover) {
+          .testimonial-card {
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+          }
+          .testimonial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+          }
+        }
+
+        /* ── DOMAIN FILTER TAG TRANSITION ── */
+        .domain-tag {
+          transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* ── CLOSING SEQUENCE DELAYS ── */
+        .closing-sequence .closing-label     { transition-delay: 0ms; }
+        .closing-sequence .closing-line-1    { transition-delay: 200ms; transition-duration: 0.8s; }
+        .closing-sequence .closing-line-2    { transition-delay: 1400ms; transition-duration: 0.8s; }
+        .closing-sequence .closing-body      { transition-delay: 2400ms; }
+        .closing-sequence .closing-directive { transition-delay: 3200ms; }
+        .closing-sequence .closing-cta       { transition-delay: 3800ms; }
+        .closing-sequence .closing-guarantee { transition-delay: 4000ms; }
+
+        /* ── ALIVE LETTER ── */
+        .alive-letter {
+          will-change: transform;
+          transition: opacity 1.0s ease-out;
+        }
+
+        /* ── REDUCED MOTION ── */
         @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after { animation: none !important; transition: none !important; }
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-delay: 0ms !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+          .animate-on-scroll { opacity: 1 !important; transform: none !important; }
           html { scroll-behavior: auto; }
         }
       `}</style>
