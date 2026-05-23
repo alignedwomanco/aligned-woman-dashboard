@@ -34,23 +34,36 @@ const DOMAIN_FILTERS = [
   "Identity & Visibility",
 ];
 
-// Static expert data (source of truth per brief)
-const EXPERTS = [
-  { id: 1, name: "Laura Jane Thomas", role: "Founder · Aligned Woman Co", domain: "Identity & Visibility", bio: "Award-winning strategist, author and speaker. Founder of The Aligned Woman Co, shaping the philosophy and architecture behind the Blueprint.", credentials: ["Award-winning Strategist", "Author", "International Speaker"] },
-  { id: 2, name: "Boitumelo Boikhutso", role: "Psychology & Mindset", domain: "Mindset & Behaviour", bio: "Specialist in psychology and trauma-informed thinking. Translates clinical insight into language ambitious women can actually use under pressure.", credentials: ["Trauma-Informed Practitioner", "Cognitive Behavioural Specialist"] },
-  { id: 3, name: "Dr Wendy Mahoney", role: "Behavioural Transformation", domain: "Mindset & Behaviour", bio: "NLP master practitioner and behavioural change specialist. TEDx speaker on the science of rewiring entrenched patterns.", credentials: ["NLP Master Practitioner", "TEDx Speaker", "PhD Behavioural Science"] },
-  { id: 4, name: "Phoebe Greenacre", role: "Somatic Practitioner", domain: "Nervous System", bio: "Somatic practitioner and regulation coach. Translates nervous system science into real-time, in-the-room tools.", credentials: ["Somatic Experiencing Practitioner", "Polyvagal-Informed Coach"] },
-  { id: 5, name: "Natacha Wauquiez", role: "Trauma Therapy & Regulation", domain: "Nervous System", bio: "Trauma therapist specialising in PTSD and somatic EMDR. Works at the intersection of clinical and somatic modalities.", credentials: ["EMDR-Certified Therapist", "PTSD Specialist"] },
-  { id: 6, name: "Danielle Venter", role: "Nutrition & Metabolic Health", domain: "Health & Hormones", bio: "Registered dietitian specialising in nutrigenomics and metabolic health. Works with high-performing women navigating energy, focus and recovery.", credentials: ["Registered Dietitian", "Nutrigenomics Specialist"] },
-  { id: 7, name: "Dr Shirley Du Plessis", role: "Integrative Hormonal Health", domain: "Health & Hormones", bio: "Integrative practitioner specialising in hormonal health and burnout. Bridges Western medicine and root-cause assessment.", credentials: ["MD", "Integrative Medicine Specialist"] },
-  { id: 8, name: "Dr Nasrat Sirkissoon", role: "Money & Entrepreneurship", domain: "Money", bio: "PhD in Entrepreneurship with 20+ years in financial services. Teaches the psychology and structure behind financial authority.", credentials: ["PhD Entrepreneurship", "20+ yrs Financial Services"] },
-  { id: 9, name: "Refilwe Moloto", role: "Strategic Advisory", domain: "Leadership & Authority", bio: "Strategic advisor and award-winning broadcaster. Works with leaders building presence and authority in high-stakes environments.", credentials: ["Award-Winning Broadcaster", "Strategic Advisor"] },
-  { id: 10, name: "Cindy Norcott", role: "Leadership & Talent", domain: "Leadership & Authority", bio: "CEO of Pro Talent and international keynote speaker. Decades inside how women actually lead, hire and progress.", credentials: ["CEO Pro Talent", "International Keynote Speaker"] },
-  { id: 11, name: "Nokuthula Magwaza", role: "Purpose-Driven Leadership", domain: "Leadership & Authority", bio: "WEDO Ambassador. Specialist in purpose-driven leadership and the long arc of meaningful contribution.", credentials: ["WEDO Ambassador", "Leadership Consultant"] },
-  { id: 12, name: "Cato Vermeulen", role: "Feminine Business & Sales", domain: "Money", bio: "Feminine sales expert, Forbes featured. Builds revenue models that match how women actually buy and sell.", credentials: ["Forbes Featured", "Sales Strategist"] },
-  { id: 13, name: "Mimi Nicklin", role: "Empathy & Relationships", domain: "Relationships", bio: "Empathy advocate and author with a 5.9-million global reach. Bridges relational science and modern leadership.", credentials: ["Author", "Empathy Advocate", "Global Reach 5.9M"] },
-  { id: 14, name: "Tinashe Mujera", role: "Visibility & Positioning", domain: "Identity & Visibility", bio: "Specialist in personal positioning and digital presence. Helps women translate inner authority into external clarity.", credentials: ["Brand Strategist", "Digital Presence Specialist"] },
-];
+// Category ID → domain label mapping (matches DB category IDs)
+const CATEGORY_DOMAIN_MAP = {
+  "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
+  "69f48a8d1e94ea01a3a8c3fa": "Nervous System",
+  "69f48a8d1e94ea01a3a8c3fb": "Mindset & Behaviour",
+  "69f48a8d1e94ea01a3a8c3fc": "Money",
+  "69f48a8d1e94ea01a3a8c3fd": "Leadership & Authority",
+  "69f48a8d1e94ea01a3a8c3fe": "Relationships",
+  "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
+};
+
+// Fallback credential chips derived from title
+function credentialsFromTitle(title) {
+  if (!title) return [];
+  return title.split("|").map(s => s.trim()).filter(Boolean).slice(0, 4);
+}
+
+// Map a DB expert record to the card shape
+function mapDbExpert(e) {
+  const domain = CATEGORY_DOMAIN_MAP[e.category] || "Identity & Visibility";
+  return {
+    id: e.id,
+    name: e.name,
+    role: e.title || "",
+    domain,
+    bio: e.bio || "",
+    credentials: credentialsFromTitle(e.title),
+    profile_picture: e.profile_picture || null,
+  };
+}
 
 // ─── MODAL ───
 function ExpertModal({ expert, mode, onClose }) {
@@ -223,7 +236,7 @@ function ExpertModal({ expert, mode, onClose }) {
 }
 
 // ─── EXPERT CARD ───
-function ExpertCard({ expert, dbExpert, onConnect, onView }) {
+function ExpertCard({ expert, onConnect, onView }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -249,8 +262,8 @@ function ExpertCard({ expert, dbExpert, onConnect, onView }) {
           aria-hidden="true"
           style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
         >
-          {dbExpert?.profile_picture ? (
-            <img src={dbExpert.profile_picture} alt={`Headshot of ${expert.name}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {expert.profile_picture ? (
+            <img src={expert.profile_picture} alt={`Headshot of ${expert.name}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 20, color: C.burgCore }}>
               {expert.name.split(" ").map(p => p[0]).join("").slice(0, 2)}
@@ -310,7 +323,7 @@ export default function ExpertsDirectory() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [modal, setModal] = useState(null); // { expert, mode }
 
-  const { data: dbExperts = [] } = useQuery({
+  const { data: dbExperts = [], isLoading } = useQuery({
     queryKey: ["experts-directory-db"],
     queryFn: () => base44.entities.Expert.filter({ isPublished: true }),
   });
@@ -319,12 +332,15 @@ export default function ExpertsDirectory() {
     base44.analytics.track({ eventName: "view_experts_page" });
   }, []);
 
-  const filtered = activeFilter === "All"
-    ? EXPERTS
-    : EXPERTS.filter(e => e.domain === activeFilter);
+  // Use live DB data, mapped to card shape
+  const experts = dbExperts.map(mapDbExpert);
 
-  // Match static expert to DB record by name for profile picture
-  const getDbExpert = (name) => dbExperts.find(e => e.name?.toLowerCase().trim() === name.toLowerCase().trim());
+  const filtered = activeFilter === "All"
+    ? experts
+    : experts.filter(e => e.domain === activeFilter);
+
+  // getDbExpert is no longer needed — data is already merged in mapDbExpert
+  const getDbExpert = () => null;
 
   const handleFilter = (f) => {
     setActiveFilter(f);
@@ -418,21 +434,26 @@ export default function ExpertsDirectory() {
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           {/* Result count */}
           <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, letterSpacing: "0.06em", textAlign: "center", marginBottom: 32 }}>
-            <strong style={{ fontWeight: 600 }}>{filtered.length}</strong> of <strong style={{ fontWeight: 600 }}>{EXPERTS.length}</strong> experts shown
+            <strong style={{ fontWeight: 600 }}>{filtered.length}</strong> of <strong style={{ fontWeight: 600 }}>{experts.length}</strong> experts shown
           </p>
 
           {/* Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
-            {filtered.map((expert) => (
-              <ExpertCard
-                key={expert.id}
-                expert={expert}
-                dbExpert={getDbExpert(expert.name)}
-                onConnect={openConnect}
-                onView={openView}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div style={{ textAlign: "center", padding: "60px 0", fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.midGrey }}>
+              Loading experts…
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
+              {filtered.map((expert) => (
+                <ExpertCard
+                  key={expert.id}
+                  expert={expert}
+                  onConnect={openConnect}
+                  onView={openView}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
