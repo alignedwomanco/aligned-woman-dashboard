@@ -21,6 +21,9 @@ import {
   Edit,
   Save,
   Upload,
+  Trash2,
+  Plus,
+  Mail,
 } from "lucide-react";
 
 const SITE_URL = "https://app.alignedwomanco.com";
@@ -400,7 +403,7 @@ function SalesTable({ sales }) {
   );
 }
 
-function ProfileTab({ expert, onExpertUpdate }) {
+function ProfileTab({ expert, onExpertUpdate, user }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -408,6 +411,7 @@ function ProfileTab({ expert, onExpertUpdate }) {
     bio: "",
     specialties: "",
     profile_picture: "",
+    social_links: [],
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -421,6 +425,7 @@ function ProfileTab({ expert, onExpertUpdate }) {
         bio: expert.bio || "",
         specialties: expert.specialties?.join(", ") || "",
         profile_picture: expert.profile_picture || "",
+        social_links: expert.social_links || [],
       });
     }
   }, [expert]);
@@ -439,6 +444,7 @@ function ProfileTab({ expert, onExpertUpdate }) {
       bio: expert.bio || "",
       specialties: expert.specialties?.join(", ") || "",
       profile_picture: expert.profile_picture || "",
+      social_links: expert.social_links || [],
     });
     setSuccess(false);
     setError(null);
@@ -455,13 +461,16 @@ function ProfileTab({ expert, onExpertUpdate }) {
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
 
-      await base44.entities.Expert.update(expert.id, {
+      const updateData = {
         name: formData.name,
         title: formData.title,
         bio: formData.bio,
         specialties: specialtiesArray,
         profile_picture: formData.profile_picture,
-      });
+        social_links: formData.social_links.filter((link) => link.platform && link.url),
+      };
+
+      await base44.entities.Expert.update(expert.id, updateData);
 
       setSuccess(true);
       setIsEditing(false);
@@ -475,6 +484,25 @@ function ProfileTab({ expert, onExpertUpdate }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleAddLink = () => {
+    setFormData({
+      ...formData,
+      social_links: [...formData.social_links, { platform: "Website", url: "" }],
+    });
+  };
+
+  const handleRemoveLink = (index) => {
+    const newLinks = formData.social_links.filter((_, i) => i !== index);
+    setFormData({ ...formData, social_links: newLinks });
+  };
+
+  const handleLinkChange = (index, field, value) => {
+    const newLinks = formData.social_links.map((link, i) =>
+      i === index ? { ...link, [field]: value } : link
+    );
+    setFormData({ ...formData, social_links: newLinks });
   };
 
   const handleProfilePictureUpload = async (e) => {
@@ -629,6 +657,19 @@ function ProfileTab({ expert, onExpertUpdate }) {
 
             <div>
               <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+                Email (read-only)
+              </label>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.15)" }}>
+                <Mail style={{ width: 14, height: 14, color: "#8A7A76" }} />
+                <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#8A7A76" }}>{user?.email || "N/A"}</span>
+              </div>
+              <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 11, color: "#8A7A76", marginTop: 4 }}>
+                Contact support to change your email
+              </p>
+            </div>
+
+            <div>
+              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
                 Bio
               </label>
               <textarea
@@ -638,6 +679,61 @@ function ProfileTab({ expert, onExpertUpdate }) {
                 style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
                 placeholder="Write your biography..."
               />
+            </div>
+
+            <div>
+              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+                Social Links
+              </label>
+              <div className="space-y-3">
+                {formData.social_links.map((link, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <select
+                      value={link.platform}
+                      onChange={(e) => handleLinkChange(index, "platform", e.target.value)}
+                      className="px-3 py-2 rounded-lg border outline-none w-40"
+                      style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+                    >
+                      <option value="LinkedIn">LinkedIn</option>
+                      <option value="Instagram">Instagram</option>
+                      <option value="Website">Website</option>
+                      <option value="Email">Email</option>
+                      <option value="Twitter">Twitter</option>
+                      <option value="TikTok">TikTok</option>
+                      <option value="YouTube">YouTube</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => handleLinkChange(index, "url", e.target.value)}
+                      placeholder="URL"
+                      className="flex-1 px-3 py-2 rounded-lg border outline-none"
+                      style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+                    />
+                    <button
+                      onClick={() => handleRemoveLink(index)}
+                      className="p-2 rounded-lg hover:bg-red-50 transition-colors"
+                      style={{ color: "#C0392B" }}
+                    >
+                      <Trash2 style={{ width: 16, height: 16 }} />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={handleAddLink}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
+                  style={{
+                    background: "#FDF5F3",
+                    border: "1px solid rgba(74,14,46,0.15)",
+                    fontFamily: "Montserrat, sans-serif",
+                    fontWeight: 500,
+                    fontSize: 12,
+                    color: "#4A0E2E",
+                  }}
+                >
+                  <Plus style={{ width: 14, height: 14 }} /> Add Link
+                </button>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4">
@@ -818,6 +914,7 @@ export default function ExpertDashboard() {
           {activeTab === "profile" && (
             <ProfileTab
               expert={expert}
+              user={user}
               onExpertUpdate={() => queryClient.invalidateQueries({ queryKey: ["expert-profile", userEmail] })}
             />
           )}
