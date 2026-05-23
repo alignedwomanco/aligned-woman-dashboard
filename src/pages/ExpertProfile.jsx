@@ -124,18 +124,18 @@ function ConnectionForm({ expertName, formRef }) {
 
   return (
     <section ref={formRef} id="connect" style={{ background: C.offWhite, padding: "80px 32px" }}>
-      <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "start" }}>
-        {/* Left */}
-        <div>
+      <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+        {/* Header — centred above form */}
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 16 }}>Connect</p>
-          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 32, color: C.burgCore, lineHeight: 1.2, margin: "0 0 20px" }}>Get in touch.</h2>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, marginBottom: 0 }}>
+          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 32, color: C.burgCore, lineHeight: 1.2, margin: "0 0 16px" }}>Get in touch.</h2>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, margin: 0 }}>
             Send a message directly to {expertName}.
           </p>
         </div>
 
-        {/* Right — Form */}
-        <div style={{ background: C.white, borderRadius: 12, padding: 32, boxShadow: "0 4px 20px rgba(74,14,46,0.06)" }}>
+        {/* Form */}
+        <div style={{ background: C.white, borderRadius: 12, padding: 32, boxShadow: "0 4px 20px rgba(74,14,46,0.06)", maxWidth: 600, margin: "0 auto" }}>
           {submitted ? (
             <div style={{ textAlign: "center", padding: "24px 0" }}>
               <div style={{ width: 56, height: 56, borderRadius: "50%", background: C.rosePale, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
@@ -233,12 +233,6 @@ function ConnectionForm({ expertName, formRef }) {
           )}
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          #connect > div { grid-template-columns: 1fr !important; gap: 40px !important; }
-        }
-      `}</style>
     </section>
   );
 }
@@ -433,7 +427,7 @@ export default function ExpertProfile() {
           <div style={{ maxWidth: 1080, margin: "0 auto" }}>
             <div style={{ background: C.white, borderRadius: 12, padding: "40px", boxShadow: "0 2px 16px rgba(74,14,46,0.04)" }}>
               <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>About</p>
-              <div style={{ maxWidth: 720 }}>
+              <div>
                 {bioParagraphs.map((p, i) => (
                   <p key={i} style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: C.darkGrey, lineHeight: 1.88, margin: i < bioParagraphs.length - 1 ? "0 0 20px" : 0 }}>
                     {p}
