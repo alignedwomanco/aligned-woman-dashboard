@@ -77,7 +77,7 @@ function MiniExpertCard({ expert }) {
 }
 
 // ─── CONNECTION FORM ───
-function ConnectionForm({ expertName, formRef }) {
+function ConnectionForm({ expertName, expertEmail, formRef }) {
   const [form, setForm] = useState({ name: "", email: "", regarding: "", message: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -99,9 +99,9 @@ function ConnectionForm({ expertName, formRef }) {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     base44.integrations.Core.SendEmail({
-      to: "hello@alignedwomanco.com",
-      subject: `Expert Connection Request — ${expertName}`,
-      body: `Name: ${form.name}\nEmail: ${form.email}\nRegarding: ${form.regarding}\nExpert: ${expertName}\n\nMessage:\n${form.message}`,
+      to: expertEmail || "hello@alignedwomanco.com",
+      subject: `New message from ${form.name} via The Aligned Woman`,
+      body: `Name: ${form.name}\nEmail: ${form.email}\nRegarding: ${form.regarding}\n\nMessage:\n${form.message}`,
     }).catch(() => {});
     base44.analytics.track({ eventName: "expert_profile_connection_request", properties: { expert: expertName } });
     setSubmitted(true);
@@ -211,7 +211,7 @@ function ConnectionForm({ expertName, formRef }) {
                 </label>
                 <textarea
                   rows={4}
-                  placeholder={`Tell us briefly why you'd like to connect with ${firstName}...`}
+                  placeholder={`Your message to ${expertName}...`}
                   value={form.message}
                   onChange={(e) => { setForm(f => ({ ...f, message: e.target.value })); setErrors(er => ({ ...er, message: undefined })); }}
                   style={{ width: "100%", background: C.white, border: `1px solid ${errors.message ? C.roseCore : "rgba(74,14,46,0.15)"}`, borderRadius: 6, padding: "12px 16px", fontFamily: sans, fontWeight: 400, fontSize: 14, color: C.darkGrey, boxSizing: "border-box", outline: "none", resize: "vertical" }}
@@ -541,7 +541,7 @@ export default function ExpertProfile() {
       )}
 
       {/* ── CONNECTION FORM ── */}
-      <ConnectionForm expertName={expert.name} formRef={formRef} />
+      <ConnectionForm expertName={expert.name} expertEmail={expert.linked_user_email} formRef={formRef} />
 
       {/* ── OTHER EXPERTS ── */}
       {otherExperts.length > 0 && (
