@@ -356,23 +356,41 @@ function AnnouncementBar() {
 // ─── STAT BAR (with counter animation) ───
 function StatBar() {
   const containerRef = useRef(null);
-  const [triggered, setTriggered] = useState(false);
-
-  const c14 = useCounter(14, 1200, "", "", triggered);
-  const c7 = useCounter(7, 1200, "", "", triggered);
-  const c116200 = useCounter(116200, 1200, "R", "__strike", triggered);
-  const c3997 = useCounter(3997, 1200, "R", "", triggered);
+  const [vals, setVals] = useState({ v14: 0, v7: 0, v116200: 0, v3997: 0 });
+  const [struck, setStruck] = useState(false);
+  const started = useRef(false);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setTriggered(true);
-          c14.start(); c7.start(); c116200.start(); c3997.start();
-          observer.unobserve(el);
-        }
+        if (!entry.isIntersecting || started.current) return;
+        started.current = true;
+        observer.unobserve(el);
+
+        const duration = 1200;
+        const startTime = performance.now();
+        const targets = { v14: 14, v7: 7, v116200: 116200, v3997: 3997 };
+
+        const tick = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setVals({
+            v14: Math.round(targets.v14 * eased),
+            v7: Math.round(targets.v7 * eased),
+            v116200: Math.round(targets.v116200 * eased),
+            v3997: Math.round(targets.v3997 * eased),
+          });
+          if (progress < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            setVals(targets);
+            setTimeout(() => setStruck(true), 300);
+          }
+        };
+        requestAnimationFrame(tick);
       },
       { threshold: 0.2 }
     );
@@ -381,10 +399,10 @@ function StatBar() {
   }, []);
 
   const stats = [
-    { label: "Specialists", display: `${c14.value}`, style: { color: C.white } },
-    { label: "Life Domains", display: `${c7.value}`, style: { color: C.white } },
-    { label: "Private Value", display: `R${c116200.value.toLocaleString()}`, struck: c116200.struck, style: { color: C.roseLight } },
-    { label: "Your Investment", display: `R${c3997.value.toLocaleString()}`, style: { color: C.white } },
+    { label: "Specialists", display: `${vals.v14}`, style: { color: C.white } },
+    { label: "Life Domains", display: `${vals.v7}`, style: { color: C.white } },
+    { label: "Private Value", display: `R${vals.v116200.toLocaleString()}`, struck, style: { color: C.roseLight } },
+    { label: "Your Investment", display: `R${vals.v3997.toLocaleString()}`, style: { color: C.white } },
   ];
 
   return (
