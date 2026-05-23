@@ -878,7 +878,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
             This is how you appear on the Blueprint sales page and Experts directory.
           </p>
         </div>
-        <a href="/experts" className="flex items-center gap-1.5 px-4 py-2 rounded-lg" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}>
+        <a href="/ExpertsDirectory" className="flex items-center gap-1.5 px-4 py-2 rounded-lg" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}>
           View <ExternalLink style={{ width: 12, height: 12 }} />
         </a>
       </div>
