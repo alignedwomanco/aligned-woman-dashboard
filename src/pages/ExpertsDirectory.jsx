@@ -1,189 +1,471 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 import { createPageUrl } from "@/utils";
+import { Link } from "react-router-dom";
+import { X } from "lucide-react";
 
-function getInitials(name) {
-  if (!name) return "??";
-  const parts = name.split(" ").filter(Boolean);
-  return parts
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
+// ─── DESIGN TOKENS ───
+const C = {
+  burgDeep: "#0E0208",
+  burgCore: "#4A0E2E",
+  roseCore: "#C4847A",
+  roseLight: "#E8B4AE",
+  rosePale: "#F5DDD9",
+  roseWash: "#FDF5F3",
+  offWhite: "#FAF5F3",
+  white: "#FFFFFF",
+  midGrey: "#8A7A76",
+  darkGrey: "#3A2A28",
+  ink: "#080105",
+};
 
-function ExpertCard({ expert, categoryName }) {
-  const initials = getInitials(expert.name);
+const serif = "'DM Serif Display', Georgia, serif";
+const sans = "Montserrat, sans-serif";
+
+const DOMAIN_FILTERS = [
+  "All",
+  "Mindset & Behaviour",
+  "Nervous System",
+  "Health & Hormones",
+  "Money",
+  "Leadership & Authority",
+  "Relationships",
+  "Identity & Visibility",
+];
+
+// Static expert data (source of truth per brief)
+const EXPERTS = [
+  { id: 1, name: "Laura Jane Thomas", role: "Founder · Aligned Woman Co", domain: "Identity & Visibility", bio: "Award-winning strategist, author and speaker. Founder of The Aligned Woman Co, shaping the philosophy and architecture behind the Blueprint.", credentials: ["Award-winning Strategist", "Author", "International Speaker"] },
+  { id: 2, name: "Boitumelo Boikhutso", role: "Psychology & Mindset", domain: "Mindset & Behaviour", bio: "Specialist in psychology and trauma-informed thinking. Translates clinical insight into language ambitious women can actually use under pressure.", credentials: ["Trauma-Informed Practitioner", "Cognitive Behavioural Specialist"] },
+  { id: 3, name: "Dr Wendy Mahoney", role: "Behavioural Transformation", domain: "Mindset & Behaviour", bio: "NLP master practitioner and behavioural change specialist. TEDx speaker on the science of rewiring entrenched patterns.", credentials: ["NLP Master Practitioner", "TEDx Speaker", "PhD Behavioural Science"] },
+  { id: 4, name: "Phoebe Greenacre", role: "Somatic Practitioner", domain: "Nervous System", bio: "Somatic practitioner and regulation coach. Translates nervous system science into real-time, in-the-room tools.", credentials: ["Somatic Experiencing Practitioner", "Polyvagal-Informed Coach"] },
+  { id: 5, name: "Natacha Wauquiez", role: "Trauma Therapy & Regulation", domain: "Nervous System", bio: "Trauma therapist specialising in PTSD and somatic EMDR. Works at the intersection of clinical and somatic modalities.", credentials: ["EMDR-Certified Therapist", "PTSD Specialist"] },
+  { id: 6, name: "Danielle Venter", role: "Nutrition & Metabolic Health", domain: "Health & Hormones", bio: "Registered dietitian specialising in nutrigenomics and metabolic health. Works with high-performing women navigating energy, focus and recovery.", credentials: ["Registered Dietitian", "Nutrigenomics Specialist"] },
+  { id: 7, name: "Dr Shirley Du Plessis", role: "Integrative Hormonal Health", domain: "Health & Hormones", bio: "Integrative practitioner specialising in hormonal health and burnout. Bridges Western medicine and root-cause assessment.", credentials: ["MD", "Integrative Medicine Specialist"] },
+  { id: 8, name: "Dr Nasrat Sirkissoon", role: "Money & Entrepreneurship", domain: "Money", bio: "PhD in Entrepreneurship with 20+ years in financial services. Teaches the psychology and structure behind financial authority.", credentials: ["PhD Entrepreneurship", "20+ yrs Financial Services"] },
+  { id: 9, name: "Refilwe Moloto", role: "Strategic Advisory", domain: "Leadership & Authority", bio: "Strategic advisor and award-winning broadcaster. Works with leaders building presence and authority in high-stakes environments.", credentials: ["Award-Winning Broadcaster", "Strategic Advisor"] },
+  { id: 10, name: "Cindy Norcott", role: "Leadership & Talent", domain: "Leadership & Authority", bio: "CEO of Pro Talent and international keynote speaker. Decades inside how women actually lead, hire and progress.", credentials: ["CEO Pro Talent", "International Keynote Speaker"] },
+  { id: 11, name: "Nokuthula Magwaza", role: "Purpose-Driven Leadership", domain: "Leadership & Authority", bio: "WEDO Ambassador. Specialist in purpose-driven leadership and the long arc of meaningful contribution.", credentials: ["WEDO Ambassador", "Leadership Consultant"] },
+  { id: 12, name: "Cato Vermeulen", role: "Feminine Business & Sales", domain: "Money", bio: "Feminine sales expert, Forbes featured. Builds revenue models that match how women actually buy and sell.", credentials: ["Forbes Featured", "Sales Strategist"] },
+  { id: 13, name: "Mimi Nicklin", role: "Empathy & Relationships", domain: "Relationships", bio: "Empathy advocate and author with a 5.9-million global reach. Bridges relational science and modern leadership.", credentials: ["Author", "Empathy Advocate", "Global Reach 5.9M"] },
+  { id: 14, name: "Tinashe Mujera", role: "Visibility & Positioning", domain: "Identity & Visibility", bio: "Specialist in personal positioning and digital presence. Helps women translate inner authority into external clarity.", credentials: ["Brand Strategist", "Digital Presence Specialist"] },
+];
+
+// ─── MODAL ───
+function ExpertModal({ expert, mode, onClose }) {
+  const closeRef = useRef(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", reason: "" });
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    closeRef.current?.focus();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  const firstName = expert.name.split(" ")[0];
+
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = "Name is required.";
+    if (!form.email.trim()) e.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Please enter a valid email.";
+    return e;
+  };
+
+  const handleSubmit = (ev) => {
+    ev.preventDefault();
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    base44.integrations.Core.SendEmail({
+      to: "hello@alignedwomanco.com",
+      subject: `Expert Connection Request — ${expert.name}`,
+      body: `Name: ${form.name}\nEmail: ${form.email}\nExpert: ${expert.name}\n\nMessage:\n${form.reason}`,
+    }).catch(() => {});
+    base44.analytics.track({ eventName: "expert_request_submit", properties: { expert: expert.name } });
+    setSubmitted(true);
+  };
 
   return (
-    <div className="bg-paper rounded-2xl overflow-hidden flex flex-col border border-awburg-core/8 shadow-sm">
-      {/* Portrait */}
-      <div className="relative bg-gradient-to-br from-awrose-pale to-awrose-wash flex items-center justify-center overflow-hidden" style={{ aspectRatio: "3/2.2" }}>
-        {expert.profile_picture ? (
-          <img
-            src={expert.profile_picture}
-            alt={expert.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <>
-            <span className="font-display italic text-awburg-core select-none" style={{ fontSize: "clamp(56px, 8vw, 88px)" }}>
-              {initials}
-            </span>
-            <span className="absolute bottom-4 left-5 font-body font-bold text-[9px] tracking-eyebrow text-awburg-core/40 uppercase">
-              PORTRAIT · PLACEHOLDER
-            </span>
-          </>
-        )}
-      </div>
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(8,1,5,0.7)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-heading"
+        style={{ background: C.offWhite, borderRadius: 12, padding: "40px 32px", maxWidth: 560, width: "100%", maxHeight: "90vh", overflowY: "auto", position: "relative", animation: "modalIn 0.3s ease" }}
+      >
+        <style>{`@keyframes modalIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }`}</style>
 
-      {/* Body */}
-      <div className="px-5 pt-4 pb-6 flex flex-col flex-1">
-        {categoryName && (
-          <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-3">
-            {categoryName}
-          </p>
-        )}
-
-        <h3 className="font-display italic text-awburg-core text-2xl leading-snug mb-2">
-          {expert.name}
-        </h3>
-
-        {expert.title && (
-          <p className="font-body font-semibold text-sm text-awburg-core/80 mb-3">{expert.title}</p>
-        )}
-
-        {expert.bio && (
-          <p className="font-body text-sm text-awburg-core/65 leading-relaxed line-clamp-5 flex-1 mb-5">
-            {expert.bio}
-          </p>
-        )}
-
-        <Link
-          to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
-          className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase transition-colors inline-flex items-center gap-1.5"
+        {/* Close */}
+        <button
+          ref={closeRef}
+          onClick={onClose}
+          aria-label="Close"
+          style={{ position: "absolute", top: 16, right: 16, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", borderRadius: 100 }}
         >
-          VIEW PROFILE →
-        </Link>
+          <X size={18} style={{ color: C.midGrey }} />
+        </button>
+
+        {/* Expert header */}
+        <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 20 }}>
+          <div
+            aria-hidden="true"
+            style={{ width: 64, height: 64, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})`, display: "flex", alignItems: "center", justifyContent: "center" }}
+          >
+            <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 22, color: C.burgCore }}>
+              {expert.name.split(" ").map(p => p[0]).join("").slice(0, 2)}
+            </span>
+          </div>
+          <div>
+            <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.2em", color: C.roseCore, display: "block", marginBottom: 4 }}>
+              {expert.domain}
+            </span>
+            <h2 id="modal-heading" style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.burgCore, margin: 0, lineHeight: 1.2 }}>
+              {expert.name}
+            </h2>
+            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, margin: "4px 0 0" }}>{expert.role}</p>
+          </div>
+        </div>
+
+        <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, marginBottom: 16 }}>{expert.bio}</p>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 24 }}>
+          {expert.credentials.map((c, i) => (
+            <span key={i} style={{ background: C.roseWash, padding: "5px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 10, color: C.burgCore, letterSpacing: "0.04em" }}>
+              {c}
+            </span>
+          ))}
+        </div>
+
+        {mode === "viewOnly" ? (
+          <button
+            onClick={onClose}
+            style={{ width: "100%", background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "14px 20px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 48 }}
+          >
+            Close
+          </button>
+        ) : submitted ? (
+          <div style={{ borderLeft: `3px solid ${C.roseCore}`, paddingLeft: 16, marginTop: 8 }}>
+            <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 20, color: C.burgCore, marginBottom: 8 }}>Request received.</p>
+            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65 }}>
+              We'll review your request and connect you with {firstName} within 3 business days.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} noValidate>
+            <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>
+              REQUEST A CONNECTION
+            </p>
+
+            {[
+              { id: "req-name", label: "Your name", type: "text", key: "name", required: true },
+              { id: "req-email", label: "Email", type: "email", key: "email", required: true },
+            ].map((field) => (
+              <div key={field.key} style={{ marginBottom: 14 }}>
+                <label htmlFor={field.id} style={{ display: "block", fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, marginBottom: 6 }}>
+                  {field.label} <span aria-hidden="true" style={{ color: C.roseCore, marginLeft: 2 }}>*</span>
+                </label>
+                <input
+                  id={field.id}
+                  type={field.type}
+                  aria-required="true"
+                  value={form[field.key]}
+                  onChange={(e) => { setForm(f => ({ ...f, [field.key]: e.target.value })); setErrors(er => ({ ...er, [field.key]: undefined })); }}
+                  style={{ width: "100%", height: 44, background: C.white, border: `1px solid ${errors[field.key] ? "#C4847A" : "rgba(74,14,46,0.15)"}`, borderRadius: 6, padding: "0 12px", fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none" }}
+                  onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.15)"; }}
+                  onBlur={(e) => { e.target.style.borderColor = errors[field.key] ? C.roseCore : "rgba(74,14,46,0.15)"; e.target.style.boxShadow = "none"; }}
+                />
+                {errors[field.key] && <p role="alert" style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors[field.key]}</p>}
+              </div>
+            ))}
+
+            <div style={{ marginBottom: 20 }}>
+              <label htmlFor="req-reason" style={{ display: "block", fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, marginBottom: 6 }}>
+                What would you like to work on with {firstName}?
+              </label>
+              <textarea
+                id="req-reason"
+                rows={4}
+                value={form.reason}
+                placeholder="A short paragraph helps us match you to the right kind of engagement."
+                onChange={(e) => setForm(f => ({ ...f, reason: e.target.value }))}
+                style={{ width: "100%", background: C.white, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "10px 12px", fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none", resize: "vertical" }}
+                onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.15)"; }}
+                onBlur={(e) => { e.target.style.borderColor = "rgba(74,14,46,0.15)"; e.target.style.boxShadow = "none"; }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              style={{ width: "100%", background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, padding: "16px 20px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 48, marginBottom: 10 }}
+            >
+              Send request +
+            </button>
+            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 11, color: C.midGrey, textAlign: "center" }}>
+              Typical response within 3 business days.
+            </p>
+          </form>
+        )}
       </div>
     </div>
   );
 }
 
-export default function ExpertsDirectory() {
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+// ─── EXPERT CARD ───
+function ExpertCard({ expert, dbExpert, onConnect, onView }) {
+  const [hovered, setHovered] = useState(false);
 
-  const { data: experts = [] } = useQuery({
-    queryKey: ["experts-directory"],
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: C.white,
+        padding: 28,
+        border: `1px solid ${hovered ? "rgba(196,132,122,0.4)" : "rgba(74,14,46,0.06)"}`,
+        borderRadius: 6,
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        boxShadow: hovered ? "0 12px 32px rgba(74,14,46,0.08)" : "none",
+        transform: hovered ? "translateY(-2px)" : "none",
+        transition: "border-color 0.25s, box-shadow 0.25s, transform 0.25s",
+      }}
+    >
+      {/* Header row */}
+      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+        <div
+          aria-hidden="true"
+          style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+        >
+          {dbExpert?.profile_picture ? (
+            <img src={dbExpert.profile_picture} alt={`Headshot of ${expert.name}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 20, color: C.burgCore }}>
+              {expert.name.split(" ").map(p => p[0]).join("").slice(0, 2)}
+            </span>
+          )}
+        </div>
+        <div>
+          <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.2em", color: C.roseCore, display: "block", marginBottom: 4 }}>
+            {expert.domain}
+          </span>
+          <h3 style={{ fontFamily: sans, fontWeight: 600, fontSize: 15, color: C.burgCore, lineHeight: 1.3, margin: 0 }}>
+            {expert.name}
+          </h3>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, margin: "2px 0 0" }}>
+            {expert.role}
+          </p>
+        </div>
+      </div>
+
+      {/* Bio */}
+      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, margin: 0 }}>
+        {expert.bio}
+      </p>
+
+      {/* Credential chips */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {expert.credentials.map((c, i) => (
+          <span key={i} style={{ background: C.roseWash, padding: "5px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 10, color: C.burgCore, letterSpacing: "0.04em" }}>
+            {c}
+          </span>
+        ))}
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <button
+          onClick={() => onConnect(expert)}
+          aria-label={`Request a connection with ${expert.name}`}
+          style={{ flex: 1, minWidth: 140, background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "12px 20px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 44 }}
+        >
+          Request a connection
+        </button>
+        <button
+          onClick={() => onView(expert)}
+          aria-label={`View profile of ${expert.name}`}
+          style={{ background: "transparent", color: C.burgCore, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 100, padding: "12px 18px", fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em", cursor: "pointer", minHeight: 44 }}
+        >
+          View profile
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── MAIN PAGE ───
+export default function ExpertsDirectory() {
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [modal, setModal] = useState(null); // { expert, mode }
+
+  const { data: dbExperts = [] } = useQuery({
+    queryKey: ["experts-directory-db"],
     queryFn: () => base44.entities.Expert.filter({ isPublished: true }),
   });
 
-  const { data: categoriesRaw = [] } = useQuery({
-    queryKey: ["expert-categories"],
-    queryFn: () => base44.entities.ExpertCategory.list(),
-  });
+  useEffect(() => {
+    base44.analytics.track({ eventName: "view_experts_page" });
+  }, []);
 
-  const categories = [...categoriesRaw].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const filtered = activeFilter === "All"
+    ? EXPERTS
+    : EXPERTS.filter(e => e.domain === activeFilter);
 
-  const getCategoryName = (id) => categories.find((c) => c.id === id)?.name || "";
+  // Match static expert to DB record by name for profile picture
+  const getDbExpert = (name) => dbExperts.find(e => e.name?.toLowerCase().trim() === name.toLowerCase().trim());
 
-  const sortedExperts = [...experts].sort((a, b) => {
-    const aCat = categories.find((c) => c.id === a.category);
-    const bCat = categories.find((c) => c.id === b.category);
-    return (aCat?.order ?? 9999) - (bCat?.order ?? 9999);
-  });
+  const handleFilter = (f) => {
+    setActiveFilter(f);
+    base44.analytics.track({ eventName: "filter_change", properties: { domain: f } });
+  };
 
-  const filtered = sortedExperts.filter((e) => {
-    const matchesSearch =
-      !search ||
-      e.name?.toLowerCase().includes(search.toLowerCase()) ||
-      e.title?.toLowerCase().includes(search.toLowerCase()) ||
-      e.specialties?.some((s) => s.toLowerCase().includes(search.toLowerCase()));
-    const matchesCategory = selectedCategory === "all" || e.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const openConnect = (expert) => {
+    base44.analytics.track({ eventName: "expert_modal_open", properties: { expert: expert.name, mode: "form" } });
+    setModal({ expert, mode: "form" });
+  };
+
+  const openView = (expert) => {
+    base44.analytics.track({ eventName: "expert_modal_open", properties: { expert: expert.name, mode: "viewOnly" } });
+    setModal({ expert, mode: "viewOnly" });
+  };
 
   return (
-    <div className="min-h-screen bg-off-white px-8 md:px-16 py-16">
-      <div className="max-w-5xl mx-auto">
+    <main id="main-content" style={{ fontFamily: sans, background: C.offWhite, minHeight: "100vh" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+        *:focus-visible { outline: 2px solid #C4847A !important; outline-offset: 3px !important; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (prefers-reduced-motion: reduce) {
+          * { transition: none !important; animation: none !important; }
+        }
+      `}</style>
 
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="inline-block w-6 h-px bg-awrose-core" />
-            <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase">
-              YOUR COUNCIL
-            </p>
-          </div>
-          <h1 className="font-display italic text-awburg-core text-5xl md:text-6xl leading-tight mb-4">
-            The women teaching you.
+      {/* ── HERO ── */}
+      <section style={{ background: C.offWhite, padding: "80px 32px 64px", textAlign: "center" }}>
+        <div style={{ maxWidth: 920, margin: "0 auto" }}>
+          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>
+            Credentialed practitioners · Verified expertise
+          </p>
+          <h1 style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(40px, 6vw, 64px)", color: C.burgCore, lineHeight: 1.1, marginBottom: 28 }}>
+            Connect with an expert.
           </h1>
-          <p className="font-body font-light italic text-awburg-core/70 text-base max-w-xl leading-relaxed">
-            Fourteen specialists across hormones, nervous-system regulation, money, mindset and identity. Browse the full council, or filter by what you're working on.
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 16, color: C.darkGrey, lineHeight: 1.8, maxWidth: 780, margin: "0 auto 20px" }}>
+            The Aligned Woman Co works exclusively with credentialed practitioners, researchers, and specialists whose expertise has been verified, not self-reported. Every expert on this platform has been selected for depth of qualification, relevance to the women we serve, and the ability to deliver measurable outcomes.
+          </p>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontStyle: "italic", fontSize: 15, color: C.midGrey, lineHeight: 1.85, maxWidth: 780, margin: "0 auto" }}>
+            We do not use influencers. We do not platform anyone whose credentials would not hold up under professional scrutiny. This is a deliberate decision. The women who trust this platform deserve practitioners who have earned their authority through years of clinical practice, academic research, or demonstrated professional results. Not through audience size.
           </p>
         </div>
+      </section>
 
-        {/* Search */}
-        <div className="relative mb-6 max-w-lg">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" />
-          <input
-            type="text"
-            placeholder="Search by name or specialism"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-paper border border-awburg-core/15 rounded-full pl-11 pr-5 py-3 text-sm font-body text-awburg-core placeholder-awburg-core/40 focus:outline-none focus:ring-2 focus:ring-awrose-light/60"
-          />
-        </div>
-
-        {/* Category Filter Pills */}
-        <div className="flex flex-wrap gap-2 mb-12">
-          <button
-            onClick={() => setSelectedCategory("all")}
-            className={`px-4 py-2 rounded-full text-xs font-body font-bold tracking-eyebrow uppercase border transition-colors ${
-              selectedCategory === "all"
-                ? "bg-awburg-core text-paper border-awburg-core"
-                : "bg-paper text-awburg-core/70 border-awburg-core/20 hover:border-awburg-core/50"
-            }`}
+      {/* ── STICKY FILTER BAR ── */}
+      <div style={{ position: "sticky", top: 0, zIndex: 10, background: C.offWhite, borderBottom: "1px solid rgba(74,14,46,0.06)", padding: "24px 32px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div
+            role="tablist"
+            aria-label="Filter by domain"
+            className="filter-scroll"
+            style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "wrap" }}
           >
-            All
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-full text-xs font-body font-bold tracking-eyebrow uppercase border transition-colors ${
-                selectedCategory === cat.id
-                  ? "bg-awburg-core text-paper border-awburg-core"
-                  : "bg-paper text-awburg-core/70 border-awburg-core/20 hover:border-awburg-core/50"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+            {DOMAIN_FILTERS.map((f) => {
+              const active = activeFilter === f;
+              return (
+                <button
+                  key={f}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => handleFilter(f)}
+                  style={{
+                    background: active ? C.burgCore : "transparent",
+                    color: active ? C.white : C.burgCore,
+                    border: `1px solid ${active ? C.burgCore : "rgba(74,14,46,0.15)"}`,
+                    borderRadius: 100,
+                    padding: "10px 18px",
+                    fontFamily: sans,
+                    fontWeight: 500,
+                    fontSize: 11,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    minHeight: 44,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "background 0.2s, color 0.2s, border-color 0.2s",
+                  }}
+                >
+                  {f}
+                </button>
+              );
+            })}
+          </div>
         </div>
+      </div>
 
-        {/* Grid */}
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+      {/* ── DIRECTORY ── */}
+      <section style={{ background: C.offWhite, padding: "56px 32px 80px" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+          {/* Result count */}
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, letterSpacing: "0.06em", textAlign: "center", marginBottom: 32 }}>
+            <strong style={{ fontWeight: 600 }}>{filtered.length}</strong> of <strong style={{ fontWeight: 600 }}>{EXPERTS.length}</strong> experts shown
+          </p>
+
+          {/* Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
             {filtered.map((expert) => (
               <ExpertCard
                 key={expert.id}
                 expert={expert}
-                categoryName={getCategoryName(expert.category)}
+                dbExpert={getDbExpert(expert.name)}
+                onConnect={openConnect}
+                onView={openView}
               />
             ))}
           </div>
-        ) : (
-          <div className="text-center py-24">
-            <p className="font-body font-light text-awburg-core/50 text-sm">No experts found.</p>
-          </div>
-        )}
+        </div>
+      </section>
 
-      </div>
-    </div>
+      {/* ── CLOSING CTA ── */}
+      <section style={{ background: "linear-gradient(160deg, #0E0208 0%, #1A0510 35%, #4A0E2E 65%, #1A0510 100%)", padding: "80px 32px", textAlign: "center" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>
+            Not sure who to start with
+          </p>
+          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(28px, 4vw, 40px)", color: C.white, lineHeight: 1.2, marginBottom: 20 }}>
+            Tell us what you are navigating. We will match you to the right practitioner.
+          </h2>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.75, marginBottom: 32 }}>
+            Every match is reviewed personally by our team. We do not auto-route. Each connection is considered against the practitioner's current focus areas and capacity.
+          </p>
+          <a
+            href="mailto:hello@alignedwomanco.com?subject=Expert%20Connection%20Request"
+            onClick={() => base44.analytics.track({ eventName: "matched_intro_click" })}
+            style={{ display: "inline-block", background: C.roseCore, color: C.burgDeep, borderRadius: 100, padding: "18px 40px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.14em", minHeight: 48, textDecoration: "none", lineHeight: "12px" }}
+          >
+            Request a matched introduction +
+          </a>
+        </div>
+      </section>
+
+      {/* ── MODAL ── */}
+      {modal && (
+        <ExpertModal
+          expert={modal.expert}
+          mode={modal.mode}
+          onClose={() => setModal(null)}
+        />
+      )}
+    </main>
   );
 }
