@@ -50,6 +50,7 @@ import WorkbookManagement from "@/components/admin/WorkbookManagement";
 import PagesManagerContent from "@/components/admin/PagesManagerContent";
 import BlogManagementContent from "@/components/admin/BlogManagementContent";
 import IntegrationsContent from "@/components/admin/IntegrationsContent";
+import AffiliatesTab from "@/components/adminpanel/AffiliatesTab";
 
 export default function AdminSettings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -309,6 +310,7 @@ export default function AdminSettings() {
                   { value: "pages", label: "Pages", icon: "🌐" },
                   { value: "blog", label: "Blog", icon: "✍️" },
                   { value: "payments", label: "Payments", icon: "💳" },
+                  { value: "affiliates", label: "Affiliates", icon: "🤝" },
                   { value: "analytics", label: "Analytics", icon: "📊" },
                 ].map((tab) => (
                   <button
@@ -718,6 +720,11 @@ export default function AdminSettings() {
           {/* Payment Settings Tab */}
           <TabsContent value="payments">
             <PaymentSettingsContent />
+          </TabsContent>
+
+          {/* Affiliates Tab */}
+          <TabsContent value="affiliates">
+            <AffiliatesTab />
           </TabsContent>
 
           {/* Pages Tab */}
