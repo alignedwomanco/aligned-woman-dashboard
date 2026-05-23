@@ -294,8 +294,8 @@ function EyebrowLeft({ children, color = C.roseCore }) {
 
 function PrimaryCTA({ large = false, label = "Begin Your Blueprint +", className = "", onClick }) {
   return (
-    <a
-      href="#enrol"
+    <Link
+      to="/checkout"
       onClick={onClick}
       className={`cta-primary inline-block rounded-full font-bold uppercase text-center ${className}`}
       style={{
@@ -307,7 +307,7 @@ function PrimaryCTA({ large = false, label = "Begin Your Blueprint +", className
       }}
     >
       {label}
-    </a>
+    </Link>
   );
 }
 
@@ -1837,13 +1837,13 @@ function StickyMobileCTA() {
             borderTop: `1px solid rgba(196,132,122,0.2)`,
           }}
         >
-          <a
-            href="#enrol"
+          <Link
+            to="/checkout"
             className="flex-1 text-center rounded-full py-3 text-[11px] font-bold uppercase tracking-[0.14em]"
             style={{ fontFamily: sans, background: C.roseCore, color: C.burgDeep }}
           >
             Begin Your Blueprint +
-          </a>
+          </Link>
           <button
             onClick={() => setDismissed(true)}
             className="p-2"
