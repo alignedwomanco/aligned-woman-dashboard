@@ -284,7 +284,7 @@ function ExpertCard({ expert, onConnect, onView }) {
       </div>
 
       {/* Bio */}
-      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, margin: 0 }}>
+      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }}>
         {expert.bio}
       </p>
 
@@ -298,18 +298,11 @@ function ExpertCard({ expert, onConnect, onView }) {
       </div>
 
       {/* Actions */}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <button
-          onClick={() => onConnect(expert)}
-          aria-label={`Request a connection with ${expert.name}`}
-          style={{ flex: 1, minWidth: 140, background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "12px 20px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 44 }}
-        >
-          Request a connection
-        </button>
+      <div style={{ display: "flex", gap: 10 }}>
         <button
           onClick={() => onView(expert)}
           aria-label={`View profile of ${expert.name}`}
-          style={{ background: "transparent", color: C.burgCore, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 100, padding: "12px 18px", fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em", cursor: "pointer", minHeight: 44 }}
+          style={{ flex: 1, background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "12px 20px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 44 }}
         >
           View profile
         </button>
