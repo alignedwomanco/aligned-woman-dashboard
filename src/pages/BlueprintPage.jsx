@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Plus, Check, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { createPageUrl } from "@/utils";
 
 // ─── BRAND TOKENS (CSS custom properties not in tailwind.config) ───
 const C = {
@@ -782,9 +786,35 @@ function WhyExists() {
 function Faculty() {
   const [activeFilter, setActiveFilter] = useState("all");
 
+  const { data: experts = [] } = useQuery({
+    queryKey: ["blueprint-experts"],
+    queryFn: () => base44.entities.Expert.filter({ isPublished: true }),
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["blueprint-expert-categories"],
+    queryFn: () => base44.entities.ExpertCategory.list(),
+  });
+
+  const getCategoryName = (id) => categories.find((c) => c.id === id)?.name || "";
+
+  const sortedExperts = [...experts].sort((a, b) => {
+    const aCat = categories.find((c) => c.id === a.category);
+    const bCat = categories.find((c) => c.id === b.category);
+    return (aCat?.order ?? 9999) - (bCat?.order ?? 9999);
+  });
+
   const filtered = activeFilter === "all"
-    ? FACULTY
-    : FACULTY.filter((f) => f.filter === activeFilter || f.filter === "all");
+    ? sortedExperts
+    : sortedExperts.filter((e) => getCategoryName(e.category) === activeFilter);
+
+  // Build filter list from actual categories
+  const filterLabels = ["all", ...categories.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((c) => c.name)];
+
+  function getInitials(name) {
+    if (!name) return "?";
+    return name.split(" ").filter(Boolean).map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+  }
 
   return (
     <section className="py-14 md:py-24 px-6 md:px-8" style={{ background: C.offWhite }}>
@@ -809,7 +839,7 @@ function Faculty() {
         {/* Filter pills */}
         <SectionReveal>
           <div className="flex flex-wrap justify-center gap-2 mb-10 overflow-x-auto">
-            {FACULTY_FILTERS.map((f) => (
+            {filterLabels.map((f) => (
               <button
                 key={f}
                 onClick={() => setActiveFilter(f)}
@@ -829,33 +859,53 @@ function Faculty() {
         </SectionReveal>
 
         {/* Faculty grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          {filtered.map((f, i) => (
-            <SectionReveal key={f.name}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filtered.map((expert) => (
+            <SectionReveal key={expert.id}>
               <div
-                className="bg-white rounded-lg p-6 text-center h-full flex flex-col items-center"
+                className="bg-white rounded-lg overflow-hidden h-full flex flex-col"
                 style={{ border: `1px solid rgba(74,14,46,0.06)` }}
               >
-                {/* Avatar placeholder */}
+                {/* Photo */}
                 <div
-                  className="w-20 h-20 rounded-full mb-3 flex-shrink-0"
-                  style={{ background: `linear-gradient(135deg, ${C.burgCore}30, ${C.roseCore}30)` }}
-                />
-                <span className="text-[8px] font-semibold uppercase tracking-[0.2em] mb-1 block" style={{ fontFamily: sans, color: C.burgCore }}>
-                  {f.domain}
-                </span>
-                <span className="text-[14px] font-semibold mb-1 block" style={{ fontFamily: sans, color: C.burgCore }}>
-                  {f.name}
-                </span>
-                <p className="text-[12px] font-light mb-3 flex-1" style={{ fontFamily: sans, color: C.midGrey }}>
-                  {f.desc}
-                </p>
-                <button
-                  className="text-[10px] font-medium uppercase tracking-[0.12em] hover:opacity-70 transition-opacity"
-                  style={{ fontFamily: sans, color: C.burgCore, minHeight: 44 }}
+                  className="w-full flex items-center justify-center overflow-hidden flex-shrink-0"
+                  style={{ aspectRatio: "3/2.2", background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseWash})` }}
                 >
-                  VIEW PROFILE &rarr;
-                </button>
+                  {expert.profile_picture ? (
+                    <img src={expert.profile_picture} alt={expert.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 48, color: C.burgCore, opacity: 0.4 }}>
+                      {getInitials(expert.name)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Body */}
+                <div className="p-5 flex flex-col flex-1">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.2em] mb-1 block" style={{ fontFamily: sans, color: C.roseDeep }}>
+                    {getCategoryName(expert.category)}
+                  </span>
+                  <span className="text-[15px] font-semibold mb-1 block" style={{ fontFamily: sans, color: C.burgCore }}>
+                    {expert.name}
+                  </span>
+                  {expert.title && (
+                    <p className="text-[12px] font-medium mb-2" style={{ fontFamily: sans, color: C.burgCore + "99" }}>
+                      {expert.title}
+                    </p>
+                  )}
+                  {expert.bio && (
+                    <p className="text-[12px] font-light leading-[1.7] mb-3 flex-1 line-clamp-3" style={{ fontFamily: sans, color: C.midGrey }}>
+                      {expert.bio}
+                    </p>
+                  )}
+                  <Link
+                    to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
+                    className="text-[10px] font-medium uppercase tracking-[0.12em] hover:opacity-70 transition-opacity mt-auto"
+                    style={{ fontFamily: sans, color: C.burgCore }}
+                  >
+                    VIEW PROFILE &rarr;
+                  </Link>
+                </div>
               </div>
             </SectionReveal>
           ))}
