@@ -24,6 +24,8 @@ import {
   Trash2,
   Plus,
   Mail,
+  MessageSquare,
+  Eye,
 } from "lucide-react";
 
 const SITE_URL = "https://app.alignedwomanco.com";
@@ -399,6 +401,97 @@ function SalesTable({ sales }) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function ContactRequestsTab({ expert }) {
+  const { data: contactSubmissions = [], isLoading } = useQuery({
+    queryKey: ["expert-contact-requests", expert?.id],
+    queryFn: () => base44.entities.ContactSubmission.filter({ recipient_email: expert?.linked_user_email }),
+    enabled: !!expert?.linked_user_email,
+  });
+
+  const sortedSubmissions = [...contactSubmissions].sort((a, b) => {
+    const dateA = new Date(a.created_date || 0);
+    const dateB = new Date(b.created_date || 0);
+    return dateB - dateA;
+  });
+
+  const unreadCount = contactSubmissions.filter((s) => s.status === "new").length;
+
+  const handleMarkAsRead = async (id) => {
+    await base44.entities.ContactSubmission.update(id, { status: "reviewed" });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="animate-spin" style={{ width: 24, height: 24, color: "#C4847A" }} />
+      </div>
+    );
+  }
+
+  if (sortedSubmissions.length === 0) {
+    return (
+      <div className="rounded-xl p-12 text-center" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.06)" }}>
+        <MessageSquare style={{ width: 48, height: 48, color: "#C4847A", margin: "0 auto 16px" }} />
+        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 14, color: "#4A0E2E", marginBottom: 4 }}>
+          No contact requests yet
+        </p>
+        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 13, color: "#8A7A76" }}>
+          When someone contacts you, their message will appear here.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {sortedSubmissions.map((submission) => (
+        <div
+          key={submission.id}
+          className="rounded-xl p-5 transition-all cursor-pointer"
+          style={{
+            background: "#FFFFFF",
+            border: submission.status === "new" ? "1px solid #C4847A" : "1px solid rgba(74,14,46,0.06)",
+            boxShadow: "0 2px 12px rgba(74,14,46,0.04)",
+          }}
+          onClick={() => handleMarkAsRead(submission.id)}
+        >
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 14, color: "#4A0E2E" }}>
+                  {submission.first_name} {submission.last_name}
+                </span>
+                {submission.status === "new" && (
+                  <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: "#C4847A", color: "#FFFFFF", fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 10 }}>
+                    NEW
+                  </span>
+                )}
+              </div>
+              <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#8A7A76" }}>
+                {submission.email}
+              </p>
+            </div>
+            <div className="text-right">
+              <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 11, color: "#8A7A76" }}>
+                {submission.created_date ? new Date(submission.created_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}
+              </p>
+              {submission.status !== "new" && (
+                <span className="inline-flex items-center gap-1 text-xs" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 10, color: "#8A7A76" }}>
+                  <Eye style={{ width: 10, height: 10 }} />
+                  {submission.status}
+                </span>
+              )}
+            </div>
+          </div>
+          <p className="line-clamp-2" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 13, color: "#3A2A28", lineHeight: 1.6 }}>
+            {submission.message || "No message"}
+          </p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -798,6 +891,12 @@ export default function ExpertDashboard() {
   const [activeTab, setActiveTab] = useState("earnings");
   const queryClient = useQueryClient();
 
+  const { data: contactSubmissions = [] } = useQuery({
+    queryKey: ["expert-contact-requests", expert?.id],
+    queryFn: () => base44.entities.ContactSubmission.filter({ recipient_email: userEmail }),
+    enabled: !!userEmail && !!expert,
+  });
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("connect") === "complete" || params.get("connect") === "refresh") {
@@ -835,6 +934,7 @@ export default function ExpertDashboard() {
   const tabs = [
     { id: "earnings", label: "Earnings", icon: BarChart3 },
     { id: "profile", label: "My Profile", icon: User },
+    { id: "contact-requests", label: "Contact Requests", icon: MessageSquare, badge: contactSubmissions?.filter((s) => s.status === "new").length || 0 },
   ];
 
   return (
@@ -853,11 +953,11 @@ export default function ExpertDashboard() {
         </div>
 
         <div className="flex gap-1 p-1 rounded-xl mb-8" style={{ background: "#FFFFFF", display: "inline-flex" }}>
-          {tabs.map(({ id, label, icon: Icon }) => (
+          {tabs.map(({ id, label, icon: Icon, badge }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all relative"
               style={{
                 background: activeTab === id ? "#4A0E2E" : "transparent",
                 color: activeTab === id ? "#FFFFFF" : "#8A7A76",
@@ -868,6 +968,11 @@ export default function ExpertDashboard() {
             >
               <Icon style={{ width: 15, height: 15 }} />
               {label}
+              {badge > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-xs font-bold" style={{ background: "#C4847A", color: "#FFFFFF", fontFamily: "Montserrat, sans-serif", fontSize: 10 }}>
+                  {badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -917,6 +1022,10 @@ export default function ExpertDashboard() {
               user={user}
               onExpertUpdate={() => queryClient.invalidateQueries({ queryKey: ["expert-profile", userEmail] })}
             />
+          )}
+
+          {activeTab === "contact-requests" && (
+            <ContactRequestsTab expert={expert} />
           )}
         </motion.div>
       </div>

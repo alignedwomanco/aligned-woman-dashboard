@@ -11,7 +11,8 @@
         "brand_collab",
         "press",
         "general",
-        "newsletter"
+        "newsletter",
+        "expert_inquiry"
       ]
     },
     "first_name": {
@@ -36,6 +37,10 @@
     "extra_field_value": {
       "type": "string"
     },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email of the expert/staff member this inquiry is directed to"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -49,55 +54,5 @@
   "required": [
     "type",
     "email"
-  ],
-  "rls": {
-    "create": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "read": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "update": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    }
-  }
+  ]
 }
