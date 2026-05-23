@@ -1300,9 +1300,9 @@ function WhoThisIsFor() {
   return (
     <section className="py-14 md:py-24 px-6 md:px-8" style={{ background: C.offWhite }}>
       <div className="max-w-[1100px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16" style={{ alignItems: "start" }}>
           {/* Left col (sticky) */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
+          <div style={{ position: "sticky", top: 96, alignSelf: "start" }}>
             <SectionReveal>
               <EyebrowLeft color={C.burgCore}>WHO THIS IS FOR</EyebrowLeft>
               <h2>
