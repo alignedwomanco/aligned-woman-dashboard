@@ -969,7 +969,7 @@ function Faculty() {
           {filtered.map((expert) => (
             <SectionReveal key={expert.id}>
               <div
-                className="bg-white rounded-lg p-4 h-full flex flex-col items-center text-center"
+                className="bg-white rounded-lg p-4 h-full flex flex-col items-center text-center overflow-hidden"
                 style={{ border: `1px solid rgba(74,14,46,0.06)` }}
               >
                 {/* Circular photo */}
@@ -994,7 +994,7 @@ function Faculty() {
 
                 {/* Bio snippet */}
                 {expert.bio && (
-                  <p className="text-[11px] font-light leading-[1.6] mb-3 flex-1 line-clamp-4" style={{ fontFamily: sans, color: C.midGrey }}>
+                  <p className="text-[11px] font-light leading-[1.6] mb-3 line-clamp-4 w-full" style={{ fontFamily: sans, color: C.midGrey }}>
                     {expert.bio}
                   </p>
                 )}
