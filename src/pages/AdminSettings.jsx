@@ -265,10 +265,26 @@ export default function AdminSettings() {
     );
   }
 
-  const canAccessAdmin = ["owner", "admin", "master_admin", "moderator", "expert", "educator", "facilitator", "support"].includes(currentUser.role);
+  const canAccessAdmin = ["owner", "admin", "master_admin", "moderator", "expert", "course_creator", "educator", "facilitator", "support"].includes(currentUser.role);
+  const isExpertOnly = ["expert", "course_creator"].includes(currentUser.role) && !["owner", "admin", "master_admin", "moderator"].includes(currentUser.role);
 
   const adminUsers = allUsers.filter(u => ["owner", "admin", "master_admin", "moderator", "educator", "facilitator", "expert", "support"].includes(u.role));
   const regularUsers = allUsers.filter(u => ["user", "member"].includes(u.role));
+
+  // Experts/course_creators see only the Experts tab
+  if (isExpertOnly) {
+    return (
+      <div className="min-h-screen p-3 sm:p-6 lg:p-12 overflow-x-hidden">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="mb-4 sm:mb-10 lg:mb-16">
+            <h1 className="text-xl sm:text-3xl font-bold mb-1" style={{ color: '#6E1D40' }}>My Expert Profile</h1>
+            <p className="text-gray-600 text-xs sm:text-base">Manage your expert profile</p>
+          </div>
+          <ExpertsManagementContent expertOnlyEmail={currentUser.email} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-3 sm:p-6 lg:p-12 overflow-x-hidden">

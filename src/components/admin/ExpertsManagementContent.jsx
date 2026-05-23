@@ -36,7 +36,7 @@ import { Link } from "react-router-dom";
 import ImageCropper from "./ImageCropper";
 import ExpertCategoryManager from "./ExpertCategoryManager";
 
-export default function ExpertsManagementContent() {
+export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("expert");
@@ -54,7 +54,10 @@ export default function ExpertsManagementContent() {
   });
   const [cropperOpen, setCropperOpen] = useState(false);
   const [tempImage, setTempImage] = useState(null);
+  const [socialLinks, setSocialLinks] = useState([]);
   const queryClient = useQueryClient();
+
+  const PLATFORM_OPTIONS = ["Website", "Email", "Instagram", "LinkedIn", "TikTok", "YouTube", "Twitter/X", "Other"];
 
   const { data: expertCategoriesRaw = [] } = useQuery({
     queryKey: ["expertCategories"],
@@ -155,17 +158,20 @@ export default function ExpertsManagementContent() {
     if (expert) {
       setCurrentExpert(expert);
       setExpertForm(expert);
+      setSocialLinks(Array.isArray(expert.social_links) ? expert.social_links : []);
     } else {
       resetForm();
+      setSocialLinks([]);
     }
     setEditExpertDialogOpen(true);
   };
 
   const handleSaveExpert = () => {
+    const formWithLinks = { ...expertForm, social_links: socialLinks.filter(l => l.platform && l.url) };
     if (currentExpert) {
-      updateExpertMutation.mutate({ id: currentExpert.id, data: expertForm });
+      updateExpertMutation.mutate({ id: currentExpert.id, data: formWithLinks });
     } else {
-      createExpertMutation.mutate(expertForm);
+      createExpertMutation.mutate(formWithLinks);
     }
   };
 
@@ -209,8 +215,13 @@ export default function ExpertsManagementContent() {
     };
   };
 
+  // If expertOnlyEmail is set, filter to only that expert's profile
+  const visibleProfiles = expertOnlyEmail
+    ? expertsProfiles.filter(e => e.linked_user_email?.toLowerCase() === expertOnlyEmail.toLowerCase())
+    : expertsProfiles;
+
   // Sort experts by category order
-  const sortedExperts = [...expertsProfiles].sort((a, b) => {
+  const sortedExperts = [...visibleProfiles].sort((a, b) => {
     const aCat = expertCategories.find((c) => c.id === a.category);
     const bCat = expertCategories.find((c) => c.id === b.category);
     const aOrder = aCat?.order ?? 9999;
@@ -624,6 +635,63 @@ export default function ExpertsManagementContent() {
                   />
                   <p className="text-xs text-gray-500">JPG, PNG, max 5MB</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Links Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Links</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSocialLinks([...socialLinks, { platform: "", url: "" }])}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add Link
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {socialLinks.map((link, idx) => (
+                  <div key={idx} className="flex gap-2 items-center">
+                    <Select
+                      value={link.platform}
+                      onValueChange={(val) => {
+                        const updated = [...socialLinks];
+                        updated[idx].platform = val;
+                        setSocialLinks(updated);
+                      }}
+                    >
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Platform" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLATFORM_OPTIONS.map((p) => (
+                          <SelectItem key={p} value={p}>{p}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      className="flex-1"
+                      placeholder="URL or email"
+                      value={link.url}
+                      onChange={(e) => {
+                        const updated = [...socialLinks];
+                        updated[idx].url = e.target.value;
+                        setSocialLinks(updated);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSocialLinks(socialLinks.filter((_, i) => i !== idx))}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </div>
 
