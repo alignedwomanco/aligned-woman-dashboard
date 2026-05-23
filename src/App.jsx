@@ -22,7 +22,7 @@ import NutritionWorkbook from './pages/NutritionWorkbook';
 import ExpertProfile from './pages/ExpertProfile';
 import Admin from './pages/Admin';
 import { PaymentProvider } from './context/PaymentContext';
-import Checkout from './pages/Checkout.jsx';
+import Checkout from './pages/Checkout';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
