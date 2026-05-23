@@ -20,8 +20,6 @@ import {
 } from "lucide-react";
 
 const SITE_URL = "https://app.alignedwomanco.com";
-const APP_ID = "69f46886a412ee042303f1af";
-const CONNECT_FUNCTION_URL = `https://api.base44.com/api/apps/${APP_ID}/functions/createConnectAccount`;
 
 function useExpertData() {
   const { user } = useAuth();
@@ -190,17 +188,7 @@ function BankAccountCard({ affiliate }) {
     setError(null);
 
     try {
-      const response = await fetch(CONNECT_FUNCTION_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ affiliate_id: affiliate.id }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create connect account");
-      }
+      const data = await base44.functions.invoke('createConnectAccount', { affiliate_id: affiliate.id });
 
       if (data.already_onboarded) {
         queryClient.invalidateQueries({ queryKey: ["expert-affiliate"] });
