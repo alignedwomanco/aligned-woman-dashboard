@@ -22,6 +22,7 @@ import NutritionWorkbook from './pages/NutritionWorkbook';
 import ExpertProfile from './pages/ExpertProfile';
 import Admin from './pages/Admin';
 import { PaymentProvider } from './context/PaymentContext';
+import Checkout from './pages/Checkout.jsx';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -88,6 +89,7 @@ const AuthenticatedApp = () => {
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
       <Route path="/NutritionWorkbook" element={<LayoutWrapper currentPageName="NutritionWorkbook"><NutritionWorkbook /></LayoutWrapper>} />
       <Route path="/experts/:slug" element={<ExpertProfile />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
