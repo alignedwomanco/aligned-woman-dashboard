@@ -2,8 +2,15 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import TabHeader from "./TabHeader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const EMPTY = { name: "", email: "", commission_percentage: 20, unique_code: "", total_sales: 0, total_commission: 0 };
+const EMPTY = { name: "", email: "", commission_percentage: 20, unique_code: "", total_sales: 0, total_commission: 0, expert_id: "" };
 
 export default function AffiliatesTab() {
   const [editing, setEditing] = useState(null);
@@ -11,6 +18,7 @@ export default function AffiliatesTab() {
   const qc = useQueryClient();
 
   const { data: affiliates = [] } = useQuery({ queryKey: ["admin-affiliates"], queryFn: () => base44.entities.Affiliate.list() });
+  const { data: experts = [] } = useQuery({ queryKey: ["admin-experts"], queryFn: () => base44.entities.Expert.list() });
 
   const save = useMutation({
     mutationFn: () => editing === "new"
@@ -44,12 +52,30 @@ export default function AffiliatesTab() {
             {editing === "new" ? "Add Affiliate" : "Edit Affiliate"}
           </h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
-            {[["Name", "name"], ["Email", "email"], ["Unique Code", "unique_code"]].map(([label, field]) => (
+            {[["Name", "name"], ["Email", "email"]].map(([label, field]) => (
               <div key={field}>
                 <label className="block text-xs font-semibold mb-1" style={{ color: "#6B1B3D" }}>{label}</label>
                 <input value={form[field] || ""} onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))} className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: "rgba(107,27,61,0.2)" }} />
               </div>
             ))}
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: "#6B1B3D" }}>Link to Expert</label>
+              <Select value={form.expert_id || ""} onValueChange={(value) => setForm(f => ({ ...f, expert_id: value === "none" ? "" : value }))}>
+                <SelectTrigger className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: "rgba(107,27,61,0.2)" }}>
+                  <SelectValue placeholder="Select expert" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {experts.map((expert) => (
+                    <SelectItem key={expert.id} value={expert.id}>{expert.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: "#6B1B3D" }}>Unique Code</label>
+              <input value={form.unique_code || ""} onChange={e => setForm(f => ({ ...f, unique_code: e.target.value }))} className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: "rgba(107,27,61,0.2)" }} />
+            </div>
             <div>
               <label className="block text-xs font-semibold mb-1" style={{ color: "#6B1B3D" }}>Commission %</label>
               <input type="number" value={form.commission_percentage || ""} onChange={e => setForm(f => ({ ...f, commission_percentage: Number(e.target.value) }))} className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: "rgba(107,27,61,0.2)" }} />
@@ -67,7 +93,7 @@ export default function AffiliatesTab() {
           <table className="w-full">
             <thead>
               <tr style={{ background: "#FAF5F3" }}>
-                {["Name", "Code", "Commission %", "Email", "Total Sales", "Total Commission", "Actions"].map(h => (
+                {["Name", "Code", "Commission %", "Email", "Linked Expert", "Total Sales", "Total Commission", "Actions"].map(h => (
                   <th key={h} className="px-4 py-3 text-left" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#C4866C" }}>{h}</th>
                 ))}
               </tr>
@@ -79,6 +105,12 @@ export default function AffiliatesTab() {
                   <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs">{a.unique_code}</code></td>
                   <td className="px-4 py-3 text-sm">{a.commission_percentage}%</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{a.email || "—"}</td>
+                  <td className="px-4 py-3 text-sm">
+                    {a.expert_id ? (() => {
+                      const expert = experts.find(e => e.id === a.expert_id);
+                      return expert ? <span className="font-medium" style={{ color: "#6B1B3D" }}>{expert.name}</span> : <span className="text-gray-400">Unknown</span>;
+                    })() : <span className="text-gray-400">—</span>}
+                  </td>
                   <td className="px-4 py-3 text-sm">{a.total_sales || 0}</td>
                   <td className="px-4 py-3 text-sm font-semibold" style={{ color: "#6B1B3D" }}>${(a.total_commission || 0).toLocaleString()}</td>
                   <td className="px-4 py-3 flex gap-2">
@@ -87,7 +119,7 @@ export default function AffiliatesTab() {
                   </td>
                 </tr>
               ))}
-              {affiliates.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No affiliates yet</td></tr>}
+              {affiliates.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">No affiliates yet</td></tr>}
             </tbody>
           </table>
         </div>
