@@ -188,16 +188,22 @@ function BankAccountCard({ affiliate }) {
     setError(null);
 
     try {
-      const data = await base44.functions.invoke('createConnectAccount', { affiliate_id: affiliate.id });
+      const response = await base44.functions.invoke('createConnectAccount', { affiliate_id: affiliate.id });
+      const data = response?.data || response;
+      console.log("Connect response:", data);
 
       if (data.already_onboarded) {
         queryClient.invalidateQueries({ queryKey: ["expert-affiliate"] });
+        setConnecting(false);
         return;
       }
 
       if (data.onboarding_url) {
         window.location.href = data.onboarding_url;
+        return;
       }
+
+      setConnecting(false);
     } catch (err) {
       setError(err.message);
       setConnecting(false);
