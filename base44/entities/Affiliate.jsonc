@@ -25,6 +25,15 @@
     "total_commission": {
       "type": "number",
       "default": 0
+    },
+    "stripe_account_id": {
+      "type": "string",
+      "description": "Stripe Connect account ID for payouts"
+    },
+    "payout_status": {
+      "type": "string",
+      "default": "pending",
+      "description": "Current payout status"
     }
   },
   "required": [
