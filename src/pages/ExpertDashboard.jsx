@@ -17,6 +17,7 @@ import {
   Landmark,
   CheckCircle2,
   AlertCircle,
+  X,
 } from "lucide-react";
 
 const SITE_URL = "https://app.alignedwomanco.com";
@@ -175,63 +176,40 @@ function AffiliateLinkCard({ affiliate }) {
   );
 }
 
-function BankAccountCard({ affiliate }) {
-  const [connecting, setConnecting] = useState(false);
+function BankDetailsCard({ affiliate }) {
+  const [formData, setFormData] = useState({
+    bank_name: "",
+    account_holder_name: "",
+    account_number: "",
+    branch_code: "",
+    account_type: "Cheque",
+  });
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const queryClient = useQueryClient();
+  const [success, setSuccess] = useState(false);
 
-  const isActive = affiliate.payout_status === "active";
-  const hasStarted = affiliate.stripe_account_id && affiliate.payout_status === "onboarding_started";
-
-  const handleConnect = async () => {
-    setConnecting(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
     setError(null);
+    setSuccess(false);
 
     try {
-      const response = await base44.functions.invoke('createConnectAccount', { affiliate_id: affiliate.id });
-      const data = response?.data || response;
-      console.log("Connect response:", data);
-
-      if (data.already_onboarded) {
-        queryClient.invalidateQueries({ queryKey: ["expert-affiliate"] });
-        setConnecting(false);
-        return;
-      }
-
-      if (data.onboarding_url) {
-        window.location.href = data.onboarding_url;
-        return;
-      }
-
-      setConnecting(false);
+      await base44.entities.Affiliate.update(affiliate.id, {
+        bank_name: formData.bank_name,
+        account_holder_name: formData.account_holder_name,
+        account_number: formData.account_number,
+        branch_code: formData.branch_code,
+        account_type: formData.account_type,
+      });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       setError(err.message);
-      setConnecting(false);
+    } finally {
+      setSaving(false);
     }
   };
-
-  if (isActive) {
-    return (
-      <div
-        className="rounded-xl p-6"
-        style={{ background: "#FFFFFF", border: "1px solid rgba(45,106,79,0.15)", boxShadow: "0 2px 12px rgba(74,14,46,0.04)" }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(45,106,79,0.1)" }}>
-            <CheckCircle2 style={{ width: 20, height: 20, color: "#2D6A4F" }} />
-          </div>
-          <div>
-            <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 14, color: "#2D6A4F" }}>
-              Bank account connected
-            </span>
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#8A7A76", marginTop: 2 }}>
-              Commissions are paid out automatically via Stripe.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -241,14 +219,16 @@ function BankAccountCard({ affiliate }) {
       <div className="flex items-center gap-2 mb-4">
         <Landmark style={{ width: 16, height: 16, color: "#C4847A" }} />
         <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 13, color: "#4A0E2E" }}>
-          {hasStarted ? "Complete your bank setup" : "Connect your bank account"}
+          Bank Details
         </span>
       </div>
-      <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 13, color: "#8A7A76", lineHeight: 1.6, marginBottom: 16 }}>
-        {hasStarted
-          ? "Your setup is incomplete. Complete your details to start receiving automatic commission payouts."
-          : "Add your banking details so commissions can be paid directly into your account. Powered by Stripe for secure, automatic payouts."}
-      </p>
+
+      {success && (
+        <div className="flex items-center gap-2 p-3 rounded-lg mb-4" style={{ background: "rgba(45,106,79,0.08)" }}>
+          <CheckCircle2 style={{ width: 14, height: 14, color: "#2D6A4F" }} />
+          <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#2D6A4F" }}>Bank details saved successfully</span>
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-lg mb-4" style={{ background: "rgba(192,57,43,0.08)" }}>
@@ -257,31 +237,104 @@ function BankAccountCard({ affiliate }) {
         </div>
       )}
 
-      <button
-        onClick={handleConnect}
-        disabled={connecting}
-        className="flex items-center gap-2 px-5 py-3 rounded-lg transition-all"
-        style={{
-          background: "#C4847A",
-          color: "#0E0208",
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 700,
-          fontSize: 13,
-          letterSpacing: "0.05em",
-          opacity: connecting ? 0.6 : 1,
-          cursor: connecting ? "wait" : "pointer",
-        }}
-      >
-        {connecting ? (
-          <><Loader2 className="animate-spin" style={{ width: 16, height: 16 }} /> Setting up...</>
-        ) : (
-          <><Landmark style={{ width: 16, height: 16 }} /> {hasStarted ? "Continue Setup" : "Connect Bank Account"}</>
-        )}
-      </button>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+            Bank Name
+          </label>
+          <input
+            type="text"
+            value={formData.bank_name}
+            onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+            required
+            className="w-full px-3 py-2 rounded-lg border outline-none"
+            style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)", focusBorderColor: "#C4847A" }}
+            placeholder="e.g. FNB, Standard Bank"
+          />
+        </div>
 
-      <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 11, color: "#8A7A76", marginTop: 12 }}>
-        You will be redirected to Stripe to securely enter your details. Your banking information is never stored on our servers.
-      </p>
+        <div>
+          <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+            Account Holder Name
+          </label>
+          <input
+            type="text"
+            value={formData.account_holder_name}
+            onChange={(e) => setFormData({ ...formData, account_holder_name: e.target.value })}
+            required
+            className="w-full px-3 py-2 rounded-lg border outline-none"
+            style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+            placeholder="Full name as on account"
+          />
+        </div>
+
+        <div>
+          <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+            Account Number
+          </label>
+          <input
+            type="text"
+            value={formData.account_number}
+            onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+            required
+            className="w-full px-3 py-2 rounded-lg border outline-none"
+            style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+            placeholder="Your account number"
+          />
+        </div>
+
+        <div>
+          <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+            Branch Code
+          </label>
+          <input
+            type="text"
+            value={formData.branch_code}
+            onChange={(e) => setFormData({ ...formData, branch_code: e.target.value })}
+            required
+            className="w-full px-3 py-2 rounded-lg border outline-none"
+            style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+            placeholder="6-digit branch code"
+          />
+        </div>
+
+        <div>
+          <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
+            Account Type
+          </label>
+          <select
+            value={formData.account_type}
+            onChange={(e) => setFormData({ ...formData, account_type: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg border outline-none"
+            style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+          >
+            <option value="Cheque">Cheque</option>
+            <option value="Savings">Savings</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="flex items-center gap-2 px-5 py-3 rounded-lg transition-all"
+          style={{
+            background: "#C4847A",
+            color: "#0E0208",
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 700,
+            fontSize: 13,
+            letterSpacing: "0.05em",
+            opacity: saving ? 0.6 : 1,
+            cursor: saving ? "wait" : "pointer",
+          }}
+        >
+          {saving ? (
+            <><Loader2 className="animate-spin" style={{ width: 16, height: 16 }} /> Saving...</>
+          ) : (
+            <>Save Bank Details</>
+          )}
+        </button>
+      </form>
     </div>
   );
 }
@@ -492,7 +545,7 @@ export default function ExpertDashboard() {
                 <StatCard icon={TrendingUp} label="Commission Rate" value={`${commissionRate}%`} sub="per sale" />
               </div>
 
-              {affiliate && <BankAccountCard affiliate={affiliate} />}
+              {affiliate && <BankDetailsCard affiliate={affiliate} />}
 
               {affiliate ? (
                 <AffiliateLinkCard affiliate={affiliate} />
