@@ -8,7 +8,7 @@ import Contact from './pages/Contact';
 import DailyCheckIn from './pages/DailyCheckIn';
 import Dashboard from './pages/Dashboard';
 import DefineMyPurpose from './pages/DefineMyPurpose';
-import Experts from './pages/Experts';
+
 import ExpertsDirectory from './pages/ExpertsDirectory.jsx';
 import ExpertProfile from './pages/ExpertProfile.jsx';
 import Journal from './pages/Journal';
@@ -41,7 +41,7 @@ export const PAGES = {
     "DailyCheckIn": DailyCheckIn,
     "Dashboard": Dashboard,
     "DefineMyPurpose": DefineMyPurpose,
-    "Experts": Experts,
+
     "ExpertsDirectory": ExpertsDirectory,
     "ExpertProfile": ExpertProfile,
     "Journal": Journal,
