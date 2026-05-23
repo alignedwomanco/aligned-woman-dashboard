@@ -23,6 +23,7 @@ import ExpertProfile from './pages/ExpertProfile';
 import Admin from './pages/Admin';
 import { PaymentProvider } from './context/PaymentContext';
 import Checkout from './pages/Checkout';
+import ExpertDashboard from './pages/ExpertDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -90,6 +91,7 @@ const AuthenticatedApp = () => {
       <Route path="/NutritionWorkbook" element={<LayoutWrapper currentPageName="NutritionWorkbook"><NutritionWorkbook /></LayoutWrapper>} />
       <Route path="/experts/:slug" element={<ExpertProfile />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/expert-dashboard" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
