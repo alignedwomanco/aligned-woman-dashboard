@@ -1,10 +1,101 @@
 import React from "react";
 import WorkbookFieldRenderer from "./WorkbookFieldRenderer";
 import WorkbookFinishButton from "./WorkbookFinishButton";
+import ScoredQuizSection from "./ScoredQuizSection";
 
 export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [] }) {
   if (!section) return null;
 
+  // Render scored_quiz section type
+  if (section.type === "scored_quiz") {
+    return (
+      <div>
+        {/* Section head */}
+        <div style={{ marginBottom: 36 }}>
+          {section.part_label && (
+            <p style={{
+              fontFamily: "var(--aw-font-sans)",
+              fontWeight: 700,
+              fontSize: 10,
+              lineHeight: 1.4,
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: "var(--aw-rose-core)",
+              margin: "0 0 8px",
+            }}>
+              {section.part_label}
+            </p>
+          )}
+          {section.heading && (
+            <h1 style={{
+              fontFamily: "var(--aw-font-display)",
+              fontWeight: 400,
+              fontSize: "clamp(34px, 4.6vw, 52px)",
+              lineHeight: 1.05,
+              letterSpacing: "-0.015em",
+              color: "var(--aw-burg-core)",
+              margin: 0,
+            }}>
+              {section.heading}
+            </h1>
+          )}
+          {section.theme_line && (
+            <p style={{
+              fontFamily: "var(--aw-font-display)",
+              fontStyle: "italic",
+              fontWeight: 400,
+              fontSize: "clamp(18px, 2.4vw, 22px)",
+              lineHeight: 1.4,
+              color: "var(--aw-rose-core)",
+              margin: "12px 0 0",
+            }}>
+              {section.theme_line}
+            </p>
+          )}
+          {section.intro_text && (
+            <p style={{
+              fontFamily: "var(--aw-font-sans)",
+              fontWeight: 300,
+              fontSize: 16,
+              lineHeight: 1.85,
+              color: "var(--aw-dark-grey)",
+              margin: "18px 0 0",
+            }}>
+              {section.intro_text}
+            </p>
+          )}
+        </div>
+
+        {/* Render fields (grounding callout before quiz) */}
+        <div className="space-y-6 mb-8">
+          {section.fields?.map((field) => (
+            <WorkbookFieldRenderer
+              key={field.id}
+              field={field}
+              answers={answers}
+              onAnswerChange={onAnswerChange}
+              sectionFields={section.fields}
+              sections={sections}
+              onJumpToSection={onJumpToSection}
+              assets={assets}
+            />
+          ))}
+        </div>
+
+        {/* Render scored quiz */}
+        <ScoredQuizSection
+          section={section}
+          answers={answers}
+          onAnswerChange={onAnswerChange}
+          isComplete={isComplete}
+          completedAt={completedAt}
+          onMarkInProgress={onMarkInProgress}
+        />
+      </div>
+    );
+  }
+
+  // Default rendering for other section types
   return (
     <div>
       {/* Section head -- 36px margin-bottom per spec */}
