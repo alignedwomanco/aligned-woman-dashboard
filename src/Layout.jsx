@@ -17,7 +17,7 @@ import LaurAIChatWidget from "../components/LaurAIChatWidget";
 
 const publicPages = [
 { name: "Home", label: "Home" },
-{ name: "AWBlueprint", label: "Aligned Woman Blueprint" },
+{ name: "AWBlueprint", label: "Aligned Woman Blueprint", href: "/blueprint" },
 { name: "OurWhy", label: "Our Why" },
 { name: "ALIVEMethod", label: "ALIVE Method" },
 { name: "Experts", label: "Experts" },
