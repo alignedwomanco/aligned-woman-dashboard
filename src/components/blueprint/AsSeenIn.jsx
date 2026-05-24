@@ -10,7 +10,7 @@ const MEDIA_LOGOS = [
   { name: "Good Hope FM", url: "https://media.base44.com/images/public/69f46886a412ee042303f1af/7ff39ba65_90980351c_logo-good-hope-fm.png" },
   { name: "Health Matters", url: "https://media.base44.com/images/public/69f46886a412ee042303f1af/cfcbee2af_88f86edb9_logo-health-matters.png" },
   { name: "Sunday Times", url: "https://media.base44.com/images/public/69f46886a412ee042303f1af/bf265e972_dddb06872_logo-sunday-times.png" },
-  { name: "Business Day", url: "https://media.base44.com/images/public/69f46886a412ee042303f1af/7c76b1ac1_71e3efbad_7.png" },
+
 ];
 
 export default function AsSeenIn() {
