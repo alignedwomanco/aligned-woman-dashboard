@@ -1650,7 +1650,7 @@ function FinalClose() {
                 This price will not last for long.
               </h2>
               <p className="text-[15px] font-light leading-[1.88] mb-4" style={{ fontFamily: sans, color: C.roseLight }}>
-                R3,997 is the founding price, set deliberately to make the Blueprint accessible to the women who need it most before it transitions to full price. The 14 specialists, the sequenced system, the bonuses. All of this at this price closes on launch day.
+                R3,997 is the founding price, set deliberately to make the Blueprint accessible to the women who need it most before it transitions to full price. The 13 specialists, the sequenced system, the bonuses. All of this at this price closes on launch day.
               </p>
               <p className="text-[15px] font-light leading-[1.88]" style={{ fontFamily: sans, color: C.roseLight }}>
                 Founding members also receive first access to LauraAI Beta, priority for future live experiences, and this rate locked permanently for any future Blueprint content.
