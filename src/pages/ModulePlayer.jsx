@@ -1839,9 +1839,10 @@ export default function ModulePlayer() {
                 )}
               </div>
             )}
+          </div>
 
-            {/* Mobile Sticky Bottom Bar */}
-            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[rgba(74,14,46,0.06)] px-4 py-3 flex items-center gap-3 safe-area-bottom">
+          {/* Mobile Sticky Bottom Bar */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[rgba(74,14,46,0.06)] px-4 py-3 flex items-center gap-3 safe-area-bottom">
           <button
             onClick={handleTogglePageComplete}
             style={{
@@ -1941,6 +1942,7 @@ export default function ModulePlayer() {
             <ChevronRight className="w-4 h-4" style={{ color: "#4A0E2E" }} />
           </button>
         </div>
+          </div>
     );
   }
 }
