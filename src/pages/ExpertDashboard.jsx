@@ -26,6 +26,10 @@ import {
   Mail,
   MessageSquare,
   Eye,
+  Linkedin,
+  Instagram,
+  Globe,
+  ChevronDown,
 } from "lucide-react";
 
 const SITE_URL = "https://app.alignedwomanco.com";
@@ -496,19 +500,37 @@ function ContactRequestsTab({ expert }) {
   );
 }
 
+const LINK_PLATFORMS = ["LinkedIn", "Instagram", "Website", "Email", "Twitter", "TikTok", "YouTube"];
+
+function SocialLinkIcon({ platform, size = 18 }) {
+  const style = { width: size, height: size };
+  const p = platform?.toLowerCase();
+  if (p === "linkedin") return <Linkedin style={style} />;
+  if (p === "instagram") return <Instagram style={style} />;
+  if (p === "email") return <Mail style={style} />;
+  if (p === "website") return <Globe style={style} />;
+  return <LinkIcon style={style} />;
+}
+
 function ProfileTab({ expert, onExpertUpdate, user }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     title: "",
     bio: "",
-    specialties: "",
+    specialties: [],
     profile_picture: "",
     social_links: [],
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const [activeLinkIndex, setActiveLinkIndex] = useState(null);
+  const [newSpecialty, setNewSpecialty] = useState("");
+  const [showAddLink, setShowAddLink] = useState(false);
+  const [newLinkPlatform, setNewLinkPlatform] = useState("Website");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     if (expert) {
@@ -516,7 +538,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         name: expert.name || "",
         title: expert.title || "",
         bio: expert.bio || "",
-        specialties: expert.specialties?.join(", ") || "",
+        specialties: expert.specialties || [],
         profile_picture: expert.profile_picture || "",
         social_links: expert.social_links || [],
       });
@@ -527,6 +549,8 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     setIsEditing(true);
     setSuccess(false);
     setError(null);
+    setActiveLinkIndex(null);
+    setShowAddLink(false);
   };
 
   const handleCancel = () => {
@@ -535,10 +559,12 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
       name: expert.name || "",
       title: expert.title || "",
       bio: expert.bio || "",
-      specialties: expert.specialties?.join(", ") || "",
+      specialties: expert.specialties || [],
       profile_picture: expert.profile_picture || "",
       social_links: expert.social_links || [],
     });
+    setActiveLinkIndex(null);
+    setShowAddLink(false);
     setSuccess(false);
     setError(null);
   };
@@ -547,31 +573,21 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     setSaving(true);
     setError(null);
     setSuccess(false);
-
     try {
-      const specialtiesArray = formData.specialties
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-
-      const updateData = {
+      await base44.entities.Expert.update(expert.id, {
         name: formData.name,
         title: formData.title,
         bio: formData.bio,
-        specialties: specialtiesArray,
+        specialties: formData.specialties.filter((s) => s.trim().length > 0),
         profile_picture: formData.profile_picture,
-        social_links: formData.social_links.filter((link) => link.platform && link.url),
-      };
-
-      await base44.entities.Expert.update(expert.id, updateData);
-
+        social_links: formData.social_links.filter((l) => l.platform && l.url),
+      });
       setSuccess(true);
       setIsEditing(false);
+      setActiveLinkIndex(null);
+      setShowAddLink(false);
       setTimeout(() => setSuccess(false), 3000);
-
-      if (onExpertUpdate) {
-        onExpertUpdate();
-      }
+      if (onExpertUpdate) onExpertUpdate();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -579,306 +595,352 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     }
   };
 
-  const handleAddLink = () => {
-    setFormData({
-      ...formData,
-      social_links: [...formData.social_links, { platform: "Website", url: "" }],
-    });
+  const handleRemoveSpecialty = (i) => {
+    setFormData({ ...formData, specialties: formData.specialties.filter((_, idx) => idx !== i) });
   };
 
-  const handleRemoveLink = (index) => {
-    const newLinks = formData.social_links.filter((_, i) => i !== index);
-    setFormData({ ...formData, social_links: newLinks });
+  const handleAddSpecialty = () => {
+    const val = newSpecialty.trim();
+    if (!val) return;
+    setFormData({ ...formData, specialties: [...formData.specialties, val] });
+    setNewSpecialty("");
   };
 
-  const handleLinkChange = (index, field, value) => {
-    const newLinks = formData.social_links.map((link, i) =>
-      i === index ? { ...link, [field]: value } : link
-    );
-    setFormData({ ...formData, social_links: newLinks });
+  const handleRemoveLink = (i) => {
+    setFormData({ ...formData, social_links: formData.social_links.filter((_, idx) => idx !== i) });
+    if (activeLinkIndex === i) setActiveLinkIndex(null);
+  };
+
+  const handleLinkUrlChange = (i, val) => {
+    const updated = formData.social_links.map((l, idx) => idx === i ? { ...l, url: val } : l);
+    setFormData({ ...formData, social_links: updated });
+  };
+
+  const handleConfirmAddLink = () => {
+    if (!newLinkUrl.trim()) return;
+    setFormData({ ...formData, social_links: [...formData.social_links, { platform: newLinkPlatform, url: newLinkUrl.trim() }] });
+    setNewLinkUrl("");
+    setNewLinkPlatform("Website");
+    setShowAddLink(false);
   };
 
   const handleProfilePictureUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+    setUploadingPhoto(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setFormData({ ...formData, profile_picture: file_url });
-    } catch (err) {
+      setFormData((prev) => ({ ...prev, profile_picture: file_url }));
+    } catch {
       setError("Failed to upload image");
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
   if (!expert) return null;
+
+  const sans = "Montserrat, sans-serif";
+  const serif = "'DM Serif Display', Georgia, serif";
 
   return (
     <div className="space-y-6">
       {success && (
         <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(45,106,79,0.08)" }}>
           <CheckCircle2 style={{ width: 14, height: 14, color: "#2D6A4F" }} />
-          <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#2D6A4F" }}>Profile updated successfully</span>
+          <span style={{ fontFamily: sans, fontSize: 12, color: "#2D6A4F" }}>Profile updated successfully</span>
         </div>
       )}
-
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(192,57,43,0.08)" }}>
           <AlertCircle style={{ width: 14, height: 14, color: "#C0392B" }} />
-          <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#C0392B" }}>{error}</span>
+          <span style={{ fontFamily: sans, fontSize: 12, color: "#C0392B" }}>{error}</span>
         </div>
       )}
 
-      <div className="rounded-xl p-6" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.06)", boxShadow: "0 2px 12px rgba(74,14,46,0.04)" }}>
-        {!isEditing ? (
-          <>
-            <div className="flex items-start gap-5">
-              <div className="w-20 h-20 rounded-full overflow-hidden shrink-0" style={{ background: "#FDF5F3" }}>
-                {formData.profile_picture ? (
-                  <img src={formData.profile_picture} alt={formData.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 28, color: "#C4847A" }}>
-                    {formData.name?.[0] || "?"}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 24, color: "#4A0E2E", marginBottom: 4 }}>
-                  {formData.name}
-                </h2>
-                <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 14, color: "#C4847A", marginBottom: 8 }}>
-                  {formData.title}
-                </p>
-                {formData.specialties && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {formData.specialties.split(",").map((s, i) => (
-                      <span key={i} className="px-3 py-1 rounded-full text-xs" style={{ background: "#FDF5F3", color: "#4A0E2E", fontFamily: "Montserrat, sans-serif", fontWeight: 500 }}>
-                        {s.trim()}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <button
-                  onClick={handleEdit}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
-                  style={{
-                    background: "#4A0E2E",
-                    color: "#FFFFFF",
-                    fontFamily: "Montserrat, sans-serif",
-                    fontWeight: 600,
-                    fontSize: 12,
-                  }}
-                >
-                  <Edit style={{ width: 14, height: 14 }} /> Edit Profile
-                </button>
-              </div>
-            </div>
-            {formData.bio && (
-              <p className="mt-5" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.7 }}>
-                {formData.bio}
-              </p>
-            )}
-          </>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden shrink-0" style={{ background: "#FDF5F3" }}>
-                {formData.profile_picture ? (
-                  <img src={formData.profile_picture} alt={formData.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 28, color: "#C4847A" }}>
-                    {formData.name?.[0] || "?"}
-                  </div>
-                )}
-              </div>
-              <div>
-                <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
-                  Profile Picture
-                </label>
-                <label htmlFor="profile-pic-upload" className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.15)", fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E" }}>
-                  <Upload style={{ width: 14, height: 14 }} />
-                  {formData.profile_picture ? "Change Photo" : "Upload Photo"}
-                </label>
-                <input
-                  id="profile-pic-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleProfilePictureUpload}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
-                Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border outline-none"
-                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-              />
-            </div>
-
-            <div>
-              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
-                Title
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border outline-none"
-                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-              />
-            </div>
-
-            <div>
-              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
-                Specialties (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={formData.specialties}
-                onChange={(e) => setFormData({ ...formData, specialties: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border outline-none"
-                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-                placeholder="e.g. Hormone Health, Nutrition, Wellness"
-              />
-            </div>
-
-            <div>
-              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
-                Email (read-only)
-              </label>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.15)" }}>
-                <Mail style={{ width: 14, height: 14, color: "#8A7A76" }} />
-                <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#8A7A76" }}>{user?.email || "N/A"}</span>
-              </div>
-              <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 11, color: "#8A7A76", marginTop: 4 }}>
-                Contact support to change your email
-              </p>
-            </div>
-
-            <div>
-              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
-                Bio
-              </label>
-              <textarea
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border outline-none min-h-[120px]"
-                style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-                placeholder="Write your biography..."
-              />
-            </div>
-
-            <div>
-              <label style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", display: "block", marginBottom: 6 }}>
-                Social Links
-              </label>
-              <div className="space-y-3">
-                {formData.social_links.map((link, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <select
-                      value={link.platform}
-                      onChange={(e) => handleLinkChange(index, "platform", e.target.value)}
-                      className="px-3 py-2 rounded-lg border outline-none w-40"
-                      style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-                    >
-                      <option value="LinkedIn">LinkedIn</option>
-                      <option value="Instagram">Instagram</option>
-                      <option value="Website">Website</option>
-                      <option value="Email">Email</option>
-                      <option value="Twitter">Twitter</option>
-                      <option value="TikTok">TikTok</option>
-                      <option value="YouTube">YouTube</option>
-                    </select>
-                    <input
-                      type="text"
-                      value={link.url}
-                      onChange={(e) => handleLinkChange(index, "url", e.target.value)}
-                      placeholder="URL"
-                      className="flex-1 px-3 py-2 rounded-lg border outline-none"
-                      style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-                    />
-                    <button
-                      onClick={() => handleRemoveLink(index)}
-                      className="p-2 rounded-lg hover:bg-red-50 transition-colors"
-                      style={{ color: "#C0392B" }}
-                    >
-                      <Trash2 style={{ width: 16, height: 16 }} />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={handleAddLink}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
-                  style={{
-                    background: "#FDF5F3",
-                    border: "1px solid rgba(74,14,46,0.15)",
-                    fontFamily: "Montserrat, sans-serif",
-                    fontWeight: 500,
-                    fontSize: 12,
-                    color: "#4A0E2E",
-                  }}
-                >
-                  <Plus style={{ width: 14, height: 14 }} /> Add Link
-                </button>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all"
-                style={{
-                  background: "#4A0E2E",
-                  color: "#FFFFFF",
-                  fontFamily: "Montserrat, sans-serif",
-                  fontWeight: 600,
-                  fontSize: 13,
-                  opacity: saving ? 0.6 : 1,
-                  cursor: saving ? "wait" : "pointer",
-                }}
-              >
-                {saving ? (
-                  <><Loader2 className="animate-spin" style={{ width: 16, height: 16 }} /> Saving...</>
-                ) : (
-                  <><Save style={{ width: 16, height: 16 }} /> Save Changes</>
-                )}
-              </button>
-              <button
-                onClick={handleCancel}
-                disabled={saving}
-                className="px-5 py-2.5 rounded-lg transition-all"
-                style={{
-                  background: "#FFFFFF",
-                  border: "1px solid rgba(74,14,46,0.15)",
-                  fontFamily: "Montserrat, sans-serif",
-                  fontWeight: 500,
-                  fontSize: 13,
-                  color: "#4A0E2E",
-                  cursor: saving ? "not-allowed" : "pointer",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
+      {/* ── WYSIWYG PROFILE CARD ── */}
+      <div className="rounded-xl overflow-hidden" style={{ background: "#FFFFFF", border: isEditing ? "2px solid #C4847A" : "1px solid rgba(74,14,46,0.06)", boxShadow: "0 2px 12px rgba(74,14,46,0.04)" }}>
+        {isEditing && (
+          <div className="px-6 py-3 flex items-center gap-2" style={{ background: "#FDF5F3", borderBottom: "1px solid rgba(196,132,122,0.2)" }}>
+            <Edit style={{ width: 13, height: 13, color: "#C4847A" }} />
+            <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#C4847A", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              Editing — changes are live as you type
+            </span>
           </div>
         )}
+
+        <div className="p-6 md:p-8">
+          {/* ── PHOTO + NAME + TITLE ── */}
+          <div className="flex items-start gap-5 mb-5">
+            {/* Photo */}
+            <div className="relative shrink-0 group" style={{ width: 88, height: 88 }}>
+              <div className="w-full h-full rounded-full overflow-hidden" style={{ background: "#FDF5F3" }}>
+                {formData.profile_picture ? (
+                  <img src={formData.profile_picture} alt={formData.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: serif, fontSize: 32, color: "#C4847A" }}>
+                    {formData.name?.[0] || "?"}
+                  </div>
+                )}
+              </div>
+              {isEditing && (
+                <>
+                  <label
+                    htmlFor="profile-pic-upload"
+                    className="absolute inset-0 rounded-full flex flex-col items-center justify-center cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
+                    style={{ background: "rgba(74,14,46,0.6)" }}
+                  >
+                    {uploadingPhoto ? (
+                      <Loader2 className="animate-spin" style={{ width: 20, height: 20, color: "#FFFFFF" }} />
+                    ) : (
+                      <>
+                        <Upload style={{ width: 16, height: 16, color: "#FFFFFF", marginBottom: 2 }} />
+                        <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 9, color: "#FFFFFF", letterSpacing: "0.1em" }}>CHANGE</span>
+                      </>
+                    )}
+                  </label>
+                  <input id="profile-pic-upload" type="file" accept="image/*" className="hidden" onChange={handleProfilePictureUpload} />
+                </>
+              )}
+            </div>
+
+            {/* Name + Title */}
+            <div className="flex-1 min-w-0">
+              {isEditing ? (
+                <>
+                  <input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-transparent outline-none border-b-2 mb-2"
+                    style={{ fontFamily: serif, fontStyle: "italic", fontSize: 26, color: "#4A0E2E", borderColor: "#E8B4AE", paddingBottom: 2 }}
+                    placeholder="Your name"
+                  />
+                  <input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full bg-transparent outline-none border-b"
+                    style={{ fontFamily: sans, fontWeight: 500, fontSize: 14, color: "#C4847A", borderColor: "rgba(196,132,122,0.3)", paddingBottom: 2 }}
+                    placeholder="Your title / role"
+                  />
+                </>
+              ) : (
+                <>
+                  <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 26, color: "#4A0E2E", marginBottom: 2, lineHeight: 1.2 }}>
+                    {formData.name}
+                  </h2>
+                  <p style={{ fontFamily: sans, fontWeight: 500, fontSize: 14, color: "#C4847A" }}>
+                    {formData.title}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* ── SPECIALTIES ── */}
+          <div className="flex flex-wrap gap-2 mb-5 items-center">
+            {formData.specialties.map((s, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full"
+                style={{ background: "#FDF5F3", color: "#4A0E2E", fontFamily: sans, fontWeight: 500, fontSize: 11 }}
+              >
+                {s}
+                {isEditing && (
+                  <button onClick={() => handleRemoveSpecialty(i)} className="ml-1 hover:opacity-60 transition-opacity" aria-label="Remove">
+                    <X style={{ width: 10, height: 10 }} />
+                  </button>
+                )}
+              </span>
+            ))}
+            {isEditing && (
+              <div className="flex items-center gap-1">
+                <input
+                  value={newSpecialty}
+                  onChange={(e) => setNewSpecialty(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSpecialty(); } }}
+                  placeholder="Add specialty…"
+                  className="px-2 py-1 rounded-full border outline-none"
+                  style={{ fontFamily: sans, fontSize: 11, color: "#3A2A28", borderColor: "rgba(74,14,46,0.2)", width: 130 }}
+                />
+                <button
+                  onClick={handleAddSpecialty}
+                  className="w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                  style={{ background: "#4A0E2E", color: "#FFFFFF" }}
+                >
+                  <Plus style={{ width: 12, height: 12 }} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ── SOCIAL LINKS ── */}
+          <div className="mb-5">
+            <div className="flex items-center gap-2 flex-wrap">
+              {formData.social_links.map((link, i) => (
+                <div key={i} className="relative">
+                  <button
+                    onClick={() => isEditing && setActiveLinkIndex(activeLinkIndex === i ? null : i)}
+                    className="flex items-center justify-center rounded-full transition-all"
+                    style={{
+                      width: 38,
+                      height: 38,
+                      background: activeLinkIndex === i ? "#4A0E2E" : "#FDF5F3",
+                      color: activeLinkIndex === i ? "#FFFFFF" : "#4A0E2E",
+                      border: "1px solid rgba(74,14,46,0.12)",
+                      cursor: isEditing ? "pointer" : "default",
+                    }}
+                    title={link.platform}
+                  >
+                    <SocialLinkIcon platform={link.platform} size={15} />
+                  </button>
+                  {/* Inline edit popover */}
+                  {isEditing && activeLinkIndex === i && (
+                    <div
+                      className="absolute top-11 left-0 z-20 rounded-xl p-3 shadow-lg"
+                      style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", minWidth: 240, boxShadow: "0 8px 24px rgba(74,14,46,0.12)" }}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <SocialLinkIcon platform={link.platform} size={13} />
+                        <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E" }}>{link.platform}</span>
+                        <button onClick={() => handleRemoveLink(i)} className="ml-auto p-1 rounded hover:bg-red-50 transition-colors" style={{ color: "#C0392B" }}>
+                          <Trash2 style={{ width: 12, height: 12 }} />
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={link.url}
+                        onChange={(e) => handleLinkUrlChange(i, e.target.value)}
+                        className="w-full px-2 py-1.5 rounded-lg border outline-none"
+                        style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+                        placeholder="https://..."
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => setActiveLinkIndex(null)}
+                        className="mt-2 w-full py-1.5 rounded-lg text-center"
+                        style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, background: "#4A0E2E", color: "#FFFFFF" }}
+                      >
+                        Done
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Add new link */}
+              {isEditing && (
+                <div className="relative">
+                  <button
+                    onClick={() => { setShowAddLink(!showAddLink); setActiveLinkIndex(null); }}
+                    className="flex items-center justify-center rounded-full transition-all"
+                    style={{ width: 38, height: 38, background: showAddLink ? "#4A0E2E" : "transparent", color: showAddLink ? "#FFFFFF" : "#C4847A", border: "1px dashed rgba(196,132,122,0.5)" }}
+                    title="Add link"
+                  >
+                    <Plus style={{ width: 15, height: 15 }} />
+                  </button>
+                  {showAddLink && (
+                    <div
+                      className="absolute top-11 left-0 z-20 rounded-xl p-3 shadow-lg"
+                      style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", minWidth: 240, boxShadow: "0 8px 24px rgba(74,14,46,0.12)" }}
+                    >
+                      <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Add a link</p>
+                      <select
+                        value={newLinkPlatform}
+                        onChange={(e) => setNewLinkPlatform(e.target.value)}
+                        className="w-full px-2 py-1.5 rounded-lg border outline-none mb-2"
+                        style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+                      >
+                        {LINK_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                      <input
+                        type="text"
+                        value={newLinkUrl}
+                        onChange={(e) => setNewLinkUrl(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleConfirmAddLink(); }}
+                        className="w-full px-2 py-1.5 rounded-lg border outline-none mb-2"
+                        style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
+                        placeholder="https://..."
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleConfirmAddLink}
+                        className="w-full py-1.5 rounded-lg text-center"
+                        style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, background: "#4A0E2E", color: "#FFFFFF" }}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── BIO ── */}
+          {isEditing ? (
+            <textarea
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              className="w-full bg-transparent border rounded-lg px-3 py-2 outline-none resize-none"
+              rows={5}
+              style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.75, borderColor: "rgba(74,14,46,0.15)" }}
+              placeholder="Write your biography…"
+            />
+          ) : (
+            formData.bio && (
+              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.75 }}>
+                {formData.bio}
+              </p>
+            )
+          )}
+
+          {/* ── ACTION BUTTONS ── */}
+          <div className="mt-6 flex gap-3">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full transition-all"
+                  style={{ background: "#4A0E2E", color: "#FFFFFF", fontFamily: sans, fontWeight: 700, fontSize: 12, letterSpacing: "0.1em", opacity: saving ? 0.6 : 1, cursor: saving ? "wait" : "pointer" }}
+                >
+                  {saving ? <><Loader2 className="animate-spin" style={{ width: 15, height: 15 }} /> Saving…</> : <><Save style={{ width: 14, height: 14 }} /> Save Changes</>}
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={saving}
+                  className="px-6 py-2.5 rounded-full transition-all"
+                  style={{ background: "transparent", border: "1px solid rgba(74,14,46,0.15)", fontFamily: sans, fontWeight: 500, fontSize: 12, color: "#4A0E2E", cursor: saving ? "not-allowed" : "pointer" }}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleEdit}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all"
+                style={{ background: "#4A0E2E", color: "#FFFFFF", fontFamily: sans, fontWeight: 600, fontSize: 12 }}
+              >
+                <Edit style={{ width: 13, height: 13 }} /> Edit Profile
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
+      {/* ── VIEW PUBLIC PROFILE ── */}
       <div className="rounded-xl p-5 flex items-center justify-between" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.06)" }}>
         <div>
-          <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 13, color: "#4A0E2E" }}>Your public profile</span>
-          <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#8A7A76", marginTop: 2 }}>
+          <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 13, color: "#4A0E2E" }}>Your public profile</span>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: "#8A7A76", marginTop: 2 }}>
             This is how you appear on the Blueprint sales page and Experts directory.
           </p>
         </div>
-        <a href={`/experts/${expert.name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`} className="flex items-center gap-1.5 px-4 py-2 rounded-lg" style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}>
+        <a
+          href={`/experts/${expert.name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg"
+          style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", fontFamily: sans, fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}
+        >
           View <ExternalLink style={{ width: 12, height: 12 }} />
         </a>
       </div>
