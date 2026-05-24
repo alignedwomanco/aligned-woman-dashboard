@@ -501,15 +501,26 @@ function ContactRequestsTab({ expert }) {
   );
 }
 
+// TikTok SVG icon (not in lucide-react)
+function TikTokIcon({ style }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" style={style}>
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z" />
+    </svg>
+  );
+}
+
 // Fixed social link fields on the Expert entity
 const SOCIAL_FIELDS = [
-  { key: "linkedin_url",  label: "LinkedIn",  Icon: Linkedin,  placeholder: "https://linkedin.com/in/yourname" },
-  { key: "instagram_url", label: "Instagram", Icon: Instagram, placeholder: "https://instagram.com/yourhandle" },
-  { key: "website_url",   label: "Website",   Icon: Globe,     placeholder: "https://yourwebsite.com" },
-  { key: "email",         label: "Email",     Icon: Mail,      placeholder: "you@example.com" },
-  { key: "twitter_url",   label: "Twitter",   Icon: Twitter,   placeholder: "https://twitter.com/yourhandle" },
-  { key: "tiktok_url",    label: "TikTok",    Icon: LinkIcon,  placeholder: "https://tiktok.com/@yourhandle" },
+  { key: "linkedin_url",  label: "LinkedIn",  Icon: Linkedin,    placeholder: "https://linkedin.com/in/yourname" },
+  { key: "instagram_url", label: "Instagram", Icon: Instagram,   placeholder: "https://instagram.com/yourhandle" },
+  { key: "website_url",   label: "Website",   Icon: Globe,       placeholder: "https://yourwebsite.com" },
+  { key: "email",         label: "Email",     Icon: Mail,        placeholder: "you@example.com" },
+  { key: "twitter_url",   label: "Twitter/X", Icon: Twitter,     placeholder: "https://twitter.com/yourhandle" },
+  { key: "tiktok_url",    label: "TikTok",    Icon: TikTokIcon,  placeholder: "https://tiktok.com/@yourhandle" },
 ];
+
+const MAX_CUSTOM_LINKS = 2;
 
 const CATEGORY_DOMAIN_MAP_DASH = {
   "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
@@ -545,13 +556,15 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     email: "",
     twitter_url: "",
     tiktok_url: "",
+    custom_links: [],
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
-  const [activeLink, setActiveLink] = useState(null); // key of the field being edited
+  const [activeLink, setActiveLink] = useState(null);
   const [newSpecialty, setNewSpecialty] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [activeCustomLink, setActiveCustomLink] = useState(null); // index of custom link being edited
 
   const buildFormData = (src) => ({
     name: src.name || "",
@@ -565,6 +578,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     email: src.email || "",
     twitter_url: src.twitter_url || "",
     tiktok_url: src.tiktok_url || "",
+    custom_links: Array.isArray(src.custom_links) ? src.custom_links : [],
   });
 
   useEffect(() => {
@@ -572,7 +586,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
   }, [expert]);
 
   const handleEdit = () => { setIsEditing(true); setSuccess(false); setError(null); };
-  const handleCancel = () => { setIsEditing(false); setFormData(buildFormData(expert)); setActiveLink(null); setSuccess(false); setError(null); };
+  const handleCancel = () => { setIsEditing(false); setFormData(buildFormData(expert)); setActiveLink(null); setActiveCustomLink(null); setSuccess(false); setError(null); };
 
   const handleSave = async () => {
     setSaving(true);
@@ -590,10 +604,12 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         email: formData.email,
         twitter_url: formData.twitter_url,
         tiktok_url: formData.tiktok_url,
+        custom_links: formData.custom_links.filter((l) => l.url?.trim()),
       });
       setSuccess(true);
       setIsEditing(false);
       setActiveLink(null);
+      setActiveCustomLink(null);
       setTimeout(() => setSuccess(false), 3000);
       if (onExpertUpdate) onExpertUpdate();
     } catch (err) {
@@ -788,12 +804,11 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                 </div>
               )}
 
-              {/* Social link icons — one per fixed field */}
-              <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
+              {/* Social link icons — one per fixed field + custom links */}
+              <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
                 {SOCIAL_FIELDS.map(({ key, label, Icon: SIcon, placeholder }) => {
                   const hasValue = !!formData[key];
                   const isActive = activeLink === key;
-                  // In view mode, only show filled links
                   if (!isEditing && !hasValue) return null;
                   return (
                     <div key={key} style={{ position: "relative" }}>
@@ -813,42 +828,31 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                         }}
                       >
                         <SIcon style={{ width: 16, height: 16 }} />
-                        {/* "+" badge on empty fields in edit mode */}
                         {isEditing && !hasValue && (
                           <span style={{ position: "absolute", bottom: -2, right: -2, width: 14, height: 14, background: "#C4847A", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <Plus style={{ width: 8, height: 8, color: "#FFFFFF" }} />
                           </span>
                         )}
                       </button>
-                      {/* Inline input popover */}
                       {isEditing && isActive && (
                         <div style={{ position: "absolute", top: 48, left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: 14, minWidth: 270, boxShadow: "0 8px 28px rgba(74,14,46,0.14)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                             <SIcon style={{ width: 13, height: 13, color: "#4A0E2E" }} />
                             <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
                             {hasValue && (
-                              <button
-                                onClick={() => { setFormData((f) => ({ ...f, [key]: "" })); setActiveLink(null); }}
-                                style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#C0392B", padding: 2, display: "flex" }}
-                                title="Clear"
-                              >
+                              <button onClick={() => { setFormData((f) => ({ ...f, [key]: "" })); setActiveLink(null); }} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#C0392B", padding: 2, display: "flex" }}>
                                 <Trash2 style={{ width: 13, height: 13 }} />
                               </button>
                             )}
                           </div>
                           <input
-                            autoFocus
-                            type="text"
-                            value={formData[key]}
+                            autoFocus type="text" value={formData[key]}
                             onChange={(e) => setFormData((f) => ({ ...f, [key]: e.target.value }))}
                             placeholder={placeholder}
                             onKeyDown={(e) => { if (e.key === "Enter") setActiveLink(null); }}
                             style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
                           />
-                          <button
-                            onClick={() => setActiveLink(null)}
-                            style={{ width: "100%", background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 600, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}
-                          >
+                          <button onClick={() => setActiveLink(null)} style={{ width: "100%", background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 600, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                             Done
                           </button>
                         </div>
@@ -856,6 +860,73 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                     </div>
                   );
                 })}
+
+                {/* Custom links (LinkIcon buttons) */}
+                {formData.custom_links.map((cl, i) => {
+                  const isActive = activeCustomLink === i;
+                  if (!isEditing && !cl.url) return null;
+                  return (
+                    <div key={`custom-${i}`} style={{ position: "relative" }}>
+                      <button
+                        onClick={() => isEditing && setActiveCustomLink(isActive ? null : i)}
+                        title={cl.label || "Custom Link"}
+                        style={{ width: 40, height: 40, borderRadius: "50%", border: isActive ? "2px solid #C4847A" : "1px solid rgba(74,14,46,0.12)", display: "flex", alignItems: "center", justifyContent: "center", background: isActive ? "#4A0E2E" : "#FFFFFF", color: isActive ? "#FFFFFF" : "#4A0E2E", cursor: isEditing ? "pointer" : "default", transition: "all 0.15s" }}
+                      >
+                        <LinkIcon style={{ width: 16, height: 16 }} />
+                      </button>
+                      {isEditing && isActive && (
+                        <div style={{ position: "absolute", top: 48, left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: 14, minWidth: 270, boxShadow: "0 8px 28px rgba(74,14,46,0.14)" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                            <LinkIcon style={{ width: 13, height: 13, color: "#4A0E2E" }} />
+                            <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.1em" }}>Custom Link</span>
+                            <button onClick={() => { setFormData((f) => ({ ...f, custom_links: f.custom_links.filter((_, idx) => idx !== i) })); setActiveCustomLink(null); }} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#C0392B", padding: 2, display: "flex" }}>
+                              <Trash2 style={{ width: 13, height: 13 }} />
+                            </button>
+                          </div>
+                          <input
+                            autoFocus type="text"
+                            value={cl.label || ""}
+                            onChange={(e) => setFormData((f) => ({ ...f, custom_links: f.custom_links.map((l, idx) => idx === i ? { ...l, label: e.target.value } : l) }))}
+                            placeholder="Label (e.g. Podcast, Substack)"
+                            style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 6 }}
+                          />
+                          <input
+                            type="text"
+                            value={cl.url || ""}
+                            onChange={(e) => setFormData((f) => ({ ...f, custom_links: f.custom_links.map((l, idx) => idx === i ? { ...l, url: e.target.value } : l) }))}
+                            placeholder="https://…"
+                            onKeyDown={(e) => { if (e.key === "Enter") setActiveCustomLink(null); }}
+                            style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+                          />
+                          <button onClick={() => setActiveCustomLink(null)} style={{ width: "100%", background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 600, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                            Done
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Add custom link button — only in edit mode, max 2 */}
+                {isEditing && formData.custom_links.length < MAX_CUSTOM_LINKS && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button
+                      onClick={() => {
+                        const newIdx = formData.custom_links.length;
+                        setFormData((f) => ({ ...f, custom_links: [...f.custom_links, { label: "", url: "" }] }));
+                        setActiveCustomLink(newIdx);
+                        setActiveLink(null);
+                      }}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: "1px dashed rgba(196,132,122,0.5)", borderRadius: 100, padding: "6px 12px", fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#C4847A", cursor: "pointer" }}
+                    >
+                      <Plus style={{ width: 12, height: 12 }} />
+                      Add Link
+                    </button>
+                    <span style={{ fontFamily: sans, fontWeight: 300, fontSize: 11, color: "#8A7A76" }}>
+                      {MAX_CUSTOM_LINKS - formData.custom_links.length} {MAX_CUSTOM_LINKS - formData.custom_links.length === 1 ? "link" : "links"} remaining
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* CTA buttons — non-editable, for visual context only */}
