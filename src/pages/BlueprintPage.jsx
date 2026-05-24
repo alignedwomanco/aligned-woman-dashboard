@@ -1627,7 +1627,6 @@ function FinalClose() {
                 </p>
                 <div className="space-y-3 mb-8">
                   {[
-                    "Founding price R3,997. Closes at launch. Final.",
                     "Full access to 14 specialists, 7 domains, and the ALIVE Method.",
                   ].map((item, i) => (
                     <div key={i} className="flex gap-3">
