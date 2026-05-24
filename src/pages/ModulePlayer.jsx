@@ -1427,15 +1427,12 @@ export default function ModulePlayer() {
 
       {/* ─── MOBILE STICKY BOTTOM BAR ─── */}
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center gap-3"
         style={{
           background: "white",
           borderTop: "1px solid rgba(74,14,46,0.06)",
           padding: "12px 16px",
           paddingBottom: "max(12px, env(safe-area-inset-bottom))",
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
         }}
       >
         <button
