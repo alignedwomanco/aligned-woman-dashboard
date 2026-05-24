@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, Search, ChevronDown } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
 const C = {
@@ -23,15 +23,15 @@ const C = {
 const serif = "'DM Serif Display', Georgia, serif";
 const sans = "Montserrat, sans-serif";
 
-const DOMAIN_FILTERS = [
-  "All",
+// The 7 pinned category pills (+ ALL). Everything else goes in "+ MORE"
+const PINNED_CATEGORIES = [
+  "Business & Entrepreneurship",
+  "Body & Movement",
   "Mindset & Behaviour",
-  "Nervous System",
-  "Health & Hormones",
-  "Money",
-  "Leadership & Authority",
-  "Relationships",
-  "Identity & Visibility",
+  "Mental Health & Psychology",
+  "Health & Medical",
+  "Money & Finance",
+  "Branding & Visibility",
 ];
 
 // Category ID → domain label mapping (matches DB category IDs)
@@ -62,6 +62,7 @@ function mapDbExpert(e) {
     bio: e.bio || "",
     credentials: credentialsFromTitle(e.title),
     profile_picture: e.profile_picture || null,
+    specialties: Array.isArray(e.specialties) ? e.specialties : [],
   };
 }
 
@@ -288,14 +289,21 @@ function ExpertCard({ expert, onConnect, onView }) {
         {expert.bio}
       </p>
 
-      {/* Credential chips */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {expert.credentials.map((c, i) => (
-          <span key={i} style={{ background: C.roseWash, padding: "5px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 10, color: C.burgCore, letterSpacing: "0.04em" }}>
-            {c}
-          </span>
-        ))}
-      </div>
+      {/* Specialty tags */}
+      {expert.specialties.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {expert.specialties.slice(0, 4).map((s, i) => (
+            <span key={i} style={{ background: C.rosePale, padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.burgCore }}>
+              {s}
+            </span>
+          ))}
+          {expert.specialties.length > 4 && (
+            <span style={{ background: "transparent", padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.midGrey, border: "1px solid rgba(74,14,46,0.12)" }}>
+              +{expert.specialties.length - 4} more
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
       <div style={{ display: "flex", gap: 10 }}>
@@ -317,8 +325,11 @@ function slugify(name) {
 
 // ─── MAIN PAGE ───
 export default function ExpertsDirectory() {
-  const [activeFilter, setActiveFilter] = useState("All");
-  const [modal, setModal] = useState(null); // { expert, mode }
+  const [activeCategory, setActiveCategory] = useState("ALL");
+  const [searchText, setSearchText] = useState("");
+  const [showMore, setShowMore] = useState(false);
+  const moreRef = useRef(null);
+  const [modal, setModal] = useState(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -327,19 +338,37 @@ export default function ExpertsDirectory() {
     queryFn: () => base44.entities.Expert.filter({ isPublished: true }),
   });
 
+  const { data: specialties = [] } = useQuery({
+    queryKey: ["specialties-all"],
+    queryFn: () => base44.entities.Specialty.list(),
+  });
+
+  // Build category map: { "Business & Entrepreneurship": ["Business Strategy", ...], ... }
+  const categoryMap = specialties.reduce((acc, s) => {
+    if (!s.category || !s.name) return acc;
+    if (!acc[s.category]) acc[s.category] = [];
+    acc[s.category].push(s.name);
+    return acc;
+  }, {});
+
+  // All category names from DB (for "+ MORE" dropdown)
+  const allCategories = Object.keys(categoryMap);
+  const moreCategories = allCategories.filter(c => !PINNED_CATEGORIES.includes(c));
+
+  // Close "more" dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (moreRef.current && !moreRef.current.contains(e.target)) setShowMore(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   useEffect(() => {
     base44.analytics.track({ eventName: "view_experts_page" });
   }, []);
 
-  // Auto-open modal if ?expert=id is in the URL
-  useEffect(() => {
-    const expertId = searchParams.get("expert");
-    if (!expertId || !dbExperts.length) return;
-    const match = dbExperts.find(e => e.id === expertId);
-    if (match) setModal({ expert: mapDbExpert(match), mode: "viewOnly" });
-  }, [dbExperts, searchParams]);
-
-  // Use live DB data, mapped to card shape — Laura Thomas always first
+  // Use live DB data, mapped to card shape — Laura always first
   const experts = [...dbExperts]
     .sort((a, b) => {
       const aIsLaura = a.name?.toLowerCase().includes("laura") ? -1 : 0;
@@ -348,26 +377,49 @@ export default function ExpertsDirectory() {
     })
     .map(mapDbExpert);
 
-  const filtered = activeFilter === "All"
-    ? experts
-    : experts.filter(e => e.domain === activeFilter);
+  // Auto-open modal if ?expert=id is in URL
+  useEffect(() => {
+    const expertId = searchParams.get("expert");
+    if (!expertId || !dbExperts.length) return;
+    const match = dbExperts.find(e => e.id === expertId);
+    if (match) setModal({ expert: mapDbExpert(match), mode: "viewOnly" });
+  }, [dbExperts, searchParams]);
 
-  // getDbExpert is no longer needed — data is already merged in mapDbExpert
-  const getDbExpert = () => null;
+  // Filtering
+  const filtered = experts.filter(expert => {
+    // Category filter
+    if (activeCategory !== "ALL") {
+      const categorySpecialties = categoryMap[activeCategory] || [];
+      const hasMatch = categorySpecialties.some(sp =>
+        expert.specialties.map(s => s.toLowerCase()).includes(sp.toLowerCase())
+      );
+      if (!hasMatch) return false;
+    }
+    // Search filter
+    if (searchText.trim()) {
+      const q = searchText.toLowerCase();
+      const nameMatch = expert.name?.toLowerCase().includes(q);
+      const titleMatch = expert.role?.toLowerCase().includes(q);
+      const specialtyMatch = expert.specialties.some(s => s.toLowerCase().includes(q));
+      if (!nameMatch && !titleMatch && !specialtyMatch) return false;
+    }
+    return true;
+  });
 
-  const handleFilter = (f) => {
-    setActiveFilter(f);
-    base44.analytics.track({ eventName: "filter_change", properties: { domain: f } });
-  };
-
-  const openConnect = (expert) => {
-    base44.analytics.track({ eventName: "expert_modal_open", properties: { expert: expert.name, mode: "form" } });
-    setModal({ expert, mode: "form" });
+  const handleFilter = (cat) => {
+    setActiveCategory(cat);
+    setShowMore(false);
+    base44.analytics.track({ eventName: "filter_change", properties: { category: cat } });
   };
 
   const openView = (expert) => {
     base44.analytics.track({ eventName: "expert_profile_view", properties: { expert: expert.name } });
     navigate(`/experts/${slugify(expert.name)}`);
+  };
+
+  const openConnect = (expert) => {
+    base44.analytics.track({ eventName: "expert_modal_open", properties: { expert: expert.name, mode: "form" } });
+    setModal({ expert, mode: "form" });
   };
 
   return (
@@ -401,43 +453,106 @@ export default function ExpertsDirectory() {
       </section>
 
       {/* ── STICKY FILTER BAR ── */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: C.offWhite, borderBottom: "1px solid rgba(74,14,46,0.06)", padding: "24px 32px" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 10, background: C.offWhite, borderBottom: "1px solid rgba(74,14,46,0.06)", padding: "20px 32px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          {/* Search bar */}
+          <div style={{ position: "relative", marginBottom: 16 }}>
+            <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: C.midGrey, pointerEvents: "none" }} />
+            <input
+              type="text"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Search by name, specialty, or topic..."
+              style={{ width: "100%", height: 44, paddingLeft: 42, paddingRight: searchText ? 42 : 14, background: C.white, border: "1px solid rgba(74,14,46,0.12)", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none" }}
+              onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.12)"; }}
+              onBlur={(e) => { e.target.style.borderColor = "rgba(74,14,46,0.12)"; e.target.style.boxShadow = "none"; }}
+            />
+            {searchText && (
+              <button onClick={() => setSearchText("")} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}>
+                <X style={{ width: 14, height: 14, color: C.midGrey }} />
+              </button>
+            )}
+          </div>
+
+          {/* Category pills */}
           <div
             role="tablist"
-            aria-label="Filter by domain"
+            aria-label="Filter by category"
             className="filter-scroll"
-            style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "wrap" }}
+            style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "wrap", alignItems: "center" }}
           >
-            {DOMAIN_FILTERS.map((f) => {
-              const active = activeFilter === f;
+            {/* ALL pill */}
+            {["ALL", ...PINNED_CATEGORIES].map((cat) => {
+              const active = activeCategory === cat;
               return (
                 <button
-                  key={f}
+                  key={cat}
                   role="tab"
                   aria-selected={active}
-                  onClick={() => handleFilter(f)}
+                  onClick={() => handleFilter(cat)}
                   style={{
                     background: active ? C.burgCore : "transparent",
                     color: active ? C.white : C.burgCore,
                     border: `1px solid ${active ? C.burgCore : "rgba(74,14,46,0.15)"}`,
                     borderRadius: 100,
-                    padding: "10px 18px",
+                    padding: "8px 16px",
                     fontFamily: sans,
                     fontWeight: 500,
                     fontSize: 11,
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
-                    minHeight: 44,
+                    minHeight: 40,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
                     transition: "background 0.2s, color 0.2s, border-color 0.2s",
                   }}
                 >
-                  {f}
+                  {cat === "ALL" ? "All" : cat}
                 </button>
               );
             })}
+
+            {/* + MORE dropdown */}
+            {moreCategories.length > 0 && (
+              <div ref={moreRef} style={{ position: "relative" }}>
+                <button
+                  onClick={() => setShowMore(v => !v)}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    background: moreCategories.includes(activeCategory) ? C.burgCore : "transparent",
+                    color: moreCategories.includes(activeCategory) ? C.white : C.burgCore,
+                    border: `1px solid ${moreCategories.includes(activeCategory) ? C.burgCore : "rgba(74,14,46,0.15)"}`,
+                    borderRadius: 100, padding: "8px 14px",
+                    fontFamily: sans, fontWeight: 500, fontSize: 11,
+                    textTransform: "uppercase", letterSpacing: "0.08em",
+                    minHeight: 40, cursor: "pointer", whiteSpace: "nowrap",
+                    transition: "background 0.2s, color 0.2s",
+                  }}
+                >
+                  {moreCategories.includes(activeCategory) ? activeCategory : "+ More"}
+                  <ChevronDown style={{ width: 13, height: 13, transform: showMore ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                </button>
+                {showMore && (
+                  <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, background: C.white, border: "1px solid rgba(74,14,46,0.1)", borderRadius: 10, padding: "8px 0", minWidth: 220, boxShadow: "0 8px 28px rgba(74,14,46,0.12)", zIndex: 100 }}>
+                    {moreCategories.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => handleFilter(cat)}
+                        style={{
+                          display: "block", width: "100%", textAlign: "left",
+                          padding: "10px 16px", background: activeCategory === cat ? C.rosePale : "transparent",
+                          border: "none", cursor: "pointer",
+                          fontFamily: sans, fontWeight: activeCategory === cat ? 600 : 400,
+                          fontSize: 12, color: C.burgCore,
+                        }}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -447,7 +562,7 @@ export default function ExpertsDirectory() {
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           {/* Result count */}
           <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, letterSpacing: "0.06em", textAlign: "center", marginBottom: 32 }}>
-            <strong style={{ fontWeight: 600 }}>{filtered.length}</strong> of <strong style={{ fontWeight: 600 }}>{experts.length}</strong> experts shown
+            <strong style={{ fontWeight: 600 }}>{filtered.length}</strong> of <strong style={{ fontWeight: 600 }}>{experts.length}</strong> {filtered.length === 1 ? "expert" : "experts"} shown
           </p>
 
           {/* Grid */}
