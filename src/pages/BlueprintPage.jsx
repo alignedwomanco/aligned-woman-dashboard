@@ -1001,7 +1001,7 @@ function Faculty() {
 
                 {/* CTA */}
                 <a
-                  href={"/Experts?id=" + expert.id}
+                  href={"/ExpertsDirectory?expert=" + expert.id}
                   className="text-[9px] font-bold uppercase tracking-[0.18em] hover:opacity-60 transition-opacity mt-auto pt-1"
                   style={{ fontFamily: sans, color: C.burgCore }}
                 >

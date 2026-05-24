@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { X } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
@@ -320,6 +320,7 @@ export default function ExpertsDirectory() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [modal, setModal] = useState(null); // { expert, mode }
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const { data: dbExperts = [], isLoading } = useQuery({
     queryKey: ["experts-directory-db"],
@@ -329,6 +330,14 @@ export default function ExpertsDirectory() {
   useEffect(() => {
     base44.analytics.track({ eventName: "view_experts_page" });
   }, []);
+
+  // Auto-open modal if ?expert=id is in the URL
+  useEffect(() => {
+    const expertId = searchParams.get("expert");
+    if (!expertId || !dbExperts.length) return;
+    const match = dbExperts.find(e => e.id === expertId);
+    if (match) setModal({ expert: mapDbExpert(match), mode: "viewOnly" });
+  }, [dbExperts, searchParams]);
 
   // Use live DB data, mapped to card shape — Laura Thomas always first
   const experts = [...dbExperts]
