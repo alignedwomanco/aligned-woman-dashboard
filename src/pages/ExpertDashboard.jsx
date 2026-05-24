@@ -29,6 +29,7 @@ import {
   Linkedin,
   Instagram,
   Globe,
+  Twitter,
   ChevronDown,
 } from "lucide-react";
 
@@ -500,7 +501,15 @@ function ContactRequestsTab({ expert }) {
   );
 }
 
-const LINK_PLATFORMS = ["LinkedIn", "Instagram", "Website", "Email", "Twitter", "TikTok", "YouTube"];
+// Fixed social link fields on the Expert entity
+const SOCIAL_FIELDS = [
+  { key: "linkedin_url",  label: "LinkedIn",  Icon: Linkedin,  placeholder: "https://linkedin.com/in/yourname" },
+  { key: "instagram_url", label: "Instagram", Icon: Instagram, placeholder: "https://instagram.com/yourhandle" },
+  { key: "website_url",   label: "Website",   Icon: Globe,     placeholder: "https://yourwebsite.com" },
+  { key: "email",         label: "Email",     Icon: Mail,      placeholder: "you@example.com" },
+  { key: "twitter_url",   label: "Twitter",   Icon: Twitter,   placeholder: "https://twitter.com/yourhandle" },
+  { key: "tiktok_url",    label: "TikTok",    Icon: LinkIcon,  placeholder: "https://tiktok.com/@yourhandle" },
+];
 
 const CATEGORY_DOMAIN_MAP_DASH = {
   "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
@@ -530,48 +539,40 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     bio: "",
     specialties: [],
     profile_picture: "",
-    social_links: [],
+    linkedin_url: "",
+    instagram_url: "",
+    website_url: "",
+    email: "",
+    twitter_url: "",
+    tiktok_url: "",
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
-  const [activeLinkIndex, setActiveLinkIndex] = useState(null);
+  const [activeLink, setActiveLink] = useState(null); // key of the field being edited
   const [newSpecialty, setNewSpecialty] = useState("");
-  const [showAddLink, setShowAddLink] = useState(false);
-  const [newLinkPlatform, setNewLinkPlatform] = useState("LinkedIn");
-  const [newLinkUrl, setNewLinkUrl] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
+  const buildFormData = (src) => ({
+    name: src.name || "",
+    title: src.title || "",
+    bio: src.bio || "",
+    specialties: Array.isArray(src.specialties) ? src.specialties : [],
+    profile_picture: src.profile_picture || "",
+    linkedin_url: src.linkedin_url || "",
+    instagram_url: src.instagram_url || "",
+    website_url: src.website_url || "",
+    email: src.email || "",
+    twitter_url: src.twitter_url || "",
+    tiktok_url: src.tiktok_url || "",
+  });
+
   useEffect(() => {
-    if (expert) {
-      setFormData({
-        name: expert.name || "",
-        title: expert.title || "",
-        bio: expert.bio || "",
-        specialties: Array.isArray(expert.specialties) ? expert.specialties : [],
-        profile_picture: expert.profile_picture || "",
-        social_links: Array.isArray(expert.social_links) ? expert.social_links : [],
-      });
-    }
+    if (expert) setFormData(buildFormData(expert));
   }, [expert]);
 
-  const resetForm = () => {
-    setFormData({
-      name: expert.name || "",
-      title: expert.title || "",
-      bio: expert.bio || "",
-      specialties: Array.isArray(expert.specialties) ? expert.specialties : [],
-      profile_picture: expert.profile_picture || "",
-      social_links: Array.isArray(expert.social_links) ? expert.social_links : [],
-    });
-    setActiveLinkIndex(null);
-    setShowAddLink(false);
-    setNewSpecialty("");
-    setNewLinkUrl("");
-  };
-
   const handleEdit = () => { setIsEditing(true); setSuccess(false); setError(null); };
-  const handleCancel = () => { setIsEditing(false); resetForm(); setSuccess(false); setError(null); };
+  const handleCancel = () => { setIsEditing(false); setFormData(buildFormData(expert)); setActiveLink(null); setSuccess(false); setError(null); };
 
   const handleSave = async () => {
     setSaving(true);
@@ -583,12 +584,16 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         bio: formData.bio,
         specialties: formData.specialties.filter((s) => s.trim().length > 0),
         profile_picture: formData.profile_picture,
-        social_links: formData.social_links.filter((l) => l.platform && l.url),
+        linkedin_url: formData.linkedin_url,
+        instagram_url: formData.instagram_url,
+        website_url: formData.website_url,
+        email: formData.email,
+        twitter_url: formData.twitter_url,
+        tiktok_url: formData.tiktok_url,
       });
       setSuccess(true);
       setIsEditing(false);
-      setActiveLinkIndex(null);
-      setShowAddLink(false);
+      setActiveLink(null);
       setTimeout(() => setSuccess(false), 3000);
       if (onExpertUpdate) onExpertUpdate();
     } catch (err) {
@@ -604,18 +609,6 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     if (!val) return;
     setFormData((f) => ({ ...f, specialties: [...f.specialties, val] }));
     setNewSpecialty("");
-  };
-  const removeLink = (i) => {
-    setFormData((f) => ({ ...f, social_links: f.social_links.filter((_, idx) => idx !== i) }));
-    if (activeLinkIndex === i) setActiveLinkIndex(null);
-  };
-  const updateLinkUrl = (i, url) => setFormData((f) => ({ ...f, social_links: f.social_links.map((l, idx) => idx === i ? { ...l, url } : l) }));
-  const confirmAddLink = () => {
-    if (!newLinkUrl.trim()) return;
-    setFormData((f) => ({ ...f, social_links: [...f.social_links, { platform: newLinkPlatform, url: newLinkUrl.trim() }] }));
-    setNewLinkUrl("");
-    setNewLinkPlatform("LinkedIn");
-    setShowAddLink(false);
   };
 
   const handleProfilePictureUpload = async (e) => {
@@ -795,100 +788,74 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                 </div>
               )}
 
-              {/* Social link icons — exactly matches public profile row */}
+              {/* Social link icons — one per fixed field */}
               <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
-                {formData.social_links.map((link, i) => (
-                  <div key={i} style={{ position: "relative" }}>
-                    <button
-                      onClick={() => isEditing && setActiveLinkIndex(activeLinkIndex === i ? null : i)}
-                      title={isEditing ? `Edit ${link.platform} URL` : link.platform}
-                      style={{
-                        width: 40, height: 40, borderRadius: "50%",
-                        border: activeLinkIndex === i ? `2px solid #C4847A` : "1px solid rgba(74,14,46,0.12)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: activeLinkIndex === i ? "#4A0E2E" : "#FFFFFF",
-                        color: activeLinkIndex === i ? "#FFFFFF" : "#4A0E2E",
-                        cursor: isEditing ? "pointer" : "default",
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      <SocialLinkIcon platform={link.platform} size={16} />
-                    </button>
-                    {/* Inline popover to edit URL */}
-                    {isEditing && activeLinkIndex === i && (
-                      <div style={{ position: "absolute", top: 48, left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: 14, minWidth: 260, boxShadow: "0 8px 28px rgba(74,14,46,0.14)" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                          <SocialLinkIcon platform={link.platform} size={13} />
-                          <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.1em" }}>{link.platform}</span>
-                          <button onClick={() => removeLink(i)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#C0392B", padding: 2, display: "flex" }}>
-                            <Trash2 style={{ width: 13, height: 13 }} />
+                {SOCIAL_FIELDS.map(({ key, label, Icon: SIcon, placeholder }) => {
+                  const hasValue = !!formData[key];
+                  const isActive = activeLink === key;
+                  // In view mode, only show filled links
+                  if (!isEditing && !hasValue) return null;
+                  return (
+                    <div key={key} style={{ position: "relative" }}>
+                      <button
+                        onClick={() => isEditing && setActiveLink(isActive ? null : key)}
+                        title={isEditing ? (hasValue ? `Edit ${label}` : `Add ${label}`) : label}
+                        style={{
+                          width: 40, height: 40, borderRadius: "50%",
+                          border: isActive ? "2px solid #C4847A" : "1px solid rgba(74,14,46,0.12)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: isActive ? "#4A0E2E" : "#FFFFFF",
+                          color: isActive ? "#FFFFFF" : "#4A0E2E",
+                          opacity: isEditing && !hasValue ? 0.35 : 1,
+                          cursor: isEditing ? "pointer" : "default",
+                          transition: "all 0.15s",
+                          position: "relative",
+                        }}
+                      >
+                        <SIcon style={{ width: 16, height: 16 }} />
+                        {/* "+" badge on empty fields in edit mode */}
+                        {isEditing && !hasValue && (
+                          <span style={{ position: "absolute", bottom: -2, right: -2, width: 14, height: 14, background: "#C4847A", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Plus style={{ width: 8, height: 8, color: "#FFFFFF" }} />
+                          </span>
+                        )}
+                      </button>
+                      {/* Inline input popover */}
+                      {isEditing && isActive && (
+                        <div style={{ position: "absolute", top: 48, left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: 14, minWidth: 270, boxShadow: "0 8px 28px rgba(74,14,46,0.14)" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                            <SIcon style={{ width: 13, height: 13, color: "#4A0E2E" }} />
+                            <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+                            {hasValue && (
+                              <button
+                                onClick={() => { setFormData((f) => ({ ...f, [key]: "" })); setActiveLink(null); }}
+                                style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#C0392B", padding: 2, display: "flex" }}
+                                title="Clear"
+                              >
+                                <Trash2 style={{ width: 13, height: 13 }} />
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            autoFocus
+                            type="text"
+                            value={formData[key]}
+                            onChange={(e) => setFormData((f) => ({ ...f, [key]: e.target.value }))}
+                            placeholder={placeholder}
+                            onKeyDown={(e) => { if (e.key === "Enter") setActiveLink(null); }}
+                            style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+                          />
+                          <button
+                            onClick={() => setActiveLink(null)}
+                            style={{ width: "100%", background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 600, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}
+                          >
+                            Done
                           </button>
                         </div>
-                        <input
-                          autoFocus
-                          type="text"
-                          value={link.url}
-                          onChange={(e) => updateLinkUrl(i, e.target.value)}
-                          placeholder="https://…"
-                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
-                        />
-                        <button
-                          onClick={() => setActiveLinkIndex(null)}
-                          style={{ width: "100%", background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 600, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}
-                        >
-                          Done
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {/* + Add link button */}
-                {isEditing && (
-                  <div style={{ position: "relative" }}>
-                    <button
-                      onClick={() => { setShowAddLink(!showAddLink); setActiveLinkIndex(null); }}
-                      title="Add a link"
-                      style={{
-                        width: 40, height: 40, borderRadius: "50%",
-                        border: "1px dashed rgba(196,132,122,0.5)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: showAddLink ? "#4A0E2E" : "transparent",
-                        color: showAddLink ? "#FFFFFF" : "#C4847A",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Plus style={{ width: 16, height: 16 }} />
-                    </button>
-                    {showAddLink && (
-                      <div style={{ position: "absolute", top: 48, left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: 14, minWidth: 260, boxShadow: "0 8px 28px rgba(74,14,46,0.14)" }}>
-                        <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 10 }}>Add a link</p>
-                        <select
-                          value={newLinkPlatform}
-                          onChange={(e) => setNewLinkPlatform(e.target.value)}
-                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
-                        >
-                          {LINK_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                        <input
-                          autoFocus
-                          type="text"
-                          value={newLinkUrl}
-                          onChange={(e) => setNewLinkUrl(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter") confirmAddLink(); }}
-                          placeholder="https://…"
-                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
-                        />
-                        <button
-                          onClick={confirmAddLink}
-                          style={{ width: "100%", background: "#C4847A", color: "#0E0208", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 700, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}
-                        >
-                          Add
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {/* CTA buttons — non-editable, for visual context only */}
