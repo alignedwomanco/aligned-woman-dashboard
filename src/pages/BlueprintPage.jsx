@@ -1000,13 +1000,13 @@ function Faculty() {
                 )}
 
                 {/* CTA */}
-                <Link
-                  to={`${createPageUrl("ExpertProfile")}?id=${expert.id}`}
+                <a
+                  href={"/Experts?id=" + expert.id}
                   className="text-[9px] font-bold uppercase tracking-[0.18em] hover:opacity-60 transition-opacity mt-auto pt-1"
                   style={{ fontFamily: sans, color: C.burgCore }}
                 >
                   VIEW PROFILE &rarr;
-                </Link>
+                </a>
               </div>
             </SectionReveal>
           ))}
