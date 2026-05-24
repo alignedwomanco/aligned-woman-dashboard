@@ -638,7 +638,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     setSaving(true);
     setError(null);
     try {
-      console.log("Saving expert data:", JSON.stringify({ linkedin_url: formData.linkedin_url, instagram_url: formData.instagram_url, website_url: formData.website_url, twitter_url: formData.twitter_url, tiktok_url: formData.tiktok_url, custom_links: formData.custom_links }));
+      // Only save fields allowed from Expert Dashboard (category managed in Dashboard Settings only)
       await base44.entities.Expert.update(expert.id, {
         name: formData.name,
         title: formData.title,
