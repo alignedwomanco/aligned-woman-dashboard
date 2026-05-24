@@ -19,33 +19,39 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
   useEffect(() => {
     const savedData = answers[section.id];
     if (savedData) {
-      if (savedData.total_score !== undefined) {
+      if (savedData.total_score !== undefined && savedData.responses) {
         // Quiz is complete - show results
-        setResponses(savedData.responses || {});
+        setResponses(savedData.responses);
         setQuizPhase("results");
       } else if (savedData.responses) {
         // Quiz is incomplete - resume from first unanswered question
-        setResponses(savedData.responses || {});
+        setResponses(savedData.responses);
         const answeredCount = Object.keys(savedData.responses).length;
         if (answeredCount < questions.length) {
           setCurrentQuestionIndex(answeredCount);
           setQuizPhase("quiz");
         } else {
+          // All questions answered but no total - mark as complete
           setQuizPhase("results");
         }
       } else {
         // No data - start from intro
         setQuizPhase("intro");
       }
+    } else {
+      // No saved data at all
+      setQuizPhase("intro");
     }
-  }, [section.id, answers]);
+  }, [section.id, answers, questions.length]);
 
   // Calculate results
   const results = useMemo(() => {
-    if (Object.keys(responses).length < questions.length) return null;
+    // Ensure all questions are answered
+    const answeredQuestions = questions.filter(q => responses[q.id] !== undefined);
+    if (answeredQuestions.length < questions.length) return null;
 
-    const responseValues = Object.values(responses);
-    const totalScore = responseValues.reduce((sum, val) => sum + (val || 0), 0);
+    const responseValues = questions.map(q => responses[q.id] || 0);
+    const totalScore = responseValues.reduce((sum, val) => sum + val, 0);
 
     // Find matched band
     let matchedBand = null;
@@ -56,13 +62,13 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
       });
     }
 
-    // Find highest and lowest dimensions
-    let highestScore = 0;
+    // Find highest and lowest dimensions (first occurrence in case of tie)
+    let highestScore = -1;
     let lowestScore = 6;
     let highestQuestion = null;
     let lowestQuestion = null;
 
-    questions.forEach((q, idx) => {
+    questions.forEach((q) => {
       const score = responses[q.id] || 0;
       if (score > highestScore) {
         highestScore = score;
@@ -100,31 +106,46 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
     const updatedResponses = { ...responses, [questionId]: value };
     setResponses(updatedResponses);
 
-    // Save to workbook
-    const sectionData = {
-      ...answers[section.id],
-      responses: updatedResponses,
-    };
-    onAnswerChange?.(section.id, sectionData);
-
     // Auto-advance after delay
     setTimeout(() => {
       if (currentQuestionIndex < questions.length - 1) {
+        // More questions to go
         setCurrentQuestionIndex(prev => prev + 1);
+        // Save intermediate progress
+        const sectionData = {
+          ...answers[section.id],
+          responses: updatedResponses,
+        };
+        onAnswerChange?.(section.id, sectionData);
       } else {
         // Quiz complete - calculate and save results
         const totalScore = Object.values(updatedResponses).reduce((sum, val) => sum + (val || 0), 0);
+        
+        // Find matched band
+        let matchedBandId = null;
+        if (scoring.bands) {
+          const matchedBand = scoring.bands.find(band => {
+            const range = band.range || {};
+            return totalScore >= (range.min || 0) && totalScore <= (range.max || 40);
+          });
+          matchedBandId = matchedBand?.id || null;
+        }
+
         const completedData = {
-          ...sectionData,
+          responses: updatedResponses,
           total_score: totalScore,
+          band_id: matchedBandId,
           completed_at: new Date().toISOString(),
         };
         onAnswerChange?.(section.id, completedData);
+        
+        // Force re-render of results
+        setResponses(updatedResponses);
         setQuizPhase("results");
       }
       setIsTransitioning(false);
     }, 400);
-  }, [responses, currentQuestionIndex, questions.length, answers, section.id, onAnswerChange, isTransitioning]);
+  }, [responses, currentQuestionIndex, questions.length, answers, section.id, onAnswerChange, isTransitioning, scoring.bands]);
 
   // Handle retake
   const handleRetake = useCallback(() => {
@@ -311,7 +332,17 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
   }
 
   // Render results phase
-  if (quizPhase === "results" && results) {
+  if (quizPhase === "results") {
+    // Ensure results are calculated
+    if (!results) {
+      // Force calculation if we're in results phase but results is null
+      return (
+        <div style={{ textAlign: "center", padding: 40 }}>
+          <p style={{ fontFamily: "var(--aw-font-sans)", color: "#8A7A76" }}>Calculating results...</p>
+        </div>
+      );
+    }
+    
     const { totalScore, matchedBand, highestQuestion, highestScore, lowestQuestion, lowestScore, chartData } = results;
 
     return (
@@ -725,7 +756,19 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
 
         {/* 10. Reflection textarea */}
         {postResultsFields.map((field) => {
-          const fieldValue = answers[`${section.id}_${field.id}`] || "";
+          // Read reflection from nested structure: answers[section.id].audit_reflection
+          const sectionData = answers[section.id] || {};
+          const fieldValue = sectionData.audit_reflection || "";
+          
+          const handleReflectionChange = (value) => {
+            // Save as nested field within section data
+            const updatedSectionData = {
+              ...sectionData,
+              audit_reflection: value,
+            };
+            onAnswerChange?.(section.id, updatedSectionData);
+          };
+          
           return (
             <div key={field.id} style={{ marginBottom: 32 }}>
               {field.label && (
@@ -753,7 +796,7 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
               <textarea
                 rows={field.rows || 4}
                 value={fieldValue}
-                onChange={(e) => onAnswerChange?.(`${section.id}_${field.id}`, e.target.value)}
+                onChange={(e) => handleReflectionChange(e.target.value)}
                 style={{
                   width: "100%",
                   borderRadius: 12,
@@ -774,7 +817,7 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = "rgba(74,14,46,0.15)";
                 }}
-                placeholder="Write here..."
+                placeholder={field.placeholder || "Write here..."}
               />
             </div>
           );
