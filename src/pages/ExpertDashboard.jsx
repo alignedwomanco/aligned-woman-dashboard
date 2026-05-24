@@ -653,10 +653,8 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         twitter_url: formData.twitter_url,
         tiktok_url: formData.tiktok_url,
         custom_links: formData.custom_links.filter((l) => l.url?.trim()),
+        category: Array.isArray(expert.category) ? expert.category : [], // Preserve existing category array, never leave it undefined
       };
-      
-      console.log("[ExpertDashboard] Saving with data:", saveData);
-      console.log("[ExpertDashboard] Current formData keys:", Object.keys(formData));
       
       await base44.entities.Expert.update(expert.id, saveData);
       console.log("Save successful");
