@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/AuthContext";
@@ -38,17 +39,33 @@ const SITE_URL = "https://app.alignedwomanco.com";
 function useExpertData() {
   const { user } = useAuth();
   const userEmail = user?.email?.toLowerCase() || "";
+  const isAdminRole = user?.role === "admin" || user?.role === "owner";
+
+  // Check for ?expert_id= param (admin mode)
+  const params = new URLSearchParams(window.location.search);
+  const adminExpertId = isAdminRole ? (params.get("expert_id") || "") : "";
+
+  const { data: expertById = null, isLoading: loadingById } = useQuery({
+    queryKey: ["expert-by-id", adminExpertId],
+    queryFn: async () => {
+      const results = await base44.entities.Expert.filter({ id: adminExpertId });
+      return results[0] || null;
+    },
+    enabled: !!adminExpertId,
+  });
 
   const { data: experts = [], isLoading: loadingExpert } = useQuery({
     queryKey: ["expert-profile", userEmail],
     queryFn: () => base44.entities.Expert.filter({ linked_user_email: userEmail }),
-    enabled: !!userEmail,
+    enabled: !!userEmail && !adminExpertId,
   });
 
+  const expert = adminExpertId ? expertById : (experts[0] || null);
+
   const { data: affiliates = [], isLoading: loadingAffiliate } = useQuery({
-    queryKey: ["expert-affiliate", userEmail],
-    queryFn: () => base44.entities.Affiliate.filter({ email: userEmail }),
-    enabled: !!userEmail,
+    queryKey: ["expert-affiliate", expert?.linked_user_email || userEmail],
+    queryFn: () => base44.entities.Affiliate.filter({ email: expert?.linked_user_email || userEmail }),
+    enabled: !!expert,
   });
 
   const affiliateCode = affiliates[0]?.unique_code || "";
@@ -61,10 +78,11 @@ function useExpertData() {
   return {
     user,
     userEmail,
-    expert: experts[0] || null,
+    expert,
     affiliate: affiliates[0] || null,
     sales,
-    isLoading: loadingExpert || loadingAffiliate || loadingSales,
+    isAdminMode: !!adminExpertId,
+    isLoading: (adminExpertId ? loadingById : loadingExpert) || loadingAffiliate || loadingSales,
   };
 }
 
@@ -1017,7 +1035,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
 }
 
 export default function ExpertDashboard() {
-  const { user, userEmail, expert, affiliate, sales, isLoading } = useExpertData();
+  const { user, userEmail, expert, affiliate, sales, isLoading, isAdminMode } = useExpertData();
   const [activeTab, setActiveTab] = useState("earnings");
   const queryClient = useQueryClient();
 
@@ -1070,15 +1088,34 @@ export default function ExpertDashboard() {
   return (
     <div style={{ background: "#FAF5F3", minHeight: "100vh" }}>
       <div className="mx-auto" style={{ maxWidth: 960, padding: "40px 24px 80px" }}>
+
+        {/* Admin mode banner */}
+        {isAdminMode && (
+          <div className="flex items-center justify-between gap-4 mb-6 px-5 py-3 rounded-xl" style={{ background: "#4A0E2E", color: "#FFFFFF" }}>
+            <div className="flex items-center gap-2">
+              <Edit style={{ width: 14, height: 14, color: "#C4847A" }} />
+              <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 12 }}>
+                Admin Mode: Editing <strong>{expert.name}</strong>'s profile
+              </span>
+            </div>
+            <Link
+              to="/expert-dashboard"
+              style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 500, fontSize: 11, color: "#E8B4AE", textDecoration: "none", whiteSpace: "nowrap" }}
+            >
+              ← Return to your dashboard
+            </Link>
+          </div>
+        )}
+
         <div className="mb-8">
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "#C4847A", marginBottom: 8 }}>
-            EXPERT DASHBOARD
+            {isAdminMode ? "ADMIN — EXPERT PROFILE" : "EXPERT DASHBOARD"}
           </p>
           <h1 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(24px, 4vw, 32px)", color: "#4A0E2E", marginBottom: 4 }}>
-            Welcome back, {expert.name?.split(" ")[0] || "Expert"}
+            {isAdminMode ? expert.name : `Welcome back, ${expert.name?.split(" ")[0] || "Expert"}`}
           </h1>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#8A7A76" }}>
-            Manage your profile and track your affiliate earnings.
+            {isAdminMode ? "Editing this expert's profile and earnings data." : "Manage your profile and track your affiliate earnings."}
           </p>
         </div>
 

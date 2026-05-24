@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { X, Search, ChevronDown } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { X, Search, ChevronDown, Pencil } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
 const C = {
@@ -237,8 +238,9 @@ function ExpertModal({ expert, mode, onClose }) {
 }
 
 // ─── EXPERT CARD ───
-function ExpertCard({ expert, onConnect, onView }) {
+function ExpertCard({ expert, onConnect, onView, isAdmin }) {
   const [hovered, setHovered] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div
@@ -314,6 +316,16 @@ function ExpertCard({ expert, onConnect, onView }) {
         >
           View profile
         </button>
+        {isAdmin && (
+          <button
+            onClick={() => navigate(`/expert-dashboard?expert_id=${expert.id}`)}
+            title="Edit profile (admin)"
+            aria-label={`Edit profile of ${expert.name}`}
+            style={{ width: 44, height: 44, background: "transparent", border: `1px solid ${C.roseCore}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, color: C.roseCore }}
+          >
+            <Pencil style={{ width: 15, height: 15 }} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -325,6 +337,15 @@ function slugify(name) {
 
 // ─── MAIN PAGE ───
 export default function ExpertsDirectory() {
+  const { user } = useAuth();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "owner";
+
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [searchText, setSearchText] = useState("");
   const [showMore, setShowMore] = useState(false);
@@ -578,6 +599,7 @@ export default function ExpertsDirectory() {
                   expert={expert}
                   onConnect={openConnect}
                   onView={openView}
+                  isAdmin={isAdmin}
                 />
               ))}
             </div>

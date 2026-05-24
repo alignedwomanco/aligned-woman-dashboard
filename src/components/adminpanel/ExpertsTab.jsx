@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import TabHeader from "./TabHeader";
 
@@ -10,6 +11,7 @@ export default function ExpertsTab() {
   const [form, setForm] = useState(EMPTY_EXPERT);
   const [specialtyInput, setSpecialtyInput] = useState("");
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: experts = [] } = useQuery({ queryKey: ["admin-experts"], queryFn: () => base44.entities.Expert.list() });
 
@@ -103,7 +105,7 @@ export default function ExpertsTab() {
                 </td>
                 <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${e.isPublished ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{e.isPublished ? "Yes" : "No"}</span></td>
                 <td className="px-4 py-3 flex gap-2">
-                  <button onClick={() => openEdit(e)} className="text-xs px-3 py-1 rounded" style={{ background: "#F5E6E0", color: "#6B1B3D" }}>Edit</button>
+                  <button onClick={() => navigate(`/expert-dashboard?expert_id=${e.id}`)} className="text-xs px-3 py-1 rounded" style={{ background: "#F5E6E0", color: "#6B1B3D" }}>Edit Profile</button>
                   <button onClick={() => del.mutate(e.id)} className="text-xs px-3 py-1 rounded bg-red-50 text-red-600">Delete</button>
                 </td>
               </tr>

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Shield, Check, Linkedin, Instagram, Globe, Mail, ChevronLeft, ArrowRight } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { Shield, Check, Linkedin, Instagram, Globe, Mail, ChevronLeft, ArrowRight, Pencil } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
 const C = {
@@ -241,6 +242,14 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
 export default function ExpertProfile() {
   const { slug } = useParams();
   const formRef = useRef(null);
+  const { user } = useAuth();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "owner";
 
   const { data: allExperts = [], isLoading } = useQuery({
     queryKey: ["all-experts-profile"],
@@ -416,6 +425,14 @@ export default function ExpertProfile() {
               >
                 View Programme
               </a>
+              {isAdmin && expert?.id && (
+                <a
+                  href={`/expert-dashboard?expert_id=${expert.id}`}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 100, padding: "14px 24px", fontFamily: sans, fontWeight: 600, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", textDecoration: "none", minHeight: 48 }}
+                >
+                  <Pencil size={14} /> Edit Profile
+                </a>
+              )}
             </div>
           </div>
         </div>
