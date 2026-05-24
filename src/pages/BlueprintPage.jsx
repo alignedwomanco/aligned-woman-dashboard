@@ -1665,7 +1665,7 @@ function FinalClose() {
                   DOORS OPEN
                 </p>
                 <p className="text-[36px] mb-6" style={{ fontFamily: serif, fontStyle: "italic", color: C.white }}>
-                  1 June 2026.
+                  Founding Price.
                 </p>
                 <div className="space-y-3 mb-8">
                   {[
