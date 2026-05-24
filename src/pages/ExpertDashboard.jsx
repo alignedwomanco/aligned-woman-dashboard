@@ -625,6 +625,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     twitter_url: src.twitter_url || "",
     tiktok_url: src.tiktok_url || "",
     custom_links: Array.isArray(src.custom_links) ? src.custom_links : [],
+    // Explicitly exclude: category, isPublished, linked_user_email, services
   });
 
   useEffect(() => {
@@ -638,8 +639,8 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     setSaving(true);
     setError(null);
     try {
-      // Only save fields allowed from Expert Dashboard (category managed in Dashboard Settings only)
-      await base44.entities.Expert.update(expert.id, {
+      // Build save data object with ONLY allowed fields (category managed in Dashboard Settings only)
+      const saveData = {
         name: formData.name,
         title: formData.title,
         bio: formData.bio,
@@ -652,7 +653,11 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         twitter_url: formData.twitter_url,
         tiktok_url: formData.tiktok_url,
         custom_links: formData.custom_links.filter((l) => l.url?.trim()),
-      });
+      };
+      // Explicitly ensure category is NEVER included
+      delete saveData.category;
+      
+      await base44.entities.Expert.update(expert.id, saveData);
       console.log("Save successful");
       setSuccess(true);
       setIsEditing(false);
