@@ -1639,10 +1639,10 @@ function ClosingSequence() {
 
 function FinalClose() {
   return (
-    <section className="py-14 md:py-24 px-6 md:px-8" style={{ background: GRAD.darkHero }}>
+    <section className="pt-14 md:pt-24 pb-8 md:pb-12 px-6 md:px-8" style={{ background: GRAD.darkHero }}>
       <div className="max-w-[1100px] mx-auto">
         {/* Top block: 60/40 grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 mb-10">
           <div className="lg:col-span-3">
             <SectionReveal>
               <EyebrowLeft color={C.roseCore}>FOUNDING MEMBER PRICE</EyebrowLeft>
