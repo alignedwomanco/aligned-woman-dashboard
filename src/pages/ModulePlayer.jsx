@@ -22,6 +22,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
+import { useCourseAccess } from "@/hooks/useCourseAccess";
 
 export default function ModulePlayer() {
   const navigate = useNavigate();
@@ -30,60 +31,21 @@ export default function ModulePlayer() {
   const courseId = searchParams.get("courseId");
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
-  const [hasPaidAccess, setHasPaidAccess] = useState(false);
-  const [accessChecked, setAccessChecked] = useState(false);
   const [mobileTab, setMobileTab] = useState("about");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const queryClient = useQueryClient();
 
-  // Check course access
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (!courseId) return;
-      const me = await base44.auth.me();
-      const email = me?.email?.toLowerCase();
-      const adminUser = ["owner", "admin", "master_admin"].includes(me?.role);
-      if (adminUser) {
-        setHasPaidAccess(true);
-        setAccessChecked(true);
-        return;
-      }
-      if (email) {
-        const enrollments = await base44.entities.CourseEnrollment.filter({
-          userEmail: email,
-          courseId,
-        });
-        if (enrollments.length > 0 && enrollments[0]?.isPaid) {
-          setHasPaidAccess(true);
-          setAccessChecked(true);
-          return;
-        }
-        const userTags = me?.access_tags || [];
-        const courses = await base44.entities.Course.filter({ id: courseId });
-        const courseData = courses[0];
-        if (courseData?.isComingSoon) {
-          setHasPaidAccess(false);
-          setAccessChecked(true);
-          return;
-        }
-        if (
-          courseData?.tags?.length > 0 &&
-          courseData.tags.some((t) => userTags.includes(t))
-        ) {
-          setHasPaidAccess(true);
-          setAccessChecked(true);
-          return;
-        }
-      }
-      const courses2 = await base44.entities.Course.filter({ id: courseId });
-      const c = courses2[0];
-      if (c && (!c.tags || c.tags.length === 0) && (!c.price || c.price === 0)) {
-        setHasPaidAccess(true);
-      }
-      setAccessChecked(true);
-    };
-    checkAccess();
-  }, [courseId]);
+  // Fetch course for access check
+  const { data: course } = useQuery({
+    queryKey: ["course", courseId],
+    queryFn: async () => {
+      const courses = await base44.entities.Course.filter({ id: courseId });
+      return courses[0];
+    },
+    enabled: !!courseId,
+  });
+
+  const { hasAccess, isLoading: accessLoading } = useCourseAccess(course);
 
   const { data: module } = useQuery({
     queryKey: ["courseModule", moduleId],
@@ -94,15 +56,6 @@ export default function ModulePlayer() {
       return modules[0];
     },
     enabled: !!moduleId,
-  });
-
-  const { data: course } = useQuery({
-    queryKey: ["course", courseId],
-    queryFn: async () => {
-      const courses = await base44.entities.Course.filter({ id: courseId });
-      return courses[0];
-    },
-    enabled: !!courseId,
   });
 
   const { data: rawPages = [] } = useQuery({
@@ -349,7 +302,7 @@ export default function ModulePlayer() {
         )
       : 0;
 
-  if (!module || !selectedPage || !accessChecked) {
+  if (!module || !selectedPage || accessLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
@@ -357,7 +310,7 @@ export default function ModulePlayer() {
     );
   }
 
-  if (!hasPaidAccess) {
+  if (!hasAccess) {
     return (
       <div className="min-h-screen bg-[#FAF5F3]">
         <div className="max-w-2xl mx-auto p-6 pt-20">
@@ -473,8 +426,7 @@ export default function ModulePlayer() {
   );
 
   return (
-    <CourseAccessGate course={course}>
-      <div style={{ background: "#FAF5F3" }} className="min-h-screen">
+    <div style={{ background: "#FAF5F3" }} className="min-h-screen">
         <MobileHeader />
 
         {/* Desktop Top Bar */}
@@ -1992,6 +1944,7 @@ export default function ModulePlayer() {
           </button>
         </div>
       </div>
-    </CourseAccessGate>
-  );
+      </div>
+    );
+  }
 }
