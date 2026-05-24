@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -32,10 +32,10 @@ export default function ModulePlayer() {
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const queryClient = useQueryClient();
 
-  // Fetch course for access check
+  // ── Queries ──────────────────────────────────────────────
+
   const { data: course } = useQuery({
     queryKey: ["course", courseId],
     queryFn: async () => {
@@ -50,9 +50,7 @@ export default function ModulePlayer() {
   const { data: module } = useQuery({
     queryKey: ["courseModule", moduleId],
     queryFn: async () => {
-      const modules = await base44.entities.CourseModule.filter({
-        id: moduleId,
-      });
+      const modules = await base44.entities.CourseModule.filter({ id: moduleId });
       return modules[0];
     },
     enabled: !!moduleId,
@@ -119,17 +117,25 @@ export default function ModulePlayer() {
     queryKey: ["expert", module?.expertId],
     queryFn: async () => {
       if (!module?.expertId) return null;
-      const experts = await base44.entities.Expert.filter({
-        id: module.expertId,
-      });
+      const experts = await base44.entities.Expert.filter({ id: module.expertId });
       return experts[0] || null;
     },
     enabled: !!module?.expertId,
   });
 
+  // ── Effects ──────────────────────────────────────────────
+
   useEffect(() => {
     setSelectedPage(null);
   }, [moduleId]);
+
+  useEffect(() => {
+    if (pages.length > 0 && !selectedPage) {
+      setSelectedPage(pages[0]);
+    }
+  }, [pages]);
+
+  // ── Mutations ────────────────────────────────────────────
 
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
@@ -184,11 +190,7 @@ export default function ModulePlayer() {
     },
   });
 
-  useEffect(() => {
-    if (pages.length > 0 && !selectedPage) {
-      setSelectedPage(pages[0]);
-    }
-  }, [pages]);
+  // ── Handlers ─────────────────────────────────────────────
 
   const handleTogglePageComplete = async () => {
     const pageProgress = moduleProgress.find((p) => p.pageId === selectedPage.id);
@@ -290,21 +292,23 @@ export default function ModulePlayer() {
     });
   };
 
+  // ── Computed values ──────────────────────────────────────
+
+  const completedPageCount = pages.filter((page) => {
+    const p = moduleProgress.find((pr) => pr.pageId === page.id);
+    return p?.status === "completed";
+  }).length;
+
   const overallProgress =
     pages.length > 0
-      ? Math.round(
-          (pages.filter((page) => {
-            const p = moduleProgress.find((pr) => pr.pageId === page.id);
-            return p?.status === "completed";
-          }).length /
-            pages.length) *
-            100
-        )
+      ? Math.round((completedPageCount / pages.length) * 100)
       : 0;
+
+  // ── Loading / access gate ────────────────────────────────
 
   if (!module || !selectedPage || accessLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
         <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
       </div>
     );
@@ -325,14 +329,17 @@ export default function ModulePlayer() {
     );
   }
 
+  // ── Derived state ────────────────────────────────────────
+
   const isPageCompleted = (pageId) => {
     const p = moduleProgress.find((pr) => pr.pageId === pageId);
     return p?.status === "completed" || false;
   };
 
-  const allPagesCompleted =
-    pages.length > 0 && pages.every((page) => isPageCompleted(page.id));
   const isCurrentPageComplete = isPageCompleted(selectedPage?.id);
+  const currentPageIndex = pages.findIndex((p) => p.id === selectedPage.id);
+  const nextPage = pages[currentPageIndex + 1] || null;
+  const prevPage = currentPageIndex > 0 ? pages[currentPageIndex - 1] : null;
 
   const sortedSections = [...allCourseSections].sort((a, b) => {
     const aOrder = a.order ?? Infinity;
@@ -352,9 +359,8 @@ export default function ModulePlayer() {
       })
   );
 
-  const currentModuleIndex = sortedCourseModules.findIndex(
-    (m) => m.id === moduleId
-  );
+  const currentModuleIndex = sortedCourseModules.findIndex((m) => m.id === moduleId);
+  const moduleNumber = currentModuleIndex >= 0 ? currentModuleIndex + 1 : 1;
   const modulesWithPages = new Set(allCoursePages.map((p) => p.moduleId));
   const nextModule =
     sortedCourseModules
@@ -365,1044 +371,934 @@ export default function ModulePlayer() {
     workbooks.find((w) => w.expert_id === module?.expertId) ||
     (workbooks.length > 0 ? workbooks[0] : null);
 
-  const currentPageIndex = pages.findIndex((p) => p.id === selectedPage.id);
-  const nextPage = pages[currentPageIndex + 1] || null;
-  const prevPage = currentPageIndex > 0 ? pages[currentPageIndex - 1] : null;
+  const moduleSection = sortedSections.find((s) => s.id === module?.sectionId);
+  const pillarLabel = moduleSection?.phase_name || moduleSection?.title?.split(" - ")[1] || "";
 
-  // Mobile sticky header
-  const MobileHeader = () => (
-    <div className="fixed top-0 left-0 right-0 z-50 md:hidden">
-      <div className="bg-[#FAF5F3] px-4 py-3 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="flex-shrink-0">
-          <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
-        </button>
-        <div className="flex-1 text-center mx-4">
-          <div
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "9px",
-              fontWeight: 700,
-              letterSpacing: "0.22em",
-              color: "#C4847A",
-              textTransform: "uppercase",
-              marginBottom: "2px",
-            }}
-          >
-            MODULE {String(currentPageIndex + 1).padStart(2, "0")} . {module?.title?.split(" ")[0]?.toUpperCase()}
-          </div>
-          <div
-            style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "16px",
-              fontStyle: "italic",
-              color: "#4A0E2E",
-              lineHeight: 1,
-            }}
-          >
-            {module?.title}
-          </div>
-        </div>
-        <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="flex-shrink-0">
-          <Menu className="w-5 h-5" style={{ color: "#4A0E2E" }} />
-        </button>
-      </div>
+  // ── Helpers ──────────────────────────────────────────────
+
+  const handleSelectPage = (page) => {
+    setSelectedPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleNextAction = () => {
+    if (nextPage) {
+      handleSelectPage(nextPage);
+      setMobileTab("about");
+    } else if (nextModule) {
+      navigate(
+        createPageUrl("ModulePlayer") +
+          `?moduleId=${nextModule.id}&courseId=${courseId}`
+      );
+    } else {
+      navigate(createPageUrl("Classroom"));
+    }
+  };
+
+  const nextLabel = nextPage
+    ? "NEXT LESSON"
+    : nextModule
+    ? "NEXT MODULE"
+    : "BACK TO CLASSROOM";
+
+  const nextMobileTopLine = nextPage
+    ? `UP NEXT · LESSON ${String(currentPageIndex + 2).padStart(2, "0")}`
+    : nextModule
+    ? "NEXT MODULE"
+    : "RETURN HOME";
+
+  const nextMobileBottomLine = nextPage
+    ? nextPage.title
+    : nextModule
+    ? nextModule.title
+    : "Blueprint Home";
+
+  // ── Video renderer (shared between desktop and mobile) ──
+
+  const renderVideo = (roundCorners) => {
+    const radius = roundCorners ? "12px" : "0";
+    return (
       <div
         style={{
-          height: "2px",
-          background: "#F5DDD9",
-          width: "100%",
+          paddingTop: "56.25%",
+          position: "relative",
+          background: "linear-gradient(135deg, #3D0F1F 0%, #4A0E2E 50%, #3D0F1F 100%)",
+          borderRadius: radius,
+          overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            height: "100%",
-            background: "#C4847A",
-            width: `${overallProgress}%`,
-            transition: "width 0.7s ease-out",
-          }}
-        />
+        {selectedPage.videoUrl ? (
+          (() => {
+            const url = selectedPage.videoUrl.trim();
+            let embedUrl = url;
+
+            if (url.includes("youtube.com") || url.includes("youtu.be")) {
+              let videoId = null;
+              try {
+                if (url.includes("youtu.be"))
+                  videoId = url.split("youtu.be/")[1]?.split(/[?&#]/)[0];
+                else videoId = new URL(url).searchParams.get("v");
+              } catch (e) {
+                const match = url.match(/[?&]v=([^&#]+)/);
+                videoId = match ? match[1] : null;
+              }
+              if (videoId)
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            }
+
+            if (url.includes("vimeo.com")) {
+              const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
+              if (vimeoId)
+                embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
+            }
+
+            if (url.includes("drive.google.com")) {
+              const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+              if (fileId)
+                embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+
+            if (url.includes("wistia.com") || url.includes("wistia.net")) {
+              const videoId =
+                url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] ||
+                url.split("/").pop();
+              embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
+            }
+
+            const isDirectVideo =
+              /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(embedUrl) ||
+              embedUrl.includes("supabase.co/storage") ||
+              embedUrl.includes("base44.app/api/apps");
+
+            if (isDirectVideo) {
+              return (
+                <video
+                  src={embedUrl}
+                  controls
+                  className="absolute top-0 left-0 w-full h-full"
+                  style={{ backgroundColor: "#000" }}
+                />
+              );
+            }
+
+            return (
+              <iframe
+                src={embedUrl}
+                className="absolute top-0 left-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowFullScreen
+                style={{ border: 0 }}
+              />
+            );
+          })()
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+            <div
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "10px",
+                fontWeight: 600,
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                marginBottom: "16px",
+                opacity: 0.8,
+              }}
+            >
+              PRESENTED BY
+            </div>
+            <div
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "12px",
+                fontWeight: 500,
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                opacity: 0.9,
+              }}
+            >
+              THE ALIGNED WOMAN CO.
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                bottom: "16px",
+                left: "16px",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "11px",
+                fontWeight: 500,
+                opacity: 0.7,
+              }}
+            >
+              00:00 · {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
-  return (
-    <div style={{ background: "#FAF5F3" }} className="min-h-screen">
-        <MobileHeader />
+  // ── Expert avatar helper ─────────────────────────────────
 
-        {/* Desktop Top Bar */}
-        <div className="hidden md:block sticky top-0 z-40 bg-[#FAF5F3] border-b border-[rgba(74,14,46,0.06)]">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={() => navigate(-1)}>
-                <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
-              </button>
-              <span
+  const renderExpertAvatar = (size) => {
+    if (!expert) return null;
+    const initials = expert.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("");
+    return (
+      <div
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          borderRadius: "50%",
+          background: "#4A0E2E",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          overflow: "hidden",
+        }}
+      >
+        {expert.profile_picture ? (
+          <img
+            src={expert.profile_picture}
+            alt={expert.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <span
+            style={{
+              color: "white",
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: `${Math.round(size * 0.35)}px`,
+              fontWeight: 700,
+            }}
+          >
+            {initials}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  // ── Lesson list (shared between desktop sidebar and mobile tab) ──
+
+  const renderLessonList = (onSelect) => (
+    <div>
+      {pages.map((page, idx) => {
+        const isActive = selectedPage?.id === page.id;
+        const isComplete = isPageCompleted(page.id);
+        return (
+          <button
+            key={page.id}
+            onClick={() => onSelect(page)}
+            style={{
+              width: "100%",
+              textAlign: "left",
+              padding: "14px 12px",
+              borderLeft: isActive ? "3px solid #C4847A" : "3px solid transparent",
+              background: isActive ? "#FDF5F3" : "transparent",
+              borderTop: "none",
+              borderRight: "none",
+              borderBottom: "1px solid rgba(74,14,46,0.06)",
+              cursor: "pointer",
+              transition: "background 0.2s",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "12px",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "'DM Serif Display', serif",
+                fontSize: "18px",
+                fontStyle: "italic",
+                color: isComplete || isActive ? "#C4847A" : "#C8B8B4",
+                flexShrink: 0,
+              }}
+            >
+              {String(idx + 1).padStart(2, "0")}
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  letterSpacing: "0.22em",
-                  color: "#4A0E2E",
+                  fontSize: "13px",
+                  fontWeight: isActive ? 600 : 500,
+                  color: isComplete ? "#8A7A76" : "#3A2A28",
+                  marginBottom: "4px",
+                  lineHeight: 1.4,
+                }}
+              >
+                {page.title}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "10px",
+                  fontWeight: 500,
+                  letterSpacing: "0.15em",
+                  color: "#8A7A76",
                   textTransform: "uppercase",
                 }}
               >
-                ALIGNED WOMAN BLUEPRINT
-              </span>
+                {page.estimatedMinutes || "22"} MIN
+                {isComplete ? " · COMPLETED" : ""}
+                {!isComplete && idx === currentPageIndex + 1 ? " · UP NEXT" : ""}
+              </div>
             </div>
+            <div style={{ flexShrink: 0, marginTop: "2px" }}>
+              {isComplete ? (
+                <CheckCircle className="w-4 h-4" style={{ color: "#C4847A" }} />
+              ) : (
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    borderRadius: "50%",
+                    border: "1.5px solid #C8B8B4",
+                  }}
+                />
+              )}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  // ── Module overview rows (shared) ────────────────────────
+
+  const renderModuleOverview = () => (
+    <div style={{ background: "white", borderRadius: "12px", padding: "20px" }}>
+      <div
+        style={{
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: "11px",
+          fontWeight: 700,
+          letterSpacing: "0.22em",
+          color: "#4A0E2E",
+          textTransform: "uppercase",
+          paddingBottom: "12px",
+          borderBottom: "2px solid #4A0E2E",
+          marginBottom: "16px",
+        }}
+      >
+        MODULE OVERVIEW
+      </div>
+      {[
+        { label: "Lessons", value: String(pages.length) },
+        {
+          label: "Total duration",
+          value: module?.durationMinutes
+            ? `${Math.floor(module.durationMinutes / 60)} hr ${module.durationMinutes % 60} min`
+            : "N/A",
+        },
+        pillarLabel ? { label: "Pillar", value: pillarLabel } : null,
+        expert ? { label: "Expert", value: expert.name } : null,
+      ]
+        .filter(Boolean)
+        .map((row, i, arr) => (
+          <div
+            key={row.label}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 0",
+              borderBottom: i < arr.length - 1 ? "1px solid rgba(74,14,46,0.06)" : "none",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "13px",
+                fontWeight: 400,
+                color: "#8A7A76",
+              }}
+            >
+              {row.label}
+            </span>
+            <span
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "#3A2A28",
+              }}
+            >
+              {row.value}
+            </span>
+          </div>
+        ))}
+    </div>
+  );
+
+  // ── Workbook card (shared) ───────────────────────────────
+
+  const renderWorkbookCard = () => {
+    if (!courseWorkbook) return null;
+    return (
+      <button
+        onClick={() => {
+          window.location.href = `/Workbook?id=${courseWorkbook.id}`;
+        }}
+        style={{
+          width: "100%",
+          background: "#FDF5F3",
+          border: "1px solid rgba(196,132,122,0.18)",
+          borderRadius: "12px",
+          padding: "16px",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          cursor: "pointer",
+          transition: "background 0.2s",
+          textAlign: "left",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "#F5DDD9")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "#FDF5F3")}
+      >
+        <FileText className="w-5 h-5 flex-shrink-0" style={{ color: "#4A0E2E" }} />
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "#4A0E2E",
+              marginBottom: "2px",
+            }}
+          >
+            Module workbook
+          </div>
+          <div
+            style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "12px",
+              fontWeight: 400,
+              color: "#8A7A76",
+            }}
+          >
+            PDF · 24 PAGES
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "#4A0E2E" }} />
+      </button>
+    );
+  };
+
+  // ── Title with italic after ampersand ────────────────────
+
+  const renderModuleTitle = (fontSize) => {
+    const parts = (module?.title || "").split(" & ");
+    if (parts.length < 2) {
+      return (
+        <span style={{ fontFamily: "'DM Serif Display', serif", fontSize, color: "#4A0E2E" }}>
+          {module?.title}
+        </span>
+      );
+    }
+    return (
+      <>
+        {parts[0]}
+        <br />
+        &amp;{" "}
+        <span style={{ fontStyle: "italic" }}>{parts[1]}</span>
+      </>
+    );
+  };
+
+  // ════════════════════════════════════════════════════════
+  //  RENDER
+  // ════════════════════════════════════════════════════════
+
+  return (
+    <div className="min-h-screen" style={{ background: "#FAF5F3" }}>
+
+      {/* ─── MOBILE STICKY HEADER ─── */}
+      <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
+        <div className="px-4 py-3 flex items-center justify-between">
+          <button onClick={() => navigate(-1)} className="flex-shrink-0 p-1">
+            <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
+          </button>
+          <div className="flex-1 text-center mx-3 min-w-0">
+            <div
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "9px",
+                fontWeight: 700,
+                letterSpacing: "0.22em",
+                color: "#C4847A",
+                textTransform: "uppercase",
+                marginBottom: "2px",
+              }}
+            >
+              MODULE {String(moduleNumber).padStart(2, "0")} · {pillarLabel.toUpperCase() || "LESSON"}
+            </div>
+            <div
+              className="truncate"
+              style={{
+                fontFamily: "'DM Serif Display', serif",
+                fontSize: "15px",
+                fontStyle: "italic",
+                color: "#4A0E2E",
+                lineHeight: 1.2,
+              }}
+            >
+              {module?.title}
+            </div>
+          </div>
+          <button
+            onClick={() => setMobileTab("course")}
+            className="flex-shrink-0 p-1"
+          >
+            <Menu className="w-5 h-5" style={{ color: "#4A0E2E" }} />
+          </button>
+        </div>
+        {/* 2px progress bar */}
+        <div style={{ height: "2px", background: "#F5DDD9", width: "100%" }}>
+          <div
+            style={{
+              height: "100%",
+              background: "#C4847A",
+              width: `${overallProgress}%`,
+              transition: "width 0.7s ease-out",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ─── DESKTOP TOP BAR ─── */}
+      <div className="hidden md:block sticky top-0 z-40" style={{ background: "#FAF5F3", borderBottom: "1px solid rgba(74,14,46,0.06)" }}>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-3"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+          >
+            <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
             <span
               style={{
                 fontFamily: "'Montserrat', sans-serif",
                 fontSize: "11px",
                 fontWeight: 700,
                 letterSpacing: "0.22em",
-                color: "#8A7A76",
+                color: "#4A0E2E",
                 textTransform: "uppercase",
               }}
             >
-              MODULE {String(currentPageIndex + 1).padStart(2, "0")} . {module?.title}
+              ALIGNED WOMAN BLUEPRINT
             </span>
-          </div>
+          </button>
+          <span
+            style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.22em",
+              color: "#8A7A76",
+              textTransform: "uppercase",
+            }}
+          >
+            MODULE {String(moduleNumber).padStart(2, "0")} · {module?.title}
+          </span>
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="md:pt-0 pt-20 pb-safe">
-          {/* Desktop Layout */}
-          <div className="hidden md:block">
-            <div className="max-w-7xl mx-auto px-6 py-8">
-              {/* Module Header */}
-              <div className="grid grid-cols-2 gap-12 mb-12">
-                <div>
-                  <div
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      letterSpacing: "0.22em",
-                      color: "#C4847A",
-                      textTransform: "uppercase",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    MODULE {String(currentPageIndex + 1).padStart(2, "0")} . {module?.title?.split(" ")[0]?.toUpperCase()}
-                  </div>
-                  <h1
-                    style={{
-                      fontFamily: "'DM Serif Display', serif",
-                      fontSize: "52px",
-                      color: "#4A0E2E",
-                      fontWeight: 400,
-                      lineHeight: 1.2,
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {module?.title?.split(" & ")[0]}
-                    <br />
-                    &{" "}
-                    <span style={{ fontStyle: "italic" }}>
-                      {module?.title?.split(" & ")[1] || ""}
-                    </span>
-                  </h1>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      letterSpacing: "0.22em",
-                      color: "#8A7A76",
-                      textTransform: "uppercase",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    MODULE PROGRESS
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'DM Serif Display', serif",
-                      fontSize: "48px",
-                      color: "#4A0E2E",
-                      fontWeight: 400,
-                      marginBottom: "16px",
-                    }}
-                  >
-                    {overallProgress}%
-                  </div>
-                  <div
-                    style={{
-                      height: "4px",
-                      background: "#F5DDD9",
-                      borderRadius: "2px",
-                      marginBottom: "12px",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        background: "#C4847A",
-                        width: `${overallProgress}%`,
-                        transition: "width 0.7s ease-out",
-                      }}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "11px",
-                      fontWeight: 500,
-                      color: "#8A7A76",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.15em",
-                    }}
-                  >
-                    {currentPageIndex + 1} OF {pages.length} LESSONS ·{" "}
-                    {module?.durationMinutes || "0"} OF {module?.durationMinutes || "0"} MIN
-                  </div>
-                </div>
+      {/* ─── PAGE BODY ─── */}
+      <div className="pt-16 md:pt-0 pb-24 md:pb-0">
+
+        {/* ═══ DESKTOP LAYOUT ═══ */}
+        <div className="hidden md:block max-w-7xl mx-auto px-6 py-8">
+
+          {/* Module Header */}
+          <div className="flex justify-between items-start gap-12 mb-12">
+            <div style={{ flex: 1 }}>
+              <div
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.22em",
+                  color: "#C4847A",
+                  textTransform: "uppercase",
+                  marginBottom: "16px",
+                }}
+              >
+                MODULE {String(moduleNumber).padStart(2, "0")} · {pillarLabel.toUpperCase() || module?.title?.split(" ")[0]?.toUpperCase()}
               </div>
-
-              {/* Two-Column Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12">
-                {/* Left Column */}
-                <div>
-                  {/* Video Player */}
-                  <motion.div
-                    key={selectedPage.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ marginBottom: "36px" }}
-                  >
-                    <div
-                      style={{
-                        paddingTop: "56.25%",
-                        position: "relative",
-                        background: "linear-gradient(135deg, #3D0F1F 0%, #4A0E2E 50%, #3D0F1F 100%)",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {selectedPage.videoUrl ? (
-                        (() => {
-                          const url = selectedPage.videoUrl.trim();
-                          let embedUrl = url;
-
-                          if (url.includes("youtube.com") || url.includes("youtu.be")) {
-                            let videoId = null;
-                            try {
-                              if (url.includes("youtu.be"))
-                                videoId = url.split("youtu.be/")[1]?.split(/[?&#]/)[0];
-                              else videoId = new URL(url).searchParams.get("v");
-                            } catch (e) {
-                              const match = url.match(/[?&]v=([^&#]+)/);
-                              videoId = match ? match[1] : null;
-                            }
-                            if (videoId)
-                              embedUrl = `https://www.youtube.com/embed/${videoId}`;
-                          }
-
-                          if (url.includes("vimeo.com")) {
-                            const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
-                            if (vimeoId)
-                              embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
-                          }
-
-                          if (url.includes("drive.google.com")) {
-                            const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-                            if (fileId)
-                              embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-                          }
-
-                          if (url.includes("wistia.com") || url.includes("wistia.net")) {
-                            const videoId =
-                              url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] ||
-                              url.split("/").pop();
-                            embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
-                          }
-
-                          const isDirectVideo =
-                            /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(embedUrl) ||
-                            embedUrl.includes("supabase.co/storage") ||
-                            embedUrl.includes("base44.app/api/apps");
-
-                          if (isDirectVideo) {
-                            return (
-                              <video
-                                src={embedUrl}
-                                controls
-                                className="absolute top-0 left-0 w-full h-full"
-                                style={{ backgroundColor: "#000" }}
-                              />
-                            );
-                          }
-
-                          return (
-                            <iframe
-                              src={embedUrl}
-                              className="absolute top-0 left-0 w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                              allowFullScreen
-                              style={{ border: 0 }}
-                            />
-                          );
-                        })()
-                      ) : (
-                        <div
-                          className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white"
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                          }}
-                        >
-                          <div className="text-center">
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: 500,
-                                letterSpacing: "0.2em",
-                                textTransform: "uppercase",
-                                marginBottom: "12px",
-                              }}
-                            >
-                              PRESENTED BY
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: 500,
-                                letterSpacing: "0.3em",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              THE ALIGNED WOMAN CO.
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {/* Timestamp overlay */}
-                      {!selectedPage.videoUrl && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: "16px",
-                            left: "16px",
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            color: "white",
-                          }}
-                        >
-                          00:00 · {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Lesson Meta Line */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      marginBottom: "24px",
-                      paddingBottom: "24px",
-                      borderBottom: "1px solid rgba(74,14,46,0.06)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "'DM Serif Display', serif",
-                        fontSize: "22px",
-                        fontStyle: "italic",
-                        color: "#C4847A",
-                      }}
-                    >
-                      {String(currentPageIndex + 1).padStart(2, "0")}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "'Montserrat', sans-serif",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        letterSpacing: "0.2em",
-                        color: "#8A7A76",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      LESSON {String(currentPageIndex + 1).padStart(2, "0")} OF {pages.length} · {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
-                    </span>
-                    {isCurrentPageComplete && (
-                      <div
-                        style={{
-                          marginLeft: "auto",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          background: "#FDF5F3",
-                          border: "1px solid rgba(196,132,122,0.18)",
-                          borderRadius: "100px",
-                          padding: "6px 12px",
-                        }}
-                      >
-                        <Check
-                          className="w-4 h-4"
-                          style={{ color: "#A86460" }}
-                        />
-                        <span
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            letterSpacing: "0.15em",
-                            color: "#A86460",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          COMPLETED
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Lesson Title */}
-                  <h2
-                    style={{
-                      fontFamily: "'DM Serif Display', serif",
-                      fontSize: "32px",
-                      color: "#4A0E2E",
-                      fontWeight: 400,
-                      lineHeight: 1.3,
-                      marginBottom: "16px",
-                    }}
-                  >
-                    {selectedPage.title}
-                  </h2>
-
-                  {/* Expert Byline */}
-                  {expert && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginBottom: "24px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "50%",
-                          background: expert.profile_picture
-                            ? `url(${expert.profile_picture}) center/cover`
-                            : "#4A0E2E",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "white",
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "14px",
-                          fontWeight: 700,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {!expert.profile_picture &&
-                          expert.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                      </div>
-                      <div>
-                        <div
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "14px",
-                            fontWeight: 400,
-                            color: "#8A7A76",
-                          }}
-                        >
-                          Presented by{" "}
-                          <span style={{ fontWeight: 600, color: "#3A2A28" }}>
-                            {expert.name}
-                          </span>{" "}
-                          ·{" "}
-                          <span style={{ color: "#8A7A76" }}>
-                            {expert.title || "Expert"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Lesson Body Copy */}
-                  <motion.div
-                    key={selectedPage.id + "-content"}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.05 }}
-                    style={{
-                      marginBottom: "32px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontFamily: "'Montserrat', sans-serif",
-                        fontSize: "15px",
-                        fontWeight: 300,
-                        color: "#3A2A28",
-                        lineHeight: 1.85,
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: selectedPage.content || "",
-                      }}
-                    />
-                  </motion.div>
-
-                  {/* Bottom Navigation */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      paddingTop: "24px",
-                      borderTop: "1px solid rgba(74,14,46,0.06)",
-                    }}
-                  >
-                    {prevPage && (
-                      <button
-                        onClick={() => {
-                          setSelectedPage(prevPage);
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        }}
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          letterSpacing: "0.2em",
-                          color: "#8A7A76",
-                          textTransform: "uppercase",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "8px 0",
-                          transition: "color 0.2s",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.target.style.color = "#4A0E2E")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.target.style.color = "#8A7A76")
-                        }
-                      >
-                        ← PREVIOUS
-                      </button>
-                    )}
-
-                    <button
-                      onClick={handleTogglePageComplete}
-                      style={{
-                        marginLeft: "auto",
-                        fontFamily: "'Montserrat', sans-serif",
-                        fontSize: "10px",
-                        fontWeight: 700,
-                        letterSpacing: "0.2em",
-                        color: isCurrentPageComplete ? "#A86460" : "#4A0E2E",
-                        textTransform: "uppercase",
-                        background: isCurrentPageComplete ? "transparent" : "#4A0E2E",
-                        border:
-                          isCurrentPageComplete
-                            ? "1px solid rgba(196,132,122,0.18)"
-                            : "none",
-                        borderRadius: "100px",
-                        padding: "8px 16px",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isCurrentPageComplete) {
-                          e.target.style.background = "#3A1F20";
-                          e.target.style.color = "white";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isCurrentPageComplete) {
-                          e.target.style.background = "#4A0E2E";
-                          e.target.style.color = "#4A0E2E";
-                        }
-                      }}
-                    >
-                      ✓ {isCurrentPageComplete ? "MARKED COMPLETE" : "MARK COMPLETE"}
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        if (nextPage) {
-                          setSelectedPage(nextPage);
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        } else if (nextModule) {
-                          navigate(
-                            createPageUrl("ModulePlayer") +
-                              `?moduleId=${nextModule.id}&courseId=${courseId}`
-                          );
-                        } else {
-                          navigate(createPageUrl("Classroom"));
-                        }
-                      }}
-                      style={{
-                        fontFamily: "'Montserrat', sans-serif",
-                        fontSize: "10px",
-                        fontWeight: 700,
-                        letterSpacing: "0.2em",
-                        color: "#4A0E2E",
-                        textTransform: "uppercase",
-                        background: "#C4847A",
-                        border: "none",
-                        borderRadius: "100px",
-                        padding: "8px 16px",
-                        cursor: "pointer",
-                        transition: "background 0.2s",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.target.style.background = "#A86460")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.target.style.background = "#C4847A")
-                      }
-                    >
-                      NEXT LESSON →
-                    </button>
-                  </div>
-                </div>
-
-                {/* Right Column - Sticky Sidebar */}
+              <h1
+                style={{
+                  fontFamily: "'DM Serif Display', serif",
+                  fontSize: "clamp(36px, 4vw, 56px)",
+                  color: "#4A0E2E",
+                  fontWeight: 400,
+                  lineHeight: 1.1,
+                }}
+              >
+                {renderModuleTitle("inherit")}
+              </h1>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0, minWidth: "200px" }}>
+              <div
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.22em",
+                  color: "#8A7A76",
+                  textTransform: "uppercase",
+                  marginBottom: "12px",
+                }}
+              >
+                MODULE PROGRESS
+              </div>
+              <div
+                style={{
+                  fontFamily: "'DM Serif Display', serif",
+                  fontSize: "48px",
+                  color: "#4A0E2E",
+                  fontWeight: 400,
+                  lineHeight: 1,
+                  marginBottom: "16px",
+                }}
+              >
+                {overallProgress}%
+              </div>
+              <div
+                style={{
+                  height: "4px",
+                  background: "#F5DDD9",
+                  borderRadius: "2px",
+                  overflow: "hidden",
+                  marginBottom: "12px",
+                }}
+              >
                 <div
                   style={{
-                    position: "sticky",
-                    top: "32px",
-                    height: "fit-content",
+                    height: "100%",
+                    background: "#C4847A",
+                    borderRadius: "2px",
+                    width: `${overallProgress}%`,
+                    transition: "width 0.7s ease-out",
                   }}
-                >
-                  {/* Course Content Panel */}
-                  <div style={{ marginBottom: "24px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "baseline",
-                        gap: "8px",
-                        marginBottom: "8px",
-                        paddingBottom: "12px",
-                        borderBottom: "2px solid #4A0E2E",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          letterSpacing: "0.22em",
-                          color: "#4A0E2E",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        COURSE CONTENT
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "'DM Serif Display', serif",
-                          fontSize: "18px",
-                          fontStyle: "italic",
-                          color: "#C4847A",
-                        }}
-                      >
-                        {String(pages.length).padStart(2, "0")}
-                      </span>
-                    </div>
-
-                    <div style={{ space: "1px" }}>
-                      {pages.map((page, idx) => {
-                        const isActive = selectedPage?.id === page.id;
-                        const isComplete = isPageCompleted(page.id);
-                        return (
-                          <button
-                            key={page.id}
-                            onClick={() => {
-                              setSelectedPage(page);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                            style={{
-                              width: "100%",
-                              textAlign: "left",
-                              padding: "12px",
-                              borderLeft: isActive
-                                ? "3px solid #C4847A"
-                                : "3px solid transparent",
-                              background: isActive ? "#FDF5F3" : "transparent",
-                              borderBottom: "1px solid rgba(74,14,46,0.06)",
-                              cursor: "pointer",
-                              transition: "all 0.2s",
-                              display: "flex",
-                              alignItems: "flex-start",
-                              gap: "12px",
-                              border: "none",
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isActive) {
-                                e.currentTarget.style.background = "#FDF5F3";
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isActive) {
-                                e.currentTarget.style.background = "transparent";
-                              }
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontFamily: "'DM Serif Display', serif",
-                                fontSize: "18px",
-                                fontStyle: "italic",
-                                color: isComplete ? "#C4847A" : "#C8B8B4",
-                                flexShrink: 0,
-                                fontWeight: 400,
-                              }}
-                            >
-                              {String(idx + 1).padStart(2, "0")}
-                            </span>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div
-                                style={{
-                                  fontFamily: "'Montserrat', sans-serif",
-                                  fontSize: "13px",
-                                  fontWeight: 500,
-                                  color: "#3A2A28",
-                                  marginBottom: "4px",
-                                }}
-                              >
-                                {page.title}
-                              </div>
-                              <div
-                                style={{
-                                  fontFamily: "'Montserrat', sans-serif",
-                                  fontSize: "10px",
-                                  fontWeight: 500,
-                                  letterSpacing: "0.15em",
-                                  color: "#8A7A76",
-                                  textTransform: "uppercase",
-                                }}
-                              >
-                                {page.estimatedMinutes || module?.durationMinutes || "22"} MIN{" "}
-                                · {isComplete ? "COMPLETED" : ""}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Module Overview Card */}
-                  <div style={{ marginBottom: "24px", background: "white", borderRadius: "12px", padding: "20px" }}>
-                    <div
-                      style={{
-                        fontFamily: "'Montserrat', sans-serif",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        letterSpacing: "0.22em",
-                        color: "#4A0E2E",
-                        textTransform: "uppercase",
-                        marginBottom: "12px",
-                        paddingBottom: "12px",
-                        borderBottom: "2px solid #4A0E2E",
-                      }}
-                    >
-                      MODULE OVERVIEW
-                    </div>
-
-                    <div style={{ space: "16px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          paddingBottom: "12px",
-                          borderBottom: "1px solid rgba(74,14,46,0.06)",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "13px",
-                            fontWeight: 400,
-                            color: "#8A7A76",
-                          }}
-                        >
-                          Lessons
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#3A2A28",
-                          }}
-                        >
-                          {pages.length}
-                        </span>
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          paddingBottom: "12px",
-                          borderBottom: "1px solid rgba(74,14,46,0.06)",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "13px",
-                            fontWeight: 400,
-                            color: "#8A7A76",
-                          }}
-                        >
-                          Total duration
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#3A2A28",
-                          }}
-                        >
-                          {module?.durationMinutes
-                            ? `${Math.floor(module.durationMinutes / 60)} hr ${
-                                module.durationMinutes % 60
-                              } min`
-                            : "N/A"}
-                        </span>
-                      </div>
-
-                      {expert && (
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            paddingBottom: "12px",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontFamily: "'Montserrat', sans-serif",
-                              fontSize: "13px",
-                              fontWeight: 400,
-                              color: "#8A7A76",
-                            }}
-                          >
-                            Expert
-                          </span>
-                          <span
-                            style={{
-                              fontFamily: "'Montserrat', sans-serif",
-                              fontSize: "13px",
-                              fontWeight: 600,
-                              color: "#3A2A28",
-                            }}
-                          >
-                            {expert.name}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Workbook Card */}
-                  {courseWorkbook && (
-                    <button
-                      onClick={() => {
-                        window.location.href = `/Workbook?id=${courseWorkbook.id}`;
-                      }}
-                      style={{
-                        width: "100%",
-                        background: "#FDF5F3",
-                        border: "1px solid rgba(196,132,122,0.18)",
-                        borderRadius: "12px",
-                        padding: "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        cursor: "pointer",
-                        transition: "background 0.2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#F5DDD9";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#FDF5F3";
-                      }}
-                    >
-                      <FileText className="w-5 h-5" style={{ color: "#4A0E2E", flexShrink: 0 }} />
-                      <div style={{ textAlign: "left", flex: 1 }}>
-                        <div
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            color: "#4A0E2E",
-                            marginBottom: "2px",
-                          }}
-                        >
-                          Module workbook
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "12px",
-                            fontWeight: 400,
-                            color: "#8A7A76",
-                          }}
-                        >
-                          PDF · 24 PAGES
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4" style={{ color: "#4A0E2E", flexShrink: 0 }} />
-                    </button>
-                  )}
-                </div>
+                />
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  color: "#8A7A76",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                {completedPageCount} OF {pages.length} LESSONS · {module?.durationMinutes || "0"} MIN
               </div>
             </div>
           </div>
 
-          {/* Mobile Layout */}
-          <div className="md:hidden px-4 space-y-4">
-            {/* Video Player */}
-            <motion.div
-              key={selectedPage.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
+          {/* Two-column grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12">
+
+            {/* Left: lesson content */}
+            <div>
+              {/* Video */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedPage.id + "-video"}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ marginBottom: "36px" }}
+                >
+                  {renderVideo(true)}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Lesson meta line */}
               <div
                 style={{
-                  paddingTop: "56.25%",
-                  position: "relative",
-                  background:
-                    "linear-gradient(135deg, #3D0F1F 0%, #4A0E2E 50%, #3D0F1F 100%)",
-                  borderRadius: "0px",
-                  overflow: "hidden",
-                  marginLeft: "-16px",
-                  marginRight: "-16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
                   marginBottom: "24px",
+                  paddingBottom: "24px",
+                  borderBottom: "1px solid rgba(74,14,46,0.06)",
                 }}
               >
-                {selectedPage.videoUrl ? (
-                  (() => {
-                    const url = selectedPage.videoUrl.trim();
-                    let embedUrl = url;
-
-                    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-                      let videoId = null;
-                      try {
-                        if (url.includes("youtu.be"))
-                          videoId = url.split("youtu.be/")[1]?.split(/[?&#]/)[0];
-                        else videoId = new URL(url).searchParams.get("v");
-                      } catch (e) {
-                        const match = url.match(/[?&]v=([^&#]+)/);
-                        videoId = match ? match[1] : null;
-                      }
-                      if (videoId)
-                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
-                    }
-
-                    if (url.includes("vimeo.com")) {
-                      const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
-                      if (vimeoId)
-                        embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
-                    }
-
-                    if (url.includes("drive.google.com")) {
-                      const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-                      if (fileId)
-                        embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-                    }
-
-                    if (url.includes("wistia.com") || url.includes("wistia.net")) {
-                      const videoId =
-                        url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] ||
-                        url.split("/").pop();
-                      embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
-                    }
-
-                    const isDirectVideo =
-                      /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(embedUrl) ||
-                      embedUrl.includes("supabase.co/storage") ||
-                      embedUrl.includes("base44.app/api/apps");
-
-                    if (isDirectVideo) {
-                      return (
-                        <video
-                          src={embedUrl}
-                          controls
-                          className="absolute top-0 left-0 w-full h-full"
-                          style={{ backgroundColor: "#000" }}
-                        />
-                      );
-                    }
-
-                    return (
-                      <iframe
-                        src={embedUrl}
-                        className="absolute top-0 left-0 w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                        allowFullScreen
-                        style={{ border: 0 }}
-                      />
-                    );
-                  })()
-                ) : (
+                <span
+                  style={{
+                    fontFamily: "'DM Serif Display', serif",
+                    fontSize: "22px",
+                    fontStyle: "italic",
+                    color: "#C4847A",
+                  }}
+                >
+                  {String(currentPageIndex + 1).padStart(2, "0")}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    letterSpacing: "0.2em",
+                    color: "#8A7A76",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  LESSON {String(currentPageIndex + 1).padStart(2, "0")} OF{" "}
+                  {String(pages.length).padStart(2, "0")} ·{" "}
+                  {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
+                  {pillarLabel ? ` · ${pillarLabel.toUpperCase()}` : ""}
+                </span>
+                {isCurrentPageComplete && (
                   <div
-                    className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white"
                     style={{
-                      fontFamily: "'Montserrat', sans-serif",
+                      marginLeft: "auto",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: "#FDF5F3",
+                      border: "1px solid rgba(196,132,122,0.18)",
+                      borderRadius: "100px",
+                      padding: "6px 14px",
                     }}
                   >
-                    <div className="text-center">
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 500,
-                          letterSpacing: "0.2em",
-                          textTransform: "uppercase",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        PRESENTED BY
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 500,
-                          letterSpacing: "0.3em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        THE ALIGNED WOMAN CO.
-                      </div>
-                    </div>
+                    <Check className="w-3.5 h-3.5" style={{ color: "#A86460" }} />
+                    <span
+                      style={{
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        letterSpacing: "0.15em",
+                        color: "#A86460",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      COMPLETED
+                    </span>
                   </div>
                 )}
               </div>
-            </motion.div>
 
-            {/* Lesson Meta */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                marginBottom: "16px",
-              }}
+              {/* Lesson title */}
+              <h2
+                style={{
+                  fontFamily: "'DM Serif Display', serif",
+                  fontSize: "32px",
+                  color: "#4A0E2E",
+                  fontWeight: 400,
+                  lineHeight: 1.3,
+                  marginBottom: "16px",
+                }}
+              >
+                {selectedPage.title}
+              </h2>
+
+              {/* Expert byline */}
+              {expert && (
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
+                  {renderExpertAvatar(40)}
+                  <div style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "14px", color: "#8A7A76" }}>
+                    Presented by{" "}
+                    <span style={{ fontWeight: 600, color: "#3A2A28" }}>{expert.name}</span>
+                    {" · "}
+                    {expert.title || "Expert"}
+                  </div>
+                </div>
+              )}
+
+              {/* Body copy */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedPage.id + "-body"}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.05 }}
+                >
+                  <div
+                    className="prose max-w-none"
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "15px",
+                      fontWeight: 300,
+                      color: "#3A2A28",
+                      lineHeight: 1.85,
+                      marginBottom: "48px",
+                    }}
+                    dangerouslySetInnerHTML={{ __html: selectedPage.content || "" }}
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Bottom navigation */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingTop: "32px",
+                  borderTop: "1px solid rgba(74,14,46,0.06)",
+                }}
+              >
+                {/* Previous */}
+                <div style={{ minWidth: "100px" }}>
+                  {prevPage && (
+                    <button
+                      onClick={() => handleSelectPage(prevPage)}
+                      style={{
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        letterSpacing: "0.2em",
+                        color: "#8A7A76",
+                        textTransform: "uppercase",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "12px 0",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "#4A0E2E")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "#8A7A76")}
+                    >
+                      ← PREVIOUS
+                    </button>
+                  )}
+                </div>
+
+                {/* Mark complete */}
+                <button
+                  onClick={handleTogglePageComplete}
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    borderRadius: "100px",
+                    padding: "14px 24px",
+                    cursor: "pointer",
+                    transition: "all 0.25s",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    ...(isCurrentPageComplete
+                      ? {
+                          color: "#A86460",
+                          background: "transparent",
+                          border: "1.5px solid rgba(196,132,122,0.3)",
+                        }
+                      : {
+                          color: "white",
+                          background: "#4A0E2E",
+                          border: "1.5px solid #4A0E2E",
+                        }),
+                  }}
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  {isCurrentPageComplete ? "MARKED COMPLETE" : "MARK COMPLETE"}
+                </button>
+
+                {/* Next */}
+                <button
+                  onClick={handleNextAction}
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    letterSpacing: "0.2em",
+                    color: "#4A0E2E",
+                    textTransform: "uppercase",
+                    background: "#C4847A",
+                    border: "none",
+                    borderRadius: "100px",
+                    padding: "14px 28px",
+                    cursor: "pointer",
+                    transition: "all 0.25s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#A86460";
+                    e.currentTarget.style.color = "white";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#C4847A";
+                    e.currentTarget.style.color = "#4A0E2E";
+                  }}
+                >
+                  {nextLabel} →
+                </button>
+              </div>
+            </div>
+
+            {/* Right: sticky sidebar */}
+            <div style={{ position: "sticky", top: "80px", alignSelf: "start" }}>
+              {/* Course content */}
+              <div style={{ marginBottom: "24px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    paddingBottom: "12px",
+                    borderBottom: "2px solid #4A0E2E",
+                    marginBottom: "4px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      letterSpacing: "0.22em",
+                      color: "#4A0E2E",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    COURSE CONTENT
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'DM Serif Display', serif",
+                      fontSize: "18px",
+                      fontStyle: "italic",
+                      color: "#C4847A",
+                    }}
+                  >
+                    {String(pages.length).padStart(2, "0")}
+                  </span>
+                </div>
+                {renderLessonList(handleSelectPage)}
+              </div>
+
+              {/* Module overview */}
+              <div style={{ marginBottom: "24px" }}>
+                {renderModuleOverview()}
+              </div>
+
+              {/* Workbook */}
+              {renderWorkbookCard()}
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ MOBILE LAYOUT ═══ */}
+        <div className="md:hidden">
+          {/* Video edge-to-edge */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedPage.id + "-mob-video"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
             >
+              {renderVideo(false)}
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="px-4 pt-5">
+            {/* Lesson meta */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
               <span
                 style={{
                   fontFamily: "'DM Serif Display', serif",
@@ -1413,36 +1309,26 @@ export default function ModulePlayer() {
               >
                 {String(currentPageIndex + 1).padStart(2, "0")}
               </span>
-              <div>
-                <span
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    letterSpacing: "0.2em",
-                    color: "#8A7A76",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  LESSON {String(currentPageIndex + 1).padStart(2, "0")} OF {pages.length} ·{" "}
-                  {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
-                </span>
-              </div>
+              <span
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  color: "#8A7A76",
+                  textTransform: "uppercase",
+                }}
+              >
+                LESSON {String(currentPageIndex + 1).padStart(2, "0")} OF{" "}
+                {String(pages.length).padStart(2, "0")} ·{" "}
+                {selectedPage.estimatedMinutes || "22"} MIN
+              </span>
               {isCurrentPageComplete && (
-                <div
-                  style={{
-                    marginLeft: "auto",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <Check className="w-4 h-4" style={{ color: "#C4847A" }} />
-                </div>
+                <Check className="w-4 h-4 ml-auto" style={{ color: "#C4847A" }} />
               )}
             </div>
 
-            {/* Lesson Title */}
+            {/* Title */}
             <h2
               style={{
                 fontFamily: "'DM Serif Display', serif",
@@ -1456,59 +1342,15 @@ export default function ModulePlayer() {
               {selectedPage.title}
             </h2>
 
-            {/* Expert Byline Mobile */}
+            {/* Expert */}
             {expert && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  marginBottom: "20px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    background: expert.profile_picture
-                      ? `url(${expert.profile_picture}) center/cover`
-                      : "#4A0E2E",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    flexShrink: 0,
-                  }}
-                >
-                  {!expert.profile_picture &&
-                    expert.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                {renderExpertAvatar(32)}
                 <div>
-                  <div
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: "#3A2A28",
-                    }}
-                  >
+                  <div style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "14px", fontWeight: 600, color: "#3A2A28" }}>
                     {expert.name}
                   </div>
-                  <div
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "12px",
-                      fontWeight: 400,
-                      color: "#8A7A76",
-                    }}
-                  >
+                  <div style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "12px", fontWeight: 400, color: "#8A7A76" }}>
                     {expert.title || "Expert"}
                   </div>
                 </div>
@@ -1516,433 +1358,155 @@ export default function ModulePlayer() {
             )}
 
             {/* Tabs */}
-            <div
-              style={{
-                display: "flex",
-                gap: "24px",
-                borderBottom: "1px solid rgba(74,14,46,0.06)",
-                marginBottom: "20px",
-              }}
-            >
-              <button
-                onClick={() => setMobileTab("about")}
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  letterSpacing: "0.2em",
-                  color: mobileTab === "about" ? "#4A0E2E" : "#8A7A76",
-                  textTransform: "uppercase",
-                  background: "none",
-                  border: "none",
-                  borderBottom:
-                    mobileTab === "about" ? "2px solid #4A0E2E" : "none",
-                  padding: "12px 0",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-              >
-                ABOUT
-              </button>
-              <button
-                onClick={() => setMobileTab("course")}
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  letterSpacing: "0.2em",
-                  color: mobileTab === "course" ? "#4A0E2E" : "#8A7A76",
-                  textTransform: "uppercase",
-                  background: "none",
-                  border: "none",
-                  borderBottom:
-                    mobileTab === "course" ? "2px solid #4A0E2E" : "none",
-                  padding: "12px 0",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-              >
-                COURSE {String(pages.length).padStart(2, "0")}
-              </button>
+            <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid rgba(74,14,46,0.06)", marginBottom: "20px" }}>
+              {["about", "course"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setMobileTab(tab)}
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    letterSpacing: "0.2em",
+                    color: mobileTab === tab ? "#4A0E2E" : "#8A7A76",
+                    textTransform: "uppercase",
+                    background: "none",
+                    border: "none",
+                    borderBottom: mobileTab === tab ? "2px solid #4A0E2E" : "2px solid transparent",
+                    padding: "12px 0",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {tab === "about" ? "ABOUT" : `COURSE ${String(pages.length).padStart(2, "0")}`}
+                </button>
+              ))}
             </div>
 
-            {/* About Tab Content */}
-            {mobileTab === "about" && (
+            {/* Tab content */}
+            {mobileTab === "about" ? (
               <motion.div
+                key="about-tab"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
+                className="prose max-w-none"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
                   fontSize: "14px",
                   fontWeight: 300,
                   color: "#3A2A28",
                   lineHeight: 1.75,
-                  marginBottom: "20px",
+                  paddingBottom: "100px",
                 }}
-                dangerouslySetInnerHTML={{
-                  __html: selectedPage.content || "",
-                }}
+                dangerouslySetInnerHTML={{ __html: selectedPage.content || "" }}
               />
-            )}
-
-            {/* Course Tab Content */}
-            {mobileTab === "course" && (
-              <div style={{ marginBottom: "20px" }}>
-                {/* Lesson List */}
+            ) : (
+              <motion.div
+                key="course-tab"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{ paddingBottom: "100px" }}
+              >
                 <div style={{ marginBottom: "24px" }}>
-                  {pages.map((page, idx) => {
-                    const isActive = selectedPage?.id === page.id;
-                    const isComplete = isPageCompleted(page.id);
-                    return (
-                      <button
-                        key={page.id}
-                        onClick={() => {
-                          setSelectedPage(page);
-                          setMobileTab("about");
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        }}
-                        style={{
-                          width: "100%",
-                          textAlign: "left",
-                          padding: "12px 0",
-                          borderBottom: "1px solid rgba(74,14,46,0.06)",
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          transition: "all 0.2s",
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: "12px",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontFamily: "'DM Serif Display', serif",
-                            fontSize: "16px",
-                            fontStyle: "italic",
-                            color: isComplete ? "#C4847A" : "#C8B8B4",
-                            flexShrink: 0,
-                            fontWeight: 400,
-                          }}
-                        >
-                          {String(idx + 1).padStart(2, "0")}
-                        </span>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              fontFamily: "'Montserrat', sans-serif",
-                              fontSize: "13px",
-                              fontWeight: 500,
-                              color: "#3A2A28",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            {page.title}
-                          </div>
-                          <div
-                            style={{
-                              fontFamily: "'Montserrat', sans-serif",
-                              fontSize: "10px",
-                              fontWeight: 500,
-                              letterSpacing: "0.15em",
-                              color: "#8A7A76",
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            {page.estimatedMinutes ||
-                              module?.durationMinutes ||
-                              "22"}{" "}
-                            MIN {isComplete ? "· COMPLETED" : ""}
-                          </div>
-                        </div>
-                      </button>
-                    );
+                  {renderLessonList((page) => {
+                    handleSelectPage(page);
+                    setMobileTab("about");
                   })}
                 </div>
-
-                {/* Module Overview Mobile */}
-                <div
-                  style={{
-                    background: "white",
-                    borderRadius: "12px",
-                    padding: "16px",
-                    marginBottom: "24px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      letterSpacing: "0.22em",
-                      color: "#4A0E2E",
-                      textTransform: "uppercase",
-                      marginBottom: "12px",
-                      paddingBottom: "12px",
-                      borderBottom: "2px solid #4A0E2E",
-                    }}
-                  >
-                    MODULE OVERVIEW
-                  </div>
-
-                  <div style={{ space: "12px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        paddingBottom: "10px",
-                        borderBottom:
-                          "1px solid rgba(74,14,46,0.06)",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "13px",
-                          fontWeight: 400,
-                          color: "#8A7A76",
-                        }}
-                      >
-                        Lessons
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "#3A2A28",
-                        }}
-                      >
-                        {pages.length}
-                      </span>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        paddingBottom: "10px",
-                        borderBottom:
-                          "1px solid rgba(74,14,46,0.06)",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "13px",
-                          fontWeight: 400,
-                          color: "#8A7A76",
-                        }}
-                      >
-                        Total duration
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "#3A2A28",
-                        }}
-                      >
-                        {module?.durationMinutes
-                          ? `${Math.floor(
-                              module.durationMinutes / 60
-                            )} hr ${module.durationMinutes % 60} min`
-                          : "N/A"}
-                      </span>
-                    </div>
-
-                    {expert && (
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "13px",
-                            fontWeight: 400,
-                            color: "#8A7A76",
-                          }}
-                        >
-                          Expert
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#3A2A28",
-                          }}
-                        >
-                          {expert.name}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                <div style={{ marginBottom: "16px" }}>
+                  {renderModuleOverview()}
                 </div>
-
-                {/* Workbook Card Mobile */}
-                {courseWorkbook && (
-                  <button
-                    onClick={() => {
-                      window.location.href = `/Workbook?id=${courseWorkbook.id}`;
-                    }}
-                    style={{
-                      width: "100%",
-                      background: "#FDF5F3",
-                      border: "1px solid rgba(196,132,122,0.18)",
-                      borderRadius: "12px",
-                      padding: "16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      cursor: "pointer",
-                      transition: "background 0.2s",
-                    }}
-                  >
-                    <FileText
-                      className="w-5 h-5"
-                      style={{ color: "#4A0E2E", flexShrink: 0 }}
-                    />
-                    <div style={{ textAlign: "left", flex: 1 }}>
-                      <div
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "14px",
-                          fontWeight: 600,
-                          color: "#4A0E2E",
-                          marginBottom: "2px",
-                        }}
-                      >
-                        Module workbook
-                      </div>
-                      <div
-                        style={{
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "12px",
-                          fontWeight: 400,
-                          color: "#8A7A76",
-                        }}
-                      >
-                        PDF · 24 PAGES
-                      </div>
-                    </div>
-                    <ChevronRight
-                      className="w-4 h-4"
-                      style={{ color: "#4A0E2E", flexShrink: 0 }}
-                    />
-                  </button>
-                )}
-              </div>
+                {renderWorkbookCard()}
+              </motion.div>
             )}
           </div>
-
-          {/* Mobile Sticky Bottom Bar */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[rgba(74,14,46,0.06)] px-4 py-3 flex items-center gap-3 safe-area-bottom">
-          <button
-            onClick={handleTogglePageComplete}
-            style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              border: isCurrentPageComplete
-                ? "none"
-                : "2px solid #4A0E2E",
-              background: isCurrentPageComplete ? "#4A0E2E" : "transparent",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              flexShrink: 0,
-            }}
-          >
-            <Check
-              className="w-5 h-5"
-              style={{
-                color: isCurrentPageComplete ? "white" : "#4A0E2E",
-              }}
-            />
-          </button>
-
-          <button
-            onClick={() => {
-              if (nextPage) {
-                setSelectedPage(nextPage);
-                setMobileTab("about");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              } else if (nextModule) {
-                navigate(
-                  createPageUrl("ModulePlayer") +
-                    `?moduleId=${nextModule.id}&courseId=${courseId}`
-                );
-              } else {
-                navigate(createPageUrl("Classroom"));
-              }
-            }}
-            style={{
-              flex: 1,
-              background: "#C4847A",
-              border: "none",
-              borderRadius: "100px",
-              padding: "12px 16px",
-              cursor: "pointer",
-              transition: "background 0.2s",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#A86460";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#C4847A";
-            }}
-          >
-            <div style={{ textAlign: "left" }}>
-              <div
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "9px",
-                  fontWeight: 700,
-                  letterSpacing: "0.2em",
-                  color: "#4A0E2E",
-                  textTransform: "uppercase",
-                }}
-              >
-                {nextPage
-                  ? `UP NEXT · LESSON ${String(currentPageIndex + 2).padStart(
-                      2,
-                      "0"
-                    )}`
-                  : nextModule
-                  ? "NEXT MODULE"
-                  : "RETURN HOME"}
-              </div>
-              <div
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: "#4A0E2E",
-                  textTransform: "uppercase",
-                }}
-              >
-                {nextPage
-                  ? nextPage.title.substring(0, 20)
-                  : nextModule
-                  ? nextModule.title.substring(0, 20)
-                  : "Blueprint Home"}
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4" style={{ color: "#4A0E2E" }} />
-          </button>
         </div>
+      </div>
+
+      {/* ─── MOBILE STICKY BOTTOM BAR ─── */}
+      <div
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40"
+        style={{
+          background: "white",
+          borderTop: "1px solid rgba(74,14,46,0.06)",
+          padding: "12px 16px",
+          paddingBottom: "max(12px, env(safe-area-inset-bottom))",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+        }}
+      >
+        <button
+          onClick={handleTogglePageComplete}
+          style={{
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            border: isCurrentPageComplete ? "none" : "2px solid #4A0E2E",
+            background: isCurrentPageComplete ? "#4A0E2E" : "transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            flexShrink: 0,
+          }}
+        >
+          <Check
+            className="w-5 h-5"
+            style={{ color: isCurrentPageComplete ? "white" : "#4A0E2E" }}
+          />
+        </button>
+        <button
+          onClick={handleNextAction}
+          style={{
+            flex: 1,
+            background: "#C4847A",
+            border: "none",
+            borderRadius: "100px",
+            padding: "10px 16px",
+            cursor: "pointer",
+            transition: "background 0.2s",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            minHeight: "48px",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#A86460")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#C4847A")}
+        >
+          <div style={{ textAlign: "left" }}>
+            <div
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "9px",
+                fontWeight: 700,
+                letterSpacing: "0.2em",
+                color: "#4A0E2E",
+                textTransform: "uppercase",
+                marginBottom: "2px",
+              }}
+            >
+              {nextMobileTopLine}
+            </div>
+            <div
+              className="truncate"
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "12px",
+                fontWeight: 600,
+                color: "#4A0E2E",
+                maxWidth: "200px",
+              }}
+            >
+              {nextMobileBottomLine}
+            </div>
           </div>
-    );
-  }
+          <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "#4A0E2E" }} />
+        </button>
+      </div>
+    </div>
+  );
 }
