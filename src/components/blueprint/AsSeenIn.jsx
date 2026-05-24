@@ -34,10 +34,10 @@ export default function AsSeenIn() {
               alt={logo.name}
               className="object-contain"
               style={{
-                height: 36,
-                maxWidth: 140,
-                opacity: 0.55,
-                filter: "grayscale(100%) sepia(30%) hue-rotate(290deg) saturate(60%)",
+                height: 52,
+                maxWidth: 180,
+                opacity: 0.75,
+                filter: "grayscale(100%) sepia(60%) hue-rotate(290deg) saturate(120%) brightness(0.65)",
               }}
             />
           ))}
