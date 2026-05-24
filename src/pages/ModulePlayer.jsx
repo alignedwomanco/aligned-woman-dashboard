@@ -1941,7 +1941,6 @@ export default function ModulePlayer() {
             <ChevronRight className="w-4 h-4" style={{ color: "#4A0E2E" }} />
           </button>
         </div>
-      </div>
     );
   }
 }
