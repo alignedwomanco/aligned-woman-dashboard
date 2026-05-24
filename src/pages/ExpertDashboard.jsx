@@ -629,6 +629,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     setSaving(true);
     setError(null);
     try {
+      console.log("Saving expert data:", JSON.stringify({ linkedin_url: formData.linkedin_url, instagram_url: formData.instagram_url, website_url: formData.website_url, twitter_url: formData.twitter_url, tiktok_url: formData.tiktok_url, custom_links: formData.custom_links }));
       await base44.entities.Expert.update(expert.id, {
         name: formData.name,
         title: formData.title,
@@ -643,6 +644,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         tiktok_url: formData.tiktok_url,
         custom_links: formData.custom_links.filter((l) => l.url?.trim()),
       });
+      console.log("Save successful");
       setSuccess(true);
       setIsEditing(false);
       setActiveLink(null);
@@ -650,6 +652,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
       setTimeout(() => setSuccess(false), 3000);
       if (onExpertUpdate) onExpertUpdate();
     } catch (err) {
+      console.error("Save failed:", err);
       setError(err.message);
     } finally {
       setSaving(false);
