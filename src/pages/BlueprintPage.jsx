@@ -1671,7 +1671,6 @@ function FinalClose() {
                   {[
                     "Founding price R3,997. Closes at launch. Final.",
                     "Full access to 14 specialists, 7 domains, and the ALIVE Method.",
-                    "30-day completion guarantee. Full refund if no shift felt.",
                   ].map((item, i) => (
                     <div key={i} className="flex gap-3">
                       <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: C.roseCore }} />
