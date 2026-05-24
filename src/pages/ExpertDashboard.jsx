@@ -560,7 +560,193 @@ function SocialLinkIcon({ platform, size = 18 }) {
   return <LinkIcon style={s} />;
 }
 
+function AdminSettingsSection({ expert, formData, setFormData, isEditing }) {
+  const { data: categories = [] } = useQuery({
+    queryKey: ["expert-categories"],
+    queryFn: () => base44.entities.ExpertCategory.list(),
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ["admin-all-users"],
+    queryFn: () => base44.entities.User.list(),
+  });
+
+  const sans = "Montserrat, sans-serif";
+
+  const emptyService = { name: "", description: "", price: "", duration: "" };
+  const services = formData.services || [];
+
+  const updateService = (i, field, val) => {
+    const updated = services.map((s, idx) => idx === i ? { ...s, [field]: field === "price" ? parseFloat(val) || "" : val } : s);
+    setFormData(f => ({ ...f, services: updated }));
+  };
+
+  const removeService = (i) => setFormData(f => ({ ...f, services: services.filter((_, idx) => idx !== i) }));
+  const addService = () => setFormData(f => ({ ...f, services: [...services, { ...emptyService }] }));
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(74,14,46,0.12)", marginTop: 24 }}>
+      {/* Header */}
+      <div className="px-6 py-3 flex items-center gap-2" style={{ background: "#4A0E2E" }}>
+        <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 10, color: "#C4847A", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+          Admin Settings
+        </span>
+      </div>
+
+      <div className="p-6 space-y-6" style={{ background: "#FFFFFF" }}>
+
+        {/* Category */}
+        <div>
+          <label style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Category
+          </label>
+          {isEditing ? (
+            <select
+              value={formData.category || ""}
+              onChange={e => setFormData(f => ({ ...f, category: e.target.value }))}
+              style={{ width: "100%", maxWidth: 320, fontFamily: sans, fontSize: 13, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 8, padding: "8px 12px", outline: "none" }}
+            >
+              <option value="">— No category —</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name || c.title || c.id}</option>
+              ))}
+            </select>
+          ) : (
+            <p style={{ fontFamily: sans, fontSize: 13, color: "#3A2A28" }}>
+              {categories.find(c => c.id === formData.category)?.name || categories.find(c => c.id === formData.category)?.title || formData.category || "—"}
+            </p>
+          )}
+        </div>
+
+        {/* Link to User Account */}
+        <div>
+          <label style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Link to User Account
+          </label>
+          {isEditing ? (
+            <select
+              value={formData.linked_user_email || ""}
+              onChange={e => setFormData(f => ({ ...f, linked_user_email: e.target.value }))}
+              style={{ width: "100%", maxWidth: 400, fontFamily: sans, fontSize: 13, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 8, padding: "8px 12px", outline: "none" }}
+            >
+              <option value="">— Not linked —</option>
+              {users.map(u => (
+                <option key={u.id} value={u.email}>{u.email}{u.full_name ? ` (${u.full_name})` : ""}</option>
+              ))}
+            </select>
+          ) : (
+            <p style={{ fontFamily: sans, fontSize: 13, color: "#3A2A28" }}>{formData.linked_user_email || "—"}</p>
+          )}
+        </div>
+
+        {/* Publish toggle */}
+        <div className="flex items-center justify-between" style={{ paddingBottom: 6 }}>
+          <div>
+            <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>
+              Publish on Experts Page
+            </p>
+            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: "#8A7A76" }}>
+              {formData.isPublished ? "Visible in the public directory" : "Hidden from public directory"}
+            </p>
+          </div>
+          {isEditing ? (
+            <button
+              onClick={() => setFormData(f => ({ ...f, isPublished: !f.isPublished }))}
+              style={{
+                width: 48, height: 26, borderRadius: 100, border: "none", cursor: "pointer",
+                background: formData.isPublished ? "#4A0E2E" : "#C8B8B4",
+                position: "relative", transition: "background 0.2s", flexShrink: 0,
+              }}
+            >
+              <span style={{
+                position: "absolute", top: 3, left: formData.isPublished ? 24 : 3,
+                width: 20, height: 20, borderRadius: "50%", background: "#FFFFFF",
+                transition: "left 0.2s", display: "block",
+              }} />
+            </button>
+          ) : (
+            <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ background: formData.isPublished ? "rgba(45,106,79,0.1)" : "rgba(138,122,118,0.1)", color: formData.isPublished ? "#2D6A4F" : "#8A7A76" }}>
+              {formData.isPublished ? "Published" : "Hidden"}
+            </span>
+          )}
+        </div>
+
+        {/* Services */}
+        <div>
+          <label style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", display: "block", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Services
+          </label>
+          <div className="space-y-4">
+            {services.map((svc, i) => (
+              <div key={i} className="rounded-lg p-4" style={{ border: "1px solid rgba(74,14,46,0.1)", background: "#FAF5F3" }}>
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label style={{ fontFamily: sans, fontWeight: 500, fontSize: 11, color: "#4A0E2E", display: "block", marginBottom: 4 }}>Service Name</label>
+                        <input value={svc.name || ""} onChange={e => updateService(i, "name", e.target.value)}
+                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "7px 10px", outline: "none", boxSizing: "border-box" }}
+                          placeholder="e.g. 1:1 Coaching" />
+                      </div>
+                      <div>
+                        <label style={{ fontFamily: sans, fontWeight: 500, fontSize: 11, color: "#4A0E2E", display: "block", marginBottom: 4 }}>Duration</label>
+                        <input value={svc.duration || ""} onChange={e => updateService(i, "duration", e.target.value)}
+                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "7px 10px", outline: "none", boxSizing: "border-box" }}
+                          placeholder="e.g. 60 min" />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ fontFamily: sans, fontWeight: 500, fontSize: 11, color: "#4A0E2E", display: "block", marginBottom: 4 }}>Description</label>
+                      <textarea value={svc.description || ""} onChange={e => updateService(i, "description", e.target.value)} rows={2}
+                        style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "7px 10px", outline: "none", resize: "vertical", boxSizing: "border-box" }}
+                        placeholder="What's included…" />
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div style={{ flex: 1 }}>
+                        <label style={{ fontFamily: sans, fontWeight: 500, fontSize: 11, color: "#4A0E2E", display: "block", marginBottom: 4 }}>Price (R)</label>
+                        <input type="number" value={svc.price || ""} onChange={e => updateService(i, "price", e.target.value)}
+                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "7px 10px", outline: "none", boxSizing: "border-box" }}
+                          placeholder="0" />
+                      </div>
+                      <button onClick={() => removeService(i)} style={{ marginTop: 20, background: "none", border: "none", cursor: "pointer", color: "#C0392B", padding: 4, display: "flex", alignItems: "center", flexShrink: 0 }}>
+                        <Trash2 style={{ width: 16, height: 16 }} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 13, color: "#4A0E2E" }}>{svc.name || "Unnamed service"}</p>
+                      <div className="flex gap-3 flex-shrink-0">
+                        {svc.price && <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 12, color: "#4A0E2E" }}>R{svc.price}</span>}
+                        {svc.duration && <span style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: "#8A7A76" }}>{svc.duration}</span>}
+                      </div>
+                    </div>
+                    {svc.description && <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: "#8A7A76", marginTop: 4 }}>{svc.description}</p>}
+                  </div>
+                )}
+              </div>
+            ))}
+            {services.length === 0 && !isEditing && (
+              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "#8A7A76" }}>No services added yet.</p>
+            )}
+            {isEditing && (
+              <button onClick={addService}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: "1px dashed rgba(196,132,122,0.5)", borderRadius: 8, padding: "8px 16px", fontFamily: sans, fontWeight: 600, fontSize: 12, color: "#C4847A", cursor: "pointer" }}>
+                <Plus style={{ width: 13, height: 13 }} /> Add Service
+              </button>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 function ProfileTab({ expert, onExpertUpdate, user }) {
+  const isAdmin = user?.role === "admin" || user?.role === "owner";
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -575,6 +761,11 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     twitter_url: "",
     tiktok_url: "",
     custom_links: [],
+    // admin fields
+    category: "",
+    linked_user_email: "",
+    isPublished: true,
+    services: [],
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -597,6 +788,11 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     twitter_url: src.twitter_url || "",
     tiktok_url: src.tiktok_url || "",
     custom_links: Array.isArray(src.custom_links) ? src.custom_links : [],
+    // admin fields
+    category: src.category || "",
+    linked_user_email: src.linked_user_email || "",
+    isPublished: src.isPublished !== false,
+    services: Array.isArray(src.services) ? src.services : [],
   });
 
   useEffect(() => {
@@ -610,7 +806,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     setSaving(true);
     setError(null);
     try {
-      await base44.entities.Expert.update(expert.id, {
+      const payload = {
         name: formData.name,
         title: formData.title,
         bio: formData.bio,
@@ -623,7 +819,14 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         twitter_url: formData.twitter_url,
         tiktok_url: formData.tiktok_url,
         custom_links: formData.custom_links.filter((l) => l.url?.trim()),
-      });
+      };
+      if (isAdmin) {
+        payload.category = formData.category;
+        payload.linked_user_email = formData.linked_user_email;
+        payload.isPublished = formData.isPublished;
+        payload.services = formData.services.filter(s => s.name?.trim());
+      }
+      await base44.entities.Expert.update(expert.id, payload);
       setSuccess(true);
       setIsEditing(false);
       setActiveLink(null);
@@ -1012,6 +1215,16 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
           </div>
         )}
       </div>
+
+      {/* ── ADMIN SETTINGS ── */}
+      {isAdmin && (
+        <AdminSettingsSection
+          expert={expert}
+          formData={formData}
+          setFormData={setFormData}
+          isEditing={isEditing}
+        />
+      )}
 
       {/* ── VIEW PUBLIC PROFILE LINK ── */}
       <div className="rounded-xl p-5 flex items-center justify-between" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.06)" }}>

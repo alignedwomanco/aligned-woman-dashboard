@@ -14,6 +14,8 @@ export default function ExpertsTab() {
   const navigate = useNavigate();
 
   const { data: experts = [] } = useQuery({ queryKey: ["admin-experts"], queryFn: () => base44.entities.Expert.list() });
+  // Note: inline editing is only used for creating new experts.
+  // Editing existing experts navigates to /expert-dashboard?expert_id=[id]
 
   const save = useMutation({
     mutationFn: () => editing === "new"
