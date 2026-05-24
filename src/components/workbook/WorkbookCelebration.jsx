@@ -1,8 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function WorkbookCelebration({ onBackToWorkbook }) {
+export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
   const navigate = useNavigate();
+
+  const bodyText = closingText?.trim()
+    ? closingText.trim()
+    : "Return to this workbook anytime. The same questions, asked at different points in your life, reveal different answers. What you wrote today is a snapshot. What you notice next month is the growth.";
 
   return (
     <div
@@ -46,9 +50,7 @@ export default function WorkbookCelebration({ onBackToWorkbook }) {
           margin: "0 auto 32px",
           maxWidth: 540,
         }}>
-          Body literacy is built through repetition. Return to this workbook in three months
-          and update what has shifted. The same questions, asked at different points in your
-          life, reveal different answers.
+          {bodyText}
         </p>
 
         {/* Buttons */}

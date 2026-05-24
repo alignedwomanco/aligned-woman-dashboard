@@ -330,6 +330,7 @@ function WorkbookViewerInner({ workbookId }) {
             setShowCelebration(false);
             jumpTo(lastSectionIdx);
           }}
+          closingText={workbook.closing_text}
         />
       )}
 
