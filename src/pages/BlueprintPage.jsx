@@ -228,7 +228,7 @@ const TESTIMONIALS = [
 ];
 
 const FAQS = [
-  { q: "What exactly is The Aligned Woman Blueprint?", a: "A structured digital programme delivering 7 life domains through 14 specialist instructors, sequenced via the ALIVE Method. Modules, workbooks, and personalised progress tracking." },
+  { q: "What exactly is The Aligned Woman Blueprint?", a: "It is an online programme built across seven domains that ambitious women are expected to navigate but rarely taught: psychology, nervous system regulation, health, money, identity, leadership, and the integration of all of them.\n\nEach domain is taught by a credentialed specialist in that field, not by a single coach or content creator covering everything. The faculty includes practitioners whose combined private consultation value exceeds R116,000. You are getting direct access to what they teach, structured into a guided curriculum you can work through at your own pace.\n\nThe programme is built on the ALIVE Method, a five-phase sequence (Awareness, Liberation, Intention, Vision, Execution) that determines the order in which the teaching is delivered. This is deliberate. Most wellness education lets you pick and choose topics at random. The Blueprint is sequenced because each phase builds on the one before it, and skipping phases is why most personal development efforts do not hold.\n\nInside the programme you get guided expert modules, deep-work workbooks designed for real application. It is not a library of content to browse. It is an architecture you move through.\n\nThe simplest way to describe it: it is the education women should have been given alongside every degree, promotion, and life transition they have ever navigated. It did not exist, so we built it." },
   { q: "Who is this for?", a: "Ambitious women, typically 26 to 38, who are succeeding by every external measure and privately exhausted, reactive, or overwhelmed." },
   { q: "How is this different from other programmes I have tried?", a: "The order. Most programmes give the right information in the wrong sequence. The ALIVE Method puts regulation before identity, foundation before structure. Always." },
   { q: "I have tried courses before and nothing changed. Why would this be different?", a: "Tools without sequence do not build anything. This programme is sequenced. Each domain is built on the last." },
@@ -1703,9 +1703,13 @@ function FAQSection() {
                   className={`faq-answer${isOpen ? " is-open" : ""}`}
                 >
                   <div className="faq-answer-inner">
-                    <p className="px-2 pb-5 text-[14px] font-light leading-[1.8]" style={{ fontFamily: sans, color: C.darkGrey }}>
-                      {faq.a}
-                    </p>
+                    <div className="px-2 pb-5 space-y-3">
+                      {faq.a.split("\n\n").map((para, pi) => (
+                        <p key={pi} className="text-[14px] font-light leading-[1.8]" style={{ fontFamily: sans, color: C.darkGrey }}>
+                          {para}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
