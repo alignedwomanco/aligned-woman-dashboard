@@ -237,8 +237,7 @@ const FAQS = [
   { q: "How much time do I need each week?", a: "Designed for 2-3 hours per week. You can move faster or slower; lifetime access means no deadlines beyond your own." },
   { q: "Is this therapy?", a: "No. This is education. It may complement therapy. It does not replace it." },
   { q: "Do I need to be spiritual or religious to benefit from this?", a: "No. The Blueprint is grounded in psychology, physiology, and structured education. No belief system required." },
-  { q: "What is the guarantee?", a: "Complete the full programme within 30 days of access. Submit your completion report. If you do not feel measurably different, full refund. No questions." },
-  { q: "When does it start?", a: "Doors open 1 June 2026. Founding price closes at launch." },
+  { q: "When does it start?", a: "Doors open 1 June 2026." },
   { q: "What happens after I complete the programme?", a: "Lifetime access to all content and updates. Priority access to live experiences. Founding rate locked for future Blueprint content." },
 ];
 
