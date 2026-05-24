@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
+import AsSeenIn from "@/components/blueprint/AsSeenIn";
 
 // ─── SCROLL REVEAL HOOK ───
 function useScrollReveal(threshold = 0.15) {
@@ -1970,6 +1971,7 @@ export default function AWBlueprint() {
 
       <AnnouncementBar />
       <Hero />
+      <AsSeenIn />
       <YouAreNotFailing />
       <DeviceShowcase />
       <VideoSection />
