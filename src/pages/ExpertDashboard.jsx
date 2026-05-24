@@ -578,7 +578,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     custom_links: [],
   });
 
-  // Specialty typeahead
+  // Specialty typeahead + browser
   const { data: allSpecialties = [] } = useQuery({
     queryKey: ["specialties-list"],
     queryFn: async () => {
@@ -589,6 +589,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
   });
   const [specialtySearch, setSpecialtySearch] = useState("");
   const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
+  const [showSpecialtyBrowser, setShowSpecialtyBrowser] = useState(false);
 
   const filteredSpecialties = specialtySearch.trim()
     ? allSpecialties.filter(s =>
@@ -596,6 +597,14 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         !formData.specialties.includes(s.name)
       )
     : [];
+
+  // Group all specialties by category for the browser modal
+  const specialtiesByCategory = allSpecialties.reduce((acc, s) => {
+    const cat = s.category || "Other";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(s);
+    return acc;
+  }, {});
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -623,7 +632,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
   }, [expert]);
 
   const handleEdit = () => { setIsEditing(true); setSuccess(false); setError(null); };
-  const handleCancel = () => { setIsEditing(false); setFormData(buildFormData(expert)); setActiveLink(null); setActiveCustomLink(null); setSuccess(false); setError(null); };
+  const handleCancel = () => { setIsEditing(false); setFormData(buildFormData(expert)); setActiveLink(null); setActiveCustomLink(null); setSpecialtySearch(""); setShowSpecialtyDropdown(false); setShowSpecialtyBrowser(false); setSuccess(false); setError(null); };
 
   const handleSave = async () => {
     setSaving(true);
@@ -814,50 +823,132 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
 
               {/* Specialty tags (from specialties array) */}
               {(formData.specialties.length > 0 || isEditing) && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20, alignItems: "center" }}>
-                  {formData.specialties.map((s, i) => (
-                    <span
-                      key={i}
-                      style={{ background: "#F5DDD9", color: "#4A0E2E", borderRadius: 100, padding: "8px 16px", fontFamily: sans, fontWeight: 400, fontSize: 12, display: "inline-flex", alignItems: "center", gap: 6 }}
-                    >
-                      {s}
-                      {isEditing && (
-                        <button onClick={() => removeSpecialty(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#4A0E2E", display: "flex", alignItems: "center", opacity: 0.5 }}>
-                          <X style={{ width: 10, height: 10 }} />
-                        </button>
-                      )}
-                    </span>
-                  ))}
-                  {isEditing && (
-                    <div style={{ position: "relative" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <input
-                          value={specialtySearch}
-                          onChange={(e) => { setSpecialtySearch(e.target.value); setShowSpecialtyDropdown(true); }}
-                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSpecialty(); } if (e.key === "Escape") setShowSpecialtyDropdown(false); }}
-                          onFocus={() => setShowSpecialtyDropdown(true)}
-                          placeholder="Search specialties…"
-                          style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px dashed rgba(74,14,46,0.25)", borderRadius: 100, padding: "6px 14px", outline: "none", background: "transparent", width: 160 }}
-                        />
-                        <button onClick={() => addSpecialty()} style={{ width: 28, height: 28, borderRadius: "50%", background: "#4A0E2E", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <Plus style={{ width: 13, height: 13, color: "#FFFFFF" }} />
-                        </button>
-                      </div>
-                      {showSpecialtyDropdown && filteredSpecialties.length > 0 && (
-                        <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: "4px 0", minWidth: 200, boxShadow: "0 8px 24px rgba(74,14,46,0.12)", marginTop: 4 }}>
-                          {filteredSpecialties.slice(0, 8).map((sp) => (
-                            <button
-                              key={sp.id}
-                              onMouseDown={(e) => { e.preventDefault(); addSpecialty(sp.name); }}
-                              style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "8px 14px", fontFamily: sans, fontSize: 12, color: "#3A2A28", cursor: "pointer" }}
-                              onMouseEnter={e => e.target.style.background = "#FAF5F3"}
-                              onMouseLeave={e => e.target.style.background = "none"}
-                            >
-                              {sp.name}
-                            </button>
-                          ))}
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                    {formData.specialties.map((s, i) => (
+                      <span
+                        key={i}
+                        style={{ background: "#F5DDD9", color: "#4A0E2E", borderRadius: 100, padding: "8px 16px", fontFamily: sans, fontWeight: 400, fontSize: 12, display: "inline-flex", alignItems: "center", gap: 6 }}
+                      >
+                        {s}
+                        {isEditing && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeSpecialty(i); }}
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#4A0E2E", display: "flex", alignItems: "center", opacity: 0.6, lineHeight: 0 }}
+                          >
+                            <X style={{ width: 11, height: 11 }} />
+                          </button>
+                        )}
+                      </span>
+                    ))}
+
+                    {/* Typeahead input — only in edit mode */}
+                    {isEditing && (
+                      <div style={{ position: "relative" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <input
+                            value={specialtySearch}
+                            onChange={(e) => { setSpecialtySearch(e.target.value); setShowSpecialtyDropdown(true); }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Escape") { setShowSpecialtyDropdown(false); setSpecialtySearch(""); }
+                            }}
+                            onFocus={() => { if (specialtySearch.trim()) setShowSpecialtyDropdown(true); }}
+                            onBlur={() => setTimeout(() => setShowSpecialtyDropdown(false), 150)}
+                            placeholder="Search specialties…"
+                            style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px dashed rgba(74,14,46,0.25)", borderRadius: 100, padding: "6px 14px", outline: "none", background: "transparent", width: 160 }}
+                          />
+                          {/* Browse all button */}
+                          <button
+                            type="button"
+                            onClick={() => setShowSpecialtyBrowser(true)}
+                            title="Browse all specialties"
+                            style={{ width: 28, height: 28, borderRadius: "50%", background: "#4A0E2E", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                          >
+                            <Plus style={{ width: 13, height: 13, color: "#FFFFFF" }} />
+                          </button>
                         </div>
-                      )}
+                        {showSpecialtyDropdown && filteredSpecialties.length > 0 && (
+                          <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 100, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: "4px 0", minWidth: 220, boxShadow: "0 8px 24px rgba(74,14,46,0.12)", marginTop: 4 }}>
+                            {filteredSpecialties.slice(0, 8).map((sp) => (
+                              <button
+                                key={sp.id}
+                                type="button"
+                                onMouseDown={(e) => { e.preventDefault(); addSpecialty(sp.name); }}
+                                style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "8px 14px", fontFamily: sans, fontSize: 12, color: "#3A2A28", cursor: "pointer" }}
+                                onMouseEnter={e => e.currentTarget.style.background = "#FAF5F3"}
+                                onMouseLeave={e => e.currentTarget.style.background = "none"}
+                              >
+                                {sp.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Specialty browser modal */}
+                  {showSpecialtyBrowser && (
+                    <div
+                      style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(10,2,8,0.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+                      onClick={() => setShowSpecialtyBrowser(false)}
+                    >
+                      <div
+                        style={{ background: "#FFFFFF", borderRadius: 16, width: "100%", maxWidth: 560, maxHeight: "80vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 24px 60px rgba(10,2,8,0.2)" }}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid rgba(74,14,46,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 14, color: "#4A0E2E" }}>Browse Specialties</span>
+                          <button type="button" onClick={() => setShowSpecialtyBrowser(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#8A7A76", padding: 4, display: "flex" }}>
+                            <X style={{ width: 18, height: 18 }} />
+                          </button>
+                        </div>
+                        <div style={{ overflowY: "auto", padding: "16px 24px 24px" }}>
+                          {Object.entries(specialtiesByCategory).sort(([a], [b]) => a.localeCompare(b)).map(([category, items]) => (
+                            <div key={category} style={{ marginBottom: 20 }}>
+                              <p style={{ fontFamily: sans, fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em", color: "#C4847A", marginBottom: 8 }}>{category}</p>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                {items.map(sp => {
+                                  const already = formData.specialties.includes(sp.name);
+                                  return (
+                                    <button
+                                      key={sp.id}
+                                      type="button"
+                                      onClick={() => { if (!already) { addSpecialty(sp.name); } }}
+                                      style={{
+                                        fontFamily: sans, fontSize: 12, fontWeight: 400,
+                                        padding: "7px 14px", borderRadius: 100, cursor: already ? "default" : "pointer",
+                                        border: already ? "1.5px solid #C4847A" : "1px solid rgba(74,14,46,0.15)",
+                                        background: already ? "#F5DDD9" : "#FFFFFF",
+                                        color: already ? "#4A0E2E" : "#3A2A28",
+                                        opacity: already ? 0.7 : 1,
+                                        transition: "all 0.12s",
+                                      }}
+                                      onMouseEnter={e => { if (!already) e.currentTarget.style.background = "#FAF5F3"; }}
+                                      onMouseLeave={e => { if (!already) e.currentTarget.style.background = "#FFFFFF"; }}
+                                    >
+                                      {already ? "✓ " : ""}{sp.name}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                          {Object.keys(specialtiesByCategory).length === 0 && (
+                            <p style={{ fontFamily: sans, fontSize: 13, color: "#8A7A76", textAlign: "center", padding: "20px 0" }}>No specialties found.</p>
+                          )}
+                        </div>
+                        <div style={{ padding: "12px 24px", borderTop: "1px solid rgba(74,14,46,0.08)" }}>
+                          <button
+                            type="button"
+                            onClick={() => setShowSpecialtyBrowser(false)}
+                            style={{ width: "100%", background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 100, padding: "11px", fontFamily: sans, fontWeight: 700, fontSize: 12, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}
+                          >
+                            Done
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
