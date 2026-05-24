@@ -77,6 +77,25 @@ export default function Dashboard() {
   const [status, setStatus] = useState("loading");
   const [data, setData] = useState({ state: null, user: null, profile: null });
   const [errorMsg, setErrorMsg] = useState("");
+  const [stateOverride, setStateOverride] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminCheckComplete, setAdminCheckComplete] = useState(false);
+
+  // Check if user is admin on mount
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const user = await base44.auth.me();
+        const isAdminUser = user?.role && ['owner', 'admin', 'master_admin'].includes(user.role);
+        setIsAdmin(isAdminUser);
+      } catch (err) {
+        console.error("Failed to check admin status:", err);
+        setIsAdmin(false);
+      }
+      setAdminCheckComplete(true);
+    };
+    checkAdmin();
+  }, []);
 
   const load = async () => {
     setStatus("loading");
@@ -196,11 +215,14 @@ export default function Dashboard() {
   const membershipLabel = getMembershipLabel(user);
   const isBlueprintOwner = membershipLabel === "Blueprint owner";
 
+  // Use override state if set, otherwise use real state
+  const effectiveState = stateOverride || state;
+
   let StateComponent = null;
-  if (state === "state_b") StateComponent = StateB;
-  else if (state === "state_a_no_quiz") StateComponent = StateANoQuiz;
-  else if (state === "state_a_with_quiz") StateComponent = StateAWithQuiz;
-  else if (state === "state_c") StateComponent = StateC;
+  if (effectiveState === "state_b") StateComponent = StateB;
+  else if (effectiveState === "state_a_no_quiz") StateComponent = StateANoQuiz;
+  else if (effectiveState === "state_a_with_quiz") StateComponent = StateAWithQuiz;
+  else if (effectiveState === "state_c") StateComponent = StateC;
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -212,6 +234,15 @@ export default function Dashboard() {
 
       <div className="lg:pl-60 pb-20 lg:pb-0">
         <main className="px-6 md:px-10 py-10 max-w-[1400px]">
+          {/* Preview banner when override is active */}
+          {stateOverride && isAdmin && (
+            <div className="mb-6 bg-amber-100 border border-amber-300 rounded-lg px-4 py-3 text-center">
+              <span className="text-amber-900 text-sm font-semibold">
+                PREVIEWING: {stateOverride.replace(/_/g, ' ').toUpperCase()}
+              </span>
+            </div>
+          )}
+
           <DashboardHeader firstName={profile?.first_name} user={user} />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -244,6 +275,65 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
+
+      {/* Admin state preview toggle - fixed position bottom-right */}
+      {isAdmin && adminCheckComplete && (
+        <div className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-4 max-w-xs">
+          <p className="font-semibold mb-3 text-gray-300">ADMIN: Preview State</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => setStateOverride("state_a_no_quiz")}
+              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+                stateOverride === "state_a_no_quiz"
+                  ? "bg-awburg-core text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              A (no quiz)
+            </button>
+            <button
+              onClick={() => setStateOverride("state_a_with_quiz")}
+              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+                stateOverride === "state_a_with_quiz"
+                  ? "bg-awburg-core text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              A (with quiz)
+            </button>
+            <button
+              onClick={() => setStateOverride("state_b")}
+              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+                stateOverride === "state_b"
+                  ? "bg-awburg-core text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              B (welcome)
+            </button>
+            <button
+              onClick={() => setStateOverride("state_c")}
+              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+                stateOverride === "state_c"
+                  ? "bg-awburg-core text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              C (free)
+            </button>
+            <button
+              onClick={() => setStateOverride(null)}
+              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+                stateOverride === null
+                  ? "bg-awburg-core text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              Real
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
