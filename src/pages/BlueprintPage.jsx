@@ -1647,7 +1647,7 @@ function FinalClose() {
             <SectionReveal>
               <EyebrowLeft color={C.roseCore}>FOUNDING MEMBER PRICE</EyebrowLeft>
               <h2 className="text-[32px] mb-6" style={{ fontFamily: serif, fontStyle: "italic", color: C.white }}>
-                This price will not exist after launch.
+                This price will not last for long.
               </h2>
               <p className="text-[15px] font-light leading-[1.88] mb-4" style={{ fontFamily: sans, color: C.roseLight }}>
                 R3,997 is the founding price, set deliberately to make the Blueprint accessible to the women who need it most before it transitions to full price. The 14 specialists, the sequenced system, the bonuses. All of this at this price closes on launch day.
