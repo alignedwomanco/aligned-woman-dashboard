@@ -1560,20 +1560,6 @@ function Pricing() {
               That is a 97% saving against private access.
             </p>
 
-            {/* Guarantee box */}
-            <div
-              className="rounded px-5 py-4 mb-8 text-left"
-              style={{ background: C.offWhite }}
-            >
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] mb-2 flex items-center gap-2" style={{ fontFamily: sans, color: C.burgCore }}>
-                <Check className="w-4 h-4" style={{ color: C.roseCore }} />
-                30-DAY COMPLETION GUARANTEE
-              </p>
-              <p className="text-[13px] font-light leading-[1.7]" style={{ fontFamily: sans, color: C.darkGrey }}>
-                Complete the full programme. Submit your completion report. If you do not feel measurably different, you receive a full refund. No questions. No conditions beyond completion.
-              </p>
-            </div>
-
             <PrimaryCTA className="w-full" />
           </div>
         </SectionReveal>
