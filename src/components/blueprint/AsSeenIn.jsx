@@ -36,8 +36,7 @@ export default function AsSeenIn() {
               style={{
                 height: 52,
                 maxWidth: 180,
-                opacity: 0.75,
-                filter: "grayscale(100%) sepia(60%) hue-rotate(290deg) saturate(120%) brightness(0.65)",
+                opacity: 0.85,
               }}
             />
           ))}
