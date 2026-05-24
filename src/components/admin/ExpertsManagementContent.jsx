@@ -47,7 +47,7 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     title: "",
     bio: "",
     profile_picture: "",
-    category: "",
+    category: [],
     specialties: [],
     services: [],
     isPublished: true,
@@ -146,7 +146,7 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
       title: "",
       bio: "",
       profile_picture: "",
-      category: "",
+      category: [],
       specialties: [],
       services: [],
       isPublished: true,
@@ -157,7 +157,11 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
   const openEditDialog = (expert = null) => {
     if (expert) {
       setCurrentExpert(expert);
-      setExpertForm(expert);
+      // Normalize legacy single-string category to array
+      const normalizedCategory = Array.isArray(expert.category)
+        ? expert.category
+        : expert.category ? [expert.category] : [];
+      setExpertForm({ ...expert, category: normalizedCategory });
       setSocialLinks(Array.isArray(expert.social_links) ? expert.social_links : []);
     } else {
       resetForm();
@@ -220,10 +224,16 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     ? expertsProfiles.filter(e => e.linked_user_email?.toLowerCase() === expertOnlyEmail.toLowerCase())
     : expertsProfiles;
 
-  // Sort experts by category order
+  // Helper: get all category IDs for an expert (supports both legacy string and new array)
+  const getExpertCategoryIds = (expert) =>
+    Array.isArray(expert.category) ? expert.category : expert.category ? [expert.category] : [];
+
+  // Sort experts by first category order
   const sortedExperts = [...visibleProfiles].sort((a, b) => {
-    const aCat = expertCategories.find((c) => c.id === a.category);
-    const bCat = expertCategories.find((c) => c.id === b.category);
+    const aCatIds = getExpertCategoryIds(a);
+    const bCatIds = getExpertCategoryIds(b);
+    const aCat = expertCategories.find((c) => aCatIds.includes(c.id));
+    const bCat = expertCategories.find((c) => bCatIds.includes(c.id));
     const aOrder = aCat?.order ?? 9999;
     const bOrder = bCat?.order ?? 9999;
     return aOrder - bOrder;
@@ -297,6 +307,16 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-sm text-gray-600 max-w-[200px] truncate">
                         {expert.title}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {getExpertCategoryIds(expert).map((catId) => {
+                            const cat = expertCategories.find((c) => c.id === catId);
+                            return cat ? (
+                              <Badge key={catId} className="bg-purple-100 text-purple-800 border-0 text-[10px] px-1.5 py-0">
+                                {cat.name}
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge className={{
@@ -577,23 +597,47 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
             </div>
 
             <div>
-              <Label>Category</Label>
-              <Select
-                value={expertForm.category || ""}
-                onValueChange={(val) => setExpertForm({ ...expertForm, category: val })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={null}>No category</SelectItem>
-                  {expertCategories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Categories</Label>
+              <p className="text-xs text-gray-400 mb-2">Select one or more categories</p>
+              <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                {expertCategories.length === 0 && (
+                  <p className="text-xs text-gray-400">No categories available</p>
+                )}
+                {expertCategories.map((cat) => {
+                  const selected = (expertForm.category || []).includes(cat.id);
+                  return (
+                    <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-1 py-1">
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => {
+                          const current = expertForm.category || [];
+                          setExpertForm({
+                            ...expertForm,
+                            category: selected
+                              ? current.filter((id) => id !== cat.id)
+                              : [...current, cat.id],
+                          });
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm text-gray-700">{cat.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              {(expertForm.category || []).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {(expertForm.category || []).map((id) => {
+                    const cat = expertCategories.find((c) => c.id === id);
+                    return cat ? (
+                      <Badge key={id} className="bg-purple-100 text-purple-800 border-0 text-xs">
+                        {cat.name}
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
             </div>
 
             <div>

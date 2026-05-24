@@ -19,8 +19,11 @@
       "description": "Expert profile picture URL"
     },
     "category": {
-      "type": "string",
-      "description": "Expert category ID"
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Expert category IDs (supports multiple categories)"
     },
     "specialties": {
       "type": "array",
@@ -73,6 +76,45 @@
     "linked_user_email": {
       "type": "string",
       "description": "Email of the linked user account"
+    },
+    "email": {
+      "type": "string",
+      "description": "Expert contact email"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL"
+    },
+    "instagram_url": {
+      "type": "string",
+      "description": "Instagram profile URL"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Website URL"
+    },
+    "twitter_url": {
+      "type": "string",
+      "description": "Twitter/X profile URL"
+    },
+    "tiktok_url": {
+      "type": "string",
+      "description": "TikTok profile URL"
+    },
+    "custom_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Additional custom links"
     }
   },
   "required": [

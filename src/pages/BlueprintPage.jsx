@@ -902,17 +902,26 @@ function Faculty() {
     queryFn: () => base44.entities.ExpertCategory.list(),
   });
 
+  // Support both legacy string and new array for category
+  const getExpertCategoryIds = (e) =>
+    Array.isArray(e.category) ? e.category : e.category ? [e.category] : [];
+
   const getCategoryName = (id) => categories.find((c) => c.id === id)?.name || "";
 
+  const getExpertCategoryNames = (e) =>
+    getExpertCategoryIds(e).map(getCategoryName).filter(Boolean);
+
   const sortedExperts = [...experts].sort((a, b) => {
-    const aCat = categories.find((c) => c.id === a.category);
-    const bCat = categories.find((c) => c.id === b.category);
+    const aIds = getExpertCategoryIds(a);
+    const bIds = getExpertCategoryIds(b);
+    const aCat = categories.find((c) => aIds.includes(c.id));
+    const bCat = categories.find((c) => bIds.includes(c.id));
     return (aCat?.order ?? 9999) - (bCat?.order ?? 9999);
   });
 
   const filtered = activeFilter === "all"
     ? sortedExperts
-    : sortedExperts.filter((e) => getCategoryName(e.category) === activeFilter);
+    : sortedExperts.filter((e) => getExpertCategoryNames(e).includes(activeFilter));
 
   // Build filter list from actual categories
   const filterLabels = ["all", ...categories.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((c) => c.name)];
@@ -984,7 +993,7 @@ function Faculty() {
 
                 {/* Category */}
                 <span className="text-[8px] font-semibold uppercase tracking-[0.18em] mb-1 block" style={{ fontFamily: sans, color: C.midGrey }}>
-                  {getCategoryName(expert.category)}
+                  {getExpertCategoryNames(expert).join(" · ") || ""}
                 </span>
 
                 {/* Name */}

@@ -54,7 +54,9 @@ function credentialsFromTitle(title) {
 
 // Map a DB expert record to the card shape
 function mapDbExpert(e) {
-  const domain = CATEGORY_DOMAIN_MAP[e.category] || "Identity & Visibility";
+  // Support both legacy string and new array for category
+  const categoryIds = Array.isArray(e.category) ? e.category : e.category ? [e.category] : [];
+  const domain = categoryIds.map(id => CATEGORY_DOMAIN_MAP[id]).find(Boolean) || "Identity & Visibility";
   return {
     id: e.id,
     name: e.name,
@@ -64,6 +66,7 @@ function mapDbExpert(e) {
     credentials: credentialsFromTitle(e.title),
     profile_picture: e.profile_picture || null,
     specialties: Array.isArray(e.specialties) ? e.specialties : [],
+    categoryIds,
   };
 }
 
