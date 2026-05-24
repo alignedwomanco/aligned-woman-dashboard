@@ -502,14 +502,24 @@ function ContactRequestsTab({ expert }) {
 
 const LINK_PLATFORMS = ["LinkedIn", "Instagram", "Website", "Email", "Twitter", "TikTok", "YouTube"];
 
+const CATEGORY_DOMAIN_MAP_DASH = {
+  "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
+  "69f48a8d1e94ea01a3a8c3fa": "Nervous System",
+  "69f48a8d1e94ea01a3a8c3fb": "Mindset & Behaviour",
+  "69f48a8d1e94ea01a3a8c3fc": "Money",
+  "69f48a8d1e94ea01a3a8c3fd": "Leadership & Authority",
+  "69f48a8d1e94ea01a3a8c3fe": "Relationships",
+  "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
+};
+
 function SocialLinkIcon({ platform, size = 18 }) {
-  const style = { width: size, height: size };
-  const p = platform?.toLowerCase();
-  if (p === "linkedin") return <Linkedin style={style} />;
-  if (p === "instagram") return <Instagram style={style} />;
-  if (p === "email") return <Mail style={style} />;
-  if (p === "website") return <Globe style={style} />;
-  return <LinkIcon style={style} />;
+  const s = { width: size, height: size, flexShrink: 0 };
+  const p = (platform || "").toLowerCase();
+  if (p === "linkedin") return <Linkedin style={s} />;
+  if (p === "instagram") return <Instagram style={s} />;
+  if (p === "email") return <Mail style={s} />;
+  if (p === "website") return <Globe style={s} />;
+  return <LinkIcon style={s} />;
 }
 
 function ProfileTab({ expert, onExpertUpdate, user }) {
@@ -528,7 +538,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
   const [activeLinkIndex, setActiveLinkIndex] = useState(null);
   const [newSpecialty, setNewSpecialty] = useState("");
   const [showAddLink, setShowAddLink] = useState(false);
-  const [newLinkPlatform, setNewLinkPlatform] = useState("Website");
+  const [newLinkPlatform, setNewLinkPlatform] = useState("LinkedIn");
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
@@ -538,41 +548,34 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         name: expert.name || "",
         title: expert.title || "",
         bio: expert.bio || "",
-        specialties: expert.specialties || [],
+        specialties: Array.isArray(expert.specialties) ? expert.specialties : [],
         profile_picture: expert.profile_picture || "",
-        social_links: expert.social_links || [],
+        social_links: Array.isArray(expert.social_links) ? expert.social_links : [],
       });
     }
   }, [expert]);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-    setSuccess(false);
-    setError(null);
-    setActiveLinkIndex(null);
-    setShowAddLink(false);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
+  const resetForm = () => {
     setFormData({
       name: expert.name || "",
       title: expert.title || "",
       bio: expert.bio || "",
-      specialties: expert.specialties || [],
+      specialties: Array.isArray(expert.specialties) ? expert.specialties : [],
       profile_picture: expert.profile_picture || "",
-      social_links: expert.social_links || [],
+      social_links: Array.isArray(expert.social_links) ? expert.social_links : [],
     });
     setActiveLinkIndex(null);
     setShowAddLink(false);
-    setSuccess(false);
-    setError(null);
+    setNewSpecialty("");
+    setNewLinkUrl("");
   };
+
+  const handleEdit = () => { setIsEditing(true); setSuccess(false); setError(null); };
+  const handleCancel = () => { setIsEditing(false); resetForm(); setSuccess(false); setError(null); };
 
   const handleSave = async () => {
     setSaving(true);
     setError(null);
-    setSuccess(false);
     try {
       await base44.entities.Expert.update(expert.id, {
         name: formData.name,
@@ -595,32 +598,23 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     }
   };
 
-  const handleRemoveSpecialty = (i) => {
-    setFormData({ ...formData, specialties: formData.specialties.filter((_, idx) => idx !== i) });
-  };
-
-  const handleAddSpecialty = () => {
+  const removeSpecialty = (i) => setFormData((f) => ({ ...f, specialties: f.specialties.filter((_, idx) => idx !== i) }));
+  const addSpecialty = () => {
     const val = newSpecialty.trim();
     if (!val) return;
-    setFormData({ ...formData, specialties: [...formData.specialties, val] });
+    setFormData((f) => ({ ...f, specialties: [...f.specialties, val] }));
     setNewSpecialty("");
   };
-
-  const handleRemoveLink = (i) => {
-    setFormData({ ...formData, social_links: formData.social_links.filter((_, idx) => idx !== i) });
+  const removeLink = (i) => {
+    setFormData((f) => ({ ...f, social_links: f.social_links.filter((_, idx) => idx !== i) }));
     if (activeLinkIndex === i) setActiveLinkIndex(null);
   };
-
-  const handleLinkUrlChange = (i, val) => {
-    const updated = formData.social_links.map((l, idx) => idx === i ? { ...l, url: val } : l);
-    setFormData({ ...formData, social_links: updated });
-  };
-
-  const handleConfirmAddLink = () => {
+  const updateLinkUrl = (i, url) => setFormData((f) => ({ ...f, social_links: f.social_links.map((l, idx) => idx === i ? { ...l, url } : l) }));
+  const confirmAddLink = () => {
     if (!newLinkUrl.trim()) return;
-    setFormData({ ...formData, social_links: [...formData.social_links, { platform: newLinkPlatform, url: newLinkUrl.trim() }] });
+    setFormData((f) => ({ ...f, social_links: [...f.social_links, { platform: newLinkPlatform, url: newLinkUrl.trim() }] }));
     setNewLinkUrl("");
-    setNewLinkPlatform("Website");
+    setNewLinkPlatform("LinkedIn");
     setShowAddLink(false);
   };
 
@@ -630,7 +624,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
     setUploadingPhoto(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setFormData((prev) => ({ ...prev, profile_picture: file_url }));
+      setFormData((f) => ({ ...f, profile_picture: file_url }));
     } catch {
       setError("Failed to upload image");
     } finally {
@@ -642,6 +636,11 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
 
   const sans = "Montserrat, sans-serif";
   const serif = "'DM Serif Display', Georgia, serif";
+  const domain = CATEGORY_DOMAIN_MAP_DASH[expert.category] || "Identity & Visibility";
+  const publicSlug = (formData.name || expert.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  // Title tags (split by |)
+  const titleTags = (formData.title || "").split("|").map((s) => s.trim()).filter(Boolean);
 
   return (
     <div className="space-y-6">
@@ -658,277 +657,307 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         </div>
       )}
 
-      {/* ── WYSIWYG PROFILE CARD ── */}
-      <div className="rounded-xl overflow-hidden" style={{ background: "#FFFFFF", border: isEditing ? "2px solid #C4847A" : "1px solid rgba(74,14,46,0.06)", boxShadow: "0 2px 12px rgba(74,14,46,0.04)" }}>
+      {/* ── WYSIWYG PROFILE CARD — mirrors public ExpertProfile hero layout ── */}
+      <div
+        className="rounded-xl overflow-visible"
+        style={{
+          background: "#FAF5F3",
+          border: isEditing ? "2px solid #C4847A" : "1px solid rgba(74,14,46,0.06)",
+          boxShadow: "0 2px 12px rgba(74,14,46,0.04)",
+        }}
+      >
+        {/* Edit mode banner */}
         {isEditing && (
-          <div className="px-6 py-3 flex items-center gap-2" style={{ background: "#FDF5F3", borderBottom: "1px solid rgba(196,132,122,0.2)" }}>
-            <Edit style={{ width: 13, height: 13, color: "#C4847A" }} />
-            <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#C4847A", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-              Editing — changes are live as you type
+          <div className="px-6 py-2.5 flex items-center gap-2" style={{ background: "#FDF5F3", borderBottom: "1px solid rgba(196,132,122,0.2)", borderRadius: "10px 10px 0 0" }}>
+            <Edit style={{ width: 12, height: 12, color: "#C4847A" }} />
+            <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, color: "#C4847A", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+              Editing your public profile
             </span>
           </div>
         )}
 
+        {/* Hero section — matches public profile 40/60 grid */}
         <div className="p-6 md:p-8">
-          {/* ── PHOTO + NAME + TITLE ── */}
-          <div className="flex items-start gap-5 mb-5">
-            {/* Photo */}
-            <div className="relative shrink-0 group" style={{ width: 88, height: 88 }}>
-              <div className="w-full h-full rounded-full overflow-hidden" style={{ background: "#FDF5F3" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,3fr)", gap: 40, alignItems: "start" }}>
+
+            {/* LEFT — Large photo (3:4 ratio like public profile) */}
+            <div>
+              <div
+                className="relative group"
+                style={{ borderRadius: 12, overflow: "hidden", aspectRatio: "3/4", background: `linear-gradient(135deg, #F5DDD9, #C4847A)`, boxShadow: "0 8px 32px rgba(74,14,46,0.1)" }}
+              >
                 {formData.profile_picture ? (
-                  <img src={formData.profile_picture} alt={formData.name} className="w-full h-full object-cover" />
+                  <img src={formData.profile_picture} alt={formData.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: serif, fontSize: 32, color: "#C4847A" }}>
-                    {formData.name?.[0] || "?"}
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 64, color: "#4A0E2E" }}>
+                      {(formData.name || "?").split(" ").map((p) => p[0]).join("").slice(0, 2)}
+                    </span>
                   </div>
                 )}
-              </div>
-              {isEditing && (
-                <>
+                {/* Upload overlay on hover when editing */}
+                {isEditing && (
                   <label
                     htmlFor="profile-pic-upload"
-                    className="absolute inset-0 rounded-full flex flex-col items-center justify-center cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
-                    style={{ background: "rgba(74,14,46,0.6)" }}
+                    className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: "rgba(74,14,46,0.55)", backdropFilter: "blur(2px)" }}
                   >
                     {uploadingPhoto ? (
-                      <Loader2 className="animate-spin" style={{ width: 20, height: 20, color: "#FFFFFF" }} />
+                      <Loader2 className="animate-spin" style={{ width: 28, height: 28, color: "#FFFFFF", marginBottom: 8 }} />
                     ) : (
                       <>
-                        <Upload style={{ width: 16, height: 16, color: "#FFFFFF", marginBottom: 2 }} />
-                        <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 9, color: "#FFFFFF", letterSpacing: "0.1em" }}>CHANGE</span>
+                        <Upload style={{ width: 24, height: 24, color: "#FFFFFF", marginBottom: 8 }} />
+                        <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 11, color: "#FFFFFF", letterSpacing: "0.15em", textTransform: "uppercase" }}>Change Photo</span>
                       </>
                     )}
                   </label>
-                  <input id="profile-pic-upload" type="file" accept="image/*" className="hidden" onChange={handleProfilePictureUpload} />
-                </>
-              )}
-            </div>
-
-            {/* Name + Title */}
-            <div className="flex-1 min-w-0">
-              {isEditing ? (
-                <>
-                  <input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-transparent outline-none border-b-2 mb-2"
-                    style={{ fontFamily: serif, fontStyle: "italic", fontSize: 26, color: "#4A0E2E", borderColor: "#E8B4AE", paddingBottom: 2 }}
-                    placeholder="Your name"
-                  />
-                  <input
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full bg-transparent outline-none border-b"
-                    style={{ fontFamily: sans, fontWeight: 500, fontSize: 14, color: "#C4847A", borderColor: "rgba(196,132,122,0.3)", paddingBottom: 2 }}
-                    placeholder="Your title / role"
-                  />
-                </>
-              ) : (
-                <>
-                  <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 26, color: "#4A0E2E", marginBottom: 2, lineHeight: 1.2 }}>
-                    {formData.name}
-                  </h2>
-                  <p style={{ fontFamily: sans, fontWeight: 500, fontSize: 14, color: "#C4847A" }}>
-                    {formData.title}
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* ── SPECIALTIES ── */}
-          <div className="flex flex-wrap gap-2 mb-5 items-center">
-            {formData.specialties.map((s, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full"
-                style={{ background: "#FDF5F3", color: "#4A0E2E", fontFamily: sans, fontWeight: 500, fontSize: 11 }}
-              >
-                {s}
-                {isEditing && (
-                  <button onClick={() => handleRemoveSpecialty(i)} className="ml-1 hover:opacity-60 transition-opacity" aria-label="Remove">
-                    <X style={{ width: 10, height: 10 }} />
-                  </button>
                 )}
-              </span>
-            ))}
-            {isEditing && (
-              <div className="flex items-center gap-1">
-                <input
-                  value={newSpecialty}
-                  onChange={(e) => setNewSpecialty(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSpecialty(); } }}
-                  placeholder="Add specialty…"
-                  className="px-2 py-1 rounded-full border outline-none"
-                  style={{ fontFamily: sans, fontSize: 11, color: "#3A2A28", borderColor: "rgba(74,14,46,0.2)", width: 130 }}
-                />
-                <button
-                  onClick={handleAddSpecialty}
-                  className="w-6 h-6 rounded-full flex items-center justify-center transition-colors"
-                  style={{ background: "#4A0E2E", color: "#FFFFFF" }}
-                >
-                  <Plus style={{ width: 12, height: 12 }} />
-                </button>
+                <input id="profile-pic-upload" type="file" accept="image/*" className="hidden" onChange={handleProfilePictureUpload} />
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* ── SOCIAL LINKS ── */}
-          <div className="mb-5">
-            <div className="flex items-center gap-2 flex-wrap">
-              {formData.social_links.map((link, i) => (
-                <div key={i} className="relative">
-                  <button
-                    onClick={() => isEditing && setActiveLinkIndex(activeLinkIndex === i ? null : i)}
-                    className="flex items-center justify-center rounded-full transition-all"
-                    style={{
-                      width: 38,
-                      height: 38,
-                      background: activeLinkIndex === i ? "#4A0E2E" : "#FDF5F3",
-                      color: activeLinkIndex === i ? "#FFFFFF" : "#4A0E2E",
-                      border: "1px solid rgba(74,14,46,0.12)",
-                      cursor: isEditing ? "pointer" : "default",
-                    }}
-                    title={link.platform}
-                  >
-                    <SocialLinkIcon platform={link.platform} size={15} />
-                  </button>
-                  {/* Inline edit popover */}
-                  {isEditing && activeLinkIndex === i && (
-                    <div
-                      className="absolute top-11 left-0 z-20 rounded-xl p-3 shadow-lg"
-                      style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", minWidth: 240, boxShadow: "0 8px 24px rgba(74,14,46,0.12)" }}
+            {/* RIGHT — details */}
+            <div style={{ paddingTop: 4 }}>
+              {/* Domain eyebrow */}
+              <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: "#C4847A", marginBottom: 12 }}>
+                {domain}
+              </p>
+
+              {/* Name */}
+              {isEditing ? (
+                <input
+                  value={formData.name}
+                  onChange={(e) => setFormData((f) => ({ ...f, name: e.target.value }))}
+                  style={{ fontFamily: serif, fontSize: "clamp(24px,3vw,36px)", color: "#4A0E2E", lineHeight: 1.1, margin: "0 0 10px", background: "transparent", border: "none", borderBottom: "2px solid #E8B4AE", outline: "none", width: "100%", padding: "0 0 4px" }}
+                  placeholder="Your name"
+                />
+              ) : (
+                <h2 style={{ fontFamily: serif, fontSize: "clamp(24px,3vw,36px)", color: "#4A0E2E", lineHeight: 1.1, margin: "0 0 10px" }}>
+                  {formData.name}
+                </h2>
+              )}
+
+              {/* Title — shown as plain text on public profile */}
+              {isEditing ? (
+                <input
+                  value={formData.title}
+                  onChange={(e) => setFormData((f) => ({ ...f, title: e.target.value }))}
+                  style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: "#8A7A76", margin: "0 0 16px", background: "transparent", border: "none", borderBottom: "1px solid rgba(196,132,122,0.3)", outline: "none", width: "100%", padding: "0 0 4px" }}
+                  placeholder="Title / role (use | to add multiple tags, e.g. Coach | Author)"
+                />
+              ) : (
+                <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: "#8A7A76", margin: "0 0 16px" }}>
+                  {formData.title}
+                </p>
+              )}
+
+              {/* Title tags (split by |) — shown as pill tags on public profile */}
+              {titleTags.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                  {titleTags.map((tag, i) => (
+                    <span key={i} style={{ fontFamily: sans, fontWeight: 400, fontSize: 11, color: "#4A0E2E", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 100, padding: "6px 14px" }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Specialty tags (from specialties array) */}
+              {(formData.specialties.length > 0 || isEditing) && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20, alignItems: "center" }}>
+                  {formData.specialties.map((s, i) => (
+                    <span
+                      key={i}
+                      style={{ background: "#F5DDD9", color: "#4A0E2E", borderRadius: 100, padding: "8px 16px", fontFamily: sans, fontWeight: 400, fontSize: 12, display: "inline-flex", alignItems: "center", gap: 6 }}
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <SocialLinkIcon platform={link.platform} size={13} />
-                        <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E" }}>{link.platform}</span>
-                        <button onClick={() => handleRemoveLink(i)} className="ml-auto p-1 rounded hover:bg-red-50 transition-colors" style={{ color: "#C0392B" }}>
-                          <Trash2 style={{ width: 12, height: 12 }} />
+                      {s}
+                      {isEditing && (
+                        <button onClick={() => removeSpecialty(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#4A0E2E", display: "flex", alignItems: "center", opacity: 0.5 }}>
+                          <X style={{ width: 10, height: 10 }} />
+                        </button>
+                      )}
+                    </span>
+                  ))}
+                  {isEditing && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <input
+                        value={newSpecialty}
+                        onChange={(e) => setNewSpecialty(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSpecialty(); } }}
+                        placeholder="Add specialty…"
+                        style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px dashed rgba(74,14,46,0.25)", borderRadius: 100, padding: "6px 14px", outline: "none", background: "transparent", width: 140 }}
+                      />
+                      <button onClick={addSpecialty} style={{ width: 28, height: 28, borderRadius: "50%", background: "#4A0E2E", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Plus style={{ width: 13, height: 13, color: "#FFFFFF" }} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Social link icons — exactly matches public profile row */}
+              <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
+                {formData.social_links.map((link, i) => (
+                  <div key={i} style={{ position: "relative" }}>
+                    <button
+                      onClick={() => isEditing && setActiveLinkIndex(activeLinkIndex === i ? null : i)}
+                      title={isEditing ? `Edit ${link.platform} URL` : link.platform}
+                      style={{
+                        width: 40, height: 40, borderRadius: "50%",
+                        border: activeLinkIndex === i ? `2px solid #C4847A` : "1px solid rgba(74,14,46,0.12)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: activeLinkIndex === i ? "#4A0E2E" : "#FFFFFF",
+                        color: activeLinkIndex === i ? "#FFFFFF" : "#4A0E2E",
+                        cursor: isEditing ? "pointer" : "default",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      <SocialLinkIcon platform={link.platform} size={16} />
+                    </button>
+                    {/* Inline popover to edit URL */}
+                    {isEditing && activeLinkIndex === i && (
+                      <div style={{ position: "absolute", top: 48, left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: 14, minWidth: 260, boxShadow: "0 8px 28px rgba(74,14,46,0.14)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                          <SocialLinkIcon platform={link.platform} size={13} />
+                          <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.1em" }}>{link.platform}</span>
+                          <button onClick={() => removeLink(i)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#C0392B", padding: 2, display: "flex" }}>
+                            <Trash2 style={{ width: 13, height: 13 }} />
+                          </button>
+                        </div>
+                        <input
+                          autoFocus
+                          type="text"
+                          value={link.url}
+                          onChange={(e) => updateLinkUrl(i, e.target.value)}
+                          placeholder="https://…"
+                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+                        />
+                        <button
+                          onClick={() => setActiveLinkIndex(null)}
+                          style={{ width: "100%", background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 600, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}
+                        >
+                          Done
                         </button>
                       </div>
-                      <input
-                        type="text"
-                        value={link.url}
-                        onChange={(e) => handleLinkUrlChange(i, e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg border outline-none"
-                        style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-                        placeholder="https://..."
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => setActiveLinkIndex(null)}
-                        className="mt-2 w-full py-1.5 rounded-lg text-center"
-                        style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, background: "#4A0E2E", color: "#FFFFFF" }}
-                      >
-                        Done
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                ))}
 
-              {/* Add new link */}
-              {isEditing && (
-                <div className="relative">
-                  <button
-                    onClick={() => { setShowAddLink(!showAddLink); setActiveLinkIndex(null); }}
-                    className="flex items-center justify-center rounded-full transition-all"
-                    style={{ width: 38, height: 38, background: showAddLink ? "#4A0E2E" : "transparent", color: showAddLink ? "#FFFFFF" : "#C4847A", border: "1px dashed rgba(196,132,122,0.5)" }}
-                    title="Add link"
-                  >
-                    <Plus style={{ width: 15, height: 15 }} />
-                  </button>
-                  {showAddLink && (
-                    <div
-                      className="absolute top-11 left-0 z-20 rounded-xl p-3 shadow-lg"
-                      style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", minWidth: 240, boxShadow: "0 8px 24px rgba(74,14,46,0.12)" }}
+                {/* + Add link button */}
+                {isEditing && (
+                  <div style={{ position: "relative" }}>
+                    <button
+                      onClick={() => { setShowAddLink(!showAddLink); setActiveLinkIndex(null); }}
+                      title="Add a link"
+                      style={{
+                        width: 40, height: 40, borderRadius: "50%",
+                        border: "1px dashed rgba(196,132,122,0.5)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: showAddLink ? "#4A0E2E" : "transparent",
+                        color: showAddLink ? "#FFFFFF" : "#C4847A",
+                        cursor: "pointer",
+                      }}
                     >
-                      <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, color: "#4A0E2E", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Add a link</p>
-                      <select
-                        value={newLinkPlatform}
-                        onChange={(e) => setNewLinkPlatform(e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg border outline-none mb-2"
-                        style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-                      >
-                        {LINK_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                      <input
-                        type="text"
-                        value={newLinkUrl}
-                        onChange={(e) => setNewLinkUrl(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") handleConfirmAddLink(); }}
-                        className="w-full px-2 py-1.5 rounded-lg border outline-none mb-2"
-                        style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", borderColor: "rgba(74,14,46,0.15)" }}
-                        placeholder="https://..."
-                        autoFocus
-                      />
-                      <button
-                        onClick={handleConfirmAddLink}
-                        className="w-full py-1.5 rounded-lg text-center"
-                        style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, background: "#4A0E2E", color: "#FFFFFF" }}
-                      >
-                        Add
-                      </button>
-                    </div>
-                  )}
+                      <Plus style={{ width: 16, height: 16 }} />
+                    </button>
+                    {showAddLink && (
+                      <div style={{ position: "absolute", top: 48, left: 0, zIndex: 50, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.12)", borderRadius: 10, padding: 14, minWidth: 260, boxShadow: "0 8px 28px rgba(74,14,46,0.14)" }}>
+                        <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, color: "#4A0E2E", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 10 }}>Add a link</p>
+                        <select
+                          value={newLinkPlatform}
+                          onChange={(e) => setNewLinkPlatform(e.target.value)}
+                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+                        >
+                          {LINK_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                        <input
+                          autoFocus
+                          type="text"
+                          value={newLinkUrl}
+                          onChange={(e) => setNewLinkUrl(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") confirmAddLink(); }}
+                          placeholder="https://…"
+                          style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+                        />
+                        <button
+                          onClick={confirmAddLink}
+                          style={{ width: "100%", background: "#C4847A", color: "#0E0208", border: "none", borderRadius: 6, padding: "8px", fontFamily: sans, fontWeight: 700, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em" }}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* CTA buttons — non-editable, for visual context only */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                <div style={{ background: "#C4847A", color: "#0E0208", borderRadius: 100, padding: "12px 24px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5, userSelect: "none" }}>
+                  Send a Message
                 </div>
-              )}
+                <div style={{ background: "transparent", color: "#4A0E2E", border: "1px solid rgba(74,14,46,0.2)", borderRadius: 100, padding: "12px 24px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5, userSelect: "none" }}>
+                  View Programme
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* ── BIO ── */}
-          {isEditing ? (
-            <textarea
-              value={formData.bio}
-              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              className="w-full bg-transparent border rounded-lg px-3 py-2 outline-none resize-none"
-              rows={5}
-              style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.75, borderColor: "rgba(74,14,46,0.15)" }}
-              placeholder="Write your biography…"
-            />
-          ) : (
-            formData.bio && (
-              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.75 }}>
-                {formData.bio}
-              </p>
-            )
-          )}
-
-          {/* ── ACTION BUTTONS ── */}
-          <div className="mt-6 flex gap-3">
+          {/* BIO — full width below the hero, matching public profile "About" card */}
+          <div style={{ marginTop: 28 }}>
+            <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: "#C4847A", marginBottom: 12 }}>About</p>
             {isEditing ? (
-              <>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-full transition-all"
-                  style={{ background: "#4A0E2E", color: "#FFFFFF", fontFamily: sans, fontWeight: 700, fontSize: 12, letterSpacing: "0.1em", opacity: saving ? 0.6 : 1, cursor: saving ? "wait" : "pointer" }}
-                >
-                  {saving ? <><Loader2 className="animate-spin" style={{ width: 15, height: 15 }} /> Saving…</> : <><Save style={{ width: 14, height: 14 }} /> Save Changes</>}
-                </button>
-                <button
-                  onClick={handleCancel}
-                  disabled={saving}
-                  className="px-6 py-2.5 rounded-full transition-all"
-                  style={{ background: "transparent", border: "1px solid rgba(74,14,46,0.15)", fontFamily: sans, fontWeight: 500, fontSize: 12, color: "#4A0E2E", cursor: saving ? "not-allowed" : "pointer" }}
-                >
-                  Cancel
-                </button>
-              </>
+              <textarea
+                value={formData.bio}
+                onChange={(e) => setFormData((f) => ({ ...f, bio: e.target.value }))}
+                rows={6}
+                placeholder="Write your biography…"
+                style={{ width: "100%", fontFamily: sans, fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.85, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 8, padding: "12px 14px", outline: "none", resize: "vertical", boxSizing: "border-box", background: "#FFFFFF" }}
+              />
             ) : (
-              <button
-                onClick={handleEdit}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all"
-                style={{ background: "#4A0E2E", color: "#FFFFFF", fontFamily: sans, fontWeight: 600, fontSize: 12 }}
-              >
-                <Edit style={{ width: 13, height: 13 }} /> Edit Profile
-              </button>
+              formData.bio && (
+                <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.85, margin: 0 }}>
+                  {formData.bio}
+                </p>
+              )
             )}
           </div>
         </div>
+
+        {/* Save / Cancel */}
+        {isEditing && (
+          <div style={{ padding: "0 24px 24px", display: "flex", gap: 12 }}>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 100, padding: "13px 28px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", cursor: saving ? "wait" : "pointer", opacity: saving ? 0.6 : 1 }}
+            >
+              {saving ? <><Loader2 className="animate-spin" style={{ width: 15, height: 15 }} /> Saving…</> : <><Save style={{ width: 14, height: 14 }} /> Save Changes</>}
+            </button>
+            <button
+              onClick={handleCancel}
+              disabled={saving}
+              style={{ background: "transparent", color: "#4A0E2E", border: "1px solid rgba(74,14,46,0.2)", borderRadius: 100, padding: "13px 28px", fontFamily: sans, fontWeight: 500, fontSize: 12, cursor: saving ? "not-allowed" : "pointer" }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {/* Edit Profile button when not editing */}
+        {!isEditing && (
+          <div style={{ padding: "0 24px 24px" }}>
+            <button
+              onClick={handleEdit}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 100, padding: "12px 24px", fontFamily: sans, fontWeight: 600, fontSize: 12, cursor: "pointer" }}
+            >
+              <Edit style={{ width: 13, height: 13 }} /> Edit Profile
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ── VIEW PUBLIC PROFILE ── */}
+      {/* ── VIEW PUBLIC PROFILE LINK ── */}
       <div className="rounded-xl p-5 flex items-center justify-between" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.06)" }}>
         <div>
           <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 13, color: "#4A0E2E" }}>Your public profile</span>
@@ -937,9 +966,10 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
           </p>
         </div>
         <a
-          href={`/experts/${expert.name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg"
-          style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", fontFamily: sans, fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}
+          href={`/experts/${publicSlug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.1)", borderRadius: 8, padding: "8px 16px", fontFamily: sans, fontWeight: 500, fontSize: 12, color: "#4A0E2E", textDecoration: "none" }}
         >
           View <ExternalLink style={{ width: 12, height: 12 }} />
         </a>
