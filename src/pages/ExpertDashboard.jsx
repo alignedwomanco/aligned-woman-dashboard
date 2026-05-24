@@ -806,7 +806,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                   value={formData.title}
                   onChange={(e) => setFormData((f) => ({ ...f, title: e.target.value }))}
                   style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: "#8A7A76", margin: "0 0 16px", background: "transparent", border: "none", borderBottom: "1px solid rgba(196,132,122,0.3)", outline: "none", width: "100%", padding: "0 0 4px" }}
-                  placeholder="Title / role (use | to add multiple tags, e.g. Coach | Author)"
+                  placeholder="Award-Winning Business Strategist, Identity Coach, Speaker, Author"
                 />
               ) : (
                 <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: "#8A7A76", margin: "0 0 16px" }}>
