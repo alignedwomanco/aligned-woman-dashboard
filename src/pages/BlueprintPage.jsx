@@ -1588,49 +1588,7 @@ function Pricing() {
 }
 
 
-// ─── CLOSING SEQUENCE ───
-function ClosingSequence() {
-  const ref = useScrollReveal(0.15);
-  return (
-    <div
-      ref={ref}
-      className="closing-sequence animate-on-scroll text-center max-w-[760px] mx-auto pt-20"
-      style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
-    >
-      <span className="closing-label animate-on-scroll text-[10px] font-semibold uppercase tracking-[0.22em] mb-6 block" style={{ fontFamily: sans, color: C.roseCore }}>
-        ONE LAST THING
-      </span>
-      <h2 className="closing-line-1 animate-on-scroll text-[clamp(28px,4vw,40px)] mb-2" style={{ fontFamily: serif, fontStyle: "italic", color: C.white }}>
-        You have been waiting for a quieter season...
-      </h2>
-      <h2 className="closing-line-2 animate-on-scroll text-[clamp(28px,4vw,40px)] mb-8" style={{ fontFamily: serif, fontStyle: "italic", color: C.roseCore }}>
-        It was never coming.
-      </h2>
-      <div className="closing-body animate-on-scroll">
-        <p className="text-[15px] font-light leading-[1.88] mb-2" style={{ fontFamily: sans, color: "rgba(255,255,255,0.65)" }}>
-          You are not late. You are not too far gone. You are not too busy, too tired, or too complicated to change.
-        </p>
-        <p className="text-[15px] font-light leading-[1.88] mb-8" style={{ fontFamily: sans, color: "rgba(255,255,255,0.65)" }}>
-          You are just operating without the foundations you were never given.
-        </p>
-      </div>
-      <div className="closing-directive animate-on-scroll">
-        <p className="text-[24px] mb-8" style={{ fontFamily: serif, fontStyle: "italic", color: "rgba(255,255,255,0.5)" }}>
-          That ends here.
-        </p>
-        <p className="text-[16px] font-bold uppercase tracking-[0.08em] mb-6" style={{ fontFamily: sans, color: C.white }}>
-          Begin your Blueprint.
-        </p>
-      </div>
-      <div className="closing-cta animate-on-scroll">
-        <PrimaryCTA />
-      </div>
-      <p className="closing-guarantee animate-on-scroll mt-6 text-[11px] font-light" style={{ fontFamily: sans, color: "rgba(255,255,255,0.5)" }}>
-        30-day completion guarantee &middot; R3,997 founding price &middot; Closes at launch
-      </p>
-    </div>
-  );
-}
+
 
 
 // ═══════════════════════════════════════════════
@@ -1686,8 +1644,6 @@ function FinalClose() {
           </div>
         </div>
 
-        {/* Bottom block — closing sequence */}
-        <ClosingSequence />
       </div>
     </section>
   );
