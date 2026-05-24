@@ -52,9 +52,8 @@ export default function ModulePlayer() {
         const enrollments = await base44.entities.CourseEnrollment.filter({
           userEmail: email,
           courseId,
-          isPaid: true,
         });
-        if (enrollments.length > 0) {
+        if (enrollments.length > 0 && enrollments[0]?.isPaid) {
           setHasPaidAccess(true);
           setAccessChecked(true);
           return;
