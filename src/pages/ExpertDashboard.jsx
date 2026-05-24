@@ -654,8 +654,9 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         tiktok_url: formData.tiktok_url,
         custom_links: formData.custom_links.filter((l) => l.url?.trim()),
       };
-      // Explicitly ensure category is NEVER included
-      delete saveData.category;
+      
+      console.log("[ExpertDashboard] Saving with data:", saveData);
+      console.log("[ExpertDashboard] Current formData keys:", Object.keys(formData));
       
       await base44.entities.Expert.update(expert.id, saveData);
       console.log("Save successful");
