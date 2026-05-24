@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -1943,7 +1944,6 @@ export default function ModulePlayer() {
             <ChevronRight className="w-4 h-4" style={{ color: "#4A0E2E" }} />
           </button>
         </div>
-      </div>
       </div>
     );
   }
