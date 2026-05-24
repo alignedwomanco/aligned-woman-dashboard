@@ -5,12 +5,6 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft,
   CheckCircle,
@@ -22,6 +16,10 @@ import {
   Check,
   Lock,
   ExternalLink,
+  FileText,
+  Menu,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 
@@ -34,6 +32,8 @@ export default function ModulePlayer() {
   const [newComment, setNewComment] = useState("");
   const [hasPaidAccess, setHasPaidAccess] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
+  const [mobileTab, setMobileTab] = useState("about");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const queryClient = useQueryClient();
 
   // Check course access
@@ -42,26 +42,40 @@ export default function ModulePlayer() {
       if (!courseId) return;
       const me = await base44.auth.me();
       const email = me?.email?.toLowerCase();
-      const adminUser = ['owner', 'admin', 'master_admin'].includes(me?.role);
-      // Admin/owner bypass: always grant access
+      const adminUser = ["owner", "admin", "master_admin"].includes(me?.role);
       if (adminUser) {
         setHasPaidAccess(true);
         setAccessChecked(true);
         return;
       }
       if (email) {
-        const enrollments = await base44.entities.CourseEnrollment.filter({ userEmail: email, courseId, isPaid: true });
-        if (enrollments.length > 0) { setHasPaidAccess(true); setAccessChecked(true); return; }
-        // Check user access tags against course tags
+        const enrollments = await base44.entities.CourseEnrollment.filter({
+          userEmail: email,
+          courseId,
+          isPaid: true,
+        });
+        if (enrollments.length > 0) {
+          setHasPaidAccess(true);
+          setAccessChecked(true);
+          return;
+        }
         const userTags = me?.access_tags || [];
         const courses = await base44.entities.Course.filter({ id: courseId });
         const courseData = courses[0];
-        if (courseData?.isComingSoon) { setHasPaidAccess(false); setAccessChecked(true); return; }
-        if (courseData?.tags?.length > 0 && courseData.tags.some(t => userTags.includes(t))) {
-          setHasPaidAccess(true); setAccessChecked(true); return;
+        if (courseData?.isComingSoon) {
+          setHasPaidAccess(false);
+          setAccessChecked(true);
+          return;
+        }
+        if (
+          courseData?.tags?.length > 0 &&
+          courseData.tags.some((t) => userTags.includes(t))
+        ) {
+          setHasPaidAccess(true);
+          setAccessChecked(true);
+          return;
         }
       }
-      // Truly free = no tags and no price
       const courses2 = await base44.entities.Course.filter({ id: courseId });
       const c = courses2[0];
       if (c && (!c.tags || c.tags.length === 0) && (!c.price || c.price === 0)) {
@@ -75,7 +89,9 @@ export default function ModulePlayer() {
   const { data: module } = useQuery({
     queryKey: ["courseModule", moduleId],
     queryFn: async () => {
-      const modules = await base44.entities.CourseModule.filter({ id: moduleId });
+      const modules = await base44.entities.CourseModule.filter({
+        id: moduleId,
+      });
       return modules[0];
     },
     enabled: !!moduleId,
@@ -96,7 +112,6 @@ export default function ModulePlayer() {
     enabled: !!moduleId,
   });
 
-  // Sort pages client-side using the same logic as the admin Course Builder
   const pages = [...rawPages].sort((a, b) => {
     const aOrder = a.order ?? Infinity;
     const bOrder = b.order ?? Infinity;
@@ -113,55 +128,60 @@ export default function ModulePlayer() {
   const { data: comments = [] } = useQuery({
     queryKey: ["comments", moduleId],
     queryFn: () =>
-      base44.entities.ModuleComment.filter(
-        { moduleId },
-        "-created_date"
-      ),
+      base44.entities.ModuleComment.filter({ moduleId }, "-created_date"),
     enabled: !!moduleId,
   });
 
-  // All modules in this course (for next module navigation)
   const { data: allCourseModules = [] } = useQuery({
     queryKey: ["allCourseModules", courseId],
     queryFn: () => base44.entities.CourseModule.filter({ courseId }),
     enabled: !!courseId,
   });
 
-  // All sections in this course (for cross-section ordering)
   const { data: allCourseSections = [] } = useQuery({
     queryKey: ["allCourseSections", courseId],
     queryFn: () => base44.entities.CourseSection.filter({ courseId }),
     enabled: !!courseId,
   });
 
-  // FIX: Workbook entity uses snake_case course_id, not camelCase courseId
   const { data: workbooks = [] } = useQuery({
     queryKey: ["courseWorkbooks", courseId],
     queryFn: () => base44.entities.Workbook.filter({ course_id: courseId }),
     enabled: !!courseId,
   });
 
-  // All pages across all course modules (to identify which modules have content)
   const { data: allCoursePages = [] } = useQuery({
     queryKey: ["allCoursePages", courseId],
     queryFn: async () => {
       const results = await Promise.all(
-        allCourseModules.map(m => base44.entities.CoursePage.filter({ moduleId: m.id }))
+        allCourseModules.map((m) =>
+          base44.entities.CoursePage.filter({ moduleId: m.id })
+        )
       );
       return results.flat();
     },
     enabled: allCourseModules.length > 0,
   });
 
-  // Reset selectedPage when navigating to a different module
+  const { data: expert } = useQuery({
+    queryKey: ["expert", module?.expertId],
+    queryFn: async () => {
+      if (!module?.expertId) return null;
+      const experts = await base44.entities.Expert.filter({
+        id: module.expertId,
+      });
+      return experts[0] || null;
+    },
+    enabled: !!module?.expertId,
+  });
+
   useEffect(() => {
     setSelectedPage(null);
   }, [moduleId]);
 
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
-      // Find the module-level progress record (one without a pageId)
-      const existing = moduleProgress.find(p => !p.pageId);
+      const existing = moduleProgress.find((p) => !p.pageId);
       if (existing) {
         return base44.entities.CourseProgress.update(existing.id, {
           status,
@@ -191,7 +211,7 @@ export default function ModulePlayer() {
 
   const togglePageCompleteMutation = useMutation({
     mutationFn: async ({ pageId, isComplete }) => {
-      const existing = moduleProgress.find(p => p.pageId === pageId);
+      const existing = moduleProgress.find((p) => p.pageId === pageId);
       if (existing) {
         return base44.entities.CourseProgress.update(existing.id, {
           status: isComplete ? "completed" : "in_progress",
@@ -219,48 +239,49 @@ export default function ModulePlayer() {
   }, [pages]);
 
   const handleTogglePageComplete = async () => {
-    const pageProgress = moduleProgress.find(p => p.pageId === selectedPage.id);
+    const pageProgress = moduleProgress.find((p) => p.pageId === selectedPage.id);
     const isCurrentlyComplete = pageProgress?.status === "completed" || false;
-    
+
     await togglePageCompleteMutation.mutateAsync({
       pageId: selectedPage.id,
       isComplete: !isCurrentlyComplete,
     });
 
-    // Check if all pages are now completed
     if (!isCurrentlyComplete) {
-      const allPagesCompleted = pages.every(page => {
+      const allPagesCompleted = pages.every((page) => {
         if (page.id === selectedPage.id) return true;
-        const progress = moduleProgress.find(p => p.pageId === page.id);
+        const progress = moduleProgress.find((p) => p.pageId === page.id);
         return progress?.status === "completed";
       });
 
       if (allPagesCompleted) {
         await completeModule();
       } else {
-        // Update module-level progress percentage
-        const completedCount = pages.filter(page => {
+        const completedCount = pages.filter((page) => {
           if (page.id === selectedPage.id) return true;
-          const p = moduleProgress.find(pr => pr.pageId === page.id);
+          const p = moduleProgress.find((pr) => pr.pageId === page.id);
           return p?.status === "completed";
         }).length;
         const pct = Math.round((completedCount / pages.length) * 100);
-        updateProgressMutation.mutate({ status: "in_progress", progressPercentage: pct });
+        updateProgressMutation.mutate({
+          status: "in_progress",
+          progressPercentage: pct,
+        });
       }
     } else {
-      // Unmarking: recalculate
-      const completedCount = pages.filter(page => {
+      const completedCount = pages.filter((page) => {
         if (page.id === selectedPage.id) return false;
-        const p = moduleProgress.find(pr => pr.pageId === page.id);
+        const p = moduleProgress.find((pr) => pr.pageId === page.id);
         return p?.status === "completed";
       }).length;
       const pct = Math.round((completedCount / pages.length) * 100);
-      updateProgressMutation.mutate({ status: pct > 0 ? "in_progress" : "not_started", progressPercentage: pct });
+      updateProgressMutation.mutate({
+        status: pct > 0 ? "in_progress" : "not_started",
+        progressPercentage: pct,
+      });
     }
   };
 
-  // FIX: use mutateAsync so the module-level write is awaited and errors
-  // surface instead of silently leaving the record as "in_progress"
   const completeModule = async () => {
     try {
       await updateProgressMutation.mutateAsync({
@@ -270,8 +291,6 @@ export default function ModulePlayer() {
     } catch (error) {
       console.error("Failed to mark module complete:", error);
     }
-
-    // Award points for module completion
     await awardModuleCompletion();
   };
 
@@ -279,8 +298,8 @@ export default function ModulePlayer() {
     try {
       const pointsRecords = await base44.entities.UserPoints.filter({});
       const currentPoints = pointsRecords[0];
-      
-      const modulePoints = 50; // Base points for module completion
+
+      const modulePoints = 50;
       const streakBonus = (currentPoints?.currentStreak || 0) >= 3 ? 5 : 0;
       const totalPoints = (currentPoints?.points || 0) + modulePoints + streakBonus;
       const newLevel = Math.floor(totalPoints / 100) + 1;
@@ -289,17 +308,16 @@ export default function ModulePlayer() {
         await base44.entities.UserPoints.update(currentPoints.id, {
           points: totalPoints,
           level: newLevel,
-          lastActivityDate: new Date().toISOString().split('T')[0],
+          lastActivityDate: new Date().toISOString().split("T")[0],
         });
       } else {
         await base44.entities.UserPoints.create({
           points: totalPoints,
           level: newLevel,
-          lastActivityDate: new Date().toISOString().split('T')[0],
+          lastActivityDate: new Date().toISOString().split("T")[0],
         });
       }
 
-      // Award badge for module completion
       await base44.entities.UserBadge.create({
         badgeId: `module-${moduleId}`,
         badgeName: `${module.title} Complete`,
@@ -311,8 +329,6 @@ export default function ModulePlayer() {
     }
   };
 
-
-
   const handleAddComment = () => {
     if (!newComment.trim()) return;
     addCommentMutation.mutate({
@@ -322,28 +338,34 @@ export default function ModulePlayer() {
     });
   };
 
-  // Calculate progress from actual page completions
-  const overallProgress = pages.length > 0
-    ? Math.round((pages.filter(page => {
-        const p = moduleProgress.find(pr => pr.pageId === page.id);
-        return p?.status === "completed";
-      }).length / pages.length) * 100)
-    : 0;
+  const overallProgress =
+    pages.length > 0
+      ? Math.round(
+          (pages.filter((page) => {
+            const p = moduleProgress.find((pr) => pr.pageId === page.id);
+            return p?.status === "completed";
+          }).length /
+            pages.length) *
+            100
+        )
+      : 0;
 
   if (!module || !selectedPage || !accessChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-[#6B1B3D] border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
       </div>
     );
   }
 
   if (!hasPaidAccess) {
     return (
-      <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
+      <div className="min-h-screen bg-[#FAF5F3]">
         <div className="max-w-2xl mx-auto p-6 pt-20">
           <button onClick={() => navigate(-1)} className="mb-6">
-            <Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" /> Back</Button>
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Back
+            </Button>
           </button>
           <CourseAccessGate course={course} />
         </div>
@@ -351,28 +373,25 @@ export default function ModulePlayer() {
     );
   }
 
-  // Helper: check if a specific page is completed
   const isPageCompleted = (pageId) => {
-    const p = moduleProgress.find(pr => pr.pageId === pageId);
-    return p?.status === "completed";
+    const p = moduleProgress.find((pr) => pr.pageId === pageId);
+    return p?.status === "completed" || false;
   };
 
-  // Helper: check if ALL pages in the module are completed
-  const allPagesCompleted = pages.length > 0 && pages.every(page => isPageCompleted(page.id));
-
-  // Helper: check if the currently selected page is completed
+  const allPagesCompleted =
+    pages.length > 0 && pages.every((page) => isPageCompleted(page.id));
   const isCurrentPageComplete = isPageCompleted(selectedPage?.id);
 
-  // Compute the next module in the course (cross-section ordering)
   const sortedSections = [...allCourseSections].sort((a, b) => {
     const aOrder = a.order ?? Infinity;
     const bOrder = b.order ?? Infinity;
     if (aOrder !== bOrder) return aOrder - bOrder;
     return (a.created_date || "").localeCompare(b.created_date || "");
   });
-  const sortedCourseModules = sortedSections.flatMap(section =>
+
+  const sortedCourseModules = sortedSections.flatMap((section) =>
     [...allCourseModules]
-      .filter(m => m.sectionId === section.id)
+      .filter((m) => m.sectionId === section.id)
       .sort((a, b) => {
         const aOrd = a.order ?? Infinity;
         const bOrd = b.order ?? Infinity;
@@ -380,412 +399,1600 @@ export default function ModulePlayer() {
         return (a.created_date || "").localeCompare(b.created_date || "");
       })
   );
-  const currentModuleIndex = sortedCourseModules.findIndex(m => m.id === moduleId);
-  // Skip modules that have no pages (e.g. placeholder "Assessment" modules)
-  const modulesWithPages = new Set(allCoursePages.map(p => p.moduleId));
-  const nextModule = sortedCourseModules
-    .slice(currentModuleIndex + 1)
-    .find(m => modulesWithPages.has(m.id)) || null;
 
-  // FIX: Find the workbook matching this module's expert, not just the first one
-  const courseWorkbook = workbooks.find(w => w.expert_id === module?.expertId)
-    || (workbooks.length > 0 ? workbooks[0] : null);
+  const currentModuleIndex = sortedCourseModules.findIndex(
+    (m) => m.id === moduleId
+  );
+  const modulesWithPages = new Set(allCoursePages.map((p) => p.moduleId));
+  const nextModule =
+    sortedCourseModules
+      .slice(currentModuleIndex + 1)
+      .find((m) => modulesWithPages.has(m.id)) || null;
 
-  return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F5E9EE 0%, #FFFFFF 100%)" }}>
-      {/* Header */}
-      <div className="bg-white border-b sticky top-20 z-40">
-        <div className="max-w-6xl mx-auto px-6 sm:px-10 py-4 sm:py-6">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-              <button onClick={() => navigate(-1)} className="flex-shrink-0">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </button>
-              <div className="min-w-0">
-                {course && (
-                  <Badge className="bg-[#F5E8EE] text-[#6E1D40] border-[#DEBECC] border mb-1 max-w-full">
-                    <Eye className="w-3 h-3 mr-1 flex-shrink-0" />
-                    <span className="truncate">{course.title}</span>
-                  </Badge>
-                )}
-                <h1 className="text-base sm:text-xl font-bold text-[#4A1228] break-words">{module?.title}</h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-              <span className="text-sm text-gray-500 items-center gap-1 hidden sm:flex">
-                <Clock className="w-4 h-4" />
-                {module.durationMinutes} min
-              </span>
-              <Progress value={overallProgress} className="w-20 sm:w-32" />
-              <span className="text-sm font-medium text-[#6B1B3D]">{overallProgress}%</span>
-            </div>
+  const courseWorkbook =
+    workbooks.find((w) => w.expert_id === module?.expertId) ||
+    (workbooks.length > 0 ? workbooks[0] : null);
+
+  const currentPageIndex = pages.findIndex((p) => p.id === selectedPage.id);
+  const nextPage = pages[currentPageIndex + 1] || null;
+  const prevPage = currentPageIndex > 0 ? pages[currentPageIndex - 1] : null;
+
+  // Mobile sticky header
+  const MobileHeader = () => (
+    <div className="fixed top-0 left-0 right-0 z-50 md:hidden">
+      <div className="bg-[#FAF5F3] px-4 py-3 flex items-center justify-between">
+        <button onClick={() => navigate(-1)} className="flex-shrink-0">
+          <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
+        </button>
+        <div className="flex-1 text-center mx-4">
+          <div
+            style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "9px",
+              fontWeight: 700,
+              letterSpacing: "0.22em",
+              color: "#C4847A",
+              textTransform: "uppercase",
+              marginBottom: "2px",
+            }}
+          >
+            MODULE {String(currentPageIndex + 1).padStart(2, "0")} . {module?.title?.split(" ")[0]?.toUpperCase()}
+          </div>
+          <div
+            style={{
+              fontFamily: "'DM Serif Display', serif",
+              fontSize: "16px",
+              fontStyle: "italic",
+              color: "#4A0E2E",
+              lineHeight: 1,
+            }}
+          >
+            {module?.title}
           </div>
         </div>
+        <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="flex-shrink-0">
+          <Menu className="w-5 h-5" style={{ color: "#4A0E2E" }} />
+        </button>
       </div>
+      <div
+        style={{
+          height: "2px",
+          background: "#F5DDD9",
+          width: "100%",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            background: "#C4847A",
+            width: `${overallProgress}%`,
+            transition: "width 0.7s ease-out",
+          }}
+        />
+      </div>
+    </div>
+  );
 
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 py-6 sm:py-8 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 overflow-hidden">
-          {/* Left Sidebar - Pages List & Resources */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Course Content</CardTitle>
-                <Progress value={overallProgress} className="h-1.5" />
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[calc(100vh-300px)]">
-                  <div className="space-y-1 p-4">
-                    {pages.map((page, idx) => {
-                      const pageProgress = moduleProgress.find(p => p.pageId === page.id);
-                      const isCompleted = pageProgress?.status === "completed" || false;
-                      return (
-                        <button
-                          key={page.id}
-                          onClick={() => setSelectedPage(page)}
-                          className={`w-full text-left p-3 rounded-lg transition-all ${
-                            selectedPage?.id === page.id
-                              ? "bg-pink-50 border-2 border-[#6B1B3D]"
-                              : "hover:bg-gray-50 border-2 border-transparent"
-                          }`}
+  return (
+    <CourseAccessGate course={course}>
+      <div style={{ background: "#FAF5F3" }} className="min-h-screen">
+        <MobileHeader />
+
+        {/* Desktop Top Bar */}
+        <div className="hidden md:block sticky top-0 z-40 bg-[#FAF5F3] border-b border-[rgba(74,14,46,0.06)]">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button onClick={() => navigate(-1)}>
+                <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
+              </button>
+              <span
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.22em",
+                  color: "#4A0E2E",
+                  textTransform: "uppercase",
+                }}
+              >
+                ALIGNED WOMAN BLUEPRINT
+              </span>
+            </div>
+            <span
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.22em",
+                color: "#8A7A76",
+                textTransform: "uppercase",
+              }}
+            >
+              MODULE {String(currentPageIndex + 1).padStart(2, "0")} . {module?.title}
+            </span>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="md:pt-0 pt-20 pb-safe">
+          {/* Desktop Layout */}
+          <div className="hidden md:block">
+            <div className="max-w-7xl mx-auto px-6 py-8">
+              {/* Module Header */}
+              <div className="grid grid-cols-2 gap-12 mb-12">
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      letterSpacing: "0.22em",
+                      color: "#C4847A",
+                      textTransform: "uppercase",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    MODULE {String(currentPageIndex + 1).padStart(2, "0")} . {module?.title?.split(" ")[0]?.toUpperCase()}
+                  </div>
+                  <h1
+                    style={{
+                      fontFamily: "'DM Serif Display', serif",
+                      fontSize: "52px",
+                      color: "#4A0E2E",
+                      fontWeight: 400,
+                      lineHeight: 1.2,
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {module?.title?.split(" & ")[0]}
+                    <br />
+                    &{" "}
+                    <span style={{ fontStyle: "italic" }}>
+                      {module?.title?.split(" & ")[1] || ""}
+                    </span>
+                  </h1>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      letterSpacing: "0.22em",
+                      color: "#8A7A76",
+                      textTransform: "uppercase",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    MODULE PROGRESS
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'DM Serif Display', serif",
+                      fontSize: "48px",
+                      color: "#4A0E2E",
+                      fontWeight: 400,
+                      marginBottom: "16px",
+                    }}
+                  >
+                    {overallProgress}%
+                  </div>
+                  <div
+                    style={{
+                      height: "4px",
+                      background: "#F5DDD9",
+                      borderRadius: "2px",
+                      marginBottom: "12px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        background: "#C4847A",
+                        width: `${overallProgress}%`,
+                        transition: "width 0.7s ease-out",
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 500,
+                      color: "#8A7A76",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.15em",
+                    }}
+                  >
+                    {currentPageIndex + 1} OF {pages.length} LESSONS ·{" "}
+                    {module?.durationMinutes || "0"} OF {module?.durationMinutes || "0"} MIN
+                  </div>
+                </div>
+              </div>
+
+              {/* Two-Column Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12">
+                {/* Left Column */}
+                <div>
+                  {/* Video Player */}
+                  <motion.div
+                    key={selectedPage.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ marginBottom: "36px" }}
+                  >
+                    <div
+                      style={{
+                        paddingTop: "56.25%",
+                        position: "relative",
+                        background: "linear-gradient(135deg, #3D0F1F 0%, #4A0E2E 50%, #3D0F1F 100%)",
+                        borderRadius: "12px",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {selectedPage.videoUrl ? (
+                        (() => {
+                          const url = selectedPage.videoUrl.trim();
+                          let embedUrl = url;
+
+                          if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                            let videoId = null;
+                            try {
+                              if (url.includes("youtu.be"))
+                                videoId = url.split("youtu.be/")[1]?.split(/[?&#]/)[0];
+                              else videoId = new URL(url).searchParams.get("v");
+                            } catch (e) {
+                              const match = url.match(/[?&]v=([^&#]+)/);
+                              videoId = match ? match[1] : null;
+                            }
+                            if (videoId)
+                              embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                          }
+
+                          if (url.includes("vimeo.com")) {
+                            const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
+                            if (vimeoId)
+                              embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
+                          }
+
+                          if (url.includes("drive.google.com")) {
+                            const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+                            if (fileId)
+                              embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                          }
+
+                          if (url.includes("wistia.com") || url.includes("wistia.net")) {
+                            const videoId =
+                              url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] ||
+                              url.split("/").pop();
+                            embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
+                          }
+
+                          const isDirectVideo =
+                            /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(embedUrl) ||
+                            embedUrl.includes("supabase.co/storage") ||
+                            embedUrl.includes("base44.app/api/apps");
+
+                          if (isDirectVideo) {
+                            return (
+                              <video
+                                src={embedUrl}
+                                controls
+                                className="absolute top-0 left-0 w-full h-full"
+                                style={{ backgroundColor: "#000" }}
+                              />
+                            );
+                          }
+
+                          return (
+                            <iframe
+                              src={embedUrl}
+                              className="absolute top-0 left-0 w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                              allowFullScreen
+                              style={{ border: 0 }}
+                            />
+                          );
+                        })()
+                      ) : (
+                        <div
+                          className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white"
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                          }}
                         >
-                          <div className="flex items-start gap-3">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              isCompleted ? "bg-green-100" : "bg-gray-200"
-                            }`}>
-                              <span className={`text-xs font-semibold ${isCompleted ? "text-green-600" : "text-gray-600"}`}>{idx + 1}</span>
+                          <div className="text-center">
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                fontWeight: 500,
+                                letterSpacing: "0.2em",
+                                textTransform: "uppercase",
+                                marginBottom: "12px",
+                              }}
+                            >
+                              PRESENTED BY
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-1.5 text-sm font-medium text-[#4A1228] break-words">
-                                  {page.title}
-                                  {isCompleted && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
-                                </div>
-                                {(page.estimatedMinutes || page.videoDuration) && (
-                                  <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 mt-0.5">
-                                    {page.estimatedMinutes
-                                      ? `${page.estimatedMinutes} min`
-                                      : `${Math.round(page.videoDuration / 60)} min`}
-                                  </span>
-                                )}
-                              </div>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                fontWeight: 500,
+                                letterSpacing: "0.3em",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              THE ALIGNED WOMAN CO.
                             </div>
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                        </div>
+                      )}
+                      {/* Timestamp overlay */}
+                      {!selectedPage.videoUrl && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: "16px",
+                            left: "16px",
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            color: "white",
+                          }}
+                        >
+                          00:00 · {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
 
-            {/* Resources Section */}
-            {selectedPage.downloads && selectedPage.downloads.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Download className="w-4 h-4" />
-                    Resources
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {selectedPage.downloads.map((download, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Download className="w-4 h-4 text-[#6B1B3D] flex-shrink-0" />
-                        <span className="text-sm font-medium text-[#4A1228] truncate">
-                          {download.name}
+                  {/* Lesson Meta Line */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      marginBottom: "24px",
+                      paddingBottom: "24px",
+                      borderBottom: "1px solid rgba(74,14,46,0.06)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'DM Serif Display', serif",
+                        fontSize: "22px",
+                        fontStyle: "italic",
+                        color: "#C4847A",
+                      }}
+                    >
+                      {String(currentPageIndex + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        letterSpacing: "0.2em",
+                        color: "#8A7A76",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      LESSON {String(currentPageIndex + 1).padStart(2, "0")} OF {pages.length} · {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
+                    </span>
+                    {isCurrentPageComplete && (
+                      <div
+                        style={{
+                          marginLeft: "auto",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          background: "#FDF5F3",
+                          border: "1px solid rgba(196,132,122,0.18)",
+                          borderRadius: "100px",
+                          padding: "6px 12px",
+                        }}
+                      >
+                        <Check
+                          className="w-4 h-4"
+                          style={{ color: "#A86460" }}
+                        />
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            letterSpacing: "0.15em",
+                            color: "#A86460",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          COMPLETED
                         </span>
                       </div>
-                      <a
-                        href={download.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-2"
+                    )}
+                  </div>
+
+                  {/* Lesson Title */}
+                  <h2
+                    style={{
+                      fontFamily: "'DM Serif Display', serif",
+                      fontSize: "32px",
+                      color: "#4A0E2E",
+                      fontWeight: 400,
+                      lineHeight: 1.3,
+                      marginBottom: "16px",
+                    }}
+                  >
+                    {selectedPage.title}
+                  </h2>
+
+                  {/* Expert Byline */}
+                  {expert && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        marginBottom: "24px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "50%",
+                          background: expert.profile_picture
+                            ? `url(${expert.profile_picture}) center/cover`
+                            : "#4A0E2E",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "white",
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
                       >
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </a>
+                        {!expert.profile_picture &&
+                          expert.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                      </div>
+                      <div>
+                        <div
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "14px",
+                            fontWeight: 400,
+                            color: "#8A7A76",
+                          }}
+                        >
+                          Presented by{" "}
+                          <span style={{ fontWeight: 600, color: "#3A2A28" }}>
+                            {expert.name}
+                          </span>{" "}
+                          ·{" "}
+                          <span style={{ color: "#8A7A76" }}>
+                            {expert.title || "Expert"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+                  )}
+
+                  {/* Lesson Body Copy */}
+                  <motion.div
+                    key={selectedPage.id + "-content"}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.05 }}
+                    style={{
+                      marginBottom: "32px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "15px",
+                        fontWeight: 300,
+                        color: "#3A2A28",
+                        lineHeight: 1.85,
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: selectedPage.content || "",
+                      }}
+                    />
+                  </motion.div>
+
+                  {/* Bottom Navigation */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      paddingTop: "24px",
+                      borderTop: "1px solid rgba(74,14,46,0.06)",
+                    }}
+                  >
+                    {prevPage && (
+                      <button
+                        onClick={() => {
+                          setSelectedPage(prevPage);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          letterSpacing: "0.2em",
+                          color: "#8A7A76",
+                          textTransform: "uppercase",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "8px 0",
+                          transition: "color 0.2s",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.target.style.color = "#4A0E2E")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.target.style.color = "#8A7A76")
+                        }
+                      >
+                        ← PREVIOUS
+                      </button>
+                    )}
+
+                    <button
+                      onClick={handleTogglePageComplete}
+                      style={{
+                        marginLeft: "auto",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        letterSpacing: "0.2em",
+                        color: isCurrentPageComplete ? "#A86460" : "#4A0E2E",
+                        textTransform: "uppercase",
+                        background: isCurrentPageComplete ? "transparent" : "#4A0E2E",
+                        border:
+                          isCurrentPageComplete
+                            ? "1px solid rgba(196,132,122,0.18)"
+                            : "none",
+                        borderRadius: "100px",
+                        padding: "8px 16px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isCurrentPageComplete) {
+                          e.target.style.background = "#3A1F20";
+                          e.target.style.color = "white";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isCurrentPageComplete) {
+                          e.target.style.background = "#4A0E2E";
+                          e.target.style.color = "#4A0E2E";
+                        }
+                      }}
+                    >
+                      ✓ {isCurrentPageComplete ? "MARKED COMPLETE" : "MARK COMPLETE"}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (nextPage) {
+                          setSelectedPage(nextPage);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        } else if (nextModule) {
+                          navigate(
+                            createPageUrl("ModulePlayer") +
+                              `?moduleId=${nextModule.id}&courseId=${courseId}`
+                          );
+                        } else {
+                          navigate(createPageUrl("Classroom"));
+                        }
+                      }}
+                      style={{
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        letterSpacing: "0.2em",
+                        color: "#4A0E2E",
+                        textTransform: "uppercase",
+                        background: "#C4847A",
+                        border: "none",
+                        borderRadius: "100px",
+                        padding: "8px 16px",
+                        cursor: "pointer",
+                        transition: "background 0.2s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.target.style.background = "#A86460")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.target.style.background = "#C4847A")
+                      }
+                    >
+                      NEXT LESSON →
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Column - Sticky Sidebar */}
+                <div
+                  style={{
+                    position: "sticky",
+                    top: "32px",
+                    height: "fit-content",
+                  }}
+                >
+                  {/* Course Content Panel */}
+                  <div style={{ marginBottom: "24px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        gap: "8px",
+                        marginBottom: "8px",
+                        paddingBottom: "12px",
+                        borderBottom: "2px solid #4A0E2E",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          letterSpacing: "0.22em",
+                          color: "#4A0E2E",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        COURSE CONTENT
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "'DM Serif Display', serif",
+                          fontSize: "18px",
+                          fontStyle: "italic",
+                          color: "#C4847A",
+                        }}
+                      >
+                        {String(pages.length).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    <div style={{ space: "1px" }}>
+                      {pages.map((page, idx) => {
+                        const isActive = selectedPage?.id === page.id;
+                        const isComplete = isPageCompleted(page.id);
+                        return (
+                          <button
+                            key={page.id}
+                            onClick={() => {
+                              setSelectedPage(page);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            style={{
+                              width: "100%",
+                              textAlign: "left",
+                              padding: "12px",
+                              borderLeft: isActive
+                                ? "3px solid #C4847A"
+                                : "3px solid transparent",
+                              background: isActive ? "#FDF5F3" : "transparent",
+                              borderBottom: "1px solid rgba(74,14,46,0.06)",
+                              cursor: "pointer",
+                              transition: "all 0.2s",
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: "12px",
+                              border: "none",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isActive) {
+                                e.currentTarget.style.background = "#FDF5F3";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isActive) {
+                                e.currentTarget.style.background = "transparent";
+                              }
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontFamily: "'DM Serif Display', serif",
+                                fontSize: "18px",
+                                fontStyle: "italic",
+                                color: isComplete ? "#C4847A" : "#C8B8B4",
+                                flexShrink: 0,
+                                fontWeight: 400,
+                              }}
+                            >
+                              {String(idx + 1).padStart(2, "0")}
+                            </span>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontFamily: "'Montserrat', sans-serif",
+                                  fontSize: "13px",
+                                  fontWeight: 500,
+                                  color: "#3A2A28",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                {page.title}
+                              </div>
+                              <div
+                                style={{
+                                  fontFamily: "'Montserrat', sans-serif",
+                                  fontSize: "10px",
+                                  fontWeight: 500,
+                                  letterSpacing: "0.15em",
+                                  color: "#8A7A76",
+                                  textTransform: "uppercase",
+                                }}
+                              >
+                                {page.estimatedMinutes || module?.durationMinutes || "22"} MIN{" "}
+                                · {isComplete ? "COMPLETED" : ""}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Module Overview Card */}
+                  <div style={{ marginBottom: "24px", background: "white", borderRadius: "12px", padding: "20px" }}>
+                    <div
+                      style={{
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        letterSpacing: "0.22em",
+                        color: "#4A0E2E",
+                        textTransform: "uppercase",
+                        marginBottom: "12px",
+                        paddingBottom: "12px",
+                        borderBottom: "2px solid #4A0E2E",
+                      }}
+                    >
+                      MODULE OVERVIEW
+                    </div>
+
+                    <div style={{ space: "16px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          paddingBottom: "12px",
+                          borderBottom: "1px solid rgba(74,14,46,0.06)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 400,
+                            color: "#8A7A76",
+                          }}
+                        >
+                          Lessons
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: "#3A2A28",
+                          }}
+                        >
+                          {pages.length}
+                        </span>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          paddingBottom: "12px",
+                          borderBottom: "1px solid rgba(74,14,46,0.06)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 400,
+                            color: "#8A7A76",
+                          }}
+                        >
+                          Total duration
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: "#3A2A28",
+                          }}
+                        >
+                          {module?.durationMinutes
+                            ? `${Math.floor(module.durationMinutes / 60)} hr ${
+                                module.durationMinutes % 60
+                              } min`
+                            : "N/A"}
+                        </span>
+                      </div>
+
+                      {expert && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            paddingBottom: "12px",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "'Montserrat', sans-serif",
+                              fontSize: "13px",
+                              fontWeight: 400,
+                              color: "#8A7A76",
+                            }}
+                          >
+                            Expert
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: "'Montserrat', sans-serif",
+                              fontSize: "13px",
+                              fontWeight: 600,
+                              color: "#3A2A28",
+                            }}
+                          >
+                            {expert.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Workbook Card */}
+                  {courseWorkbook && (
+                    <button
+                      onClick={() => {
+                        window.location.href = `/Workbook?id=${courseWorkbook.id}`;
+                      }}
+                      style={{
+                        width: "100%",
+                        background: "#FDF5F3",
+                        border: "1px solid rgba(196,132,122,0.18)",
+                        borderRadius: "12px",
+                        padding: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        cursor: "pointer",
+                        transition: "background 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "#F5DDD9";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "#FDF5F3";
+                      }}
+                    >
+                      <FileText className="w-5 h-5" style={{ color: "#4A0E2E", flexShrink: 0 }} />
+                      <div style={{ textAlign: "left", flex: 1 }}>
+                        <div
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            color: "#4A0E2E",
+                            marginBottom: "2px",
+                          }}
+                        >
+                          Module workbook
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "12px",
+                            fontWeight: 400,
+                            color: "#8A7A76",
+                          }}
+                        >
+                          PDF · 24 PAGES
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4" style={{ color: "#4A0E2E", flexShrink: 0 }} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div className="space-y-8">
+          {/* Mobile Layout */}
+          <div className="md:hidden px-4 space-y-4">
             {/* Video Player */}
             <motion.div
               key={selectedPage.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <Card className="overflow-hidden">
-                <div style={{ paddingTop: '56.25%', position: 'relative' }} className="bg-gray-900">
-                  {selectedPage.videoUrl ? (
-                    (() => {
-                      const url = selectedPage.videoUrl.trim();
-                      let embedUrl = url;
+              <div
+                style={{
+                  paddingTop: "56.25%",
+                  position: "relative",
+                  background:
+                    "linear-gradient(135deg, #3D0F1F 0%, #4A0E2E 50%, #3D0F1F 100%)",
+                  borderRadius: "0px",
+                  overflow: "hidden",
+                  marginLeft: "-16px",
+                  marginRight: "-16px",
+                  marginBottom: "24px",
+                }}
+              >
+                {selectedPage.videoUrl ? (
+                  (() => {
+                    const url = selectedPage.videoUrl.trim();
+                    let embedUrl = url;
 
-                      // YouTube
-                      if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                        let videoId = null;
-                        try {
-                          if (url.includes('youtu.be')) videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
-                          else videoId = new URL(url).searchParams.get('v');
-                        } catch (e) {
-                          const match = url.match(/[?&]v=([^&#]+)/);
-                          videoId = match ? match[1] : null;
-                        }
-                        if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                      let videoId = null;
+                      try {
+                        if (url.includes("youtu.be"))
+                          videoId = url.split("youtu.be/")[1]?.split(/[?&#]/)[0];
+                        else videoId = new URL(url).searchParams.get("v");
+                      } catch (e) {
+                        const match = url.match(/[?&]v=([^&#]+)/);
+                        videoId = match ? match[1] : null;
                       }
+                      if (videoId)
+                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                    }
 
-                      // Vimeo
-                      if (url.includes('vimeo.com')) {
-                        const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
-                        if (vimeoId) embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
-                      }
+                    if (url.includes("vimeo.com")) {
+                      const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
+                      if (vimeoId)
+                        embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
+                    }
 
-                      // Google Drive
-                      if (url.includes('drive.google.com')) {
-                        const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-                        if (fileId) embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-                      }
+                    if (url.includes("drive.google.com")) {
+                      const fileId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+                      if (fileId)
+                        embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                    }
 
-                      // Wistia
-                      if (url.includes('wistia.com') || url.includes('wistia.net')) {
-                        const videoId = url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] || url.split('/').pop();
-                        embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
-                      }
-                      
-                      // Check if it's a direct video file (mp4, webm, mov, ogg, etc.) or hosted upload
-                      const isDirectVideo = /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(embedUrl) || embedUrl.includes('supabase.co/storage') || embedUrl.includes('base44.app/api/apps');
-                      if (isDirectVideo) {
-                        return (
-                          <video
-                            src={embedUrl}
-                            controls
-                            className="absolute top-0 left-0 w-full h-full"
-                            style={{ backgroundColor: '#000' }}
-                          />
-                        );
-                      }
+                    if (url.includes("wistia.com") || url.includes("wistia.net")) {
+                      const videoId =
+                        url.match(/medias\/([a-zA-Z0-9]+)/)?.[1] ||
+                        url.split("/").pop();
+                      embedUrl = `https://fast.wistia.net/embed/iframe/${videoId}`;
+                    }
 
-                      // For Google Drive, Wistia, Vimeo, and other embed URLs
+                    const isDirectVideo =
+                      /\.(mp4|webm|mov|ogg|m4v|avi|mkv)(\?|$)/i.test(embedUrl) ||
+                      embedUrl.includes("supabase.co/storage") ||
+                      embedUrl.includes("base44.app/api/apps");
+
+                    if (isDirectVideo) {
                       return (
-                        <iframe
+                        <video
                           src={embedUrl}
+                          controls
                           className="absolute top-0 left-0 w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                          allowFullScreen
-                          style={{ border: 0 }}
+                          style={{ backgroundColor: "#000" }}
                         />
-                      );
-                    })()
-                  ) : (
-                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white">
-                      No video available
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Lesson Content */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{selectedPage.title}</CardTitle>
-                  {(() => {
-                    const pageProgress = moduleProgress.find(p => p.pageId === selectedPage.id);
-                    const isPageComplete = pageProgress?.status === "completed" || false;
-                    
-                    return (
-                      <div className="flex flex-col items-end">
-                        {/* Helper text above Mark Complete (only when not completed) */}
-                        {!isPageComplete && (
-                          <p
-                            className="text-xs italic mb-2 text-right max-w-[220px]"
-                            style={{ color: "var(--aw-burg-core, #4A0E2E)", opacity: 0.6 }}
-                          >
-                            You must press this button in order to move onto the next module.
-                          </p>
-                        )}
-                        {/* Pulse animation on Mark Complete when not completed */}
-                        <Button
-                          onClick={handleTogglePageComplete}
-                          variant={isPageComplete ? "outline" : "default"}
-                          className={
-                            isPageComplete
-                              ? "border-[#943A59] text-[#943A59] hover:bg-pink-50"
-                              : "bg-[#943A59] hover:bg-[#7a2e49] text-white animate-pulse ring-2 ring-offset-2"
-                          }
-                          style={
-                            !isPageComplete
-                              ? { "--tw-ring-color": "rgba(196, 132, 122, 0.4)" }
-                              : undefined
-                          }
-                        >
-                          <span className="font-medium">{isPageComplete ? "Completed" : "Mark Complete"}</span>
-                          <CheckCircle className="w-4 h-4 ml-2" />
-                        </Button>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div 
-                  className="prose max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: selectedPage.content || '' }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Next/Complete Actions */}
-            <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  {(() => {
-                    const currentIndex = pages.findIndex(p => p.id === selectedPage.id);
-                    const nextPage = pages[currentIndex + 1];
-
-                    // Not the last page: show Next Lesson
-                    if (nextPage) {
-                      return (
-                        <Button
-                          className={`w-full ${
-                            isCurrentPageComplete
-                              ? "bg-[#6B1B3D] hover:bg-[#4A1228] text-white"
-                              : "bg-[#6B1B3D] text-white opacity-50 cursor-not-allowed"
-                          }`}
-                          onClick={() => {
-                            if (isCurrentPageComplete) {
-                              setSelectedPage(nextPage);
-                            }
-                          }}
-                          disabled={!isCurrentPageComplete}
-                        >
-                          Next Lesson &rarr;
-                        </Button>
                       );
                     }
 
-                    // Last page: show Workbook + Next Module + Back to Classroom
                     return (
-                      <>
-                        {/* Continue to Workbook (if one exists for this module's expert) */}
-                        {courseWorkbook && (
-                          <Button
-                            className={`w-full ${
-                              allPagesCompleted
-                                ? "bg-[#943A59] hover:bg-[#7a2e49] text-white"
-                                : "bg-[#943A59] text-white opacity-50 cursor-not-allowed"
-                            }`}
-                            onClick={() => {
-                              if (allPagesCompleted) {
-                                // FIX: use the registered /Workbook route with ?id= param
-                                window.location.href = `/Workbook?id=${courseWorkbook.id}`;
-                              }
-                            }}
-                            disabled={!allPagesCompleted}
-                          >
-                            Continue to Workbook &rarr;
-                          </Button>
-                        )}
-
-                        {/* Next Module (if one exists in the course) */}
-                        {nextModule && (
-                          <Button
-                            className={`w-full ${
-                              allPagesCompleted
-                                ? "bg-[#6B1B3D] hover:bg-[#4A1228] text-white"
-                                : "bg-[#6B1B3D] text-white opacity-50 cursor-not-allowed"
-                            }`}
-                            onClick={() => {
-                              if (allPagesCompleted) {
-                                navigate(createPageUrl("ModulePlayer") + `?moduleId=${nextModule.id}&courseId=${courseId}`);
-                              }
-                            }}
-                            disabled={!allPagesCompleted}
-                          >
-                            Next Module: {nextModule.title} &rarr;
-                          </Button>
-                        )}
-
-                        {/* Back to Classroom (always available) */}
-                        <Button
-                          variant="outline"
-                          className="w-full border-[#6B1B3D] text-[#6B1B3D] hover:bg-pink-50"
-                          onClick={() => navigate(createPageUrl("Classroom"))}
-                        >
-                          Back to Classroom
-                        </Button>
-                      </>
+                      <iframe
+                        src={embedUrl}
+                        className="absolute top-0 left-0 w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        style={{ border: 0 }}
+                      />
                     );
-                  })()}
-                </div>
-              </CardContent>
-            </Card>
+                  })()
+                ) : (
+                  <div
+                    className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white"
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                    }}
+                  >
+                    <div className="text-center">
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 500,
+                          letterSpacing: "0.2em",
+                          textTransform: "uppercase",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        PRESENTED BY
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 500,
+                          letterSpacing: "0.3em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        THE ALIGNED WOMAN CO.
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
 
-            {/* Comments Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <MessageCircle className="w-5 h-5" />
-                  Questions & Comments
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Add Comment */}
-                  <div className="flex gap-3">
-                    <Textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Ask a question or leave a comment..."
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={handleAddComment}
-                      className="bg-[#6B1B3D] hover:bg-[#4A1228]"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
+            {/* Lesson Meta */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "16px",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'DM Serif Display', serif",
+                  fontSize: "20px",
+                  fontStyle: "italic",
+                  color: "#C4847A",
+                }}
+              >
+                {String(currentPageIndex + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <span
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    letterSpacing: "0.2em",
+                    color: "#8A7A76",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  LESSON {String(currentPageIndex + 1).padStart(2, "0")} OF {pages.length} ·{" "}
+                  {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
+                </span>
+              </div>
+              {isCurrentPageComplete && (
+                <div
+                  style={{
+                    marginLeft: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <Check className="w-4 h-4" style={{ color: "#C4847A" }} />
+                </div>
+              )}
+            </div>
+
+            {/* Lesson Title */}
+            <h2
+              style={{
+                fontFamily: "'DM Serif Display', serif",
+                fontSize: "26px",
+                color: "#4A0E2E",
+                fontWeight: 400,
+                lineHeight: 1.3,
+                marginBottom: "16px",
+              }}
+            >
+              {selectedPage.title}
+            </h2>
+
+            {/* Expert Byline Mobile */}
+            {expert && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    background: expert.profile_picture
+                      ? `url(${expert.profile_picture}) center/cover`
+                      : "#4A0E2E",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  {!expert.profile_picture &&
+                    expert.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#3A2A28",
+                    }}
+                  >
+                    {expert.name}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      color: "#8A7A76",
+                    }}
+                  >
+                    {expert.title || "Expert"}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tabs */}
+            <div
+              style={{
+                display: "flex",
+                gap: "24px",
+                borderBottom: "1px solid rgba(74,14,46,0.06)",
+                marginBottom: "20px",
+              }}
+            >
+              <button
+                onClick={() => setMobileTab("about")}
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  color: mobileTab === "about" ? "#4A0E2E" : "#8A7A76",
+                  textTransform: "uppercase",
+                  background: "none",
+                  border: "none",
+                  borderBottom:
+                    mobileTab === "about" ? "2px solid #4A0E2E" : "none",
+                  padding: "12px 0",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                ABOUT
+              </button>
+              <button
+                onClick={() => setMobileTab("course")}
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  color: mobileTab === "course" ? "#4A0E2E" : "#8A7A76",
+                  textTransform: "uppercase",
+                  background: "none",
+                  border: "none",
+                  borderBottom:
+                    mobileTab === "course" ? "2px solid #4A0E2E" : "none",
+                  padding: "12px 0",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                COURSE {String(pages.length).padStart(2, "0")}
+              </button>
+            </div>
+
+            {/* About Tab Content */}
+            {mobileTab === "about" && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 300,
+                  color: "#3A2A28",
+                  lineHeight: 1.75,
+                  marginBottom: "20px",
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: selectedPage.content || "",
+                }}
+              />
+            )}
+
+            {/* Course Tab Content */}
+            {mobileTab === "course" && (
+              <div style={{ marginBottom: "20px" }}>
+                {/* Lesson List */}
+                <div style={{ marginBottom: "24px" }}>
+                  {pages.map((page, idx) => {
+                    const isActive = selectedPage?.id === page.id;
+                    const isComplete = isPageCompleted(page.id);
+                    return (
+                      <button
+                        key={page.id}
+                        onClick={() => {
+                          setSelectedPage(page);
+                          setMobileTab("about");
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          padding: "12px 0",
+                          borderBottom: "1px solid rgba(74,14,46,0.06)",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: "12px",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "'DM Serif Display', serif",
+                            fontSize: "16px",
+                            fontStyle: "italic",
+                            color: isComplete ? "#C4847A" : "#C8B8B4",
+                            flexShrink: 0,
+                            fontWeight: 400,
+                          }}
+                        >
+                          {String(idx + 1).padStart(2, "0")}
+                        </span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontFamily: "'Montserrat', sans-serif",
+                              fontSize: "13px",
+                              fontWeight: 500,
+                              color: "#3A2A28",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            {page.title}
+                          </div>
+                          <div
+                            style={{
+                              fontFamily: "'Montserrat', sans-serif",
+                              fontSize: "10px",
+                              fontWeight: 500,
+                              letterSpacing: "0.15em",
+                              color: "#8A7A76",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {page.estimatedMinutes ||
+                              module?.durationMinutes ||
+                              "22"}{" "}
+                            MIN {isComplete ? "· COMPLETED" : ""}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Module Overview Mobile */}
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    marginBottom: "24px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      letterSpacing: "0.22em",
+                      color: "#4A0E2E",
+                      textTransform: "uppercase",
+                      marginBottom: "12px",
+                      paddingBottom: "12px",
+                      borderBottom: "2px solid #4A0E2E",
+                    }}
+                  >
+                    MODULE OVERVIEW
                   </div>
 
-                  <Separator />
-
-                  {/* Comments List */}
-                  <ScrollArea className="h-[300px]">
-                    <div className="space-y-4">
-                      {comments.map((comment) => (
-                        <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 bg-[#6B1B3D] rounded-full flex items-center justify-center text-white text-sm">
-                              {comment.created_by?.[0]}
-                            </div>
-                            <span className="text-sm font-medium text-gray-700">
-                              {comment.created_by}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {new Date(comment.created_date).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-gray-700">{comment.comment}</p>
-                        </div>
-                      ))}
+                  <div style={{ space: "12px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        paddingBottom: "10px",
+                        borderBottom:
+                          "1px solid rgba(74,14,46,0.06)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "13px",
+                          fontWeight: 400,
+                          color: "#8A7A76",
+                        }}
+                      >
+                        Lessons
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#3A2A28",
+                        }}
+                      >
+                        {pages.length}
+                      </span>
                     </div>
-                  </ScrollArea>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        paddingBottom: "10px",
+                        borderBottom:
+                          "1px solid rgba(74,14,46,0.06)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "13px",
+                          fontWeight: 400,
+                          color: "#8A7A76",
+                        }}
+                      >
+                        Total duration
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#3A2A28",
+                        }}
+                      >
+                        {module?.durationMinutes
+                          ? `${Math.floor(
+                              module.durationMinutes / 60
+                            )} hr ${module.durationMinutes % 60} min`
+                          : "N/A"}
+                      </span>
+                    </div>
+
+                    {expert && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 400,
+                            color: "#8A7A76",
+                          }}
+                        >
+                          Expert
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: "#3A2A28",
+                          }}
+                        >
+                          {expert.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Workbook Card Mobile */}
+                {courseWorkbook && (
+                  <button
+                    onClick={() => {
+                      window.location.href = `/Workbook?id=${courseWorkbook.id}`;
+                    }}
+                    style={{
+                      width: "100%",
+                      background: "#FDF5F3",
+                      border: "1px solid rgba(196,132,122,0.18)",
+                      borderRadius: "12px",
+                      padding: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      cursor: "pointer",
+                      transition: "background 0.2s",
+                    }}
+                  >
+                    <FileText
+                      className="w-5 h-5"
+                      style={{ color: "#4A0E2E", flexShrink: 0 }}
+                    />
+                    <div style={{ textAlign: "left", flex: 1 }}>
+                      <div
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "14px",
+                          fontWeight: 600,
+                          color: "#4A0E2E",
+                          marginBottom: "2px",
+                        }}
+                      >
+                        Module workbook
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "12px",
+                          fontWeight: 400,
+                          color: "#8A7A76",
+                        }}
+                      >
+                        PDF · 24 PAGES
+                      </div>
+                    </div>
+                    <ChevronRight
+                      className="w-4 h-4"
+                      style={{ color: "#4A0E2E", flexShrink: 0 }}
+                    />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Mobile Sticky Bottom Bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[rgba(74,14,46,0.06)] px-4 py-3 flex items-center gap-3 safe-area-bottom">
+          <button
+            onClick={handleTogglePageComplete}
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              border: isCurrentPageComplete
+                ? "none"
+                : "2px solid #4A0E2E",
+              background: isCurrentPageComplete ? "#4A0E2E" : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              flexShrink: 0,
+            }}
+          >
+            <Check
+              className="w-5 h-5"
+              style={{
+                color: isCurrentPageComplete ? "white" : "#4A0E2E",
+              }}
+            />
+          </button>
+
+          <button
+            onClick={() => {
+              if (nextPage) {
+                setSelectedPage(nextPage);
+                setMobileTab("about");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              } else if (nextModule) {
+                navigate(
+                  createPageUrl("ModulePlayer") +
+                    `?moduleId=${nextModule.id}&courseId=${courseId}`
+                );
+              } else {
+                navigate(createPageUrl("Classroom"));
+              }
+            }}
+            style={{
+              flex: 1,
+              background: "#C4847A",
+              border: "none",
+              borderRadius: "100px",
+              padding: "12px 16px",
+              cursor: "pointer",
+              transition: "background 0.2s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#A86460";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#C4847A";
+            }}
+          >
+            <div style={{ textAlign: "left" }}>
+              <div
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "9px",
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  color: "#4A0E2E",
+                  textTransform: "uppercase",
+                }}
+              >
+                {nextPage
+                  ? `UP NEXT · LESSON ${String(currentPageIndex + 2).padStart(
+                      2,
+                      "0"
+                    )}`
+                  : nextModule
+                  ? "NEXT MODULE"
+                  : "RETURN HOME"}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "#4A0E2E",
+                  textTransform: "uppercase",
+                }}
+              >
+                {nextPage
+                  ? nextPage.title.substring(0, 20)
+                  : nextModule
+                  ? nextModule.title.substring(0, 20)
+                  : "Blueprint Home"}
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4" style={{ color: "#4A0E2E" }} />
+          </button>
+        </div>
       </div>
-    </div>
+    </CourseAccessGate>
   );
 }
