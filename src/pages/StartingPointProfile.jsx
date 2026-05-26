@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
 
 const PATTERNS = {
   performer: {
@@ -254,20 +253,10 @@ export default function StartingPointProfile() {
   const [shuffledQs, setShuffledQs] = useState([]);
   const [fadeIn, setFadeIn] = useState(true);
   const [selected, setSelected] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
     setShuffledQs(QUESTIONS.map((q) => ({ ...q, answers: shuffleArray(q.answers) })));
-    const checkAuth = async () => {
-      try {
-        const authed = await base44.auth.isAuthenticated();
-        setIsAuthenticated(!!authed);
-      } catch (_) {
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
   }, []);
 
   const transition = (cb) => {
@@ -300,26 +289,10 @@ export default function StartingPointProfile() {
         setUnderPattern(secondKey ? PATTERNS[secondKey] : null);
         setSecondaryKey(secondKey);
 
-        if (isAuthenticated) {
-          const quizResult = {
-            archetype_key: KEY_TO_ENUM[primaryKey],
-            secondary_key: secondKey ? KEY_TO_ENUM[secondKey] : null,
-            completed_at: new Date().toISOString(),
-          };
-          localStorage.setItem("aw_quiz_result", JSON.stringify(quizResult));
-          transition(() => {
-            setScreen("redirecting");
-            setSelected(null);
-          });
-          setTimeout(() => {
-            window.location.href = "/Dashboard";
-          }, 1200);
-        } else {
-          transition(() => {
-            setScreen("gate");
-            setSelected(null);
-          });
-        }
+        transition(() => {
+          setScreen("gate");
+          setSelected(null);
+        });
       }
     }, 600);
   };
