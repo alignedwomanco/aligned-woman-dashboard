@@ -1232,7 +1232,7 @@ export default function ModulePlayer() {
             </div>
 
             {/* Right: sticky sidebar */}
-            <div style={{ position: "sticky", top: "80px", alignSelf: "start" }}>
+            <div className="hidden lg:block" style={{ position: "sticky", top: "80px", alignSelf: "start" }}>
               {/* Course content */}
               <div style={{ marginBottom: "24px" }}>
                 <div
