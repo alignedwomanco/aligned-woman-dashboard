@@ -906,7 +906,7 @@ export default function ModulePlayer() {
       </div>
 
       {/* ─── PAGE BODY ─── */}
-      <div className="pt-16 md:pt-0 pb-24 md:pb-0">
+      <div className="pt-0 md:pt-0 pb-24 md:pb-0">
 
         {/* ═══ DESKTOP LAYOUT ═══ */}
         <div className="hidden md:block max-w-7xl mx-auto px-6 py-8">
@@ -1284,7 +1284,8 @@ export default function ModulePlayer() {
 
         {/* ═══ MOBILE LAYOUT ═══ */}
         <div className="md:hidden">
-          {/* Video edge-to-edge */}
+          {/* Video edge-to-edge — sits below the fixed header (~68px) */}
+          <div style={{ paddingTop: "68px" }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage.id + "-mob-video"}
@@ -1295,6 +1296,7 @@ export default function ModulePlayer() {
               {renderVideo(false)}
             </motion.div>
           </AnimatePresence>
+          </div>
 
           <div className="px-4 pt-5">
             {/* Lesson meta */}
