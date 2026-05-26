@@ -69,10 +69,10 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
               On hard weeks, come back here. This is your north star.
             </p>
             <div className="flex gap-4 items-center">
-              <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase inline-flex items-center gap-1 transition-colors">
+              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase inline-flex items-center gap-1 transition-colors">
                 EDIT MY ANSWERS &rarr;
               </button>
-              <button className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors">
+              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors">
                 RETAKE THE QUIZ
               </button>
             </div>
