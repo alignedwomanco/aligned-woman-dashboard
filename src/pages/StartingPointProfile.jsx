@@ -650,12 +650,7 @@ export default function StartingPointProfile() {
           <span style={s.ml}>{result.mirror}</span>
           <div style={s.divider} />
           <p style={s.gateDesc}>
-            Your full diagnostic is ready. Four paragraphs written by our specialists about the
-            pattern that has been running your life. Your primary and secondary pillars. The module
-            where the work asks you to begin.
-          </p>
-          <p style={s.gateDesc}>
-            Create your free account to read it all.
+            Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
           </p>
           <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10, marginTop: 32 }}>
             <button
