@@ -1283,9 +1283,8 @@ export default function ModulePlayer() {
         </div>
 
         {/* ═══ MOBILE LAYOUT ═══ */}
-        <div className="md:hidden">
-          {/* Video edge-to-edge — sits below the fixed header (~68px) */}
-          <div style={{ paddingTop: "68px" }}>
+        <div className="md:hidden pt-16">
+          {/* Video edge-to-edge */}
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage.id + "-mob-video"}
@@ -1296,7 +1295,6 @@ export default function ModulePlayer() {
               {renderVideo(false)}
             </motion.div>
           </AnimatePresence>
-          </div>
 
           <div className="px-4 pt-5">
             {/* Lesson meta */}
