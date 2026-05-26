@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -32,8 +32,6 @@ export default function ModulePlayer() {
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
-  const mobileHeaderRef = useRef(null);
-  const [mobileHeaderH, setMobileHeaderH] = useState(64);
   const queryClient = useQueryClient();
 
   // ── Queries ──────────────────────────────────────────────
@@ -130,17 +128,6 @@ export default function ModulePlayer() {
   useEffect(() => {
     setSelectedPage(null);
   }, [moduleId]);
-
-  useEffect(() => {
-    const measure = () => {
-      if (mobileHeaderRef.current) {
-        setMobileHeaderH(mobileHeaderRef.current.offsetHeight);
-      }
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
 
   useEffect(() => {
     if (pages.length > 0 && !selectedPage) {
@@ -433,7 +420,8 @@ export default function ModulePlayer() {
     return (
       <div
         style={{
-          paddingTop: "56.25%",
+          width: "100%",
+          aspectRatio: "16 / 9",
           position: "relative",
           background: "linear-gradient(135deg, #3D0F1F 0%, #4A0E2E 50%, #3D0F1F 100%)",
           borderRadius: radius,
@@ -829,7 +817,7 @@ export default function ModulePlayer() {
     <div className="min-h-screen" style={{ background: "#FAF5F3" }}>
 
       {/* ─── MOBILE STICKY HEADER ─── */}
-      <div ref={mobileHeaderRef} className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
+      <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
         <div className="px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="flex-shrink-0 p-1">
             <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
@@ -1296,7 +1284,7 @@ export default function ModulePlayer() {
         </div>
 
         {/* ═══ MOBILE LAYOUT ═══ */}
-        <div className="md:hidden" style={{ paddingTop: `${mobileHeaderH}px` }}>
+        <div className="md:hidden pt-[60px]">
           {/* Video edge-to-edge */}
           <AnimatePresence mode="wait">
             <motion.div
