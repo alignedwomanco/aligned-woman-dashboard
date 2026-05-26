@@ -75,25 +75,6 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
       {/* Workbooks */}
       <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
 
-      {/* Pattern explanation */}
-      <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-4">
-          <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />
-          REVISITING YOUR PATTERN
-        </p>
-        <h3 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-5">
-          The pattern, <span className="italic text-awrose-core">named</span>.
-        </h3>
-        <div className="space-y-4 max-w-2xl">
-          <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
-            Identity is performance-dependent. Without the performing, you have no reliable sense of self. The achievements stack up, but the sense of who you are without them does not. The performance becomes the identity. When the performance pauses, even briefly, the floor disappears.
-          </p>
-          <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
-            This is not a character flaw. It is a survival adaptation. Most high-functioning women learn early that being valued is conditional on being impressive. The pattern made sense. It also made you exhausted.
-          </p>
-        </div>
-      </section>
-
       {/* Intake / Archetype card */}
       <section className="bg-awrose-pale rounded-xl p-6 md:p-8">
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-4">
@@ -129,6 +110,25 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
             <p className="font-body font-light text-paper/70 text-sm mb-1">You are</p>
             <p className="font-display italic text-awrose-light text-2xl leading-tight">{archetypeLabel}</p>
           </div>
+        </div>
+      </section>
+
+      {/* Pattern explanation */}
+      <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
+        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-4">
+          <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />
+          REVISITING YOUR PATTERN
+        </p>
+        <h3 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-5">
+          The pattern, <span className="italic text-awrose-core">named</span>.
+        </h3>
+        <div className="space-y-4 max-w-2xl">
+          <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
+            Identity is performance-dependent. Without the performing, you have no reliable sense of self. The achievements stack up, but the sense of who you are without them does not. The performance becomes the identity. When the performance pauses, even briefly, the floor disappears.
+          </p>
+          <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
+            This is not a character flaw. It is a survival adaptation. Most high-functioning women learn early that being valued is conditional on being impressive. The pattern made sense. It also made you exhausted.
+          </p>
         </div>
       </section>
     </div>
