@@ -103,11 +103,15 @@ export default function Layout({ children, currentPageName }) {
         if (authenticated) {
           const userData = await base44.auth.me();
           setUser(userData);
-
-
+        } else if (!isPublicPage) {
+          // Redirect unauthenticated users away from protected pages
+          base44.auth.redirectToLogin(window.location.pathname);
         }
       } catch (e) {
         setIsAuthenticated(false);
+        if (!isPublicPage) {
+          base44.auth.redirectToLogin(window.location.pathname);
+        }
       }
     };
     checkAuth();

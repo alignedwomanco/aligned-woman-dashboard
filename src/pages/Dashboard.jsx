@@ -83,6 +83,58 @@ export default function Dashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCheckComplete, setAdminCheckComplete] = useState(false);
 
+  // Process pending quiz result from localStorage (set by StartingPointProfile after quiz completion)
+  useEffect(() => {
+    const processPendingQuiz = async () => {
+      const raw = localStorage.getItem("aw_quiz_result");
+      if (!raw) return;
+
+      try {
+        // Check auth first - if not logged in, leave localStorage and bail
+        const authed = await base44.auth.isAuthenticated();
+        if (!authed) return;
+
+        const quizResult = JSON.parse(raw);
+        const me = await base44.auth.me();
+        if (!me) return;
+
+        let profiles = [];
+        try {
+          profiles = await base44.entities.MemberProfile.filter({ user_id: me.id });
+        } catch (_) {
+          profiles = await base44.entities.MemberProfile.list();
+        }
+
+        if (profiles.length > 0) {
+          await base44.entities.MemberProfile.update(profiles[0].id, {
+            computed_archetype_key: quizResult.archetype_key,
+            quiz_completed_at: quizResult.completed_at,
+          });
+        } else {
+          await base44.entities.MemberProfile.create({
+            user_id: me.id,
+            first_name: me.full_name?.split(" ")[0] || "",
+            full_name: me.full_name || "",
+            computed_archetype_key: quizResult.archetype_key,
+            quiz_completed_at: quizResult.completed_at,
+            has_seen_welcome: true,
+            signup_timestamp: new Date().toISOString(),
+          });
+        }
+
+        localStorage.removeItem("aw_quiz_result");
+        window.location.reload();
+      } catch (err) {
+        console.error("Failed to process quiz result:", err);
+        // Only clear localStorage if it was a data error, not an auth error
+        const authed = await base44.auth.isAuthenticated().catch(() => false);
+        if (authed) localStorage.removeItem("aw_quiz_result");
+      }
+    };
+
+    processPendingQuiz();
+  }, []);
+
   // Check if user is admin on mount
   useEffect(() => {
     const checkAdmin = async () => {
