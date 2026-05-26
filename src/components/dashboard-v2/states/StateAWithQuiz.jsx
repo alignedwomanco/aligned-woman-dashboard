@@ -10,7 +10,7 @@ import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 const ARCHETYPE_LABELS = {
   performer: "The Performer",
   over_functioner: "The Over-Functioner",
-  outsourcer: "The Outsourcer",
+  outsourcer: "The Delegator",
   overrider: "The Overrider",
   reactor: "The Reactor",
 };

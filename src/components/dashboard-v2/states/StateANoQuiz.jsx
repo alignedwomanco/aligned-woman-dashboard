@@ -9,7 +9,7 @@ import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 const ARCHETYPES = [
   "The Performer",
   "The Over-Functioner",
-  "The Outsourcer",
+  "The Delegator",
   "The Overrider",
   "The Reactor",
 ];
