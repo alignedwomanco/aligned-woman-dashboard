@@ -46,44 +46,6 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
 
   return (
     <div className="space-y-6">
-      {/* Intake / Archetype card */}
-      <section className="bg-awrose-pale rounded-xl p-6 md:p-8">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-4">
-          <span className="inline-block w-3 h-px bg-awrose-deep mr-2 align-middle" />
-          WHY YOU STARTED · YOUR INTAKE
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-6 items-start">
-          <div>
-            <h2 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
-              The reasons you<br />
-              <span className="italic text-awrose-core">showed up</span>:
-            </h2>
-            {concerns.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {concerns.map((c, i) => (
-                  <span key={i} className="font-body text-xs text-awburg-core/80 bg-paper border border-awburg-core/10 rounded-full px-3 py-1.5">{c}</span>
-                ))}
-              </div>
-            )}
-            <p className="font-display italic text-awrose-deep text-sm leading-relaxed mb-6 max-w-md">
-              On hard weeks, come back here. This is your north star.
-            </p>
-            <div className="flex gap-4 items-center">
-              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase inline-flex items-center gap-1 transition-colors">
-                EDIT MY ANSWERS &rarr;
-              </button>
-              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors">
-                RETAKE THE QUIZ
-              </button>
-            </div>
-          </div>
-          <div className="bg-awburg-core rounded-xl p-6 text-center">
-            <p className="font-body font-light text-paper/70 text-sm mb-1">You are</p>
-            <p className="font-display italic text-awrose-light text-2xl leading-tight">{archetypeLabel}</p>
-          </div>
-        </div>
-      </section>
-
       {/* Pattern explanation */}
       <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-4">
@@ -131,6 +93,44 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
 
       {/* Workbooks */}
       <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
+
+      {/* Intake / Archetype card */}
+      <section className="bg-awrose-pale rounded-xl p-6 md:p-8">
+        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-4">
+          <span className="inline-block w-3 h-px bg-awrose-deep mr-2 align-middle" />
+          WHY YOU STARTED · YOUR INTAKE
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-6 items-start">
+          <div>
+            <h2 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
+              The reasons you<br />
+              <span className="italic text-awrose-core">showed up</span>:
+            </h2>
+            {concerns.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {concerns.map((c, i) => (
+                  <span key={i} className="font-body text-xs text-awburg-core/80 bg-paper border border-awburg-core/10 rounded-full px-3 py-1.5">{c}</span>
+                ))}
+              </div>
+            )}
+            <p className="font-display italic text-awrose-deep text-sm leading-relaxed mb-6 max-w-md">
+              On hard weeks, come back here. This is your north star.
+            </p>
+            <div className="flex gap-4 items-center">
+              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase inline-flex items-center gap-1 transition-colors">
+                EDIT MY ANSWERS &rarr;
+              </button>
+              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors">
+                RETAKE THE QUIZ
+              </button>
+            </div>
+          </div>
+          <div className="bg-awburg-core rounded-xl p-6 text-center">
+            <p className="font-body font-light text-paper/70 text-sm mb-1">You are</p>
+            <p className="font-display italic text-awrose-light text-2xl leading-tight">{archetypeLabel}</p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
