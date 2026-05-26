@@ -415,8 +415,12 @@ export default function ModulePlayer() {
 
   // ── Video renderer (shared between desktop and mobile) ──
 
-  const renderVideo = (roundCorners) => {
+  const renderVideo = (roundCorners, cropTop = false) => {
     const radius = roundCorners ? "12px" : "0";
+    // cropTop: shift iframe up to hide black letterbox bar from the video source
+    const iframeStyle = cropTop
+      ? { position: "absolute", top: "-10%", left: "0", width: "100%", height: "120%", border: 0 }
+      : { border: 0 };
     return (
       <div
         style={{
@@ -476,8 +480,8 @@ export default function ModulePlayer() {
                 <video
                   src={embedUrl}
                   controls
-                  className="absolute top-0 left-0 w-full h-full"
-                  style={{ backgroundColor: "#000" }}
+                  className={cropTop ? "" : "absolute top-0 left-0 w-full h-full"}
+                  style={cropTop ? { ...iframeStyle, backgroundColor: "#000" } : { backgroundColor: "#000" }}
                 />
               );
             }
@@ -485,10 +489,10 @@ export default function ModulePlayer() {
             return (
               <iframe
                 src={embedUrl}
-                className="absolute top-0 left-0 w-full h-full"
+                className={cropTop ? "" : "absolute top-0 left-0 w-full h-full"}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
-                style={{ border: 0 }}
+                style={iframeStyle}
               />
             );
           })()
@@ -1285,7 +1289,7 @@ export default function ModulePlayer() {
 
         {/* ═══ MOBILE LAYOUT ═══ */}
         <div className="md:hidden pt-[60px]">
-          {/* Video edge-to-edge */}
+          {/* Video edge-to-edge, cropped to hide source letterbox */}
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage.id + "-mob-video"}
@@ -1293,7 +1297,7 @@ export default function ModulePlayer() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-              {renderVideo(false)}
+              {renderVideo(false, true)}
             </motion.div>
           </AnimatePresence>
 
