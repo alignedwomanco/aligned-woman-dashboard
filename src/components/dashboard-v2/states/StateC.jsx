@@ -1,16 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const ARCHETYPE_LABELS = {
   performer: "The Performer",
   over_functioner: "The Over-Functioner",
-  outsourcer: "The Outsourcer",
+  delegator: "The Delegator",
   overrider: "The Overrider",
   reactor: "The Reactor",
 };
 
-export default function StateC({ user, profile }) {
+export default function StateC({ user, profile, onCheckout }) {
   const archetypeKey = profile?.computed_archetype_key;
   const archetypeLabel = ARCHETYPE_LABELS[archetypeKey] || "The Performer";
   const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
@@ -60,15 +59,6 @@ export default function StateC({ user, profile }) {
         </div>
       </section>
 
-      <section className="bg-awrose-wash rounded-xl p-6 md:p-8">
-        <blockquote className="font-display italic text-awburg-core text-[20px] md:text-[24px] leading-relaxed max-w-2xl">
-          &ldquo;I had been performing competence for so long I forgot I was the one performing. The thirty minute reset was the first time I sat with myself in years.&rdquo;
-        </blockquote>
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 uppercase mt-4">
-          M., JOHANNESBURG · BLUEPRINT MEMBER
-        </p>
-      </section>
-
       <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-4">
           <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />
@@ -81,13 +71,14 @@ export default function StateC({ user, profile }) {
           A free, unhurried half hour with one of our practitioners. No pitch, no pressure. The reset is the practice. You will know after it whether you want what comes next.
         </p>
 
-        <div className="bg-awburg-core rounded-lg aspect-video flex items-center justify-center mb-6 max-w-2xl">
-          <button
-            className="w-16 h-16 rounded-full bg-paper/15 hover:bg-paper/25 flex items-center justify-center transition-colors"
-            aria-label="Play video"
-          >
-            <Play className="w-6 h-6 text-paper ml-1" fill="currentColor" />
-          </button>
+        <div className="mb-6 max-w-2xl">
+          <iframe
+            src="https://drive.google.com/file/d/1pEjiiWfD6H5mYkj4otMjAK897h35yKv6/preview"
+            width="100%"
+            style={{ aspectRatio: "16/9", borderRadius: "12px", border: "none" }}
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
         </div>
 
         <button className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
@@ -108,13 +99,22 @@ export default function StateC({ user, profile }) {
           R3,997 / ONE INVESTMENT · LIFETIME ACCESS
         </p>
 
-        <Link
-          to="/blueprint"
-          className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200 mb-8"
-        >
-          BEGIN THE BLUEPRINT
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="flex flex-wrap gap-3 mb-8">
+          <button
+            onClick={onCheckout}
+            className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
+          >
+            BEGIN THE BLUEPRINT
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => window.location.href = "/BlueprintPage"}
+            className="inline-flex items-center gap-2 bg-transparent border border-awburg-core text-awburg-core hover:bg-awburg-core hover:text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
+          >
+            LEARN MORE
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
           {[

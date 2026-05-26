@@ -13,6 +13,7 @@ import StateB from "@/components/dashboard-v2/states/StateB";
 import StateANoQuiz from "@/components/dashboard-v2/states/StateANoQuiz";
 import StateAWithQuiz from "@/components/dashboard-v2/states/StateAWithQuiz";
 import StateC from "@/components/dashboard-v2/states/StateC";
+import CheckoutModal from "@/components/dashboard/CheckoutModal";
 
 const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
 
@@ -78,6 +79,7 @@ export default function Dashboard() {
   const [data, setData] = useState({ state: null, user: null, profile: null });
   const [errorMsg, setErrorMsg] = useState("");
   const [stateOverride, setStateOverride] = useState(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCheckComplete, setAdminCheckComplete] = useState(false);
 
@@ -253,6 +255,7 @@ export default function Dashboard() {
                   profile={profile}
                   workbookData={workbookData}
                   continueData={continueData}
+                  onCheckout={() => setCheckoutOpen(true)}
                 />
               ) : (
                 <DashboardError
@@ -275,6 +278,8 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
+
+      <CheckoutModal open={checkoutOpen} onOpenChange={setCheckoutOpen} />
 
       {/* Admin state preview toggle - fixed position bottom-right */}
       {isAdmin && adminCheckComplete && (
