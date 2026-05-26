@@ -82,9 +82,9 @@ export default function StateB({ user, profile, workbookData = [], continueData 
         <p className="font-body font-light text-awburg-core/75 text-sm leading-relaxed mb-5 max-w-lg">
           A short diagnostic. It will not change what you have access to. It will sharpen what you notice in the work.
         </p>
-        <Link to="/quiz" className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core hover:underline uppercase inline-flex items-center gap-2 transition-colors">
+        <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core hover:underline uppercase inline-flex items-center gap-2 transition-colors">
           TAKE THE QUIZ <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        </button>
       </section>
     </div>
   );
