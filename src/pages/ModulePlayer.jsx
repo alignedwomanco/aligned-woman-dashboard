@@ -140,7 +140,7 @@ export default function ModulePlayer() {
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [module]);
+  }, []);
 
   useEffect(() => {
     if (pages.length > 0 && !selectedPage) {
