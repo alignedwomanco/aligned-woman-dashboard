@@ -251,6 +251,10 @@ export default function Dashboard() {
   }
 
   if (status === "error") {
+    if (errorMsg && typeof errorMsg === "string" && errorMsg.toLowerCase().includes("auth")) {
+      window.location.href = "/";
+      return null;
+    }
     return (
       <div className="min-h-screen bg-off-white">
         <DashboardSidebar />
