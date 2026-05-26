@@ -1283,7 +1283,7 @@ export default function ModulePlayer() {
         </div>
 
         {/* ═══ MOBILE LAYOUT ═══ */}
-        <div className="md:hidden pt-16">
+        <div className="md:hidden pt-0">
           {/* Video edge-to-edge */}
           <AnimatePresence mode="wait">
             <motion.div
