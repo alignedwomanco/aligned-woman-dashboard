@@ -104,18 +104,7 @@ export default function Layout({ children, currentPageName }) {
           const userData = await base44.auth.me();
           setUser(userData);
 
-          // Redirect to onboarding if not completed (skip for admins)
-          if (!isPublicPage && currentPageName !== "OnboardingForm" && userData?.role !== "admin") {
-            const sessions = await base44.entities.DiagnosticSession.filter(
-              { isComplete: true },
-              "-created_date",
-              1
-            );
 
-            if (!sessions || sessions.length === 0) {
-              window.location.href = createPageUrl("OnboardingForm");
-            }
-          }
         }
       } catch (e) {
         setIsAuthenticated(false);

@@ -1,7 +1,5 @@
-import ALIVEMethod from './pages/ALIVEMethod';
 import AdminSettings from './pages/AdminSettings';
 import Apply from './pages/Apply';
-import CheckIn from './pages/CheckIn';
 import Classroom from './pages/Classroom.jsx';
 import Community from './pages/Community';
 import Contact from './pages/Contact';
@@ -19,7 +17,6 @@ import MyALIVEJourney from './pages/MyALIVEJourney';
 import MyCycle from './pages/MyCycle';
 import MyMetrics from './pages/MyMetrics';
 import MyPathway from './pages/MyPathway';
-import OnboardingForm from './pages/OnboardingForm';
 import OurWhy from './pages/OurWhy';
 import ProfileSettings from './pages/ProfileSettings';
 import Progress from './pages/Progress';
@@ -31,10 +28,8 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "ALIVEMethod": ALIVEMethod,
     "dashboardsettings": AdminSettings,
     "Apply": Apply,
-    "CheckIn": CheckIn,
     "Classroom": Classroom,
     "Community": Community,
     "Contact": Contact,
@@ -52,7 +47,6 @@ export const PAGES = {
     "MyCycle": MyCycle,
     "MyMetrics": MyMetrics,
     "MyPathway": MyPathway,
-    "OnboardingForm": OnboardingForm,
     "OurWhy": OurWhy,
     "ProfileSettings": ProfileSettings,
     "Progress": Progress,
