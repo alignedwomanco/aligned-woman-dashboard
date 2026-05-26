@@ -8,12 +8,52 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState({});
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // Store computed results directly to avoid stale-closure issues
+  const [computedResults, setComputedResults] = useState(null);
 
   // Extract quiz configuration
   const quizConfig = section.quiz_config || {};
   const questions = section.questions || [];
   const scoring = section.scoring || {};
   const postResultsFields = section.post_results_fields || [];
+
+  // Pure function: compute results from a responses object
+  const computeResults = useCallback((responseMap) => {
+    try {
+      const responseValues = questions.map(q => responseMap[q.id] || 0);
+      const totalScore = responseValues.reduce((sum, val) => sum + val, 0);
+
+      let matchedBand = null;
+      if (scoring.bands) {
+        matchedBand = scoring.bands.find(band => {
+          const range = band.range || {};
+          return totalScore >= (range.min || 0) && totalScore <= (range.max || 40);
+        }) || null;
+      }
+
+      let highestScore = -1;
+      let lowestScore = 6;
+      let highestQuestion = questions[0] || null;
+      let lowestQuestion = questions[0] || null;
+
+      questions.forEach((q) => {
+        const score = responseMap[q.id] || 0;
+        if (score > highestScore) { highestScore = score; highestQuestion = q; }
+        if (score < lowestScore) { lowestScore = score; lowestQuestion = q; }
+      });
+
+      const chartData = questions.map(q => ({
+        dimension: q.dimension,
+        score: responseMap[q.id] || 0,
+        fullMark: 5,
+      }));
+
+      return { totalScore, matchedBand, highestQuestion, highestScore, lowestQuestion, lowestScore, chartData };
+    } catch (err) {
+      console.error("[ScoredQuiz] computeResults error:", err);
+      return { totalScore: 0, matchedBand: null, highestQuestion: null, highestScore: 0, lowestQuestion: null, lowestScore: 0, chartData: [] };
+    }
+  }, [questions, scoring.bands]);
 
   // Load saved data on mount
   useEffect(() => {
@@ -22,6 +62,7 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
       if (savedData.total_score !== undefined && savedData.responses) {
         // Quiz is complete - show results
         setResponses(savedData.responses);
+        setComputedResults(computeResults(savedData.responses));
         setQuizPhase("results");
       } else if (savedData.responses) {
         // Quiz is incomplete - resume from first unanswered question
@@ -31,72 +72,21 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
           setCurrentQuestionIndex(answeredCount);
           setQuizPhase("quiz");
         } else {
-          // All questions answered but no total - mark as complete
+          // All questions answered but no total
+          const res = computeResults(savedData.responses);
+          setComputedResults(res);
           setQuizPhase("results");
         }
       } else {
-        // No data - start from intro
         setQuizPhase("intro");
       }
     } else {
-      // No saved data at all
       setQuizPhase("intro");
     }
-  }, [section.id, answers, questions.length]);
+  }, [section.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Calculate results
-  const results = useMemo(() => {
-    // Ensure all questions are answered
-    const answeredQuestions = questions.filter(q => responses[q.id] !== undefined);
-    if (answeredQuestions.length < questions.length) return null;
-
-    const responseValues = questions.map(q => responses[q.id] || 0);
-    const totalScore = responseValues.reduce((sum, val) => sum + val, 0);
-
-    // Find matched band
-    let matchedBand = null;
-    if (scoring.bands) {
-      matchedBand = scoring.bands.find(band => {
-        const range = band.range || {};
-        return totalScore >= (range.min || 0) && totalScore <= (range.max || 40);
-      });
-    }
-
-    // Find highest and lowest dimensions (first occurrence in case of tie)
-    let highestScore = -1;
-    let lowestScore = 6;
-    let highestQuestion = null;
-    let lowestQuestion = null;
-
-    questions.forEach((q) => {
-      const score = responses[q.id] || 0;
-      if (score > highestScore) {
-        highestScore = score;
-        highestQuestion = q;
-      }
-      if (score < lowestScore) {
-        lowestScore = score;
-        lowestQuestion = q;
-      }
-    });
-
-    // Prepare chart data
-    const chartData = questions.map(q => ({
-      dimension: q.dimension,
-      score: responses[q.id] || 0,
-      fullMark: 5,
-    }));
-
-    return {
-      totalScore,
-      matchedBand,
-      highestQuestion,
-      highestScore,
-      lowestQuestion,
-      lowestScore,
-      chartData,
-    };
-  }, [responses, questions, scoring.bands]);
+  // Keep results up to date when responses change while in results view
+  const results = computedResults;
 
   // Handle answer selection
   const handleSelectOption = useCallback((questionId, value) => {
@@ -118,34 +108,22 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
         };
         onAnswerChange?.(section.id, sectionData);
       } else {
-        // Quiz complete - calculate and save results
-        const totalScore = Object.values(updatedResponses).reduce((sum, val) => sum + (val || 0), 0);
-        
-        // Find matched band
-        let matchedBandId = null;
-        if (scoring.bands) {
-          const matchedBand = scoring.bands.find(band => {
-            const range = band.range || {};
-            return totalScore >= (range.min || 0) && totalScore <= (range.max || 40);
-          });
-          matchedBandId = matchedBand?.id || null;
-        }
-
+        // Quiz complete - calculate results eagerly before setting phase
+        const res = computeResults(updatedResponses);
         const completedData = {
           responses: updatedResponses,
-          total_score: totalScore,
-          band_id: matchedBandId,
+          total_score: res.totalScore,
+          band_id: res.matchedBand?.id || null,
           completed_at: new Date().toISOString(),
         };
         onAnswerChange?.(section.id, completedData);
-        
-        // Force re-render of results
         setResponses(updatedResponses);
+        setComputedResults(res);
         setQuizPhase("results");
       }
       setIsTransitioning(false);
     }, 400);
-  }, [responses, currentQuestionIndex, questions.length, answers, section.id, onAnswerChange, isTransitioning, scoring.bands]);
+  }, [responses, currentQuestionIndex, questions.length, answers, section.id, onAnswerChange, isTransitioning, scoring.bands, computeResults]);
 
   // Handle retake
   const handleRetake = useCallback(() => {
@@ -333,22 +311,33 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
 
   // Render results phase
   if (quizPhase === "results") {
-    // Ensure results are calculated
-    if (!results) {
-      // Force calculation if we're in results phase but results is null
-      return (
-        <div style={{ textAlign: "center", padding: 40 }}>
-          <p style={{ fontFamily: "var(--aw-font-sans)", color: "#8A7A76" }}>Calculating results...</p>
-        </div>
-      );
-    }
-    
-    const { totalScore, matchedBand, highestQuestion, highestScore, lowestQuestion, lowestScore, chartData } = results;
+    // If results haven't been computed yet (edge case), compute now from current responses
+    const activeResults = results || computeResults(responses);
+    const { totalScore, matchedBand, highestQuestion, highestScore, lowestQuestion, lowestScore, chartData } = activeResults;
 
     return (
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         {/* 1. Score header */}
         <div style={{ marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
+            <button
+              onClick={handleRetake}
+              style={{
+                fontFamily: "var(--aw-font-sans)",
+                fontSize: 12,
+                fontWeight: 400,
+                color: "#C4847A",
+                background: "transparent",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
+            >
+              Retake assessment
+            </button>
+          </div>
           <div style={{
             display: "flex",
             alignItems: "baseline",
@@ -823,7 +812,7 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
           );
         })}
 
-        {/* Retake button */}
+        {/* Restart Quiz button */}
         <button
           onClick={handleRetake}
           style={{
@@ -832,28 +821,28 @@ export default function ScoredQuizSection({ section, answers = {}, onAnswerChang
             gap: 8,
             fontFamily: "var(--aw-font-sans)",
             fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.22em",
+            fontWeight: 600,
+            letterSpacing: "0.16em",
             textTransform: "uppercase",
             background: "transparent",
             color: "#4A0E2E",
-            border: "1px solid rgba(74,14,46,0.22)",
+            border: "1.5px solid #4A0E2E",
             borderRadius: 100,
-            padding: "12px 24px",
+            padding: "14px 32px",
             cursor: "pointer",
             transition: "all 180ms ease",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(74,14,46,0.04)";
-            e.currentTarget.style.borderColor = "rgba(74,14,46,0.4)";
+            e.currentTarget.style.background = "#4A0E2E";
+            e.currentTarget.style.color = "#FFFFFF";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.borderColor = "rgba(74,14,46,0.22)";
+            e.currentTarget.style.color = "#4A0E2E";
           }}
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          Retake Assessment
+          Restart Quiz
         </button>
       </div>
     );
