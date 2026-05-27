@@ -267,7 +267,7 @@ export default function StateC({ user, profile, onCheckout }) {
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
-            onClick={() => window.location.href = "/BlueprintPage"}
+            onClick={() => window.location.href = "/blueprint"}
             className="inline-flex items-center gap-2 text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
             style={{ background: "transparent", border: "1px solid rgba(250,245,243,0.2)", color: "rgba(250,245,243,0.6)" }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(250,245,243,0.4)"; e.currentTarget.style.color = "#FAF5F3"; }}
