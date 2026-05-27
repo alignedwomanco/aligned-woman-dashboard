@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   CheckCircle,
-  Clock,
   Eye,
   Download,
   MessageCircle,
@@ -534,7 +533,7 @@ export default function ModulePlayer() {
                 opacity: 0.7,
               }}
             >
-              00:00 · {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
+              00:00 · {selectedPage.estimatedMinutes || "22"} MIN
             </div>
           </div>
         )}
@@ -693,12 +692,6 @@ export default function ModulePlayer() {
       </div>
       {[
         { label: "Lessons", value: String(pages.length) },
-        {
-          label: "Total duration",
-          value: module?.durationMinutes
-            ? `${Math.floor(module.durationMinutes / 60)} hr ${module.durationMinutes % 60} min`
-            : "N/A",
-        },
         pillarLabel ? { label: "Pillar", value: pillarLabel } : null,
         expert ? { label: "Expert", value: expert.name } : null,
       ]
@@ -998,7 +991,7 @@ export default function ModulePlayer() {
                   letterSpacing: "0.1em",
                 }}
               >
-                {completedPageCount} OF {pages.length} LESSONS · {module?.durationMinutes || "0"} MIN
+                {completedPageCount} OF {pages.length} LESSONS
               </div>
             </div>
           </div>
@@ -1054,7 +1047,7 @@ export default function ModulePlayer() {
                 >
                   LESSON {String(currentPageIndex + 1).padStart(2, "0")} OF{" "}
                   {String(pages.length).padStart(2, "0")} ·{" "}
-                  {selectedPage.estimatedMinutes || module?.durationMinutes || "22"} MIN
+                  {selectedPage.estimatedMinutes || "22"} MIN
                   {pillarLabel ? ` · ${pillarLabel.toUpperCase()}` : ""}
                 </span>
                 {isCurrentPageComplete && (
