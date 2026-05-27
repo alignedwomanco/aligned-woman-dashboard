@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { getAllArchetypes } from "@/data/archetypes";
+import { getAllArchetypes, getArchetype } from "@/data/archetypes";
 
 // ── Pattern data (unchanged) ──
 
@@ -8,14 +8,11 @@ const PATTERNS = {
     name: "The Performer",
     mirror: "You have not been achieving. You have been performing.",
     pillar: "Identity, Visibility & Personal Brand",
-    expert: "Tinashe Mujera & Nokuthula Magwaza",
     secondaryPillar: "Mindset & Behaviour",
-    secondaryExpert: "Dr Wendy Mahoney & Boitumelo Boikhutso",
-    read: [
+    description: [
       "You have built your life around a version of yourself that works. She is competent, composed, and almost impossible to fault. She shows up prepared. She delivers. She makes it look effortless. And the gap between who she is in public and who you are in private has become so wide that you are no longer sure which one is real.",
-      "Dr Wendy Mahoney calls this operating from your ego rather than your authentic self. Your 'I am' statements, the identity you carry into every room, were not chosen by you. They were assembled from what earned approval, what avoided rejection, what kept you safe in environments that rewarded performance over presence. Boitumelo Boikhutso would recognise this as identity protection: a behavioural driver so deep it runs beneath your conscious awareness.",
-      "Tinashe Mujera teaches that if you do not define yourself with intention, the market will define you by assumption. You have been defined by assumption for a long time. Not by the market. By yourself. The version of you that people admire is a construction. She is expensive to maintain. And the exhaustion you feel is not from the work. It is from the distance between who you perform as and who you actually are.",
-      "Nokuthula Magwaza frames this as living off-purpose: the fog, the disconnection, the quiet frustration of doing everything right and still feeling hollow. Your alignment problem is not about strategy or effort. It is about identity. The foundation you are missing is not competence. You already have that. The foundation you are missing is knowing who you are without the performance."
+      "The Aligned Woman Blueprint Course addresses this through two pillars. Your primary work begins in Identity, Visibility & Personal Brand, where you will learn to define yourself with intention rather than assumption. Your secondary work sits in Mindset & Behaviour, where the identity protection patterns running beneath your conscious awareness are made visible and addressable.",
+      "The foundation you are missing is not competence. You already have that. The foundation you are missing is knowing who you are without the performance."
     ],
     startingModule: "Identity Architecture",
   },
@@ -23,14 +20,11 @@ const PATTERNS = {
     name: "The Over-Functioner",
     mirror: "You have not been strong. You have been over-functioning.",
     pillar: "Nervous System & Emotional Regulation",
-    expert: "Natacha Wauquiez",
     secondaryPillar: "Leadership, Authority & Career",
-    secondaryExpert: "Refilwe Moloto & Cindy Norcott",
-    read: [
+    description: [
       "You carry more than your share and you have done it for so long that it feels like your nature rather than a pattern. You are the one who holds it together. The one who shows up early, stays late, absorbs the tension in the room, and makes sure nothing falls through. Other people's systems run because you run them. And the cost of that is a nervous system that has forgotten what rest actually feels like.",
-      "Dr Shirley Du Plessis describes your cortisol pattern precisely: you are wired. Your HPA axis has been in a sustained alarm state for so long that your body no longer distinguishes between a real threat and a Tuesday morning. Natacha Wauquiez would identify this as a nervous system locked in sympathetic activation, where your fight response has been repurposed as productivity. You are not productive because you are thriving. You are productive because your body does not know how to stop.",
-      "Dr Wendy Mahoney would map this to the rescuer pattern: you seek relief through fixing and overhelping. 'I will handle it. Let me take care of it.' At work, you step in instead of empowering others. At home, you overextend, avoid conflict, manage everyone's emotions. The temporary sense of control comes at the cost of lingering exhaustion. Cindy Norcott names it directly: overperforming from a place of lack, saying weak yeses when you should be saying strong nos.",
-      "Refilwe Moloto teaches that leadership is not about doing more. It is about buy-in, composure, and clarity. You have confused leadership with labour. The people around you have adapted to your capacity, which means they will never tell you to slow down. The system runs because you run it. That is the problem. The foundation you are missing is not more strength. It is the ability to put yourself down."
+      "The Aligned Woman Blueprint Course addresses this through two pillars. Your primary work begins in Nervous System & Emotional Regulation, where you will learn to recognise the difference between productivity and a body that does not know how to stop. Your secondary work sits in Leadership, Authority & Career, where you will unlearn the pattern of confusing leadership with labour and learn to lead from composure rather than capacity.",
+      "The foundation you are missing is not more strength. It is the ability to put yourself down."
     ],
     startingModule: "Nervous System Literacy",
   },
@@ -38,14 +32,11 @@ const PATTERNS = {
     name: "The Delegator",
     mirror: "You have not been delegating. You have been giving your power away.",
     pillar: "Money & Financial Agency",
-    expert: "Dr Nasrat Sirkissoon",
     secondaryPillar: "Mindset & Behaviour",
-    secondaryExpert: "Boitumelo Boikhutso & Dr Wendy Mahoney",
-    read: [
+    description: [
       "You earn well. You may even earn exceptionally. But somewhere along the way, you handed your financial agency to someone else, or to avoidance itself, and called it a personality trait. 'I am just not a numbers person.' 'I trust my partner with that.' 'I have someone who handles it.' These are not preferences. They are patterns. And they are costing you the one thing money is actually supposed to buy: freedom.",
-      "Dr Nasrat Sirkissoon traces this back to childhood. Your relationship with money did not start when you opened your first bank account. It started in the household you grew up in, in the conversations you heard or did not hear, in the scripts you inherited without choosing them. 'Money does not grow on trees.' 'We cannot afford that.' 'Just put it on the card.' These scripts became your financial blueprint, and you have been operating on someone else's blueprint your entire adult life.",
-      "Dr Wendy Mahoney would identify the deeper structure: a limiting decision, formed early, that sits beneath the pattern. It might be 'I am not the kind of person who commands money.' It might be 'Financial decisions are for someone smarter than me.' Whatever it is, it has calcified into an identity constraint that no amount of financial literacy will fix on its own. The gap is not knowledge. It is sovereignty. Boitumelo Boikhutso would frame it as an unexamined need for safety: you delegate decisions because the discomfort of getting it wrong feels more dangerous than the cost of never deciding.",
-      "Cato Vermeulen calls this a wounded feminine pattern around money: shame around charging, avoiding the bank account, feeling overwhelmed by financial decisions. The irony is that you are competent everywhere else. You lead teams, you make complex decisions, you navigate ambiguity professionally. But the domain that actually determines your freedom is the one where you defer. The foundation you are missing is not a spreadsheet. It is the belief that you are someone who commands money."
+      "The Aligned Woman Blueprint Course addresses this through two pillars. Your primary work begins in Money & Financial Agency, where you will trace the scripts you inherited and replace them with sovereignty over your own financial decisions. Your secondary work sits in Mindset & Behaviour, where the deeper pattern of delegating power and avoiding discomfort is made visible and addressable.",
+      "The foundation you are missing is not a spreadsheet. It is the belief that you are someone who commands money."
     ],
     startingModule: "Financial Architecture",
   },
@@ -53,14 +44,11 @@ const PATTERNS = {
     name: "The Overrider",
     mirror: "You have not been disciplined. You have been overriding.",
     pillar: "Health, Hormones & Body Literacy",
-    expert: "Dr Shirley Du Plessis & Danielle Venter",
     secondaryPillar: "Nervous System & Emotional Regulation",
-    secondaryExpert: "Natacha Wauquiez",
-    read: [
+    description: [
       "You push through. Pain, fatigue, hormonal shifts, illness, grief. Your body sends signals and you override every single one because there is always something more important than how you feel. You have been rewarded for this your entire life. School rewarded it. Work rewarded it. Relationships rewarded it. Nobody told you that the override has a physiological cost that compounds.",
-      "Dr Shirley Du Plessis maps the exact mechanism: when you chronically override your body's signals, your cortisol system moves through three phases. First you are wired, running on adrenaline and determination. Then you are wired and tired, waking up exhausted but unable to sleep at night. Then you are just tired, and your body's stress response has effectively shut down. The bill comes due in your thirties or forties in ways that look like sudden decline but are actually years of accumulated debt. Weight gain around the abdomen. Irregular cycles. Brain fog. Inflammation that no one can quite explain.",
-      "Danielle Venter sees it in your plate. You are the woman who has not eaten properly since morning because there was always something more urgent. Protein skipped, blood sugar crashing, gut lining inflamed from years of eating in fight-or-flight. Your body is not failing you. You are failing to listen to it. Her framework is simple: protein is your anchor, rhythm not restriction, awareness not control. But the Overrider cannot follow this framework because following it requires slowing down, and slowing down feels more dangerous than the symptoms.",
-      "Natacha Wauquiez would recognise the somatic disconnection. You have dissociated from your body so thoroughly that you do not notice the tension in your shoulders until someone touches them, the shallow breathing until a therapist points it out, the clenched jaw until it becomes a dental problem. Your body has been talking for years. You have been too busy surviving to listen. The foundation you are missing is not willpower or a better supplement stack. It is the radical act of treating your body as a source of intelligence rather than an obstacle to productivity."
+      "The Aligned Woman Blueprint Course addresses this through two pillars. Your primary work begins in Health, Hormones & Body Literacy, where you will learn what your body has been trying to tell you and why the override has a cost that compounds. Your secondary work sits in Nervous System & Emotional Regulation, where you will reconnect with the body you have been treating as an obstacle to productivity.",
+      "The foundation you are missing is not willpower or a better supplement stack. It is the radical act of treating your body as a source of intelligence rather than something to override."
     ],
     startingModule: "Body & Hormonal Literacy",
   },
@@ -68,14 +56,11 @@ const PATTERNS = {
     name: "The Reactor",
     mirror: "You have not been responsive. You have been reactive.",
     pillar: "Mindset & Behaviour",
-    expert: "Boitumelo Boikhutso & Dr Wendy Mahoney",
     secondaryPillar: "Relationships & Connection",
-    secondaryExpert: "Mimi Nicklin",
-    read: [
+    description: [
       "You respond. To other people's urgency, to emotional shifts in a room, to crises that may not be yours. Your life has a pattern of high reactivity followed by regret, correction, and then the same cycle again. You can see it happening. That is the painful part. You are not unaware. You are aware and still caught.",
-      "Boitumelo Boikhutso identifies three behavioural drivers beneath reactivity: fear of failure, need for approval, and desire for control. When these needs feel threatened, you do not respond. You react. The difference is structural. A response comes from your values. A reaction comes from your nervous system. She teaches a discernment pause: observe the behaviour, identify the emotional signal, consider the driver, then choose your response. You know this intellectually. The problem is that your amygdala moves faster than your discernment.",
-      "Dr Wendy Mahoney maps this to what she calls Character Two: the left-brain emotional circuit. The protector, the critic. It holds fear, anxiety, insecurity. It identifies threats everywhere. It creates emotional reactivity that hijacks your logic before your frontal lobe can intervene. She also names the cycle clearly: thoughts create feelings, feelings create actions, actions create results, results become evidence for the original belief. You are living inside a loop. Anxiety is future fear. You are investing your resources in a worst-case scenario that has not happened, and the investment itself is exhausting you.",
-      "Natacha Wauquiez explains the neuroscience: when your amygdala is triggered, blood flow redirects from your cortex to your heart and muscles. You literally cannot think clearly because your body has prepared you to fight or flee. The pattern you see but cannot stop is not a character flaw. It is a nervous system response running on old information. The foundation you are missing is not mindfulness or willpower. It is the structural gap between how you receive emotional data and how you process it. That gap is addressable. But not with the tools you have been using."
+      "The Aligned Woman Blueprint Course addresses this through two pillars. Your primary work begins in Mindset & Behaviour, where you will learn the structural difference between a response and a reaction, and build the gap between how you receive emotional data and how you process it. Your secondary work sits in Relationships & Connection, where the patterns that show up in how you relate to others are addressed at the root.",
+      "The foundation you are missing is not mindfulness or willpower. It is the structural gap between how you receive emotional data and how you process it. That gap is addressable. But not with the tools you have been using."
     ],
     startingModule: "Behavioural Patterns & Emotional Regulation",
   },
@@ -546,47 +531,175 @@ export default function StartingPointProfile() {
   }
 
   // ════════════════════════════════════════════════════════
-  //  RESULT / GATE SCREEN (keeping existing dark design for now)
+  //  RESULT / GATE SCREEN (new light design)
   // ════════════════════════════════════════════════════════
 
   if (screen === "gate" && result) {
-    const ds = {
-      wrap: { width: "100%", minHeight: "100vh", background: "linear-gradient(160deg, #0E0208 0%, #1A0510 35%, #2A0A1A 65%, #1A0510 100%)", fontFamily: SANS, color: "#FAF5F3", overflowY: "auto" },
-      inner: { maxWidth: 700, margin: "0 auto", padding: "56px 28px 80px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" },
-    };
-    return (
-      <div ref={ref} style={ds.wrap}>
-        <div style={ds.inner}>
-          <span style={{ fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, marginBottom: 28, display: "block" }}>
-            Your Starting Point
-          </span>
-          <h1 style={{ fontFamily: SERIF, fontSize: "clamp(34px, 6.5vw, 52px)", fontWeight: 400, fontStyle: "italic", lineHeight: 1.0, color: "#FAF5F3", marginBottom: 10, letterSpacing: "-0.015em" }}>
+    const arch = getArchetype(resultKey) || {};
+    const videoUrl = arch.videoUrl || "";
+    const atBest = arch.atBest || "";
+    const atWorst = arch.atWorst || "";
+
+    const videoCard = (cardWidth) => (
+      <div style={{
+        width: cardWidth,
+        aspectRatio: "9 / 16",
+        background: videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)",
+        border: "1px solid rgba(196,132,122,0.3)",
+        borderRadius: 8,
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {videoUrl && (
+          <video
+            src={videoUrl}
+            muted
+            playsInline
+            autoPlay
+            loop
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        )}
+        {/* Bottom gradient for text readability */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(20,4,12,0.92) 0%, rgba(20,4,12,0.7) 30%, rgba(20,4,12,0.15) 55%, transparent 70%)", pointerEvents: "none" }} />
+        {/* Play button glass blur top right */}
+        <div style={{
+          position: "absolute",
+          top: mobile ? 14 : 18,
+          right: mobile ? 14 : 18,
+          width: mobile ? 36 : 44,
+          height: mobile ? 36 : 44,
+          borderRadius: "50%",
+          background: "rgba(20,4,12,0.55)",
+          border: "1px solid rgba(255,255,255,0.3)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
+        }}>
+          <svg width={mobile ? 10 : 12} height={mobile ? 12 : 14} viewBox="0 0 14 16" fill="#FFFFFF" style={{ marginLeft: 2 }}>
+            <path d="M0 0 L14 8 L0 16 Z" />
+          </svg>
+        </div>
+        {/* Overlay text */}
+        <div style={{ position: "absolute", left: mobile ? 18 : 24, right: mobile ? 18 : 24, bottom: mobile ? 22 : 28 }}>
+          <div style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 22 : 28, lineHeight: 1.05, letterSpacing: "-0.015em", color: "#FFFFFF", marginBottom: mobile ? 12 : 16, textShadow: "0 2px 16px rgba(0,0,0,0.65), 0 0 32px rgba(0,0,0,0.4)" }}>
             {result.name}
-          </h1>
-          <span style={{ fontFamily: SERIF, fontSize: "clamp(15px, 2.8vw, 19px)", fontWeight: 400, fontStyle: "italic", lineHeight: 1.4, color: ROSE, marginBottom: 36, display: "block" }}>
-            {result.mirror}
-          </span>
-          <div style={{ width: 36, height: 1, background: "rgba(196,136,123,0.3)", margin: "32px 0" }} />
-          <p style={{ fontFamily: SANS, fontSize: 14, fontWeight: 300, lineHeight: 1.8, color: "rgba(250,245,243,0.55)", marginBottom: 16, maxWidth: 480 }}>
-            Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
+          </div>
+          <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 11 : 13, lineHeight: 1.6, color: "rgba(255,255,255,0.96)", fontWeight: 400, textShadow: "0 1px 8px rgba(0,0,0,0.65), 0 0 24px rgba(0,0,0,0.3)" }}>
+            {atBest.split(". ").slice(0, 3).join(". ") + "."}
           </p>
-          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10, marginTop: 32 }}>
-            <button
-              style={{ display: "inline-block", padding: "15px 38px", borderRadius: 100, background: ROSE, color: "#0E0208", fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", border: "none", cursor: "pointer", transition: "all 0.3s ease" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#d4998d"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = ROSE; e.currentTarget.style.transform = "translateY(0)"; }}
-              onClick={handleSeeResult}
-            >
-              See Your Full Result →
-            </button>
-            <button
-              style={{ display: "inline-block", padding: "11px 26px", borderRadius: 100, background: "transparent", color: "rgba(250,245,243,0.3)", fontFamily: SANS, fontSize: 10, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", border: "1px solid rgba(250,245,243,0.1)", cursor: "pointer", transition: "all 0.3s ease", marginLeft: 14 }}
-              onClick={restart}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(250,245,243,0.22)"; e.currentTarget.style.color = "rgba(250,245,243,0.5)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(250,245,243,0.1)"; e.currentTarget.style.color = "rgba(250,245,243,0.3)"; }}
-            >
-              Retake
-            </button>
+        </div>
+      </div>
+    );
+
+    const headerBlock = (
+      <>
+        <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: ROSE }}>
+          Your Starting Point
+        </div>
+
+        <h1 style={{
+          margin: mobile ? "20px 0 20px" : "24px 0 28px",
+          fontFamily: SERIF,
+          fontStyle: "italic",
+          fontWeight: 400,
+          fontSize: mobile ? 52 : 84,
+          lineHeight: 1,
+          letterSpacing: "-0.02em",
+          color: INK,
+        }}>
+          {result.name}
+        </h1>
+
+        <p style={{
+          margin: 0,
+          fontFamily: SERIF,
+          fontStyle: "italic",
+          fontWeight: 400,
+          fontSize: mobile ? 18 : 22,
+          lineHeight: 1.45,
+          color: ROSE_DEEP,
+          maxWidth: mobile ? "100%" : 460,
+        }}>
+          {result.mirror}
+        </p>
+      </>
+    );
+
+    const detailBlock = (
+      <div style={{ marginTop: mobile ? 28 : 32, display: "flex", flexDirection: "column", gap: mobile ? 20 : 22, maxWidth: mobile ? "100%" : 460 }}>
+        <div>
+          <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: mobile ? 8 : 10 }}>At your best</div>
+          <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300 }}>
+            {atBest}
+          </p>
+        </div>
+        <div>
+          <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: mobile ? 8 : 10 }}>At your worst</div>
+          <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300 }}>
+            {atWorst}
+          </p>
+        </div>
+      </div>
+    );
+
+    const footerBlock = (
+      <>
+        <div style={{ margin: "32px 0", width: 56, height: 1, background: ROSE }} />
+        <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 460, fontWeight: 300 }}>
+          Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
+        </p>
+        <div style={{ marginTop: mobile ? 32 : 40, display: "flex", flexDirection: mobile ? "column" : "row", gap: mobile ? 12 : 16, alignItems: mobile ? "stretch" : "center", flexWrap: "wrap" }}>
+          <button
+            onClick={handleSeeResult}
+            style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "16px 28px" : "18px 36px", borderRadius: 100, background: ROSE, color: "#FFFFFF", border: "none", fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", justifyContent: mobile ? "center" : "flex-start", transition: `background 180ms ${EASE}` }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = ROSE_DEEP)}
+            onMouseLeave={(e) => (e.currentTarget.style.background = ROSE)}
+          >
+            See your full result <span>→</span>
+          </button>
+          <button
+            onClick={restart}
+            style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "15px 28px" : "17px 36px", borderRadius: 100, background: "transparent", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", justifyContent: mobile ? "center" : "flex-start", transition: `all 180ms ${EASE}` }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
+          >
+            Retake
+          </button>
+        </div>
+      </>
+    );
+
+    if (mobile) {
+      return (
+        <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
+          <div style={{ position: "relative", padding: "60px 24px 80px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
+            {headerBlock}
+            <div style={{ display: "flex", justifyContent: "center", margin: "32px 0" }}>
+              {videoCard(260)}
+            </div>
+            {detailBlock}
+            {footerBlock}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
+        <div style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "88px 64px 120px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 56, alignItems: "start" }}>
+            <div>{videoCard(300)}</div>
+            <div>
+              {headerBlock}
+              {detailBlock}
+              {footerBlock}
+            </div>
           </div>
         </div>
       </div>
