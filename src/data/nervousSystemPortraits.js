@@ -1,114 +1,129 @@
 /**
  * Portrait templates for the nervous system baseline workbook.
  * Keyed by the values produced by computeWorkbookScores:
- *   dominant_state_variant  → DOMINANT_STATE
- *   window_classification   → WINDOW
- *   resource_classification → RESOURCES
- *   somatic_classification  → SOMATIC
+ *   dominant_state_variant  (portrait_keys.dominant) → DOMINANT_STATE
+ *   window_classification                             → WINDOW
+ *   resource_classification                           → RESOURCES
+ *   somatic_classification                            → SOMATIC
  */
 
 export const DOMINANT_STATE_PORTRAITS = {
   ventral_vagal: {
-    title: "Your Dominant State: Safe & Connected",
-    body: "Your nervous system spends most of its time in ventral vagal — the social engagement state. This is your regulated baseline. You have access to curiosity, connection, and clear thinking more often than not. This doesn't mean life is easy; it means your system has a strong home base to return to. Your work is about protecting and deepening this capacity, especially during seasons that challenge it.",
+    title: "Regulated and Connected",
+    body: "Your system spends most of its time in a regulated, connected state. This is a strong foundation. The work ahead is less about crisis management and more about deepening your capacity and understanding what keeps you here, so you can return more quickly when life pulls you out.",
   },
   sympathetic: {
-    title: "Your Dominant State: Activated & On Edge",
-    body: "Your nervous system's default is sympathetic activation — fight-or-flight. This state is designed for short bursts of threat response, not as a way of living. When it becomes your baseline, it often shows up as chronic urgency, difficulty resting, anxiety that doesn't match your circumstances, or a body that never quite settles. This isn't a character flaw. It is a survival adaptation. And it can shift.",
+    title: "Living in Activation",
+    body: "Your system is spending most of its time in an activated state. This does not mean something is wrong with you. It means your nervous system has learned that staying alert feels safer than relaxing. You may have been running on adrenaline and willpower for so long that it feels normal. The regulation practices ahead are designed to show your system that it is safe to come down.",
   },
   dorsal_vagal: {
-    title: "Your Dominant State: Shut Down & Withdrawn",
-    body: "Your nervous system's default is dorsal vagal — the shutdown or collapse state. This is the body's last-resort protection when life has felt too much for too long. It often looks like exhaustion that sleep doesn't fix, emotional flatness, difficulty caring, or a sense of being behind glass. This state is protective, not broken. Understanding it is the first step to gently expanding back toward life.",
+    title: "In Withdrawal",
+    body: "Your system is spending most of its time in a withdrawn, low-energy state. This is not laziness. It is your nervous system's way of protecting you when activation felt too overwhelming for too long. You may feel disconnected from your body, your motivation, or your sense of self. The work ahead focuses on gentle reactivation: not pushing through, but slowly showing your system it is safe to come back online.",
   },
   cycling: {
-    title: "Your Dominant State: Moving Between States",
-    body: "Your nervous system moves fluidly between states — sometimes within the same day. You may know the experience of being completely wired in the morning and collapsed by evening, or flipping from fine to overwhelmed with no clear reason. This cycling pattern often reflects a nervous system that is working very hard to manage an environment it perceives as unpredictable. Rhythm and predictability are your greatest resources.",
+    title: "Moving Between States",
+    body: "Your system is moving between states unpredictably. You may feel wired in the morning and collapsed by afternoon, or fine one day and overwhelmed the next. This cycling pattern often shows up when the nervous system has not had enough safety to settle into any one state for long. The regulation practices ahead will focus on building a wider, more stable baseline rather than managing individual swings.",
   },
   oscillating: {
-    title: "Your Dominant State: Oscillating",
-    body: "Your pattern shows significant time in both sympathetic activation and dorsal shutdown — a nervous system oscillating between the two extremes with limited time in the regulated middle. This is one of the most exhausting patterns to live in. Your system is working overtime. The path forward is not about pushing through; it is about finding small, consistent moments of safety that interrupt the cycle.",
+    title: "The Activation-Shutdown Loop",
+    body: "Your system appears to be oscillating between activation and shutdown. You may recognise the pattern: periods of high output and anxiety followed by crashes into numbness or exhaustion. This is one of the most common patterns in women navigating burnout. The regulation module addresses both ends of this swing.",
+  },
+  ventral_tied_with_sympathetic: {
+    title: "Regulated But Pulled Toward Activation",
+    body: "Your system has access to a regulated state, but activation is competing for dominance. This is actually promising. It means you already know what safety feels like in your body. The work ahead is about tipping the balance so that regulated state becomes your primary home rather than a place you visit between stretches of being wired.",
+  },
+  ventral_tied_with_dorsal_vagal: {
+    title: "Regulated But Pulled Toward Withdrawal",
+    body: "Your system has access to a regulated state, but shutdown is competing for dominance. This is actually promising. It means you already know what safety feels like in your body. The work ahead is about tipping the balance so that regulated state becomes your primary home rather than a place you visit between stretches of feeling flat or disconnected.",
+  },
+  ventral_tied_with_cycling: {
+    title: "Regulated But Unstable",
+    body: "Your system has access to a regulated state, but unpredictable swings are competing for dominance. This is actually promising. It means you already know what safety feels like in your body. The work ahead is about stabilising your baseline so that regulated state becomes your consistent home rather than one of several states you cycle through.",
   },
 };
 
 export const WINDOW_PORTRAITS = {
   narrow: {
-    title: "Your Window of Tolerance: Currently Narrow",
-    body: "Right now, your window of tolerance is narrow. Small stressors can tip you outside of it quickly, and returning to baseline takes considerable time. This is important information, not a life sentence. A narrow window often reflects a season of high demand, accumulated stress, or unprocessed experiences. Gentle, consistent support — not pushing harder — is what widens it over time.",
+    title: "Your window is narrow right now",
+    body: "Right now, your window of tolerance is narrow. Small stressors can push you into overwhelm or shutdown, and it takes time to come back. This is not a permanent state. It is a reflection of how much your system has been carrying. As you build regulation capacity through this module, the window will widen.",
   },
   moderate_narrow: {
-    title: "Your Window of Tolerance: Moderate with Narrowing Tendencies",
-    body: "Your window of tolerance is moderate, with a tendency to narrow under pressure. You can manage day-to-day demands but find yourself more reactive or slower to recover during harder stretches. This is a common place to be. You have a foundation to build from, and there is real room to widen your window with the right support and practices.",
+    title: "Your window is on the narrower side",
+    body: "Your window of tolerance has some room in it, but it narrows under pressure. You can handle day-to-day demands, but when stress stacks up, you may find yourself tipping over more quickly than you would like. The practices ahead will help you build a buffer.",
   },
   moderate_wide: {
-    title: "Your Window of Tolerance: Moderately Wide",
-    body: "Your window of tolerance is reasonably wide. You have solid capacity to handle life's demands without tipping into reactivity or shutdown, and you recover from stress within a reasonable timeframe. This is a strong foundation. The invitation now is to deepen and protect it — noticing what narrows your window and being intentional about what restores it.",
+    title: "Your window has room in it",
+    body: "Your window of tolerance is reasonably wide. You can handle a fair amount before dysregulating, and you have some capacity to recover. The work ahead will help you understand what maintains this window and how to protect it during high-demand seasons.",
   },
   wide: {
-    title: "Your Window of Tolerance: Wide and Resilient",
-    body: "Your window of tolerance is wide. You demonstrate strong capacity to move through challenge, return to baseline relatively quickly, and tolerate a range of stressors without becoming dysregulated for extended periods. This is genuine resilience — not toughness, but flexibility. Your work is to maintain this capacity and recognise early signals when it begins to narrow.",
+    title: "Your window is relatively wide",
+    body: "Your window of tolerance is relatively wide right now. You can hold a lot before losing your centre, and you recover fairly quickly when you do. This is a strong position to be in. The regulation module will deepen your understanding of how your system works and give you tools to maintain this capacity long-term.",
   },
 };
 
 export const RESOURCE_PORTRAITS = {
   no_tools: {
-    title: "Your Regulation Resources: Building from Scratch",
-    body: "Right now, you haven't identified any consistent regulation tools in your toolkit. This is honest, and it's useful. It means we begin here. Regulation doesn't require a long practice list. It starts with one thing that reliably helps your nervous system settle — even briefly. You'll build from there.",
+    title: "Starting from scratch",
+    body: "You indicated that you do not currently have reliable tools for coming back to yourself when you are dysregulated. That is an honest and important starting point. Building your first set of regulation practices is a primary outcome of this module. You are not behind. You are exactly where you need to be to begin.",
   },
   limited_tools: {
-    title: "Your Regulation Resources: A Small but Real Toolkit",
-    body: "You have one or two things that help your nervous system settle. This is a beginning, not a limitation. Having even one reliable resource is significant. The next step is understanding when and how to use them more intentionally — and slowly expanding the range so you have options for different states and different seasons.",
+    title: "A few tools to build on",
+    body: "You have a small number of regulation resources you can draw on. That is more than many women in this position have. The module ahead will expand your toolkit and help you understand why the tools you already use work, so you can use them more intentionally.",
   },
   moderate_tools: {
-    title: "Your Regulation Resources: A Growing Toolkit",
-    body: "You have a meaningful range of regulation tools — things that genuinely help your system settle, recover, or restore. This is real capacity. The work now is integration: using these tools proactively rather than reactively, and understanding which tools work for which states. Not all regulation is the same — what helps activation is often different from what helps collapse.",
+    title: "A reasonable toolkit",
+    body: "You have a reasonable set of tools for self-regulation. The module will help you understand the nervous system science behind them, which tools work for which states (an activation tool is different from a shutdown tool), and how to sequence them for maximum effect.",
   },
   strong_tools: {
-    title: "Your Regulation Resources: A Rich Toolkit",
-    body: "You have a rich range of regulation resources at your disposal. This is a significant advantage. The question is no longer what helps — it is whether you are using these tools consistently and strategically. Strong toolkits can sometimes mask a nervous system that is still running on high, keeping things together through effort rather than genuine ease. Audit how you feel on your 'off days.'",
+    title: "A solid foundation",
+    body: "You already have a solid toolkit of regulation practices. The module will deepen your understanding of why they work at a nervous system level and introduce additional approaches you may not have encountered, particularly for the specific state patterns you identified above.",
   },
 };
 
 export const SOMATIC_PORTRAITS = {
   low: {
-    title: "Your Body Awareness: Developing",
-    body: "You are in the early stages of building somatic awareness — noticing where and how your nervous system speaks through your body. This is not a gap; it is a starting place. Many women have learned to live from the neck up, disconnected from body signals that hold crucial information. The practices in this programme will gently rebuild this connection. You don't need to force it.",
+    title: "Building body awareness",
+    body: "Your body awareness may still be developing, and that is completely normal. Many women, especially those who have spent years in their heads or pushing through, have learned to ignore their body's signals. A core part of this module is rebuilding that connection gently and at your own pace.",
   },
   moderate: {
-    title: "Your Body Awareness: Emerging",
-    body: "You have some awareness of how stress and safety show up in your body — you recognise some of the signals, even if the connection isn't always clear or immediate. This is a meaningful foundation. Building on it means slowing down long enough to listen, and learning to trust what you notice rather than dismissing it.",
+    title: "Growing body literacy",
+    body: "You have some awareness of how your body communicates with you. You can identify where stress lives and you are beginning to recognise the physical signatures of different states. This module will sharpen that awareness and help you use your body as an early warning system rather than a source of symptoms to manage.",
   },
   high: {
-    title: "Your Body Awareness: Strong",
-    body: "You have strong somatic awareness. You recognise where your nervous system speaks through your body — in stress, in shutdown, and in safety. This is a genuine resource. It means you have access to real-time information about your state that many people miss entirely. The invitation is to act on what you notice, not just observe it.",
+    title: "Strong body connection",
+    body: "You have strong body awareness. You can identify where different states show up physically, and you have language for what safety feels like in your body. This is a real asset. The module will build on this foundation and connect your somatic awareness to practical regulation strategies.",
   },
 };
 
 export const STATE_DISPLAY_NAMES = {
-  ventral_vagal: "Safe & Connected",
-  sympathetic:   "Activated & On Edge",
-  dorsal_vagal:  "Shut Down & Withdrawn",
-  cycling:       "Moving Between States",
-  oscillating:   "Oscillating",
+  ventral_vagal:                  "Regulated and Connected",
+  sympathetic:                    "Living in Activation",
+  dorsal_vagal:                   "In Withdrawal",
+  cycling:                        "Moving Between States",
+  oscillating:                    "The Activation-Shutdown Loop",
+  ventral_tied_with_sympathetic:  "Regulated But Pulled Toward Activation",
+  ventral_tied_with_dorsal_vagal: "Regulated But Pulled Toward Withdrawal",
+  ventral_tied_with_cycling:      "Regulated But Unstable",
 };
 
 export const WINDOW_DISPLAY_NAMES = {
   narrow:          "Narrow",
-  moderate_narrow: "Moderate — Narrowing",
-  moderate_wide:   "Moderate — Wide",
-  wide:            "Wide & Resilient",
+  moderate_narrow: "On the narrower side",
+  moderate_wide:   "Has room in it",
+  wide:            "Relatively wide",
 };
 
 export const RESOURCE_DISPLAY_NAMES = {
-  no_tools:       "Building from Scratch",
-  limited_tools:  "Limited",
-  moderate_tools: "Moderate",
-  strong_tools:   "Strong",
+  no_tools:      "Starting from scratch",
+  limited_tools: "A few tools to build on",
+  moderate_tools: "A reasonable toolkit",
+  strong_tools:  "A solid foundation",
 };
 
 export const SOMATIC_DISPLAY_NAMES = {
-  low:      "Developing",
-  moderate: "Emerging",
-  high:     "Strong",
+  low:      "Building body awareness",
+  moderate: "Growing body literacy",
+  high:     "Strong body connection",
 };
 
 export const STRESS_LOCATION_LABELS = {
