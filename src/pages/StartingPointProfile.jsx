@@ -155,10 +155,9 @@ function ArchetypeCarousel({ mobile }) {
       <div style={{
         position: "relative",
         width: totalW,
-        height: mobile ? 300 : 560,
+        height: mobile ? 340 : 620,
         margin: "0 auto",
         padding: mobile ? "20px 0 16px" : "32px 0 24px",
-        overflow: "hidden",
       }}>
         {archetypes.map((arch, i) => {
           const diff = getOffset(i);
@@ -431,55 +430,115 @@ export default function StartingPointProfile() {
   }
 
   // ════════════════════════════════════════════════════════
-  //  QUIZ SCREEN (keeping existing dark design for now)
+  //  QUIZ SCREEN (new light design)
   // ════════════════════════════════════════════════════════
 
   if (screen === "quiz" && shuffledQs.length > 0) {
     const q = shuffledQs[currentQ];
-    const ds = {
-      wrap: { width: "100%", minHeight: "100vh", background: "linear-gradient(160deg, #0E0208 0%, #1A0510 35%, #2A0A1A 65%, #1A0510 100%)", fontFamily: SANS, color: "#FAF5F3", overflowY: "auto" },
-      inner: { maxWidth: 700, margin: "0 auto", padding: "56px 28px 80px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" },
+    const handleBack = () => {
+      if (currentQ > 0) {
+        transition(() => {
+          setCurrentQ(currentQ - 1);
+          setSelected(null);
+        });
+      } else {
+        transition(() => setScreen("intro"));
+      }
     };
+
     return (
-      <div ref={ref} style={ds.wrap}>
-        <div style={ds.inner}>
-          <div style={{ display: "flex", gap: 4, marginBottom: 44 }}>
+      <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
+        {/* Atmospheric haze */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
+
+        <div style={{ position: "relative", maxWidth: mobile ? "100%" : 700, margin: "0 auto", padding: mobile ? "48px 24px 80px" : "72px 28px 100px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
+
+          {/* Progress rail */}
+          <div style={{ display: "flex", gap: mobile ? 4 : 8, marginBottom: mobile ? 32 : 48 }}>
             {shuffledQs.map((_, i) => (
-              <div key={i} style={{ flex: 1, height: 2, borderRadius: 1, background: i < currentQ ? ROSE : i === currentQ ? "rgba(196,136,123,0.5)" : "rgba(250,245,243,0.08)", transition: "background 0.4s ease" }} />
+              <div key={i} style={{ flex: 1, height: 2, borderRadius: 2, background: i < currentQ ? ROSE : i === currentQ ? ROSE : HAIRLINE, transition: `background 0.4s ${EASE}` }} />
             ))}
           </div>
-          <span style={{ fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, marginBottom: 8, display: "block" }}>
+
+          {/* Eyebrow */}
+          <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: ROSE }}>
             Question {q.label} of 12
-          </span>
-          <span style={{ fontFamily: SANS, fontSize: 10, fontWeight: 400, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(250,245,243,0.25)", marginBottom: 24, display: "block" }}>
+          </div>
+
+          {/* Dimension */}
+          <div style={{ marginTop: mobile ? 10 : 14, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: INK_MUTED }}>
             {q.dimension}
-          </span>
+          </div>
+
+          {/* Setup text */}
           {q.setup && (
-            <p style={{ fontFamily: SANS, fontSize: 13, fontWeight: 300, lineHeight: 1.75, color: "rgba(250,245,243,0.45)", marginBottom: 20, maxWidth: 580 }}>
+            <p style={{ margin: mobile ? "22px 0 0" : "28px 0 0", fontFamily: SANS, fontSize: mobile ? 14 : 15, fontWeight: 300, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 560 }}>
               {q.setup}
             </p>
           )}
-          <h2 style={{ fontFamily: SERIF, fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 400, fontStyle: "italic", lineHeight: 1.25, color: "#FAF5F3", marginBottom: 32, letterSpacing: "-0.005em" }}>
+
+          {/* Question */}
+          <h2 style={{ margin: mobile ? "32px 0 28px" : "44px 0 36px", fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 28 : 38, lineHeight: 1.15, letterSpacing: "-0.015em", color: INK, maxWidth: mobile ? "100%" : 640 }}>
             {q.question}
           </h2>
-          <div>
-            {q.answers.map((a, i) => (
-              <button
-                key={i}
-                style={{
-                  display: "block", width: "100%", textAlign: "left", padding: "16px 20px", marginBottom: 8, borderRadius: 4,
-                  background: selected === a.pattern ? "rgba(196,136,123,0.14)" : "rgba(250,245,243,0.025)",
-                  border: selected === a.pattern ? "1px solid rgba(196,136,123,0.35)" : "1px solid rgba(250,245,243,0.07)",
-                  color: selected === a.pattern ? "#FAF5F3" : "rgba(250,245,243,0.65)",
-                  fontFamily: SANS, fontSize: 13, fontWeight: 300, lineHeight: 1.6, cursor: selected ? "default" : "pointer", transition: "all 0.3s ease", letterSpacing: "0.003em",
-                }}
-                onClick={() => !selected && handleAnswer(a.pattern)}
-                onMouseEnter={(e) => { if (!selected) { e.currentTarget.style.background = "rgba(196,136,123,0.07)"; e.currentTarget.style.borderColor = "rgba(196,136,123,0.18)"; e.currentTarget.style.color = "#FAF5F3"; } }}
-                onMouseLeave={(e) => { if (!selected || selected !== a.pattern) { e.currentTarget.style.background = "rgba(250,245,243,0.025)"; e.currentTarget.style.borderColor = "rgba(250,245,243,0.07)"; e.currentTarget.style.color = "rgba(250,245,243,0.65)"; } }}
-              >
-                {a.text}
-              </button>
-            ))}
+
+          {/* Answer cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: mobile ? 10 : 12 }}>
+            {q.answers.map((a, i) => {
+              const isSel = selected === a.pattern;
+              return (
+                <button
+                  key={i}
+                  onClick={() => !selected && handleAnswer(a.pattern)}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: mobile ? "18px 20px" : "22px 26px",
+                    borderRadius: 8,
+                    background: isSel ? "rgba(196,132,122,0.06)" : "#FFFFFF",
+                    border: `1px solid ${isSel ? ROSE : HAIRLINE}`,
+                    boxShadow: isSel ? "0 2px 0 rgba(196,132,122,0.25)" : "none",
+                    color: INK_BODY,
+                    fontFamily: SANS,
+                    fontSize: mobile ? 13 : 14,
+                    lineHeight: 1.65,
+                    fontWeight: 400,
+                    cursor: selected ? "default" : "pointer",
+                    transition: `all 200ms ${EASE}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selected) {
+                      e.currentTarget.style.borderColor = HAIRLINE_STRONG;
+                      e.currentTarget.style.background = "rgba(196,132,122,0.03)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selected || !isSel) {
+                      e.currentTarget.style.borderColor = isSel ? ROSE : HAIRLINE;
+                      e.currentTarget.style.background = isSel ? "rgba(196,132,122,0.06)" : "#FFFFFF";
+                    }
+                  }}
+                >
+                  {a.text}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Footer nav */}
+          <div style={{ marginTop: mobile ? 32 : 44, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+            <button
+              onClick={handleBack}
+              style={{ background: "transparent", border: "none", color: INK_MUTED, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", padding: 0, transition: `color 180ms ${EASE}` }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = INK)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = INK_MUTED)}
+            >
+              ← Back
+            </button>
+            <span style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: INK_MUTED }}>
+              {currentQ + 1} / {shuffledQs.length}
+            </span>
           </div>
         </div>
       </div>
