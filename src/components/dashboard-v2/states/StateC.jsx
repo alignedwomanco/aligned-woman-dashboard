@@ -11,7 +11,7 @@ const KEY_MAP = {
 };
 
 export default function StateC({ user, profile, onCheckout }) {
-  const [bestOpen, setBestOpen] = useState(true);
+  const [bestOpen, setBestOpen] = useState(false);
   const [worstOpen, setWorstOpen] = useState(false);
 
   const archetypeDbKey = profile?.computed_archetype_key;
@@ -178,14 +178,6 @@ export default function StateC({ user, profile, onCheckout }) {
             </p>
           )}
         </div>
-        <div className="flex gap-4 items-center mt-6">
-          <button onClick={onCheckout} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
-            BEGIN THE BLUEPRINT <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={() => window.location.href = "/blueprint"} className="inline-flex items-center gap-2 bg-transparent border border-awburg-core text-awburg-core hover:bg-awburg-core hover:text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-5 rounded-full transition-all duration-200">
-            LEARN MORE <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
       </section>
 
       {/* 30-minute reset */}
@@ -217,47 +209,73 @@ export default function StateC({ user, profile, onCheckout }) {
         </button>
       </section>
 
-      {/* Purchase CTA */}
-      <section className="bg-awrose-pale rounded-xl p-8 md:p-10">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-4">
-          <span className="inline-block w-3 h-px bg-awrose-deep mr-2 align-middle" />
-          YOUR NEXT STEP
+      {/* Purchase CTA - dark editorial */}
+      <section
+        className="rounded-xl p-8 md:p-10"
+        style={{
+          background: "linear-gradient(160deg, #0E0208 0%, #1A0510 35%, #4A0E2E 65%, #1A0510 100%)",
+          color: "#FAF5F3",
+        }}
+      >
+        <p
+          className="font-body font-bold text-[10px] tracking-eyebrow uppercase mb-6"
+          style={{ color: "#E8B4AE" }}
+        >
+          <span className="inline-block w-5 h-px mr-3 align-middle" style={{ background: "#E8B4AE" }} />
+          YOUR NEXT STEP · CHAPTER 02
         </p>
-        <h3 className="font-display text-awburg-core text-[28px] md:text-[36px] leading-tight mb-5 max-w-2xl">
-          The Aligned Woman Blueprint was built for <span className="italic text-awrose-core">exactly this woman</span>.
+        <h3
+          className="font-display text-[34px] md:text-[48px] leading-tight mb-5 max-w-xl"
+          style={{ color: "#FAF5F3", fontWeight: 400 }}
+        >
+          Built for <span className="italic" style={{ color: "#E8B4AE" }}>exactly</span><br />
+          this woman.
         </h3>
-        <p className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/70 uppercase mb-6">
-          R3,997 / ONE INVESTMENT · 1 YEAR ACCESS
+        <p
+          className="font-body font-light text-sm md:text-base leading-relaxed mb-8 max-w-lg"
+          style={{ color: "rgba(250,245,243,0.6)" }}
+        >
+          The internal architecture you were never given, taught in sequence, by practitioners who have done the work.
         </p>
 
-        <div className="flex flex-wrap gap-3 mb-8">
+        <div className="mb-8" style={{ width: 48, height: 1, background: "rgba(232,180,174,0.3)" }} />
+
+        <div className="flex items-baseline gap-4 mb-8">
+          <span
+            className="font-display italic"
+            style={{ fontSize: "clamp(40px, 5vw, 56px)", color: "#E8B4AE", lineHeight: 1, fontWeight: 400 }}
+          >
+            R3,997
+          </span>
+          <span
+            className="font-body font-bold text-[10px] tracking-eyebrow uppercase"
+            style={{ color: "rgba(250,245,243,0.45)" }}
+          >
+            ONE INVESTMENT · 1 YEAR ACCESS
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={onCheckout}
-            className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
+            className="inline-flex items-center gap-2 text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
+            style={{ background: "#C4847A", color: "#0E0208" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#E8B4AE"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "#C4847A"; }}
           >
             BEGIN THE BLUEPRINT
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
-            onClick={() => window.location.href = "/blueprint"}
-            className="inline-flex items-center gap-2 bg-transparent border border-awburg-core text-awburg-core hover:bg-awburg-core hover:text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
+            onClick={() => window.location.href = "/BlueprintPage"}
+            className="inline-flex items-center gap-2 text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
+            style={{ background: "transparent", border: "1px solid rgba(250,245,243,0.2)", color: "rgba(250,245,243,0.6)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(250,245,243,0.4)"; e.currentTarget.style.color = "#FAF5F3"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(250,245,243,0.2)"; e.currentTarget.style.color = "rgba(250,245,243,0.6)"; }}
           >
             LEARN MORE
             <ArrowRight className="w-4 h-4" />
           </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
-          {[
-            
-          ].map((line, i) => (
-            <p
-              key={i}
-              className="font-body font-light text-awburg-core/75 text-sm leading-relaxed"
-            >
-              {line}
-            </p>
-          ))}
         </div>
       </section>
     </div>
