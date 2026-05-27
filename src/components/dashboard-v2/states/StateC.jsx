@@ -219,7 +219,7 @@ export default function StateC({ user, profile, onCheckout }) {
           The Aligned Woman Blueprint was built for <span className="italic text-awrose-core">exactly this woman</span>.
         </h3>
         <p className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/70 uppercase mb-6">
-          R3,997 / ONE INVESTMENT · LIFETIME ACCESS
+          R3,997 / ONE INVESTMENT · 1 YEAR ACCESS
         </p>
 
         <div className="flex flex-wrap gap-3 mb-8">
