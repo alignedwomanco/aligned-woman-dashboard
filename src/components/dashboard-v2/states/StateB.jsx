@@ -61,9 +61,10 @@ export default function StateB({ user, profile, workbookData = [], continueData 
               <p className="font-body text-xs text-awburg-core/60 mt-1">with {continueData.expert.name}</p>
             )}
           </div>
-          <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0">
+          <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0" style={{ animation: "continuePulse 2.5s ease-in-out infinite" }}>
             CONTINUE YOUR PHASE <ArrowRight className="w-4 h-4" />
           </button>
+          <style>{`@keyframes continuePulse { 0%,100%{box-shadow:0 0 0 0 rgba(196,132,122,0.45)} 50%{box-shadow:0 0 0 8px rgba(196,132,122,0)} }`}</style>
         </div>
       </div>
 
