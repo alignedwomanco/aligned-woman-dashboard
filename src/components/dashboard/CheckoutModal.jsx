@@ -104,7 +104,7 @@ export default function CheckoutModal({ open, onOpenChange }) {
               fontFamily: "Montserrat, sans-serif",
             }}
           >
-            One investment. Lifetime access.
+            One investment. 1 year access.
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export default function CheckoutModal({ open, onOpenChange }) {
                     fontFamily: "Montserrat, sans-serif",
                   }}
                 >
-                  One investment, lifetime access
+                  One investment, 1 year access
                 </p>
               </div>
 
