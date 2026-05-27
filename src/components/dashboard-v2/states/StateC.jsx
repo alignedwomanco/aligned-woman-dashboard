@@ -11,7 +11,7 @@ const KEY_MAP = {
 };
 
 export default function StateC({ user, profile, onCheckout }) {
-  const [bestOpen, setBestOpen] = useState(false);
+  const [bestOpen, setBestOpen] = useState(true);
   const [worstOpen, setWorstOpen] = useState(false);
 
   const archetypeDbKey = profile?.computed_archetype_key;

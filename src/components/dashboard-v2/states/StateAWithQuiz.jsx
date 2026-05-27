@@ -19,7 +19,7 @@ const KEY_MAP = {
 export default function StateAWithQuiz({ user, profile, workbookData, continueData }) {
   const navigate = useNavigate();
   const [diagnosticSession, setDiagnosticSession] = useState(null);
-  const [bestOpen, setBestOpen] = useState(false);
+  const [bestOpen, setBestOpen] = useState(true);
   const [worstOpen, setWorstOpen] = useState(false);
 
   const archetypeDbKey = profile?.computed_archetype_key;
