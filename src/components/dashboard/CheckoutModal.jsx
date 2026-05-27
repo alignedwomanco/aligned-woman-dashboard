@@ -12,7 +12,7 @@ const INCLUSIONS = [
   "13 globally credentialled specialists",
   "5 phases, 11 year Access",
   "Workbooks, tools, and community",
-  "Enroll Now",
+
 ];
 
 export default function CheckoutModal({ open, onOpenChange }) {
