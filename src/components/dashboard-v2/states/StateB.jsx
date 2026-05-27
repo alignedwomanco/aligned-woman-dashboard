@@ -39,7 +39,7 @@ export default function StateB({ user, profile, workbookData = [], continueData 
         <p className="font-body font-light text-awburg-core/80 text-base leading-relaxed max-w-xl mb-8">
           The Blueprint is not a course you finish. It is a practice you return to. Each phase opens when the one before it has settled. You set the pace.
         </p>
-        <Link to={`${createPageUrl("CourseDetail")}?courseId=${courseId}`} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200">
+        <Link to={`${createPageUrl("CourseDetail")}?courseId=${courseId}`} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200" style={{ animation: "continuePulse 2.5s ease-in-out infinite" }}>
           BEGIN PHASE 1: AWARENESS <ArrowRight className="w-4 h-4" />
         </Link>
       </section>
