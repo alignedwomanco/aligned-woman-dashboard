@@ -109,12 +109,63 @@ Deno.serve(async (req) => {
       somatic_classification = "low";
     }
 
+    // ── 5. DOMINANT STATE VARIANT & OSCILLATING ───────────────────────────
+    const is_oscillating = stateScores.sympathetic >= 4 && stateScores.dorsal_vagal >= 4;
+
+    // Check if ventral_vagal was tied with the winner in the original topStates
+    const ventral_tied_with_winner =
+      topStates.includes("ventral_vagal") && topStates.includes(dominant_state) && dominant_state !== "ventral_vagal";
+
+    let dominant_state_variant;
+    if (is_oscillating) {
+      dominant_state_variant = "oscillating";
+    } else if (ventral_tied_with_winner) {
+      dominant_state_variant = "ventral_tied_with_" + dominant_state;
+    } else {
+      dominant_state_variant = dominant_state;
+    }
+
     // ── Write scores back ──────────────────────────────────────────────────
     const computed_scores = {
+      // Core classifications (preserved exactly)
       dominant_state,
       window_classification,
       resource_classification,
       somatic_classification,
+
+      // Extended variant fields
+      dominant_state_variant,
+      is_oscillating,
+
+      // Raw frequency values
+      state_frequencies: {
+        ventral_vagal: stateScores.ventral_vagal,
+        sympathetic:   stateScores.sympathetic,
+        dorsal_vagal:  stateScores.dorsal_vagal,
+        cycling:       stateScores.cycling,
+      },
+      dominant_state_frequency: stateScores[dominant_state] ?? maxScore,
+
+      // Raw numeric scores
+      window_score:    Math.round(windowAvg * 100) / 100,
+      resource_score:  toolCount,
+      somatic_total:   somaticTotal,
+
+      // Top body location samples
+      top_stress_locations: stressBodyLocations.slice(0, 3),
+      top_safety_signals:   safetyBodySignals.slice(0, 3),
+
+      // Portrait key map (used for UI portrait selection)
+      portrait_keys: {
+        dominant:  dominant_state_variant,
+        window:    window_classification,
+        resources: resource_classification,
+        somatic:   somatic_classification,
+      },
+
+      // Metadata
+      scoring_version: "nervous_system_baseline_v1",
+      computed_at:     new Date().toISOString(),
     };
 
     await base44.asServiceRole.entities.WorkbookResponse.update(workbookResponseId, {
