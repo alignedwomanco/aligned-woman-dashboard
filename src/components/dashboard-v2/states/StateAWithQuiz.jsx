@@ -1,25 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
+import { getArchetype } from "@/data/archetypes";
 import PhaseIndicator from "@/components/dashboard-v2/PhaseIndicator";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
 import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 
-const ARCHETYPE_LABELS = {
-  performer: "The Performer",
-  over_functioner: "The Over-Functioner",
-  outsourcer: "The Delegator",
-  overrider: "The Overrider",
-  reactor: "The Reactor",
+const KEY_MAP = {
+  performer: "performer",
+  over_functioner: "overFunctioner",
+  delegator: "delegator",
+  overrider: "overrider",
+  reactor: "reactor",
 };
 
 export default function StateAWithQuiz({ user, profile, workbookData, continueData }) {
   const navigate = useNavigate();
   const [diagnosticSession, setDiagnosticSession] = useState(null);
-  const archetypeKey = profile?.computed_archetype_key;
-  const archetypeLabel = ARCHETYPE_LABELS[archetypeKey] || "The Performer";
+  const [bestOpen, setBestOpen] = useState(false);
+  const [worstOpen, setWorstOpen] = useState(false);
+
+  const archetypeDbKey = profile?.computed_archetype_key;
+  const archetypeDataKey = KEY_MAP[archetypeDbKey] || "performer";
+  const arch = getArchetype(archetypeDataKey);
+  const archetypeLabel = arch?.name || "The Performer";
 
   useEffect(() => {
     base44.entities.DiagnosticSession
@@ -81,39 +87,127 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
           <span className="inline-block w-3 h-px bg-awrose-deep mr-2 align-middle" />
           WHY YOU STARTED · YOUR INTAKE
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-6 items-start">
           <div>
             <h2 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
               The reasons you<br />
               <span className="italic text-awrose-core">showed up</span>:
             </h2>
-            {concerns.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {concerns.map((c, i) => (
-                  <span key={i} className="font-body text-xs text-awburg-core/80 bg-paper border border-awburg-core/10 rounded-full px-3 py-1.5">{c}</span>
-                ))}
-              </div>
+
+            {/* At Your Best - collapsible */}
+            <button
+              onClick={() => setBestOpen(!bestOpen)}
+              className="w-full flex items-center justify-between py-3 border-b border-awburg-core/8"
+            >
+              <span className="font-body font-bold text-[10px] tracking-[0.24em] text-awburg-core uppercase">AT YOUR BEST</span>
+              <ChevronDown
+                className="w-4 h-4 text-awburg-core/50 transition-transform duration-200"
+                style={{ transform: bestOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+              />
+            </button>
+            {bestOpen && (
+              <p className="font-body font-light text-awburg-core/80 text-sm leading-relaxed py-3">
+                {arch?.atBest || ""}
+              </p>
             )}
-            <p className="font-display italic text-awrose-deep text-sm leading-relaxed mb-6 max-w-md">
-              On hard weeks, come back here. This is your north star.
-            </p>
-            <div className="flex gap-4 items-center">
-              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core hover:text-awburg-dark uppercase inline-flex items-center gap-1 transition-colors">
-                EDIT MY ANSWERS &rarr;
+
+            {/* At Your Worst - collapsible */}
+            <button
+              onClick={() => setWorstOpen(!worstOpen)}
+              className="w-full flex items-center justify-between py-3 border-b border-awburg-core/8"
+            >
+              <span className="font-body font-bold text-[10px] tracking-[0.24em] text-awburg-core uppercase">AT YOUR WORST</span>
+              <ChevronDown
+                className="w-4 h-4 text-awburg-core/50 transition-transform duration-200"
+                style={{ transform: worstOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+              />
+            </button>
+            {worstOpen && (
+              <p className="font-body font-light text-awburg-core/80 text-sm leading-relaxed py-3">
+                {arch?.atWorst || ""}
+              </p>
+            )}
+
+            <div className="flex gap-4 items-center mt-5">
+              <button onClick={() => window.location.href = "/StartingPointProfile"} className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
+                EDIT MY ANSWERS <ArrowRight className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors">
+              <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors border border-awburg-core/20 rounded-full py-3 px-5">
                 RETAKE THE QUIZ
               </button>
             </div>
           </div>
-          <div className="bg-awburg-core rounded-xl p-6 text-center">
-            <p className="font-body font-light text-paper/70 text-sm mb-1">You are</p>
-            <p className="font-display italic text-awrose-light text-2xl leading-tight">{archetypeLabel}</p>
+
+          {/* Archetype video card */}
+          <div
+            style={{
+              width: "100%",
+              aspectRatio: "9 / 16",
+              borderRadius: "10px",
+              overflow: "hidden",
+              position: "relative",
+              background: "#3D0B27",
+            }}
+          >
+            {arch?.videoUrl && (
+              <video
+                src={arch.videoUrl}
+                muted
+                playsInline
+                autoPlay
+                loop
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            )}
+            {/* Bottom gradient */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "linear-gradient(to top, rgba(20,4,12,0.9) 0%, rgba(20,4,12,0.6) 30%, transparent 60%)",
+                pointerEvents: "none",
+              }}
+            />
+            {/* Overlay text */}
+            <div style={{ position: "absolute", left: 16, right: 16, bottom: 18 }}>
+              <p
+                style={{
+                  fontFamily: "'DM Serif Display', Georgia, serif",
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  fontSize: "18px",
+                  lineHeight: 1.1,
+                  color: "#FFFFFF",
+                  marginBottom: "8px",
+                  textShadow: "0 2px 12px rgba(0,0,0,0.5)",
+                }}
+              >
+                {archetypeLabel}
+              </p>
+              <p
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "10px",
+                  lineHeight: 1.5,
+                  color: "rgba(255,255,255,0.85)",
+                  fontWeight: 300,
+                  textShadow: "0 1px 6px rgba(0,0,0,0.5)",
+                }}
+              >
+                {arch?.atBest ? arch.atBest.split(". ").slice(0, 2).join(". ") + "." : ""}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Pattern explanation */}
+      {/* Pattern explanation - dynamic from archetype data */}
       <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-4">
           <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />
@@ -123,12 +217,27 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
           The pattern, <span className="italic text-awrose-core">named</span>.
         </h3>
         <div className="space-y-4 max-w-2xl">
-          <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
-            Identity is performance-dependent. Without the performing, you have no reliable sense of self. The achievements stack up, but the sense of who you are without them does not. The performance becomes the identity. When the performance pauses, even briefly, the floor disappears.
-          </p>
-          <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
-            This is not a character flaw. It is a survival adaptation. Most high-functioning women learn early that being valued is conditional on being impressive. The pattern made sense. It also made you exhausted.
-          </p>
+          {(arch?.fullDescription || "").split("\n").filter(Boolean).length > 0 ? (
+            <>
+              <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
+                {arch.fullDescription}
+              </p>
+              <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
+                The Aligned Woman Blueprint Course addresses this through two pillars. Your primary work begins in{" "}
+                <span className="font-medium text-awburg-core">{arch.primaryPillar}</span>,{" "}
+                {arch.primaryPillarNote} Your secondary work sits in{" "}
+                <span className="font-medium text-awburg-core">{arch.secondaryPillar}</span>,{" "}
+                {arch.secondaryPillarNote}
+              </p>
+              <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed italic">
+                {arch.foundation}
+              </p>
+            </>
+          ) : (
+            <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed">
+              {arch?.mirrorLine || "Your pattern has been identified. Explore your course to understand it fully."}
+            </p>
+          )}
         </div>
       </section>
     </div>
