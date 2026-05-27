@@ -10,7 +10,7 @@ const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU7sN7Vkg8p1Cp5p7eME06";
 
 const INCLUSIONS = [
   "13 globally credentialled specialists",
-  "5 phases, 11 year Access",
+  "5 phases, 1 year Access",
   "Workbooks, tools, and community",
 
 ];
