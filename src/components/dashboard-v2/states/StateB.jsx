@@ -89,7 +89,7 @@ export default function StateB({ user, profile, workbookData = [], continueData 
         <h3 className="relative font-display text-paper text-[26px] md:text-[30px] leading-tight mb-3">
           Find your <span className="italic text-awrose-light">pattern</span>.
         </h3>
-        <p className="relative font-body font-light text-paper/80 text-sm leading-relaxed mb-5 max-w-lg">
+        <p className="relative font-body font-light text-white text-sm leading-relaxed mb-5 max-w-lg">
           A short diagnostic. It will not change what you have access to. It will sharpen what you notice in the work.
         </p>
         <button onClick={() => window.location.href = "/StartingPointProfile"} className="relative font-body font-bold text-[11px] tracking-eyebrow text-paper hover:text-awrose-light uppercase inline-flex items-center gap-2 transition-colors">
