@@ -163,12 +163,9 @@ function ArchetypeCarousel({ mobile }) {
               </figcaption>
               <div style={{ width: w, aspectRatio: "9 / 16", background: arch.videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)", border: `1px solid ${isC ? "rgba(196,132,122,0.55)" : "rgba(196,132,122,0.25)"}`, borderRadius: mobile ? 8 : 10, boxShadow: isC ? (mobile ? "0 10px 28px rgba(74,14,46,0.18)" : "0 18px 48px rgba(74,14,46,0.22)") : "none", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", transition: `all 500ms ${EASE}` }}>
                 {arch.videoUrl && (
-                  <video src={arch.videoUrl} muted playsInline preload="metadata" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }} />
+                  <video src={arch.videoUrl} muted playsInline autoPlay loop style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }} />
                 )}
                 <div style={{ position: "absolute", inset: 0, background: arch.videoUrl ? "radial-gradient(circle at 50% 60%, transparent 40%, rgba(74,14,46,0.3) 100%)" : "radial-gradient(circle at 50% 60%, transparent 50%, rgba(74,14,46,0.1) 100%)", pointerEvents: "none" }} />
-                <div style={{ position: "relative", width: isC ? z.playA : z.playS, height: isC ? z.playA : z.playS, borderRadius: "50%", background: "rgba(74,14,46,0.85)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(74,14,46,0.25)", transition: `all 500ms ${EASE}` }}>
-                  <svg width={isC ? z.svgA : z.svgS} height={Math.round((isC ? z.svgA : z.svgS) * 1.15)} viewBox="0 0 14 16" fill="#FFFFFF" style={{ marginLeft: 2 }}><path d="M0 0 L14 8 L0 16 Z" /></svg>
-                </div>
               </div>
             </figure>
           );
