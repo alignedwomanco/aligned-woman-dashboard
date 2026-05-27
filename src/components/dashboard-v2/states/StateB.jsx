@@ -33,7 +33,7 @@ export default function StateB({ user, profile, workbookData = [], continueData 
         </p>
         <h2 className="font-display text-awburg-core text-[34px] md:text-[44px] leading-tight mb-6">
           Five phases.<br />
-          Fourteen practitioners.<br />
+          Thirteen practitioners.<br />
           <span className="italic text-awrose-core">Your</span> pace.
         </h2>
         <p className="font-body font-light text-awburg-core/80 text-base leading-relaxed max-w-xl mb-8">
