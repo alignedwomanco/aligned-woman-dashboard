@@ -133,47 +133,143 @@ function ArchetypeCarousel({ mobile }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setActive((a) => (a + 1) % len), 2400);
+    const id = setInterval(() => setActive((a) => (a + 1) % len), 3200);
     return () => clearInterval(id);
   }, [len]);
 
-  const prev = (active - 1 + len) % len;
-  const next = (active + 1) % len;
-  const cards = [
-    { i: prev, role: "side" },
-    { i: active, role: "center" },
-    { i: next, role: "side" },
-  ];
+  const cW = mobile ? 140 : 280;
+  const sW = mobile ? 80 : 160;
+  const gap = mobile ? 12 : 28;
+  const totalW = cW + (sW + gap) * 2;
 
-  const z = mobile
-    ? { cW: 140, sW: 80, gap: 12, playA: 42, playS: 24, svgA: 13, svgS: 8, capA: 10, capS: 8 }
-    : { cW: 280, sW: 160, gap: 28, playA: 72, playS: 40, svgA: 22, svgS: 12, capA: 12, capS: 10 };
+  // Position each card relative to center based on distance from active
+  const getOffset = (i) => {
+    let diff = i - active;
+    if (diff > len / 2) diff -= len;
+    if (diff < -len / 2) diff += len;
+    return diff;
+  };
 
   return (
     <div style={{ marginTop: 8 }}>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: z.gap, padding: mobile ? "20px 0 16px" : "32px 0 24px", minHeight: mobile ? 280 : 540 }}>
-        {cards.map((c, idx) => {
-          const isC = c.role === "center";
-          const w = isC ? z.cW : z.sW;
-          const arch = archetypes[c.i];
+      <div style={{
+        position: "relative",
+        width: totalW,
+        height: mobile ? 300 : 560,
+        margin: "0 auto",
+        padding: mobile ? "20px 0 16px" : "32px 0 24px",
+        overflow: "hidden",
+      }}>
+        {archetypes.map((arch, i) => {
+          const diff = getOffset(i);
+          const isCenter = diff === 0;
+          const isSide = Math.abs(diff) === 1;
+          const isVisible = Math.abs(diff) <= 1;
+
+          const w = isCenter ? cW : sW;
+          const centerX = totalW / 2;
+          const x = isCenter
+            ? centerX - cW / 2
+            : diff === -1
+            ? centerX - cW / 2 - gap - sW
+            : diff === 1
+            ? centerX + cW / 2 + gap
+            : diff < 0
+            ? -sW - 20
+            : totalW + 20;
+
           return (
-            <figure key={`slot-${idx}`} style={{ margin: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: mobile ? 10 : 14, opacity: isC ? 1 : 0.55, transition: `opacity 500ms ${EASE}` }}>
-              <figcaption style={{ fontFamily: SANS, fontSize: isC ? z.capA : z.capS, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: isC ? ROSE_DEEP : "rgba(74,14,46,0.45)", textAlign: "center", lineHeight: 1.3, maxWidth: w + 40, minHeight: mobile ? 26 : 32, transition: `all 500ms ${EASE}` }}>
+            <div
+              key={arch.key}
+              style={{
+                position: "absolute",
+                top: mobile ? 20 : 32,
+                left: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: mobile ? 10 : 14,
+                width: w,
+                transform: `translateX(${x}px)`,
+                opacity: isVisible ? (isCenter ? 1 : 0.55) : 0,
+                transition: `all 800ms ${EASE}`,
+                pointerEvents: isVisible ? "auto" : "none",
+              }}
+            >
+              <div style={{
+                fontFamily: SANS,
+                fontSize: isCenter ? (mobile ? 10 : 12) : (mobile ? 8 : 10),
+                fontWeight: 700,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: isCenter ? ROSE_DEEP : "rgba(74,14,46,0.45)",
+                textAlign: "center",
+                lineHeight: 1.3,
+                minHeight: mobile ? 26 : 32,
+                transition: `all 800ms ${EASE}`,
+                whiteSpace: "nowrap",
+              }}>
                 {arch.name.replace("The ", "")}
-              </figcaption>
-              <div style={{ width: w, aspectRatio: "9 / 16", background: arch.videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)", border: `1px solid ${isC ? "rgba(196,132,122,0.55)" : "rgba(196,132,122,0.25)"}`, borderRadius: mobile ? 8 : 10, boxShadow: isC ? (mobile ? "0 10px 28px rgba(74,14,46,0.18)" : "0 18px 48px rgba(74,14,46,0.22)") : "none", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", transition: `all 500ms ${EASE}` }}>
-                {arch.videoUrl && (
-                  <video src={arch.videoUrl} muted playsInline autoPlay loop style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }} />
-                )}
-                <div style={{ position: "absolute", inset: 0, background: arch.videoUrl ? "radial-gradient(circle at 50% 60%, transparent 40%, rgba(74,14,46,0.3) 100%)" : "radial-gradient(circle at 50% 60%, transparent 50%, rgba(74,14,46,0.1) 100%)", pointerEvents: "none" }} />
               </div>
-            </figure>
+              <div style={{
+                width: "100%",
+                aspectRatio: "9 / 16",
+                background: arch.videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)",
+                border: `1px solid ${isCenter ? "rgba(196,132,122,0.55)" : "rgba(196,132,122,0.25)"}`,
+                borderRadius: mobile ? 8 : 10,
+                boxShadow: isCenter
+                  ? mobile
+                    ? "0 10px 28px rgba(74,14,46,0.18)"
+                    : "0 18px 48px rgba(74,14,46,0.22)"
+                  : "none",
+                position: "relative",
+                overflow: "hidden",
+                transition: `all 800ms ${EASE}`,
+              }}>
+                {arch.videoUrl && (
+                  <video
+                    src={arch.videoUrl}
+                    muted
+                    playsInline
+                    autoPlay
+                    loop
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      pointerEvents: "none",
+                    }}
+                  />
+                )}
+                <div style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: arch.videoUrl
+                    ? "radial-gradient(circle at 50% 60%, transparent 40%, rgba(74,14,46,0.3) 100%)"
+                    : "radial-gradient(circle at 50% 60%, transparent 50%, rgba(74,14,46,0.1) 100%)",
+                  pointerEvents: "none",
+                }} />
+              </div>
+            </div>
           );
         })}
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: mobile ? 8 : 10, marginTop: mobile ? 8 : 16 }}>
         {archetypes.map((_, i) => (
-          <span key={i} onClick={() => setActive(i)} style={{ width: i === active ? (mobile ? 18 : 24) : (mobile ? 6 : 8), height: mobile ? 4 : 5, borderRadius: 2, background: i === active ? ROSE : "rgba(196,132,122,0.35)", transition: `all 500ms ${EASE}`, cursor: "pointer" }} />
+          <span
+            key={i}
+            onClick={() => setActive(i)}
+            style={{
+              width: i === active ? (mobile ? 18 : 24) : (mobile ? 6 : 8),
+              height: mobile ? 4 : 5,
+              borderRadius: 2,
+              background: i === active ? ROSE : "rgba(196,132,122,0.35)",
+              transition: `all 600ms ${EASE}`,
+              cursor: "pointer",
+            }}
+          />
         ))}
       </div>
     </div>
