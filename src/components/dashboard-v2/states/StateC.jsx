@@ -178,6 +178,14 @@ export default function StateC({ user, profile, onCheckout }) {
             </p>
           )}
         </div>
+        <div className="flex gap-4 items-center mt-6">
+          <button onClick={() => window.location.href = "/StartingPointProfile"} className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
+            EDIT MY ANSWERS <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors border border-awburg-core/20 rounded-full py-3 px-5">
+            RETAKE THE QUIZ
+          </button>
+        </div>
       </section>
 
       {/* 30-minute reset */}
