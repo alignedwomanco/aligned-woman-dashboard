@@ -26,7 +26,7 @@ export default function StateC({ user, profile, onCheckout }) {
       <section className="bg-awrose-pale rounded-xl p-6 md:p-8">
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-4">
           <span className="inline-block w-3 h-px bg-awrose-deep mr-2 align-middle" />
-          YOUR DIAGNOSIS
+          YOUR DIAGNOSIS · YOUR INTAKE
         </p>
         <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-6 items-start">
           <div>
@@ -70,6 +70,9 @@ export default function StateC({ user, profile, onCheckout }) {
             )}
 
             <div className="flex gap-4 items-center mt-5">
+              <button onClick={() => window.location.href = "/StartingPointProfile"} className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
+                EDIT MY ANSWERS <ArrowRight className="w-3.5 h-3.5" />
+              </button>
               <button onClick={() => window.location.href = "/StartingPointProfile"} className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/60 hover:text-awburg-core uppercase transition-colors border border-awburg-core/20 rounded-full py-3 px-5">
                 RETAKE THE QUIZ
               </button>
