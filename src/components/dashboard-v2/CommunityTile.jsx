@@ -36,46 +36,50 @@ export default function CommunityTile({ posts, hasNewActivity }) {
       ];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm mb-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-0.5 bg-[#C77B85] rounded-full" />
-          <p className="text-[10px] tracking-[0.2em] text-[#C77B85] font-medium uppercase">
-            COMMUNITY
-          </p>
-        </div>
-        {hasNewActivity !== false && (
-          <div className="w-2.5 h-2.5 rounded-full bg-[#C77B85]" />
-        )}
+    <div className="relative bg-white rounded-xl border border-gray-100 p-5 shadow-sm mb-4 overflow-hidden">
+      {/* Greyed out overlay */}
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
+        <span className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/50 uppercase">Coming Soon</span>
       </div>
 
-      {/* Activity list */}
-      <div className="space-y-3.5 mb-4">
-        {activities.map((item, i) => (
-          <div key={i} className="flex items-start justify-between gap-3">
-            <p className="text-sm text-[#2A1218] leading-snug flex-1">
-              <span dangerouslySetInnerHTML={{
-                __html: item.text.replace(
-                  /"([^"]+)"/g,
-                  '<em class="italic text-[#5C1A2E]">$1</em>'
-                )
-              }} />
+      <div className="opacity-40 pointer-events-none">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-0.5 bg-[#C77B85] rounded-full" />
+            <p className="text-[10px] tracking-[0.2em] text-[#C77B85] font-medium uppercase">
+              COMMUNITY
             </p>
-            <span className="text-[9px] tracking-[0.1em] text-[#6B6168] uppercase flex-shrink-0 mt-0.5">
-              {item.time}
-            </span>
           </div>
-        ))}
-      </div>
+          {hasNewActivity !== false && (
+            <div className="w-2.5 h-2.5 rounded-full bg-[#C77B85]" />
+          )}
+        </div>
 
-      {/* Footer link */}
-      <Link
-        to={createPageUrl("Community")}
-        className="text-[10px] tracking-[0.15em] text-[#5C1A2E] hover:text-[#3D0F1F] font-medium uppercase transition-colors"
-      >
-        OPEN COMMUNITY →
-      </Link>
+        {/* Activity list */}
+        <div className="space-y-3.5 mb-4">
+          {activities.map((item, i) => (
+            <div key={i} className="flex items-start justify-between gap-3">
+              <p className="text-sm text-[#2A1218] leading-snug flex-1">
+                <span dangerouslySetInnerHTML={{
+                  __html: item.text.replace(
+                    /"([^"]+)"/g,
+                    '<em class="italic text-[#5C1A2E]">$1</em>'
+                  )
+                }} />
+              </p>
+              <span className="text-[9px] tracking-[0.1em] text-[#6B6168] uppercase flex-shrink-0 mt-0.5">
+                {item.time}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer link */}
+        <span className="text-[10px] tracking-[0.15em] text-[#5C1A2E] font-medium uppercase">
+          OPEN COMMUNITY →
+        </span>
+      </div>
     </div>
   );
 }
