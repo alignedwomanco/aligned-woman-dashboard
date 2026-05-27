@@ -182,7 +182,7 @@ export default function StateC({ user, profile, onCheckout }) {
           <button onClick={onCheckout} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
             BEGIN THE BLUEPRINT <ArrowRight className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => window.location.href = "/BlueprintPage"} className="inline-flex items-center gap-2 bg-transparent border border-awburg-core text-awburg-core hover:bg-awburg-core hover:text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-5 rounded-full transition-all duration-200">
+          <button onClick={() => window.location.href = "/blueprint"} className="inline-flex items-center gap-2 bg-transparent border border-awburg-core text-awburg-core hover:bg-awburg-core hover:text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-5 rounded-full transition-all duration-200">
             LEARN MORE <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -239,7 +239,7 @@ export default function StateC({ user, profile, onCheckout }) {
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
-            onClick={() => window.location.href = "/BlueprintPage"}
+            onClick={() => window.location.href = "/blueprint"}
             className="inline-flex items-center gap-2 bg-transparent border border-awburg-core text-awburg-core hover:bg-awburg-core hover:text-paper text-xs font-bold tracking-eyebrow uppercase py-4 px-8 rounded-full transition-all duration-200"
           >
             LEARN MORE
