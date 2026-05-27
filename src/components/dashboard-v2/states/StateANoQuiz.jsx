@@ -1,18 +1,10 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import PhaseIndicator from "@/components/dashboard-v2/PhaseIndicator";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
 import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
-
-const ARCHETYPES = [
-  "The Performer",
-  "The Over-Functioner",
-  "The Delegator",
-  "The Overrider",
-  "The Reactor",
-];
 
 export default function StateANoQuiz({ user, profile, workbookData, continueData }) {
   const navigate = useNavigate();
@@ -68,28 +60,27 @@ export default function StateANoQuiz({ user, profile, workbookData, continueData
       {/* Workbooks */}
       <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
 
-      {/* Quiz card */}
-      <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-4">
-          <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />
-          FIND YOUR PATTERN
+      {/* Quiz nudge */}
+      <section className="rounded-xl border border-awburg-core/8 p-6 md:p-8 overflow-hidden relative" style={{ minHeight: 180 }}>
+        {/* Background video */}
+        <video
+          src="https://pub-e1032a6c8b9241cf9d03513d43a81f17.r2.dev/YourPattern.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+        />
+        {/* Dark overlay */}
+        <div style={{ position: "absolute", inset: 0, background: "rgba(10,2,6,0.55)", pointerEvents: "none" }} />
+        <h3 className="relative font-display text-paper text-[26px] md:text-[30px] leading-tight mb-3">
+          Find your <span className="italic text-awrose-light">pattern</span>.
+        </h3>
+        <p className="relative font-body font-light text-white text-sm leading-relaxed mb-5 max-w-lg">
+          A short diagnostic. It will not change what you have access to. It will sharpen what you notice in the work.
         </p>
-        <h2 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
-          The diagnostic is <span className="italic text-awrose-core">waiting</span> for you.
-        </h2>
-        <p className="font-body font-light text-awburg-core/75 text-sm md:text-base leading-relaxed mb-6 max-w-xl">
-          Two minutes. Five questions. The result is a pattern you have probably already lived for years. Naming it is the first thing the work asks of you.
-        </p>
-        <ul className="space-y-2 mb-6 max-w-md">
-          {ARCHETYPES.map((name) => (
-            <li key={name} className="flex items-center justify-between bg-awrose-wash rounded-lg px-4 py-3">
-              <span className="font-display italic text-awburg-core text-base">{name}</span>
-              <Lock className="w-3.5 h-3.5 text-awburg-core/40" />
-            </li>
-          ))}
-        </ul>
-        <button onClick={() => window.location.href = "/StartingPointProfile"} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep hover:shadow-md text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200">
-          TAKE THE QUIZ <ArrowRight className="w-4 h-4" />
+        <button onClick={() => window.location.href = "/StartingPointProfile"} className="relative font-body font-bold text-[11px] tracking-eyebrow text-paper hover:text-awrose-light uppercase inline-flex items-center gap-2 transition-colors">
+          TAKE THE QUIZ <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </section>
     </div>
