@@ -9,10 +9,10 @@ import { Loader2, Shield, Check } from "lucide-react";
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU7sN7Vkg8p1Cp5p7eME06";
 
 const INCLUSIONS = [
-  "14 globally credentialled specialists",
-  "5 phases, 14 modules, lifetime access",
+  "13 globally credentialled specialists",
+  "5 phases, 11 year Access",
   "Workbooks, tools, and community",
-  "14-day satisfaction guarantee",
+  "Enroll Now",
 ];
 
 export default function CheckoutModal({ open, onOpenChange }) {
