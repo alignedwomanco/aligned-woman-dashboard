@@ -75,7 +75,6 @@ export default function StateB({ user, profile, workbookData = [], continueData 
 
       {/* Quiz nudge */}
       <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-3">OPTIONAL · TWO MINUTES</p>
         <h3 className="font-display text-awburg-core text-[26px] md:text-[30px] leading-tight mb-3">
           Find your <span className="italic text-awrose-core">pattern</span>.
         </h3>
