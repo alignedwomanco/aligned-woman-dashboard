@@ -241,9 +241,7 @@ export default function StateC({ user, profile, onCheckout }) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
           {[
-            "2,000+ women already inside",
-            "14 globally credentialled specialists",
-            "Featured on CNBC Africa & ENCA",
+            
           ].map((line, i) => (
             <p
               key={i}
