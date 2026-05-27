@@ -125,6 +125,7 @@ function WorkbookViewerInner({ workbookId }) {
   const [user, setUser] = useState(null);
   const [isComplete, setIsComplete] = useState(false);
   const [completedAt, setCompletedAt] = useState(null);
+  const [computedScores, setComputedScores] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const initialSectionId = useRef(null);
   const saveTimer = useRef(null);
@@ -168,6 +169,7 @@ function WorkbookViewerInner({ workbookId }) {
           setAnswers(responses[0].answers || {});
           setIsComplete(responses[0].is_complete || false);
           setCompletedAt(responses[0].completed_at || null);
+          setComputedScores(responses[0].computed_scores || null);
           initialSectionId.current = responses[0].last_section_id || null;
         }
       }).catch(() => {}).finally(() => setResponseLoaded(true));
@@ -194,6 +196,37 @@ function WorkbookViewerInner({ workbookId }) {
     if (!workbook?.schema?.sections) return [];
     return workbook.schema.sections;
   }, [workbook]);
+
+  const progressiveDisclosure = workbook?.schema?.progressive_disclosure === true;
+
+  // Determine which sections are unlocked for progressive_disclosure workbooks.
+  // A section is unlocked if any section before it has at least one answered field.
+  // The first section is always unlocked. computed_results sections unlock when is_complete.
+  const unlockedSections = useMemo(() => {
+    if (!progressiveDisclosure) return sections.map((_, i) => i);
+    const unlocked = [0]; // first section always visible
+    for (let i = 1; i < sections.length; i++) {
+      const prev = sections[i - 1];
+      const isComputedResults = prev.type === "computed_results";
+      if (isComputedResults) {
+        // computed_results section unlocks next only if workbook is complete
+        if (isComplete) unlocked.push(i);
+      } else {
+        // previous section has at least one answered field
+        const prevAnswered = prev.fields?.some(f => {
+          const id = f.id || f.field_id;
+          const v = answers[id];
+          if (v === undefined || v === null) return false;
+          if (typeof v === "string") return v.trim() !== "";
+          if (typeof v === "number") return true;
+          if (typeof v === "object") return Object.values(v).some(Boolean);
+          return true;
+        });
+        if (prevAnswered) unlocked.push(i);
+      }
+    }
+    return unlocked;
+  }, [progressiveDisclosure, sections, answers, isComplete]);
 
   const assets = useMemo(() => {
     if (!workbook?.schema?.assets) return [];
@@ -226,7 +259,7 @@ function WorkbookViewerInner({ workbookId }) {
     setActiveSection(idx);
     setDrawerOpen(false);
     window.scrollTo({ top: 0, behavior: "instant" });
-    const sectionId = sections[idx]?.id;
+    const sectionId = sections[idx]?.id || sections[idx]?.section_id;
     if (sectionId) {
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(async () => {
@@ -344,6 +377,7 @@ function WorkbookViewerInner({ workbookId }) {
         onJumpTo={jumpTo}
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        unlockedSections={unlockedSections}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -358,7 +392,7 @@ function WorkbookViewerInner({ workbookId }) {
         <div className="flex-1" ref={contentRef}>
           {sections.map((section, idx) => (
             <div
-              key={section.id}
+              key={section.id || section.section_id}
               className={`wb-section-block ${idx === activeSection ? "wb-section-active" : "wb-section-inactive"}`}
             >
               <div className="wb-page" style={{ maxWidth: 720, margin: "0 auto", padding: "56px 40px 80px" }}>
@@ -374,6 +408,7 @@ function WorkbookViewerInner({ workbookId }) {
                   onFinish={handleFinishWorkbook}
                   onMarkInProgress={handleMarkInProgress}
                   assets={assets}
+                  computedScores={computedScores}
                 />
               </div>
             </div>
@@ -384,7 +419,15 @@ function WorkbookViewerInner({ workbookId }) {
           sections={sections}
           activeSection={activeSection}
           onPrev={() => jumpTo(Math.max(0, activeSection - 1))}
-          onNext={() => jumpTo(Math.min(sections.length - 1, activeSection + 1))}
+          onNext={() => {
+            const nextIdx = activeSection + 1;
+            if (nextIdx >= sections.length) return;
+            // In progressive disclosure, only jump to unlocked sections
+            if (!progressiveDisclosure || unlockedSections.includes(nextIdx)) {
+              jumpTo(nextIdx);
+            }
+          }}
+          nextLocked={progressiveDisclosure && !unlockedSections.includes(activeSection + 1)}
         />
       </div>
 

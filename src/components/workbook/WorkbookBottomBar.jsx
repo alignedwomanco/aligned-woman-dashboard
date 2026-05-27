@@ -1,11 +1,11 @@
 import React from "react";
-import { ArrowLeft, ArrowRight, FileDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileDown, Lock } from "lucide-react";
 
 /**
  * WorkbookBottomBar — sticky bottom nav: Previous | counter | Next/Review/Save PDF
  */
 export default function WorkbookBottomBar({
-  sections, activeSection, onPrev, onNext
+  sections, activeSection, onPrev, onNext, nextLocked
 }) {
   const total = sections.length;
   const isFirst = activeSection === 0;
@@ -65,13 +65,25 @@ export default function WorkbookBottomBar({
 
         {/* Next / Review / Save PDF */}
         <div className="flex justify-end">
-          <button
-            className={`wb-btn ${isLast ? "wb-btn--secondary" : "wb-btn--primary"}`}
-            onClick={handleNextClick}
-          >
-            <span className="wb-btn-label">{getNextLabel()}</span>
-            {getNextIcon()}
-          </button>
+          {nextLocked ? (
+            <button
+              className="wb-btn wb-btn--secondary"
+              disabled
+              title="Complete this section to continue"
+              style={{ opacity: 0.45, cursor: "not-allowed" }}
+            >
+              <span className="wb-btn-label">Next</span>
+              <Lock style={{ width: 12, height: 12 }} />
+            </button>
+          ) : (
+            <button
+              className={`wb-btn ${isLast ? "wb-btn--secondary" : "wb-btn--primary"}`}
+              onClick={handleNextClick}
+            >
+              <span className="wb-btn-label">{getNextLabel()}</span>
+              {getNextIcon()}
+            </button>
+          )}
         </div>
       </div>
 

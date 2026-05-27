@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import TickListField from "./TickListField";
 import CtaRowField from "./CtaRowField";
 import ScoredQuizField from "./ScoredQuizField";
+import ScaleField from "./ScaleField";
 
 /**
  * Renders a single field from the workbook schema.
@@ -34,6 +35,8 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
       return <TickListField field={field} />;
     case "cta_row":
       return <CtaRowField field={field} sections={sections} onJumpToSection={onJumpToSection} />;
+    case "scale":
+      return <ScaleField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "scored_quiz":
       return <ScoredQuizField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     default:

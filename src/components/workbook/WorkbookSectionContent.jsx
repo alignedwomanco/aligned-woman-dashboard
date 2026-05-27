@@ -2,9 +2,54 @@ import React from "react";
 import WorkbookFieldRenderer from "./WorkbookFieldRenderer";
 import WorkbookFinishButton from "./WorkbookFinishButton";
 import ScoredQuizSection from "./ScoredQuizSection";
+import ComputedResultsSection from "./ComputedResultsSection";
 
-export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [] }) {
+/* ── Grounding prompt callout ────────────────────────── */
+function GroundingCallout({ text }) {
+  return (
+    <div style={{
+      borderRadius: 12,
+      padding: "18px 22px",
+      background: "var(--aw-rose-pale)",
+      border: "1.5px solid rgba(196,132,122,0.3)",
+      marginBottom: 28,
+      display: "flex",
+      gap: 14,
+      alignItems: "flex-start",
+    }}>
+      <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>🌿</span>
+      <p style={{
+        fontFamily: "var(--aw-font-sans)",
+        fontWeight: 400,
+        fontSize: 14,
+        fontStyle: "italic",
+        lineHeight: 1.75,
+        color: "var(--aw-burg-core)",
+        margin: 0,
+      }}>
+        {text}
+      </p>
+    </div>
+  );
+}
+
+export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [], computedScores }) {
   if (!section) return null;
+
+  // Render computed_results section type
+  if (section.type === "computed_results") {
+    return (
+      <ComputedResultsSection
+        section={section}
+        computedScores={computedScores}
+        answers={answers}
+        onAnswerChange={onAnswerChange}
+        sections={sections}
+        onJumpToSection={onJumpToSection}
+        assets={assets}
+      />
+    );
+  }
 
   // Render scored_quiz section type
   if (section.type === "scored_quiz") {
@@ -66,20 +111,26 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
           )}
         </div>
 
-        {/* Render fields (grounding callout before quiz) */}
+        {/* Grounding prompt */}
+        {section.grounding_prompt && <GroundingCallout text={section.grounding_prompt} />}
+
+        {/* Render fields */}
         <div className="space-y-6 mb-8">
-          {section.fields?.map((field) => (
-            <WorkbookFieldRenderer
-              key={field.id}
-              field={field}
-              answers={answers}
-              onAnswerChange={onAnswerChange}
-              sectionFields={section.fields}
-              sections={sections}
-              onJumpToSection={onJumpToSection}
-              assets={assets}
-            />
-          ))}
+          {section.fields?.map((field) => {
+            const fieldId = field.id || field.field_id;
+            return (
+              <WorkbookFieldRenderer
+                key={fieldId}
+                field={{ ...field, id: fieldId }}
+                answers={answers}
+                onAnswerChange={onAnswerChange}
+                sectionFields={section.fields}
+                sections={sections}
+                onJumpToSection={onJumpToSection}
+                assets={assets}
+              />
+            );
+          })}
         </div>
 
         {/* Render scored quiz */}
@@ -154,20 +205,26 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
         )}
       </div>
 
+      {/* Grounding prompt (nervous system map and similar sections) */}
+      {section.grounding_prompt && <GroundingCallout text={section.grounding_prompt} />}
+
       {/* Fields */}
       <div className="space-y-6">
-        {section.fields?.map((field) => (
-          <WorkbookFieldRenderer
-            key={field.id}
-            field={field}
-            answers={answers}
-            onAnswerChange={onAnswerChange}
-            sectionFields={section.fields}
-            sections={sections}
-            onJumpToSection={onJumpToSection}
-            assets={assets}
-          />
-        ))}
+        {section.fields?.map((field) => {
+          const fieldId = field.id || field.field_id;
+          return (
+            <WorkbookFieldRenderer
+              key={fieldId}
+              field={{ ...field, id: fieldId }}
+              answers={answers}
+              onAnswerChange={onAnswerChange}
+              sectionFields={section.fields}
+              sections={sections}
+              onJumpToSection={onJumpToSection}
+              assets={assets}
+            />
+          );
+        })}
       </div>
 
       {/* Finish button on the last section */}

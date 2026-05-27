@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 /**
@@ -7,20 +7,24 @@ import { useNavigate } from "react-router-dom";
  * Props: workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose
  */
 export default function WorkbookSidebar({
-  workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose
+  workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose, unlockedSections
 }) {
   const navigate = useNavigate();
   // Check if section has any non-empty answer
   const isSectionCompleted = (section) => {
     if (!section?.fields) return false;
     return section.fields.some(f => {
-      const v = answers[f.id];
+      const id = f.id || f.field_id;
+      const v = answers[id];
       if (v === undefined || v === null) return false;
       if (typeof v === "string") return v.trim() !== "";
+      if (typeof v === "number") return true;
       if (typeof v === "object") return Object.keys(v).length > 0 && Object.values(v).some(Boolean);
       return true;
     });
   };
+
+  const isLocked = (idx) => unlockedSections && !unlockedSections.includes(idx);
 
   const getNumberDisplay = (section, idx) => {
     if (idx === 0) return "\u2014";
@@ -87,23 +91,29 @@ export default function WorkbookSidebar({
         <div className="flex flex-col" style={{ gap: 1 }}>
           {sections.map((section, idx) => {
             const isCurrent = idx === activeSection;
-            const isCompleted = !isCurrent && isSectionCompleted(section);
+            const locked = isLocked(idx);
+            const isCompleted = !isCurrent && !locked && isSectionCompleted(section);
             const num = getNumberDisplay(section, idx);
 
             return (
               <button
-                key={section.id}
-                onClick={() => onJumpTo(idx)}
+                key={section.id || section.section_id}
+                onClick={() => !locked && onJumpTo(idx)}
+                disabled={locked}
                 className={`wb-nav-item ${isCurrent ? "wb-nav-current" : ""} w-full text-left flex items-center gap-3`}
                 style={{
                   padding: "10px 14px",
                   borderRadius: "var(--aw-radius-sm)",
                   background: isCurrent ? "var(--aw-rose-wash)" : "transparent",
+                  opacity: locked ? 0.4 : 1,
+                  cursor: locked ? "default" : "pointer",
                 }}
               >
                 {/* Dot / marker */}
                 <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 16, height: 16 }}>
-                  {isCompleted ? (
+                  {locked ? (
+                    <Lock style={{ width: 12, height: 12, color: "var(--aw-mid-grey)" }} />
+                  ) : isCompleted ? (
                     <div className="rounded-full flex items-center justify-center" style={{ width: 16, height: 16, background: "var(--aw-rose-core)" }}>
                       <Check className="text-white" style={{ width: 9, height: 9 }} strokeWidth={3} />
                     </div>

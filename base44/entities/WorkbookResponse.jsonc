@@ -4,7 +4,7 @@
   "properties": {
     "workbook_id": {
       "type": "string",
-      "description": "Relationship \u2192 Workbook"
+      "description": "Relationship to Workbook"
     },
     "answers": {
       "type": "object",
@@ -24,6 +24,11 @@
       "type": "string",
       "format": "date-time",
       "description": "Timestamp when user marked complete"
+    },
+    "computed_scores": {
+      "type": "object",
+      "description": "Scoring output computed when workbook is marked complete. Null until completion. Contains dominant_state, window_classification, resource_classification, somatic_classification, and portrait_keys.",
+      "default": null
     }
   },
   "required": [
@@ -37,7 +42,16 @@
       "created_by": "{{user.email}}"
     },
     "update": {
-      "created_by": "{{user.email}}"
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
       "created_by": "{{user.email}}"
