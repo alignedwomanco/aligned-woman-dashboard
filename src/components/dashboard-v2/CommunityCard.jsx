@@ -11,11 +11,11 @@ export default function CommunityCard() {
   return (
     <section className="relative bg-paper rounded-xl border border-awburg-core/8 p-6 mb-4 overflow-hidden">
       {/* Greyed out overlay */}
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
-        <span className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/50 uppercase">Coming Soon</span>
+      <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl">
+        <span className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/60 uppercase">Community Coming Soon</span>
       </div>
 
-      <div className="opacity-40 pointer-events-none">
+      <div className="opacity-60 pointer-events-none">
         <div className="flex items-center justify-between mb-5">
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase flex items-center">
             <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />

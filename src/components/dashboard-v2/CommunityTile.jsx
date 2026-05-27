@@ -38,11 +38,11 @@ export default function CommunityTile({ posts, hasNewActivity }) {
   return (
     <div className="relative bg-white rounded-xl border border-gray-100 p-5 shadow-sm mb-4 overflow-hidden">
       {/* Greyed out overlay */}
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
-        <span className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/50 uppercase">Coming Soon</span>
+      <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl">
+        <span className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/60 uppercase">Community Coming Soon</span>
       </div>
 
-      <div className="opacity-40 pointer-events-none">
+      <div className="opacity-60 pointer-events-none">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
