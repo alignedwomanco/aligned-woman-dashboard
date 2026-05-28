@@ -4,6 +4,31 @@ import WorkbookFinishButton from "./WorkbookFinishButton";
 import ScoredQuizSection from "./ScoredQuizSection";
 import ComputedResultsSection from "./ComputedResultsSection";
 
+/* ── Interactive workbook sections (Money workbook) ──── */
+import Section1Diagnostic from "./money/Section1Diagnostic";
+import Section2Blueprint from "./money/Section2Blueprint";
+import Section3Scripts from "./money/Section3Scripts";
+import Section4Triggers from "./money/Section4Triggers";
+import Section5Wealth from "./money/Section5Wealth";
+import Section6Gap from "./money/Section6Gap";
+import Section7Saving from "./money/Section7Saving";
+import Section8Risk from "./money/Section8Risk";
+import Section9Advice from "./money/Section9Advice";
+import Section10Action from "./money/Section10Action";
+
+const INTERACTIVE_SECTIONS = {
+  s01: Section1Diagnostic,
+  s02: Section2Blueprint,
+  s03: Section3Scripts,
+  s04: Section4Triggers,
+  s05: Section5Wealth,
+  s06: Section6Gap,
+  s07: Section7Saving,
+  s08: Section8Risk,
+  s09: Section9Advice,
+  s10: Section10Action,
+};
+
 /* ── Grounding prompt callout ────────────────────────── */
 function GroundingCallout({ text }) {
   return (
@@ -36,7 +61,30 @@ function GroundingCallout({ text }) {
 export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [], computedScores }) {
   if (!section) return null;
 
-  // Render computed_results section type
+  // ── Interactive workbook sections (detected by step_flow in schema) ──
+  if (section.step_flow) {
+    const InteractiveSection = INTERACTIVE_SECTIONS[section.section_id];
+    if (InteractiveSection) {
+      return (
+        <InteractiveSection
+          section={section}
+          answers={answers}
+          onAnswerChange={onAnswerChange}
+          sections={sections}
+          onJumpToSection={onJumpToSection}
+          isLastSection={isLastSection}
+          isComplete={isComplete}
+          completedAt={completedAt}
+          onFinish={onFinish}
+          onMarkInProgress={onMarkInProgress}
+          assets={assets}
+          computedScores={computedScores}
+        />
+      );
+    }
+  }
+
+  // ── Computed results section type ──
   if (section.type === "computed_results") {
     return (
       <ComputedResultsSection
@@ -51,7 +99,7 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
     );
   }
 
-  // Render scored_quiz section type
+  // ── Scored quiz section type ──
   if (section.type === "scored_quiz") {
     return (
       <div>
@@ -146,7 +194,7 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
     );
   }
 
-  // Default rendering for other section types
+  // ── Default rendering for standard sections ──
   return (
     <div>
       {/* Section head -- 36px margin-bottom per spec */}
