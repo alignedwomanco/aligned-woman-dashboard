@@ -39,16 +39,7 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
+/* NavBtn removed — navigation handled by bottom bar */
 
 const num = (v) => parseFloat(v) || 0;
 const fmt = (n) => {
@@ -220,7 +211,7 @@ function Step1({ monthlyAmount, setMonthlyAmount, years, setYears, rate, setRate
         </FadeIn>
       )}
 
-      {num(monthlyAmount) > 0 && <NavBtn onNext={onNext} />}
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -338,7 +329,7 @@ function Step2({ safetyLevel, setSafetyLevel, monthlyEssentials, setMonthlyEssen
         </FadeIn>
       )}
 
-      {safetyLevel && <NavBtn onNext={onNext} onBack={onBack} />}
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -446,7 +437,7 @@ function Step3({ goals, setGoal, addGoal, removeGoal, onNext, onBack }) {
         </FadeIn>
       )}
 
-      <NavBtn onNext={onNext} onBack={onBack} />
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -535,7 +526,7 @@ function Step4({ protections, setProtection, onNext, onBack }) {
         </FadeIn>
       )}
 
-      {answered >= 5 && <NavBtn onNext={onNext} onBack={onBack} />}
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -629,7 +620,7 @@ function Step5({ barriers, toggleBarrier, commitment, setCommitment, startAmount
         </div>
       </div>
 
-      {(barriers.length > 0 || num(startAmount) > 0) && <NavBtn onNext={onNext} onBack={onBack} label="See my summary" />}
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -738,7 +729,7 @@ function Step6({ monthlyAmount, years, rate, safetyLevel, goals, protections, ba
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section7Saving({ section, answers = {}, onAnswerChange }) {
+export default function Section7Saving({ section, answers = {}, onAnswerChange, step = 0 }) {
   const monthlyAmount      = answers.s07_monthly_amount || "";
   const years              = answers.s07_years || 15;
   const rate               = answers.s07_rate || 8;
@@ -750,8 +741,6 @@ export default function Section7Saving({ section, answers = {}, onAnswerChange }
   const barriers           = answers.s07_barriers || [];
   const commitment         = answers.s07_commitment || null;
   const startAmount        = answers.s07_start_amount || "";
-
-  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -769,10 +758,6 @@ export default function Section7Saving({ section, answers = {}, onAnswerChange }
     save("s07_barriers", next);
   };
 
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
-
   const STEPS = ["Compounding", "Safety net", "Goals", "Protection", "Barriers", "Summary"];
 
   return (
@@ -784,14 +769,14 @@ export default function Section7Saving({ section, answers = {}, onAnswerChange }
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 monthlyAmount={monthlyAmount} setMonthlyAmount={(v) => save("s07_monthly_amount", v)} years={years} setYears={(v) => save("s07_years", v)} rate={rate} setRate={(v) => save("s07_rate", v)} onNext={goNext} />}
-      {step === 1 && <Step2 safetyLevel={safetyLevel} setSafetyLevel={(v) => save("s07_safety_level", v)} monthlyEssentials={monthlyEssentials} setMonthlyEssentials={(v) => save("s07_monthly_essentials", v)} survivalReflection={survivalReflection} setSurvivalReflection={(v) => save("s07_survival_reflection", v)} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 goals={goals} setGoal={setGoal} addGoal={addGoal} removeGoal={removeGoal} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4 protections={protections} setProtection={setProtection} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <Step5 barriers={barriers} toggleBarrier={toggleBarrier} commitment={commitment} setCommitment={(v) => save("s07_commitment", v)} startAmount={startAmount} setStartAmount={(v) => save("s07_start_amount", v)} onNext={goNext} onBack={goBack} />}
-      {step === 5 && <Step6 monthlyAmount={monthlyAmount} years={years} rate={rate} safetyLevel={safetyLevel} goals={goals} protections={protections} barriers={barriers} startAmount={startAmount} commitment={commitment} onBack={goBack} />}
+      {step === 0 && <Step1 monthlyAmount={monthlyAmount} setMonthlyAmount={(v) => save("s07_monthly_amount", v)} years={years} setYears={(v) => save("s07_years", v)} rate={rate} setRate={(v) => save("s07_rate", v)} />}
+      {step === 1 && <Step2 safetyLevel={safetyLevel} setSafetyLevel={(v) => save("s07_safety_level", v)} monthlyEssentials={monthlyEssentials} setMonthlyEssentials={(v) => save("s07_monthly_essentials", v)} survivalReflection={survivalReflection} setSurvivalReflection={(v) => save("s07_survival_reflection", v)} />}
+      {step === 2 && <Step3 goals={goals} setGoal={setGoal} addGoal={addGoal} removeGoal={removeGoal} />}
+      {step === 3 && <Step4 protections={protections} setProtection={setProtection} />}
+      {step === 4 && <Step5 barriers={barriers} toggleBarrier={toggleBarrier} commitment={commitment} setCommitment={(v) => save("s07_commitment", v)} startAmount={startAmount} setStartAmount={(v) => save("s07_start_amount", v)} />}
+      {step === 5 && <Step6 monthlyAmount={monthlyAmount} years={years} rate={rate} safetyLevel={safetyLevel} goals={goals} protections={protections} barriers={barriers} startAmount={startAmount} commitment={commitment} />}
     </div>
   );
 }

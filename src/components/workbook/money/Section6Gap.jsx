@@ -33,16 +33,7 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
+/* NavBtn removed — navigation handled by bottom bar */
 
 const num = (v) => parseFloat(v) || 0;
 const fmt = (n) => {
@@ -173,7 +164,7 @@ function Step1({ income, setIncome, incomeStability, setIncomeStability, onNext 
         </FadeIn>
       )}
 
-      {total > 0 && incomeStability && <NavBtn onClick={onNext} />}
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -318,7 +309,7 @@ function Step2({ expenses, setExpense, income, onNext, onBack }) {
         </FadeIn>
       )}
 
-      {filledCount >= 5 && <NavBtn onClick={onNext} onBack={onBack} />}
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -433,7 +424,7 @@ function Step3({ income, expenses, onNext, onBack }) {
         })}
       </div>
 
-      <NavBtn onClick={onNext} onBack={onBack} />
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -557,7 +548,7 @@ function Step4({ expenses, leaks, setLeak, leakActions, setLeakAction, onNext, o
         </FadeIn>
       )}
 
-      {(ratedCount >= Math.min(3, allLeakable.length) || allLeakable.length === 0) && <NavBtn onClick={onNext} onBack={onBack} label="See my summary" />}
+      {/* navigation via bottom bar */}
     </div>
   );
 }
@@ -717,14 +708,12 @@ function Step5({ income, expenses, incomeStability, leaks, leakActions, onBack }
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section6Gap({ section, answers = {}, onAnswerChange }) {
+export default function Section6Gap({ section, answers = {}, onAnswerChange, step = 0 }) {
   const income          = answers.s06_income || {};
   const incomeStability = answers.s06_income_stability || null;
   const expenses        = answers.s06_expenses || {};
   const leaks           = answers.s06_leaks || {};
   const leakActions     = answers.s06_leak_actions || {};
-
-  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -732,10 +721,6 @@ export default function Section6Gap({ section, answers = {}, onAnswerChange }) {
   const setExpense = (id, val) => save("s06_expenses", { ...expenses, [id]: val });
   const setLeak = (id, val) => save("s06_leaks", { ...leaks, [id]: val });
   const setLeakAction = (id, val) => save("s06_leak_actions", { ...leakActions, [id]: val });
-
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
 
   const STEPS = ["Income", "Expenses", "Gap diagnostic", "Leak finder", "Summary"];
 
@@ -748,13 +733,13 @@ export default function Section6Gap({ section, answers = {}, onAnswerChange }) {
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 income={income} setIncome={setIncome} incomeStability={incomeStability} setIncomeStability={(v) => save("s06_income_stability", v)} onNext={goNext} />}
-      {step === 1 && <Step2 expenses={expenses} setExpense={setExpense} income={income} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 income={income} expenses={expenses} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4 expenses={expenses} leaks={leaks} setLeak={setLeak} leakActions={leakActions} setLeakAction={setLeakAction} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <Step5 income={income} expenses={expenses} incomeStability={incomeStability} leaks={leaks} leakActions={leakActions} onBack={goBack} />}
+      {step === 0 && <Step1 income={income} setIncome={setIncome} incomeStability={incomeStability} setIncomeStability={(v) => save("s06_income_stability", v)} />}
+      {step === 1 && <Step2 expenses={expenses} setExpense={setExpense} income={income} />}
+      {step === 2 && <Step3 income={income} expenses={expenses} />}
+      {step === 3 && <Step4 expenses={expenses} leaks={leaks} setLeak={setLeak} leakActions={leakActions} setLeakAction={setLeakAction} />}
+      {step === 4 && <Step5 income={income} expenses={expenses} incomeStability={incomeStability} leaks={leaks} leakActions={leakActions} />}
     </div>
   );
 }
