@@ -44,54 +44,6 @@ function NavBtn({ onClick, label, onBack }) {
   );
 }
 
-/* -- DATA -- */
-
-) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 0, padding: "0 4px" }}>
-      {steps.map((s, i) => {
-        const done = i < current; const active = i === current;
-        const clickable = done && onStepClick;
-        return (
-          <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
-            <div onClick={() => clickable && onStepClick(i)} style={{
-              width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-              background: done ? "var(--aw-burg-core)" : active ? "white" : "transparent",
-              border: `2px solid ${done || active ? "var(--aw-burg-core)" : "var(--aw-border, #E8DDD6)"}`,
-              color: done ? "white" : active ? "var(--aw-burg-core)" : "var(--aw-soft-grey, #A89B94)", fontSize: 13, fontWeight: 600, flexShrink: 0,
-              cursor: clickable ? "pointer" : "default",
-              transition: "transform 0.2s",
-            }}
-              onMouseEnter={(e) => { if (clickable) e.target.style.transform = "scale(1.1)"; }}
-              onMouseLeave={(e) => { if (clickable) e.target.style.transform = "scale(1)"; }}
-            >{done ? "✓" : i + 1}</div>
-            {i < steps.length - 1 && <div style={{ flex: 1, height: 2, background: done ? "var(--aw-burg-core)" : "var(--aw-border, #E8DDD6)", margin: "0 6px", minWidth: 16 }} />}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && (
-          <button onClick={onBack} style={{
-            padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: `1.5px solid ${"var(--aw-burg-core)"}`,
-            borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
-          }}><span style={{ fontSize: 18 }}>&#8592;</span> Back</button>
-        )}
-        <button onClick={onClick} style={{
-          padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none",
-          borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
-        }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>
-      </div>
-    </FadeIn>
-  );
-}
-
 const num = (v) => parseFloat(v) || 0;
 const fmt = (n) => {
   if (n === 0) return "0";
