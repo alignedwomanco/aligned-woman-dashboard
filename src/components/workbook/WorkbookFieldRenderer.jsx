@@ -5,7 +5,7 @@ import ScoredQuizField from "./ScoredQuizField";
 import ScaleField from "./ScaleField";
 import MappedQuizField from "./MappedQuizField";
 import ScoredCycleField from "./ScoredCycleField";
-import BurnoutStageField from "./BurnoutStageField";
+import BurnoutDiscoveryField from "./BurnoutDiscoveryField";
 
 /**
  * Renders a single field from the workbook schema.
@@ -31,7 +31,7 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
         return <ScoredCycleField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
       }
       if (field.subtype === "stage_select") {
-        return <BurnoutStageField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
+        return <BurnoutDiscoveryField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
       }
       return <CheckboxGroupField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "long_text":
