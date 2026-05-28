@@ -225,9 +225,27 @@ function IdentityStep({ primary, secondary, reflections, setReflection, onNext, 
 
 /* ── STEP 3: Script Construction ─────────────────────── */
 
+const SCRIPT_STEMS = [
+  "Growing up, the message I absorbed about money was",
+  "Because of that, I came to believe that money is",
+  "That belief makes me",
+  "The price I pay for this pattern is",
+];
+
+function buildOldScript(answers) {
+  return SCRIPT_PROMPTS
+    .map((p, i) => {
+      const val = (answers[p.fid] || "").trim();
+      if (!val) return null;
+      return `${SCRIPT_STEMS[i]} ${val}.`;
+    })
+    .filter(Boolean)
+    .join(" ");
+}
+
 function ScriptStep({ answers, save, onNext, onBack }) {
   const allFilled = SCRIPT_PROMPTS.every(p => answers[p.fid] && answers[p.fid].trim());
-  const composite = allFilled ? SCRIPT_PROMPTS.map(p => answers[p.fid]).join(" ") : null;
+  const composite = allFilled ? buildOldScript(answers) : null;
 
   return (
     <div>
@@ -265,7 +283,7 @@ function ScriptStep({ answers, save, onNext, onBack }) {
 /* ── STEP 4: Script Rewrite ──────────────────────────── */
 
 function RewriteStep({ answers, save, commitments, toggleCommitment, onNext, onBack }) {
-  const oldScript = SCRIPT_PROMPTS.map(p => answers[p.fid] || "").filter(Boolean).join(" ");
+  const oldScript = buildOldScript(answers);
   const allFilled = REWRITE_PROMPTS.every(p => answers[p.fid] && answers[p.fid].trim());
   const newComposite = allFilled ? REWRITE_PROMPTS.map(p => answers[p.fid]).join(" ") : null;
 
@@ -321,7 +339,7 @@ function RewriteStep({ answers, save, commitments, toggleCommitment, onNext, onB
 function SummaryStep({ primary, secondary, answers }) {
   const pId = IDENTITIES.find(i => i.id === primary);
   const sId = secondary ? IDENTITIES.find(i => i.id === secondary) : null;
-  const oldScript = SCRIPT_PROMPTS.map(p => answers[p.fid] || "").filter(Boolean).join(" ");
+  const oldScript = buildOldScript(answers);
   const newScript = REWRITE_PROMPTS.map(p => answers[p.fid] || "").filter(Boolean).join(" ");
 
   return (
