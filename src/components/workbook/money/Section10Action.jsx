@@ -617,6 +617,55 @@ function Step4Final({ reflections, newScript, actions30, actions6m, actions12m, 
           Your workbook is saved. Return anytime to revisit your answers, update your plan, or measure how far you have come.
         </p>
       </FadeIn>
+
+      {/* ─── CLOSING MESSAGE ─── */}
+      <FadeIn delay={3200}>
+        <div style={{
+          marginTop: 48,
+          padding: "28px 32px",
+          borderRadius: 16,
+          background: "var(--aw-rose-pale)",
+          borderLeft: "4px solid var(--aw-burg-core)",
+        }}>
+          <h2 style={{
+            fontFamily: "var(--aw-font-display)",
+            fontWeight: 400,
+            fontSize: 28,
+            color: "var(--aw-burg-core)",
+            margin: "0 0 20px",
+            lineHeight: 1.2,
+          }}>
+            You did the work.
+          </h2>
+          <p style={{ margin: "0 0 16px", fontSize: 15, color: "var(--aw-dark-grey)", lineHeight: 1.8, fontFamily: "var(--aw-font-sans)" }}>
+            Most people never look at their relationship with money this honestly. You traced it back to childhood. You named the scripts. You mapped the triggers. You faced the real numbers. And you chose to write a different story.
+          </p>
+          <p style={{ margin: "0 0 16px", fontSize: 15, color: "var(--aw-dark-grey)", lineHeight: 1.8, fontFamily: "var(--aw-font-sans)" }}>
+            This workbook is not the end. It is the foundation. Every time you catch yourself reaching for the old script, remember: you have already proven you can see it. And seeing it is how you change it.
+          </p>
+          <p style={{ margin: "0 0 16px", fontSize: 15, color: "var(--aw-dark-grey)", lineHeight: 1.8, fontFamily: "var(--aw-font-sans)" }}>
+            Dr Nasrat teaches that financial confidence is not about having all the answers. It is about having the courage to ask the questions. You just asked them all.
+          </p>
+          <p style={{ margin: 0, fontSize: 15, color: "var(--aw-dark-grey)", lineHeight: 1.8, fontFamily: "var(--aw-font-sans)" }}>
+            Whatever comes next, you are not starting from zero. You are starting from here.
+          </p>
+        </div>
+      </FadeIn>
+
+      {/* ─── ATTRIBUTION LINE ─── */}
+      <FadeIn delay={3400}>
+        <p style={{
+          marginTop: 24,
+          textAlign: "center",
+          fontSize: 11,
+          color: "var(--aw-soft-grey, #A89B94)",
+          fontFamily: "var(--aw-font-sans)",
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+        }}>
+          The Aligned Woman Blueprint / Your Money Story / Dr Nasrat Sirkissoon
+        </p>
+      </FadeIn>
     </div>
   );
 }
