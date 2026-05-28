@@ -56,6 +56,17 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
 
 /* ─── Content Block ─── */
 
+function renderBoldText(text) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} style={{ fontWeight: 600 }}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
 function ContentBlockField({ field, assets }) {
   const variant = field.variant || "body";
 
@@ -91,7 +102,7 @@ function ContentBlockField({ field, assets }) {
             margin: i < paragraphs.length - 1 ? "0 0 10px" : 0,
             whiteSpace: "pre-line",
           }}>
-            {p}
+            {renderBoldText(p)}
           </p>
         ))}
       </div>
@@ -228,7 +239,7 @@ function ContentBlockField({ field, assets }) {
             whiteSpace: "pre-line",
           }}
         >
-          {p}
+          {renderBoldText(p)}
         </p>
       ))}
     </div>
