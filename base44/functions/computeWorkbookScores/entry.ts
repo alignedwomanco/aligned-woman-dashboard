@@ -1,5 +1,12 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+// Helper: normalise checkbox values (object {key: true} or array ["key"])
+function toArray(val: unknown): string[] {
+  if (Array.isArray(val)) return val;
+  if (val && typeof val === 'object') return Object.keys(val).filter(k => (val as Record<string, boolean>)[k]);
+  return [];
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -44,18 +51,18 @@ Deno.serve(async (req) => {
       .filter(([, v]) => v === maxScore)
       .map(([k]) => k);
 
-    let dominant_state;
+    let dominant_state: string;
     if (topStates.length === 1) {
       dominant_state = topStates[0];
     } else if (topStates.includes("sympathetic") && topStates.includes("dorsal_vagal")) {
-      // Sympathetic + dorsal_vagal tie → cycling
+      // Sympathetic + dorsal_vagal tie -> cycling
       dominant_state = "cycling";
     } else if (topStates.includes("ventral_vagal")) {
-      // ventral_vagal ties with any other → other wins
+      // ventral_vagal ties with any other -> other wins
       const nonVentral = topStates.filter(s => s !== "ventral_vagal");
       dominant_state = nonVentral.length === 1 ? nonVentral[0] : "cycling";
     } else {
-      // Any other tie → pick alphabetically as fallback
+      // Any other tie -> pick alphabetically as fallback
       dominant_state = topStates.sort()[0];
     }
 
@@ -64,7 +71,7 @@ Deno.serve(async (req) => {
     const triggerThreshold  = Number(answers.trigger_threshold)  || 0;
     const windowAvg = (recoverySpeed + triggerThreshold) / 2;
 
-    let window_classification;
+    let window_classification: string;
     if (windowAvg <= 2) {
       window_classification = "narrow";
     } else if (windowAvg <= 3) {
@@ -76,11 +83,11 @@ Deno.serve(async (req) => {
     }
 
     // ── 3. REGULATION RESOURCES ────────────────────────────────────────────
-    const regulationTools = Array.isArray(answers.regulation_tools) ? answers.regulation_tools : [];
+    const regulationTools = toArray(answers.regulation_tools);
     const hasNothing = regulationTools.includes("nothing");
     const toolCount = hasNothing ? 0 : regulationTools.length;
 
-    let resource_classification;
+    let resource_classification: string;
     if (toolCount === 0) {
       resource_classification = "no_tools";
     } else if (toolCount <= 2) {
@@ -92,15 +99,15 @@ Deno.serve(async (req) => {
     }
 
     // ── 4. SOMATIC AWARENESS ───────────────────────────────────────────────
-    const stressBodyLocations   = Array.isArray(answers.stress_body_locations)   ? answers.stress_body_locations   : [];
-    const shutdownBodyLocations = Array.isArray(answers.shutdown_body_locations)  ? answers.shutdown_body_locations  : [];
-    const safetyBodySignals     = Array.isArray(answers.safety_body_signals)      ? answers.safety_body_signals      : [];
+    const stressBodyLocations   = toArray(answers.stress_body_locations);
+    const shutdownBodyLocations = toArray(answers.shutdown_body_locations);
+    const safetyBodySignals     = toArray(answers.safety_body_signals);
     const somaticTotal = stressBodyLocations.length + shutdownBodyLocations.length + safetyBodySignals.length;
 
-    const safetyMeaningHasText  = typeof answers.safety_meaning === "string"    && answers.safety_meaning.trim().length > 0;
-    const stressBodyDetailHasText = typeof answers.stress_body_detail === "string" && answers.stress_body_detail.trim().length > 0;
+    const safetyMeaningHasText    = typeof answers.safety_meaning === "string"      && answers.safety_meaning.trim().length > 0;
+    const stressBodyDetailHasText = typeof answers.stress_body_detail === "string"   && answers.stress_body_detail.trim().length > 0;
 
-    let somatic_classification;
+    let somatic_classification: string;
     if (somaticTotal >= 9 || (safetyMeaningHasText && somaticTotal >= 6)) {
       somatic_classification = "high";
     } else if (somaticTotal >= 4 || stressBodyDetailHasText) {
@@ -116,7 +123,7 @@ Deno.serve(async (req) => {
     const ventral_tied_with_winner =
       topStates.includes("ventral_vagal") && topStates.includes(dominant_state) && dominant_state !== "ventral_vagal";
 
-    let dominant_state_variant;
+    let dominant_state_variant: string;
     if (is_oscillating) {
       dominant_state_variant = "oscillating";
     } else if (ventral_tied_with_winner) {
@@ -127,7 +134,7 @@ Deno.serve(async (req) => {
 
     // ── Write scores back ──────────────────────────────────────────────────
     const computed_scores = {
-      // Core classifications (preserved exactly)
+      // Core classifications
       dominant_state,
       window_classification,
       resource_classification,
