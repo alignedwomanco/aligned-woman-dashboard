@@ -362,12 +362,11 @@ function SummaryStep({ primary, secondary, answers }) {
    MAIN
    ══════════════════════════════════════════════════════════ */
 
-export default function Section3Scripts({ section, answers = {}, onAnswerChange }) {
+export default function Section3Scripts({ section, answers = {}, onAnswerChange, step = 0, onStepChange }) {
   const scenarioAnswers = answers.s03_scenario_answers || {};
   const reflections = answers.s03_identity_reflections || {};
   const commitments = answers.s03_commitments || [];
 
-  const [step, setStep] = useState(0);
   const save = (fid, val) => { if (onAnswerChange) onAnswerChange(fid, val); };
 
   // Compute identities from scenarios
@@ -385,8 +384,6 @@ export default function Section3Scripts({ section, answers = {}, onAnswerChange 
     save("s03_commitments", next);
   };
 
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
   const STEPS = ["Scenarios", "Your identity", "Old script", "New script", "Summary"];
 
   return (
@@ -396,12 +393,12 @@ export default function Section3Scripts({ section, answers = {}, onAnswerChange 
         {section?.heading && <h1 style={{ fontFamily: "var(--aw-font-display)", fontWeight: 400, fontSize: "clamp(34px, 4.6vw, 52px)", lineHeight: 1.05, letterSpacing: "-0.015em", color: "var(--aw-burg-core)", margin: 0 }}>{section.heading}</h1>}
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
-      <StepIndicator steps={STEPS} current={step} onStepClick={s => setStep(s)} />
-      {step === 0 && <ScenarioStep scenarioAnswers={scenarioAnswers} setAnswer={setScenarioAnswer} onNext={goNext} />}
-      {step === 1 && <IdentityStep primary={primary} secondary={secondary} reflections={reflections} setReflection={setReflection} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <ScriptStep answers={answers} save={save} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <RewriteStep answers={answers} save={save} commitments={commitments} toggleCommitment={toggleCommitment} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <SummaryStep primary={primary} secondary={secondary} answers={answers} onBack={goBack} />}
+      <StepIndicator steps={STEPS} current={step} />
+      {step === 0 && <ScenarioStep scenarioAnswers={scenarioAnswers} setAnswer={setScenarioAnswer} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <IdentityStep primary={primary} secondary={secondary} reflections={reflections} setReflection={setReflection} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <ScriptStep answers={answers} save={save} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <RewriteStep answers={answers} save={save} commitments={commitments} toggleCommitment={toggleCommitment} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 4 && <SummaryStep primary={primary} secondary={secondary} answers={answers} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }

@@ -117,6 +117,7 @@ export default function WorkbookViewer() {
 
 function WorkbookViewerInner({ workbookId }) {
   const [activeSection, setActiveSection] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [responseId, setResponseId] = useState(null);
   const [responseLoaded, setResponseLoaded] = useState(false);
@@ -257,6 +258,7 @@ function WorkbookViewerInner({ workbookId }) {
 
   const jumpTo = useCallback((idx) => {
     setActiveSection(idx);
+    setActiveStep(0);
     setDrawerOpen(false);
     window.scrollTo({ top: 0, behavior: "instant" });
     const sectionId = sections[idx]?.id || sections[idx]?.section_id;
@@ -397,18 +399,20 @@ function WorkbookViewerInner({ workbookId }) {
             >
               <div className="wb-page" style={{ maxWidth: 720, margin: "0 auto", padding: "56px 40px 80px" }}>
                 <WorkbookSectionContent
-                  section={section}
-                  answers={answers}
-                  onAnswerChange={handleAnswerChange}
-                  sections={sections}
-                  onJumpToSection={jumpTo}
-                  isLastSection={idx === lastSectionIdx}
-                  isComplete={isComplete}
-                  completedAt={completedAt}
-                  onFinish={handleFinishWorkbook}
-                  onMarkInProgress={handleMarkInProgress}
-                  assets={assets}
-                  computedScores={computedScores}
+                 section={section}
+                 answers={answers}
+                 onAnswerChange={handleAnswerChange}
+                 sections={sections}
+                 onJumpToSection={jumpTo}
+                 isLastSection={idx === lastSectionIdx}
+                 isComplete={isComplete}
+                 completedAt={completedAt}
+                 onFinish={handleFinishWorkbook}
+                 onMarkInProgress={handleMarkInProgress}
+                 assets={assets}
+                 computedScores={computedScores}
+                 step={idx === activeSection ? activeStep : 0}
+                 onStepChange={idx === activeSection ? setActiveStep : undefined}
                 />
               </div>
             </div>
@@ -418,12 +422,27 @@ function WorkbookViewerInner({ workbookId }) {
         <WorkbookBottomBar
           sections={sections}
           activeSection={activeSection}
-          hasStepFlow={!!sections[activeSection]?.step_flow}
-          onPrev={() => jumpTo(Math.max(0, activeSection - 1))}
+          activeStep={activeStep}
+          totalSteps={sections[activeSection]?.step_flow?.length || 0}
+          onPrev={() => {
+            const hasFlow = !!sections[activeSection]?.step_flow;
+            if (hasFlow && activeStep > 0) {
+              setActiveStep(s => s - 1);
+            } else {
+              jumpTo(Math.max(0, activeSection - 1));
+            }
+          }}
           onNext={() => {
-            const nextIdx = activeSection + 1;
-            if (nextIdx >= sections.length) return;
-            jumpTo(nextIdx);
+            const currentSection = sections[activeSection];
+            const hasFlow = !!currentSection?.step_flow;
+            const lastStep = (currentSection?.step_flow?.length || 1) - 1;
+            if (hasFlow && activeStep < lastStep) {
+              setActiveStep(s => s + 1);
+            } else {
+              const nextIdx = activeSection + 1;
+              if (nextIdx >= sections.length) return;
+              jumpTo(nextIdx);
+            }
           }}
           nextLocked={progressiveDisclosure && !unlockedSections.includes(activeSection + 1)}
         />

@@ -687,14 +687,12 @@ function Step5({ income, expenses, incomeStability, leaks, leakActions, onBack }
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section6Gap({ section, answers = {}, onAnswerChange }) {
+export default function Section6Gap({ section, answers = {}, onAnswerChange, step = 0, onStepChange }) {
   const income          = answers.s06_income || {};
   const incomeStability = answers.s06_income_stability || null;
   const expenses        = answers.s06_expenses || {};
   const leaks           = answers.s06_leaks || {};
   const leakActions     = answers.s06_leak_actions || {};
-
-  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -702,10 +700,6 @@ export default function Section6Gap({ section, answers = {}, onAnswerChange }) {
   const setExpense = (id, val) => save("s06_expenses", { ...expenses, [id]: val });
   const setLeak = (id, val) => save("s06_leaks", { ...leaks, [id]: val });
   const setLeakAction = (id, val) => save("s06_leak_actions", { ...leakActions, [id]: val });
-
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
 
   const STEPS = ["Income", "Expenses", "Gap diagnostic", "Leak finder", "Summary"];
 
@@ -718,13 +712,13 @@ export default function Section6Gap({ section, answers = {}, onAnswerChange }) {
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 income={income} setIncome={setIncome} incomeStability={incomeStability} setIncomeStability={(v) => save("s06_income_stability", v)} onNext={goNext} />}
-      {step === 1 && <Step2 expenses={expenses} setExpense={setExpense} income={income} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 income={income} expenses={expenses} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4 expenses={expenses} leaks={leaks} setLeak={setLeak} leakActions={leakActions} setLeakAction={setLeakAction} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <Step5 income={income} expenses={expenses} incomeStability={incomeStability} leaks={leaks} leakActions={leakActions} onBack={goBack} />}
+      {step === 0 && <Step1 income={income} setIncome={setIncome} incomeStability={incomeStability} setIncomeStability={(v) => save("s06_income_stability", v)} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <Step2 expenses={expenses} setExpense={setExpense} income={income} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <Step3 income={income} expenses={expenses} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <Step4 expenses={expenses} leaks={leaks} setLeak={setLeak} leakActions={leakActions} setLeakAction={setLeakAction} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 4 && <Step5 income={income} expenses={expenses} incomeStability={incomeStability} leaks={leaks} leakActions={leakActions} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }

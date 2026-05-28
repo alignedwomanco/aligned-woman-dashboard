@@ -524,15 +524,13 @@ function Step4Summary({ history, selectedBarriers, needs, selectedQualities, rea
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section9Advice({ section, answers = {}, onAnswerChange }) {
+export default function Section9Advice({ section, answers = {}, onAnswerChange, step = 0, onStepChange }) {
   const history            = answers.s09_history || null;
   const selectedBarriers   = answers.s09_barriers || [];
   const needs              = answers.s09_needs || {};
   const selectedQualities  = answers.s09_qualities || [];
   const readiness          = answers.s09_readiness || null;
   const timeline           = answers.s09_timeline || null;
-
-  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -546,10 +544,6 @@ export default function Section9Advice({ section, answers = {}, onAnswerChange }
     save("s09_qualities", next);
   };
 
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
-
   const STEPS = ["Your history", "What you need", "Finding your fit", "Advisor brief"];
 
   return (
@@ -561,12 +555,12 @@ export default function Section9Advice({ section, answers = {}, onAnswerChange }
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 history={history} setHistory={(v) => save("s09_history", v)} selectedBarriers={selectedBarriers} toggleBarrier={toggleBarrier} onNext={goNext} />}
-      {step === 1 && <Step2 needs={needs} setNeed={setNeed} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 selectedQualities={selectedQualities} toggleQuality={toggleQuality} readiness={readiness} setReadiness={(v) => save("s09_readiness", v)} timeline={timeline} setTimeline={(v) => save("s09_timeline", v)} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4Summary history={history} selectedBarriers={selectedBarriers} needs={needs} selectedQualities={selectedQualities} readiness={readiness} timeline={timeline} onBack={goBack} />}
+      {step === 0 && <Step1 history={history} setHistory={(v) => save("s09_history", v)} selectedBarriers={selectedBarriers} toggleBarrier={toggleBarrier} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <Step2 needs={needs} setNeed={setNeed} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <Step3 selectedQualities={selectedQualities} toggleQuality={toggleQuality} readiness={readiness} setReadiness={(v) => save("s09_readiness", v)} timeline={timeline} setTimeline={(v) => save("s09_timeline", v)} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <Step4Summary history={history} selectedBarriers={selectedBarriers} needs={needs} selectedQualities={selectedQualities} readiness={readiness} timeline={timeline} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }

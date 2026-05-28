@@ -636,14 +636,12 @@ function Step5({ intensities, bodySignals, chains, patterns, regret }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section4Triggers({ section, answers = {}, onAnswerChange }) {
+export default function Section4Triggers({ section, answers = {}, onAnswerChange, step = 0, onStepChange }) {
   const intensities  = answers.s04_intensities || {};
   const chains       = answers.s04_chains || {};
   const bodySignals  = answers.s04_body_signals || [];
   const patterns     = answers.s04_patterns || {};
   const regret       = answers.s04_regret || {};
-
-  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -656,10 +654,6 @@ export default function Section4Triggers({ section, answers = {}, onAnswerChange
   const setPattern = (id, field, val) => save("s04_patterns", { ...patterns, [id]: { ...(patterns[id] || {}), [field]: val } });
   const setRegretField = (key, val) => save("s04_regret", { ...regret, [key]: val });
 
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
-
   const STEPS = ["Trigger map", "Trigger chains", "Spending patterns", "Regret autopsy", "Summary"];
 
   return (
@@ -671,13 +665,13 @@ export default function Section4Triggers({ section, answers = {}, onAnswerChange
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 intensities={intensities} setIntensity={setIntensity} onNext={goNext} />}
-      {step === 1 && <Step2 intensities={intensities} chains={chains} setChain={setChain} bodySignals={bodySignals} toggleBodySignal={toggleBodySignal} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 patterns={patterns} setPattern={setPattern} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4 regret={regret} setRegretField={setRegretField} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <Step5 intensities={intensities} bodySignals={bodySignals} chains={chains} patterns={patterns} regret={regret} onBack={goBack} />}
+      {step === 0 && <Step1 intensities={intensities} setIntensity={setIntensity} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <Step2 intensities={intensities} chains={chains} setChain={setChain} bodySignals={bodySignals} toggleBodySignal={toggleBodySignal} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <Step3 patterns={patterns} setPattern={setPattern} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <Step4 regret={regret} setRegretField={setRegretField} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 4 && <Step5 intensities={intensities} bodySignals={bodySignals} chains={chains} patterns={patterns} regret={regret} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }

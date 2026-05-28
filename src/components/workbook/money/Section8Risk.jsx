@@ -562,22 +562,16 @@ function Step4Summary({ reactions, capacity, reflection, mismatchReflection, onB
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section8Risk({ section, answers = {}, onAnswerChange }) {
+export default function Section8Risk({ section, answers = {}, onAnswerChange, step = 0, onStepChange }) {
   const reactions           = answers.s08_reactions || {};
   const capacity            = answers.s08_capacity || {};
   const reflection          = answers.s08_reflection || "";
   const mismatchReflection  = answers.s08_mismatch_reflection || "";
 
-  const [step, setStep] = useState(0);
-
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
   const setReaction = (id, val) => save("s08_reactions", { ...reactions, [id]: val });
   const setCapacityAnswer = (id, val) => save("s08_capacity", { ...capacity, [id]: val });
-
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
 
   const STEPS = ["Market reactions", "Risk capacity", "The split", "Your profile"];
 
@@ -590,12 +584,12 @@ export default function Section8Risk({ section, answers = {}, onAnswerChange }) 
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 reactions={reactions} setReaction={setReaction} onNext={goNext} />}
-      {step === 1 && <Step2 capacity={capacity} setCapacity={setCapacityAnswer} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 reactions={reactions} capacity={capacity} reflection={reflection} setReflection={(v) => save("s08_reflection", v)} mismatchReflection={mismatchReflection} setMismatchReflection={(v) => save("s08_mismatch_reflection", v)} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4Summary reactions={reactions} capacity={capacity} reflection={reflection} mismatchReflection={mismatchReflection} onBack={goBack} />}
+      {step === 0 && <Step1 reactions={reactions} setReaction={setReaction} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <Step2 capacity={capacity} setCapacity={setCapacityAnswer} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <Step3 reactions={reactions} capacity={capacity} reflection={reflection} setReflection={(v) => save("s08_reflection", v)} mismatchReflection={mismatchReflection} setMismatchReflection={(v) => save("s08_mismatch_reflection", v)} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <Step4Summary reactions={reactions} capacity={capacity} reflection={reflection} mismatchReflection={mismatchReflection} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }

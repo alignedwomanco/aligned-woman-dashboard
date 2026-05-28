@@ -674,7 +674,7 @@ function Step4Final({ reflections, newScript, actions30, actions6m, actions12m, 
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section10Action({ section, answers = {}, onAnswerChange, allAnswers }) {
+export default function Section10Action({ section, answers = {}, onAnswerChange, allAnswers, step = 0, onStepChange }) {
   const reflections      = answers.s10_reflections || {};
   const newScript        = answers.s10_new_script || "";
   const actions30        = answers.s10_actions_30d || [{ action: "", by: "", need: "" }, { action: "", by: "", need: "" }, { action: "", by: "", need: "" }];
@@ -684,8 +684,6 @@ export default function Section10Action({ section, answers = {}, onAnswerChange,
   const confidenceBefore = allAnswers?.s01_confidence || 0;
   const confidenceAfter  = answers.s10_confidence_after || 0;
   const commitments      = answers.s10_commitments || [];
-
-  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -710,9 +708,7 @@ export default function Section10Action({ section, answers = {}, onAnswerChange,
     save("s10_commitments", next);
   };
 
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
+
 
   const STEPS = ["Journey review", "Action plan", "Letter + confidence", "Complete"];
 
@@ -725,12 +721,12 @@ export default function Section10Action({ section, answers = {}, onAnswerChange,
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 reflections={reflections} setReflection={setReflection} newScript={newScript} setNewScript={(v) => save("s10_new_script", v)} onNext={goNext} />}
-      {step === 1 && <Step2 actions30={actions30} setAction30={setAction30} actions6m={actions6m} setAction6m={setAction6m} actions12m={actions12m} setAction12m={setAction12m} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 letter={letter} setLetter={(v) => save("s10_letter", v)} confidenceBefore={confidenceBefore} confidenceAfter={confidenceAfter} setConfidenceAfter={(v) => save("s10_confidence_after", v)} commitments={commitments} toggleCommitment={toggleCommitment} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4Final reflections={reflections} newScript={newScript} actions30={actions30} actions6m={actions6m} actions12m={actions12m} letter={letter} confidenceBefore={confidenceBefore} confidenceAfter={confidenceAfter} commitments={commitments} onBack={goBack} />}
+      {step === 0 && <Step1 reflections={reflections} setReflection={setReflection} newScript={newScript} setNewScript={(v) => save("s10_new_script", v)} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <Step2 actions30={actions30} setAction30={setAction30} actions6m={actions6m} setAction6m={setAction6m} actions12m={actions12m} setAction12m={setAction12m} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <Step3 letter={letter} setLetter={(v) => save("s10_letter", v)} confidenceBefore={confidenceBefore} confidenceAfter={confidenceAfter} setConfidenceAfter={(v) => save("s10_confidence_after", v)} commitments={commitments} toggleCommitment={toggleCommitment} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <Step4Final reflections={reflections} newScript={newScript} actions30={actions30} actions6m={actions6m} actions12m={actions12m} letter={letter} confidenceBefore={confidenceBefore} confidenceAfter={confidenceAfter} commitments={commitments} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }

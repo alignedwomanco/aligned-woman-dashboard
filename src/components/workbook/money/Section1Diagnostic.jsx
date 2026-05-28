@@ -389,16 +389,13 @@ function DiagnosticSummary({ confidence, selected, emotions, onBack }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section1Diagnostic({ section, answers = {}, onAnswerChange, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress }) {
+export default function Section1Diagnostic({ section, answers = {}, onAnswerChange, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, step = 0, onStepChange }) {
   // ── Read persisted state from answers ──
   const confidence     = answers.s01_confidence || 0;
   const selected       = answers.s01_financial_state || [];
   const emotions       = answers.s01_emotions || [];
   const customEmotion  = answers.s01_custom_emotion || "";
   const narrative      = answers.s01_narrative || "";
-
-  // ── Local UI state (step navigation only, not persisted) ──
-  const [step, setStep] = useState(0);
 
   // ── Helpers to write back to the workbook response ──
   const save = (fieldId, value) => {
@@ -414,10 +411,6 @@ export default function Section1Diagnostic({ section, answers = {}, onAnswerChan
     const next = emotions.includes(word) ? emotions.filter(w => w !== word) : emotions.length < 3 ? [...emotions, word] : emotions;
     save("s01_emotions", next);
   };
-
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
 
   const STEPS = ["Confidence", "Financial state", "Emotions", "Your words", "Diagnostic"];
 
@@ -437,14 +430,14 @@ export default function Section1Diagnostic({ section, answers = {}, onAnswerChan
       </div>
 
       {/* Step indicator */}
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
       {/* Steps */}
-      {step === 0 && <ConfidenceStep value={confidence} onChange={v => save("s01_confidence", v)} onNext={goNext} />}
-      {step === 1 && <DiagnosticChecklistStep selected={selected} onToggle={toggleSelected} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <EmotionStep selectedEmotions={emotions} onToggle={toggleEmotion} customEmotion={customEmotion} onCustomChange={v => save("s01_custom_emotion", v)} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <NarrativeStep text={narrative} onChange={v => save("s01_narrative", v)} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <DiagnosticSummary confidence={confidence} selected={selected} emotions={emotions} onBack={goBack} />}
+      {step === 0 && <ConfidenceStep value={confidence} onChange={v => save("s01_confidence", v)} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <DiagnosticChecklistStep selected={selected} onToggle={toggleSelected} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <EmotionStep selectedEmotions={emotions} onToggle={toggleEmotion} customEmotion={customEmotion} onCustomChange={v => save("s01_custom_emotion", v)} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <NarrativeStep text={narrative} onChange={v => save("s01_narrative", v)} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 4 && <DiagnosticSummary confidence={confidence} selected={selected} emotions={emotions} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }

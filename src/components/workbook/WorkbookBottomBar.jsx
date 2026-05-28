@@ -5,33 +5,45 @@ import { ArrowLeft, ArrowRight, FileDown } from "lucide-react";
  * WorkbookBottomBar — sticky bottom nav: Previous | counter | Next/Review/Save PDF
  */
 export default function WorkbookBottomBar({
-  sections, activeSection, onPrev, onNext, nextLocked, hasStepFlow
+  sections, activeSection, activeStep = 0, totalSteps = 0, onPrev, onNext, nextLocked
 }) {
   const total = sections.length;
-  const isFirst = activeSection === 0;
-  const isLast = activeSection === total - 1;
-  const isSecondToLast = activeSection === total - 2;
+  const isFirstSection = activeSection === 0;
+  const isLastSection = activeSection === total - 1;
+  const hasFlow = totalSteps > 0;
+  const isLastStep = !hasFlow || activeStep >= totalSteps - 1;
+  const isFirstStep = !hasFlow || activeStep === 0;
 
-  // Next button label
+  // Prev button: on first step of first section → disabled
+  const prevDisabled = isFirstSection && isFirstStep;
+
+  const getPrevLabel = () => {
+    if (hasFlow && activeStep > 0) return "Previous";
+    return "Previous Section";
+  };
+
   const getNextLabel = () => {
-    if (isLast) return "Print PDF";
-    if (hasStepFlow) return "Next Section";
-    if (isSecondToLast) return "Review";
-    return "Next";
+    if (isLastSection && isLastStep) return "Print PDF";
+    if (hasFlow && !isLastStep) return "Next";
+    return "Next Section";
   };
 
   const getNextIcon = () => {
-    if (isLast) return <FileDown style={{ width: 14, height: 14 }} />;
+    if (isLastSection && isLastStep) return <FileDown style={{ width: 14, height: 14 }} />;
     return <ArrowRight style={{ width: 14, height: 14 }} />;
   };
 
   const handleNextClick = () => {
-    if (isLast) {
+    if (isLastSection && isLastStep) {
       window.print();
     } else {
       onNext();
     }
   };
+
+  const counterText = hasFlow
+    ? `${activeSection + 1} / ${total}  ·  ${activeStep + 1} / ${totalSteps}`
+    : `${activeSection + 1} / ${total}`;
 
   return (
     <div className="wb-bottombar sticky bottom-0 z-20" data-wb-bottombar style={{ borderTop: "1px solid var(--aw-border-light)" }}>
@@ -40,11 +52,11 @@ export default function WorkbookBottomBar({
         <div className="flex justify-start">
           <button
             className="wb-btn wb-btn--secondary"
-            disabled={isFirst}
+            disabled={prevDisabled}
             onClick={onPrev}
           >
             <ArrowLeft style={{ width: 14, height: 14 }} />
-            <span className="wb-btn-label">{hasStepFlow ? "Previous Section" : "Previous"}</span>
+            <span className="wb-btn-label">{getPrevLabel()}</span>
           </button>
         </div>
 
@@ -59,15 +71,13 @@ export default function WorkbookBottomBar({
           textAlign: "center",
           whiteSpace: "nowrap",
         }}>
-          <strong style={{ fontWeight: 700, color: "var(--aw-burg-core)" }}>{activeSection + 1}</strong>
-          {" / "}
-          {total}
+          {counterText}
         </div>
 
-        {/* Next / Review / Save PDF */}
+        {/* Next / Print PDF */}
         <div className="flex justify-end">
           <button
-            className={`wb-btn ${isLast ? "wb-btn--secondary" : "wb-btn--primary"}`}
+            className={`wb-btn ${isLastSection && isLastStep ? "wb-btn--secondary" : "wb-btn--primary"}`}
             onClick={handleNextClick}
           >
             <span className="wb-btn-label">{getNextLabel()}</span>

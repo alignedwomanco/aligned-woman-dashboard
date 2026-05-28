@@ -376,7 +376,7 @@ function Step5({ household, atmosphere, messageImpacts, memories, signalChecks, 
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section2Blueprint({ section, answers = {}, onAnswerChange }) {
+export default function Section2Blueprint({ section, answers = {}, onAnswerChange, step = 0, onStepChange }) {
   // ── Read persisted state ──
   const household     = answers.s02_household || null;
   const atmosphere    = answers.s02_atmosphere || [];
@@ -384,7 +384,6 @@ export default function Section2Blueprint({ section, answers = {}, onAnswerChang
   const signalChecks  = answers.s02_value_signals || {};
 
   // ── Local UI state ──
-  const [step, setStep] = useState(0);
   const [expandedMsg, setExpandedMsg] = useState(null);
   const [activePrompt, setActivePrompt] = useState(null);
 
@@ -410,9 +409,7 @@ export default function Section2Blueprint({ section, answers = {}, onAnswerChang
   const memories = {};
   MEMORY_PROMPTS.forEach(p => { memories[p.fid] = answers[p.fid] || ""; });
 
-  const goNext = () => setStep(s => s + 1);
-  const goBack = () => setStep(s => Math.max(0, s - 1));
-  const goToStep = (s) => setStep(s);
+
 
   const STEPS = ["Your home", "Money soundtrack", "Memories", "Values", "Blueprint"];
 
@@ -425,13 +422,13 @@ export default function Section2Blueprint({ section, answers = {}, onAnswerChang
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
+      <StepIndicator steps={STEPS} current={step} />
 
-      {step === 0 && <Step1 household={household} setHousehold={v => save("s02_household", v)} atmosphere={atmosphere} toggleAtmosphere={toggleAtmosphere} onNext={goNext} />}
-      {step === 1 && <Step2 messageImpacts={messageImpacts} setMessageImpact={setMessageImpact} expandedMsg={expandedMsg} setExpandedMsg={setExpandedMsg} onNext={goNext} onBack={goBack} />}
-      {step === 2 && <Step3 memories={memories} setMemory={setMemory} activePrompt={activePrompt} setActivePrompt={setActivePrompt} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4 signalChecks={signalChecks} toggleSignal={toggleSignal} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <Step5 household={household} atmosphere={atmosphere} messageImpacts={messageImpacts} memories={memories} signalChecks={signalChecks} onBack={goBack} />}
+      {step === 0 && <Step1 household={household} setHousehold={v => save("s02_household", v)} atmosphere={atmosphere} toggleAtmosphere={toggleAtmosphere} onNext={() => onStepChange?.(step + 1)} />}
+      {step === 1 && <Step2 messageImpacts={messageImpacts} setMessageImpact={setMessageImpact} expandedMsg={expandedMsg} setExpandedMsg={setExpandedMsg} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 2 && <Step3 memories={memories} setMemory={setMemory} activePrompt={activePrompt} setActivePrompt={setActivePrompt} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 3 && <Step4 signalChecks={signalChecks} toggleSignal={toggleSignal} onNext={() => onStepChange?.(step + 1)} onBack={() => onStepChange?.(step - 1)} />}
+      {step === 4 && <Step5 household={household} atmosphere={atmosphere} messageImpacts={messageImpacts} memories={memories} signalChecks={signalChecks} onBack={() => onStepChange?.(step - 1)} />}
     </div>
   );
 }
