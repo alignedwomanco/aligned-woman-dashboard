@@ -47,42 +47,6 @@ function NavBtn({ onClick, label, onBack }) {
   );
 }
 
-/* -- DATA -- */
-
-) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 0, padding: "0 4px" }}>
-      {steps.map((s, i) => {
-        const done = i < current; const active = i === current;
-        const clickable = done && onStepClick;
-        return (
-          <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
-            <div onClick={() => clickable && onStepClick(i)} style={{
-              width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-              background: done ? "var(--aw-burg-core)" : active ? "white" : "transparent",
-              border: `2px solid ${done || active ? "var(--aw-burg-core)" : "var(--aw-border, #E8DDD6)"}`,
-              color: done ? "white" : active ? "var(--aw-burg-core)" : "var(--aw-soft-grey, #A89B94)", fontSize: 13, fontWeight: 600, flexShrink: 0,
-              cursor: clickable ? "pointer" : "default",
-            }}>{done ? "✓" : i + 1}</div>
-            {i < steps.length - 1 && <div style={{ flex: 1, height: 2, background: done ? "var(--aw-burg-core)" : "var(--aw-border, #E8DDD6)", margin: "0 6px", minWidth: 16 }} />}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: `1.5px solid ${"var(--aw-burg-core)"}`, borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>&#8592; Back</button>}
-        {onNext && <button onClick={onNext} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>{nextLabel || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
-
 // ─── STEP 1: THE JOURNEY REFLECTION ───
 
 const JOURNEY_PROMPTS = [
@@ -740,7 +704,7 @@ export default function Section10Action({ section, answers = {}, onAnswerChange,
       {step === 0 && <Step1 reflections={reflections} setReflection={setReflection} newScript={newScript} setNewScript={(v) => save("s10_new_script", v)} onNext={goNext} />}
       {step === 1 && <Step2 actions30={actions30} setAction30={setAction30} actions6m={actions6m} setAction6m={setAction6m} actions12m={actions12m} setAction12m={setAction12m} onNext={goNext} onBack={goBack} />}
       {step === 2 && <Step3 letter={letter} setLetter={(v) => save("s10_letter", v)} confidenceBefore={confidenceBefore} confidenceAfter={confidenceAfter} setConfidenceAfter={(v) => save("s10_confidence_after", v)} commitments={commitments} toggleCommitment={toggleCommitment} onNext={goNext} onBack={goBack} />}
-      {step === 3 && <Step4Summary reflections={reflections} newScript={newScript} actions30={actions30} actions6m={actions6m} actions12m={actions12m} letter={letter} confidenceBefore={confidenceBefore} confidenceAfter={confidenceAfter} commitments={commitments} onBack={goBack} />}
+      {step === 3 && <Step4Final reflections={reflections} newScript={newScript} actions30={actions30} actions6m={actions6m} actions12m={actions12m} letter={letter} confidenceBefore={confidenceBefore} confidenceAfter={confidenceAfter} commitments={commitments} onBack={goBack} />}
     </div>
   );
 }
