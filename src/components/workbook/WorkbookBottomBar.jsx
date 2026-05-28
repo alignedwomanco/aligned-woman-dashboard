@@ -44,7 +44,7 @@ export default function WorkbookBottomBar({
             onClick={onPrev}
           >
             <ArrowLeft style={{ width: 14, height: 14 }} />
-            <span className="wb-btn-label">Previous</span>
+            <span className="wb-btn-label">{hasStepFlow ? "Previous Section" : "Previous"}</span>
           </button>
         </div>
 
