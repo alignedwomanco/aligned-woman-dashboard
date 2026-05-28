@@ -36,17 +36,6 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
-
 // ─── STEP 1: THE JOURNEY REFLECTION ───
 
 const JOURNEY_PROMPTS = [
@@ -136,7 +125,7 @@ function Step1({ reflections, setReflection, newScript, setNewScript, onNext }) 
       )}
 
       <div style={{ marginTop: 12, fontSize: 13, color: "var(--aw-soft-grey, #A89B94)" }}>{filled} of {JOURNEY_PROMPTS.length} insights captured</div>
-      {filled >= 5 && <NavBtn onNext={onNext} />}
+
     </div>
   );
 }
@@ -242,7 +231,7 @@ function Step2({ actions30, setAction30, actions6m, setAction6m, actions12m, set
         </FadeIn>
       )}
 
-      {filled30 >= 1 && <NavBtn onNext={onNext} onBack={onBack} />}
+
     </div>
   );
 }
@@ -383,9 +372,7 @@ function Step3({ letter, setLetter, confidenceBefore, confidenceAfter, setConfid
         </div>
       </div>
 
-      {confidenceAfter > 0 && commitments.length > 0 && letter.trim().length > 20 && (
-        <NavBtn onNext={onNext} onBack={onBack} label="Complete workbook" />
-      )}
+
     </div>
   );
 }

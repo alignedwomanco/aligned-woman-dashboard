@@ -36,17 +36,6 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
-
 // ─── STEP 1: THE WEALTH ILLUSION TEST ───
 
 const ILLUSION_SCENARIOS = [
@@ -146,7 +135,7 @@ function Step1({ guesses, setGuess, revealed, setRevealed, onNext }) {
         })}
       </div>
 
-      {allRevealed && <NavBtn onClick={onNext} />}
+
     </div>
   );
 }
@@ -271,7 +260,7 @@ function Step2({ audit, setAuditField, onNext }) {
         </FadeIn>
       )}
 
-      {classified.length >= 8 && <NavBtn onClick={onNext} />}
+
     </div>
   );
 }
@@ -381,7 +370,7 @@ function Step3({ visibility, setVisibility, onNext }) {
         </FadeIn>
       )}
 
-      {answered === VISIBILITY_QUESTIONS.length && <NavBtn onClick={onNext} />}
+
     </div>
   );
 }
@@ -522,7 +511,7 @@ function Step4({ assets, setAsset, liabilities, setLiability, netWorthReflection
         </FadeIn>
       )}
 
-      {hasData && <NavBtn onClick={onNext} label="See my summary" />}
+
     </div>
   );
 }

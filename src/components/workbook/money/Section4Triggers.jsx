@@ -33,17 +33,6 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
-
 // ─── DATA ───
 
 const TRIGGER_SITUATIONS = [
@@ -204,7 +193,7 @@ function Step1({ intensities, setIntensity, onNext }) {
         </FadeIn>
       )}
 
-      {rated >= 6 && <NavBtn onClick={onNext} />}
+
     </div>
   );
 }
@@ -221,7 +210,7 @@ function Step2({ intensities, chains, setChain, bodySignals, toggleBodySignal, o
         <p style={{ fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.5, fontFamily: "var(--aw-font-sans)" }}>
           Your trigger ratings were all mild or neutral. This could mean you have strong emotional regulation, or it could mean you have learned to minimise your responses. Either way, you can continue to the next step.
         </p>
-        <NavBtn onClick={onNext} />
+
       </div>
     );
   }
@@ -337,8 +326,6 @@ function Step2({ intensities, chains, setChain, bodySignals, toggleBodySignal, o
           );
         })}
       </div>
-
-      <NavBtn onClick={onNext} />
     </div>
   );
 }
@@ -447,7 +434,6 @@ function Step3({ patterns, setPattern, onNext }) {
         </FadeIn>
       )}
 
-      <NavBtn onClick={onNext} />
     </div>
   );
 }
@@ -527,7 +513,7 @@ function Step4({ regret, setRegretField, onNext }) {
         </FadeIn>
       )}
 
-      <NavBtn onClick={onNext} label="See my summary" />
+
     </div>
   );
 }

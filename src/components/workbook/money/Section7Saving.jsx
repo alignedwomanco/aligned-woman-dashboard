@@ -39,17 +39,6 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
-
 const num = (v) => parseFloat(v) || 0;
 const fmt = (n) => {
   if (n === 0) return "0";
@@ -220,7 +209,7 @@ function Step1({ monthlyAmount, setMonthlyAmount, years, setYears, rate, setRate
         </FadeIn>
       )}
 
-      {num(monthlyAmount) > 0 && <NavBtn onNext={onNext} />}
+
     </div>
   );
 }
@@ -338,7 +327,7 @@ function Step2({ safetyLevel, setSafetyLevel, monthlyEssentials, setMonthlyEssen
         </FadeIn>
       )}
 
-      {safetyLevel && <NavBtn onNext={onNext} onBack={onBack} />}
+
     </div>
   );
 }
@@ -446,7 +435,7 @@ function Step3({ goals, setGoal, addGoal, removeGoal, onNext, onBack }) {
         </FadeIn>
       )}
 
-      <NavBtn onNext={onNext} onBack={onBack} />
+
     </div>
   );
 }
@@ -535,7 +524,7 @@ function Step4({ protections, setProtection, onNext, onBack }) {
         </FadeIn>
       )}
 
-      {answered >= 5 && <NavBtn onNext={onNext} onBack={onBack} />}
+
     </div>
   );
 }
@@ -629,7 +618,7 @@ function Step5({ barriers, toggleBarrier, commitment, setCommitment, startAmount
         </div>
       </div>
 
-      {(barriers.length > 0 || num(startAmount) > 0) && <NavBtn onNext={onNext} onBack={onBack} label="See my summary" />}
+
     </div>
   );
 }

@@ -37,17 +37,6 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
-
 /* ── DATA ─────────────────────────────────────────────── */
 
 const HOUSEHOLD_TYPES = [
@@ -149,7 +138,7 @@ function Step1({ household, setHousehold, atmosphere, toggleAtmosphere, onNext }
           );
         })}
       </div>
-      {household && atmosphere.length > 0 && <NavBtn onClick={onNext} />}
+      {/* NavBtn removed — navigation via StepIndicator dots and bottom bar */}
     </div>
   );
 }
@@ -201,7 +190,7 @@ function Step2({ messageImpacts, setMessageImpact, expandedMsg, setExpandedMsg, 
       {ratedCount > 0 && (
         <FadeIn><div style={{ marginTop: 24, padding: "14px 18px", borderRadius: 10, background: "white", border: "1px solid var(--aw-border, #E8DDD6)" }}><span style={{ fontSize: 13, color: "var(--aw-dark-grey)", fontFamily: "var(--aw-font-sans)" }}>{ratedCount} message{ratedCount !== 1 ? "s" : ""} rated{highImpact.length > 0 && <span style={{ color: "var(--aw-burg-core)", fontWeight: 600 }}> / {highImpact.length} with high impact</span>}</span></div></FadeIn>
       )}
-      {ratedCount >= 3 && <NavBtn onClick={onNext} onBack={onBack} />}
+
     </div>
   );
 }
@@ -238,7 +227,7 @@ function Step3({ memories, setMemory, activePrompt, setActivePrompt, onNext, onB
         })}
       </div>
       <div style={{ marginTop: 16, fontSize: 13, color: "var(--aw-soft-grey, #A89B94)", fontFamily: "var(--aw-font-sans)" }}>{filledCount} of {MEMORY_PROMPTS.length} memories recorded</div>
-      {filledCount >= 2 && <NavBtn onClick={onNext} onBack={onBack} />}
+
     </div>
   );
 }
@@ -299,7 +288,7 @@ function Step4({ signalChecks, toggleSignal, onNext, onBack }) {
           );
         })}
       </div>
-      {primaryValue && <NavBtn onClick={onNext} onBack={onBack} />}
+
     </div>
   );
 }
@@ -378,7 +367,7 @@ function Step5({ household, atmosphere, messageImpacts, memories, signalChecks, 
         </div>
       </FadeIn>
 
-      <NavBtn onBack={onBack} />
+
     </div>
   );
 }

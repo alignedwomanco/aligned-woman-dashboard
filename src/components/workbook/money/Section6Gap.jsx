@@ -33,17 +33,6 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-function NavBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
-        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
-      </div>
-    </FadeIn>
-  );
-}
-
 const num = (v) => parseFloat(v) || 0;
 const fmt = (n) => {
   if (n === 0) return "0";
@@ -173,7 +162,7 @@ function Step1({ income, setIncome, incomeStability, setIncomeStability, onNext 
         </FadeIn>
       )}
 
-      {total > 0 && incomeStability && <NavBtn onClick={onNext} />}
+
     </div>
   );
 }
@@ -318,7 +307,7 @@ function Step2({ expenses, setExpense, income, onNext, onBack }) {
         </FadeIn>
       )}
 
-      {filledCount >= 5 && <NavBtn onClick={onNext} onBack={onBack} />}
+
     </div>
   );
 }
@@ -433,7 +422,7 @@ function Step3({ income, expenses, onNext, onBack }) {
         })}
       </div>
 
-      <NavBtn onClick={onNext} onBack={onBack} />
+
     </div>
   );
 }
@@ -557,7 +546,7 @@ function Step4({ expenses, leaks, setLeak, leakActions, setLeakAction, onNext, o
         </FadeIn>
       )}
 
-      {(ratedCount >= Math.min(3, allLeakable.length) || allLeakable.length === 0) && <NavBtn onClick={onNext} onBack={onBack} label="See my summary" />}
+
     </div>
   );
 }
