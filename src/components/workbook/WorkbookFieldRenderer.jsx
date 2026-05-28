@@ -4,6 +4,8 @@ import CtaRowField from "./CtaRowField";
 import ScoredQuizField from "./ScoredQuizField";
 import ScaleField from "./ScaleField";
 import MappedQuizField from "./MappedQuizField";
+import ScoredCycleField from "./ScoredCycleField";
+import BurnoutStageField from "./BurnoutStageField";
 
 /**
  * Renders a single field from the workbook schema.
@@ -24,6 +26,12 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
     case "checkbox_group":
       if (field.subtype === "mapped_quiz") {
         return <MappedQuizField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
+      }
+      if (field.subtype === "scored_quiz") {
+        return <ScoredCycleField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
+      }
+      if (field.subtype === "stage_select") {
+        return <BurnoutStageField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
       }
       return <CheckboxGroupField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "long_text":
