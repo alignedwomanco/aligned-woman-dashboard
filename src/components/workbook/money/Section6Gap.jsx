@@ -678,26 +678,7 @@ function Step5({ income, expenses, incomeStability, leaks, leakActions, onBack }
         </div>
       </FadeIn>
 
-      <FadeIn delay={600}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 32, gap: 12 }}>
-          {onBack && (
-            <button onClick={onBack} style={{
-              padding: "10px 24px", background: "white", color: "var(--aw-burg-core)", border: `1.5px solid ${"var(--aw-burg-core)"}`,
-              borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer",
-            }}>&#8592; Back to edit</button>
-          )}
-          <button style={{
-            padding: "14px 40px", background: `linear-gradient(135deg, ${"var(--aw-burg-core)"}, ${"var(--aw-rose-core)"})`,
-            color: "white", border: "none", borderRadius: 10, fontSize: 16, fontWeight: 600,
-            cursor: "pointer", boxShadow: `0 4px 20px ${"var(--aw-burg-core)"}33`,
-          }}>
-            Save and continue to Part 7: Saving with Intention &#8594;
-          </button>
-          <p style={{ marginTop: 4, fontSize: 13, color: "var(--aw-soft-grey, #A89B94)" }}>
-            Your answers are saved automatically. You can return and edit anytime.
-          </p>
-        </div>
-      </FadeIn>
+
     </div>
   );
 }

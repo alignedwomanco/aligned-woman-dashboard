@@ -613,19 +613,9 @@ function Step4Final({ reflections, newScript, actions30, actions6m, actions12m, 
 
       {/* ─── ACTIONS ─── */}
       <FadeIn delay={2800}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-          {onBack && <button onClick={onBack} style={{ padding: "10px 24px", background: "white", color: "var(--aw-burg-core)", border: `1.5px solid ${"var(--aw-burg-core)"}`, borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>&#8592; Back to edit</button>}
-          <button style={{
-            padding: "16px 48px", background: `linear-gradient(135deg, ${"var(--aw-burg-core)"}, ${"var(--aw-rose-core)"})`,
-            color: "white", border: "none", borderRadius: 10, fontSize: 16, fontWeight: 600,
-            cursor: "pointer", boxShadow: `0 4px 20px ${"var(--aw-burg-core)"}33`,
-          }}>
-            Download my completed workbook
-          </button>
-          <p style={{ marginTop: 8, fontSize: 13, color: "var(--aw-soft-grey, #A89B94)", maxWidth: 400, textAlign: "center", lineHeight: 1.5 }}>
-            Your workbook is saved. Return anytime to revisit your answers, update your plan, or measure how far you have come.
-          </p>
-        </div>
+        <p style={{ marginTop: 8, fontSize: 13, color: "var(--aw-soft-grey, #A89B94)", maxWidth: 400, textAlign: "center", lineHeight: 1.5, margin: "0 auto" }}>
+          Your workbook is saved. Return anytime to revisit your answers, update your plan, or measure how far you have come.
+        </p>
       </FadeIn>
     </div>
   );

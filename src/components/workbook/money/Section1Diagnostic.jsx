@@ -114,28 +114,7 @@ function StepIndicator({ steps, current, onStepClick }) {
 
 /* ── Continue button ──────────────────────────────────── */
 
-function ContinueBtn({ onClick, label, onBack }) {
-  return (
-    <FadeIn delay={200}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
-        {onBack && (
-          <button onClick={onBack} style={{
-            padding: "12px 24px", background: "white", color: "var(--aw-burg-core)",
-            border: "1.5px solid var(--aw-burg-core)", borderRadius: 8,
-            fontSize: 15, fontWeight: 600, cursor: "pointer",
-            fontFamily: "var(--aw-font-sans)",
-          }}>&#8592; Back</button>
-        )}
-        <button onClick={onClick} style={{
-          padding: "12px 32px", background: "var(--aw-burg-core)", color: "white",
-          border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600,
-          cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
-          fontFamily: "var(--aw-font-sans)",
-        }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>
-      </div>
-    </FadeIn>
-  );
-}
+
 
 /* ── Step 1: Confidence scale ─────────────────────────── */
 
@@ -184,7 +163,7 @@ function ConfidenceStep({ value, onChange, onNext }) {
           </div>
         </FadeIn>
       )}
-      {value > 0 && <ContinueBtn onClick={onNext} />}
+
     </div>
   );
 }
@@ -250,7 +229,6 @@ function DiagnosticChecklistStep({ selected, onToggle, onNext, onBack }) {
           </div>
         </FadeIn>
       )}
-      <ContinueBtn onClick={onNext} onBack={onBack} />
     </div>
   );
 }
@@ -303,7 +281,6 @@ function EmotionStep({ selectedEmotions, onToggle, customEmotion, onCustomChange
           </div>
         </FadeIn>
       )}
-      <ContinueBtn onClick={onNext} onBack={onBack} />
     </div>
   );
 }
@@ -329,7 +306,7 @@ function NarrativeStep({ text, onChange, onNext, onBack }) {
         }} />
         <div style={{ position: "absolute", bottom: 10, right: 14, fontSize: 12, color: wordCount >= 20 ? "var(--aw-green, #3D7A5F)" : "var(--aw-soft-grey, #A89B94)", fontFamily: "var(--aw-font-sans)" }}>{wordCount} word{wordCount !== 1 ? "s" : ""}</div>
       </div>
-      <ContinueBtn onClick={onNext} onBack={onBack} label="See my diagnostic summary" />
+
     </div>
   );
 }
@@ -403,7 +380,7 @@ function DiagnosticSummary({ confidence, selected, emotions, onBack }) {
         </FadeIn>
       )}
 
-      <ContinueBtn onBack={onBack} />
+
     </div>
   );
 }
