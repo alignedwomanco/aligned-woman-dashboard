@@ -12,16 +12,33 @@ export default function WorkbookSidebar({
   const navigate = useNavigate();
   // Check if section has any non-empty answer
   const isSectionCompleted = (section) => {
-    if (!section?.fields) return false;
-    return section.fields.some(f => {
-      const id = f.id || f.field_id;
-      const v = answers[id];
-      if (v === undefined || v === null) return false;
-      if (typeof v === "string") return v.trim() !== "";
-      if (typeof v === "number") return true;
-      if (typeof v === "object") return Object.keys(v).length > 0 && Object.values(v).some(Boolean);
-      return true;
-    });
+    // Check schema fields if present
+    if (section?.fields?.length > 0) {
+      const hasFieldAnswer = section.fields.some(f => {
+        const id = f.id || f.field_id;
+        const v = answers[id];
+        if (v === undefined || v === null) return false;
+        if (typeof v === "string") return v.trim() !== "";
+        if (typeof v === "number") return true;
+        if (typeof v === "object") return Object.keys(v).length > 0 && Object.values(v).some(Boolean);
+        return true;
+      });
+      if (hasFieldAnswer) return true;
+    }
+    // Fallback: check if any answer key starts with the section's prefix (e.g. s03_, s04_)
+    const sectionNum = section?.section_number;
+    if (sectionNum) {
+      const prefix = `s${String(sectionNum).padStart(2, "0")}_`;
+      return Object.keys(answers).some(k => k.startsWith(prefix) && (() => {
+        const v = answers[k];
+        if (v === undefined || v === null) return false;
+        if (typeof v === "string") return v.trim() !== "";
+        if (typeof v === "number") return true;
+        if (typeof v === "object") return Object.keys(v).length > 0;
+        return true;
+      })());
+    }
+    return false;
   };
 
   const isLocked = (idx) => unlockedSections && !unlockedSections.includes(idx);
