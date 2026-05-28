@@ -36,7 +36,16 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-/* NavBtn removed — navigation handled by bottom bar */
+function NavBtn({ onClick, label, onBack }) {
+  return (
+    <FadeIn delay={200}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
+        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
+        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
+      </div>
+    </FadeIn>
+  );
+}
 
 // ─── STEP 1: THE WEALTH ILLUSION TEST ───
 
@@ -137,7 +146,7 @@ function Step1({ guesses, setGuess, revealed, setRevealed, onNext }) {
         })}
       </div>
 
-      {/* navigation via bottom bar */}
+      {allRevealed && <NavBtn onClick={onNext} />}
     </div>
   );
 }
@@ -262,7 +271,7 @@ function Step2({ audit, setAuditField, onNext }) {
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      {classified.length >= 8 && <NavBtn onClick={onNext} />}
     </div>
   );
 }
@@ -372,7 +381,7 @@ function Step3({ visibility, setVisibility, onNext }) {
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      {answered === VISIBILITY_QUESTIONS.length && <NavBtn onClick={onNext} />}
     </div>
   );
 }
@@ -513,7 +522,7 @@ function Step4({ assets, setAsset, liabilities, setLiability, netWorthReflection
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      {hasData && <NavBtn onClick={onNext} label="See my summary" />}
     </div>
   );
 }
@@ -608,7 +617,7 @@ function Step5({ audit, visibility, assets, liabilities, wealthDefinition, setWe
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section5Wealth({ section, answers = {}, onAnswerChange, step = 0 }) {
+export default function Section5Wealth({ section, answers = {}, onAnswerChange }) {
   const guesses            = answers.s05_guesses || {};
   const revealed           = answers.s05_revealed || [];
   const audit              = answers.s05_audit || {};
@@ -618,6 +627,8 @@ export default function Section5Wealth({ section, answers = {}, onAnswerChange, 
   const netWorthReflection = answers.s05_net_worth_reflection || "";
   const wealthDefinition   = answers.s05_wealth_definition || "";
 
+  const [step, setStep] = useState(0);
+
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
   const setGuess = (id, val) => save("s05_guesses", { ...guesses, [id]: val });
@@ -626,6 +637,10 @@ export default function Section5Wealth({ section, answers = {}, onAnswerChange, 
   const setVisibilityAnswer = (id, val) => save("s05_visibility", { ...visibility, [id]: val });
   const setAsset = (id, val) => save("s05_assets", { ...assets, [id]: val });
   const setLiability = (id, val) => save("s05_liabilities", { ...liabilities, [id]: val });
+
+  const goNext = () => setStep(s => s + 1);
+  const goBack = () => setStep(s => Math.max(0, s - 1));
+  const goToStep = (s) => setStep(s);
 
   const STEPS = ["Wealth illusion", "Spending audit", "Visibility test", "Net worth", "Summary"];
 
@@ -638,13 +653,13 @@ export default function Section5Wealth({ section, answers = {}, onAnswerChange, 
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} />
+      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
 
-      {step === 0 && <Step1 guesses={guesses} setGuess={setGuess} revealed={revealed} setRevealed={setRevealed} />}
-      {step === 1 && <Step2 audit={audit} setAuditField={setAuditField} />}
-      {step === 2 && <Step3 visibility={visibility} setVisibility={setVisibilityAnswer} />}
-      {step === 3 && <Step4 assets={assets} setAsset={setAsset} liabilities={liabilities} setLiability={setLiability} netWorthReflection={netWorthReflection} setNetWorthReflection={(v) => save("s05_net_worth_reflection", v)} />}
-      {step === 4 && <Step5 audit={audit} visibility={visibility} assets={assets} liabilities={liabilities} wealthDefinition={wealthDefinition} setWealthDefinition={(v) => save("s05_wealth_definition", v)} />}
+      {step === 0 && <Step1 guesses={guesses} setGuess={setGuess} revealed={revealed} setRevealed={setRevealed} onNext={goNext} />}
+      {step === 1 && <Step2 audit={audit} setAuditField={setAuditField} onNext={goNext} onBack={goBack} />}
+      {step === 2 && <Step3 visibility={visibility} setVisibility={setVisibilityAnswer} onNext={goNext} onBack={goBack} />}
+      {step === 3 && <Step4 assets={assets} setAsset={setAsset} liabilities={liabilities} setLiability={setLiability} netWorthReflection={netWorthReflection} setNetWorthReflection={(v) => save("s05_net_worth_reflection", v)} onNext={goNext} onBack={goBack} />}
+      {step === 4 && <Step5 audit={audit} visibility={visibility} assets={assets} liabilities={liabilities} wealthDefinition={wealthDefinition} setWealthDefinition={(v) => save("s05_wealth_definition", v)} onBack={goBack} />}
     </div>
   );
 }

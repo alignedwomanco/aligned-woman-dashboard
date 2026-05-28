@@ -112,7 +112,30 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-/* ── Continue button removed — navigation handled by bottom bar ── */
+/* ── Continue button ──────────────────────────────────── */
+
+function ContinueBtn({ onClick, label, onBack }) {
+  return (
+    <FadeIn delay={200}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
+        {onBack && (
+          <button onClick={onBack} style={{
+            padding: "12px 24px", background: "white", color: "var(--aw-burg-core)",
+            border: "1.5px solid var(--aw-burg-core)", borderRadius: 8,
+            fontSize: 15, fontWeight: 600, cursor: "pointer",
+            fontFamily: "var(--aw-font-sans)",
+          }}>&#8592; Back</button>
+        )}
+        <button onClick={onClick} style={{
+          padding: "12px 32px", background: "var(--aw-burg-core)", color: "white",
+          border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600,
+          cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+          fontFamily: "var(--aw-font-sans)",
+        }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>
+      </div>
+    </FadeIn>
+  );
+}
 
 /* ── Step 1: Confidence scale ─────────────────────────── */
 
@@ -161,7 +184,7 @@ function ConfidenceStep({ value, onChange, onNext }) {
           </div>
         </FadeIn>
       )}
-      {/* navigation via bottom bar */}
+      {value > 0 && <ContinueBtn onClick={onNext} />}
     </div>
   );
 }
@@ -227,7 +250,7 @@ function DiagnosticChecklistStep({ selected, onToggle, onNext, onBack }) {
           </div>
         </FadeIn>
       )}
-      {/* navigation via bottom bar */}
+      <ContinueBtn onClick={onNext} onBack={onBack} />
     </div>
   );
 }
@@ -280,7 +303,7 @@ function EmotionStep({ selectedEmotions, onToggle, customEmotion, onCustomChange
           </div>
         </FadeIn>
       )}
-      {/* navigation via bottom bar */}
+      <ContinueBtn onClick={onNext} onBack={onBack} />
     </div>
   );
 }
@@ -306,7 +329,7 @@ function NarrativeStep({ text, onChange, onNext, onBack }) {
         }} />
         <div style={{ position: "absolute", bottom: 10, right: 14, fontSize: 12, color: wordCount >= 20 ? "var(--aw-green, #3D7A5F)" : "var(--aw-soft-grey, #A89B94)", fontFamily: "var(--aw-font-sans)" }}>{wordCount} word{wordCount !== 1 ? "s" : ""}</div>
       </div>
-      {/* navigation via bottom bar */}
+      <ContinueBtn onClick={onNext} onBack={onBack} label="See my diagnostic summary" />
     </div>
   );
 }
@@ -380,7 +403,7 @@ function DiagnosticSummary({ confidence, selected, emotions, onBack }) {
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      <ContinueBtn onBack={onBack} />
     </div>
   );
 }
@@ -389,13 +412,16 @@ function DiagnosticSummary({ confidence, selected, emotions, onBack }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section1Diagnostic({ section, answers = {}, onAnswerChange, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, step = 0 }) {
+export default function Section1Diagnostic({ section, answers = {}, onAnswerChange, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress }) {
   // ── Read persisted state from answers ──
   const confidence     = answers.s01_confidence || 0;
   const selected       = answers.s01_financial_state || [];
   const emotions       = answers.s01_emotions || [];
   const customEmotion  = answers.s01_custom_emotion || "";
   const narrative      = answers.s01_narrative || "";
+
+  // ── Local UI state (step navigation only, not persisted) ──
+  const [step, setStep] = useState(0);
 
   // ── Helpers to write back to the workbook response ──
   const save = (fieldId, value) => {
@@ -411,6 +437,10 @@ export default function Section1Diagnostic({ section, answers = {}, onAnswerChan
     const next = emotions.includes(word) ? emotions.filter(w => w !== word) : emotions.length < 3 ? [...emotions, word] : emotions;
     save("s01_emotions", next);
   };
+
+  const goNext = () => setStep(s => s + 1);
+  const goBack = () => setStep(s => Math.max(0, s - 1));
+  const goToStep = (s) => setStep(s);
 
   const STEPS = ["Confidence", "Financial state", "Emotions", "Your words", "Diagnostic"];
 
@@ -430,14 +460,14 @@ export default function Section1Diagnostic({ section, answers = {}, onAnswerChan
       </div>
 
       {/* Step indicator */}
-      <StepIndicator steps={STEPS} current={step} />
+      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
 
       {/* Steps */}
-      {step === 0 && <ConfidenceStep value={confidence} onChange={v => save("s01_confidence", v)} />}
-      {step === 1 && <DiagnosticChecklistStep selected={selected} onToggle={toggleSelected} />}
-      {step === 2 && <EmotionStep selectedEmotions={emotions} onToggle={toggleEmotion} customEmotion={customEmotion} onCustomChange={v => save("s01_custom_emotion", v)} />}
-      {step === 3 && <NarrativeStep text={narrative} onChange={v => save("s01_narrative", v)} />}
-      {step === 4 && <DiagnosticSummary confidence={confidence} selected={selected} emotions={emotions} />}
+      {step === 0 && <ConfidenceStep value={confidence} onChange={v => save("s01_confidence", v)} onNext={goNext} />}
+      {step === 1 && <DiagnosticChecklistStep selected={selected} onToggle={toggleSelected} onNext={goNext} onBack={goBack} />}
+      {step === 2 && <EmotionStep selectedEmotions={emotions} onToggle={toggleEmotion} customEmotion={customEmotion} onCustomChange={v => save("s01_custom_emotion", v)} onNext={goNext} onBack={goBack} />}
+      {step === 3 && <NarrativeStep text={narrative} onChange={v => save("s01_narrative", v)} onNext={goNext} onBack={goBack} />}
+      {step === 4 && <DiagnosticSummary confidence={confidence} selected={selected} emotions={emotions} onBack={goBack} />}
     </div>
   );
 }

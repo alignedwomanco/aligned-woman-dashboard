@@ -33,7 +33,16 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-/* NavBtn removed — navigation handled by bottom bar */
+function NavBtn({ onClick, label, onBack }) {
+  return (
+    <FadeIn delay={200}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
+        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
+        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
+      </div>
+    </FadeIn>
+  );
+}
 
 // ─── DATA ───
 
@@ -195,7 +204,7 @@ function Step1({ intensities, setIntensity, onNext }) {
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      {rated >= 6 && <NavBtn onClick={onNext} />}
     </div>
   );
 }
@@ -212,7 +221,7 @@ function Step2({ intensities, chains, setChain, bodySignals, toggleBodySignal, o
         <p style={{ fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.5, fontFamily: "var(--aw-font-sans)" }}>
           Your trigger ratings were all mild or neutral. This could mean you have strong emotional regulation, or it could mean you have learned to minimise your responses. Either way, you can continue to the next step.
         </p>
-        {/* navigation via bottom bar */}
+        <NavBtn onClick={onNext} />
       </div>
     );
   }
@@ -329,6 +338,7 @@ function Step2({ intensities, chains, setChain, bodySignals, toggleBodySignal, o
         })}
       </div>
 
+      <NavBtn onClick={onNext} />
     </div>
   );
 }
@@ -437,6 +447,7 @@ function Step3({ patterns, setPattern, onNext }) {
         </FadeIn>
       )}
 
+      <NavBtn onClick={onNext} />
     </div>
   );
 }
@@ -516,7 +527,7 @@ function Step4({ regret, setRegretField, onNext }) {
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      <NavBtn onClick={onNext} label="See my summary" />
     </div>
   );
 }
@@ -639,12 +650,14 @@ function Step5({ intensities, bodySignals, chains, patterns, regret }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section4Triggers({ section, answers = {}, onAnswerChange, step = 0 }) {
+export default function Section4Triggers({ section, answers = {}, onAnswerChange }) {
   const intensities  = answers.s04_intensities || {};
   const chains       = answers.s04_chains || {};
   const bodySignals  = answers.s04_body_signals || [];
   const patterns     = answers.s04_patterns || {};
   const regret       = answers.s04_regret || {};
+
+  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -657,6 +670,10 @@ export default function Section4Triggers({ section, answers = {}, onAnswerChange
   const setPattern = (id, field, val) => save("s04_patterns", { ...patterns, [id]: { ...(patterns[id] || {}), [field]: val } });
   const setRegretField = (key, val) => save("s04_regret", { ...regret, [key]: val });
 
+  const goNext = () => setStep(s => s + 1);
+  const goBack = () => setStep(s => Math.max(0, s - 1));
+  const goToStep = (s) => setStep(s);
+
   const STEPS = ["Trigger map", "Trigger chains", "Spending patterns", "Regret autopsy", "Summary"];
 
   return (
@@ -668,13 +685,13 @@ export default function Section4Triggers({ section, answers = {}, onAnswerChange
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} />
+      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
 
-      {step === 0 && <Step1 intensities={intensities} setIntensity={setIntensity} />}
-      {step === 1 && <Step2 intensities={intensities} chains={chains} setChain={setChain} bodySignals={bodySignals} toggleBodySignal={toggleBodySignal} />}
-      {step === 2 && <Step3 patterns={patterns} setPattern={setPattern} />}
-      {step === 3 && <Step4 regret={regret} setRegretField={setRegretField} />}
-      {step === 4 && <Step5 intensities={intensities} bodySignals={bodySignals} chains={chains} patterns={patterns} regret={regret} />}
+      {step === 0 && <Step1 intensities={intensities} setIntensity={setIntensity} onNext={goNext} />}
+      {step === 1 && <Step2 intensities={intensities} chains={chains} setChain={setChain} bodySignals={bodySignals} toggleBodySignal={toggleBodySignal} onNext={goNext} onBack={goBack} />}
+      {step === 2 && <Step3 patterns={patterns} setPattern={setPattern} onNext={goNext} onBack={goBack} />}
+      {step === 3 && <Step4 regret={regret} setRegretField={setRegretField} onNext={goNext} onBack={goBack} />}
+      {step === 4 && <Step5 intensities={intensities} bodySignals={bodySignals} chains={chains} patterns={patterns} regret={regret} onBack={goBack} />}
     </div>
   );
 }

@@ -34,7 +34,16 @@ function StepIndicator({ steps, current, onStepClick }) {
   );
 }
 
-/* NavBtn removed — navigation handled by bottom bar */
+function NavBtn({ onClick, label, onBack }) {
+  return (
+    <FadeIn delay={200}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
+        {onBack && <button onClick={onBack} style={{ padding: "12px 24px", background: "white", color: "var(--aw-burg-core)", border: "1.5px solid var(--aw-burg-core)", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "var(--aw-font-sans)" }}>&#8592; Back</button>}
+        {onClick && <button onClick={onClick} style={{ padding: "12px 32px", background: "var(--aw-burg-core)", color: "white", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--aw-font-sans)" }}>{label || "Continue"} <span style={{ fontSize: 18 }}>&#8594;</span></button>}
+      </div>
+    </FadeIn>
+  );
+}
 
 // ─── STEP 1: YOUR ADVISOR HISTORY ───
 
@@ -168,7 +177,7 @@ function Step1({ history, setHistory, selectedBarriers, toggleBarrier, onNext })
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      {hasHistory && <NavBtn onNext={onNext} />}
     </div>
   );
 }
@@ -257,7 +266,7 @@ function Step2({ needs, setNeed, onNext, onBack }) {
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      {selected.length >= 2 && <NavBtn onNext={onNext} onBack={onBack} />}
     </div>
   );
 }
@@ -407,7 +416,7 @@ function Step3({ selectedQualities, toggleQuality, readiness, setReadiness, time
         </FadeIn>
       )}
 
-      {/* navigation via bottom bar */}
+      {readiness && timeline && <NavBtn onNext={onNext} onBack={onBack} label="See my advisor brief" />}
     </div>
   );
 }
@@ -534,13 +543,15 @@ function Step4Summary({ history, selectedBarriers, needs, selectedQualities, rea
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════ */
 
-export default function Section9Advice({ section, answers = {}, onAnswerChange, step = 0 }) {
+export default function Section9Advice({ section, answers = {}, onAnswerChange }) {
   const history            = answers.s09_history || null;
   const selectedBarriers   = answers.s09_barriers || [];
   const needs              = answers.s09_needs || {};
   const selectedQualities  = answers.s09_qualities || [];
   const readiness          = answers.s09_readiness || null;
   const timeline           = answers.s09_timeline || null;
+
+  const [step, setStep] = useState(0);
 
   const save = (fieldId, value) => { if (onAnswerChange) onAnswerChange(fieldId, value); };
 
@@ -554,6 +565,10 @@ export default function Section9Advice({ section, answers = {}, onAnswerChange, 
     save("s09_qualities", next);
   };
 
+  const goNext = () => setStep(s => s + 1);
+  const goBack = () => setStep(s => Math.max(0, s - 1));
+  const goToStep = (s) => setStep(s);
+
   const STEPS = ["Your history", "What you need", "Finding your fit", "Advisor brief"];
 
   return (
@@ -565,12 +580,12 @@ export default function Section9Advice({ section, answers = {}, onAnswerChange, 
         {section?.intro && <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 300, fontSize: 16, lineHeight: 1.85, color: "var(--aw-dark-grey)", margin: "18px 0 0" }}>{section.intro}</p>}
       </div>
 
-      <StepIndicator steps={STEPS} current={step} />
+      <StepIndicator steps={STEPS} current={step} onStepClick={goToStep} />
 
-      {step === 0 && <Step1 history={history} setHistory={(v) => save("s09_history", v)} selectedBarriers={selectedBarriers} toggleBarrier={toggleBarrier} />}
-      {step === 1 && <Step2 needs={needs} setNeed={setNeed} />}
-      {step === 2 && <Step3 selectedQualities={selectedQualities} toggleQuality={toggleQuality} readiness={readiness} setReadiness={(v) => save("s09_readiness", v)} timeline={timeline} setTimeline={(v) => save("s09_timeline", v)} />}
-      {step === 3 && <Step4Summary history={history} selectedBarriers={selectedBarriers} needs={needs} selectedQualities={selectedQualities} readiness={readiness} timeline={timeline} />}
+      {step === 0 && <Step1 history={history} setHistory={(v) => save("s09_history", v)} selectedBarriers={selectedBarriers} toggleBarrier={toggleBarrier} onNext={goNext} />}
+      {step === 1 && <Step2 needs={needs} setNeed={setNeed} onNext={goNext} onBack={goBack} />}
+      {step === 2 && <Step3 selectedQualities={selectedQualities} toggleQuality={toggleQuality} readiness={readiness} setReadiness={(v) => save("s09_readiness", v)} timeline={timeline} setTimeline={(v) => save("s09_timeline", v)} onNext={goNext} onBack={goBack} />}
+      {step === 3 && <Step4Summary history={history} selectedBarriers={selectedBarriers} needs={needs} selectedQualities={selectedQualities} readiness={readiness} timeline={timeline} onBack={goBack} />}
     </div>
   );
 }

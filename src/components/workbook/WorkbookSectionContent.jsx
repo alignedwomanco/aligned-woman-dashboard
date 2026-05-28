@@ -58,7 +58,7 @@ function GroundingCallout({ text }) {
   );
 }
 
-export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [], computedScores, step = 0 }) {
+export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [], computedScores }) {
   if (!section) return null;
 
   // ── Interactive workbook sections (detected by step_flow in schema) ──
@@ -79,7 +79,6 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
           onMarkInProgress={onMarkInProgress}
           assets={assets}
           computedScores={computedScores}
-          step={step}
         />
       );
     }
