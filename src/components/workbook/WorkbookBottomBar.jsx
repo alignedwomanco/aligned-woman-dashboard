@@ -5,16 +5,17 @@ import { ArrowLeft, ArrowRight, FileDown, Lock } from "lucide-react";
  * WorkbookBottomBar — sticky bottom nav: Previous | counter | Next/Review/Save PDF
  */
 export default function WorkbookBottomBar({
-  sections, activeSection, onPrev, onNext, nextLocked
+  sections, activeSection, onPrev, onNext, nextLocked, hasStepFlow
 }) {
   const total = sections.length;
   const isFirst = activeSection === 0;
   const isLast = activeSection === total - 1;
   const isSecondToLast = activeSection === total - 2;
 
-  // Next button label: "Review" before summary, "Print PDF" on summary
+  // Next button label
   const getNextLabel = () => {
     if (isLast) return "Print PDF";
+    if (hasStepFlow) return "Next Section";
     if (isSecondToLast) return "Review";
     return "Next";
   };

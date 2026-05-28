@@ -415,22 +415,21 @@ function WorkbookViewerInner({ workbookId }) {
           ))}
         </div>
 
-        {!sections[activeSection]?.step_flow && (
-          <WorkbookBottomBar
-            sections={sections}
-            activeSection={activeSection}
-            onPrev={() => jumpTo(Math.max(0, activeSection - 1))}
-            onNext={() => {
-              const nextIdx = activeSection + 1;
-              if (nextIdx >= sections.length) return;
-              // In progressive disclosure, only jump to unlocked sections
-              if (!progressiveDisclosure || unlockedSections.includes(nextIdx)) {
-                jumpTo(nextIdx);
-              }
-            }}
-            nextLocked={progressiveDisclosure && !unlockedSections.includes(activeSection + 1)}
-          />
-        )}
+        <WorkbookBottomBar
+          sections={sections}
+          activeSection={activeSection}
+          hasStepFlow={!!sections[activeSection]?.step_flow}
+          onPrev={() => jumpTo(Math.max(0, activeSection - 1))}
+          onNext={() => {
+            const nextIdx = activeSection + 1;
+            if (nextIdx >= sections.length) return;
+            // In progressive disclosure, only jump to unlocked sections
+            if (!progressiveDisclosure || unlockedSections.includes(nextIdx)) {
+              jumpTo(nextIdx);
+            }
+          }}
+          nextLocked={progressiveDisclosure && !unlockedSections.includes(activeSection + 1)}
+        />
       </div>
 
       <style>{`
