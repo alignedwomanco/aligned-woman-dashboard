@@ -423,10 +423,7 @@ function WorkbookViewerInner({ workbookId }) {
           onNext={() => {
             const nextIdx = activeSection + 1;
             if (nextIdx >= sections.length) return;
-            // In progressive disclosure, only jump to unlocked sections
-            if (!progressiveDisclosure || unlockedSections.includes(nextIdx)) {
-              jumpTo(nextIdx);
-            }
+            jumpTo(nextIdx);
           }}
           nextLocked={progressiveDisclosure && !unlockedSections.includes(activeSection + 1)}
         />
