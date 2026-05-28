@@ -3,6 +3,7 @@ import TickListField from "./TickListField";
 import CtaRowField from "./CtaRowField";
 import ScoredQuizField from "./ScoredQuizField";
 import ScaleField from "./ScaleField";
+import MappedQuizField from "./MappedQuizField";
 
 /**
  * Renders a single field from the workbook schema.
@@ -21,13 +22,14 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
     case "numbered_list":
       return <NumberedListField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "checkbox_group":
+      if (field.subtype === "mapped_quiz") {
+        return <MappedQuizField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
+      }
       return <CheckboxGroupField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "long_text":
     case "short_text":
       return <TextInputField field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "grid":
-      /* FIX 1: Route grid to StructuredListPlaceholder which supports
-         columns with key, fixed_label, min_rows, max_rows, prefilled_examples */
       return <StructuredListPlaceholder field={field} answers={answers} onAnswerChange={onAnswerChange} />;
     case "structured_list":
       return <StructuredListPlaceholder field={field} answers={answers} onAnswerChange={onAnswerChange} />;
@@ -49,7 +51,6 @@ export default function WorkbookFieldRenderer({ field, answers = {}, onAnswerCha
 function ContentBlockField({ field, assets }) {
   const variant = field.variant || "body";
 
-  /* FIX 2: Handle callout variant inside content_block */
   if (variant === "callout") {
     const paragraphs = (field.body || "").split("\n\n").filter(Boolean);
     return (
@@ -89,7 +90,6 @@ function ContentBlockField({ field, assets }) {
     );
   }
 
-  /* FIX 3: Handle quote variant inside content_block */
   if (variant === "quote") {
     return (
       <blockquote style={{
@@ -128,7 +128,6 @@ function ContentBlockField({ field, assets }) {
   }
 
   if (variant === "image") {
-    // Resolve asset_key to URL
     let imageUrl = field.image_url || "";
     if (field.asset_key && assets?.length) {
       const match = assets.find((a) => a.key === field.asset_key);
@@ -204,7 +203,6 @@ function ContentBlockField({ field, assets }) {
   }
 
   // variant === "body" (default)
-  // Supports newlines as paragraph breaks
   const paragraphs = (field.body || "").split("\n\n").filter(Boolean);
 
   return (
@@ -463,9 +461,6 @@ function NumberedListField({ field, answers, onAnswerChange }) {
 function CheckboxGroupField({ field, answers, onAnswerChange }) {
   const checked = answers[field.id] || {};
 
-  // Support both formats:
-  // Format A (existing): options = [{ id: "opt1", label: "Label" }]
-  // Format B (new):      options = ["Label string", "Label string"]
   const normalizedOptions = (field.options || []).map((opt, idx) => {
     if (typeof opt === "string") {
       return { id: `opt_${idx}`, label: opt };
@@ -618,7 +613,6 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
         <p className="text-xs text-gray-400 italic mb-1">{field.prompt}</p>
       )}
 
-      {/* Prefilled examples (read-only reference rows) */}
       {field.prefilled_examples?.length > 0 && (
         <div className="mb-3">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Reference examples</p>
@@ -649,7 +643,6 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
         </div>
       )}
 
-      {/* Editable rows */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
@@ -667,7 +660,6 @@ function StructuredListPlaceholder({ field, answers, onAnswerChange }) {
                 {field.columns?.map((col) => {
                   const colKey = col.id || col.key;
 
-                  // Fixed label column (e.g. row numbers or labels)
                   if (col.type === "fixed_label") {
                     return (
                       <td key={colKey} className="px-3 py-2 text-sm font-semibold text-[#C4847A]">
