@@ -91,8 +91,8 @@ export default function WorkbookSidebar({
         <div className="flex flex-col" style={{ gap: 1 }}>
           {sections.map((section, idx) => {
             const isCurrent = idx === activeSection;
-            const locked = isLocked(idx);
-            const isCompleted = !isCurrent && !locked && isSectionCompleted(section);
+            const locked = false;
+            const isCompleted = !isCurrent && isSectionCompleted(section);
             const num = getNumberDisplay(section, idx);
 
             return (
