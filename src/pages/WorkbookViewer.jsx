@@ -428,27 +428,13 @@ function WorkbookViewerInner({ workbookId }) {
         <WorkbookBottomBar
           sections={sections}
           activeSection={activeSection}
-          activeStep={activeStep}
-          totalSteps={sections[activeSection]?.step_flow?.length || 0}
-          onPrev={() => {
-            const hasFlow = !!sections[activeSection]?.step_flow;
-            if (hasFlow && activeStep > 0) {
-              setActiveStep(s => s - 1);
-            } else {
-              jumpTo(Math.max(0, activeSection - 1));
-            }
-          }}
+          activeStep={0}
+          totalSteps={0}
+          onPrev={() => jumpTo(Math.max(0, activeSection - 1))}
           onNext={() => {
-            const currentSection = sections[activeSection];
-            const hasFlow = !!currentSection?.step_flow;
-            const lastStep = (currentSection?.step_flow?.length || 1) - 1;
-            if (hasFlow && activeStep < lastStep) {
-              setActiveStep(s => s + 1);
-            } else {
-              const nextIdx = activeSection + 1;
-              if (nextIdx >= sections.length) return;
-              jumpTo(nextIdx);
-            }
+            const nextIdx = activeSection + 1;
+            if (nextIdx >= sections.length) return;
+            jumpTo(nextIdx);
           }}
           nextLocked={progressiveDisclosure && !unlockedSections.includes(activeSection + 1)}
         />
