@@ -186,7 +186,7 @@ export default function Layout({ children, currentPageName }) {
                   src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
                   alt="The Aligned Woman"
                   className="object-contain w-auto"
-                  style={{ height: '35px' }}
+                  style={{ height: '35px', filter: 'brightness(0) saturate(100%) invert(7%) sepia(60%) saturate(2000%) hue-rotate(300deg) brightness(60%)' }}
                 />
               )}
             </Link>
