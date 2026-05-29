@@ -1,8 +1,5 @@
 import React from "react";
 
-const MAROON = "#6B1B3D";
-const CREAM = "#FAF7F4";
-
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function computeEnergyData(answers, allSections) {
   const mascIds = Array.isArray(answers.s02_wounded_masc) ? answers.s02_wounded_masc : [];
@@ -48,8 +45,8 @@ function EnergyPortrait({ field, answers, allSections }) {
 
   if (!hasData) {
     return (
-      <div style={{ background: "#f5f0eb", border: `1px dashed rgba(107,27,61,0.2)`, borderRadius: 12, padding: "24px 24px", textAlign: "center" }}>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 14, color: "#8a7a76", margin: 0 }}>
+      <div style={{ background: "var(--aw-rose-wash)", border: "1px dashed var(--aw-border-rose)", borderRadius: "var(--aw-radius-md)", padding: "24px", textAlign: "center" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)", margin: 0 }}>
           Complete the diagnostic checklists above to see your energy portrait.
         </p>
       </div>
@@ -57,20 +54,20 @@ function EnergyPortrait({ field, answers, allSections }) {
   }
 
   const dominantLabel = dominant === "masculine" ? "Wounded Masculine Dominant" : dominant === "feminine" ? "Wounded Feminine Dominant" : "Mixed Energy Pattern";
-  const dominantColor = dominant === "masculine" ? "#1e3a5f" : dominant === "feminine" ? "#6B1B3D" : "#5a3a2a";
-  const dominantBg = dominant === "masculine" ? "#e8f0fb" : dominant === "feminine" ? "#f5e6ec" : "#f5ece6";
+  const dominantColor = dominant === "masculine" ? "#1e3a5f" : dominant === "feminine" ? "var(--aw-burg-core)" : "var(--aw-dark-grey)";
+  const dominantBg = dominant === "masculine" ? "#e8f0fb" : dominant === "feminine" ? "var(--aw-rose-pale)" : "var(--aw-rose-wash)";
 
   return (
-    <div style={{ background: "#f9f5f2", borderRadius: 14, padding: "24px 24px", border: `1px solid rgba(107,27,61,0.1)` }}>
+    <div style={{ background: "var(--aw-rose-wash)", borderRadius: "var(--aw-radius-md)", padding: "24px", border: "1px solid var(--aw-border-rose)" }}>
       {field.label && (
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: `${MAROON}99`, margin: "0 0 16px" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-rose-core)", margin: "0 0 16px" }}>
           {field.label}
         </p>
       )}
 
       {/* Dominant badge */}
-      <div style={{ display: "inline-flex", alignItems: "center", padding: "6px 14px", borderRadius: 100, background: dominantBg, marginBottom: 20 }}>
-        <span style={{ fontFamily: "DM Sans, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: dominantColor }}>
+      <div style={{ display: "inline-flex", alignItems: "center", padding: "6px 14px", borderRadius: "var(--aw-radius-pill)", background: dominantBg, marginBottom: 20 }}>
+        <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: dominantColor }}>
           {dominantLabel}
         </span>
       </div>
@@ -78,27 +75,27 @@ function EnergyPortrait({ field, answers, allSections }) {
       {/* Split bar */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-          <span style={{ fontFamily: "DM Sans, sans-serif", fontSize: 11, fontWeight: 700, color: "#1e3a5f" }}>Masculine ({masc})</span>
-          <span style={{ fontFamily: "DM Sans, sans-serif", fontSize: 11, fontWeight: 700, color: MAROON }}>Feminine ({fem})</span>
+          <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 11, fontWeight: 700, color: "#1e3a5f" }}>Masculine ({masc})</span>
+          <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 11, fontWeight: 700, color: "var(--aw-burg-core)" }}>Feminine ({fem})</span>
         </div>
-        <div style={{ height: 10, background: "#e8d8dc", borderRadius: 100, overflow: "hidden", display: "flex" }}>
+        <div style={{ height: 10, background: "var(--aw-border-rose)", borderRadius: 100, overflow: "hidden", display: "flex" }}>
           <div style={{ width: `${mascPct}%`, background: "#1e3a5f", transition: "width 0.5s ease" }} />
-          <div style={{ flex: 1, background: MAROON }} />
+          <div style={{ flex: 1, background: "var(--aw-burg-core)" }} />
         </div>
       </div>
 
       {/* Severity counts */}
       <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-        <div style={{ flex: 1, background: "#fef2f2", borderRadius: 8, padding: "10px 14px", textAlign: "center" }}>
-          <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 20, fontWeight: 700, color: "#dc2626", margin: "0 0 2px" }}>{mascHighCount + femHighCount}</p>
-          <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 11, color: "#dc2626", margin: 0 }}>High severity</p>
+        <div style={{ flex: 1, background: "#fef2f2", borderRadius: "var(--aw-radius-sm)", padding: "10px 14px", textAlign: "center" }}>
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 20, fontWeight: 700, color: "#dc2626", margin: "0 0 2px" }}>{mascHighCount + femHighCount}</p>
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 11, color: "#dc2626", margin: 0 }}>High severity</p>
         </div>
         {topCategories.length > 0 && (
-          <div style={{ flex: 2, background: "rgba(107,27,61,0.05)", borderRadius: 8, padding: "10px 14px" }}>
-            <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: `${MAROON}80`, margin: "0 0 6px" }}>Top affected areas</p>
+          <div style={{ flex: 2, background: "var(--aw-white)", borderRadius: "var(--aw-radius-sm)", padding: "10px 14px" }}>
+            <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--aw-rose-core)", margin: "0 0 6px" }}>Top affected areas</p>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {topCategories.map(c => (
-                <span key={c} style={{ fontFamily: "DM Sans, sans-serif", fontSize: 11, padding: "2px 10px", borderRadius: 100, background: "rgba(107,27,61,0.1)", color: MAROON }}>
+                <span key={c} style={{ fontFamily: "var(--aw-font-sans)", fontSize: 10, padding: "2px 10px", borderRadius: "var(--aw-radius-pill)", background: "var(--aw-rose-pale)", color: "var(--aw-burg-core)" }}>
                   {c}
                 </span>
               ))}
@@ -108,8 +105,8 @@ function EnergyPortrait({ field, answers, allSections }) {
       </div>
 
       {/* Narrative */}
-      <div style={{ borderTop: `1px solid rgba(107,27,61,0.1)`, paddingTop: 16 }}>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 15, color: "#3a2a28", lineHeight: 1.7, margin: 0 }}>
+      <div style={{ borderTop: "1px solid var(--aw-border-rose)", paddingTop: 16 }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 15, color: "var(--aw-dark-grey)", lineHeight: 1.7, margin: 0 }}>
           {narratives[dominant]}
         </p>
       </div>
@@ -135,20 +132,20 @@ function FoundationScore({ field, answers }) {
   };
 
   return (
-    <div style={{ background: c.bg, borderRadius: 12, padding: "22px 22px", border: `1px solid ${c.text}22` }}>
+    <div style={{ background: c.bg, borderRadius: "var(--aw-radius-md)", padding: "22px", border: `1px solid ${c.text}22` }}>
       {field.label && (
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: `${MAROON}80`, margin: "0 0 12px" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-rose-core)", margin: "0 0 12px" }}>
           {field.label}
         </p>
       )}
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-        <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 48, fontWeight: 700, color: c.text, lineHeight: 1 }}>{count}</span>
-        <span style={{ fontFamily: "DM Sans, sans-serif", fontSize: 15, color: "#6b5550" }}>of {total} in place</span>
+        <span style={{ fontFamily: "var(--aw-font-display)", fontSize: 48, fontWeight: 400, color: c.text, lineHeight: 1 }}>{count}</span>
+        <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 15, color: "var(--aw-dark-grey)" }}>of {total} in place</span>
       </div>
       <div style={{ height: 6, background: `${c.text}22`, borderRadius: 100, overflow: "hidden", marginBottom: 14 }}>
         <div style={{ width: `${pct}%`, height: "100%", background: c.bar, borderRadius: 100, transition: "width 0.5s ease" }} />
       </div>
-      <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 14, color: "#3a2a28", lineHeight: 1.7, margin: 0 }}>
+      <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.7, margin: 0 }}>
         {feedbackMap[tier]}
       </p>
     </div>
@@ -162,8 +159,8 @@ function ReferenceBack({ field, answers }) {
 
   if (!text || !text.trim()) {
     return (
-      <div style={{ padding: "20px 20px", border: "1.5px dashed rgba(107,27,61,0.2)", borderRadius: 10, background: "#f9f5f2" }}>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 14, color: "#a09090", fontStyle: "italic", margin: 0 }}>
+      <div style={{ padding: "20px", border: "1px dashed var(--aw-border-rose)", borderRadius: "var(--aw-radius-md)", background: "var(--aw-rose-wash)" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)", fontStyle: "italic", margin: 0 }}>
           {field.empty_placeholder || "You will see your earlier answer here once you complete Part One."}
         </p>
       </div>
@@ -173,15 +170,15 @@ function ReferenceBack({ field, answers }) {
   return (
     <div>
       {field.label && (
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: `${MAROON}80`, margin: "0 0 12px" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-rose-core)", margin: "0 0 12px" }}>
           {field.label}
         </p>
       )}
-      <div style={{ background: "#F5F0EB", borderLeft: `3px solid ${MAROON}`, borderRadius: "0 10px 10px 0", padding: "18px 20px" }}>
-        <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 18, fontStyle: "italic", color: "#3a2a28", lineHeight: 1.65, margin: 0 }}>
+      <div style={{ border: "1px solid var(--aw-border-rose)", borderLeft: "3px solid var(--aw-rose-core)", borderRadius: "var(--aw-radius-md)", padding: "18px 20px", background: "var(--aw-rose-wash)" }}>
+        <p style={{ fontFamily: "var(--aw-font-display)", fontSize: 19, fontStyle: "italic", color: "var(--aw-burg-core)", lineHeight: 1.65, margin: 0 }}>
           "{text}"
         </p>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: `${MAROON}70`, margin: "10px 0 0" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--aw-rose-deep)", margin: "10px 0 0" }}>
           Your words from Part One
         </p>
       </div>
@@ -210,36 +207,36 @@ function Snapshot({ field, answers, allSections }) {
   const foundationColor = structCount >= 5 ? "#16a34a" : structCount >= 3 ? "#d97706" : "#dc2626";
 
   return (
-    <div style={{ background: MAROON, borderRadius: 16, padding: "36px 30px" }}>
+    <div style={{ background: "var(--aw-burg-core)", borderRadius: "var(--aw-radius-md)", padding: "36px 30px" }}>
       {/* Header */}
-      <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(250,247,244,0.6)", margin: "0 0 10px" }}>
+      <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(250,245,243,0.6)", margin: "0 0 10px" }}>
         Your Power Snapshot
       </p>
-      <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 30, fontStyle: "italic", color: CREAM, margin: "0 0 32px", lineHeight: 1.2 }}>
+      <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 30, fontStyle: "italic", fontWeight: 400, color: "var(--aw-off-white)", margin: "0 0 32px", lineHeight: 1.2 }}>
         Building From Feminine Power
       </h2>
 
       {/* Energy Portrait */}
-      <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(250,247,244,0.15)" }}>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,247,244,0.55)", margin: "0 0 10px" }}>
+      <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(250,245,243,0.15)" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,245,243,0.55)", margin: "0 0 10px" }}>
           Energy Portrait
         </p>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 15, fontWeight: 700, color: CREAM, margin: "0 0 6px" }}>{dominantLabel}</p>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 13, color: "rgba(250,247,244,0.75)", margin: "0 0 10px" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 15, fontWeight: 700, color: "var(--aw-off-white)", margin: "0 0 6px" }}>{dominantLabel}</p>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 13, color: "rgba(250,245,243,0.75)", margin: "0 0 10px" }}>
           {masc} masculine · {fem} feminine patterns identified
         </p>
         {topCategories.length > 0 && (
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {topCategories.map(c => (
-              <span key={c} style={{ fontFamily: "DM Sans, sans-serif", fontSize: 11, padding: "3px 10px", borderRadius: 100, background: "rgba(250,247,244,0.12)", color: CREAM }}>{c}</span>
+              <span key={c} style={{ fontFamily: "var(--aw-font-sans)", fontSize: 10, padding: "3px 10px", borderRadius: "var(--aw-radius-pill)", background: "rgba(250,245,243,0.12)", color: "var(--aw-off-white)" }}>{c}</span>
             ))}
           </div>
         )}
       </div>
 
       {/* Three vitals */}
-      <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(250,247,244,0.15)" }}>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,247,244,0.55)", margin: "0 0 14px" }}>
+      <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(250,245,243,0.15)" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,245,243,0.55)", margin: "0 0 14px" }}>
           Three Vitals
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
@@ -248,15 +245,15 @@ function Snapshot({ field, answers, allSections }) {
             { label: "Intuition Trust", val: intuitionScale, max: 10 },
             { label: "Energy Tank", val: tankVal, max: 10 },
           ].map(v => (
-            <div key={v.label} style={{ background: "rgba(250,247,244,0.1)", borderRadius: 10, padding: "14px 14px", textAlign: "center" }}>
-              <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 32, fontWeight: 700, color: v.val ? CREAM : "rgba(250,247,244,0.3)", margin: "0 0 4px", lineHeight: 1 }}>
+            <div key={v.label} style={{ background: "rgba(250,245,243,0.1)", borderRadius: "var(--aw-radius-sm)", padding: "14px", textAlign: "center" }}>
+              <p style={{ fontFamily: "var(--aw-font-display)", fontSize: 32, fontWeight: 400, color: v.val ? "var(--aw-off-white)" : "rgba(250,245,243,0.3)", margin: "0 0 4px", lineHeight: 1 }}>
                 {v.val || "–"}
               </p>
-              <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(250,247,244,0.6)", margin: "0 0 8px" }}>
+              <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 8, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(250,245,243,0.6)", margin: "0 0 8px" }}>
                 {v.label}
               </p>
               {v.val && (
-                <div style={{ height: 3, background: "rgba(250,247,244,0.15)", borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: 3, background: "rgba(250,245,243,0.15)", borderRadius: 2, overflow: "hidden" }}>
                   <div style={{ width: `${(v.val / v.max) * 100}%`, height: "100%", background: vitalColor(v.val), borderRadius: 2 }} />
                 </div>
               )}
@@ -266,15 +263,15 @@ function Snapshot({ field, answers, allSections }) {
       </div>
 
       {/* Foundation */}
-      <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(250,247,244,0.15)" }}>
-        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,247,244,0.55)", margin: "0 0 10px" }}>
+      <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(250,245,243,0.15)" }}>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,245,243,0.55)", margin: "0 0 10px" }}>
           Foundation Score
         </p>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 40, fontWeight: 700, color: CREAM, lineHeight: 1 }}>{structCount}</span>
-          <span style={{ fontFamily: "DM Sans, sans-serif", fontSize: 14, color: "rgba(250,247,244,0.7)" }}>of 7 structures in place</span>
+          <span style={{ fontFamily: "var(--aw-font-display)", fontSize: 40, fontWeight: 400, color: "var(--aw-off-white)", lineHeight: 1 }}>{structCount}</span>
+          <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "rgba(250,245,243,0.7)" }}>of 7 structures in place</span>
         </div>
-        <div style={{ height: 4, background: "rgba(250,247,244,0.15)", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
+        <div style={{ height: 4, background: "rgba(250,245,243,0.15)", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
           <div style={{ width: `${(structCount / 7) * 100}%`, height: "100%", background: foundationColor, borderRadius: 2, transition: "width 0.5s" }} />
         </div>
       </div>
@@ -282,10 +279,10 @@ function Snapshot({ field, answers, allSections }) {
       {/* Starting definition */}
       {startingDef && (
         <div>
-          <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,247,244,0.55)", margin: "0 0 10px" }}>
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(250,245,243,0.55)", margin: "0 0 10px" }}>
             Your Starting Definition
           </p>
-          <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 17, fontStyle: "italic", color: "rgba(250,247,244,0.85)", lineHeight: 1.65, margin: 0 }}>
+          <p style={{ fontFamily: "var(--aw-font-display)", fontSize: 17, fontStyle: "italic", color: "rgba(250,245,243,0.85)", lineHeight: 1.65, margin: 0 }}>
             "{startingDef.length > 300 ? startingDef.slice(0, 300) + "…" : startingDef}"
           </p>
         </div>
