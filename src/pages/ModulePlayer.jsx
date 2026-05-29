@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -68,11 +68,28 @@ export default function ModulePlayer() {
     return (a.created_date || "").localeCompare(b.created_date || "");
   });
 
-  const { data: moduleProgress = [] } = useQuery({
-    queryKey: ["courseProgress", moduleId],
-    queryFn: () => base44.entities.CourseProgress.filter({ moduleId }),
-    enabled: !!moduleId,
+  // Load ALL user progress so existing-record lookups in mutations always
+  // find prior completions, even if they were saved with a different or null
+  // moduleId.  Page IDs are unique across modules so page-level finds are safe.
+  const { data: rawProgress = [] } = useQuery({
+    queryKey: ["courseProgress"],
+    queryFn: () => base44.entities.CourseProgress.filter({}),
   });
+
+  // Deduplicate: keep only the most recently updated record per pageId so
+  // stale duplicates never shadow a completed record.
+  const moduleProgress = useMemo(() => {
+    const best = {};
+    rawProgress.forEach((p) => {
+      const key = p.pageId || `module:${p.moduleId}`;
+      const existing = best[key];
+      if (!existing) { best[key] = p; return; }
+      const pDate = p.updated_date || p.created_date || "";
+      const eDate = existing.updated_date || existing.created_date || "";
+      if (pDate > eDate) best[key] = p;
+    });
+    return Object.values(best);
+  }, [rawProgress]);
 
   const { data: comments = [] } = useQuery({
     queryKey: ["comments", moduleId],
@@ -138,7 +155,7 @@ export default function ModulePlayer() {
 
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
-      const existing = moduleProgress.find((p) => !p.pageId);
+      const existing = moduleProgress.find((p) => !p.pageId && p.moduleId === moduleId);
       if (existing) {
         return base44.entities.CourseProgress.update(existing.id, {
           status,
