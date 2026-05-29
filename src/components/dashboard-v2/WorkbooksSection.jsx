@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { FileText, Download, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 
 // Danielle Venter's expert ID: routes to /NutritionWorkbook instead of /Workbook
 const DANIELLE_EXPERT_ID = "69f48ab57e6d6614129172d8";
@@ -25,71 +25,93 @@ function WorkbookCard({ workbook, expertName, status }) {
   const actionLabel = status === "completed" ? "REVIEW" : status === "in_progress" ? "CONTINUE" : "BEGIN";
   const url = getWorkbookUrl(workbook);
 
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col h-full overflow-hidden">
-      {/* Cover image */}
-      {workbook.cover_image_url ? (
-        <div className="relative w-full h-28 flex-shrink-0 overflow-hidden">
-          <img src={workbook.cover_image_url} alt={workbook.title} className="w-full h-full object-cover" />
-          <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm rounded-full px-2 py-1">
-            <div className={`w-1.5 h-1.5 rounded-full ${cfg.dotColor}`} />
-            <span className="text-[8px] tracking-[0.15em] font-medium uppercase text-white">
-              {cfg.label}
-            </span>
-          </div>
-        </div>
-      ) : null}
+  const hasCover = !!workbook.cover_image_url;
 
-      <div className="p-4 flex flex-col flex-1">
-      {/* Top row (no cover) */}
-      {!workbook.cover_image_url && (
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-10 h-10 bg-[#F5E6E8] rounded-lg flex items-center justify-center flex-shrink-0">
-            <FileText className="w-5 h-5 text-[#5C1A2E]" />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className={`w-2 h-2 rounded-full ${cfg.dotColor}`} />
-            <span className={`text-[9px] tracking-[0.15em] font-medium uppercase ${cfg.textColor}`}>
-              {cfg.label}
-            </span>
-          </div>
-        </div>
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden flex flex-col"
+      style={{
+        aspectRatio: "3/4",
+        background: hasCover ? "transparent" : "linear-gradient(160deg, #5C1433 0%, #3A0B20 100%)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+      }}
+    >
+      {/* Background cover image */}
+      {hasCover && (
+        <img
+          src={workbook.cover_image_url}
+          alt={workbook.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
       )}
 
-      {/* Title */}
-      <h4 className={`text-base text-[#2A1218] mb-1 leading-snug flex-1 ${workbook.cover_image_url ? "" : ""}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-        <em>{workbook.title}</em>
-      </h4>
+      {/* Gradient overlay for readability */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(30,4,16,0.55) 55%, rgba(30,4,16,0.92) 100%)",
+        }}
+      />
 
-      {/* Expert */}
-      <p className="text-[9px] tracking-[0.15em] text-[#6B6168] uppercase mb-3">
-        {expertName}
-      </p>
-
-      {/* Divider */}
-      <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
-        <Link
-          to={url}
-          className="text-[10px] tracking-[0.15em] text-[#5C1A2E] hover:text-[#3D0F1F] font-medium uppercase transition-colors"
+      {/* Status badge — top right */}
+      <div className="relative z-10 flex justify-end p-4">
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
+          style={{ background: "rgba(60,10,30,0.65)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)" }}
         >
-          {actionLabel} →
-        </Link>
-        {workbook.blank_pdf_url ? (
-          <a
-            href={workbook.blank_pdf_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[10px] tracking-[0.15em] text-[#6B6168] hover:text-[#5C1A2E] font-medium uppercase transition-colors"
-          >
-            <Download className="w-3 h-3" />
-            PDF
-          </a>
-        ) : (
-          <span className="text-[10px] tracking-[0.15em] text-[#6B6168] font-medium uppercase opacity-40">
-            PDF
+          <div className={`w-1.5 h-1.5 rounded-full ${cfg.dotColor}`} />
+          <span className="text-[9px] tracking-[0.18em] font-bold uppercase text-white/90">
+            {cfg.label}
           </span>
-        )}
+        </div>
       </div>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Bottom content */}
+      <div className="relative z-10 px-5 pb-5">
+        {/* Title */}
+        <h4
+          className="text-white leading-snug mb-1"
+          style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.25rem", fontStyle: "italic", fontWeight: 700 }}
+        >
+          {workbook.title}
+        </h4>
+
+        {/* Expert */}
+        <p className="text-white/55 mb-4" style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", fontFamily: "Montserrat, sans-serif", fontWeight: 600 }}>
+          {expertName}
+        </p>
+
+        {/* Divider */}
+        <div style={{ height: "1px", background: "rgba(255,255,255,0.15)", marginBottom: "14px" }} />
+
+        {/* Actions row */}
+        <div className="flex items-center justify-between">
+          <Link
+            to={url}
+            className="text-white/90 hover:text-white transition-colors font-bold uppercase"
+            style={{ fontSize: "9px", letterSpacing: "0.22em", fontFamily: "Montserrat, sans-serif" }}
+          >
+            {actionLabel} →
+          </Link>
+          {workbook.blank_pdf_url ? (
+            <a
+              href={workbook.blank_pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/55 hover:text-white/90 transition-colors font-bold uppercase"
+              style={{ fontSize: "9px", letterSpacing: "0.22em", fontFamily: "Montserrat, sans-serif" }}
+            >
+              PDF
+            </a>
+          ) : (
+            <span className="text-white/30 font-bold uppercase" style={{ fontSize: "9px", letterSpacing: "0.22em", fontFamily: "Montserrat, sans-serif" }}>
+              PDF
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
