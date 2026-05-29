@@ -1,5 +1,97 @@
 import React from "react";
 
+import { useState, useEffect, useRef } from "react";
+
+function GridField({ field, value, onChange }) {
+  const cols = field.columns || [];
+  const numRows = field.num_rows || (field.rows ? field.rows.length : 3);
+
+  const initGrid = (val) =>
+    Array.isArray(val) && val.length === numRows
+      ? val.map(row => ({ ...row }))
+      : Array.from({ length: numRows }, () => ({}));
+
+  const [grid, setGrid] = useState(() => initGrid(value));
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  // Sync inbound value only on mount (prevents re-init on every parent re-render)
+  const mounted = useRef(false);
+  useEffect(() => {
+    if (!mounted.current) { mounted.current = true; setGrid(initGrid(value)); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const updateCell = (rowIdx, colKey, val) => {
+    setGrid(prev => {
+      const next = prev.map((row, i) =>
+        i === rowIdx ? { ...row, [colKey]: val } : { ...row }
+      );
+      onChangeRef.current(next);
+      return next;
+    });
+  };
+
+  return (
+    <div>
+      {field.label && (
+        <label style={{
+          display: "block", fontFamily: "var(--aw-font-display)", fontStyle: "italic",
+          fontSize: 20, fontWeight: 400, color: "var(--aw-burg-core)", marginBottom: 12, lineHeight: 1.2,
+        }}>
+          {field.label}
+        </label>
+      )}
+      {field.prompt && (
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)", lineHeight: 1.65, margin: "0 0 14px" }}>
+          {field.prompt}
+        </p>
+      )}
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--aw-font-sans)" }}>
+          <thead>
+            <tr>
+              {cols.map(col => (
+                <th key={col.key || col.id || col} style={{
+                  padding: "10px 12px", background: "var(--aw-rose-pale)",
+                  color: "var(--aw-burg-core)", fontSize: 9, fontWeight: 700,
+                  letterSpacing: "0.18em", textTransform: "uppercase",
+                  textAlign: "left", border: "1px solid var(--aw-border-rose)",
+                }}>
+                  {col.label || col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {grid.map((rowData, ri) => (
+              <tr key={ri}>
+                {cols.map(col => {
+                  const colKey = col.key || col.id || col;
+                  return (
+                    <td key={colKey} style={{ padding: 4, border: "1px solid var(--aw-border-light)", verticalAlign: "top" }}>
+                      <input
+                        type="text"
+                        value={rowData[colKey] || ""}
+                        onChange={e => updateCell(ri, colKey, e.target.value)}
+                        style={{
+                          width: "100%", padding: "8px 10px", border: "none",
+                          background: "var(--aw-white)", fontFamily: "var(--aw-font-sans)",
+                          fontSize: 14, color: "var(--aw-dark-grey)",
+                          outline: "none", boxSizing: "border-box",
+                        }}
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function FemFieldRenderer({ field, value, answers, onChange }) {
   const { type, variant } = field;
 
@@ -460,75 +552,7 @@ export default function FemFieldRenderer({ field, value, answers, onChange }) {
 
   // ── Grid ─────────────────────────────────────────────────────────────────────
   if (type === "grid") {
-    const cols = field.columns || [];
-    const numRows = field.num_rows || (field.rows ? field.rows.length : 3);
-    // value is an array of row-objects: [{colId: cellValue, ...}, ...]
-    const gridVal = Array.isArray(value) ? value : Array.from({ length: numRows }, () => ({}));
-
-    const updateCell = (rowIdx, colId, v) => {
-      const next = gridVal.map((row, i) => i === rowIdx ? { ...row, [colId]: v } : row);
-      onChange(next);
-    };
-
-    return (
-      <div>
-        {field.label && (
-          <label style={{
-            display: "block", fontFamily: "var(--aw-font-display)", fontStyle: "italic",
-            fontSize: 20, fontWeight: 400, color: "var(--aw-burg-core)", marginBottom: 12, lineHeight: 1.2,
-          }}>
-            {field.label}
-          </label>
-        )}
-        {field.prompt && (
-          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)", lineHeight: 1.65, margin: "0 0 14px" }}>
-            {field.prompt}
-          </p>
-        )}
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--aw-font-sans)" }}>
-            <thead>
-              <tr>
-                {cols.map(col => (
-                  <th key={col.id || col} style={{
-                    padding: "10px 12px", background: "var(--aw-rose-pale)",
-                    color: "var(--aw-burg-core)", fontSize: 9, fontWeight: 700,
-                    letterSpacing: "0.18em", textTransform: "uppercase",
-                    textAlign: "left", border: "1px solid var(--aw-border-rose)",
-                  }}>
-                    {col.label || col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {gridVal.map((rowData, ri) => (
-                <tr key={ri}>
-                  {cols.map(col => {
-                    const colId = col.id || col;
-                    return (
-                      <td key={colId} style={{ padding: 4, border: "1px solid var(--aw-border-light)", verticalAlign: "top" }}>
-                        <input
-                          type="text"
-                          value={rowData[colId] || ""}
-                          onChange={e => updateCell(ri, colId, e.target.value)}
-                          style={{
-                            width: "100%", padding: "8px 10px", border: "none",
-                            background: "var(--aw-white)", fontFamily: "var(--aw-font-sans)",
-                            fontSize: 14, color: "var(--aw-dark-grey)",
-                            outline: "none", boxSizing: "border-box",
-                          }}
-                        />
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
+    return <GridField field={field} value={value} onChange={onChange} />;
   }
 
   return null;
