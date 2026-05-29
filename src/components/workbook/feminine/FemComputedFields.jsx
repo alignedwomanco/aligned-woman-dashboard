@@ -114,14 +114,18 @@ function EnergyPortrait({ field, answers, allSections }) {
   );
 }
 
-// ── B. Foundation Score ────────────────────────────────────────────────────────
-function FoundationScore({ field, answers }) {
-  const selected = Array.isArray(answers.s07_structures) ? answers.s07_structures : [];
-  const count = selected.length;
-  const total = 7;
-  const pct = Math.round((count / total) * 100);
+// ── B. Foundation Score (3-state) ─────────────────────────────────────────────
+function FoundationScore({ field, answers, allSections }) {
+  // s07_structures is now an object: { itemId: 0 | 0.5 | 1 }
+  const ratingsRaw = answers.s07_structures;
+  const ratings = (typeof ratingsRaw === "object" && !Array.isArray(ratingsRaw) && ratingsRaw !== null) ? ratingsRaw : {};
 
-  const tier = count >= 5 ? "green" : count >= 3 ? "amber" : "red";
+  // Sum of all values
+  const score = Object.values(ratings).reduce((sum, v) => sum + (typeof v === "number" ? v : 0), 0);
+  const total = 7;
+  const pct = Math.min(100, Math.round((score / total) * 100));
+
+  const tier = score >= 5 ? "green" : score >= 3 ? "amber" : "red";
   const tierColors = { green: { bg: "#f0fdf4", text: "#16a34a", bar: "#16a34a" }, amber: { bg: "#fffbeb", text: "#d97706", bar: "#d97706" }, red: { bg: "#fef2f2", text: "#dc2626", bar: "#dc2626" } };
   const c = tierColors[tier];
 
@@ -131,23 +135,58 @@ function FoundationScore({ field, answers }) {
     red: "You are building on sand. Without these structures, your business is entirely dependent on your personal effort. That is not sustainable.",
   };
 
+  const displayScore = score === Math.round(score) ? score : score.toFixed(1);
+
+  // ── Pattern Connection cross-reference ──
+  const mascIds = Array.isArray(answers.s02_wounded_masc) ? answers.s02_wounded_masc : [];
+  const femIds = Array.isArray(answers.s02_wounded_fem) ? answers.s02_wounded_fem : [];
+  const crossMessages = [];
+
+  const hasMoneyWound = femIds.some(id => ["money_shame", "avoidance"].includes(id));
+  const missingFinance = ratings.financial_tracking === 0 || ratings.pricing_clear === 0 ||
+    ratings.financial_tracking === undefined || ratings.pricing_clear === undefined;
+  if (hasMoneyWound && missingFinance) {
+    crossMessages.push("You identified money-related wound patterns in Part Two. Your missing financial foundations may be connected to that same pattern.");
+  }
+
+  const hasControlWound = mascIds.some(id => ["cant_delegate"].includes(id));
+  const missingTeam = ratings.team_support === 0 || ratings.team_support === undefined;
+  if (hasControlWound && missingTeam) {
+    crossMessages.push("You identified control patterns in Part Two. Your difficulty building team support may be connected.");
+  }
+
   return (
-    <div style={{ background: c.bg, borderRadius: "var(--aw-radius-md)", padding: "22px", border: `1px solid ${c.text}22` }}>
-      {field.label && (
-        <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-rose-core)", margin: "0 0 12px" }}>
-          {field.label}
+    <div>
+      <div style={{ background: c.bg, borderRadius: "var(--aw-radius-md)", padding: "22px", border: `1px solid ${c.text}22` }}>
+        {field.label && (
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-rose-core)", margin: "0 0 12px" }}>
+            {field.label}
+          </p>
+        )}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
+          <span style={{ fontFamily: "var(--aw-font-display)", fontSize: 48, fontWeight: 400, color: c.text, lineHeight: 1 }}>{displayScore}</span>
+          <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 15, color: "var(--aw-dark-grey)" }}>of {total}</span>
+        </div>
+        <div style={{ height: 6, background: `${c.text}22`, borderRadius: 100, overflow: "hidden", marginBottom: 14 }}>
+          <div style={{ width: `${pct}%`, height: "100%", background: c.bar, borderRadius: 100, transition: "width 0.5s ease" }} />
+        </div>
+        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.7, margin: 0 }}>
+          {feedbackMap[tier]}
         </p>
+      </div>
+
+      {crossMessages.length > 0 && (
+        <div style={{ marginTop: 16, padding: "18px 20px", background: "var(--aw-rose-wash)", border: "1px solid var(--aw-border-rose)", borderRadius: "var(--aw-radius-md)" }}>
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--aw-burg-core)", margin: "0 0 10px" }}>
+            Pattern Connection
+          </p>
+          {crossMessages.map((msg, i) => (
+            <p key={i} style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.7, margin: i > 0 ? "10px 0 0" : 0 }}>
+              {msg}
+            </p>
+          ))}
+        </div>
       )}
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-        <span style={{ fontFamily: "var(--aw-font-display)", fontSize: 48, fontWeight: 400, color: c.text, lineHeight: 1 }}>{count}</span>
-        <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 15, color: "var(--aw-dark-grey)" }}>of {total} in place</span>
-      </div>
-      <div style={{ height: 6, background: `${c.text}22`, borderRadius: 100, overflow: "hidden", marginBottom: 14 }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: c.bar, borderRadius: 100, transition: "width 0.5s ease" }} />
-      </div>
-      <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.7, margin: 0 }}>
-        {feedbackMap[tier]}
-      </p>
     </div>
   );
 }
@@ -192,7 +231,8 @@ function Snapshot({ field, answers, allSections }) {
   const energyScale = answers.s04_energy_scale;
   const intuitionScale = answers.s05_intuition_scale;
   const tankVal = answers.s06_tank;
-  const structCount = (answers.s07_structures || []).length;
+  const structRatings = (typeof answers.s07_structures === "object" && !Array.isArray(answers.s07_structures) && answers.s07_structures !== null) ? answers.s07_structures : {};
+  const structCount = Object.values(structRatings).reduce((sum, v) => sum + (typeof v === "number" ? v : 0), 0);
   const startingDef = answers.s01_feminine_leadership_def;
 
   const dominantLabel = dominant === "masculine" ? "Wounded Masculine Dominant" : dominant === "feminine" ? "Wounded Feminine Dominant" : "Mixed Energy Pattern";
@@ -205,6 +245,7 @@ function Snapshot({ field, answers, allSections }) {
   };
 
   const foundationColor = structCount >= 5 ? "#16a34a" : structCount >= 3 ? "#d97706" : "#dc2626";
+  const displayStructCount = structCount === Math.round(structCount) ? structCount : structCount.toFixed(1);
 
   return (
     <div style={{ background: "var(--aw-burg-core)", borderRadius: "var(--aw-radius-md)", padding: "36px 30px" }}>
@@ -268,8 +309,8 @@ function Snapshot({ field, answers, allSections }) {
           Foundation Score
         </p>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span style={{ fontFamily: "var(--aw-font-display)", fontSize: 40, fontWeight: 400, color: "var(--aw-off-white)", lineHeight: 1 }}>{structCount}</span>
-          <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "rgba(250,245,243,0.7)" }}>of 7 structures in place</span>
+          <span style={{ fontFamily: "var(--aw-font-display)", fontSize: 40, fontWeight: 400, color: "var(--aw-off-white)", lineHeight: 1 }}>{displayStructCount}</span>
+          <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "rgba(250,245,243,0.7)" }}>of 7 structures</span>
         </div>
         <div style={{ height: 4, background: "rgba(250,245,243,0.15)", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
           <div style={{ width: `${(structCount / 7) * 100}%`, height: "100%", background: foundationColor, borderRadius: 2, transition: "width 0.5s" }} />

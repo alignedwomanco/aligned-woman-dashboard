@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function FemFieldRenderer({ field, value, onChange }) {
+export default function FemFieldRenderer({ field, value, answers, onChange }) {
   const { type, variant } = field;
 
   // ── Content Blocks ──────────────────────────────────────────────────────────
@@ -197,8 +197,6 @@ export default function FemFieldRenderer({ field, value, onChange }) {
       if (selected.includes(id)) onChange(selected.filter(x => x !== id));
       else onChange([...selected, id]);
     };
-    const sevBg = { high: "#fef2f2", medium: "#fffbeb", low: "#f0fdf4" };
-    const sevText = { high: "#dc2626", medium: "#d97706", low: "#16a34a" };
 
     return (
       <div>
@@ -241,10 +239,10 @@ export default function FemFieldRenderer({ field, value, onChange }) {
                   {isChecked && <span style={{ color: "#fff", fontSize: 11, lineHeight: 1 }}>✓</span>}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.6, margin: "0 0 6px" }}>
+                  <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.6, margin: item.category ? "0 0 6px" : 0 }}>
                     {item.text}
                   </p>
-                  <div style={{ display: "flex", gap: 6 }}>
+                  {item.category && (
                     <span style={{
                       fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700,
                       letterSpacing: "0.18em", textTransform: "uppercase",
@@ -253,18 +251,7 @@ export default function FemFieldRenderer({ field, value, onChange }) {
                     }}>
                       {item.category}
                     </span>
-                    {item.severity && (
-                      <span style={{
-                        fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700,
-                        letterSpacing: "0.18em", textTransform: "uppercase",
-                        padding: "2px 8px", borderRadius: "var(--aw-radius-pill)",
-                        background: sevBg[item.severity] || "#f9f9f9",
-                        color: sevText[item.severity] || "#666",
-                      }}>
-                        {item.severity}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
               </button>
             );
@@ -279,13 +266,208 @@ export default function FemFieldRenderer({ field, value, onChange }) {
     );
   }
 
+  // ── Foundation Rating (3-state) ──────────────────────────────────────────────
+  if (type === "foundation_rating") {
+    // value: object keyed by item.id → 0 | 0.5 | 1
+    const ratings = (typeof value === "object" && !Array.isArray(value) && value !== null) ? value : {};
+    const options = [
+      { label: "Not in place", val: 0, color: "#dc2626", bg: "#fef2f2" },
+      { label: "Started but inconsistent", val: 0.5, color: "#d97706", bg: "#fffbeb" },
+      { label: "Solid and working", val: 1, color: "#16a34a", bg: "#f0fdf4" },
+    ];
+
+    return (
+      <div>
+        {field.label && (
+          <label style={{
+            display: "block", fontFamily: "var(--aw-font-display)", fontStyle: "italic",
+            fontSize: 20, fontWeight: 400, color: "var(--aw-burg-core)", marginBottom: 6, lineHeight: 1.2,
+          }}>
+            {field.label}
+          </label>
+        )}
+        {field.prompt && (
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)", lineHeight: 1.65, margin: "0 0 14px" }}>
+            {field.prompt}
+          </p>
+        )}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {field.items?.map(item => {
+            const current = ratings[item.id];
+            return (
+              <div key={item.id} style={{
+                border: "1px solid var(--aw-border-rose)", borderRadius: "var(--aw-radius-md)",
+                padding: "16px 18px", background: "var(--aw-white)",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
+                  <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.6, margin: 0, flex: 1 }}>
+                    {item.text}
+                  </p>
+                  {item.category && (
+                    <span style={{
+                      fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700,
+                      letterSpacing: "0.18em", textTransform: "uppercase",
+                      padding: "2px 8px", borderRadius: "var(--aw-radius-pill)",
+                      background: "var(--aw-rose-pale)", color: "var(--aw-burg-core)",
+                      flexShrink: 0,
+                    }}>
+                      {item.category}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {options.map(opt => {
+                    const selected = current === opt.val;
+                    return (
+                      <button
+                        key={opt.val}
+                        onClick={() => onChange({ ...ratings, [item.id]: opt.val })}
+                        style={{
+                          padding: "6px 14px", borderRadius: "var(--aw-radius-pill)",
+                          border: selected ? `1.5px solid ${opt.color}` : "1px solid var(--aw-border-rose)",
+                          background: selected ? opt.bg : "transparent",
+                          color: selected ? opt.color : "var(--aw-mid-grey)",
+                          fontFamily: "var(--aw-font-sans)", fontWeight: selected ? 700 : 400,
+                          fontSize: 12, cursor: "pointer", transition: "all 150ms ease",
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Foundation Priority Picker ────────────────────────────────────────────────
+  if (type === "foundation_priority") {
+    // value: { priority: itemId, action: string }
+    const pickerVal = (typeof value === "object" && value !== null && !Array.isArray(value)) ? value : {};
+    const ratingsField = field.ratings_source_field || "s07_structures";
+    const ratingsRaw = answers ? answers[ratingsField] : null;
+    const ratings = (typeof ratingsRaw === "object" && !Array.isArray(ratingsRaw) && ratingsRaw !== null) ? ratingsRaw : {};
+
+    // Show items rated 0 (not in place) or 0.5 (started but inconsistent)
+    const incompleteItems = (field.items || []).filter(item =>
+      ratings[item.id] === 0 || ratings[item.id] === 0.5 || ratings[item.id] === undefined
+    );
+
+    const labelFor = (id) => ratings[id] === 0.5 ? "Started but inconsistent" : "Not in place";
+
+    if (incompleteItems.length === 0) {
+      return (
+        <div style={{ padding: "20px", border: "1px solid var(--aw-border-rose)", borderRadius: "var(--aw-radius-md)", background: "var(--aw-rose-wash)", textAlign: "center" }}>
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-rose-deep)", margin: 0 }}>
+            All foundations are solid — great work.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        {field.label && (
+          <label style={{
+            display: "block", fontFamily: "var(--aw-font-display)", fontStyle: "italic",
+            fontSize: 20, fontWeight: 400, color: "var(--aw-burg-core)", marginBottom: 6, lineHeight: 1.2,
+          }}>
+            {field.label}
+          </label>
+        )}
+        {field.prompt && (
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)", lineHeight: 1.65, margin: "0 0 14px" }}>
+            {field.prompt || "Select the ONE foundation you will focus on first."}
+          </p>
+        )}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+          {incompleteItems.map(item => {
+            const selected = pickerVal.priority === item.id;
+            const isStarted = ratings[item.id] === 0.5;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onChange({ ...pickerVal, priority: item.id })}
+                style={{
+                  textAlign: "left", padding: "14px 16px",
+                  borderRadius: "var(--aw-radius-md)",
+                  border: selected ? "1.5px solid var(--aw-burg-core)" : "1px solid var(--aw-border-rose)",
+                  background: selected ? "var(--aw-rose-wash)" : "var(--aw-white)",
+                  cursor: "pointer", transition: "all 150ms ease",
+                  display: "flex", alignItems: "center", gap: 12,
+                }}
+              >
+                <div style={{
+                  width: 18, height: 18, borderRadius: "50%",
+                  border: selected ? "2px solid var(--aw-burg-core)" : "1px solid var(--aw-border-rose)",
+                  background: selected ? "var(--aw-burg-core)" : "transparent",
+                  flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {selected && <span style={{ color: "#fff", fontSize: 9, lineHeight: 1 }}>●</span>}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-dark-grey)", lineHeight: 1.5, margin: "0 0 4px" }}>
+                    {item.text}
+                  </p>
+                  <span style={{
+                    fontFamily: "var(--aw-font-sans)", fontSize: 9, fontWeight: 700,
+                    letterSpacing: "0.14em", textTransform: "uppercase",
+                    color: isStarted ? "#d97706" : "#dc2626",
+                  }}>
+                    {labelFor(item.id)}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {pickerVal.priority && (
+          <div>
+            <label style={{
+              display: "block", fontFamily: "var(--aw-font-display)", fontStyle: "italic",
+              fontSize: 18, fontWeight: 400, color: "var(--aw-burg-core)", marginBottom: 8, lineHeight: 1.3,
+            }}>
+              What is the specific first step you will take, and what has stopped you from doing it until now?
+            </label>
+            <textarea
+              value={pickerVal.action || ""}
+              onChange={e => onChange({ ...pickerVal, action: e.target.value })}
+              placeholder="Be specific..."
+              rows={4}
+              style={{
+                width: "100%", padding: "14px 16px",
+                borderRadius: "var(--aw-radius-md)",
+                border: "1px solid var(--aw-border-rose)",
+                background: "var(--aw-white)",
+                fontFamily: "var(--aw-font-sans)", fontSize: 15,
+                color: "var(--aw-dark-grey)", lineHeight: 1.65,
+                resize: "vertical", outline: "none", boxSizing: "border-box",
+              }}
+              onFocus={e => e.target.style.borderColor = "var(--aw-burg-core)"}
+              onBlur={e => e.target.style.borderColor = "var(--aw-border-rose)"}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ── Grid ─────────────────────────────────────────────────────────────────────
   if (type === "grid") {
     const cols = field.columns || [];
-    const rows = field.rows || Array.from({ length: field.num_rows || 3 }, (_, i) => `row_${i}`);
-    const gridVal = value || {};
-    const updateCell = (rowId, colId, v) => {
-      onChange({ ...gridVal, [`${rowId}_${colId}`]: v });
+    const numRows = field.num_rows || (field.rows ? field.rows.length : 3);
+    // value is an array of row-objects: [{colId: cellValue, ...}, ...]
+    const gridVal = Array.isArray(value) ? value : Array.from({ length: numRows }, () => ({}));
+
+    const updateCell = (rowIdx, colId, v) => {
+      const next = gridVal.map((row, i) => i === rowIdx ? { ...row, [colId]: v } : row);
+      onChange(next);
     };
 
     return (
@@ -320,32 +502,28 @@ export default function FemFieldRenderer({ field, value, onChange }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, ri) => {
-                const rowId = row.id || `row_${ri}`;
-                return (
-                  <tr key={rowId}>
-                    {cols.map(col => {
-                      const colId = col.id || col;
-                      const cellKey = `${rowId}_${colId}`;
-                      return (
-                        <td key={colId} style={{ padding: 4, border: "1px solid var(--aw-border-light)", verticalAlign: "top" }}>
-                          <input
-                            type="text"
-                            value={gridVal[cellKey] || ""}
-                            onChange={e => updateCell(rowId, colId, e.target.value)}
-                            style={{
-                              width: "100%", padding: "8px 10px", border: "none",
-                              background: "var(--aw-white)", fontFamily: "var(--aw-font-sans)",
-                              fontSize: 14, color: "var(--aw-dark-grey)",
-                              outline: "none", boxSizing: "border-box",
-                            }}
-                          />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+              {gridVal.map((rowData, ri) => (
+                <tr key={ri}>
+                  {cols.map(col => {
+                    const colId = col.id || col;
+                    return (
+                      <td key={colId} style={{ padding: 4, border: "1px solid var(--aw-border-light)", verticalAlign: "top" }}>
+                        <input
+                          type="text"
+                          value={rowData[colId] || ""}
+                          onChange={e => updateCell(ri, colId, e.target.value)}
+                          style={{
+                            width: "100%", padding: "8px 10px", border: "none",
+                            background: "var(--aw-white)", fontFamily: "var(--aw-font-sans)",
+                            fontSize: 14, color: "var(--aw-dark-grey)",
+                            outline: "none", boxSizing: "border-box",
+                          }}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

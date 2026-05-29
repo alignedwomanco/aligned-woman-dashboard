@@ -124,7 +124,8 @@ export default function FeminineWorkbook() {
       catCount[i.category] = (catCount[i.category] || 0) + 1;
     });
     const topCats = Object.entries(catCount).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c]) => c);
-    const structCount = (answers.s07_structures || []).length;
+    const structRatings = (typeof answers.s07_structures === "object" && !Array.isArray(answers.s07_structures) && answers.s07_structures !== null) ? answers.s07_structures : {};
+    const structCount = Object.values(structRatings).reduce((sum, v) => sum + (typeof v === "number" ? v : 0), 0);
     const scores = {
       energy_dominant: mascIds.length > femIds.length + 2 ? "masculine" : femIds.length > mascIds.length + 2 ? "feminine" : "mixed",
       energy_masculine_count: mascIds.length,
@@ -341,14 +342,23 @@ function FemSectionContent({ section, answers, onAnswerChange, allSections, isLa
   );
 }
 
+// IDs or attribution text of fields to suppress entirely
+const SUPPRESSED_ATTRIBUTIONS = ["THE ASSIGNMENT"];
+
 function FemField({ field, answers, onAnswerChange, allSections }) {
   const value = answers[field.field_id];
+
+  // FIX 4: suppress assignment callout in Part Nine
+  if (field.type === "content_block" && field.variant === "callout") {
+    const attr = (field.attribution || "").toUpperCase();
+    if (SUPPRESSED_ATTRIBUTIONS.some(s => attr.includes(s))) return null;
+  }
 
   if (field.type === "computed_energy_portrait") {
     return <FemComputedFields.EnergyPortrait field={field} answers={answers} allSections={allSections} />;
   }
   if (field.type === "computed_foundation_score") {
-    return <FemComputedFields.FoundationScore field={field} answers={answers} />;
+    return <FemComputedFields.FoundationScore field={field} answers={answers} allSections={allSections} />;
   }
   if (field.type === "reference_back") {
     return <FemComputedFields.ReferenceBack field={field} answers={answers} />;
@@ -361,6 +371,7 @@ function FemField({ field, answers, onAnswerChange, allSections }) {
     <FemFieldRenderer
       field={field}
       value={value}
+      answers={answers}
       onChange={(val) => onAnswerChange(field.field_id, val)}
     />
   );
