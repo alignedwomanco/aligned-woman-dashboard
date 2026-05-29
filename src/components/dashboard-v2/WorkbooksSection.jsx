@@ -26,22 +26,38 @@ function WorkbookCard({ workbook, expertName, status }) {
   const url = getWorkbookUrl(workbook);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-col h-full">
-      {/* Top row */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 bg-[#F5E6E8] rounded-lg flex items-center justify-center flex-shrink-0">
-          <FileText className="w-5 h-5 text-[#5C1A2E]" />
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col h-full overflow-hidden">
+      {/* Cover image */}
+      {workbook.cover_image_url ? (
+        <div className="relative w-full h-28 flex-shrink-0 overflow-hidden">
+          <img src={workbook.cover_image_url} alt={workbook.title} className="w-full h-full object-cover" />
+          <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm rounded-full px-2 py-1">
+            <div className={`w-1.5 h-1.5 rounded-full ${cfg.dotColor}`} />
+            <span className="text-[8px] tracking-[0.15em] font-medium uppercase text-white">
+              {cfg.label}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className={`w-2 h-2 rounded-full ${cfg.dotColor}`} />
-          <span className={`text-[9px] tracking-[0.15em] font-medium uppercase ${cfg.textColor}`}>
-            {cfg.label}
-          </span>
+      ) : null}
+
+      <div className="p-4 flex flex-col flex-1">
+      {/* Top row (no cover) */}
+      {!workbook.cover_image_url && (
+        <div className="flex items-start justify-between mb-3">
+          <div className="w-10 h-10 bg-[#F5E6E8] rounded-lg flex items-center justify-center flex-shrink-0">
+            <FileText className="w-5 h-5 text-[#5C1A2E]" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-full ${cfg.dotColor}`} />
+            <span className={`text-[9px] tracking-[0.15em] font-medium uppercase ${cfg.textColor}`}>
+              {cfg.label}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Title */}
-      <h4 className="text-base text-[#2A1218] mb-1 leading-snug flex-1" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+      <h4 className={`text-base text-[#2A1218] mb-1 leading-snug flex-1 ${workbook.cover_image_url ? "" : ""}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
         <em>{workbook.title}</em>
       </h4>
 
@@ -73,6 +89,7 @@ function WorkbookCard({ workbook, expertName, status }) {
             PDF
           </span>
         )}
+      </div>
       </div>
     </div>
   );
