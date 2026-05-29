@@ -116,13 +116,19 @@ function EnergyPortrait({ field, answers, allSections }) {
 
 // ── B. Foundation Score (3-state) ─────────────────────────────────────────────
 function FoundationScore({ field, answers, allSections }) {
-  // s07_structures is now an object: { itemId: 0 | 0.5 | 1 }
+  // s07_structures is an object: { itemId: 0 | 0.5 | 1 }
+  // Fallback: if somehow stored as array (old checklist), treat each selected ID as 1
   const ratingsRaw = answers.s07_structures;
-  const ratings = (typeof ratingsRaw === "object" && !Array.isArray(ratingsRaw) && ratingsRaw !== null) ? ratingsRaw : {};
+  let ratings = {};
+  if (Array.isArray(ratingsRaw)) {
+    // Legacy array format — treat each checked item as "solid" (1)
+    ratingsRaw.forEach(id => { ratings[id] = 1; });
+  } else if (typeof ratingsRaw === "object" && ratingsRaw !== null) {
+    ratings = ratingsRaw;
+  }
 
-  // Sum of all values
-  const score = Object.values(ratings).reduce((sum, v) => sum + (typeof v === "number" ? v : 0), 0);
   const total = 7;
+  const score = Object.values(ratings).reduce((sum, v) => sum + (typeof v === "number" ? v : 0), 0);
   const pct = Math.min(100, Math.round((score / total) * 100));
 
   const tier = score >= 5 ? "green" : score >= 3 ? "amber" : "red";

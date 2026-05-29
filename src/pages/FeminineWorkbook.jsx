@@ -8,6 +8,7 @@ import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
 import FemFieldRenderer from "@/components/workbook/feminine/FemFieldRenderer";
 import FemComputedFields from "@/components/workbook/feminine/FemComputedFields";
+import FoundationRatingField from "@/components/workbook/feminine/FoundationRatingField";
 
 const WORKBOOK_ID = "6a1958f44abcf0360979ef18";
 
@@ -359,6 +360,17 @@ function FemField({ field, answers, onAnswerChange, allSections }) {
   }
   if (field.type === "computed_foundation_score") {
     return <FemComputedFields.FoundationScore field={field} answers={answers} allSections={allSections} />;
+  }
+
+  // Force s07_structures to render as 3-state foundation_rating regardless of schema type
+  if (field.field_id === "s07_structures") {
+    return (
+      <FoundationRatingField
+        field={field}
+        value={value}
+        onChange={(val) => onAnswerChange(field.field_id, val)}
+      />
+    );
   }
   if (field.type === "reference_back") {
     return <FemComputedFields.ReferenceBack field={field} answers={answers} />;
