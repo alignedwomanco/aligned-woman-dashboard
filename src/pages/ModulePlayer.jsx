@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ModulePlayer() {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export default function ModulePlayer() {
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // ── Queries ──────────────────────────────────────────────
 
@@ -398,6 +400,14 @@ export default function ModulePlayer() {
   };
 
   const handleNextAction = () => {
+    // Block navigation until the current lesson is marked complete
+    if (!isCurrentPageComplete) {
+      toast({
+        description: "You must mark this lesson complete to move to the next lesson",
+        duration: 3000,
+      });
+      return;
+    }
     if (nextPage) {
       handleSelectPage(nextPage);
       setMobileTab("about");
@@ -829,6 +839,12 @@ export default function ModulePlayer() {
 
   return (
     <div className="min-h-screen" style={{ background: "#FAF5F3" }}>
+      <style>{`
+        @keyframes mp-pulse-ring {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0; transform: scale(1.08); }
+        }
+      `}</style>
 
       {/* ─── MOBILE STICKY HEADER ─── */}
       <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
@@ -1177,43 +1193,57 @@ export default function ModulePlayer() {
                       onMouseEnter={(e) => (e.currentTarget.style.color = "#4A0E2E")}
                       onMouseLeave={(e) => (e.currentTarget.style.color = "#8A7A76")}
                     >
-                      ← PREVIOUS
+                      ← PREVIOUS LESSON
                     </button>
                   )}
                 </div>
 
                 {/* Mark complete */}
-                <button
-                  onClick={handleTogglePageComplete}
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    borderRadius: "100px",
-                    padding: "14px 24px",
-                    cursor: "pointer",
-                    transition: "all 0.25s",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    ...(isCurrentPageComplete
-                      ? {
-                          color: "#A86460",
-                          background: "transparent",
-                          border: "1.5px solid rgba(196,132,122,0.3)",
-                        }
-                      : {
-                          color: "white",
-                          background: "#4A0E2E",
-                          border: "1.5px solid #4A0E2E",
-                        }),
-                  }}
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  {isCurrentPageComplete ? "MARKED COMPLETE" : "MARK COMPLETE"}
-                </button>
+                <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  {!isCurrentPageComplete && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        inset: "-4px",
+                        borderRadius: "100px",
+                        border: "2px solid #C4847A",
+                        animation: "mp-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
+                  <button
+                    onClick={handleTogglePageComplete}
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                      borderRadius: "100px",
+                      padding: "14px 24px",
+                      cursor: "pointer",
+                      transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      ...(isCurrentPageComplete
+                        ? {
+                            color: "#fff",
+                            background: "#22c55e",
+                            border: "1.5px solid #22c55e",
+                          }
+                        : {
+                            color: "white",
+                            background: "#4A0E2E",
+                            border: "1.5px solid #4A0E2E",
+                          }),
+                    }}
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {isCurrentPageComplete ? "COMPLETED" : "MARK COMPLETE"}
+                  </button>
+                </div>
 
                 {/* Next */}
                 <button
@@ -1223,22 +1253,27 @@ export default function ModulePlayer() {
                     fontSize: "10px",
                     fontWeight: 700,
                     letterSpacing: "0.2em",
-                    color: "#4A0E2E",
+                    color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
                     textTransform: "uppercase",
-                    background: "#C4847A",
+                    background: isCurrentPageComplete ? "#C4847A" : "rgba(196,132,122,0.2)",
                     border: "none",
                     borderRadius: "100px",
                     padding: "14px 28px",
-                    cursor: "pointer",
-                    transition: "all 0.25s",
+                    cursor: isCurrentPageComplete ? "pointer" : "not-allowed",
+                    opacity: isCurrentPageComplete ? 1 : 0.6,
+                    transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#A86460";
-                    e.currentTarget.style.color = "white";
+                    if (isCurrentPageComplete) {
+                      e.currentTarget.style.background = "#A86460";
+                      e.currentTarget.style.color = "white";
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "#C4847A";
-                    e.currentTarget.style.color = "#4A0E2E";
+                    if (isCurrentPageComplete) {
+                      e.currentTarget.style.background = "#C4847A";
+                      e.currentTarget.style.color = "#4A0E2E";
+                    }
                   }}
                 >
                   {nextLabel} →
@@ -1450,44 +1485,57 @@ export default function ModulePlayer() {
           paddingBottom: "max(12px, env(safe-area-inset-bottom))",
         }}
       >
-        <button
-          onClick={handleTogglePageComplete}
-          style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "50%",
-            border: isCurrentPageComplete ? "none" : "2px solid #4A0E2E",
-            background: isCurrentPageComplete ? "#4A0E2E" : "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "all 0.2s",
-            flexShrink: 0,
-          }}
-        >
-          <Check
-            className="w-5 h-5"
-            style={{ color: isCurrentPageComplete ? "white" : "#4A0E2E" }}
-          />
-        </button>
+        <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          {!isCurrentPageComplete && (
+            <span
+              style={{
+                position: "absolute",
+                inset: "-4px",
+                borderRadius: "50%",
+                border: "2px solid #C4847A",
+                animation: "mp-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          <button
+            onClick={handleTogglePageComplete}
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              border: isCurrentPageComplete ? "none" : "2px solid #4A0E2E",
+              background: isCurrentPageComplete ? "#22c55e" : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
+              flexShrink: 0,
+            }}
+          >
+            {isCurrentPageComplete
+              ? <CheckCircle className="w-5 h-5" style={{ color: "white" }} />
+              : <Check className="w-5 h-5" style={{ color: "#4A0E2E" }} />
+            }
+          </button>
+        </div>
         <button
           onClick={handleNextAction}
           style={{
             flex: 1,
-            background: "#C4847A",
+            background: isCurrentPageComplete ? "#C4847A" : "rgba(196,132,122,0.2)",
             border: "none",
             borderRadius: "100px",
             padding: "10px 16px",
-            cursor: "pointer",
-            transition: "background 0.2s",
+            cursor: isCurrentPageComplete ? "pointer" : "not-allowed",
+            opacity: isCurrentPageComplete ? 1 : 0.6,
+            transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             minHeight: "48px",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#A86460")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#C4847A")}
         >
           <div style={{ textAlign: "left" }}>
             <div
@@ -1496,7 +1544,7 @@ export default function ModulePlayer() {
                 fontSize: "9px",
                 fontWeight: 700,
                 letterSpacing: "0.2em",
-                color: "#4A0E2E",
+                color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
                 textTransform: "uppercase",
                 marginBottom: "2px",
               }}
@@ -1509,14 +1557,14 @@ export default function ModulePlayer() {
                 fontFamily: "'Montserrat', sans-serif",
                 fontSize: "12px",
                 fontWeight: 600,
-                color: "#4A0E2E",
+                color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
                 maxWidth: "200px",
               }}
             >
               {nextMobileBottomLine}
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "#4A0E2E" }} />
+          <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76" }} />
         </button>
       </div>
     </div>
