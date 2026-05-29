@@ -98,6 +98,7 @@ function WorkbookPicker() {
 }
 
 const NUTRITION_WORKBOOK_ID = "6a104ae93e4fc7402ba59f6e";
+const FEMININE_WORKBOOK_ID = "6a1958f44abcf0360979ef18";
 
 export default function WorkbookViewer() {
   const { search } = useLocation();
@@ -105,6 +106,11 @@ export default function WorkbookViewer() {
 
   if (workbookId === NUTRITION_WORKBOOK_ID) {
     window.location.href = "/NutritionWorkbook?id=" + workbookId;
+    return null;
+  }
+
+  if (workbookId === FEMININE_WORKBOOK_ID) {
+    window.location.href = "/FeminineWorkbook";
     return null;
   }
 

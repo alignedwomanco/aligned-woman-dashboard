@@ -25,6 +25,7 @@ import { PaymentProvider } from './context/PaymentContext';
 import Checkout from './pages/Checkout';
 import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
+import FeminineWorkbook from './pages/FeminineWorkbook';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -94,6 +95,7 @@ const AuthenticatedApp = () => {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/expert-dashboard" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
       <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
+      <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
