@@ -31,7 +31,7 @@ export default function FeminineWorkbook() {
   useEffect(() => {
     base44.auth.me().then(u => setUser(u)).catch(() => {});
     Promise.all([
-      base44.entities.Workbook.filter({ id: WORKBOOK_ID }).then(r => r[0] || null),
+      base44.entities.Workbook.filter({ id: WORKBOOK_ID }, null, 1).then(r => r[0] || null),
       base44.entities.WorkbookResponse.filter({ workbook_id: WORKBOOK_ID }, "-created_date", 1),
     ]).then(([wb, responses]) => {
       setWorkbook(wb);
@@ -362,8 +362,8 @@ function FemField({ field, answers, onAnswerChange, allSections }) {
     return <FemComputedFields.FoundationScore field={field} answers={answers} allSections={allSections} />;
   }
 
-  // Force s07_structures to render as 3-state foundation_rating regardless of schema type
-  if (field.field_id === "s07_structures") {
+  // Render foundation_rating type (3-state) — only if field type explicitly says so
+  if (field.type === "foundation_rating") {
     return (
       <FoundationRatingField
         field={field}
