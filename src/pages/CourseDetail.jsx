@@ -683,9 +683,20 @@ export default function CourseDetail() {
   }, [courseId]);
 
   // ── Build progressMap: pageId -> status ──
+  // When duplicate CourseProgress records exist for the same pageId
+  // (caused by records created with different or null moduleId), the
+  // most recently updated record must win so completions are not hidden.
   const progressMap = useMemo(() => {
     const map = {};
-    progress.forEach((p) => { if (p.pageId) map[p.pageId] = p.status; });
+    const dateMap = {};
+    progress.forEach((p) => {
+      if (!p.pageId) return;
+      const pDate = p.updated_date || p.created_date || "";
+      if (!map[p.pageId] || pDate > (dateMap[p.pageId] || "")) {
+        map[p.pageId] = p.status;
+        dateMap[p.pageId] = pDate;
+      }
+    });
     return map;
   }, [progress]);
 
