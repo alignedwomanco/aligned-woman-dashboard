@@ -96,7 +96,7 @@ export default function WorkbookSidebar({
       {/* Workbook meta */}
       <div style={{ padding: "28px 28px 20px" }}>
         <p style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--aw-rose-core)", marginBottom: 8 }}>
-          Workbook
+          Integration Practice
         </p>
         <h2 style={{ fontFamily: "var(--aw-font-display)", fontWeight: 400, fontSize: 26, lineHeight: 1.05, letterSpacing: "-0.01em", color: "var(--aw-burg-core)", margin: 0 }}>
           {renderTitle()}

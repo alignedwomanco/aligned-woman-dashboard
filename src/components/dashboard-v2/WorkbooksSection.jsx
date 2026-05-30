@@ -257,7 +257,7 @@ export default function WorkbooksSection({ phaseIndex }) {
       <div className="flex items-center mb-4">
         <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B1B3D", fontFamily: "Montserrat, sans-serif" }}>
           <span style={{ display: "inline-block", width: "12px", height: "1px", background: "#6B1B3D", marginRight: "8px" }} />
-          YOUR WORKBOOKS · PHASE {String(phaseIndex || 1).padStart(2, "0")}
+          YOUR INTEGRATION PRACTICES · PHASE {String(phaseIndex || 1).padStart(2, "0")}
         </p>
       </div>
 

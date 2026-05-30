@@ -24,7 +24,7 @@ export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
           color: "#C4847A",
           marginBottom: 16,
         }}>
-          Workbook Complete
+          Integration Practice Complete
         </p>
 
         {/* Headline */}
@@ -106,7 +106,7 @@ export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
               e.currentTarget.style.background = "transparent";
             }}
           >
-            Back to Workbook
+            Back to Integration Practice
           </button>
         </div>
       </div>

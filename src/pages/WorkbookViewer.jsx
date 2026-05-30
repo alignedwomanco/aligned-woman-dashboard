@@ -43,11 +43,11 @@ function WorkbookPicker() {
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "#FAF5F3" }}>
         <BookOpen className="w-12 h-12 mb-4" style={{ color: "#C4847A" }} />
         <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "#4A0E2E", marginBottom: 8 }}>
-          No workbooks available
-        </h2>
-        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "#8A7A76", marginBottom: 24 }}>
-          No workbooks are currently available.
-        </p>
+          No integration practices available
+          </h2>
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "#8A7A76", marginBottom: 24 }}>
+            No integration practices are currently available.
+          </p>
         <Link
           to="/Dashboard"
           style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
@@ -62,10 +62,10 @@ function WorkbookPicker() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6" style={{ background: "#FAF5F3" }}>
       <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 32, color: "#4A0E2E", marginBottom: 8, textAlign: "center" }}>
-        Your Workbooks
+        Your Integration Practices
       </h2>
       <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "#8A7A76", marginBottom: 40 }}>
-        Choose a workbook to open.
+        Choose an integration practice to open.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 480 }}>
         {workbooks.map(wb => (
@@ -316,9 +316,9 @@ function WorkbookViewerInner({ workbookId }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
         <BookOpen className="w-12 h-12 mb-4" style={{ color: "#C4847A" }} />
-        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "#4A0E2E", marginBottom: 8 }}>Workbook not found</h2>
+        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "#4A0E2E", marginBottom: 8 }}>Integration Practice not found</h2>
         <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "#8A7A76", marginBottom: 24 }}>
-          This workbook does not exist or has been removed.
+          This integration practice does not exist or has been removed.
         </p>
         <Link
           to="/Dashboard"
@@ -353,9 +353,9 @@ function WorkbookViewerInner({ workbookId }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
         <Lock className="w-12 h-12 mb-4" style={{ color: "var(--aw-rose-core)" }} />
-        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "var(--aw-burg-core)", marginBottom: 8 }}>Workbook Locked</h2>
+        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "var(--aw-burg-core)", marginBottom: 8 }}>Integration Practice Locked</h2>
         <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)" }}>
-          Complete all modules for this course to unlock this workbook.
+          Complete all modules for this course to unlock this integration practice.
         </p>
       </div>
     );
