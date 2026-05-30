@@ -96,7 +96,7 @@ export default function PhaseBoxes({ allPhasesData = [], courseId }) {
               <div className="relative" style={{ zIndex: 2 }}>
                 <div className="flex items-start justify-between mb-2">
                   <span
-                    className="font-display italic leading-none text-white"
+                    className="font-display italic leading-none text-awburg-core"
                     style={{ fontSize: 36 }}
                   >
                     {letter}
@@ -107,7 +107,7 @@ export default function PhaseBoxes({ allPhasesData = [], courseId }) {
                     <Lock className="w-3.5 h-3.5 text-white/50 flex-shrink-0 mt-1" />
                   ) : null}
                 </div>
-                <p className="font-body font-bold text-[9px] tracking-eyebrow text-white uppercase mb-1">
+                <p className="font-body font-bold text-[9px] tracking-eyebrow text-awburg-core uppercase mb-1">
                   {name.toUpperCase()}
                 </p>
                 <p className="font-display italic text-white/90 text-sm leading-snug">
