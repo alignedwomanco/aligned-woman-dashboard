@@ -17,6 +17,7 @@ const STATUS_CONFIG = {
 const STATUS_RANK = { in_progress: 0, not_started: 1, completed: 2 };
 
 const FILTER_DEFS = [
+  { id: "default", label: "Recent" },
   { id: "all", label: "All" },
   { id: "in_progress", label: "In Progress" },
   { id: "completed", label: "Completed" },
@@ -153,7 +154,8 @@ function FilterChip({ filter, active, onSelect }) {
 }
 
 export default function WorkbooksSection({ phaseIndex }) {
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("default");
+  // "default" = snap rail of first 3; "all" = full grid; others = filtered snap rail
 
   // Fetch all published workbooks
   const { data: workbooks = [], isLoading: loadingWb } = useQuery({
@@ -204,6 +206,7 @@ export default function WorkbooksSection({ phaseIndex }) {
 
   // Counts for the chips (live)
   const counts = {
+    default: Math.min(enriched.length, 3),
     all: enriched.length,
     in_progress: enriched.filter(e => e.status === "in_progress").length,
     completed: enriched.filter(e => e.status === "completed").length,
@@ -211,6 +214,13 @@ export default function WorkbooksSection({ phaseIndex }) {
   const filters = FILTER_DEFS.map(f => ({ ...f, count: counts[f.id] }));
 
   // Build the visible, sorted slice for the active filter
+  const queueSorted = [...enriched].sort((a, b) => {
+    const ra = STATUS_RANK[a.status] ?? 9;
+    const rb = STATUS_RANK[b.status] ?? 9;
+    if (ra !== rb) return ra - rb;
+    return (a.wb.order || 0) - (b.wb.order || 0);
+  });
+
   let visible;
   if (activeFilter === "in_progress") {
     visible = enriched.filter(e => e.status === "in_progress");
@@ -220,16 +230,13 @@ export default function WorkbooksSection({ phaseIndex }) {
       .sort((a, b) => {
         const at = a.resp?.completed_at ? new Date(a.resp.completed_at).getTime() : 0;
         const bt = b.resp?.completed_at ? new Date(b.resp.completed_at).getTime() : 0;
-        return bt - at; // most recently completed first
+        return bt - at;
       });
+  } else if (activeFilter === "default") {
+    visible = queueSorted.slice(0, 3);
   } else {
-    // "all": queue order, in_progress then not_started then completed, then by order
-    visible = [...enriched].sort((a, b) => {
-      const ra = STATUS_RANK[a.status] ?? 9;
-      const rb = STATUS_RANK[b.status] ?? 9;
-      if (ra !== rb) return ra - rb;
-      return (a.wb.order || 0) - (b.wb.order || 0);
-    });
+    // "all": full queue
+    visible = queueSorted;
   }
 
 
@@ -269,7 +276,7 @@ export default function WorkbooksSection({ phaseIndex }) {
         ))}
       </div>
 
-      {/* Grid for "all" filter, snap rail for filtered views */}
+      {/* Grid for "all" filter (full grid), snap rail for everything else */}
       {visible.length > 0 ? (
         activeFilter === "all" ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -283,23 +290,23 @@ export default function WorkbooksSection({ phaseIndex }) {
             ))}
           </div>
         ) : (
-        <div
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1"
-          style={{ scrollbarWidth: "thin", WebkitOverflowScrolling: "touch" }}
-        >
-          {visible.map(({ wb, status }) => (
-            <div
-              key={wb.id}
-              className="snap-start shrink-0 w-[78%] sm:w-[calc((100%-2rem)/3)]"
-            >
-              <WorkbookCard
-                workbook={wb}
-                expertName={expertMap[wb.expert_id]?.name || "Expert"}
-                status={status}
-              />
-            </div>
-          ))}
-        </div>
+          <div
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1"
+            style={{ scrollbarWidth: "thin", WebkitOverflowScrolling: "touch" }}
+          >
+            {visible.map(({ wb, status }) => (
+              <div
+                key={wb.id}
+                className="snap-start shrink-0 w-[78%] sm:w-[calc((100%-2rem)/3)]"
+              >
+                <WorkbookCard
+                  workbook={wb}
+                  expertName={expertMap[wb.expert_id]?.name || "Expert"}
+                  status={status}
+                />
+              </div>
+            ))}
+          </div>
         )
       ) : (
         <p style={{ fontSize: "12px", color: "#6B6168", fontFamily: "Montserrat, sans-serif", padding: "8px 0" }}>
