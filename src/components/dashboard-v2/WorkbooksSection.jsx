@@ -96,7 +96,7 @@ function WorkbookCard({ workbook, expertName, status }) {
           >
             {actionLabel} →
           </Link>
-          {workbook.blank_pdf_url ? (
+          {workbook.blank_pdf_url && (
             <a
               href={workbook.blank_pdf_url}
               target="_blank"
@@ -104,12 +104,8 @@ function WorkbookCard({ workbook, expertName, status }) {
               className="text-white/55 hover:text-white/90 transition-colors font-bold uppercase"
               style={{ fontSize: "9px", letterSpacing: "0.22em", fontFamily: "Montserrat, sans-serif" }}
             >
-              PDF
+              DOWNLOAD
             </a>
-          ) : (
-            <span className="text-white/30 font-bold uppercase" style={{ fontSize: "9px", letterSpacing: "0.22em", fontFamily: "Montserrat, sans-serif" }}>
-              PDF
-            </span>
           )}
         </div>
       </div>
