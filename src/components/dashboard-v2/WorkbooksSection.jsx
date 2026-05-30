@@ -232,8 +232,7 @@ export default function WorkbooksSection({ phaseIndex }) {
     });
   }
 
-  // View all carries the active filter so the full library opens on the same slice
-  const viewAllHref = activeFilter === "all" ? "/Workbook" : `/Workbook?filter=${activeFilter}`;
+
 
   if (loadingWb) {
     return (
@@ -247,18 +246,12 @@ export default function WorkbooksSection({ phaseIndex }) {
 
   return (
     <div style={{ background: "white", border: "1px solid #f0f0f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", marginBottom: "24px" }}>
-      {/* Header row: kicker + view all */}
-      <div className="flex items-center justify-between gap-3 mb-4">
+      {/* Header row: kicker */}
+      <div className="flex items-center mb-4">
         <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B1B3D", fontFamily: "Montserrat, sans-serif" }}>
           <span style={{ display: "inline-block", width: "12px", height: "1px", background: "#6B1B3D", marginRight: "8px" }} />
           YOUR WORKBOOKS · PHASE {String(phaseIndex || 1).padStart(2, "0")}
         </p>
-        <Link
-          to={viewAllHref}
-          className="shrink-0 text-[10px] tracking-[0.15em] text-[#6B6168] hover:text-[#5C1A2E] font-medium uppercase transition-colors"
-        >
-          ALL WORKBOOKS →
-        </Link>
       </div>
 
       {/* Filter chips: scrollable on narrow screens */}
@@ -276,8 +269,20 @@ export default function WorkbooksSection({ phaseIndex }) {
         ))}
       </div>
 
-      {/* Short snap rail: one+peek on mobile, three across on >= sm */}
+      {/* Grid for "all" filter, snap rail for filtered views */}
       {visible.length > 0 ? (
+        activeFilter === "all" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {visible.map(({ wb, status }) => (
+              <WorkbookCard
+                key={wb.id}
+                workbook={wb}
+                expertName={expertMap[wb.expert_id]?.name || "Expert"}
+                status={status}
+              />
+            ))}
+          </div>
+        ) : (
         <div
           className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1"
           style={{ scrollbarWidth: "thin", WebkitOverflowScrolling: "touch" }}
@@ -295,6 +300,7 @@ export default function WorkbooksSection({ phaseIndex }) {
             </div>
           ))}
         </div>
+        )
       ) : (
         <p style={{ fontSize: "12px", color: "#6B6168", fontFamily: "Montserrat, sans-serif", padding: "8px 0" }}>
           Nothing here yet.
