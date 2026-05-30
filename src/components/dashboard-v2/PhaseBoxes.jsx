@@ -102,7 +102,7 @@ export default function PhaseBoxes({ allPhasesData = [], courseId }) {
                     {letter}
                   </span>
                   {isComplete && !isLocked ? (
-                    <CheckCircle2 className="w-4 h-4 text-white flex-shrink-0 mt-1" />
+                    <CheckCircle2 className="w-4 h-4 text-awburg-core flex-shrink-0 mt-1" />
                   ) : isLocked ? (
                     <Lock className="w-3.5 h-3.5 text-white/50 flex-shrink-0 mt-1" />
                   ) : null}
