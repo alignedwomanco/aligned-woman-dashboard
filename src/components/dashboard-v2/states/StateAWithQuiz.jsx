@@ -56,23 +56,32 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
       <PhaseIndicator section={currentSection} completedModules={completedModules} totalModules={totalModules} phaseIndex={phaseIndex} totalPhases={totalSections} />
 
       {/* Continue button */}
-      <div className="bg-paper rounded-xl border border-awburg-core/8 p-5 md:p-6">
+      <div className="relative rounded-xl overflow-hidden" style={{ border: "1px solid rgba(196,132,123,0.2)" }}>
+        {/* Background video */}
+        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ zIndex: 0 }}>
+          <source src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4" type="video/mp4" />
+        </video>
+        {/* Colour overlay */}
+        <div className="absolute inset-0" style={{ background: "rgba(196,132,123,0.82)", zIndex: 1 }} />
+        {/* Content */}
+        <div className="relative p-5 md:p-6" style={{ zIndex: 2 }}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 uppercase mb-1">
+            <p className="font-body font-bold text-[10px] tracking-eyebrow text-white/70 uppercase mb-1">
               {continueData?.module ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}` : "YOUR NEXT STEP"}
             </p>
-            <p className="font-display text-awburg-core text-lg leading-snug">
+            <p className="font-display text-white text-lg leading-snug">
               {continueData?.module?.title || "Continue your phase"}
             </p>
             {continueData?.expert?.name && (
-              <p className="font-body text-xs text-awburg-core/60 mt-1">with {continueData.expert.name}</p>
+              <p className="font-body text-xs text-white/70 mt-1">with {continueData.expert.name}</p>
             )}
           </div>
-          <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0 animate-pulse hover:animate-none shadow-[0_0_0_0_rgba(196,132,122,0.5)] hover:shadow-md" style={{ animation: "continuePulse 2.5s ease-in-out infinite" }}>
+          <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0 border border-white/30">
             CONTINUE YOUR PHASE <ArrowRight className="w-4 h-4" />
           </button>
           <style>{`@keyframes continuePulse { 0%,100%{box-shadow:0 0 0 0 rgba(196,132,122,0.45)} 50%{box-shadow:0 0 0 8px rgba(196,132,122,0)} }`}</style>
+        </div>
         </div>
       </div>
 
