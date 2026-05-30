@@ -68,38 +68,57 @@ export default function PhaseBoxes({ allPhasesData = [], courseId }) {
               tabIndex={isClickable ? 0 : -1}
               onKeyDown={(e) => { if (isClickable && e.key === "Enter") handleClick(phaseData); }}
               className={[
-                "bg-paper rounded-xl border p-4 transition-colors",
+                "relative rounded-xl border overflow-hidden p-4 transition-colors",
                 isLocked
                   ? "border-awburg-core/8 opacity-60 cursor-not-allowed"
                   : isCurrent
-                    ? "border-awrose-core/40 cursor-pointer hover:bg-awrose-wash"
-                    : "border-awburg-core/8 cursor-pointer hover:bg-awrose-wash",
+                    ? "border-awrose-core/40 cursor-pointer"
+                    : "border-awburg-core/8 cursor-pointer",
               ].join(" ")}
             >
-              <div className="flex items-start justify-between mb-2">
-                <span
-                  className={`font-display italic leading-none ${isLocked ? "text-awburg-core/30" : isComplete ? "text-awrose-core" : "text-awrose-deep"}`}
-                  style={{ fontSize: 36 }}
-                >
-                  {letter}
-                </span>
-                {isComplete && !isLocked ? (
-                  <CheckCircle2 className="w-4 h-4 text-awrose-core flex-shrink-0 mt-1" />
-                ) : isLocked ? (
-                  <Lock className="w-3.5 h-3.5 text-awburg-core/30 flex-shrink-0 mt-1" />
-                ) : null}
+              {/* Background video */}
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ zIndex: 0 }}
+              >
+                <source src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4" type="video/mp4" />
+              </video>
+              {/* Colour overlay */}
+              <div
+                className="absolute inset-0"
+                style={{ backgroundColor: "#C4847B", opacity: 0.82, zIndex: 1 }}
+              />
+              {/* Content */}
+              <div className="relative" style={{ zIndex: 2 }}>
+                <div className="flex items-start justify-between mb-2">
+                  <span
+                    className="font-display italic leading-none text-white"
+                    style={{ fontSize: 36 }}
+                  >
+                    {letter}
+                  </span>
+                  {isComplete && !isLocked ? (
+                    <CheckCircle2 className="w-4 h-4 text-white flex-shrink-0 mt-1" />
+                  ) : isLocked ? (
+                    <Lock className="w-3.5 h-3.5 text-white/50 flex-shrink-0 mt-1" />
+                  ) : null}
+                </div>
+                <p className="font-body font-bold text-[9px] tracking-eyebrow text-white uppercase mb-1">
+                  {name.toUpperCase()}
+                </p>
+                <p className="font-display italic text-white/90 text-sm leading-snug">
+                  {quote}
+                </p>
+                {isCurrent && (
+                  <span className="inline-block mt-2 bg-awburg-core text-white font-body font-bold text-[8px] tracking-eyebrow uppercase rounded-full px-2 py-0.5">
+                    CURRENT
+                  </span>
+                )}
               </div>
-              <p className="font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase mb-1">
-                {name.toUpperCase()}
-              </p>
-              <p className="font-display italic text-awburg-core/80 text-sm leading-snug">
-                {quote}
-              </p>
-              {isCurrent && (
-                <span className="inline-block mt-2 bg-awrose-core text-paper font-body font-bold text-[8px] tracking-eyebrow uppercase rounded-full px-2 py-0.5">
-                  CURRENT
-                </span>
-              )}
             </div>
           );
         })}
