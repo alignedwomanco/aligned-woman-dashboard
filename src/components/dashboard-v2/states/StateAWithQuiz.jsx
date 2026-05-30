@@ -4,7 +4,6 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { getArchetype } from "@/data/archetypes";
-import PhaseIndicator from "@/components/dashboard-v2/PhaseIndicator";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
 import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 
@@ -52,36 +51,64 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
 
   return (
     <div className="space-y-6">
-      {/* Phase Indicator */}
-      <PhaseIndicator section={currentSection} completedModules={completedModules} totalModules={totalModules} phaseIndex={phaseIndex} totalPhases={totalSections} />
-
-      {/* Continue button */}
-      <div className="relative rounded-xl overflow-hidden" style={{ border: "1px solid rgba(196,132,123,0.2)" }}>
+      {/* Phase Indicator + Continue — merged into one block */}
+      <div className="relative rounded-xl mb-6 shadow-sm overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
         {/* Background video */}
         <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ zIndex: 0 }}>
           <source src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4" type="video/mp4" />
         </video>
-        {/* Colour overlay */}
-        <div className="absolute inset-0" style={{ background: "rgba(196,132,123,0.82)", zIndex: 1 }} />
+        {/* Burgundy overlay */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(74,14,46,0.80) 0%, rgba(44,6,26,0.80) 100%)", zIndex: 1 }} />
         {/* Content */}
         <div className="relative p-5 md:p-6" style={{ zIndex: 2 }}>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <p className="font-body font-bold text-[10px] tracking-eyebrow text-white/70 uppercase mb-1">
-              {continueData?.module ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}` : "YOUR NEXT STEP"}
-            </p>
-            <p className="font-display text-white text-lg leading-snug">
-              {continueData?.module?.title || "Continue your phase"}
-            </p>
-            {continueData?.expert?.name && (
-              <p className="font-body text-xs text-white/70 mt-1">with {continueData.expert.name}</p>
-            )}
+          {/* Top row: phase info */}
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8 mb-5 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+            {/* Large letter */}
+            <div className="flex-shrink-0">
+              <span className="text-7xl md:text-8xl italic text-[#E8B4AE] leading-none" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                {currentSection ? (currentSection.title || currentSection.name || "").replace(/^Phase\s*\d+\s*[-–—]\s*/i, "").trim()[0] || "?" : "?"}
+              </span>
+            </div>
+            {/* Phase name & tagline */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] tracking-[0.2em] text-white/55 font-medium uppercase mb-1">
+                CURRENT PHASE · {String(phaseIndex || 1).padStart(2, "0")} OF {String(totalSections || 0).padStart(2, "0")}
+              </p>
+              <h3 className="text-2xl text-white mb-1" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                {(() => { const n = (currentSection?.title || currentSection?.name || "").replace(/^Phase\s*\d+\s*[-–—]\s*/i, "").trim(); return n === "VisionEmbodiment" ? "Vision & Embodiment" : n; })()}
+              </h3>
+              {currentSection?.description && <p className="text-sm text-white/65 italic">"{currentSection.description}"</p>}
+            </div>
+            {/* Progress */}
+            <div className="flex-shrink-0 md:text-right">
+              <p className="text-[10px] tracking-[0.2em] text-white/55 font-medium uppercase mb-1">MODULES COMPLETE</p>
+              <p className="text-3xl text-white font-light mb-2">
+                {completedModules} <span className="text-white/55 text-lg">/ {totalModules}</span>
+              </p>
+              <div className="w-40 h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(255,255,255,0.15)" }}>
+                <div className="h-full rounded-full transition-all" style={{ width: `${totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0}%`, background: "#E8B4AE" }} />
+              </div>
+              <p className="text-xs text-white/55">{totalModules - completedModules} modules remaining in this phase</p>
+            </div>
           </div>
-          <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0 border border-white/30">
-            CONTINUE YOUR PHASE <ArrowRight className="w-4 h-4" />
-          </button>
-          <style>{`@keyframes continuePulse { 0%,100%{box-shadow:0 0 0 0 rgba(196,132,122,0.45)} 50%{box-shadow:0 0 0 8px rgba(196,132,122,0)} }`}</style>
-        </div>
+
+          {/* Bottom row: continue CTA */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p className="font-body font-bold text-[10px] tracking-eyebrow text-white/70 uppercase mb-1">
+                {continueData?.module ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}` : "YOUR NEXT STEP"}
+              </p>
+              <p className="font-display text-white text-lg leading-snug">
+                {continueData?.module?.title || "Continue your phase"}
+              </p>
+              {continueData?.expert?.name && (
+                <p className="font-body text-xs text-white/70 mt-1">with {continueData.expert.name}</p>
+              )}
+            </div>
+            <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0 border border-white/30">
+              CONTINUE YOUR PHASE <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
