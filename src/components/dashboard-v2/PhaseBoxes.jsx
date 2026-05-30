@@ -50,7 +50,7 @@ export default function PhaseBoxes({ allPhasesData = [], courseId }) {
           Each phase unlocks once the previous phase is complete.
         </p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${allPhasesData.length}, minmax(0, 1fr))` }}>
         {allPhasesData.map((phaseData) => {
           const name = stripPhasePrefix(phaseData.section?.title);
           const letter = name?.[0]?.toUpperCase() || "?";
