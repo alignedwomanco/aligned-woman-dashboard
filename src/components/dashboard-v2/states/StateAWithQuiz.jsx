@@ -105,7 +105,7 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
                 <p className="font-body text-xs text-white/70 mt-1">with {continueData.expert.name}</p>
               )}
             </div>
-            <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0 border border-white/30">
+            <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0 border border-white/30 animate-pulse">
               CONTINUE YOUR PHASE <ArrowRight className="w-4 h-4" />
             </button>
           </div>
