@@ -30,7 +30,7 @@ export default function PhaseIndicator({ section, completedModules, totalModules
       </video>
 
       {/* Burgundy overlay */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(74,14,46,0.70) 0%, rgba(44,6,26,0.70) 100%)", zIndex: 1 }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(74,14,46,0.80) 0%, rgba(44,6,26,0.80) 100%)", zIndex: 1 }} />
 
       {/* Content */}
       <div className="relative p-5 md:p-6" style={{ zIndex: 2 }}>
