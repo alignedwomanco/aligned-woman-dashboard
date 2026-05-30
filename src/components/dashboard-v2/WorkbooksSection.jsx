@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -12,6 +12,15 @@ const STATUS_CONFIG = {
   in_progress: { label: "IN PROGRESS", dotColor: "bg-[#C77B85]", textColor: "text-[#5C1A2E]" },
   not_started: { label: "NOT STARTED", dotColor: "bg-gray-300", textColor: "text-[#6B6168]" },
 };
+
+// Queue order: in_progress first (resume), then not_started, completed last.
+const STATUS_RANK = { in_progress: 0, not_started: 1, completed: 2 };
+
+const FILTER_DEFS = [
+  { id: "all", label: "All" },
+  { id: "in_progress", label: "In Progress" },
+  { id: "completed", label: "Completed" },
+];
 
 function getWorkbookUrl(wb) {
   if (wb.expert_id === DANIELLE_EXPERT_ID) {
@@ -53,7 +62,7 @@ function WorkbookCard({ workbook, expertName, status }) {
         }}
       />
 
-      {/* Status badge — top right */}
+      {/* Status badge top right */}
       <div className="relative z-10 flex justify-end p-4">
         <div
           className="flex items-center gap-2 px-3 py-1.5 rounded-full"
@@ -113,7 +122,39 @@ function WorkbookCard({ workbook, expertName, status }) {
   );
 }
 
+function FilterChip({ filter, active, onSelect }) {
+  const disabled = filter.count === 0;
+  return (
+    <button
+      type="button"
+      onClick={() => { if (!disabled) onSelect(filter.id); }}
+      disabled={disabled}
+      aria-pressed={active}
+      className="shrink-0 rounded-full transition-colors"
+      style={{
+        fontFamily: "Montserrat, sans-serif",
+        fontSize: "10px",
+        fontWeight: 700,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        padding: "9px 14px",
+        minHeight: "38px",
+        border: "1px solid",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.4 : 1,
+        background: active ? "#6B1B3D" : "transparent",
+        color: active ? "#FFFFFF" : "#6B6168",
+        borderColor: active ? "#6B1B3D" : "#f0f0f0",
+      }}
+    >
+      {filter.label} <span style={{ opacity: 0.6, marginLeft: "2px" }}>{filter.count}</span>
+    </button>
+  );
+}
+
 export default function WorkbooksSection({ phaseIndex }) {
+  const [activeFilter, setActiveFilter] = useState("all");
+
   // Fetch all published workbooks
   const { data: workbooks = [], isLoading: loadingWb } = useQuery({
     queryKey: ["dashboardWorkbooks"],
@@ -155,8 +196,44 @@ export default function WorkbooksSection({ phaseIndex }) {
     return "in_progress";
   };
 
-  // Sort by order field
-  const sorted = [...workbooks].sort((a, b) => (a.order || 0) - (b.order || 0));
+  // Base list, ordered by the workbook's own order field (within-band tiebreak)
+  const ordered = [...workbooks].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  // Attach derived status and response once
+  const enriched = ordered.map(wb => ({ wb, status: getStatus(wb), resp: responseMap[wb.id] }));
+
+  // Counts for the chips (live)
+  const counts = {
+    all: enriched.length,
+    in_progress: enriched.filter(e => e.status === "in_progress").length,
+    completed: enriched.filter(e => e.status === "completed").length,
+  };
+  const filters = FILTER_DEFS.map(f => ({ ...f, count: counts[f.id] }));
+
+  // Build the visible, sorted slice for the active filter
+  let visible;
+  if (activeFilter === "in_progress") {
+    visible = enriched.filter(e => e.status === "in_progress");
+  } else if (activeFilter === "completed") {
+    visible = enriched
+      .filter(e => e.status === "completed")
+      .sort((a, b) => {
+        const at = a.resp?.completed_at ? new Date(a.resp.completed_at).getTime() : 0;
+        const bt = b.resp?.completed_at ? new Date(b.resp.completed_at).getTime() : 0;
+        return bt - at; // most recently completed first
+      });
+  } else {
+    // "all": queue order, in_progress then not_started then completed, then by order
+    visible = [...enriched].sort((a, b) => {
+      const ra = STATUS_RANK[a.status] ?? 9;
+      const rb = STATUS_RANK[b.status] ?? 9;
+      if (ra !== rb) return ra - rb;
+      return (a.wb.order || 0) - (b.wb.order || 0);
+    });
+  }
+
+  // View all carries the active filter so the full library opens on the same slice
+  const viewAllHref = activeFilter === "all" ? "/Workbook" : `/Workbook?filter=${activeFilter}`;
 
   if (loadingWb) {
     return (
@@ -166,33 +243,63 @@ export default function WorkbooksSection({ phaseIndex }) {
     );
   }
 
-  if (!sorted.length) return null;
+  if (!enriched.length) return null;
 
   return (
     <div style={{ background: "white", border: "1px solid #f0f0f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", marginBottom: "24px" }}>
-      <div className="flex items-center justify-between mb-4">
+      {/* Header row: kicker + view all */}
+      <div className="flex items-center justify-between gap-3 mb-4">
         <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B1B3D", fontFamily: "Montserrat, sans-serif" }}>
           <span style={{ display: "inline-block", width: "12px", height: "1px", background: "#6B1B3D", marginRight: "8px" }} />
           YOUR WORKBOOKS · PHASE {String(phaseIndex || 1).padStart(2, "0")}
         </p>
         <Link
-          to="/Workbook"
-          className="text-[10px] tracking-[0.15em] text-[#6B6168] hover:text-[#5C1A2E] font-medium uppercase transition-colors"
+          to={viewAllHref}
+          className="shrink-0 text-[10px] tracking-[0.15em] text-[#6B6168] hover:text-[#5C1A2E] font-medium uppercase transition-colors"
         >
           ALL WORKBOOKS →
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {sorted.map(wb => (
-          <WorkbookCard
-            key={wb.id}
-            workbook={wb}
-            expertName={expertMap[wb.expert_id]?.name || "Expert"}
-            status={getStatus(wb)}
+      {/* Filter chips: scrollable on narrow screens */}
+      <div
+        className="flex items-center gap-2 mb-5 overflow-x-auto"
+        style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+      >
+        {filters.map(f => (
+          <FilterChip
+            key={f.id}
+            filter={f}
+            active={activeFilter === f.id}
+            onSelect={setActiveFilter}
           />
         ))}
       </div>
+
+      {/* Short snap rail: one+peek on mobile, three across on >= sm */}
+      {visible.length > 0 ? (
+        <div
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1"
+          style={{ scrollbarWidth: "thin", WebkitOverflowScrolling: "touch" }}
+        >
+          {visible.map(({ wb, status }) => (
+            <div
+              key={wb.id}
+              className="snap-start shrink-0 w-[78%] sm:w-[calc((100%-2rem)/3)]"
+            >
+              <WorkbookCard
+                workbook={wb}
+                expertName={expertMap[wb.expert_id]?.name || "Expert"}
+                status={status}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p style={{ fontSize: "12px", color: "#6B6168", fontFamily: "Montserrat, sans-serif", padding: "8px 0" }}>
+          Nothing here yet.
+        </p>
+      )}
     </div>
   );
 }
