@@ -572,7 +572,14 @@ export default function StartingPointProfile() {
         <div>
           <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: mobile ? 8 : 10 }}>At your worst</div>
           <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300, filter: "blur(6px)", userSelect: "none" }}>{atWorst}</p>
-
+          <button
+            onClick={handleSeeResult}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: mobile ? 14 : 16, padding: mobile ? "12px 20px" : "13px 22px", borderRadius: 100, background: "#FFFFFF", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
+          >
+            <span style={{ fontSize: 12 }}>&#x1F512;</span> Read the full detail
+          </button>
         </div>
       </div>
     );
