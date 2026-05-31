@@ -631,48 +631,7 @@ function YouAreNotFailing() {
 }
 
 
-// ═══════════════════════════════════════════════
-// SECTION 04: DEVICE SHOWCASE
-// ═══════════════════════════════════════════════
 
-function DeviceShowcase() {
-  return (
-    <section className="py-14 md:py-24 px-6 md:px-8" style={{ background: GRAD.editorial }}>
-      <div className="max-w-[1100px] mx-auto text-center">
-        <SectionReveal>
-          <Eyebrow dark>INSIDE THE BLUEPRINT</Eyebrow>
-          <h2 className="mb-10">
-            <span
-              className="text-[clamp(28px,4vw,44px)] font-extrabold uppercase text-white block"
-              style={{ fontFamily: sans }}
-            >
-              Your Blueprint. Any device.{" "}
-            </span>
-            <span
-              className="text-[clamp(32px,5vw,52px)]"
-              style={{ fontFamily: serif, fontStyle: "italic", color: C.roseCore }}
-            >
-              Your pace.
-            </span>
-          </h2>
-        </SectionReveal>
-
-        <SectionReveal>
-          <div
-            className="relative max-w-[1000px] mx-auto rounded-lg overflow-hidden"
-            style={{ aspectRatio: "16/9", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-white/40 text-sm font-medium uppercase tracking-widest" style={{ fontFamily: sans }}>
-                Device Showcase Mockup
-              </p>
-            </div>
-          </div>
-        </SectionReveal>
-      </div>
-    </section>
-  );
-}
 
 
 // ═══════════════════════════════════════════════
@@ -1884,7 +1843,6 @@ export default function AWBlueprint() {
       <Hero />
       <AsSeenIn />
       <YouAreNotFailing />
-      <DeviceShowcase />
       <VideoSection />
       <WhyExists />
       <Faculty />
