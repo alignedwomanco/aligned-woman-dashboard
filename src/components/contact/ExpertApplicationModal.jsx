@@ -47,7 +47,18 @@ export default function ExpertApplicationModal({ onClose }) {
         status: "new",
       });
 
-      // TODO: Call backend function to send email once Gmail connector is set up
+      // Send automated email reply
+      try {
+        await base44.functions.invoke("sendContactFormEmail", {
+          submissionId: "",
+          recipientEmail: formData.email,
+          submissionType: "apply_expert",
+          firstName: formData.name,
+        });
+      } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+        // Don't fail the submission if email fails
+      }
       setSubmitted(true);
     } catch (error) {
       console.error("Failed to submit application:", error);

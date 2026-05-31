@@ -23,6 +23,7 @@ const publicPages = [
 { name: "Experts", label: "Experts" },
 { name: "Apply", label: "Join" },
 { name: "Contact", label: "Contact" },
+{ name: "ContactForm", label: "Contact Form" },
 { name: "about-us", label: "About Us", href: "/about-us" },
 { name: "blueprint", label: "Blueprint", href: "/blueprint" },
 { name: "CheckoutComplete", label: "Checkout" }];
@@ -50,7 +51,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete" || currentPageName === "StartingPointProfile";
+  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete" || currentPageName === "StartingPointProfile" || currentPageName === "ContactForm";
 
   // Dashboard has its own layout - render children directly
   const isDashboardPage = currentPageName === "Dashboard";
