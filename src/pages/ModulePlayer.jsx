@@ -397,8 +397,7 @@ export default function ModulePlayer() {
       .find((m) => modulesWithPages.has(m.id)) || null;
 
   const courseWorkbook =
-    workbooks.find((w) => w.expert_id === module?.expertId) ||
-    (workbooks.length > 0 ? workbooks[0] : null);
+    workbooks.find((w) => w.expert_id === module?.expertId) || null;
 
   const moduleSection = sortedSections.find((s) => s.id === module?.sectionId);
   const pillarLabel = moduleSection?.phase_name || moduleSection?.title?.split(" - ")[1] || "";
