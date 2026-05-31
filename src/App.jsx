@@ -26,6 +26,7 @@ import Checkout from './pages/Checkout';
 import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
 import FeminineWorkbook from './pages/FeminineWorkbook';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -96,6 +97,7 @@ const AuthenticatedApp = () => {
       <Route path="/expert-dashboard" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
       <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
       <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
+      <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="TermsAndConditions"><TermsAndConditions /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

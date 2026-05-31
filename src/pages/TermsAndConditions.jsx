@@ -1,150 +1,373 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const sections = [
+const SECTIONS = [
   {
-    title: "1. Introduction",
-    content: `Welcome to The Aligned Woman Blueprint™ ("the Programme"). These Terms and Conditions govern your purchase of, and participation in, the Programme offered by The Aligned Woman (Pty) Ltd ("we", "us", "our").
-
-By purchasing or enrolling in the Programme, you agree to be bound by these Terms and Conditions. Please read them carefully.`,
+    num: "1",
+    title: "Company Information",
+    content: (
+      <div className="space-y-2">
+        <p>ALIGNED WOMAN LTD</p>
+        <p>Registered in England and Wales</p>
+        <p>Incorporated under the Companies Act 2006</p>
+        <p>For the purposes of data protection law, ALIGNED WOMAN LTD is the Data Controller.</p>
+      </div>
+    ),
   },
   {
-    title: "2. The Programme",
-    content: `The Aligned Woman Blueprint™ is a premium transformational programme for women, structured around the ALIVE Method™ (Awareness, Liberation, Intention, Vision, Embodiment). The Programme includes:
-
-• Access to all digital course modules and content
-• Live group coaching sessions (as scheduled)
-• Expert panel sessions
-• Community platform access
-• Programme workbooks and tools
-• Bonus resources as announced
-
-Content, schedules and delivery format may be updated from time to time. We will notify participants of material changes.`,
+    num: "2",
+    title: "Educational Purpose Only",
+    content: (
+      <p>All content provided by The Aligned Woman is intended for educational and informational purposes only. The Aligned Woman does not provide medical advice, mental health treatment, psychotherapy, counselling, diagnosis, or crisis support. Nothing within our programmes, courses, quizzes, materials, or community spaces should be interpreted as a substitute for professional medical, psychological, psychiatric, or therapeutic care.</p>
+    ),
   },
   {
-    title: "3. Payment Terms",
-    content: `Pricing is region-dependent and will be displayed in your local currency at checkout. We offer two payment options:
-
-Full Payment: The full programme fee paid at point of purchase.
-Instalment Plan: Where available, monthly payments over an agreed period. All instalments must be completed to maintain full access.
-
-Payments are processed securely via Stripe (international) or PayFast (South Africa). We do not store your card details.`,
+    num: "3",
+    title: "Not Therapy, Not Diagnosis",
+    content: (
+      <div className="space-y-4">
+        <p>Participation in any Aligned Woman programme, course, quiz, or experience does not constitute therapy, counselling, or a therapeutic relationship of any kind.</p>
+        <p>While some contributors may be qualified healthcare practitioners, therapists, or clinicians in their professional capacity, their participation within The Aligned Woman platform is strictly educational in nature.</p>
+        <p className="font-semibold" style={{ color: "#6B1B3D" }}>We do not:</p>
+        <ul className="space-y-2 pl-4">
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Diagnose physical or mental health conditions</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Provide treatment plans or clinical interventions</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Replace care from a licensed healthcare or mental health professional</li>
+        </ul>
+        <p>If you have concerns about your physical health, mental health, or emotional wellbeing, you are encouraged to seek support from a qualified professional.</p>
+      </div>
+    ),
   },
   {
-    title: "4. Refund Policy",
-    content: `Due to the nature of digital products and the immediate access granted upon purchase, we operate a limited refund policy:
-
-• Within 7 days of purchase: A full refund may be requested if you have not accessed more than 20% of the programme content.
-• After 7 days: No refunds will be issued.
-• Instalment plans: Cancellation of an instalment plan will result in loss of programme access. Previously paid instalments are non-refundable.
-
-To request a refund, contact us at hello@thealignedwoman.com within the refund window.`,
+    num: "4",
+    title: "Quizzes, Screenings & Self-Assessment Tools",
+    content: (
+      <div className="space-y-4">
+        <p>Any quizzes, questionnaires, or self-assessment tools (including but not limited to hormone, nervous system, or PMDD awareness tools) are provided for educational awareness only.</p>
+        <p className="font-semibold" style={{ color: "#6B1B3D" }}>They:</p>
+        <ul className="space-y-2 pl-4">
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Are not diagnostic tools</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Do not provide medical or psychological diagnoses</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Are not a substitute for professional assessment</li>
+        </ul>
+        <p>Results should be interpreted as informational and may highlight patterns worth discussing with a qualified professional.</p>
+      </div>
+    ),
   },
   {
-    title: "5. Intellectual Property",
-    content: `All content within the Programme — including but not limited to videos, workbooks, frameworks, the ALIVE Method™, and The Aligned Woman Blueprint™ name — is the exclusive intellectual property of The Aligned Woman (Pty) Ltd.
-
-You may not reproduce, redistribute, share, sell, or otherwise use any Programme content outside of your personal use. This includes sharing login credentials or content with third parties.`,
+    num: "5",
+    title: "Personal Responsibility",
+    content: (
+      <div className="space-y-4">
+        <p>By participating in The Aligned Woman, you acknowledge and agree that:</p>
+        <ul className="space-y-2 pl-4">
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>You are responsible for your own physical, emotional, and mental wellbeing</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>You choose how and whether to apply any information provided</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>You engage with the content at your own pace and discretion</li>
+        </ul>
+        <p>Personal growth and self-reflection may bring up emotions or insights. You agree to seek appropriate professional or personal support if needed.</p>
+      </div>
+    ),
   },
   {
-    title: "6. Programme Access",
-    content: `Upon successful payment, you will receive access to the Programme platform within 24 hours.
-
-Access is granted to a single user only and is non-transferable. You must not share your login details with any other person.
-
-We reserve the right to suspend or revoke access without refund in the event of:
-• Breach of these Terms and Conditions
-• Abusive, harassing or harmful behaviour toward other participants or the team
-• Sharing of programme content in violation of our intellectual property rights`,
+    num: "6",
+    title: "No Guarantees",
+    content: (
+      <p>The Aligned Woman does not guarantee specific outcomes, results, or transformations. Any examples, testimonials, or case studies shared are illustrative only and do not promise similar results. Individual experiences vary based on personal circumstances, readiness, and engagement.</p>
+    ),
   },
   {
-    title: "7. Community Standards",
-    content: `By participating in the Programme, you agree to uphold the following community standards:
-
-• Treat all participants, facilitators and experts with respect and dignity
-• Maintain confidentiality — what is shared in the community stays in the community
-• No promotional or spam content in community spaces
-• No hateful, discriminatory or harmful language or behaviour
-
-Violation of community standards may result in removal from the Programme without refund.`,
+    num: "7",
+    title: "Scope of Practice",
+    content: (
+      <p>The Aligned Woman operates as an education and learning platform. Participation does not create a practitioner–client, therapist–client, doctor–patient, or coach–client relationship unless explicitly stated and contracted outside of The Aligned Woman platform.</p>
+    ),
   },
   {
-    title: "8. Disclaimer",
-    content: `The Aligned Woman Blueprint™ is a transformational personal development programme. It is not a substitute for professional medical, psychological, legal or financial advice.
+    num: "8",
+    title: "Emotional Safety & Self-Pacing",
+    content: (
+      <div className="space-y-4">
+        <p>You agree to:</p>
+        <ul className="space-y-2 pl-4">
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Engage with content in a way that feels safe and appropriate for you</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Pause or step back if content feels overwhelming</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Respect your own boundaries and nervous system capacity</li>
+        </ul>
+        <p>The Aligned Woman is not responsible for emotional distress arising from self-inquiry, reflection, or participation.</p>
+      </div>
+    ),
+  },
+  {
+    num: "9",
+    title: "Community Conduct",
+    content: (
+      <div className="space-y-4">
+        <p>If you participate in any community spaces (online or in person), you agree to:</p>
+        <ul className="space-y-2 pl-4">
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Treat others with respect, confidentiality, and care</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Avoid giving medical, therapeutic, or diagnostic advice to others</li>
+          <li style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>Respect diversity of experience, background, and belief</li>
+        </ul>
+        <p>The Aligned Woman reserves the right to remove participants who breach community standards.</p>
+      </div>
+    ),
+  },
+  {
+    num: "10",
+    title: "Intellectual Property",
+    content: (
+      <p>All materials, content, videos, exercises, frameworks, text, graphics, and resources provided by The Aligned Woman are the intellectual property of ALIGNED WOMAN LTD or its contributors. You may not copy, reproduce, distribute, resell, or create derivative works without prior written permission.</p>
+    ),
+  },
+  {
+    num: "11",
+    title: "Payments, Pricing & Access",
+    content: (
+      <p>Pricing, payment terms, access periods, and any payment plan options are clearly stated at the point of registration or purchase. By enrolling, you agree to the pricing and payment terms in effect at the time of sign-up. Access to content may be suspended or revoked if payment obligations are not met.</p>
+    ),
+  },
+  {
+    num: "12",
+    title: "Refunds & Cancellations",
+    content: (
+      <p>Refund policies, if applicable, are outlined at the point of purchase and form part of these Terms & Conditions. Unless otherwise stated, digital content and access-based programmes are non-refundable once access has been granted.</p>
+    ),
+  },
+  {
+    num: "13",
+    title: "Limitation of Liability",
+    content: (
+      <p>To the fullest extent permitted by law, The Aligned Woman, its founders, contributors, partners, and affiliates are not liable for any loss, injury, or damages arising from participation in our programmes or use of our content, including but not limited to emotional distress, financial loss, or personal decisions made as a result of the information provided.</p>
+    ),
+  },
+];
 
-Results will vary between individuals. We do not guarantee specific outcomes. Testimonials shared are individual experiences and are not typical results.`,
+const DATA_SECTIONS = [
+  {
+    num: "14",
+    title: "What Personal Data We Collect",
+    content: (
+      <div className="space-y-4">
+        <p>When you sign up for The Aligned Woman or any affiliated programme, we may collect:</p>
+        <ul className="space-y-2 pl-4">
+          {["Name", "Email address", "Country, city, or general location", "Age range", "Payment preference", "Programme participation details", "Information you voluntarily provide through forms or questionnaires"].map(item => (
+            <li key={item} style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>{item}</li>
+          ))}
+        </ul>
+        <p>We do not intentionally collect medical records or diagnostic data.</p>
+      </div>
+    ),
   },
   {
-    title: "9. Limitation of Liability",
-    content: `To the maximum extent permitted by law, The Aligned Woman (Pty) Ltd shall not be liable for any indirect, incidental, consequential, or punitive damages arising from your use of or inability to use the Programme, even if we have been advised of the possibility of such damages.
-
-Our total liability in any event shall not exceed the amount you paid for the Programme.`,
+    num: "15",
+    title: "How We Use Your Data",
+    content: (
+      <div className="space-y-4">
+        <p>Your data is used to:</p>
+        <ul className="space-y-2 pl-4">
+          {["Register you for programmes, courses, or events", "Communicate with you about enrolment and participation", "Provide access to content or platforms", "Improve services and user experience", "Meet legal or regulatory obligations"].map(item => (
+            <li key={item} style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>{item}</li>
+          ))}
+        </ul>
+        <p>We do not sell personal data.</p>
+      </div>
+    ),
   },
   {
-    title: "10. Privacy & Data",
-    content: `We collect and process your personal data in accordance with our Privacy Policy. By purchasing the Programme, you consent to us storing your contact information and using it to provide the Programme and relevant communications.
-
-We will never sell your data to third parties. You may unsubscribe from marketing communications at any time.`,
+    num: "16",
+    title: "Legal Basis for Processing (UK GDPR)",
+    content: (
+      <div className="space-y-4">
+        <p>We process personal data under the following lawful bases:</p>
+        <ul className="space-y-2 pl-4">
+          {["Consent", "Contractual necessity", "Legitimate interest", "Legal obligation"].map(item => (
+            <li key={item} style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>{item}</li>
+          ))}
+        </ul>
+        <p>You may withdraw consent at any time.</p>
+      </div>
+    ),
   },
   {
-    title: "11. Governing Law",
-    content: `These Terms and Conditions are governed by the laws of South Africa. Any disputes arising from these Terms and Conditions shall be subject to the exclusive jurisdiction of the courts of South Africa.`,
+    num: "17",
+    title: "Data Storage & Security",
+    content: (
+      <p>We take appropriate technical and organisational measures to protect your data. Access is limited to authorised personnel and trusted service providers only. No system can be guaranteed 100% secure, but reasonable safeguards are in place.</p>
+    ),
   },
   {
-    title: "12. Changes to Terms",
-    content: `We reserve the right to amend these Terms and Conditions at any time. Material changes will be communicated to enrolled participants via email. Your continued participation in the Programme following notification of changes constitutes acceptance of the updated Terms.`,
+    num: "18",
+    title: "Data Sharing",
+    content: (
+      <div className="space-y-4">
+        <p>Limited data may be shared with trusted third parties for operational purposes such as:</p>
+        <ul className="space-y-2 pl-4">
+          {["Email communications", "Website or course hosting", "Payment processing (once active)"].map(item => (
+            <li key={item} style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>{item}</li>
+          ))}
+        </ul>
+        <p>All third parties are required to comply with data protection standards.</p>
+      </div>
+    ),
   },
   {
-    title: "13. Contact",
-    content: `If you have any questions about these Terms and Conditions, please contact us:
-
-The Aligned Woman (Pty) Ltd
-Email: hello@thealignedwoman.com
-Website: www.thealignedwoman.com`,
+    num: "19",
+    title: "International Data Transfers",
+    content: (
+      <p>Some service providers may store data outside the UK or EEA. Where this occurs, appropriate safeguards are used in accordance with UK GDPR.</p>
+    ),
+  },
+  {
+    num: "20",
+    title: "Your Rights",
+    content: (
+      <div className="space-y-4">
+        <p>You have the right to:</p>
+        <ul className="space-y-2 pl-4">
+          {["Access your data", "Request corrections", "Request deletion", "Restrict or object to processing", "Withdraw consent", "Request data portability"].map(item => (
+            <li key={item} style={{ borderLeft: "2px solid #C4866C", paddingLeft: "1rem" }}>{item}</li>
+          ))}
+        </ul>
+        <p>Requests can be made via the website contact form.</p>
+      </div>
+    ),
+  },
+  {
+    num: "21",
+    title: "Cookies & Analytics",
+    content: (
+      <p>The website may use cookies or analytics tools to improve functionality and performance. You can manage cookies through your browser settings.</p>
+    ),
+  },
+  {
+    num: "22",
+    title: "Data Retention",
+    content: (
+      <p>Personal data is retained only for as long as necessary to fulfil its purpose or comply with legal obligations.</p>
+    ),
+  },
+  {
+    num: "23",
+    title: "Changes to These Terms",
+    content: (
+      <p>We may update these Terms & Conditions from time to time. Continued use of the platform constitutes acceptance of the updated terms.</p>
+    ),
+  },
+  {
+    num: "24",
+    title: "Contact",
+    content: (
+      <p>For questions regarding these Terms & Conditions or data protection, please contact us via the website contact form.</p>
+    ),
   },
 ];
 
 export default function TermsAndConditions() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FDF5F3] via-white to-[#F5E8EE]">
+    <div style={{ background: "#FAF5F3", minHeight: "100vh" }}>
       {/* Header */}
-      <div className="bg-[#6E1D40] text-white py-16 px-4 text-center">
-        <p className="text-[#E8B4AE] font-semibold tracking-widest uppercase text-sm mb-4">Legal</p>
-        <h1 className="text-4xl md:text-5xl font-serif mb-4">Terms & Conditions</h1>
-        <p className="text-white/70">The Aligned Woman Blueprint™</p>
-        <p className="text-white/50 text-sm mt-3">Last updated: 30 April 2026</p>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 py-16">
-        {/* Intro Banner */}
-        <div className="bg-[#FDF5F3] border border-[#E8B4AE] rounded-2xl p-6 mb-12">
-          <p className="text-[#6E1D40] font-semibold mb-2">Please read these terms carefully.</p>
-          <p className="text-gray-600 text-sm leading-relaxed">
-            These Terms and Conditions form a legally binding agreement between you and The Aligned Woman (Pty) Ltd. By purchasing or participating in the Programme, you confirm that you have read, understood and agree to these terms.
+      <div style={{ background: "#6B1B3D", padding: "clamp(60px,10vw,100px) clamp(24px,6vw,80px) clamp(40px,6vw,60px)" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(196,134,108,0.7)", marginBottom: 16 }}>
+            The Aligned Woman
+          </p>
+          <h1 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2.5rem,6vw,4rem)", color: "#fff", fontWeight: 400, lineHeight: 1.15, marginBottom: 20 }}>
+            Terms &amp; Conditions
+          </h1>
+          <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)", fontWeight: 300 }}>
+            Last updated: 7 January 2026
           </p>
         </div>
+      </div>
 
-        {/* Sections */}
-        <div className="space-y-10">
-          {sections.map((section) => (
-            <div key={section.title} className="bg-white rounded-2xl shadow-sm p-8">
-              <h2 className="text-xl font-serif text-[#6E1D40] mb-4">{section.title}</h2>
-              <div className="text-gray-600 leading-relaxed whitespace-pre-line text-sm">
-                {section.content}
+      {/* Intro */}
+      <div style={{ background: "#fff", borderBottom: "1px solid rgba(107,27,61,0.08)" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto", padding: "clamp(32px,5vw,56px) clamp(24px,6vw,80px)" }}>
+          <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, lineHeight: 1.8, color: "#4A2030" }}>
+            These Terms & Conditions apply to all programmes, courses, digital content, live or recorded sessions, events, quizzes, community spaces, and resources offered by The Aligned Woman and its affiliated offerings, including but not limited to The Aligned Woman Blueprint.
+          </p>
+          <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontStyle: "italic", fontSize: "clamp(1.1rem,2.5vw,1.4rem)", color: "#C4866C", marginTop: 20 }}>
+            By accessing, registering for, or participating in any Aligned Woman offering, you agree to these Terms & Conditions.
+          </p>
+        </div>
+      </div>
+
+      {/* Main Sections */}
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "clamp(48px,8vw,80px) clamp(24px,6vw,80px)" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+          {SECTIONS.map((s) => (
+            <div key={s.num} style={{ borderBottom: "1px solid rgba(107,27,61,0.08)", paddingBottom: 40 }}>
+              <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+                <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: "#C4866C", minWidth: 28, marginTop: 4 }}>
+                  {s.num}.
+                </span>
+                <div style={{ flex: 1 }}>
+                  <h2 style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6B1B3D", marginBottom: 16 }}>
+                    {s.title}
+                  </h2>
+                  <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.85, color: "#4A2030" }}>
+                    {s.content}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Footer CTA */}
-        <div className="mt-16 text-center">
-          <p className="text-gray-500 mb-6">Questions about our Terms?</p>
+        {/* Data Protection divider */}
+        <div style={{ margin: "64px 0 48px", textAlign: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(107,27,61,0.15)" }} />
+            <div>
+              <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#C4866C", marginBottom: 6 }}>
+                Section Two
+              </p>
+              <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "#6B1B3D", fontWeight: 400 }}>
+                Data Protection &amp; Privacy
+              </h2>
+            </div>
+            <div style={{ flex: 1, height: 1, background: "rgba(107,27,61,0.15)" }} />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+          {DATA_SECTIONS.map((s) => (
+            <div key={s.num} style={{ borderBottom: "1px solid rgba(107,27,61,0.08)", paddingBottom: 40 }}>
+              <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+                <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: "#C4866C", minWidth: 28, marginTop: 4 }}>
+                  {s.num}.
+                </span>
+                <div style={{ flex: 1 }}>
+                  <h2 style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6B1B3D", marginBottom: 16 }}>
+                    {s.title}
+                  </h2>
+                  <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.85, color: "#4A2030" }}>
+                    {s.content}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Back to top */}
+        <div style={{ textAlign: "center", marginTop: 64 }}>
           <Link
-            to="/contact?type=general"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-[#6E1D40] text-white font-semibold rounded-xl hover:bg-[#5A1633] transition-colors"
+            to="/"
+            style={{
+              fontFamily: "Montserrat, sans-serif",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#6B1B3D",
+              textDecoration: "none",
+              borderBottom: "1px solid rgba(107,27,61,0.3)",
+              paddingBottom: 2,
+            }}
           >
-            Contact Us
+            ← Return Home
           </Link>
         </div>
       </div>
