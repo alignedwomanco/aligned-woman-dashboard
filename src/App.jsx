@@ -29,7 +29,6 @@ import FeminineWorkbook from './pages/FeminineWorkbook';
 import TermsAndConditions from './pages/TermsAndConditions';
 import Contact from './pages/Contact';
 import ContactForm from './pages/ContactForm';
-import ContactForm from './pages/ContactForm';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
