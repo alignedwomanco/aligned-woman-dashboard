@@ -497,153 +497,61 @@ export default function StartingPointProfile() {
     const atBest = arch.atBest || "";
     const atWorst = arch.atWorst || "";
 
-    const videoCard = (cardWidth) => (
-      <div style={{
-        width: cardWidth,
-        aspectRatio: "9 / 16",
-        background: videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)",
-        border: "1px solid rgba(196,132,122,0.3)",
-        borderRadius: 8,
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        {videoUrl && (
-          <video
-            src={videoUrl}
-            muted
-            playsInline
-            autoPlay
-            loop
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(20,4,12,0.92) 0%, rgba(20,4,12,0.7) 30%, rgba(20,4,12,0.15) 55%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{
-          position: "absolute",
-          top: mobile ? 14 : 18,
-          right: mobile ? 14 : 18,
-          width: mobile ? 36 : 44,
-          height: mobile ? 36 : 44,
-          borderRadius: "50%",
-          background: "rgba(20,4,12,0.55)",
-          border: "1px solid rgba(255,255,255,0.3)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
-        }}>
-          <svg width={mobile ? 10 : 12} height={mobile ? 12 : 14} viewBox="0 0 14 16" fill="#FFFFFF" style={{ marginLeft: 2 }}>
-            <path d="M0 0 L14 8 L0 16 Z" />
-          </svg>
-        </div>
-        <div style={{ position: "absolute", left: mobile ? 18 : 24, right: mobile ? 18 : 24, bottom: mobile ? 22 : 28 }}>
-          <div style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 22 : 28, lineHeight: 1.05, letterSpacing: "-0.015em", color: "#FFFFFF", marginBottom: mobile ? 12 : 16, textShadow: "0 2px 16px rgba(0,0,0,0.65), 0 0 32px rgba(0,0,0,0.4)" }}>
-            {result.name}
-          </div>
-          <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 11 : 13, lineHeight: 1.6, color: "rgba(255,255,255,0.96)", fontWeight: 400, textShadow: "0 1px 8px rgba(0,0,0,0.65), 0 0 24px rgba(0,0,0,0.3)" }}>
-            {atBest.split(". ").slice(0, 3).join(". ") + "."}
-          </p>
-        </div>
-      </div>
-    );
-
-    const headerBlock = (
-      <>
-        <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: ROSE }}>
-          Your Starting Point
-        </div>
-        <h1 style={{ margin: mobile ? "20px 0 20px" : "24px 0 28px", fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 52 : 84, lineHeight: 1, letterSpacing: "-0.02em", color: INK }}>
-          {result.name}
-        </h1>
-        <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 18 : 22, lineHeight: 1.45, color: ROSE_DEEP, maxWidth: mobile ? "100%" : 460 }}>
-          {result.mirror}
-        </p>
-      </>
-    );
-
-    const detailBlock = (
-      <div style={{ marginTop: mobile ? 28 : 32, display: "flex", flexDirection: "column", gap: mobile ? 20 : 22, maxWidth: mobile ? "100%" : 460 }}>
-        <div>
-          <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: mobile ? 8 : 10 }}>At your best</div>
-          <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300 }}>{atBest}</p>
-        </div>
-        <div>
-          <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: mobile ? 8 : 10 }}>At your worst</div>
-          <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300, filter: "blur(6px)", userSelect: "none" }}>{atWorst}</p>
-        </div>
-      </div>
-    );
-
-    const footerBlock = (
-      <>
-        <div style={{ margin: "32px 0", width: 56, height: 1, background: ROSE }} />
-        <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 460, fontWeight: 300 }}>
-          Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
-        </p>
-      </>
-    );
-
-    if (mobile) {
-      return (
-        <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
-          <div style={{ position: "relative", padding: "60px 24px 80px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-              {videoCard(260)}
-            </div>
-            {headerBlock}
-            {detailBlock}
-            {/* Bottom centered footer */}
-            <div style={{ marginTop: 40, textAlign: "center" }}>
-              <p style={{ margin: "0 auto 24px", fontFamily: SANS, fontSize: 14, lineHeight: 1.75, color: INK_BODY, fontWeight: 300 }}>
-                Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
-              </p>
-              <button
-                onClick={handleSeeResult}
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 22px", borderRadius: 100, background: "#FFFFFF", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
-              >
-                <span style={{ fontSize: 12 }}>&#x1F512;</span> Read the full detail
-              </button>
-              <div style={{ marginTop: 12 }}>
-                <button
-                  onClick={restart}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "11px 22px", borderRadius: 100, background: "transparent", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
-                >
-                  Retake
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
+    // Single unified layout — responsive via mobile state
+    const cardWidth = mobile ? 220 : 300;
 
     return (
       <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "88px 64px 120px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
-          {/* Top: 2-col grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 56, alignItems: "start" }}>
-            <div>{videoCard(300)}</div>
+        <div style={{ position: "relative", maxWidth: mobile ? "100%" : 900, margin: "0 auto", padding: mobile ? "48px 24px 80px" : "88px 64px 120px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
+
+          {/* Top section: video card + content */}
+          <div style={{ display: mobile ? "block" : "grid", gridTemplateColumns: "300px 1fr", gap: 56, alignItems: "start" }}>
+
+            {/* Video card */}
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: mobile ? 32 : 0 }}>
+              <div style={{ width: cardWidth, aspectRatio: "9 / 16", background: videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)", border: "1px solid rgba(196,132,122,0.3)", borderRadius: 8, position: "relative", overflow: "hidden" }}>
+                {videoUrl && (
+                  <video src={videoUrl} muted playsInline autoPlay loop style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                )}
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(20,4,12,0.92) 0%, rgba(20,4,12,0.7) 30%, rgba(20,4,12,0.15) 55%, transparent 70%)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", top: 18, right: 18, width: 44, height: 44, borderRadius: "50%", background: "rgba(20,4,12,0.55)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(0,0,0,0.35)" }}>
+                  <svg width={12} height={14} viewBox="0 0 14 16" fill="#FFFFFF" style={{ marginLeft: 2 }}><path d="M0 0 L14 8 L0 16 Z" /></svg>
+                </div>
+                <div style={{ position: "absolute", left: 24, right: 24, bottom: 28 }}>
+                  <div style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 20 : 28, lineHeight: 1.05, color: "#FFFFFF", marginBottom: 12, textShadow: "0 2px 16px rgba(0,0,0,0.65)" }}>{result.name}</div>
+                  <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 11 : 13, lineHeight: 1.6, color: "rgba(255,255,255,0.96)", fontWeight: 400, textShadow: "0 1px 8px rgba(0,0,0,0.65)" }}>{atBest.split(". ").slice(0, 3).join(". ") + "."}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Text content */}
             <div>
-              {headerBlock}
-              {detailBlock}
+              <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: ROSE }}>Your Starting Point</div>
+              <h1 style={{ margin: mobile ? "20px 0" : "24px 0 28px", fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 48 : 84, lineHeight: 1, letterSpacing: "-0.02em", color: INK }}>{result.name}</h1>
+              <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 17 : 22, lineHeight: 1.45, color: ROSE_DEEP, maxWidth: 460 }}>{result.mirror}</p>
+
+              <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 22, maxWidth: 460 }}>
+                <div>
+                  <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: 10 }}>At your best</div>
+                  <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300 }}>{atBest}</p>
+                </div>
+                <div>
+                  <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: 10 }}>At your worst</div>
+                  <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300, filter: "blur(6px)", userSelect: "none" }}>{atWorst}</p>
+                </div>
+              </div>
             </div>
           </div>
-          {/* Bottom: full-width centered footer */}
-          <div style={{ marginTop: 56, textAlign: "center" }}>
-            <p style={{ margin: "0 auto 28px", fontFamily: SANS, fontSize: 15, lineHeight: 1.75, color: INK_BODY, maxWidth: 460, fontWeight: 300 }}>
+
+          {/* Bottom: centered CTA — same on all archetypes */}
+          <div style={{ marginTop: mobile ? 48 : 56, textAlign: "center" }}>
+            <p style={{ margin: "0 auto 28px", fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: 460, fontWeight: 300 }}>
               Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
             </p>
             <button
               onClick={handleSeeResult}
-              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 26px", borderRadius: 100, background: "#FFFFFF", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: mobile ? "12px 22px" : "13px 26px", borderRadius: 100, background: "#FFFFFF", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
               onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
             >
@@ -652,7 +560,7 @@ export default function StartingPointProfile() {
             <div style={{ marginTop: 12 }}>
               <button
                 onClick={restart}
-                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "12px 28px", borderRadius: 100, background: "transparent", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
+                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "11px 22px" : "12px 28px", borderRadius: 100, background: "transparent", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
               >
@@ -660,6 +568,7 @@ export default function StartingPointProfile() {
               </button>
             </div>
           </div>
+
         </div>
       </div>
     );
