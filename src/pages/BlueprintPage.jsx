@@ -332,26 +332,6 @@ function SecondaryCTA({ label = "Explore The Programme", dark = true, className 
 }
 
 
-// ═══════════════════════════════════════════════
-// SECTION 01: ANNOUNCEMENT BAR
-// ═══════════════════════════════════════════════
-
-function AnnouncementBar() {
-  return (
-    <div
-      className="sticky top-0 z-50 flex items-center justify-center px-4"
-      style={{ background: C.ink, height: 40 }}
-    >
-      <p
-        className="text-[10px] font-semibold uppercase tracking-[0.18em] text-center md:text-[10px] text-[8px]"
-        style={{ fontFamily: sans, color: C.roseCore }}
-      >
-        FOUNDING PRICE R3,997 &middot; DOORS OPEN 1 JUNE 2026 &middot; PRICE RISES AT LAUNCH
-      </p>
-    </div>
-  );
-}
-
 
 // ─── STAT BAR (with counter animation) ───
 function StatBar() {
@@ -1921,7 +1901,6 @@ export default function AWBlueprint() {
         }
       `}</style>
 
-      <AnnouncementBar />
       <Hero />
       <AsSeenIn />
       <YouAreNotFailing />
