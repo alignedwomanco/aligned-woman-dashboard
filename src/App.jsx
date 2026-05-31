@@ -27,6 +27,7 @@ import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
 import FeminineWorkbook from './pages/FeminineWorkbook';
 import TermsAndConditions from './pages/TermsAndConditions';
+import ContactForm from './pages/ContactForm';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -98,6 +99,7 @@ const AuthenticatedApp = () => {
       <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
       <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
+      <Route path="/ContactForm" element={<LayoutWrapper currentPageName="ContactForm"><ContactForm /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
