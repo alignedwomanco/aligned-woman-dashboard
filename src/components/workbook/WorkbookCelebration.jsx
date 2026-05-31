@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
-export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
+export default function WorkbookCelebration({ onBackToWorkbook, closingText, onContinueBlueprint }) {
   const navigate = useNavigate();
 
   // Resume point for "Continue the Blueprint": last active module in CourseProgress.
@@ -84,7 +84,7 @@ export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
         {/* Buttons */}
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <button
-            onClick={handleContinueBlueprint}
+            onClick={onContinueBlueprint || handleContinueBlueprint}
             style={{
               display: "inline-flex",
               alignItems: "center",
