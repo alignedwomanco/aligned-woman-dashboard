@@ -177,7 +177,6 @@ export default function Contact() {
       {/* Newsletter Signup */}
       <section style={{ background: "linear-gradient(135deg, #3D0F27 0%, #5A1633 100%)", padding: "clamp(80px,12vw,120px) clamp(24px,6vw,80px)" }}>
         <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
-          <Mail style={{ width: 32, height: 32, color: "rgba(196,132,122,0.6)", marginBottom: 24 }} />
           <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2rem,5vw,3rem)", color: "#fff", marginBottom: 12, fontStyle: "italic" }}>
             Stay in the <span style={{ color: "#C4847A" }}>loop.</span>
           </h2>
