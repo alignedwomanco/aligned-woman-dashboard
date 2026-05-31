@@ -76,8 +76,8 @@ export default function ContactForm() {
     setLoading(true);
 
     try {
-      // Save to database
-      await base44.entities.ContactSubmission.create({
+      // Save to database first
+      const submission = await base44.entities.ContactSubmission.create({
         type,
         first_name: formData.first_name,
         last_name: formData.last_name,
@@ -92,7 +92,7 @@ export default function ContactForm() {
       // Send automated email reply
       try {
         await base44.functions.invoke("sendContactFormEmail", {
-          submissionId: "",
+          submissionId: submission.id,
           recipientEmail: formData.email,
           submissionType: type,
           firstName: formData.first_name,

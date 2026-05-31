@@ -60,9 +60,9 @@ Deno.serve(async (req) => {
 
     // Build MIME message
     const rawMessage = buildMimeMessage(
-      "The Aligned Woman <hello@alignedwoman.com>",
+      "The Aligned Woman <hello@alignedwomanco.com>",
       recipientEmail,
-      "admin@alignedwoman.com",
+      "hello@alignedwomanco.com",
       subject,
       body
     );
