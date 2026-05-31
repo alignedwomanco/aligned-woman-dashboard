@@ -94,17 +94,25 @@ export default function MembersManager({ allUsers }) {
 
   const addExistingMutation = useMutation({
     mutationFn: async ({ userId, tags }) => {
-      const updateData = { is_member: true };
+      const updateData = { 
+        is_member: true,
+        role: "user"
+      };
       if (tags && tags.length > 0) {
         const user = allUsers.find(u => u.id === userId);
         const existing = user?.access_tags || [];
         updateData.access_tags = [...new Set([...existing, ...tags])];
       }
       await base44.entities.User.update(userId, updateData);
+      return userId;
     },
     onSuccess: () => {
       resetAddDialog();
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      alert("Member added successfully!");
+    },
+    onError: (error) => {
+      alert(`Failed to add member: ${error.message}`);
     },
   });
 
