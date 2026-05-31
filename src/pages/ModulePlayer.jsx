@@ -421,14 +421,25 @@ export default function ModulePlayer() {
     );
   };
 
-  // Completion-based progression, robust to messy section/module ordering.
-  const courseModulesWithPages = sortedCourseModules.filter((m) => modulesWithPages.has(m.id));
+  // The Welcome section is an intro, not a graded phase: keep it out of progression.
+  const isWelcomeSection = (s) =>
+    (s?.order === 0) || (s?.title || "").toLowerCase().includes("welcome");
+  const contentSectionIds = new Set(
+    sortedSections.filter((s) => !isWelcomeSection(s)).map((s) => s.id)
+  );
+
+  // Completion-based progression over content phases only.
+  const courseModulesWithPages = sortedCourseModules.filter(
+    (m) => modulesWithPages.has(m.id) && contentSectionIds.has(m.sectionId)
+  );
   const nextIncompleteModule =
     courseModulesWithPages.find((m) => m.id !== moduleId && !isModuleComplete(m.id)) || null;
 
   const isCourseEnd = !nextIncompleteModule;
   const isPhaseBoundary =
-    !!nextIncompleteModule && nextIncompleteModule.sectionId !== module?.sectionId;
+    contentSectionIds.has(module?.sectionId) &&
+    !!nextIncompleteModule &&
+    nextIncompleteModule.sectionId !== module?.sectionId;
 
   const nextSection = nextIncompleteModule
     ? sortedSections.find((s) => s.id === nextIncompleteModule.sectionId)
