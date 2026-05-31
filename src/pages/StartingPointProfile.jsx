@@ -632,11 +632,13 @@ export default function StartingPointProfile() {
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
         <div style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "88px 64px 120px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
           <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 56, alignItems: "start" }}>
-            <div>{videoCard(300)}</div>
+            <div>
+              {videoCard(300)}
+              {footerBlock}
+            </div>
             <div>
               {headerBlock}
               {detailBlock}
-              {footerBlock}
             </div>
           </div>
         </div>
