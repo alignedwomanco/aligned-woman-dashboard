@@ -154,6 +154,73 @@ function WorkbookViewerInner({ workbookId }) {
     enabled: !!workbook?.expert_id,
   });
 
+  // ── Next-module navigation for "Continue the Blueprint" ───────────
+  const wbCourseId = workbook?.course_id || null;
+
+  const { data: wbAllModules = [] } = useQuery({
+    queryKey: ["wbAllCourseModules", wbCourseId],
+    queryFn: () => base44.entities.CourseModule.filter({ courseId: wbCourseId }),
+    enabled: !!wbCourseId,
+  });
+
+  const { data: wbAllSections = [] } = useQuery({
+    queryKey: ["wbAllCourseSections", wbCourseId],
+    queryFn: () => base44.entities.CourseSection.filter({ courseId: wbCourseId }),
+    enabled: !!wbCourseId,
+  });
+
+  const { data: wbAllPages = [] } = useQuery({
+    queryKey: ["wbAllCoursePages", wbCourseId],
+    queryFn: async () => {
+      const results = await Promise.all(
+        wbAllModules.map((m) => base44.entities.CoursePage.filter({ moduleId: m.id }))
+      );
+      return results.flat();
+    },
+    enabled: wbAllModules.length > 0,
+  });
+
+  const { data: wbProgress = [] } = useQuery({
+    queryKey: ["wbCourseProgress"],
+    queryFn: () => base44.entities.CourseProgress.filter({}),
+  });
+
+  const wbSortedSections = [...wbAllSections].sort((a, b) => {
+    const ao = a.order ?? Infinity;
+    const bo = b.order ?? Infinity;
+    if (ao !== bo) return ao - bo;
+    return (a.created_date || "").localeCompare(b.created_date || "");
+  });
+  const wbSortedModules = wbSortedSections.flatMap((section) =>
+    [...wbAllModules]
+      .filter((m) => m.sectionId === section.id)
+      .sort((a, b) => {
+        const ao = a.order ?? Infinity;
+        const bo = b.order ?? Infinity;
+        if (ao !== bo) return ao - bo;
+        return (a.created_date || "").localeCompare(b.created_date || "");
+      })
+  );
+  const wbModulesWithPages = new Set(wbAllPages.map((p) => p.moduleId));
+  const wbIsModuleComplete = (mId) => {
+    const mPages = wbAllPages.filter((pg) => pg.moduleId === mId);
+    if (mPages.length === 0) return false;
+    return mPages.every(
+      (pg) => wbProgress.find((pr) => pr.pageId === pg.id)?.status === "completed"
+    );
+  };
+  const wbNextModule =
+    wbSortedModules.find((m) => wbModulesWithPages.has(m.id) && !wbIsModuleComplete(m.id)) || null;
+
+  const handleContinueNext = () => {
+    if (wbNextModule) {
+      const cid = wbCourseId ? `&courseId=${wbCourseId}` : "";
+      window.location.href = `/ModulePlayer?moduleId=${wbNextModule.id}${cid}`;
+    } else {
+      window.location.href = "/Dashboard";
+    }
+  };
+
   // Redirect to interactive NutritionWorkbook for Danielle Venter
   const DANIELLE_EXPERT_ID = "69f48ab57e6d6614129172d8";
   useEffect(() => {
@@ -367,6 +434,7 @@ function WorkbookViewerInner({ workbookId }) {
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
       {showCelebration && (
         <WorkbookCelebration
+          onContinueBlueprint={handleContinueNext}
           onBackToWorkbook={() => {
             setShowCelebration(false);
             jumpTo(lastSectionIdx);
@@ -386,6 +454,7 @@ function WorkbookViewerInner({ workbookId }) {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={unlockedSections}
+        onContinueNext={handleContinueNext}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -419,6 +488,7 @@ function WorkbookViewerInner({ workbookId }) {
                  computedScores={computedScores}
                  step={idx === activeSection ? activeStep : 0}
                  onStepChange={idx === activeSection ? setActiveStep : undefined}
+                 onContinueNext={handleContinueNext}
                 />
               </div>
             </div>
