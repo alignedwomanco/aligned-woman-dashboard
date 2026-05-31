@@ -17,39 +17,46 @@ const CONTACT_PATHS = [
     title: "Corporate D&I",
     description: "Bring embodied leadership practices to your organisation.",
     icon: Building2,
-    action: "form",
+    action: "modal",
   },
   {
     type: "brand_collab",
     title: "Brand Collaboration",
     description: "Partnership and collaboration opportunities with aligned brands and platforms.",
     icon: Handshake,
-    action: "form",
+    action: "modal",
   },
   {
     type: "press",
     title: "Press & Media",
     description: "Media inquiries and press resources for The Aligned Woman.",
     icon: Newspaper,
-    action: "form",
+    action: "modal",
   },
   {
     type: "general",
     title: "General Enquiry",
     description: "Any other questions or support needs we can help with.",
     icon: HelpCircle,
-    action: "form",
+    action: "modal",
   },
 ];
 
 export default function Contact() {
   const [showExpertModal, setShowExpertModal] = useState(false);
+  const [selectedType, setSelectedType] = useState(null);
 
   const handleCardClick = (path) => {
-    if (path.action === "modal") {
+    if (path.type === "apply_expert") {
       setShowExpertModal(true);
+    } else {
+      setSelectedType(path.type);
     }
-    // Form paths navigate to ContactForm page
+  };
+
+  const closeModal = () => {
+    setShowExpertModal(false);
+    setSelectedType(null);
   };
 
   return (
@@ -119,54 +126,33 @@ export default function Contact() {
                    <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.7, color: "#666", marginBottom: 24 }}>
                      {path.description}
                    </p>
-                   {path.action === "form" && (
-                     <Link
-                       to={`/ContactForm?type=${path.type}`}
-                       style={{
-                         display: "inline-flex",
-                         alignItems: "center",
-                         gap: 6,
-                         fontFamily: "Montserrat, sans-serif",
-                         fontSize: 10,
-                         fontWeight: 700,
-                         letterSpacing: "0.15em",
-                         textTransform: "uppercase",
-                         color: "#6B1B3D",
-                         textDecoration: "none",
-                       }}
-                     >
-                       Start Here <ArrowRight style={{ width: 13, height: 13 }} />
-                     </Link>
-                   )}
-                   {path.action === "modal" && (
-                     <button
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         handleCardClick(path);
-                       }}
-                       style={{
-                         display: "inline-flex",
-                         alignItems: "center",
-                         gap: 8,
-                         fontFamily: "Montserrat, sans-serif",
-                         fontSize: 10,
-                         fontWeight: 700,
-                         letterSpacing: "0.15em",
-                         textTransform: "uppercase",
-                         color: "#fff",
-                         background: "#4A0E2E",
-                         padding: "12px 28px",
-                         borderRadius: 100,
-                         border: "none",
-                         cursor: "pointer",
-                         transition: "all 0.2s",
-                       }}
-                       onMouseEnter={(e) => e.currentTarget.style.opacity = "0.88"}
-                       onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                     >
-                       Apply Now <ArrowRight style={{ width: 13, height: 13 }} />
-                     </button>
-                   )}
+                   <button
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       handleCardClick(path);
+                     }}
+                     style={{
+                       display: "inline-flex",
+                       alignItems: "center",
+                       gap: 8,
+                       fontFamily: "Montserrat, sans-serif",
+                       fontSize: 10,
+                       fontWeight: 700,
+                       letterSpacing: "0.15em",
+                       textTransform: "uppercase",
+                       color: "#fff",
+                       background: "#4A0E2E",
+                       padding: "12px 28px",
+                       borderRadius: 100,
+                       border: "none",
+                       cursor: "pointer",
+                       transition: "all 0.2s",
+                     }}
+                     onMouseEnter={(e) => e.currentTarget.style.opacity = "0.88"}
+                     onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                   >
+                     {path.type === "apply_expert" ? "Apply Now" : "Start Here"} <ArrowRight style={{ width: 13, height: 13 }} />
+                   </button>
                  </div>
                );
              })}
@@ -249,7 +235,149 @@ export default function Contact() {
       </section>
 
       {/* Expert Application Modal */}
-      {showExpertModal && <ExpertApplicationModal onClose={() => setShowExpertModal(false)} />}
+      {showExpertModal && <ExpertApplicationModal onClose={closeModal} />}
+
+      {/* Generic Contact Form Modal */}
+      {selectedType && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(26,5,16,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={closeModal}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              padding: 40,
+              maxWidth: 520,
+              width: "90%",
+              maxHeight: "90vh",
+              overflow: "auto",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeModal}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 8,
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 24, color: "#3D0F27", marginBottom: 8, fontStyle: "italic" }}>
+              {CONTACT_PATHS.find(p => p.type === selectedType)?.title}
+            </h3>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, color: "#666", marginBottom: 24 }}>
+              {CONTACT_PATHS.find(p => p.type === selectedType)?.description}
+            </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+                // Submit to ContactSubmission entity
+                window.location.href = `/ContactForm?type=${selectedType}`;
+              }}
+              style={{ display: "flex", flexDirection: "column", gap: 16 }}
+            >
+              <div>
+                <label style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#666", marginBottom: 6, display: "block" }}>
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  name="first_name"
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(74,14,46,0.2)",
+                    fontFamily: "Montserrat, sans-serif",
+                    fontSize: 14,
+                    outline: "none",
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#666", marginBottom: 6, display: "block" }}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(74,14,46,0.2)",
+                    fontFamily: "Montserrat, sans-serif",
+                    fontSize: 14,
+                    outline: "none",
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#666", marginBottom: 6, display: "block" }}>
+                  Message
+                </label>
+                <textarea
+                  name="message"
+                  required
+                  rows={4}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(74,14,46,0.2)",
+                    fontFamily: "Montserrat, sans-serif",
+                    fontSize: 14,
+                    outline: "none",
+                    resize: "vertical",
+                  }}
+                />
+              </div>
+              <button
+                type="submit"
+                style={{
+                  fontFamily: "Montserrat, sans-serif",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: "#fff",
+                  background: "#4A0E2E",
+                  padding: "14px 32px",
+                  borderRadius: 100,
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  marginTop: 8,
+                }}
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
