@@ -69,7 +69,7 @@ export default function MembersManager({ allUsers }) {
 
   const inviteMemberMutation = useMutation({
     mutationFn: async ({ email, tags }) => {
-      await base44.users.inviteUser(email, "member");
+      await base44.users.inviteUser(email, "user");
       return { email, tags };
     },
     onSuccess: (data) => {
