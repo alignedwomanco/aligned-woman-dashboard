@@ -90,22 +90,21 @@ export default function StateC({ user, profile, onCheckout }) {
               background: "#3D0B27",
             }}
           >
-            {arch?.videoUrl && (
-              <video
-                src={arch.videoUrl}
-                muted
-                playsInline
-                autoPlay
-                loop
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            )}
+            <video
+              src="https://pub-a26ceee6cec44b839c223b51dba09333.r2.dev/Phoebe-Greenacre-Intro-Yin-stress-digest.mp4"
+              muted
+              playsInline
+              autoPlay
+              loop
+              controls
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
             <div
               style={{
                 position: "absolute",
