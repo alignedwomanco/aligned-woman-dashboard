@@ -311,7 +311,12 @@ export default function Classroom() {
   const hasAccess = (course) => {
     if (isAdmin) return true;
     if (!course.tags || course.tags.length === 0) return true;
-    return course.tags.some((t) => userTags.includes(t));
+    // Honor paid membership the same way the dashboard does, so a member
+    // marked paid via membership_type is not locked out of the classroom.
+    const effectiveTags = user?.membership_type === "paid"
+      ? [...userTags, "blueprint_paid"]
+      : userTags;
+    return course.tags.some((t) => effectiveTags.includes(t));
   };
 
   const isEnrolledInCourse = (courseId) =>
