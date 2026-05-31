@@ -29,6 +29,7 @@ import FeminineWorkbook from './pages/FeminineWorkbook';
 import TermsAndConditions from './pages/TermsAndConditions';
 import Contact from './pages/Contact';
 import ContactForm from './pages/ContactForm';
+import Welcome from './pages/Welcome';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -102,6 +103,7 @@ const AuthenticatedApp = () => {
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
       <Route path="/Contact" element={<LayoutWrapper currentPageName="blueprint"><Contact /></LayoutWrapper>} />
       <Route path="/ContactForm" element={<LayoutWrapper currentPageName="blueprint"><ContactForm /></LayoutWrapper>} />
+      <Route path="/welcome" element={<Welcome />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
