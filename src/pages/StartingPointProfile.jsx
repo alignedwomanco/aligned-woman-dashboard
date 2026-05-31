@@ -581,15 +581,6 @@ export default function StartingPointProfile() {
             <span style={{ fontSize: 12 }}>&#x1F512;</span> Read the full detail
           </button>
         </div>
-      </div>
-    );
-
-    const footerBlock = (
-      <>
-        <div style={{ margin: "32px 0", width: 56, height: 1, background: ROSE }} />
-        <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 460, fontWeight: 300 }}>
-          Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
-        </p>
         <div style={{ marginTop: mobile ? 32 : 40, display: "flex", flexDirection: mobile ? "column" : "row", gap: mobile ? 12 : 16, alignItems: mobile ? "stretch" : "center", flexWrap: "wrap" }}>
           <button
             onClick={handleSeeResult}
@@ -608,6 +599,15 @@ export default function StartingPointProfile() {
             Retake
           </button>
         </div>
+      </div>
+    );
+
+    const footerBlock = (
+      <>
+        <div style={{ margin: "32px 0", width: 56, height: 1, background: ROSE }} />
+        <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 460, fontWeight: 300 }}>
+          Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
+        </p>
       </>
     );
 
