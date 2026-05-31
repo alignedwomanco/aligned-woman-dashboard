@@ -451,15 +451,9 @@ export default function ModulePlayer() {
     }
   };
 
-  // From the module milestone: skip the practice (or no practice) and move on.
+  // From the module milestone: skip the practice (or no practice) and go directly to next module.
   const handleMilestoneContinue = () => {
-    if (isPhaseBoundary) {
-      setMilestone("phase");
-    } else if (isCourseEnd) {
-      setMilestone("course");
-    } else {
-      goToNextModule();
-    }
+    goToNextModule();
   };
 
   const handleMilestoneStartWorkbook = () => {
