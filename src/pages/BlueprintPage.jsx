@@ -435,17 +435,6 @@ function Hero() {
           </span>
         </motion.div>
 
-        {/* Subline italic */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="max-w-[680px] mx-auto mb-8 text-[20px] leading-relaxed"
-          style={{ fontFamily: serif, fontStyle: "italic", color: "rgba(255,255,255,0.65)" }}
-        >
-          You have achieved everything you were supposed to want. And you are still not okay.
-        </motion.p>
-
         {/* Headline H1 */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
