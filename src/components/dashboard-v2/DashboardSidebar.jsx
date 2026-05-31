@@ -25,7 +25,6 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
             src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
             alt="The Aligned Woman"
             className="h-10 w-auto object-contain"
-            style={{ filter: "brightness(0) saturate(100%) invert(13%) sepia(55%) saturate(1200%) hue-rotate(300deg) brightness(70%)" }}
           />
         </Link>
       </div>
