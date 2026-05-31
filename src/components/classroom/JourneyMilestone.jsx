@@ -79,7 +79,7 @@ export default function JourneyMilestone({
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <PrimaryButton onClick={onStartWorkbook}>Start the integration practice</PrimaryButton>
-              <SecondaryButton onClick={onContinue}>Skip for now</SecondaryButton>
+              <SecondaryButton onClick={onContinue}>Continue the Blueprint</SecondaryButton>
             </div>
             <p style={{ fontFamily: FONT_SANS, fontSize: "12px", color: "#8A7A76", marginTop: "16px" }}>
               It stays open. You can come back whenever you are ready.
@@ -91,7 +91,7 @@ export default function JourneyMilestone({
               That is another piece of the picture in place. When you are ready, the next one is waiting.
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <PrimaryButton onClick={onContinue}>Continue</PrimaryButton>
+              <PrimaryButton onClick={onContinue}>Continue the Blueprint</PrimaryButton>
             </div>
           </>
         )}
