@@ -521,16 +521,7 @@ function Hero() {
           <SecondaryCTA />
         </motion.div>
 
-        {/* Guarantee line */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-          className="text-[11px] font-light"
-          style={{ fontFamily: sans, color: "rgba(255,255,255,0.5)" }}
-        >
-          30-day completion guarantee &middot; No credit card required to begin
-        </motion.p>
+
       </div>
     </section>
   );
