@@ -65,7 +65,11 @@ export default function useContinueModule(currentUser) {
   );
 
   const sortedSections = [...sections].sort((a, b) => (a.order || 0) - (b.order || 0));
-  const sortedModules = [...modules].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const sortedModules = sortedSections.flatMap((section) =>
+    [...modules]
+      .filter((m) => m.sectionId === section.id)
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+  );
 
   /** Module is complete when all its pages are done. 0 pages = complete. */
   const isModComplete = (mod) => {
@@ -121,7 +125,9 @@ export default function useContinueModule(currentUser) {
   let inProgressModule = null;
   let bestLastAccessed = null;
 
+  const contentSectionIds = new Set(contentSections.map((s) => s.id));
   for (const mod of sortedModules) {
+    if (!contentSectionIds.has(mod.sectionId)) continue;
     const modPages = pages.filter(p => p.moduleId === mod.id);
     if (modPages.length === 0) continue;
     if (!modPages.some(p => !completedPageIds.has(p.id))) continue;
