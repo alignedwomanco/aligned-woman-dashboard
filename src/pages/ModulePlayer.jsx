@@ -35,6 +35,8 @@ export default function ModulePlayer() {
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
   const [milestone, setMilestone] = useState(null); // null | "module" | "phase" | "course"
+  // Preview mode: local-only completion tracking (never writes to DB)
+  const [previewCompletedIds, setPreviewCompletedIds] = useState(new Set());
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -221,7 +223,28 @@ export default function ModulePlayer() {
 
   const handleTogglePageComplete = async () => {
     const pageProgress = moduleProgress.find((p) => p.pageId === selectedPage.id);
-    const isCurrentlyComplete = pageProgress?.status === "completed" || false;
+    const isCurrentlyComplete = isPreviewMode()
+      ? previewCompletedIds.has(selectedPage.id)
+      : (pageProgress?.status === "completed" || false);
+
+    // In preview mode, just toggle local state without writing to DB
+    if (isPreviewMode()) {
+      setPreviewCompletedIds((prev) => {
+        const next = new Set(prev);
+        if (isCurrentlyComplete) next.delete(selectedPage.id);
+        else next.add(selectedPage.id);
+        return next;
+      });
+      if (!isCurrentlyComplete) {
+        const allPagesCompleted = pages.every((page) =>
+          page.id === selectedPage.id || previewCompletedIds.has(page.id)
+        );
+        if (allPagesCompleted && !module?.isPhaseIntro) {
+          setMilestone("module");
+        }
+      }
+      return;
+    }
 
     await togglePageCompleteMutation.mutateAsync({
       pageId: selectedPage.id,
@@ -325,6 +348,7 @@ export default function ModulePlayer() {
   // ── Computed values ──────────────────────────────────────
 
   const completedPageCount = pages.filter((page) => {
+    if (isPreviewMode()) return previewCompletedIds.has(page.id);
     const p = moduleProgress.find((pr) => pr.pageId === page.id);
     return p?.status === "completed";
   }).length;
@@ -362,6 +386,7 @@ export default function ModulePlayer() {
   // ── Derived state ────────────────────────────────────────
 
   const isPageCompleted = (pageId) => {
+    if (isPreviewMode()) return previewCompletedIds.has(pageId);
     const p = moduleProgress.find((pr) => pr.pageId === pageId);
     return p?.status === "completed" || false;
   };
