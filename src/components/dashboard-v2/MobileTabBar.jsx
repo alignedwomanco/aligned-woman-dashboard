@@ -6,7 +6,6 @@ import { LayoutDashboard, BookOpen, Users, Lightbulb } from "lucide-react";
 const TABS = [
   { name: "Dashboard", path: "Dashboard", icon: LayoutDashboard },
   { name: "Classroom", path: "Classroom", icon: BookOpen },
-  { name: "Community", path: "Community", icon: Users },
   { name: "Experts", path: "ExpertsDirectory", icon: Lightbulb },
 ];
 

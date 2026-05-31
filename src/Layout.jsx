@@ -30,7 +30,7 @@ const publicPages = [
 
 const appNavigation = [
 { name: "Dashboard", label: "Dashboard" },
-{ name: "Community", label: "Community" },
+
 { name: "Members", label: "Members" },
 { name: "Classroom", label: "Classroom" },
 { name: "ExpertsDirectory", label: "Experts" },
