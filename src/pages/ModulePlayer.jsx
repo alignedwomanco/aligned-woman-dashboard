@@ -23,6 +23,7 @@ import {
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import { useToast } from "@/components/ui/use-toast";
+import PractitionerHandoff from "@/components/classroom/PractitionerHandoff";
 
 export default function ModulePlayer() {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export default function ModulePlayer() {
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
+  const [handoffDismissed, setHandoffDismissed] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -145,6 +147,7 @@ export default function ModulePlayer() {
 
   useEffect(() => {
     setSelectedPage(null);
+    setHandoffDismissed(false);
   }, [moduleId]);
 
   useEffect(() => {
@@ -384,6 +387,24 @@ export default function ModulePlayer() {
     sortedCourseModules
       .slice(currentModuleIndex + 1)
       .find((m) => modulesWithPages.has(m.id)) || null;
+
+  const prevModule =
+    [...sortedCourseModules]
+      .slice(0, currentModuleIndex < 0 ? 0 : currentModuleIndex)
+      .reverse()
+      .find((m) => modulesWithPages.has(m.id)) || null;
+
+  const isNewPractitioner =
+    !!prevModule &&
+    !!prevModule.expertId &&
+    !!module?.expertId &&
+    prevModule.expertId !== module.expertId;
+
+  const showHandoff =
+    isNewPractitioner &&
+    !handoffDismissed &&
+    currentPageIndex === 0 &&
+    !!expert;
 
   const courseWorkbook =
     workbooks.find((w) => w.expert_id === module?.expertId) ||
@@ -1567,6 +1588,18 @@ export default function ModulePlayer() {
           <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76" }} />
         </button>
       </div>
+
+      <AnimatePresence>
+        {showHandoff && (
+          <PractitionerHandoff
+            previousModuleTitle={prevModule?.title}
+            expert={expert}
+            moduleTitle={module?.title}
+            durationMinutes={module?.durationMinutes}
+            onDismiss={() => setHandoffDismissed(true)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
