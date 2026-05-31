@@ -445,32 +445,38 @@ export default function ModulePlayer() {
     sortedSections.filter((s) => !isWelcomeSection(s)).map((s) => s.id)
   );
 
-  // Completion-based progression over content phases only.
+  // Linear progression over content phases only: always advance to the NEXT
+  // module in course order, never the "first incomplete" one. This keeps the
+  // flow moving forward (module -> module -> end of phase -> next phase) even
+  // if an earlier module was left unfinished.
   const courseModulesWithPages = sortedCourseModules.filter(
     (m) => modulesWithPages.has(m.id) && contentSectionIds.has(m.sectionId)
   );
-  const nextIncompleteModule =
-    courseModulesWithPages.find((m) => m.id !== moduleId && !isModuleComplete(m.id)) || null;
+  const currentContentIdx = courseModulesWithPages.findIndex((m) => m.id === moduleId);
+  const nextModuleInOrder =
+    currentContentIdx >= 0
+      ? courseModulesWithPages[currentContentIdx + 1] || null
+      : null;
 
-  const isCourseEnd = !nextIncompleteModule;
+  const isCourseEnd = currentContentIdx >= 0 && !nextModuleInOrder;
   const isPhaseBoundary =
     contentSectionIds.has(module?.sectionId) &&
-    !!nextIncompleteModule &&
-    nextIncompleteModule.sectionId !== module?.sectionId;
+    !!nextModuleInOrder &&
+    nextModuleInOrder.sectionId !== module?.sectionId;
 
-  const nextSection = nextIncompleteModule
-    ? sortedSections.find((s) => s.id === nextIncompleteModule.sectionId)
+  const nextSection = nextModuleInOrder
+    ? sortedSections.find((s) => s.id === nextModuleInOrder.sectionId)
     : null;
-  const nextExpertName = nextIncompleteModule
-    ? expertMap[nextIncompleteModule.expertId]?.name || ""
+  const nextExpertName = nextModuleInOrder
+    ? expertMap[nextModuleInOrder.expertId]?.name || ""
     : "";
 
   const goToNextModule = () => {
     setMilestone(null);
-    if (nextIncompleteModule) {
+    if (nextModuleInOrder) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextIncompleteModule.id}&courseId=${courseId}`
+          `?moduleId=${nextModuleInOrder.id}&courseId=${courseId}`
       );
     } else {
       navigate("/Dashboard");
@@ -1682,7 +1688,7 @@ export default function ModulePlayer() {
             stage={milestone}
             moduleTitle={module?.title}
             hasWorkbook={!!courseWorkbook}
-            nextModuleTitle={nextIncompleteModule?.title}
+            nextModuleTitle={nextModuleInOrder?.title}
             nextExpertName={nextExpertName}
             phaseLetter={phaseLetterOf(moduleSection)}
             phaseName={phaseNameOf(moduleSection)}
