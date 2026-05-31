@@ -181,8 +181,9 @@ function WorkbookViewerInner({ workbookId }) {
   });
 
   const { data: wbProgress = [] } = useQuery({
-    queryKey: ["wbCourseProgress"],
-    queryFn: () => base44.entities.CourseProgress.filter({}),
+    queryKey: ["wbCourseProgress", user?.email],
+    queryFn: () => base44.entities.CourseProgress.filter({ created_by: user?.email }),
+    enabled: !!user?.email,
   });
 
   const wbSortedSections = [...wbAllSections].sort((a, b) => {
@@ -202,6 +203,11 @@ function WorkbookViewerInner({ workbookId }) {
       })
   );
   const wbModulesWithPages = new Set(wbAllPages.map((p) => p.moduleId));
+  const wbIsWelcomeSection = (s) =>
+    (s?.order === 0) || (s?.title || "").toLowerCase().includes("welcome");
+  const wbContentSectionIds = new Set(
+    wbSortedSections.filter((s) => !wbIsWelcomeSection(s)).map((s) => s.id)
+  );
   const wbIsModuleComplete = (mId) => {
     const mPages = wbAllPages.filter((pg) => pg.moduleId === mId);
     if (mPages.length === 0) return false;
@@ -210,7 +216,12 @@ function WorkbookViewerInner({ workbookId }) {
     );
   };
   const wbNextModule =
-    wbSortedModules.find((m) => wbModulesWithPages.has(m.id) && !wbIsModuleComplete(m.id)) || null;
+    wbSortedModules.find(
+      (m) =>
+        wbModulesWithPages.has(m.id) &&
+        wbContentSectionIds.has(m.sectionId) &&
+        !wbIsModuleComplete(m.id)
+    ) || null;
 
   const handleContinueNext = () => {
     if (wbNextModule) {
