@@ -1,8 +1,36 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
   const navigate = useNavigate();
+
+  // Resume point for "Continue the Blueprint": last active module in CourseProgress.
+  const { data: courseProgress = [] } = useQuery({
+    queryKey: ["wcCourseProgress"],
+    queryFn: () => base44.entities.CourseProgress.filter({}),
+  });
+
+  const resumeModule = useMemo(() => {
+    const active = (courseProgress || [])
+      .filter((p) => p.moduleId && (p.status === "in_progress" || p.status === "completed"))
+      .sort((a, b) => {
+        const ad = a.updated_date || a.created_date || "";
+        const bd = b.updated_date || b.created_date || "";
+        return bd.localeCompare(ad);
+      });
+    return active[0] || null;
+  }, [courseProgress]);
+
+  const handleContinueBlueprint = () => {
+    if (resumeModule?.moduleId) {
+      const cid = resumeModule.courseId ? `&courseId=${resumeModule.courseId}` : "";
+      window.location.href = `/ModulePlayer?moduleId=${resumeModule.moduleId}${cid}`;
+    } else {
+      navigate("/Dashboard");
+    }
+  };
 
   const bodyText = closingText?.trim()
     ? closingText.trim()
@@ -56,7 +84,7 @@ export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
         {/* Buttons */}
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <button
-            onClick={() => navigate("/Dashboard")}
+            onClick={handleContinueBlueprint}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -76,6 +104,31 @@ export default function WorkbookCelebration({ onBackToWorkbook, closingText }) {
             }}
             onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
             onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            Continue the Blueprint
+          </button>
+
+          <button
+            onClick={() => navigate("/Dashboard")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "14px 28px",
+              borderRadius: 100,
+              background: "transparent",
+              color: "#4A0E2E",
+              border: "1px solid #4A0E2E",
+              fontFamily: "var(--aw-font-sans)",
+              fontWeight: 700,
+              fontSize: 10,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              transition: "all 180ms ease",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(74,14,46,0.05)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
             Return to Dashboard
           </button>
