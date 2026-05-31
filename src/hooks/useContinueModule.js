@@ -37,9 +37,10 @@ export default function useContinueModule(currentUser) {
   });
 
   const { data: progress, isLoading: loadingProgress } = useQuery({
-    queryKey: ["continue-progress"],
-    queryFn: () => base44.entities.CourseProgress.filter({}),
+    queryKey: ["continue-progress", currentUser?.email],
+    queryFn: () => base44.entities.CourseProgress.filter({ created_by: currentUser?.email }),
     initialData: [],
+    enabled: !!currentUser?.email,
   });
 
   const { data: experts, isLoading: loadingExperts } = useQuery({
