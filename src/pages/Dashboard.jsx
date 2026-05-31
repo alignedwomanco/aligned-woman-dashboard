@@ -51,7 +51,7 @@ function DashboardSkeleton() {
   );
 }
 
-function DashboardError({ message, onRetry }) {
+function DashboardError({ message, onRetry, onLogout }) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="bg-paper rounded-xl border border-awburg-core/8 p-8 max-w-md text-center">
@@ -64,12 +64,22 @@ function DashboardError({ message, onRetry }) {
         <p className="font-body font-light text-awburg-core/75 text-sm leading-relaxed mb-6">
           {message || "Please try again, or sign out and back in."}
         </p>
-        <button
-          onClick={onRetry}
-          className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
-        >
-          REFRESH
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={onRetry}
+            className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
+          >
+            REFRESH
+          </button>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="inline-flex items-center gap-2 border border-awburg-core/30 text-awburg-core hover:bg-awburg-core/5 text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
+            >
+              LOG OUT
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -83,6 +93,23 @@ export default function Dashboard() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCheckComplete, setAdminCheckComplete] = useState(false);
+
+  // A member arriving from an emailed link may not be signed in yet.
+  // Send them to Base44's own sign-in, then return them here.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const authed = await base44.auth.isAuthenticated();
+        if (!authed && active) {
+          base44.auth.redirectToLogin(window.location.href);
+        }
+      } catch (e) {
+        // If the check fails, leave the page to render its normal state.
+      }
+    })();
+    return () => { active = false; };
+  }, []);
 
   // Process pending quiz result from localStorage (set by StartingPointProfile after quiz completion)
   useEffect(() => {
@@ -159,10 +186,55 @@ export default function Dashboard() {
       const result = await getDashboardState();
       setData(result);
       setStatus("ready");
+      return;
     } catch (err) {
-      setErrorMsg(err?.message || "Unknown error");
-      setStatus("error");
+      const msg = err?.message || "Unknown error";
+
+      // Anything other than a missing profile: show the generic error card.
+      if (!msg.toLowerCase().includes("no memberprofile")) {
+        setErrorMsg(msg);
+        setStatus("error");
+        return;
+      }
+
+      // No MemberProfile yet. Branch on whether this account is entitled.
+      try {
+        const me = await base44.auth.me();
+        const tags = Array.isArray(me?.access_tags) ? me.access_tags : [];
+        const isPaid =
+          me?.membership_type === "paid" ||
+          tags.includes("blueprint_paid") ||
+          ["admin", "owner", "master_admin"].includes(me?.role);
+
+        if (!isPaid) {
+          // Logged in, but this email is not registered for the course.
+          setStatus("not_registered");
+          return;
+        }
+
+        // Paid member with no profile yet (e.g. added manually): create one, then retry.
+        if (me?.id) {
+          await base44.entities.MemberProfile.create({
+            user_id: me.id,
+            first_name: me.full_name?.split(" ")[0] || "",
+            full_name: me.full_name || "",
+            has_seen_welcome: false,
+            signup_timestamp: new Date().toISOString(),
+          });
+        }
+        const result = await getDashboardState();
+        setData(result);
+        setStatus("ready");
+      } catch (e2) {
+        setErrorMsg(e2?.message || msg);
+        setStatus("error");
+      }
     }
+  };
+
+  const handleLogout = () => {
+    // Log out, then land back on the dashboard, which prompts a fresh sign-in.
+    base44.auth.logout(`${window.location.origin}/Dashboard`);
   };
 
   useEffect(() => {
@@ -251,6 +323,38 @@ export default function Dashboard() {
     );
   }
 
+  if (status === "not_registered") {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <DashboardSidebar />
+        <MobileTabBar />
+        <div className="lg:pl-60 pb-20 lg:pb-0">
+          <main className="px-6 md:px-10 py-10 max-w-[1400px]">
+            <div className="min-h-[60vh] flex items-center justify-center">
+              <div className="bg-paper rounded-xl border border-awburg-core/8 p-8 max-w-md text-center">
+                <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-3">
+                  WELCOME
+                </p>
+                <h2 className="font-display text-awburg-core text-2xl leading-tight mb-3">
+                  Oops! You don't seem to be registered for this course.
+                </h2>
+                <p className="font-body font-light text-awburg-core/75 text-sm leading-relaxed mb-6">
+                  If you have paid for this course, you may have tried to enter on another email address. Log out and sign in with the email you used when you joined.
+                </p>
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
+                >
+                  LOG OUT AND TRY ANOTHER EMAIL
+                </button>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   if (status === "error") {
     if (errorMsg && typeof errorMsg === "string" && errorMsg.toLowerCase().includes("auth")) {
       window.location.href = "/";
@@ -262,7 +366,7 @@ export default function Dashboard() {
         <MobileTabBar />
         <div className="lg:pl-60 pb-20 lg:pb-0">
           <main className="px-6 md:px-10 py-10 max-w-[1400px]">
-            <DashboardError message={errorMsg} onRetry={load} />
+            <DashboardError message={errorMsg} onRetry={load} onLogout={handleLogout} />
           </main>
         </div>
       </div>
@@ -320,6 +424,7 @@ export default function Dashboard() {
                 <DashboardError
                   message={`Unrecognised dashboard state: ${state}`}
                   onRetry={load}
+                  onLogout={handleLogout}
                 />
               )}
             </section>
