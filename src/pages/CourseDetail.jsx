@@ -611,6 +611,7 @@ export default function CourseDetail() {
   const navigate = useNavigate();
   const courseId = searchParams.get("courseId") || searchParams.get("id");
   const phaseParam = searchParams.get("phase");
+  const isNewUserPreview = searchParams.get("preview") === "new_user";
 
   const [course, setCourse] = useState(null);
   const [sections, setSections] = useState([]);
@@ -646,7 +647,7 @@ export default function CourseDetail() {
         const rawPages = await base44.entities.CoursePage.filter({ courseId });
         setPages(rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
-        if (email) {
+        if (email && !isNewUserPreview) {
           const prog = await base44.entities.CourseProgress.filter({});
           setProgress(prog);
           const profileArr = await base44.entities.MemberProfile.filter(
@@ -879,6 +880,21 @@ export default function CourseDetail() {
       <style>{PAGE_CSS}</style>
 
       <div className="mx-auto px-4 sm:px-6 lg:px-10 py-6" style={{ maxWidth: 1480 }}>
+        {/* Admin preview banner */}
+        {isNewUserPreview && (
+          <div style={{ marginBottom: 16, background: "#FEF3C7", border: "1px solid #FCD34D", borderRadius: 8, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <span style={{ fontFamily: "var(--aw-font-sans)", fontSize: 12, fontWeight: 700, color: "#92400E", letterSpacing: "0.1em" }}>
+              ADMIN PREVIEW · New user (zero progress)
+            </span>
+            <button
+              onClick={() => setSearchParams((prev) => { const next = new URLSearchParams(prev); next.delete("preview"); return next; }, { replace: true })}
+              style={{ fontFamily: "var(--aw-font-sans)", fontSize: 11, fontWeight: 700, color: "#92400E", background: "transparent", border: "1px solid #FCD34D", borderRadius: 100, padding: "4px 12px", cursor: "pointer" }}
+            >
+              Exit Preview
+            </button>
+          </div>
+        )}
+
         {/* Back link */}
         <Link to={createPageUrl("Classroom")}
           className="inline-flex items-center gap-2 mb-5"
