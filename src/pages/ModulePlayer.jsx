@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { isPreviewMode } from "@/lib/previewMode";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -35,8 +34,6 @@ export default function ModulePlayer() {
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
   const [milestone, setMilestone] = useState(null); // null | "module" | "phase" | "course"
-  // Preview mode: local-only completion tracking (never writes to DB)
-  const [previewCompletedIds, setPreviewCompletedIds] = useState(new Set());
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -80,7 +77,7 @@ export default function ModulePlayer() {
   // moduleId.  Page IDs are unique across modules so page-level finds are safe.
   const { data: rawProgress = [] } = useQuery({
     queryKey: ["courseProgress"],
-    queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({}),
+    queryFn: () => base44.entities.CourseProgress.filter({}),
   });
 
   // Deduplicate: keep only the most recently updated record per pageId so
@@ -223,28 +220,7 @@ export default function ModulePlayer() {
 
   const handleTogglePageComplete = async () => {
     const pageProgress = moduleProgress.find((p) => p.pageId === selectedPage.id);
-    const isCurrentlyComplete = isPreviewMode()
-      ? previewCompletedIds.has(selectedPage.id)
-      : (pageProgress?.status === "completed" || false);
-
-    // In preview mode, just toggle local state without writing to DB
-    if (isPreviewMode()) {
-      setPreviewCompletedIds((prev) => {
-        const next = new Set(prev);
-        if (isCurrentlyComplete) next.delete(selectedPage.id);
-        else next.add(selectedPage.id);
-        return next;
-      });
-      if (!isCurrentlyComplete) {
-        const allPagesCompleted = pages.every((page) =>
-          page.id === selectedPage.id || previewCompletedIds.has(page.id)
-        );
-        if (allPagesCompleted && !module?.isPhaseIntro) {
-          setMilestone("module");
-        }
-      }
-      return;
-    }
+    const isCurrentlyComplete = pageProgress?.status === "completed" || false;
 
     await togglePageCompleteMutation.mutateAsync({
       pageId: selectedPage.id,
@@ -348,7 +324,6 @@ export default function ModulePlayer() {
   // ── Computed values ──────────────────────────────────────
 
   const completedPageCount = pages.filter((page) => {
-    if (isPreviewMode()) return previewCompletedIds.has(page.id);
     const p = moduleProgress.find((pr) => pr.pageId === page.id);
     return p?.status === "completed";
   }).length;
@@ -386,7 +361,6 @@ export default function ModulePlayer() {
   // ── Derived state ────────────────────────────────────────
 
   const isPageCompleted = (pageId) => {
-    if (isPreviewMode()) return previewCompletedIds.has(pageId);
     const p = moduleProgress.find((pr) => pr.pageId === pageId);
     return p?.status === "completed" || false;
   };
@@ -432,28 +406,58 @@ export default function ModulePlayer() {
   const expertMap = {};
   allExperts.forEach((e) => { expertMap[e.id] = e; });
 
-  const nextSection = nextModule
-    ? sortedSections.find((s) => s.id === nextModule.sectionId)
+  // Phase name/letter are derived from the section title ("Phase 1 - Awareness"),
+  // since the sections do not store them separately.
+  const phaseNameOf = (section) =>
+    (section?.title || "").split(" - ")[1]?.trim() || section?.title || "";
+  const phaseLetterOf = (section) => (phaseNameOf(section)[0] || "").toUpperCase();
+
+  // A module is complete when all of its pages are completed.
+  const isModuleComplete = (mId) => {
+    const mPages = allCoursePages.filter((pg) => pg.moduleId === mId);
+    if (mPages.length === 0) return false;
+    return mPages.every(
+      (pg) => moduleProgress.find((pr) => pr.pageId === pg.id)?.status === "completed"
+    );
+  };
+
+  // Completion-based progression, robust to messy section/module ordering.
+  const courseModulesWithPages = sortedCourseModules.filter((m) => modulesWithPages.has(m.id));
+  const nextIncompleteModule =
+    courseModulesWithPages.find((m) => m.id !== moduleId && !isModuleComplete(m.id)) || null;
+
+  const isCourseEnd = !nextIncompleteModule;
+  const isPhaseBoundary =
+    !!nextIncompleteModule && nextIncompleteModule.sectionId !== module?.sectionId;
+
+  const nextSection = nextIncompleteModule
+    ? sortedSections.find((s) => s.id === nextIncompleteModule.sectionId)
     : null;
-  const isCourseEnd = !nextModule;
-  const isPhaseBoundary = !!nextModule && nextModule.sectionId !== module?.sectionId;
-  const nextExpertName = nextModule ? expertMap[nextModule.expertId]?.name || "" : "";
+  const nextExpertName = nextIncompleteModule
+    ? expertMap[nextIncompleteModule.expertId]?.name || ""
+    : "";
 
   const goToNextModule = () => {
     setMilestone(null);
-    if (nextModule) {
+    if (nextIncompleteModule) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextModule.id}&courseId=${courseId}`
+          `?moduleId=${nextIncompleteModule.id}&courseId=${courseId}`
       );
     } else {
       navigate("/Dashboard");
     }
   };
 
-  // From the module milestone: skip the practice (or no practice) and go directly to next module.
+  // From the module milestone: move on once the practice is skipped or done.
   const handleMilestoneContinue = () => {
-    goToNextModule();
+    if (isCourseEnd) {
+      setMilestone("course");
+    } else if (isPhaseBoundary) {
+      setMilestone("phase");
+    } else {
+      goToNextModule();
+    }
   };
 
   const handleMilestoneStartWorkbook = () => {
@@ -1650,12 +1654,12 @@ export default function ModulePlayer() {
             stage={milestone}
             moduleTitle={module?.title}
             hasWorkbook={!!courseWorkbook}
-            nextModuleTitle={nextModule?.title}
+            nextModuleTitle={nextIncompleteModule?.title}
             nextExpertName={nextExpertName}
-            phaseLetter={moduleSection?.phase_letter}
-            phaseName={moduleSection?.phase_name}
+            phaseLetter={phaseLetterOf(moduleSection)}
+            phaseName={phaseNameOf(moduleSection)}
             phaseTagline={moduleSection?.tagline}
-            nextPhaseName={nextSection?.phase_name}
+            nextPhaseName={phaseNameOf(nextSection)}
             onStartWorkbook={handleMilestoneStartWorkbook}
             onContinue={handleMilestoneContinue}
             onNextPhase={goToNextModule}
