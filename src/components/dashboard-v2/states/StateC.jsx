@@ -96,7 +96,6 @@ export default function StateC({ user, profile, onCheckout }) {
               playsInline
               autoPlay
               loop
-              controls
               style={{
                 position: "absolute",
                 inset: 0,
