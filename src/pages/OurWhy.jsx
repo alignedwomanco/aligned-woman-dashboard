@@ -205,7 +205,7 @@ export default function OurWhy() {
             Learn More
           </Link>
         </div>
-        <p className="text-white/30 text-xs mt-12">© {new Date().getFullYear()} The Aligned Woman Blueprint · All rights reserved</p>
+
       </section>
     </div>
   );
