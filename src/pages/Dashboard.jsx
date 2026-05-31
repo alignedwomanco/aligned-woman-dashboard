@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { enablePreviewMode, disablePreviewMode } from "@/lib/previewMode";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardState } from "@/lib/dashboardState";
 import useContinueModule from "@/hooks/useContinueModule";
@@ -352,7 +353,7 @@ export default function Dashboard() {
           </a>
           <div className="space-y-2">
             <button
-              onClick={() => setStateOverride("new_paid_user")}
+              onClick={() => { enablePreviewMode(); setStateOverride("new_paid_user"); }}
               className={`w-full text-left px-3 py-2 rounded transition-colors ${
                 stateOverride === "new_paid_user"
                   ? "bg-amber-600 text-white"
@@ -362,7 +363,7 @@ export default function Dashboard() {
               New paid user (blank)
             </button>
             <button
-              onClick={() => setStateOverride("state_a_no_quiz")}
+              onClick={() => { disablePreviewMode(); setStateOverride("state_a_no_quiz"); }}
               className={`w-full text-left px-3 py-2 rounded transition-colors ${
                 stateOverride === "state_a_no_quiz"
                   ? "bg-awburg-core text-white"
@@ -372,7 +373,7 @@ export default function Dashboard() {
               A (no quiz)
             </button>
             <button
-              onClick={() => setStateOverride("state_a_with_quiz")}
+              onClick={() => { disablePreviewMode(); setStateOverride("state_a_with_quiz"); }}
               className={`w-full text-left px-3 py-2 rounded transition-colors ${
                 stateOverride === "state_a_with_quiz"
                   ? "bg-awburg-core text-white"
@@ -382,7 +383,7 @@ export default function Dashboard() {
               A (with quiz)
             </button>
             <button
-              onClick={() => setStateOverride("state_b")}
+              onClick={() => { disablePreviewMode(); setStateOverride("state_b"); }}
               className={`w-full text-left px-3 py-2 rounded transition-colors ${
                 stateOverride === "state_b"
                   ? "bg-awburg-core text-white"
@@ -392,7 +393,7 @@ export default function Dashboard() {
               B (welcome)
             </button>
             <button
-              onClick={() => setStateOverride("state_c")}
+              onClick={() => { disablePreviewMode(); setStateOverride("state_c"); }}
               className={`w-full text-left px-3 py-2 rounded transition-colors ${
                 stateOverride === "state_c"
                   ? "bg-awburg-core text-white"
@@ -402,7 +403,7 @@ export default function Dashboard() {
               C (free)
             </button>
             <button
-              onClick={() => setStateOverride(null)}
+              onClick={() => { disablePreviewMode(); setStateOverride(null); }}
               className={`w-full text-left px-3 py-2 rounded transition-colors ${
                 stateOverride === null
                   ? "bg-awburg-core text-white"

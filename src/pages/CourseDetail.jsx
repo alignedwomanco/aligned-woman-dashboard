@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { isPreviewMode } from "@/lib/previewMode";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -647,7 +648,7 @@ export default function CourseDetail() {
         const rawPages = await base44.entities.CoursePage.filter({ courseId });
         setPages(rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
-        if (email && !isNewUserPreview) {
+        if (email && !isNewUserPreview && !isPreviewMode()) {
           const prog = await base44.entities.CourseProgress.filter({});
           setProgress(prog);
           const profileArr = await base44.entities.MemberProfile.filter(

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { isPreviewMode } from "@/lib/previewMode";
 import { Loader2, BookOpen, ArrowLeft, ArrowRight, Download, ChevronLeft, ChevronRight, Check, Lock, Zap, UtensilsCrossed, BarChart3, TrendingUp, X, Menu } from "lucide-react";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -1206,7 +1207,7 @@ export default function NutritionWorkbook() {
   // Resume point for "Continue the Blueprint": the module the learner was last active in.
   const { data: courseProgress = [] } = useQuery({
     queryKey: ["nwCourseProgress"],
-    queryFn: () => base44.entities.CourseProgress.filter({}),
+    queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({}),
   });
 
   const resumeModule = useMemo(() => {

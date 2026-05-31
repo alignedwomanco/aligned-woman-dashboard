@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { isPreviewMode } from "@/lib/previewMode";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ export default function ModulePlayer() {
   // moduleId.  Page IDs are unique across modules so page-level finds are safe.
   const { data: rawProgress = [] } = useQuery({
     queryKey: ["courseProgress"],
-    queryFn: () => base44.entities.CourseProgress.filter({}),
+    queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({}),
   });
 
   // Deduplicate: keep only the most recently updated record per pageId so

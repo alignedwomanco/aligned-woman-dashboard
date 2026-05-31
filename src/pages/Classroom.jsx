@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { isPreviewMode } from "@/lib/previewMode";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 
@@ -282,7 +283,7 @@ export default function Classroom() {
   // Course progress
   const { data: progressRecords = [] } = useQuery({
     queryKey: ["classroom-progress", user?.email],
-    queryFn: () => base44.entities.CourseProgress.filter({ created_by: user.email }, "-lastAccessedAt"),
+    queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({ created_by: user.email }, "-lastAccessedAt"),
     enabled: !!user?.email,
   });
 
