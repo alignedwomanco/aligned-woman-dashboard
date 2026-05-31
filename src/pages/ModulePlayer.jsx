@@ -236,6 +236,23 @@ export default function ModulePlayer() {
 
       if (allPagesCompleted) {
         await completeModule();
+        // Welcome intro: send them straight into the first content module
+        // (Awareness), with no module/phase milestone in between.
+        const currentSec = allCourseSections.find((s) => s.id === module?.sectionId);
+        const onWelcome =
+          currentSec &&
+          ((currentSec.order ?? 0) === 0 ||
+            (currentSec.title || "").toLowerCase().includes("welcome"));
+        if (onWelcome) {
+          const firstContent = courseModulesWithPages[0] || null;
+          if (firstContent) {
+            navigate(
+              createPageUrl("ModulePlayer") +
+                `?moduleId=${firstContent.id}&courseId=${courseId}`
+            );
+            return;
+          }
+        }
         if (!module?.isPhaseIntro) {
           setMilestone("module");
         }
