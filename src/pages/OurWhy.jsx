@@ -191,16 +191,10 @@ export default function OurWhy() {
         <p className="text-white/60 text-sm mb-8 max-w-md mx-auto">
           The Aligned Woman Blueprint is the first education system built entirely around the female brain, body, and lived experience.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex justify-center">
           <Link
-            to={createPageUrl("Apply")}
-            className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-[#C4847A] text-white font-bold text-sm tracking-widest uppercase hover:bg-[#A86460] transition-colors"
-          >
-            Apply Now
-          </Link>
-          <Link
-            to={createPageUrl("ALIVEMethod")}
-            className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-white/30 text-white font-bold text-sm tracking-widest uppercase hover:bg-white/10 transition-colors"
+            to="/blueprint"
+            className="inline-flex items-center justify-center px-12 py-4 rounded-full border border-white/30 text-white font-bold text-base tracking-widest uppercase hover:bg-white/10 transition-colors"
           >
             Learn More
           </Link>
