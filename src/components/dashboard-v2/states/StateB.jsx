@@ -23,6 +23,15 @@ export default function StateB({ user, profile, workbookData = [], continueData 
     ? createPageUrl("ModulePlayer") + `?moduleId=${continueData.module.id}&courseId=${courseId}`
     : `${createPageUrl("CourseDetail")}?courseId=${courseId}`;
 
+  // Welcome intro gate: until the Introduction is complete, the main action is
+  // "Start here" and opens it. After that it reverts to the phase continue.
+  const welcomeModule = continueData?.welcomeModule || null;
+  const showWelcome = !!welcomeModule && continueData?.welcomeComplete === false;
+  const welcomeExpertName = continueData?.welcomeExpertName || "";
+  const primaryUrl = showWelcome && welcomeModule
+    ? createPageUrl("ModulePlayer") + `?moduleId=${welcomeModule.id}&courseId=${courseId}`
+    : continueUrl;
+
   return (
     <div className="space-y-6">
       {/* Welcome hero */}
@@ -52,17 +61,27 @@ export default function StateB({ user, profile, workbookData = [], continueData 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 uppercase mb-1">
-              {continueData?.module ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}` : "YOUR NEXT STEP"}
+              {showWelcome
+                ? "START HERE"
+                : continueData?.module
+                ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}`
+                : "YOUR NEXT STEP"}
             </p>
             <p className="font-display text-awburg-core text-lg leading-snug">
-              {continueData?.module?.title || "Begin Awareness"}
+              {showWelcome
+                ? "Welcome to The Aligned Woman"
+                : continueData?.module?.title || "Begin Awareness"}
             </p>
-            {continueData?.expert?.name && (
-              <p className="font-body text-xs text-awburg-core/60 mt-1">with {continueData.expert.name}</p>
-            )}
+            {showWelcome
+              ? welcomeExpertName && (
+                  <p className="font-body text-xs text-awburg-core/60 mt-1">with {welcomeExpertName}</p>
+                )
+              : continueData?.expert?.name && (
+                  <p className="font-body text-xs text-awburg-core/60 mt-1">with {continueData.expert.name}</p>
+                )}
           </div>
-          <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0" style={{ animation: "continuePulse 2.5s ease-in-out infinite" }}>
-            CONTINUE YOUR PHASE <ArrowRight className="w-4 h-4" />
+          <button onClick={() => navigate(primaryUrl)} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0" style={{ animation: "continuePulse 2.5s ease-in-out infinite" }}>
+            {showWelcome ? "START HERE" : "CONTINUE YOUR PHASE"} <ArrowRight className="w-4 h-4" />
           </button>
           <style>{`@keyframes continuePulse { 0%,100%{box-shadow:0 0 0 0 rgba(196,132,122,0.45)} 50%{box-shadow:0 0 0 8px rgba(196,132,122,0)} }`}</style>
         </div>
