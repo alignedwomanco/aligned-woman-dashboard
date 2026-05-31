@@ -581,24 +581,6 @@ export default function StartingPointProfile() {
             <span style={{ fontSize: 12 }}>&#x1F512;</span> Read the full detail
           </button>
         </div>
-        <div style={{ marginTop: mobile ? 32 : 40, display: "flex", flexDirection: mobile ? "column" : "row", gap: mobile ? 12 : 16, alignItems: mobile ? "stretch" : "center", flexWrap: "wrap" }}>
-          <button
-            onClick={handleSeeResult}
-            style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "16px 28px" : "18px 36px", borderRadius: 100, background: ROSE, color: "#FFFFFF", border: "none", fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `background 180ms ${EASE}` }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = ROSE_DEEP)}
-            onMouseLeave={(e) => (e.currentTarget.style.background = ROSE)}
-          >
-            See your full result <span>&#8594;</span>
-          </button>
-          <button
-            onClick={restart}
-            style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "15px 28px" : "17px 36px", borderRadius: 100, background: "transparent", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
-          >
-            Retake
-          </button>
-        </div>
       </div>
     );
 
@@ -631,14 +613,36 @@ export default function StartingPointProfile() {
       <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
         <div style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "88px 64px 120px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
+          {/* Top: 2-col grid */}
           <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 56, alignItems: "start" }}>
-            <div>
-              {videoCard(300)}
-              {footerBlock}
-            </div>
+            <div>{videoCard(300)}</div>
             <div>
               {headerBlock}
               {detailBlock}
+            </div>
+          </div>
+          {/* Bottom: full-width centered footer */}
+          <div style={{ marginTop: 56, textAlign: "center" }}>
+            <p style={{ margin: "0 auto 28px", fontFamily: SANS, fontSize: 15, lineHeight: 1.75, color: INK_BODY, maxWidth: 460, fontWeight: 300 }}>
+              Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
+            </p>
+            <button
+              onClick={handleSeeResult}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 26px", borderRadius: 100, background: "#FFFFFF", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
+            >
+              <span style={{ fontSize: 12 }}>&#x1F512;</span> Read the full detail
+            </button>
+            <div style={{ marginTop: 12 }}>
+              <button
+                onClick={restart}
+                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "12px 28px", borderRadius: 100, background: "transparent", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
+              >
+                Retake
+              </button>
             </div>
           </div>
         </div>
