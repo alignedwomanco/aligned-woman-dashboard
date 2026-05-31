@@ -63,8 +63,14 @@ export default function MembersManager({ allUsers }) {
   });
 
   const removeMemberMutation = useMutation({
-    mutationFn: (userId) => base44.entities.User.update(userId, { is_member: false }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["allUsers"] }),
+    mutationFn: (userId) => base44.functions.invoke("deleteUser", { userId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      alert("User deleted successfully!");
+    },
+    onError: (error) => {
+      alert(`Failed to delete user: ${error.message}`);
+    },
   });
 
   const inviteMemberMutation = useMutation({
@@ -260,7 +266,7 @@ export default function MembersManager({ allUsers }) {
                           <Button variant="ghost" size="sm" title="Tags" onClick={() => setEditTagsMember(member)} className="h-8 w-8 p-0">
                             <Tag className="w-4 h-4 text-blue-600" />
                           </Button>
-                          <Button variant="ghost" size="sm" title="Remove from members" onClick={() => { if (confirm(`Remove ${member.full_name || member.email} from members? This will NOT delete their account.`)) removeMemberMutation.mutate(member.id); }} className="h-8 w-8 p-0">
+                          <Button variant="ghost" size="sm" title="Delete user" onClick={() => { if (confirm(`Permanently delete ${member.full_name || member.email}? This cannot be undone.`)) removeMemberMutation.mutate(member.id); }} className="h-8 w-8 p-0">
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
                         </div>
