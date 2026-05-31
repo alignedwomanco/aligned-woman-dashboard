@@ -1203,6 +1203,32 @@ export default function NutritionWorkbook() {
     enabled: !!workbook?.expert_id,
   });
 
+  // Resume point for "Continue the Blueprint": the module the learner was last active in.
+  const { data: courseProgress = [] } = useQuery({
+    queryKey: ["nwCourseProgress"],
+    queryFn: () => base44.entities.CourseProgress.filter({}),
+  });
+
+  const resumeModule = useMemo(() => {
+    const active = (courseProgress || [])
+      .filter((p) => p.moduleId && (p.status === "in_progress" || p.status === "completed"))
+      .sort((a, b) => {
+        const ad = a.updated_date || a.created_date || "";
+        const bd = b.updated_date || b.created_date || "";
+        return bd.localeCompare(ad);
+      });
+    return active[0] || null;
+  }, [courseProgress]);
+
+  const handleContinueBlueprint = () => {
+    if (resumeModule?.moduleId) {
+      const cid = resumeModule.courseId ? `&courseId=${resumeModule.courseId}` : "";
+      window.location.href = `/ModulePlayer?moduleId=${resumeModule.moduleId}${cid}`;
+    } else {
+      window.location.href = "/Dashboard";
+    }
+  };
+
   const { data: nutritionProfile } = useQuery({
     queryKey: ["nutritionProfile"],
     queryFn: async () => {
@@ -1407,7 +1433,10 @@ export default function NutritionWorkbook() {
             <p className="text-[7px] tracking-[0.25em] font-bold uppercase" style={{ color: "var(--aw-rose-core)" }}>Nutrition Module</p>
             <p className="text-base" style={{ fontFamily: "var(--aw-font-display)", fontStyle: "italic", color: "var(--aw-rose-light)" }}>Food Blueprint</p>
           </div>
-          <Link to="/Dashboard" className="px-3 py-1.5 rounded-md text-[9px] font-semibold" style={{ background: "rgba(196,132,122,0.2)", color: "var(--aw-rose-light)" }}>DASHBOARD</Link>
+          <div className="flex items-center gap-2">
+            <button onClick={handleContinueBlueprint} className="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-wide" style={{ background: "var(--aw-rose-core)", color: "var(--aw-ink)" }}>Continue</button>
+            <Link to="/Dashboard" className="px-3 py-1.5 rounded-md text-[9px] font-semibold" style={{ background: "rgba(196,132,122,0.2)", color: "var(--aw-rose-light)" }}>DASHBOARD</Link>
+          </div>
         </div>
 
         <div className="flex" style={{ background: "var(--aw-white)", borderBottom: "1px solid var(--aw-rose-pale)" }}>
@@ -1459,6 +1488,13 @@ export default function NutritionWorkbook() {
             <div className="w-px h-4" style={{ background: "rgba(196,132,122,0.4)" }} />
             <p className="text-[15px]" style={{ fontFamily: "var(--aw-font-display)", fontStyle: "italic", color: "var(--aw-rose-light)" }}>Phase One: Awareness</p>
           </div>
+          <button
+            onClick={handleContinueBlueprint}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-90"
+            style={{ background: "var(--aw-rose-core)", color: "var(--aw-ink)" }}
+          >
+            Continue the Blueprint <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         {/* Expert header */}
