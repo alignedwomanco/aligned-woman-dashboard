@@ -72,12 +72,17 @@ export default function ModulePlayer() {
     return (a.created_date || "").localeCompare(b.created_date || "");
   });
 
-  // Load ALL user progress so existing-record lookups in mutations always
-  // find prior completions, even if they were saved with a different or null
-  // moduleId.  Page IDs are unique across modules so page-level finds are safe.
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // Load THIS user's progress, scoped per user in both the cache key and the
+  // filter, so different accounts in the same browser never share a cache entry.
   const { data: rawProgress = [] } = useQuery({
-    queryKey: ["courseProgress"],
-    queryFn: () => base44.entities.CourseProgress.filter({}),
+    queryKey: ["courseProgress", currentUser?.email],
+    queryFn: () => base44.entities.CourseProgress.filter({ created_by: currentUser?.email }),
+    enabled: !!currentUser?.email,
   });
 
   // Deduplicate: keep only the most recently updated record per pageId so
