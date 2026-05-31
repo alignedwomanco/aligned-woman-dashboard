@@ -75,10 +75,13 @@ export default function MembersManager({ allUsers }) {
 
   const inviteMemberMutation = useMutation({
     mutationFn: async ({ email, tags }) => {
-      await base44.users.inviteUser(email, "user");
+      console.log("Inviting member with email:", email, "tags:", tags);
+      const result = await base44.users.inviteUser(email, "user");
+      console.log("Invite result:", result);
       return { email, tags };
     },
     onSuccess: (data) => {
+      console.log("Invitation sent successfully");
       setAddMemberOpen(false);
       setNewMemberEmail("");
       setNewMemberTags([]);
@@ -88,12 +91,14 @@ export default function MembersManager({ allUsers }) {
       alert(`Invitation sent to ${data.email}!`);
     },
     onError: (error) => {
+      console.error("Failed to send invitation:", error);
       alert(`Failed to send invitation: ${error.message}`);
     },
   });
 
   const addExistingMutation = useMutation({
     mutationFn: async ({ userId, tags }) => {
+      console.log("Adding member with userId:", userId, "tags:", tags);
       const updateData = { 
         is_member: true,
         role: "user"
@@ -103,15 +108,19 @@ export default function MembersManager({ allUsers }) {
         const existing = user?.access_tags || [];
         updateData.access_tags = [...new Set([...existing, ...tags])];
       }
-      await base44.entities.User.update(userId, updateData);
+      console.log("Update data:", updateData);
+      const result = await base44.entities.User.update(userId, updateData);
+      console.log("Update result:", result);
       return userId;
     },
     onSuccess: () => {
+      console.log("Member added successfully");
       resetAddDialog();
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       alert("Member added successfully!");
     },
     onError: (error) => {
+      console.error("Failed to add member:", error);
       alert(`Failed to add member: ${error.message}`);
     },
   });
