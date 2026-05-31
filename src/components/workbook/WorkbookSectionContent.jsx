@@ -58,7 +58,7 @@ function GroundingCallout({ text }) {
   );
 }
 
-export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [], computedScores, step = 0, onStepChange }) {
+export default function WorkbookSectionContent({ section, answers = {}, onAnswerChange, sections, onJumpToSection, isLastSection, isComplete, completedAt, onFinish, onMarkInProgress, assets = [], computedScores, step = 0, onStepChange, onContinueNext }) {
   if (!section) return null;
 
   // ── Interactive workbook sections (detected by step_flow in schema) ──
@@ -285,6 +285,36 @@ export default function WorkbookSectionContent({ section, answers = {}, onAnswer
           onFinish={onFinish}
           onMarkInProgress={onMarkInProgress}
         />
+      )}
+
+      {/* Once complete, offer a way back into the course */}
+      {isLastSection && isComplete && onContinueNext && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+          <button
+            onClick={onContinueNext}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "14px 28px",
+              borderRadius: 100,
+              background: "#4A0E2E",
+              color: "#FFFFFF",
+              border: "none",
+              fontFamily: "var(--aw-font-sans)",
+              fontWeight: 700,
+              fontSize: 10,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              transition: "opacity 180ms ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            Continue the Blueprint
+          </button>
+        </div>
       )}
     </div>
   );
