@@ -23,7 +23,7 @@ import {
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import { useToast } from "@/components/ui/use-toast";
-import PractitionerHandoff from "@/components/classroom/PractitionerHandoff";
+import JourneyMilestone from "@/components/classroom/JourneyMilestone";
 
 export default function ModulePlayer() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export default function ModulePlayer() {
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
-  const [handoffDismissed, setHandoffDismissed] = useState(false);
+  const [milestone, setMilestone] = useState(null); // null | "module" | "phase" | "course"
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -143,11 +143,16 @@ export default function ModulePlayer() {
     enabled: !!module?.expertId,
   });
 
+  const { data: allExperts = [] } = useQuery({
+    queryKey: ["allExperts"],
+    queryFn: () => base44.entities.Expert.list(),
+  });
+
   // ── Effects ──────────────────────────────────────────────
 
   useEffect(() => {
     setSelectedPage(null);
-    setHandoffDismissed(false);
+    setMilestone(null);
   }, [moduleId]);
 
   useEffect(() => {
@@ -231,6 +236,9 @@ export default function ModulePlayer() {
 
       if (allPagesCompleted) {
         await completeModule();
+        if (!module?.isPhaseIntro) {
+          setMilestone("module");
+        }
       } else {
         const completedCount = pages.filter((page) => {
           if (page.id === selectedPage.id) return true;
@@ -388,30 +396,58 @@ export default function ModulePlayer() {
       .slice(currentModuleIndex + 1)
       .find((m) => modulesWithPages.has(m.id)) || null;
 
-  const prevModule =
-    [...sortedCourseModules]
-      .slice(0, currentModuleIndex < 0 ? 0 : currentModuleIndex)
-      .reverse()
-      .find((m) => modulesWithPages.has(m.id)) || null;
-
-  const isNewPractitioner =
-    !!prevModule &&
-    !!prevModule.expertId &&
-    !!module?.expertId &&
-    prevModule.expertId !== module.expertId;
-
-  const showHandoff =
-    isNewPractitioner &&
-    !handoffDismissed &&
-    currentPageIndex === 0 &&
-    !!expert;
-
   const courseWorkbook =
     workbooks.find((w) => w.expert_id === module?.expertId) ||
     (workbooks.length > 0 ? workbooks[0] : null);
 
   const moduleSection = sortedSections.find((s) => s.id === module?.sectionId);
   const pillarLabel = moduleSection?.phase_name || moduleSection?.title?.split(" - ")[1] || "";
+
+  // ── Journey milestone data ───────────────────────────────
+  const expertMap = {};
+  allExperts.forEach((e) => { expertMap[e.id] = e; });
+
+  const nextSection = nextModule
+    ? sortedSections.find((s) => s.id === nextModule.sectionId)
+    : null;
+  const isCourseEnd = !nextModule;
+  const isPhaseBoundary = !!nextModule && nextModule.sectionId !== module?.sectionId;
+  const nextExpertName = nextModule ? expertMap[nextModule.expertId]?.name || "" : "";
+
+  const goToNextModule = () => {
+    setMilestone(null);
+    if (nextModule) {
+      navigate(
+        createPageUrl("ModulePlayer") +
+          `?moduleId=${nextModule.id}&courseId=${courseId}`
+      );
+    } else {
+      navigate("/Dashboard");
+    }
+  };
+
+  // From the module milestone: skip the practice (or no practice) and move on.
+  const handleMilestoneContinue = () => {
+    if (isPhaseBoundary) {
+      setMilestone("phase");
+    } else if (isCourseEnd) {
+      setMilestone("course");
+    } else {
+      goToNextModule();
+    }
+  };
+
+  const handleMilestoneStartWorkbook = () => {
+    if (courseWorkbook) {
+      // /Workbook self-redirects to /NutritionWorkbook for Danielle's workbook.
+      window.location.href = `/Workbook?id=${courseWorkbook.id}`;
+    }
+  };
+
+  const handleMilestoneDashboard = () => {
+    setMilestone(null);
+    navigate("/Dashboard");
+  };
 
   // ── Helpers ──────────────────────────────────────────────
 
@@ -1590,13 +1626,21 @@ export default function ModulePlayer() {
       </div>
 
       <AnimatePresence>
-        {showHandoff && (
-          <PractitionerHandoff
-            previousModuleTitle={prevModule?.title}
-            expert={expert}
+        {milestone && (
+          <JourneyMilestone
+            stage={milestone}
             moduleTitle={module?.title}
-            durationMinutes={module?.durationMinutes}
-            onDismiss={() => setHandoffDismissed(true)}
+            hasWorkbook={!!courseWorkbook}
+            nextModuleTitle={nextModule?.title}
+            nextExpertName={nextExpertName}
+            phaseLetter={moduleSection?.phase_letter}
+            phaseName={moduleSection?.phase_name}
+            phaseTagline={moduleSection?.tagline}
+            nextPhaseName={nextSection?.phase_name}
+            onStartWorkbook={handleMilestoneStartWorkbook}
+            onContinue={handleMilestoneContinue}
+            onNextPhase={goToNextModule}
+            onDashboard={handleMilestoneDashboard}
           />
         )}
       </AnimatePresence>
