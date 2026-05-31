@@ -392,7 +392,6 @@ export default function Layout({ children, currentPageName }) {
   const NAV_ITEMS = [
     { name: "Dashboard", path: "Dashboard" },
     { name: "Classroom", path: "Classroom" },
-    { name: "Community", path: "Community" },
     { name: "Experts", path: "ExpertsDirectory" },
   ];
 
