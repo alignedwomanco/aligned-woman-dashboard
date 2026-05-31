@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
  * Props: workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose
  */
 export default function WorkbookSidebar({
-  workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose, unlockedSections
+  workbook, expert, user, sections, activeSection, answers, onJumpTo, isOpen, onClose, unlockedSections, onContinueNext
 }) {
   const navigate = useNavigate();
   // Check if section has any non-empty answer
@@ -179,6 +179,36 @@ export default function WorkbookSidebar({
 
         {/* Back to Dashboard -- below last section, visually demoted */}
         <div style={{ padding: "0 14px" }}>
+          {onContinueNext && (
+            <button
+              onClick={onContinueNext}
+              className="wb-nav-item w-full text-left flex items-center gap-3"
+              style={{
+                padding: "10px 14px",
+                borderRadius: "var(--aw-radius-sm)",
+                background: "var(--aw-rose-core)",
+                border: "none",
+                cursor: "pointer",
+                marginTop: 4,
+                transition: "opacity 180ms ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              <div className="flex-shrink-0" style={{ width: 16, height: 16 }} />
+              <span
+                className="flex-shrink-0"
+                style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 11, letterSpacing: "0.18em", color: "#4A0E2E", width: 18, textAlign: "center" }}
+              >
+                &#8594;
+              </span>
+              <span
+                style={{ fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 12, lineHeight: 1.35, letterSpacing: "0.04em", color: "#4A0E2E", textTransform: "uppercase" }}
+              >
+                Continue To Next Module
+              </span>
+            </button>
+          )}
           <div style={{ height: 1, background: "rgba(74,14,46,0.08)", margin: "12px 0" }} />
           <button
             onClick={() => navigate("/Dashboard")}
