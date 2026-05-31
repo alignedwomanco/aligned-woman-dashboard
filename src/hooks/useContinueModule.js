@@ -164,6 +164,7 @@ export default function useContinueModule(currentUser) {
       currentSection: null, phaseIndex: 1, totalSections: contentSections.length,
       completedModulesInSection: 0, totalModulesInSection: 0,
       allPhasesData: phasesWithStatus, courseId,
+      welcomeModule: null, welcomeComplete: true, welcomeExpertName: "",
     };
   }
 
@@ -193,6 +194,19 @@ export default function useContinueModule(currentUser) {
     if (isModComplete(mod)) completedModulesInSection++;
   }
 
+  // ── Welcome intro: shown first, never gated, never repeated ──────────────
+  const welcomeSection = sortedSections.find((s) => isWelcomeSection(s)) || null;
+  const welcomeModule = welcomeSection
+    ? sortedModules.find(
+        (m) => m.sectionId === welcomeSection.id && pages.some((p) => p.moduleId === m.id)
+      ) || null
+    : null;
+  const welcomeComplete = welcomeModule ? isModComplete(welcomeModule) : true;
+  const welcomeExpertName =
+    welcomeModule && welcomeModule.expertId
+      ? experts.find((e) => e.id === welcomeModule.expertId)?.name || ""
+      : "";
+
   return {
     module: inProgressModule,
     expert,
@@ -209,5 +223,8 @@ export default function useContinueModule(currentUser) {
     totalModulesInSection: sectionModules.length,
     allPhasesData: phasesWithStatus,
     courseId,
+    welcomeModule,
+    welcomeComplete,
+    welcomeExpertName,
   };
 }
