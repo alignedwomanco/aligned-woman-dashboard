@@ -182,7 +182,6 @@ export default function WhatChangesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.15 }}
-          style={{ display: "none" }}
           className="wc-desktop"
         >
           <div style={{ display: "grid", gridTemplateColumns: "0.9fr 1.4fr", gap: 48 }}>
@@ -230,7 +229,6 @@ export default function WhatChangesSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.15 }}
           className="wc-mobile"
-          style={{ display: "none" }}
         >
           <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, overflow: "hidden" }}>
             {DOMAINS.map((d, i) => {
@@ -276,10 +274,8 @@ export default function WhatChangesSection() {
       </div>
 
       <style>{`
-        @media (min-width: 768px) {
-          .wc-desktop { display: block !important; }
-          .wc-mobile { display: none !important; }
-        }
+        .wc-mobile { display: none; }
+        .wc-desktop { display: block; }
         @media (max-width: 767px) {
           .wc-mobile { display: block !important; }
           .wc-desktop { display: none !important; }
