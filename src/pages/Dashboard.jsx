@@ -276,9 +276,11 @@ export default function Dashboard() {
   // Use override state if set, otherwise use real state
   const effectiveState = stateOverride || state;
 
+  const isNewPaidUserPreview = effectiveState === "new_paid_user";
+
   let StateComponent = null;
   if (effectiveState === "state_b") StateComponent = StateB;
-  else if (effectiveState === "state_a_no_quiz") StateComponent = StateANoQuiz;
+  else if (effectiveState === "state_a_no_quiz" || isNewPaidUserPreview) StateComponent = StateANoQuiz;
   else if (effectiveState === "state_a_with_quiz") StateComponent = StateAWithQuiz;
   else if (effectiveState === "state_c") StateComponent = StateC;
 
@@ -309,8 +311,8 @@ export default function Dashboard() {
                 <StateComponent
                   user={user}
                   profile={profile}
-                  workbookData={workbookData}
-                  continueData={continueData}
+                  workbookData={isNewPaidUserPreview ? [] : workbookData}
+                  continueData={isNewPaidUserPreview ? null : continueData}
                   onCheckout={() => setCheckoutOpen(true)}
                 />
               ) : (
@@ -342,6 +344,16 @@ export default function Dashboard() {
         <div className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-4 max-w-xs">
           <p className="font-semibold mb-3 text-gray-300">ADMIN: Preview State</p>
           <div className="space-y-2">
+            <button
+              onClick={() => setStateOverride("new_paid_user")}
+              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+                stateOverride === "new_paid_user"
+                  ? "bg-amber-600 text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              New paid user (blank)
+            </button>
             <button
               onClick={() => setStateOverride("state_a_no_quiz")}
               className={`w-full text-left px-3 py-2 rounded transition-colors ${
