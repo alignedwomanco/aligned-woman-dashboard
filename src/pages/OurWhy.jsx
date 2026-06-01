@@ -36,9 +36,9 @@ export default function OurWhy() {
         </div>
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-8">
           {[
-          { stat: "78%", desc: "of women report burnout as their primary reason for leaving high-performance careers — yet receive no systemic education on prevention." },
-          { stat: "2x", desc: "Women are twice as likely to experience anxiety and depression — and half as likely to receive gender-informed treatment or support." },
-          { stat: "$800B", desc: "lost annually in productivity due to unaddressed female health and hormonal issues in the workplace — with zero formal education on root causes." }].
+          { stat: "78%", desc: "of women report burnout as their primary reason for leaving high-performance careers, yet receive no systemic education on prevention." },
+          { stat: "2x", desc: "Women are twice as likely to experience anxiety and depression, and half as likely to receive gender-informed treatment or support." },
+          { stat: "$800B", desc: "lost annually in productivity due to unaddressed female health and hormonal issues in the workplace, with zero formal education on root causes." }].
           map(({ stat, desc }) =>
           <div key={stat} className="text-left">
               <p className="font-display text-4xl text-[#C4847A] mb-2">{stat}</p>
