@@ -8,7 +8,7 @@ import { base44 } from "@/api/base44Client";
 export default function useContinueModule(currentUser) {
   const { data: courses, isLoading: loadingCourses } = useQuery({
     queryKey: ["continue-courses"],
-    queryFn: () => base44.entities.Course.filter({ isPublished: true }),
+    queryFn: () => base44.entities.Course.filter({ isPublished: true }, "-created_date", 500),
     initialData: [],
   });
 
@@ -17,35 +17,35 @@ export default function useContinueModule(currentUser) {
 
   const { data: sections, isLoading: loadingSections } = useQuery({
     queryKey: ["continue-sections", courseId],
-    queryFn: () => base44.entities.CourseSection.filter({ courseId }, "order"),
+    queryFn: () => base44.entities.CourseSection.filter({ courseId }, "order", 500),
     initialData: [],
     enabled: !!courseId,
   });
 
   const { data: modules, isLoading: loadingModules } = useQuery({
     queryKey: ["continue-modules", courseId],
-    queryFn: () => base44.entities.CourseModule.filter({ courseId }, "order"),
+    queryFn: () => base44.entities.CourseModule.filter({ courseId }, "order", 500),
     initialData: [],
     enabled: !!courseId,
   });
 
   const { data: pages, isLoading: loadingPages } = useQuery({
     queryKey: ["continue-pages", courseId],
-    queryFn: () => base44.entities.CoursePage.filter({ courseId }, "order"),
+    queryFn: () => base44.entities.CoursePage.filter({ courseId }, "order", 500),
     initialData: [],
     enabled: !!courseId,
   });
 
   const { data: progress, isLoading: loadingProgress } = useQuery({
     queryKey: ["continue-progress", currentUser?.email],
-    queryFn: () => base44.entities.CourseProgress.filter({ created_by: currentUser?.email }),
+    queryFn: () => base44.entities.CourseProgress.filter({ created_by: currentUser?.email }, "-created_date", 500),
     initialData: [],
     enabled: !!currentUser?.email,
   });
 
   const { data: experts, isLoading: loadingExperts } = useQuery({
     queryKey: ["continue-experts"],
-    queryFn: () => base44.entities.Expert.filter({ isPublished: true }),
+    queryFn: () => base44.entities.Expert.filter({ isPublished: true }, "-created_date", 500),
     initialData: [],
   });
 
