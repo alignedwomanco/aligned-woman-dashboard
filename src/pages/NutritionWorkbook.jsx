@@ -291,7 +291,7 @@ export default function NutritionWorkbook() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               {workbook.blank_pdf_url && (
-                
+                <a
                   href={workbook.blank_pdf_url}
                   target="_blank"
                   rel="noopener noreferrer"
