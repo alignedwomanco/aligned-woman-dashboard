@@ -242,11 +242,17 @@ export default function ModulePlayer() {
     });
 
     if (!isCurrentlyComplete) {
-      const allPagesCompleted = pages.every((page) => {
-        if (page.id === selectedPage.id) return true;
-        const progress = moduleProgress.find((p) => p.pageId === page.id);
-        return progress?.status === "completed";
-      });
+      // Build the set of completed page ids from the freshest progress we have
+      // and add the page just ticked. This does not depend on the cache having
+      // already refetched, so the final lesson reliably registers the module as
+      // complete and the end-of-course milestone fires instead of stalling.
+      const completedPageIds = new Set(
+        moduleProgress
+          .filter((p) => p.status === "completed" && p.pageId)
+          .map((p) => p.pageId)
+      );
+      completedPageIds.add(selectedPage.id);
+      const allPagesCompleted = pages.every((page) => completedPageIds.has(page.id));
 
       if (allPagesCompleted) {
         await completeModule();
