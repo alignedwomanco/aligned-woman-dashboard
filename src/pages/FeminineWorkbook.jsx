@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, BookOpen } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
 import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
@@ -10,10 +10,12 @@ import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
 import FemFieldRenderer from "@/components/workbook/feminine/FemFieldRenderer";
 import FemComputedFields from "@/components/workbook/feminine/FemComputedFields";
 import FoundationRatingField from "@/components/workbook/feminine/FoundationRatingField";
+import { getNextModuleForWorkbook, isFlowReady } from "@/lib/courseFlow";
 
 const WORKBOOK_ID = "6a1958f44abcf0360979ef18";
 
 export default function FeminineWorkbook() {
+  const navigate = useNavigate();
   const [workbook, setWorkbook] = useState(null);
   const [expert, setExpert] = useState(null);
   const [answers, setAnswers] = useState({});
@@ -178,6 +180,16 @@ export default function FeminineWorkbook() {
     setShowCelebration(true);
   };
 
+  const handleContinueBlueprint = useCallback(() => {
+    if (!isFlowReady(allSections, allModules, allPages)) return;
+    const nextModule = getNextModuleForWorkbook(workbook, allSections, allModules, allPages);
+    if (nextModule) {
+      navigate(`/ModulePlayer?moduleId=${nextModule.id}&courseId=${workbook.course_id}`);
+    } else {
+      navigate("/Dashboard");
+    }
+  }, [workbook, allSections, allModules, allPages, navigate]);
+
   const sectionsWithNumbers = useMemo(() => sections.map((s, i) => ({ ...s, section_number: i })), [sections]);
 
   const lastSectionIdx = sections.length - 1;
@@ -207,7 +219,7 @@ export default function FeminineWorkbook() {
       <WorkbookCelebration
         onBackToWorkbook={() => { setShowCelebration(false); jumpTo(lastSectionIdx); }}
         closingText={workbook.closing_text}
-        onContinueBlueprint={() => window.location.href = "/Dashboard"}
+        onContinueBlueprint={handleContinueBlueprint}
       />
     );
   }
@@ -225,7 +237,7 @@ export default function FeminineWorkbook() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={sectionsWithNumbers.map((_, i) => i)}
-        onContinueNext={() => window.location.href = "/Dashboard"}
+        onContinueNext={handleContinueBlueprint}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -252,7 +264,7 @@ export default function FeminineWorkbook() {
                   isLastSection={idx === lastSectionIdx}
                   isComplete={isComplete}
                   onComplete={handleComplete}
-                  onContinueBlueprint={() => window.location.href = "/Dashboard"}
+                  onContinueBlueprint={handleContinueBlueprint}
                 />
               </div>
             </div>
