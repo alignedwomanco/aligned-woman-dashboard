@@ -10,7 +10,6 @@ import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
 import FemFieldRenderer from "@/components/workbook/feminine/FemFieldRenderer";
 import FemComputedFields from "@/components/workbook/feminine/FemComputedFields";
 import FoundationRatingField from "@/components/workbook/feminine/FoundationRatingField";
-import { getNextModuleForWorkbook, isFlowReady } from "@/lib/courseFlow";
 
 const WORKBOOK_ID = "6a1958f44abcf0360979ef18";
 
@@ -78,21 +77,7 @@ export default function FeminineWorkbook() {
     enabled: allModules.length > 0,
   });
 
-  const flowReady = isFlowReady(allSections, allModules, allPages);
-  const nextModule = useMemo(
-    () => (flowReady ? getNextModuleForWorkbook(workbook, allSections, allModules, allPages) : null),
-    [flowReady, workbook, allSections, allModules, allPages]
-  );
 
-  const handleContinueBlueprint = useCallback(() => {
-    if (!flowReady) return;
-    if (nextModule) {
-      const cid = nextModule.courseId ? `&courseId=${nextModule.courseId}` : "";
-      window.location.href = `/ModulePlayer?moduleId=${nextModule.id}${cid}`;
-    } else {
-      window.location.href = "/Dashboard";
-    }
-  }, [flowReady, nextModule]);
 
   const sections = useMemo(() => workbook?.schema?.sections || [], [workbook]);
 
@@ -222,7 +207,7 @@ export default function FeminineWorkbook() {
       <WorkbookCelebration
         onBackToWorkbook={() => { setShowCelebration(false); jumpTo(lastSectionIdx); }}
         closingText={workbook.closing_text}
-        onContinueBlueprint={handleContinueBlueprint}
+        onContinueBlueprint={() => window.location.href = "/Dashboard"}
       />
     );
   }
@@ -240,7 +225,7 @@ export default function FeminineWorkbook() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={sectionsWithNumbers.map((_, i) => i)}
-        onContinueNext={flowReady ? handleContinueBlueprint : undefined}
+        onContinueNext={() => window.location.href = "/Dashboard"}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -267,7 +252,7 @@ export default function FeminineWorkbook() {
                   isLastSection={idx === lastSectionIdx}
                   isComplete={isComplete}
                   onComplete={handleComplete}
-                  onContinueBlueprint={flowReady ? handleContinueBlueprint : undefined}
+                  onContinueBlueprint={() => window.location.href = "/Dashboard"}
                 />
               </div>
             </div>
