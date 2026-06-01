@@ -28,6 +28,10 @@ export default function Welcome() {
     return () => { active = false; };
   }, []);
 
+  const handleCreateAccount = () => {
+    base44.auth.redirectToLogin(`${window.location.origin}/Dashboard`, { mode: "signup" });
+  };
+
   const handleSignIn = () => {
     base44.auth.redirectToLogin(`${window.location.origin}/Dashboard`);
   };
@@ -91,15 +95,15 @@ export default function Welcome() {
         ) : (
           <>
             <button
-              onClick={handleSignIn}
+              onClick={handleCreateAccount}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "16px 42px",
                 borderRadius: 100,
-                background: "#4A0E2E",
-                color: "#FFFFFF",
+                background: "var(--aw-burg-core)",
+                color: "var(--aw-white)",
                 border: "none",
                 fontFamily: "var(--aw-font-sans, sans-serif)",
                 fontWeight: 700,
@@ -112,7 +116,7 @@ export default function Welcome() {
               onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
               onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
             >
-              Sign in to continue
+              Create Your Account
             </button>
 
             <p
@@ -120,14 +124,30 @@ export default function Welcome() {
                 fontFamily: "var(--aw-font-sans, sans-serif)",
                 fontSize: 12,
                 lineHeight: 1.6,
-                color: "#8A7A76",
-                margin: "22px auto 0",
+                color: "var(--aw-mid-grey)",
+                margin: "22px auto 12px",
                 maxWidth: 390,
               }}
             >
-              Use the email you were added under. You can sign in with email and password,
-              or with your Microsoft, Apple, or Facebook account.
+              First time here? Create your account with the email you were given. Already a member? Sign in below.
             </p>
+
+            <button
+              onClick={handleSignIn}
+              style={{
+                background: "none",
+                border: "none",
+                fontFamily: "var(--aw-font-sans, sans-serif)",
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--aw-burg-core)",
+                textDecoration: "underline",
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              Already have an account? Sign in
+            </button>
           </>
         )}
       </div>
