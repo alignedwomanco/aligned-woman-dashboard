@@ -268,7 +268,7 @@ export default function Classroom() {
   // Courses
   const { data: courses = [], isLoading: coursesLoading } = useQuery({
     queryKey: ["classroom-courses"],
-    queryFn: () => base44.entities.Course.filter({ isPublished: true }, "order"),
+    queryFn: () => base44.entities.Course.filter({ isPublished: true }, "order", 500),
     enabled: !!user,
   });
 
@@ -283,21 +283,21 @@ export default function Classroom() {
   // Course progress
   const { data: progressRecords = [] } = useQuery({
     queryKey: ["classroom-progress", user?.email],
-    queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({ created_by: user.email }, "-lastAccessedAt"),
+    queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({ created_by: user.email }, "-lastAccessedAt", 500),
     enabled: !!user?.email,
   });
 
   // Modules (for breadcrumb and resume banner)
   const { data: modules = [] } = useQuery({
     queryKey: ["classroom-modules"],
-    queryFn: () => base44.entities.CourseModule.filter({}),
+    queryFn: () => base44.entities.CourseModule.filter({}, "order", 500),
     enabled: !!user,
   });
 
   // Sections (for breadcrumb)
   const { data: sections = [] } = useQuery({
     queryKey: ["classroom-sections"],
-    queryFn: () => base44.entities.CourseSection.filter({}),
+    queryFn: () => base44.entities.CourseSection.filter({}, "order", 500),
     enabled: !!user,
   });
 
