@@ -39,7 +39,7 @@ const COMMITMENTS = [
   {
     num: "04",
     title: "We hold ourselves publicly to a listening commitment",
-    desc: "We will not claim to have all the answers. We commit to asking better questions — of our community, our contributors, and ourselves — and to updating our practice accordingly.",
+    desc: "We will not claim to have all the answers. We commit to asking better questions, of our community, our contributors, and ourselves, and to updating our practice accordingly.",
   },
   {
     num: "05",
@@ -49,7 +49,7 @@ const COMMITMENTS = [
   {
     num: "06",
     title: "We will never stop interrogating our own blind spots",
-    desc: "This is ongoing work. We commit to regular review of our curriculum, our language, our partnerships, and our internal culture — and to naming what we find.",
+    desc: "This is ongoing work. We commit to regular review of our curriculum, our language, our partnerships, and our internal culture, and to naming what we find.",
   },
 ];
 
