@@ -1204,30 +1204,72 @@ export default function NutritionWorkbook() {
     enabled: !!workbook?.expert_id,
   });
 
-  // Resume point for "Continue the Blueprint": the module the learner was last active in.
-  const { data: courseProgress = [] } = useQuery({
-    queryKey: ["nwCourseProgress"],
-    queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({}),
+  // In-flow continue: resolve this workbook's module by expert_id, then navigate to the NEXT module in canonical course order.
+  // Per the canonical map: after Danielle Venter (Nutrition) comes Natacha Wauquiez (Release stress).
+  const { data: allModules = [] } = useQuery({
+    queryKey: ["allCourseModules"],
+    queryFn: async () => {
+      const modules = await base44.entities.CourseModule.filter({});
+      return modules || [];
+    },
   });
 
-  const resumeModule = useMemo(() => {
-    const active = (courseProgress || [])
-      .filter((p) => p.moduleId && (p.status === "in_progress" || p.status === "completed"))
-      .sort((a, b) => {
-        const ad = a.updated_date || a.created_date || "";
-        const bd = b.updated_date || b.created_date || "";
-        return bd.localeCompare(ad);
-      });
-    return active[0] || null;
-  }, [courseProgress]);
+  const { data: allSections = [] } = useQuery({
+    queryKey: ["allCourseSections"],
+    queryFn: async () => {
+      const sections = await base44.entities.CourseSection.filter({});
+      return sections || [];
+    },
+  });
+
+  // Build canonical module order once all data is loaded
+  const canonicalModuleOrder = useMemo(() => {
+    if (!allModules.length || !allSections.length) return [];
+    
+    // Filter out Welcome/Intro sections (order 0 or title containing "welcome")
+    const contentSections = allSections.filter(s => {
+      const isWelcome = s.order === 0 || (s.title && s.title.toLowerCase().includes("welcome"));
+      return !isWelcome;
+    });
+    
+    // Sort sections by order
+    contentSections.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    // Build ordered module list
+    const orderedModules = [];
+    for (const section of contentSections) {
+      const sectionModules = allModules.filter(m => m.sectionId === section.id);
+      sectionModules.sort((a, b) => (a.order || 0) - (b.order || 0));
+      orderedModules.push(...sectionModules);
+    }
+    
+    return orderedModules;
+  }, [allModules, allSections]);
 
   const handleContinueBlueprint = () => {
-    if (resumeModule?.moduleId) {
-      const cid = resumeModule.courseId ? `&courseId=${resumeModule.courseId}` : "";
-      window.location.href = `/ModulePlayer?moduleId=${resumeModule.moduleId}${cid}`;
-    } else {
+    if (!workbook?.expert_id || !canonicalModuleOrder.length) {
       window.location.href = "/Dashboard";
+      return;
     }
+
+    // Find this workbook's module by matching expert_id
+    const currentModule = canonicalModuleOrder.find(m => m.expertId === workbook.expert_id);
+    if (!currentModule) {
+      window.location.href = "/Dashboard";
+      return;
+    }
+
+    const currentIndex = canonicalModuleOrder.findIndex(m => m.id === currentModule.id);
+    
+    if (currentIndex === -1 || currentIndex >= canonicalModuleOrder.length - 1) {
+      // No next module - this is the last module, go to Dashboard
+      window.location.href = "/Dashboard";
+      return;
+    }
+
+    const nextModule = canonicalModuleOrder[currentIndex + 1];
+    const courseId = nextModule.courseId ? `&courseId=${nextModule.courseId}` : "";
+    window.location.href = `/ModulePlayer?moduleId=${nextModule.id}${courseId}`;
   };
 
   const { data: nutritionProfile } = useQuery({
