@@ -75,13 +75,12 @@ export default function MembersManager({ allUsers }) {
 
   const inviteMemberMutation = useMutation({
     mutationFn: async ({ email, tags }) => {
-      console.log("Inviting member with email:", email, "tags:", tags);
-      const result = await base44.users.inviteUser(email, "user");
-      console.log("Invite result:", result);
+      await base44.users.inviteUser(email, "user");
+      // Send welcome email via your connected Gmail account
+      await base44.functions.invoke("sendWelcomeEmail", { recipientEmail: email });
       return { email, tags };
     },
     onSuccess: (data) => {
-      console.log("Invitation sent successfully");
       setAddMemberOpen(false);
       setNewMemberEmail("");
       setNewMemberTags([]);
@@ -91,7 +90,6 @@ export default function MembersManager({ allUsers }) {
       alert(`Invitation sent to ${data.email}!`);
     },
     onError: (error) => {
-      console.error("Failed to send invitation:", error);
       alert(`Failed to send invitation: ${error.message}`);
     },
   });
