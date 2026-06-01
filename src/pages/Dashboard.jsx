@@ -195,20 +195,44 @@ export default function Dashboard() {
 
       // No MemberProfile yet. Branch on whether this account is entitled.
       try {
-        const me = await base44.auth.me();
-        const tags = Array.isArray(me?.access_tags) ? me.access_tags : [];
-        const isPaid =
+        let me = await base44.auth.me();
+        let tags = Array.isArray(me?.access_tags) ? me.access_tags : [];
+        let isPaid =
           me?.membership_type === "paid" ||
           tags.includes("blueprint_paid") ||
           ["admin", "owner", "master_admin"].includes(me?.role);
 
+        // First-login race: a pre-approved member may not have been granted
+        // access yet, because claimPreApproval is still running in the
+        // background. Before showing the not-registered screen, run the claim
+        // here, wait for it, and re-read the account. Only treat them as not
+        // registered if they still have no access after the claim has run.
         if (!isPaid) {
-          // Logged in, but this email is not registered for the course.
+          try {
+            await base44.functions.invoke("claimPreApproval", {});
+          } catch (_) {
+            // Nothing to claim, or the claim failed. Fall through to re-check.
+          }
+          try {
+            me = await base44.auth.me();
+          } catch (_) {
+            // Keep the earlier value if the refetch fails.
+          }
+          tags = Array.isArray(me?.access_tags) ? me.access_tags : [];
+          isPaid =
+            me?.membership_type === "paid" ||
+            tags.includes("blueprint_paid") ||
+            ["admin", "owner", "master_admin"].includes(me?.role);
+        }
+
+        if (!isPaid) {
+          // Logged in, but this email genuinely has no access to the course.
           setStatus("not_registered");
           return;
         }
 
-        // Paid member with no profile yet (e.g. added manually): create one, then retry.
+        // Entitled but no profile yet (pre-approval just claimed, or added
+        // manually): create one, then retry.
         await ensureMemberProfile(me);
         const result = await getDashboardState();
         setData(result);
@@ -437,7 +461,7 @@ export default function Dashboard() {
       {isAdmin && adminCheckComplete && (
         <div className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-4 max-w-xs">
           <p className="font-semibold mb-2 text-gray-300">ADMIN: Preview State</p>
-          <a
+          
             href={`/CourseDetail?courseId=69f4885c4fadbeea6d28a9be&preview=new_user`}
             className="block w-full text-center px-3 py-2 rounded mb-3 bg-amber-700 text-white text-xs font-bold hover:bg-amber-600 transition-colors"
             style={{ textDecoration: "none" }}
