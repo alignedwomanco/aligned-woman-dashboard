@@ -286,14 +286,10 @@ export default function ModulePlayer() {
   };
 
   const completeModule = async () => {
-    try {
-      await updateProgressMutation.mutateAsync({
-        status: "completed",
-        progressPercentage: 100,
-      });
-    } catch (error) {
-      console.error("Failed to mark module complete:", error);
-    }
+    await updateProgressMutation.mutateAsync({
+      status: "completed",
+      progressPercentage: 100,
+    });
     await awardModuleCompletion();
   };
 
