@@ -221,10 +221,10 @@ export default function Layout({ children, currentPageName }) {
                 />
               ) : (
                 <img
-                  src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                  src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
                   alt="The Aligned Woman"
                   className="object-contain w-auto"
-                  style={{ height: '35px', filter: 'brightness(0) saturate(100%) invert(7%) sepia(60%) saturate(2000%) hue-rotate(300deg) brightness(60%)' }}
+                  style={{ height: '35px' }}
                 />
               )}
             </Link>
@@ -305,7 +305,7 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b">
                       <img
-                      src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                      src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
                       alt="AW"
                       className="object-contain w-auto"
                       style={{ height: '40px' }} />
@@ -419,10 +419,9 @@ export default function Layout({ children, currentPageName }) {
         <div className="p-6 pb-8">
           <Link to={createPageUrl("Home")}>
             <img
-            src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
             alt="The Aligned Woman"
             className="h-10 w-auto object-contain"
-            style={{ filter: "brightness(0) saturate(100%) invert(13%) sepia(55%) saturate(1200%) hue-rotate(300deg) brightness(70%)" }}
             />
           </Link>
         </div>
