@@ -520,7 +520,7 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b border-awburg-core/8">
                   <img
-                    src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
+                    src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
                     alt="AW" className="object-contain w-auto h-9"
                   />
                   <button onClick={() => setShowMobileMenu(false)} className="p-2 hover:bg-awrose-wash rounded-lg transition-colors">
