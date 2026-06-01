@@ -8,6 +8,7 @@ import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
 import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
 import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
+import { getNextModuleForWorkbook, isFlowReady } from "@/lib/courseFlow";
 
 const WORKBOOK_ID = "6a104ae93e4fc7402ba59f6e";
 
@@ -67,7 +68,21 @@ export default function NutritionWorkbook() {
     enabled: wbAllModules.length > 0,
   });
 
+  const flowReady = isFlowReady(wbAllSections, wbAllModules, wbAllPages);
+  const wbNextModule = useMemo(
+    () => (flowReady ? getNextModuleForWorkbook(workbook, wbAllSections, wbAllModules, wbAllPages) : null),
+    [flowReady, workbook, wbAllSections, wbAllModules, wbAllPages]
+  );
 
+  const handleContinueBlueprint = useCallback(() => {
+    if (!flowReady) return;
+    if (wbNextModule) {
+      const cid = wbCourseId ? `&courseId=${wbCourseId}` : "";
+      window.location.href = `/ModulePlayer?moduleId=${wbNextModule.id}${cid}`;
+    } else {
+      window.location.href = "/Dashboard";
+    }
+  }, [flowReady, wbNextModule, wbCourseId]);
 
   useEffect(() => {
     base44.auth.me().then(u => setUser(u)).catch(() => {});
@@ -204,9 +219,9 @@ export default function NutritionWorkbook() {
 
   const lastSectionIdx = sections.length - 1;
 
-  const continueButton = (
+  const continueButton = flowReady ? (
     <button
-      onClick={() => window.location.href = "/Dashboard"}
+      onClick={handleContinueBlueprint}
       style={{
         display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
         background: "var(--aw-burg-core)", color: "#fff", border: "none", borderRadius: 100,
@@ -217,7 +232,7 @@ export default function NutritionWorkbook() {
       Continue the Blueprint
       <ChevronRight className="w-3.5 h-3.5" />
     </button>
-  );
+  ) : null;
 
   return (
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
@@ -243,7 +258,7 @@ export default function NutritionWorkbook() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={sections.map((_, i) => i)}
-        onContinueNext={() => window.location.href = "/Dashboard"}
+        onContinueNext={flowReady ? handleContinueBlueprint : undefined}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -319,7 +334,7 @@ export default function NutritionWorkbook() {
                   computedScores={computedScores}
                   step={idx === activeSection ? activeStep : 0}
                   onStepChange={idx === activeSection ? setActiveStep : undefined}
-                  onContinueNext={() => window.location.href = "/Dashboard"}
+                  onContinueNext={flowReady ? handleContinueBlueprint : undefined}
                 />
 
                 {idx === lastSectionIdx && continueButton && (
