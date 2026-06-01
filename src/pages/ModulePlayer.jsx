@@ -242,16 +242,24 @@ export default function ModulePlayer() {
     });
 
     if (!isCurrentlyComplete) {
-      // Build the set of completed page ids from the freshest progress we have
-      // and add the page just ticked. This does not depend on the cache having
-      // already refetched, so the final lesson reliably registers the module as
-      // complete and the end-of-course milestone fires instead of stalling.
+      // Read CourseProgress fresh from the server right after writing.
+      // Do not trust the cached moduleProgress, which may not have refetched yet.
+      // Treat the page just marked as completed even if the fresh read has not caught it.
+      const freshProgress = await base44.entities.CourseProgress.filter(
+        { created_by: currentUser?.email },
+        "-created_date",
+        500
+      );
+
+      // Build the set of completed page ids from the fresh progress
       const completedPageIds = new Set(
-        moduleProgress
+        freshProgress
           .filter((p) => p.status === "completed" && p.pageId)
           .map((p) => p.pageId)
       );
+      // Add the page just ticked (in case fresh read is not caught up yet)
       completedPageIds.add(selectedPage.id);
+
       const allPagesCompleted = pages.every((page) => completedPageIds.has(page.id));
 
       if (allPagesCompleted) {
@@ -280,7 +288,7 @@ export default function ModulePlayer() {
       } else {
         const completedCount = pages.filter((page) => {
           if (page.id === selectedPage.id) return true;
-          const p = moduleProgress.find((pr) => pr.pageId === page.id);
+          const p = freshProgress.find((pr) => pr.pageId === page.id);
           return p?.status === "completed";
         }).length;
         const pct = Math.round((completedCount / pages.length) * 100);
