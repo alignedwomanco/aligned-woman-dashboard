@@ -69,7 +69,7 @@ function WorkbookPicker() {
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 480 }}>
         {workbooks.map(wb => (
-          <a
+          
             key={wb.id}
             href={`/Workbook?id=${wb.id}`}
             style={{
@@ -159,13 +159,13 @@ function WorkbookViewerInner({ workbookId }) {
 
   const { data: wbAllModules = [] } = useQuery({
     queryKey: ["wbAllCourseModules", wbCourseId],
-    queryFn: () => base44.entities.CourseModule.filter({ courseId: wbCourseId }),
+    queryFn: () => base44.entities.CourseModule.filter({ courseId: wbCourseId }, "order", 500),
     enabled: !!wbCourseId,
   });
 
   const { data: wbAllSections = [] } = useQuery({
     queryKey: ["wbAllCourseSections", wbCourseId],
-    queryFn: () => base44.entities.CourseSection.filter({ courseId: wbCourseId }),
+    queryFn: () => base44.entities.CourseSection.filter({ courseId: wbCourseId }, "order", 500),
     enabled: !!wbCourseId,
   });
 
@@ -173,16 +173,20 @@ function WorkbookViewerInner({ workbookId }) {
     queryKey: ["wbAllCoursePages", wbCourseId],
     queryFn: async () => {
       const results = await Promise.all(
-        wbAllModules.map((m) => base44.entities.CoursePage.filter({ moduleId: m.id }))
+        wbAllModules.map((m) => base44.entities.CoursePage.filter({ moduleId: m.id }, "order", 500))
       );
       return results.flat();
     },
     enabled: wbAllModules.length > 0,
   });
 
+  // This user's progress for the course. Explicit limit: the default 50 rows
+  // truncates a learner who has worked through several modules, which made
+  // already-finished modules read as incomplete and sent "Continue the
+  // Blueprint" backwards to an earlier module.
   const { data: wbProgress = [] } = useQuery({
     queryKey: ["wbCourseProgress", user?.email],
-    queryFn: () => base44.entities.CourseProgress.filter({ created_by: user?.email }),
+    queryFn: () => base44.entities.CourseProgress.filter({ created_by: user?.email }, "-created_date", 500),
     enabled: !!user?.email,
   });
 
@@ -433,7 +437,7 @@ function WorkbookViewerInner({ workbookId }) {
         <Lock className="w-12 h-12 mb-4" style={{ color: "var(--aw-rose-core)" }} />
         <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "var(--aw-burg-core)", marginBottom: 8 }}>Integration Practice Locked</h2>
         <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)" }}>
-          Complete all modules for this course to unlock this integration practice.
+          Finish the lessons in this module to unlock its integration practice.
         </p>
       </div>
     );
