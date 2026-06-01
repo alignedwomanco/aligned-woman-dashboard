@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import LandingFooter from "@/components/home/LandingFooter";
 
 const EYEBROW = ({ children }) =>
 <p className="text-[10px] tracking-[0.22em] uppercase font-bold text-[#C4847A] mb-4">{children}</p>;
@@ -201,6 +202,8 @@ export default function OurWhy() {
         </div>
 
       </section>
+
+      <LandingFooter />
     </div>);
 
 }

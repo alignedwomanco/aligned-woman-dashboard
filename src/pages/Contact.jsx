@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import LandingFooter from "@/components/home/LandingFooter";
 import { ArrowRight, Mail, Star, Building2, Handshake, Newspaper, HelpCircle } from "lucide-react";
 import ExpertApplicationModal from "@/components/contact/ExpertApplicationModal";
 
@@ -233,6 +234,8 @@ export default function Contact() {
           </p>
         </div>
       </section>
+
+      <LandingFooter />
 
       {/* Expert Application Modal */}
       {showExpertModal && <ExpertApplicationModal onClose={closeModal} />}

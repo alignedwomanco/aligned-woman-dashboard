@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import LandingFooter from "@/components/home/LandingFooter";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
@@ -120,6 +121,7 @@ export default function Apply() {
           </div>
         </div>
       </section>
+      <LandingFooter />
     </div>
   );
 }

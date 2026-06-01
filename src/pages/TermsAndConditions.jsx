@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import LandingFooter from "@/components/home/LandingFooter";
 
 const SECTIONS = [
   {
@@ -371,6 +372,7 @@ export default function TermsAndConditions() {
           </Link>
         </div>
       </div>
+      <LandingFooter />
     </div>
   );
 }
