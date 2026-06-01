@@ -2,13 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-const EYEBROW = ({ children }) => (
-  <p className="text-[10px] tracking-[0.22em] uppercase font-bold text-[#C4847A] mb-4">{children}</p>
-);
+const EYEBROW = ({ children }) =>
+<p className="text-[10px] tracking-[0.22em] uppercase font-bold text-[#C4847A] mb-4">{children}</p>;
 
-const ITALIC_SERIF = ({ children }) => (
-  <span className="font-display italic">{children}</span>
-);
+
+const ITALIC_SERIF = ({ children }) =>
+<span className="font-display italic">{children}</span>;
+
 
 export default function OurWhy() {
   return (
@@ -36,22 +36,22 @@ export default function OurWhy() {
         </div>
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-8">
           {[
-            { stat: "78%", desc: "of women report burnout as their primary reason for leaving high-performance careers — yet receive no systemic education on prevention." },
-            { stat: "2x", desc: "Women are twice as likely to experience anxiety and depression — and half as likely to receive gender-informed treatment or support." },
-            { stat: "$800B", desc: "lost annually in productivity due to unaddressed female health and hormonal issues in the workplace — with zero formal education on root causes." },
-          ].map(({ stat, desc }) => (
-            <div key={stat} className="text-left">
+          { stat: "78%", desc: "of women report burnout as their primary reason for leaving high-performance careers — yet receive no systemic education on prevention." },
+          { stat: "2x", desc: "Women are twice as likely to experience anxiety and depression — and half as likely to receive gender-informed treatment or support." },
+          { stat: "$800B", desc: "lost annually in productivity due to unaddressed female health and hormonal issues in the workplace — with zero formal education on root causes." }].
+          map(({ stat, desc }) =>
+          <div key={stat} className="text-left">
               <p className="font-display text-4xl text-[#C4847A] mb-2">{stat}</p>
               <p className="text-sm text-[#6B4C55] leading-relaxed">{desc}</p>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Quote block */}
         <div className="max-w-3xl mx-auto px-6 mt-16">
           <div className="bg-[#4A0E2E] rounded-2xl p-8 text-center">
-            <p className="text-white text-base sm:text-lg leading-relaxed font-body">
-              Women weren't excluded from mainstream education because they weren't capable. They were excluded because the system was never designed to include them. It wasn't built around their bodies, their biology, their cycles, or their way of knowing. And that gap — that vast, deliberate gap — is exactly what we exist to close.
+            <p className="text-white text-base sm:text-lg leading-relaxed font-body">Women weren't excluded from mainstream education because they weren't capable. They were excluded because the system was never designed to include them. It wasn't built around their bodies, their biology, their cycles, or their way of knowing. And that gap, that vast, deliberate gap, is exactly what we exist to close.
+
             </p>
           </div>
         </div>
@@ -70,34 +70,34 @@ export default function OurWhy() {
           <div>
             <p className="text-xs tracking-widest uppercase text-[#C4847A] font-bold mb-4">Traditional education teaches:</p>
             <ul className="space-y-3">
-              {["Hard skills & technical knowledge", "Linear productivity systems", "Goal setting & KPI tracking", "Leadership modelled on male frameworks", "Stress management through willpower"].map(item => (
-                <li key={item} className="flex items-start gap-3 text-sm text-[#6B4C55]">
+              {["Hard skills & technical knowledge", "Linear productivity systems", "Goal setting & KPI tracking", "Leadership modelled on male frameworks", "Stress management through willpower"].map((item) =>
+              <li key={item} className="flex items-start gap-3 text-sm text-[#6B4C55]">
                   <span className="mt-1 w-4 h-4 flex-shrink-0 rounded-full border border-[#C4847A]/40 flex items-center justify-center">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#C4847A]/40" />
                   </span>
                   {item}
                 </li>
-              ))}
+              )}
             </ul>
           </div>
           <div>
             <p className="text-xs tracking-widest uppercase text-[#4A0E2E] font-bold mb-4">What women actually need:</p>
             <ul className="space-y-3">
               {[
-                "Hormonal literacy & cycle intelligence",
-                "Nervous system regulation & capacity building",
-                "Identity evolution & archetype awareness",
-                "Embodied leadership & feminine power",
-                "Financial intelligence rooted in self-worth",
-                "Nutritional science designed for female biology",
-              ].map(item => (
-                <li key={item} className="flex items-start gap-3 text-sm text-[#4A0E2E]">
+              "Hormonal literacy & cycle intelligence",
+              "Nervous system regulation & capacity building",
+              "Identity evolution & archetype awareness",
+              "Embodied leadership & feminine power",
+              "Financial intelligence rooted in self-worth",
+              "Nutritional science designed for female biology"].
+              map((item) =>
+              <li key={item} className="flex items-start gap-3 text-sm text-[#4A0E2E]">
                   <span className="mt-1 w-4 h-4 flex-shrink-0 rounded-full bg-[#C4847A]/20 flex items-center justify-center">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#C4847A]" />
                   </span>
                   {item}
                 </li>
-              ))}
+              )}
             </ul>
           </div>
         </div>
@@ -133,18 +133,18 @@ export default function OurWhy() {
               </thead>
               <tbody>
                 {[
-                  ["Wellness Apps", "Symptom tracking, habit nudges", "Root cause education, integration"],
-                  ["Business Coaching", "Strategy, sales, mindset", "Biology, identity, embodiment"],
-                  ["Therapy / Psychology", "Mental health support", "Performance, leadership, ambition"],
-                  ["Hormone Clinics", "Medical treatment", "Self-directed education, tools"],
-                  ["Social Media", "Information overload", "Coherent, structured, safe to learn"],
-                ].map(([what, delivers, missing]) => (
-                  <tr key={what} className="border-t border-[#E8B4AE]/30">
+                ["Wellness Apps", "Symptom tracking, habit nudges", "Root cause education, integration"],
+                ["Business Coaching", "Strategy, sales, mindset", "Biology, identity, embodiment"],
+                ["Therapy / Psychology", "Mental health support", "Performance, leadership, ambition"],
+                ["Hormone Clinics", "Medical treatment", "Self-directed education, tools"],
+                ["Social Media", "Information overload", "Coherent, structured, safe to learn"]].
+                map(([what, delivers, missing]) =>
+                <tr key={what} className="border-t border-[#E8B4AE]/30">
                     <td className="p-4 text-[#4A0E2E] font-medium">{what}</td>
                     <td className="p-4 text-[#6B4C55]">{delivers}</td>
                     <td className="p-4 text-[#C4847A]">{missing}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -167,17 +167,17 @@ export default function OurWhy() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           {[
-            { label: "At home", value: "They lead with presence, not pressure." },
-            { label: "Confidence", value: "Rooted in knowing, not performance." },
-            { label: "Their own wellbeing", value: "Managed with intelligence, not willpower." },
-            { label: "Money", value: "Earned and held with self-worth intact." },
-            { label: "Leadership", value: "Embodied, not performed." },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#E8B4AE]/30">
+          { label: "At home", value: "They lead with presence, not pressure." },
+          { label: "Confidence", value: "Rooted in knowing, not performance." },
+          { label: "Their own wellbeing", value: "Managed with intelligence, not willpower." },
+          { label: "Money", value: "Earned and held with self-worth intact." },
+          { label: "Leadership", value: "Embodied, not performed." }].
+          map(({ label, value }) =>
+          <div key={label} className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#E8B4AE]/30">
               <div className="flex-shrink-0 w-24 text-xs text-[#C4847A] font-bold uppercase tracking-widest pt-0.5">{label}</div>
               <div className="text-sm text-[#4A0E2E]">{value}</div>
             </div>
-          ))}
+          )}
         </div>
       </section>
 
@@ -194,13 +194,13 @@ export default function OurWhy() {
         <div className="flex justify-center">
           <Link
             to="/blueprint"
-            className="inline-flex items-center justify-center px-12 py-4 rounded-full border border-white/30 text-white font-bold text-base tracking-widest uppercase hover:bg-white/10 transition-colors"
-          >
+            className="inline-flex items-center justify-center px-12 py-4 rounded-full border border-white/30 text-white font-bold text-base tracking-widest uppercase hover:bg-white/10 transition-colors">
+            
             Learn More
           </Link>
         </div>
 
       </section>
-    </div>
-  );
+    </div>);
+
 }
