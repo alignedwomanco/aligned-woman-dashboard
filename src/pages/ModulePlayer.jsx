@@ -32,18 +32,12 @@ export default function ModulePlayer() {
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
-  const [milestone, setMilestone] = useState(null); // null | "module" | "phase" | "course"
-  // Frozen copy of the just-finished module, its next module and its phase
-  // boundary, captured at the moment of completion. The milestone reads from
-  // this snapshot rather than the live module, so navigation or a late data
-  // load can never shift the card onto the following module.
+  const [milestone, setMilestone] = useState(null);
   const [milestoneSnapshot, setMilestoneSnapshot] = useState(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // ── Queries ──────────────────────────────────────────────
-
-  const { data: course } = useQuery({
+  const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ["course", courseId],
     queryFn: async () => {
       const courses = await base44.entities.Course.filter({ id: courseId });
@@ -54,7 +48,7 @@ export default function ModulePlayer() {
 
   const { hasAccess, isLoading: accessLoading } = useCourseAccess(course);
 
-  const { data: module } = useQuery({
+  const { data: module, isLoading: moduleLoading } = useQuery({
     queryKey: ["courseModule", moduleId],
     queryFn: async () => {
       const modules = await base44.entities.CourseModule.filter({ id: moduleId });
@@ -63,26 +57,26 @@ export default function ModulePlayer() {
     enabled: !!moduleId,
   });
 
-  const { data: rawPages = [] } = useQuery({
+  const { data: rawPages = [], isLoading: pagesLoading } = useQuery({
     queryKey: ["coursePages", moduleId],
     queryFn: () => base44.entities.CoursePage.filter({ moduleId }),
     enabled: !!moduleId,
   });
 
-  const pages = [...rawPages].sort((a, b) => {
-    const aOrder = a.order ?? Infinity;
-    const bOrder = b.order ?? Infinity;
-    if (aOrder !== bOrder) return aOrder - bOrder;
-    return (a.created_date || "").localeCompare(b.created_date || "");
-  });
+  const pages = useMemo(() => {
+    return [...rawPages].sort((a, b) => {
+      const aOrder = a.order ?? Infinity;
+      const bOrder = b.order ?? Infinity;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return (a.created_date || "").localeCompare(b.created_date || "");
+    });
+  }, [rawPages]);
 
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: () => base44.auth.me(),
   });
 
-  // Load THIS user's progress, scoped per user in both the cache key and the
-  // filter, so different accounts in the same browser never share a cache entry.
   const { data: rawProgress = [] } = useQuery({
     queryKey: ["courseProgress", currentUser?.email],
     queryFn: () =>
@@ -94,8 +88,6 @@ export default function ModulePlayer() {
     enabled: !!currentUser?.email,
   });
 
-  // Deduplicate: keep only the most recently updated record per pageId so
-  // stale duplicates never shadow a completed record.
   const moduleProgress = useMemo(() => {
     const best = {};
     rawProgress.forEach((p) => {
@@ -134,12 +126,6 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
-  // Load every page for the course in a single query keyed only on courseId,
-  // the same way the dashboard hook does. The previous version mapped over the
-  // module list inside a query that did not track that list, so when the
-  // modules arrived late or partially the page set silently dropped the newest
-  // modules and the course appeared to end early. Sourcing pages directly by
-  // courseId removes that dependency entirely.
   const { data: allCoursePages = [] } = useQuery({
     queryKey: ["allCoursePages", courseId],
     queryFn: () => base44.entities.CoursePage.filter({ courseId }, "order", 500),
@@ -161,8 +147,6 @@ export default function ModulePlayer() {
     queryFn: () => base44.entities.Expert.list(),
   });
 
-  // ── Effects ──────────────────────────────────────────────
-
   useEffect(() => {
     setSelectedPage(null);
     setMilestone(null);
@@ -174,8 +158,6 @@ export default function ModulePlayer() {
       setSelectedPage(pages[0]);
     }
   }, [pages]);
-
-  // ── Mutations ────────────────────────────────────────────
 
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
@@ -230,8 +212,6 @@ export default function ModulePlayer() {
     },
   });
 
-  // ── Handlers ─────────────────────────────────────────────
-
   const handleTogglePageComplete = async () => {
     const pageProgress = moduleProgress.find((p) => p.pageId === selectedPage.id);
     const isCurrentlyComplete = pageProgress?.status === "completed" || false;
@@ -242,39 +222,47 @@ export default function ModulePlayer() {
     });
 
     if (!isCurrentlyComplete) {
-      const allPagesCompleted = pages.every((page) => {
-        if (page.id === selectedPage.id) return true;
-        const progress = moduleProgress.find((p) => p.pageId === page.id);
-        return progress?.status === "completed";
-      });
+      const freshProgress = await base44.entities.CourseProgress.filter(
+        { created_by: currentUser?.email },
+        "-created_date",
+        500
+      );
+
+      const completedPageIds = new Set(
+        freshProgress
+          .filter((p) => p.status === "completed" && p.pageId)
+          .map((p) => p.pageId)
+      );
+      completedPageIds.add(selectedPage.id);
+
+      const allPagesCompleted = pages.every((page) => completedPageIds.has(page.id));
 
       if (allPagesCompleted) {
         await completeModule();
-        // Welcome intro: send them straight into the first content module
-        // (Awareness), with no module/phase milestone in between.
         const currentSec = allCourseSections.find((s) => s.id === module?.sectionId);
         const onWelcome =
           currentSec &&
           ((currentSec.order ?? 0) === 0 ||
             (currentSec.title || "").toLowerCase().includes("welcome"));
+        
         if (onWelcome) {
-          const firstContent = courseModulesWithPages[0] || null;
-          if (firstContent) {
-            navigate(
-              createPageUrl("ModulePlayer") +
-                `?moduleId=${firstContent.id}&courseId=${courseId}`
-            );
-            return;
+          if (!module?.isPhaseIntro) {
+            setMilestoneSnapshot(buildMilestoneSnapshot());
+            setMilestone("module");
           }
-        }
-        if (!module?.isPhaseIntro) {
+        } else if (!nextModuleInOrder) {
           setMilestoneSnapshot(buildMilestoneSnapshot());
-          setMilestone("module");
+          setMilestone("course");
+        } else {
+          if (!module?.isPhaseIntro) {
+            setMilestoneSnapshot(buildMilestoneSnapshot());
+            setMilestone("module");
+          }
         }
       } else {
         const completedCount = pages.filter((page) => {
           if (page.id === selectedPage.id) return true;
-          const p = moduleProgress.find((pr) => pr.pageId === page.id);
+          const p = freshProgress.find((pr) => pr.pageId === page.id);
           return p?.status === "completed";
         }).length;
         const pct = Math.round((completedCount / pages.length) * 100);
@@ -353,8 +341,6 @@ export default function ModulePlayer() {
     });
   };
 
-  // ── Computed values ──────────────────────────────────────
-
   const completedPageCount = pages.filter((page) => {
     const p = moduleProgress.find((pr) => pr.pageId === page.id);
     return p?.status === "completed";
@@ -365,12 +351,25 @@ export default function ModulePlayer() {
       ? Math.round((completedPageCount / pages.length) * 100)
       : 0;
 
-  // ── Loading / access gate ────────────────────────────────
+  const isCoreDataLoading = moduleLoading || pagesLoading || accessLoading;
 
-  if (!module || !selectedPage || accessLoading) {
+  if (isCoreDataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
         <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!module || !selectedPage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
+        <div className="text-center">
+          <h2 className="text-2xl font-serif text-[#4A0E2E] mb-4">Module not found</h2>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Go Back
+          </Button>
+        </div>
       </div>
     );
   }
@@ -389,8 +388,6 @@ export default function ModulePlayer() {
       </div>
     );
   }
-
-  // ── Derived state ────────────────────────────────────────
 
   const isPageCompleted = (pageId) => {
     const p = moduleProgress.find((pr) => pr.pageId === pageId);
@@ -434,17 +431,13 @@ export default function ModulePlayer() {
   const moduleSection = sortedSections.find((s) => s.id === module?.sectionId);
   const pillarLabel = moduleSection?.phase_name || moduleSection?.title?.split(" - ")[1] || "";
 
-  // ── Journey milestone data ───────────────────────────────
   const expertMap = {};
   allExperts.forEach((e) => { expertMap[e.id] = e; });
 
-  // Phase name/letter are derived from the section title ("Phase 1 - Awareness"),
-  // since the sections do not store them separately.
   const phaseNameOf = (section) =>
     (section?.title || "").split(" - ")[1]?.trim() || section?.title || "";
   const phaseLetterOf = (section) => (phaseNameOf(section)[0] || "").toUpperCase();
 
-  // A module is complete when all of its pages are completed.
   const isModuleComplete = (mId) => {
     const mPages = allCoursePages.filter((pg) => pg.moduleId === mId);
     if (mPages.length === 0) return false;
@@ -453,17 +446,14 @@ export default function ModulePlayer() {
     );
   };
 
-  // The Welcome section is an intro, not a graded phase: keep it out of progression.
   const isWelcomeSection = (s) =>
     (s?.order === 0) || (s?.title || "").toLowerCase().includes("welcome");
   const contentSectionIds = new Set(
     sortedSections.filter((s) => !isWelcomeSection(s)).map((s) => s.id)
   );
 
-  // Linear progression over content phases only: always advance to the NEXT
-  // module in course order, never the "first incomplete" one. This keeps the
-  // flow moving forward (module -> module -> end of phase -> next phase) even
-  // if an earlier module was left unfinished.
+  const isIntroModule = !!moduleSection && isWelcomeSection(moduleSection);
+
   const courseModulesWithPages = sortedCourseModules.filter(
     (m) => modulesWithPages.has(m.id) && contentSectionIds.has(m.sectionId)
   );
@@ -486,10 +476,6 @@ export default function ModulePlayer() {
     ? expertMap[nextModuleInOrder.expertId]?.name || ""
     : "";
 
-  // Freeze everything the milestone needs at the instant a module is completed.
-  // The card then renders from this snapshot, so it always names the module the
-  // member actually finished and the correct next step, even if the live module
-  // or the route changes underneath it a moment later.
   const buildMilestoneSnapshot = () => ({
     moduleTitle: module?.title || "",
     hasWorkbook: !!courseWorkbook,
@@ -519,7 +505,6 @@ export default function ModulePlayer() {
     }
   };
 
-  // From the module milestone: move on once the practice is skipped or done.
   const handleMilestoneContinue = () => {
     if (milestoneSnapshot?.isCourseEnd) {
       setMilestone("course");
@@ -533,7 +518,6 @@ export default function ModulePlayer() {
   const handleMilestoneStartWorkbook = () => {
     const wbId = milestoneSnapshot?.workbookId || courseWorkbook?.id || null;
     if (wbId) {
-      // /Workbook self-redirects to /NutritionWorkbook for Danielle's workbook.
       window.location.href = `/Workbook?id=${wbId}`;
     }
   };
@@ -544,15 +528,12 @@ export default function ModulePlayer() {
     navigate("/Dashboard");
   };
 
-  // ── Helpers ──────────────────────────────────────────────
-
   const handleSelectPage = (page) => {
     setSelectedPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleNextAction = () => {
-    // Block navigation until the current lesson is marked complete
     if (!isCurrentPageComplete) {
       toast({
         description: "You must mark this lesson complete to move to the next lesson",
@@ -563,39 +544,56 @@ export default function ModulePlayer() {
     if (nextPage) {
       handleSelectPage(nextPage);
       setMobileTab("about");
-    } else if (nextModule) {
+    } else if (nextModuleInOrder) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextModule.id}&courseId=${courseId}`
+          `?moduleId=${nextModuleInOrder.id}&courseId=${courseId}`
       );
     } else {
-      navigate(createPageUrl("Classroom"));
+      setMilestoneSnapshot(buildMilestoneSnapshot());
+      setMilestone("course");
+    }
+  };
+
+  const handleStartCourse = async () => {
+    if (!isCurrentPageComplete) {
+      await togglePageCompleteMutation.mutateAsync({
+        pageId: selectedPage.id,
+        isComplete: true,
+      });
+      await completeModule();
+    }
+    const firstContent = courseModulesWithPages[0] || null;
+    if (firstContent) {
+      navigate(
+        createPageUrl("ModulePlayer") +
+          `?moduleId=${firstContent.id}&courseId=${courseId}`
+      );
+    } else {
+      navigate("/Dashboard");
     }
   };
 
   const nextLabel = nextPage
     ? "NEXT LESSON"
-    : nextModule
+    : nextModuleInOrder
     ? "NEXT MODULE"
     : "BACK TO CLASSROOM";
 
   const nextMobileTopLine = nextPage
     ? `UP NEXT · LESSON ${String(currentPageIndex + 2).padStart(2, "0")}`
-    : nextModule
+    : nextModuleInOrder
     ? "NEXT MODULE"
     : "RETURN HOME";
 
   const nextMobileBottomLine = nextPage
     ? nextPage.title
-    : nextModule
-    ? nextModule.title
+    : nextModuleInOrder
+    ? nextModuleInOrder.title
     : "Blueprint Home";
-
-  // ── Video renderer (shared between desktop and mobile) ──
 
   const renderVideo = (roundCorners, cropTop = false) => {
     const radius = roundCorners ? "12px" : "0";
-    // cropTop: shift iframe up to hide black letterbox bar from the video source
     const iframeStyle = cropTop
       ? { position: "absolute", top: "-10%", left: "0", width: "100%", height: "120%", border: 0 }
       : { border: 0 };
@@ -720,8 +718,6 @@ export default function ModulePlayer() {
     );
   };
 
-  // ── Expert avatar helper ─────────────────────────────────
-
   const renderExpertAvatar = (size) => {
     if (!expert) return null;
     const initials = expert.name
@@ -763,8 +759,6 @@ export default function ModulePlayer() {
       </div>
     );
   };
-
-  // ── Lesson list (shared between desktop sidebar and mobile tab) ──
 
   const renderLessonList = (onSelect) => (
     <div>
@@ -850,8 +844,6 @@ export default function ModulePlayer() {
     </div>
   );
 
-  // ── Module overview rows (shared) ────────────────────────
-
   const renderModuleOverview = () => (
     <div style={{ background: "white", borderRadius: "12px", padding: "20px" }}>
       <div
@@ -910,11 +902,6 @@ export default function ModulePlayer() {
     </div>
   );
 
-  // ── Continue the Blueprint (shown once the module is complete) ──
-  // A clear, persistent way to move forward to the next module in course
-  // order. It appears only when every lesson in this module is done, and
-  // falls back to the dashboard at the end of the course.
-
   const renderContinueBlueprint = () => {
     if (pages.length === 0 || overallProgress !== 100) return null;
     const label = nextModuleInOrder ? "CONTINUE THE BLUEPRINT" : "BACK TO DASHBOARD";
@@ -949,8 +936,6 @@ export default function ModulePlayer() {
     );
   };
 
-  // ── Title with italic after ampersand ────────────────────
-
   const renderModuleTitle = (fontSize) => {
     const parts = (module?.title || "").split(" & ");
     if (parts.length < 2) {
@@ -970,10 +955,6 @@ export default function ModulePlayer() {
     );
   };
 
-  // ════════════════════════════════════════════════════════
-  //  RENDER
-  // ════════════════════════════════════════════════════════
-
   return (
     <div className="min-h-screen" style={{ background: "#FAF5F3" }}>
       <style>{`
@@ -983,7 +964,6 @@ export default function ModulePlayer() {
         }
       `}</style>
 
-      {/* ─── MOBILE STICKY HEADER ─── */}
       <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
         <div className="px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="flex-shrink-0 p-1">
@@ -1023,7 +1003,6 @@ export default function ModulePlayer() {
             <Menu className="w-5 h-5" style={{ color: "#4A0E2E" }} />
           </button>
         </div>
-        {/* 2px progress bar */}
         <div style={{ height: "2px", background: "#F5DDD9", width: "100%" }}>
           <div
             style={{
@@ -1036,7 +1015,6 @@ export default function ModulePlayer() {
         </div>
       </div>
 
-      {/* ─── DESKTOP TOP BAR ─── */}
       <div className="hidden md:block sticky top-0 z-40" style={{ background: "#FAF5F3", borderBottom: "1px solid rgba(74,14,46,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -1073,13 +1051,10 @@ export default function ModulePlayer() {
         </div>
       </div>
 
-      {/* ─── PAGE BODY ─── */}
       <div className="pt-0 md:pt-0 pb-24 md:pb-0">
 
-        {/* ═══ DESKTOP LAYOUT ═══ */}
         <div className="hidden md:block max-w-7xl mx-auto px-6 py-8">
 
-          {/* Module Header */}
           <div className="flex justify-between items-start gap-12 mb-12">
             <div style={{ flex: 1 }}>
               <div
@@ -1166,12 +1141,9 @@ export default function ModulePlayer() {
             </div>
           </div>
 
-          {/* Two-column grid */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12">
 
-            {/* Left: lesson content */}
             <div>
-              {/* Video */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={selectedPage.id + "-video"}
@@ -1184,7 +1156,6 @@ export default function ModulePlayer() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Lesson meta line */}
               <div
                 style={{
                   display: "flex",
@@ -1250,7 +1221,6 @@ export default function ModulePlayer() {
                 )}
               </div>
 
-              {/* Lesson title */}
               <h2
                 style={{
                   fontFamily: "'DM Serif Display', serif",
@@ -1264,7 +1234,6 @@ export default function ModulePlayer() {
                 {selectedPage.title}
               </h2>
 
-              {/* Expert byline */}
               {expert && (
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
                   {renderExpertAvatar(40)}
@@ -1277,7 +1246,6 @@ export default function ModulePlayer() {
                 </div>
               )}
 
-              {/* Body copy */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={selectedPage.id + "-body"}
@@ -1300,7 +1268,6 @@ export default function ModulePlayer() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Bottom navigation */}
               <div
                 style={{
                   display: "flex",
@@ -1310,117 +1277,144 @@ export default function ModulePlayer() {
                   borderTop: "1px solid rgba(74,14,46,0.06)",
                 }}
               >
-                {/* Previous */}
-                <div style={{ minWidth: "100px" }}>
-                  {prevPage && (
+                {isIntroModule ? (
+                  <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
                     <button
-                      onClick={() => handleSelectPage(prevPage)}
+                      onClick={handleStartCourse}
+                      style={{
+                        background: "#4A0E2E",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "100px",
+                        padding: "16px 40px",
+                        cursor: "pointer",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        transition: "background 0.2s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#3D0F1F")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "#4A0E2E")}
+                    >
+                      START THE COURSE
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ minWidth: "100px" }}>
+                      {prevPage && (
+                        <button
+                          onClick={() => handleSelectPage(prevPage)}
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            letterSpacing: "0.2em",
+                            color: "#8A7A76",
+                            textTransform: "uppercase",
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "12px 0",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "#4A0E2E")}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "#8A7A76")}
+                        >
+                          ← PREVIOUS LESSON
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      {!isCurrentPageComplete && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            inset: "-4px",
+                            borderRadius: "100px",
+                            border: "2px solid #C4847A",
+                            animation: "mp-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      )}
+                      <button
+                        onClick={handleTogglePageComplete}
+                        style={{
+                          fontFamily: "'Montserrat', sans-serif",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          letterSpacing: "0.2em",
+                          textTransform: "uppercase",
+                          borderRadius: "100px",
+                          padding: "14px 24px",
+                          cursor: "pointer",
+                          transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          ...(isCurrentPageComplete
+                            ? {
+                                color: "#fff",
+                                background: "#22c55e",
+                                border: "1.5px solid #22c55e",
+                              }
+                            : {
+                                color: "white",
+                                background: "#4A0E2E",
+                                border: "1.5px solid #4A0E2E",
+                              }),
+                        }}
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        {isCurrentPageComplete ? "COMPLETED" : "MARK COMPLETE"}
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={handleNextAction}
                       style={{
                         fontFamily: "'Montserrat', sans-serif",
                         fontSize: "10px",
                         fontWeight: 700,
                         letterSpacing: "0.2em",
-                        color: "#8A7A76",
+                        color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
                         textTransform: "uppercase",
-                        background: "none",
+                        background: isCurrentPageComplete ? "#C4847A" : "rgba(196,132,122,0.2)",
                         border: "none",
-                        cursor: "pointer",
-                        padding: "12px 0",
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = "#4A0E2E")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "#8A7A76")}
-                    >
-                      ← PREVIOUS LESSON
-                    </button>
-                  )}
-                </div>
-
-                {/* Mark complete */}
-                <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {!isCurrentPageComplete && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        inset: "-4px",
                         borderRadius: "100px",
-                        border: "2px solid #C4847A",
-                        animation: "mp-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                        pointerEvents: "none",
+                        padding: "14px 28px",
+                        cursor: isCurrentPageComplete ? "pointer" : "not-allowed",
+                        opacity: isCurrentPageComplete ? 1 : 0.6,
+                        transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
                       }}
-                    />
-                  )}
-                  <button
-                    onClick={handleTogglePageComplete}
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "10px",
-                      fontWeight: 700,
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      borderRadius: "100px",
-                      padding: "14px 24px",
-                      cursor: "pointer",
-                      transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      ...(isCurrentPageComplete
-                        ? {
-                            color: "#fff",
-                            background: "#22c55e",
-                            border: "1.5px solid #22c55e",
-                          }
-                        : {
-                            color: "white",
-                            background: "#4A0E2E",
-                            border: "1.5px solid #4A0E2E",
-                          }),
-                    }}
-                  >
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    {isCurrentPageComplete ? "COMPLETED" : "MARK COMPLETE"}
-                  </button>
-                </div>
-
-                {/* Next */}
-                <button
-                  onClick={handleNextAction}
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    letterSpacing: "0.2em",
-                    color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
-                    textTransform: "uppercase",
-                    background: isCurrentPageComplete ? "#C4847A" : "rgba(196,132,122,0.2)",
-                    border: "none",
-                    borderRadius: "100px",
-                    padding: "14px 28px",
-                    cursor: isCurrentPageComplete ? "pointer" : "not-allowed",
-                    opacity: isCurrentPageComplete ? 1 : 0.6,
-                    transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (isCurrentPageComplete) {
-                      e.currentTarget.style.background = "#A86460";
-                      e.currentTarget.style.color = "white";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (isCurrentPageComplete) {
-                      e.currentTarget.style.background = "#C4847A";
-                      e.currentTarget.style.color = "#4A0E2E";
-                    }
-                  }}
-                >
-                  {nextLabel} →
-                </button>
+                      onMouseEnter={(e) => {
+                        if (isCurrentPageComplete) {
+                          e.currentTarget.style.background = "#A86460";
+                          e.currentTarget.style.color = "white";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isCurrentPageComplete) {
+                          e.currentTarget.style.background = "#C4847A";
+                          e.currentTarget.style.color = "#4A0E2E";
+                        }
+                      }}
+                    >
+                      {nextLabel} →
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Right: sticky sidebar */}
             <div className="hidden lg:block" style={{ position: "sticky", top: "80px", alignSelf: "start" }}>
-              {/* Course content */}
               <div style={{ marginBottom: "24px" }}>
                 <div
                   style={{
@@ -1458,20 +1452,18 @@ export default function ModulePlayer() {
                 {renderLessonList(handleSelectPage)}
               </div>
 
-              {/* Module overview */}
-              <div style={{ marginBottom: "24px" }}>
-                {renderModuleOverview()}
-              </div>
+              {!isIntroModule && (
+                <div style={{ marginBottom: "24px" }}>
+                  {renderModuleOverview()}
+                </div>
+              )}
 
-              {/* Continue the Blueprint */}
               {renderContinueBlueprint()}
             </div>
           </div>
         </div>
 
-        {/* ═══ MOBILE LAYOUT ═══ */}
         <div className="md:hidden pt-[60px]">
-          {/* Video edge-to-edge, cropped to hide source letterbox */}
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage.id + "-mob-video"}
@@ -1484,7 +1476,6 @@ export default function ModulePlayer() {
           </AnimatePresence>
 
           <div className="px-4 pt-5">
-            {/* Lesson meta */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
               <span
                 style={{
@@ -1515,7 +1506,6 @@ export default function ModulePlayer() {
               )}
             </div>
 
-            {/* Title */}
             <h2
               style={{
                 fontFamily: "'DM Serif Display', serif",
@@ -1529,7 +1519,6 @@ export default function ModulePlayer() {
               {selectedPage.title}
             </h2>
 
-            {/* Expert */}
             {expert && (
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
                 {renderExpertAvatar(32)}
@@ -1544,7 +1533,6 @@ export default function ModulePlayer() {
               </div>
             )}
 
-            {/* Tabs */}
             <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid rgba(74,14,46,0.06)", marginBottom: "20px" }}>
               {["about", "course"].map((tab) => (
                 <button
@@ -1570,7 +1558,6 @@ export default function ModulePlayer() {
               ))}
             </div>
 
-            {/* Tab content */}
             {mobileTab === "about" ? (
               <motion.div
                 key="about-tab"
@@ -1602,9 +1589,11 @@ export default function ModulePlayer() {
                     setMobileTab("about");
                   })}
                 </div>
-                <div style={{ marginBottom: "16px" }}>
-                  {renderModuleOverview()}
-                </div>
+                {!isIntroModule && (
+                  <div style={{ marginBottom: "16px" }}>
+                    {renderModuleOverview()}
+                  </div>
+                )}
                 {renderContinueBlueprint()}
               </motion.div>
             )}
@@ -1612,7 +1601,6 @@ export default function ModulePlayer() {
         </div>
       </div>
 
-      {/* ─── MOBILE STICKY BOTTOM BAR ─── */}
       <div
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center gap-3"
         style={{
@@ -1622,87 +1610,117 @@ export default function ModulePlayer() {
           paddingBottom: "max(12px, env(safe-area-inset-bottom))",
         }}
       >
-        <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          {!isCurrentPageComplete && (
-            <span
-              style={{
-                position: "absolute",
-                inset: "-4px",
-                borderRadius: "50%",
-                border: "2px solid #C4847A",
-                animation: "mp-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                pointerEvents: "none",
-              }}
-            />
-          )}
+        {isIntroModule ? (
           <button
-            onClick={handleTogglePageComplete}
+            onClick={handleStartCourse}
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              border: isCurrentPageComplete ? "none" : "2px solid #4A0E2E",
-              background: isCurrentPageComplete ? "#22c55e" : "transparent",
+              flex: 1,
+              background: "#4A0E2E",
+              color: "white",
+              border: "none",
+              borderRadius: "100px",
+              padding: "14px 16px",
+              cursor: "pointer",
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              cursor: "pointer",
-              transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
-              flexShrink: 0,
+              gap: "8px",
+              minHeight: "48px",
             }}
           >
-            {isCurrentPageComplete
-              ? <CheckCircle className="w-5 h-5" style={{ color: "white" }} />
-              : <Check className="w-5 h-5" style={{ color: "#4A0E2E" }} />
-            }
+            START THE COURSE
+            <ChevronRight className="w-4 h-4" />
           </button>
-        </div>
-        <button
-          onClick={handleNextAction}
-          style={{
-            flex: 1,
-            background: isCurrentPageComplete ? "#C4847A" : "rgba(196,132,122,0.2)",
-            border: "none",
-            borderRadius: "100px",
-            padding: "10px 16px",
-            cursor: isCurrentPageComplete ? "pointer" : "not-allowed",
-            opacity: isCurrentPageComplete ? 1 : 0.6,
-            transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: "48px",
-          }}
-        >
-          <div style={{ textAlign: "left" }}>
-            <div
+        ) : (
+          <>
+            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              {!isCurrentPageComplete && (
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: "-4px",
+                    borderRadius: "50%",
+                    border: "2px solid #C4847A",
+                    animation: "mp-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              <button
+                onClick={handleTogglePageComplete}
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  border: isCurrentPageComplete ? "none" : "2px solid #4A0E2E",
+                  background: isCurrentPageComplete ? "#22c55e" : "transparent",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
+                  flexShrink: 0,
+                }}
+              >
+                {isCurrentPageComplete
+                  ? <CheckCircle className="w-5 h-5" style={{ color: "white" }} />
+                  : <Check className="w-5 h-5" style={{ color: "#4A0E2E" }} />
+                }
+              </button>
+            </div>
+            <button
+              onClick={handleNextAction}
               style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "9px",
-                fontWeight: 700,
-                letterSpacing: "0.2em",
-                color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
-                textTransform: "uppercase",
-                marginBottom: "2px",
+                flex: 1,
+                background: isCurrentPageComplete ? "#C4847A" : "rgba(196,132,122,0.2)",
+                border: "none",
+                borderRadius: "100px",
+                padding: "10px 16px",
+                cursor: isCurrentPageComplete ? "pointer" : "not-allowed",
+                opacity: isCurrentPageComplete ? 1 : 0.6,
+                transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                minHeight: "48px",
               }}
             >
-              {nextMobileTopLine}
-            </div>
-            <div
-              className="truncate"
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "12px",
-                fontWeight: 600,
-                color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
-                maxWidth: "200px",
-              }}
-            >
-              {nextMobileBottomLine}
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76" }} />
-        </button>
+              <div style={{ textAlign: "left" }}>
+                <div
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    letterSpacing: "0.2em",
+                    color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
+                    textTransform: "uppercase",
+                    marginBottom: "2px",
+                  }}
+                >
+                  {nextMobileTopLine}
+                </div>
+                <div
+                  className="truncate"
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
+                    maxWidth: "200px",
+                  }}
+                >
+                  {nextMobileBottomLine}
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76" }} />
+            </button>
+          </>
+        )}
       </div>
 
       <AnimatePresence>
