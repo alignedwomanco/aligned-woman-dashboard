@@ -84,10 +84,20 @@ export default function MembersManager({ allUsers }) {
 
   const inviteMemberMutation = useMutation({
     mutationFn: async ({ email, tags }) => {
-      await base44.users.inviteUser(email, "user");
-      // Send welcome email via your connected Gmail account
-      await base44.functions.invoke("sendWelcomeEmail", { recipientEmail: email });
-      return { email, tags };
+      const normalizedEmail = email.trim().toLowerCase();
+      const grantTags = tags && tags.length > 0 ? tags : ["blueprint_paid"];
+      await base44.entities.PreApprovedMember.create({
+        email: normalizedEmail,
+        grant_membership_type: "paid",
+        grant_access_tags: grantTags,
+        status: "pending",
+      });
+      const loginUrl = window.location.origin;
+      await base44.functions.invoke("sendWelcomeEmail", {
+        recipientEmail: normalizedEmail,
+        loginUrl,
+      });
+      return { email: normalizedEmail };
     },
     onSuccess: (data) => {
       setAddMemberOpen(false);
@@ -96,10 +106,10 @@ export default function MembersManager({ allUsers }) {
       setAddMode("invite");
       setSelectedExistingUser("");
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      alert(`Invitation sent to ${data.email}!`);
+      alert(`${data.email} has been pre-approved. They can now sign in at ${window.location.origin} and their access will be granted automatically.`);
     },
     onError: (error) => {
-      alert(`Failed to send invitation: ${error.message}`);
+      alert(`Failed to pre-approve member: ${error.message}`);
     },
   });
 

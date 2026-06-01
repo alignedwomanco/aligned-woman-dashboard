@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
 import { Bell, LogOut, User, Settings, ChevronDown } from "lucide-react";
+import { hasBlueprintAccess } from "@/lib/entitlement";
+import PendingApproval from "@/components/access/PendingApproval";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,6 +50,8 @@ export default function Layout({ children, currentPageName }) {
   const [siteSettings, setSiteSettings] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [showPending, setShowPending] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -102,10 +106,20 @@ export default function Layout({ children, currentPageName }) {
         const authenticated = await base44.auth.isAuthenticated();
         setIsAuthenticated(authenticated);
         if (authenticated) {
-          const userData = await base44.auth.me();
+          let userData = await base44.auth.me();
           setUser(userData);
+
+          const isPrivileged = ["admin", "master_admin", "owner"].includes(userData?.role);
+          if (!isPublicPage && !isPrivileged && !hasBlueprintAccess(userData)) {
+            await base44.functions.invoke("claimPreApproval", {});
+            userData = await base44.auth.me();
+            setUser(userData);
+            if (!hasBlueprintAccess(userData)) {
+              setShowPending(true);
+            }
+          }
+          setAccessChecked(true);
         } else if (!isPublicPage) {
-          // Redirect unauthenticated users away from protected pages
           base44.auth.redirectToLogin(window.location.pathname);
         }
       } catch (e) {
@@ -384,6 +398,12 @@ export default function Layout({ children, currentPageName }) {
                 </div>);
 
             }
+
+  // Pending approval gate for authenticated users without access
+  if (!isPublicPage && showPending && user) {
+    const firstName = user.full_name ? user.full_name.trim().split(" ")[0] : "";
+    return <PendingApproval firstName={firstName} />;
+  }
 
   // Dashboard and Workbook pages have their own chrome - render children directly
   if (isDashboardPage || currentPageName === "Workbook") {
