@@ -32,12 +32,12 @@ export default function ModulePlayer() {
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
-  const [milestone, setMilestone] = useState(null); // null | "module" | "phase" | "course"
+  const [milestone, setMilestone] = useState(null);
   const [milestoneSnapshot, setMilestoneSnapshot] = useState(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: course } = useQuery({
+  const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ["course", courseId],
     queryFn: async () => {
       const courses = await base44.entities.Course.filter({ id: courseId });
@@ -48,7 +48,7 @@ export default function ModulePlayer() {
 
   const { hasAccess, isLoading: accessLoading } = useCourseAccess(course);
 
-  const { data: module } = useQuery({
+  const { data: module, isLoading: moduleLoading } = useQuery({
     queryKey: ["courseModule", moduleId],
     queryFn: async () => {
       const modules = await base44.entities.CourseModule.filter({ id: moduleId });
@@ -57,18 +57,20 @@ export default function ModulePlayer() {
     enabled: !!moduleId,
   });
 
-  const { data: rawPages = [] } = useQuery({
+  const { data: rawPages = [], isLoading: pagesLoading } = useQuery({
     queryKey: ["coursePages", moduleId],
     queryFn: () => base44.entities.CoursePage.filter({ moduleId }),
     enabled: !!moduleId,
   });
 
-  const pages = [...rawPages].sort((a, b) => {
-    const aOrder = a.order ?? Infinity;
-    const bOrder = b.order ?? Infinity;
-    if (aOrder !== bOrder) return aOrder - bOrder;
-    return (a.created_date || "").localeCompare(b.created_date || "");
-  });
+  const pages = useMemo(() => {
+    return [...rawPages].sort((a, b) => {
+      const aOrder = a.order ?? Infinity;
+      const bOrder = b.order ?? Infinity;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return (a.created_date || "").localeCompare(b.created_date || "");
+    });
+  }, [rawPages]);
 
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
@@ -237,9 +239,6 @@ export default function ModulePlayer() {
 
       if (allPagesCompleted) {
         await completeModule();
-        // STOP here - show the end screen and wait for user to click Continue.
-        // Do not navigate, prefetch, or render the next module.
-        // For Welcome intro and final module, decide the milestone stage now.
         const currentSec = allCourseSections.find((s) => s.id === module?.sectionId);
         const onWelcome =
           currentSec &&
@@ -247,17 +246,14 @@ export default function ModulePlayer() {
             (currentSec.title || "").toLowerCase().includes("welcome"));
         
         if (onWelcome) {
-          // Welcome intro: show module milestone, user clicks Continue to go to first content module
           if (!module?.isPhaseIntro) {
             setMilestoneSnapshot(buildMilestoneSnapshot());
             setMilestone("module");
           }
         } else if (isCourseEnd) {
-          // Final module: show course-complete celebration immediately
           setMilestoneSnapshot(buildMilestoneSnapshot());
           setMilestone("course");
         } else {
-          // Regular module: show module milestone
           if (!module?.isPhaseIntro) {
             setMilestoneSnapshot(buildMilestoneSnapshot());
             setMilestone("module");
@@ -355,10 +351,25 @@ export default function ModulePlayer() {
       ? Math.round((completedPageCount / pages.length) * 100)
       : 0;
 
-  if (!module || !selectedPage || accessLoading) {
+  const isCoreDataLoading = moduleLoading || pagesLoading || accessLoading;
+
+  if (isCoreDataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
         <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!module || !selectedPage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
+        <div className="text-center">
+          <h2 className="text-2xl font-serif text-[#4A0E2E] mb-4">Module not found</h2>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Go Back
+          </Button>
+        </div>
       </div>
     );
   }
