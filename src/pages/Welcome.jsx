@@ -29,7 +29,7 @@ export default function Welcome() {
   }, []);
 
   const handleCreateAccount = () => {
-    base44.auth.redirectToLogin(`${window.location.origin}/Dashboard?signup=true`);
+    base44.auth.redirectToLogin(`${window.location.origin}/Dashboard`, { mode: "signup" });
   };
 
   return (
@@ -125,7 +125,7 @@ export default function Welcome() {
                 maxWidth: 390,
               }}
             >
-              You'll be taken directly to the signup screen to create your account.
+              You'll be taken to the account creation screen to register for the first time.
             </p>
           </>
         )}
