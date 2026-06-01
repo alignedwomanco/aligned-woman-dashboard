@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { enablePreviewMode, disablePreviewMode } from "@/lib/previewMode";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardState } from "@/lib/dashboardState";
+import { ensureMemberProfile } from "@/lib/ensureMemberProfile";
 import useContinueModule from "@/hooks/useContinueModule";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
@@ -133,20 +134,12 @@ export default function Dashboard() {
           profiles = await base44.entities.MemberProfile.list();
         }
 
-        if (profiles.length > 0) {
-          await base44.entities.MemberProfile.update(profiles[0].id, {
-            computed_archetype_key: quizResult.archetype_key,
-            quiz_completed_at: quizResult.completed_at,
-          });
-        } else {
-          await base44.entities.MemberProfile.create({
-            user_id: me.id,
-            first_name: me.full_name?.split(" ")[0] || "",
-            full_name: me.full_name || "",
+        const profile = profiles.length > 0 ? profiles[0] : await ensureMemberProfile(me);
+        if (profile) {
+          await base44.entities.MemberProfile.update(profile.id, {
             computed_archetype_key: quizResult.archetype_key,
             quiz_completed_at: quizResult.completed_at,
             has_seen_welcome: true,
-            signup_timestamp: new Date().toISOString(),
           });
         }
 
@@ -213,15 +206,7 @@ export default function Dashboard() {
         }
 
         // Paid member with no profile yet (e.g. added manually): create one, then retry.
-        if (me?.id) {
-          await base44.entities.MemberProfile.create({
-            user_id: me.id,
-            first_name: me.full_name?.split(" ")[0] || "",
-            full_name: me.full_name || "",
-            has_seen_welcome: false,
-            signup_timestamp: new Date().toISOString(),
-          });
-        }
+        await ensureMemberProfile(me);
         const result = await getDashboardState();
         setData(result);
         setStatus("ready");

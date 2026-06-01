@@ -1,0 +1,1 @@
+export const MEMBER_READ_LIMIT = 500;
