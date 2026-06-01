@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
 /**
- * Resolves the user's current in-progress module and computes
- * per-phase completion and lock/unlock status from real course data.
+ * Resolves the user's current module and computes per-phase completion and
+ * lock/unlock status from real course data. The current module is the first
+ * unfinished module in course order, so "continue" always moves forward and
+ * never lands on a module the user has already completed.
  */
 export default function useContinueModule(currentUser) {
   const { data: courses, isLoading: loadingCourses } = useQuery({
@@ -57,7 +59,7 @@ export default function useContinueModule(currentUser) {
       moduleIndex: 1, totalModules: 0, nextPageId: null, isLoading,
       currentSection: null, phaseIndex: 1, totalSections: 0,
       completedModulesInSection: 0, totalModulesInSection: 0,
-      allPhasesData: [], courseId: null,
+      allPhasesData: [], courseId: null, isCourseComplete: false,
     };
   }
 
@@ -122,42 +124,38 @@ export default function useContinueModule(currentUser) {
     isComplete: pd.isComplete,
   }));
 
-  // ── Find the user's current in-progress module ──────────────────────────
-  let inProgressModule = null;
-  let bestLastAccessed = null;
-
+  // ── Find the user's current module ───────────────────────────────────────
+  // The next module is the first one, in course order (section order, then
+  // module order), that still has an incomplete lesson. Deterministic, always
+  // forward, and never an already-finished module. A brand-new user naturally
+  // resolves to the first content module, since all its lessons are incomplete.
   const contentSectionIds = new Set(contentSections.map((s) => s.id));
+  let inProgressModule = null;
   for (const mod of sortedModules) {
-    if (!contentSectionIds.has(mod.sectionId)) continue;
+    if (!contentSectionIds.has(mod.sectionId)) continue; // skip welcome
     const modPages = pages.filter(p => p.moduleId === mod.id);
-    if (modPages.length === 0) continue;
-    if (!modPages.some(p => !completedPageIds.has(p.id))) continue;
-
-    const moduleProgress = progress.filter(p => p.moduleId === mod.id);
-    const lastAccessed = moduleProgress.reduce((latest, p) => {
-      if (!p.lastAccessedAt) return latest;
-      const d = new Date(p.lastAccessedAt);
-      return (!latest || d > latest) ? d : latest;
-    }, null);
-
-    if (!inProgressModule || (lastAccessed && (!bestLastAccessed || lastAccessed > bestLastAccessed))) {
-      if (lastAccessed) {
-        inProgressModule = mod;
-        bestLastAccessed = lastAccessed;
-      }
-    }
-    if (!inProgressModule) {
+    if (modPages.length === 0) continue; // skip modules with no lessons
+    if (modPages.some(p => !completedPageIds.has(p.id))) {
       inProgressModule = mod;
+      break;
     }
   }
 
-  // Fallback: first module in first content section
-  if (!inProgressModule && contentSections.length > 0 && sortedModules.length > 0) {
-    const firstSection = contentSections[0];
-    const firstSectionModules = sortedModules.filter(m => m.sectionId === firstSection.id);
-    inProgressModule = firstSectionModules[0] || sortedModules[0];
-  }
+  // Welcome intro fields, shared across return paths
+  const welcomeSection = sortedSections.find((s) => isWelcomeSection(s)) || null;
+  const welcomeModule = welcomeSection
+    ? sortedModules.find(
+        (m) => m.sectionId === welcomeSection.id && pages.some((p) => p.moduleId === m.id)
+      ) || null
+    : null;
+  const welcomeComplete = welcomeModule ? isModComplete(welcomeModule) : true;
+  const welcomeExpertName =
+    welcomeModule && welcomeModule.expertId
+      ? experts.find((e) => e.id === welcomeModule.expertId)?.name || ""
+      : "";
 
+  // Every content module is finished: the course is complete. Do not loop back
+  // to module one.
   if (!inProgressModule) {
     return {
       module: null, expert: null, completedPages: 0, totalPages: 0,
@@ -165,7 +163,8 @@ export default function useContinueModule(currentUser) {
       currentSection: null, phaseIndex: 1, totalSections: contentSections.length,
       completedModulesInSection: 0, totalModulesInSection: 0,
       allPhasesData: phasesWithStatus, courseId,
-      welcomeModule: null, welcomeComplete: true, welcomeExpertName: "",
+      welcomeModule, welcomeComplete, welcomeExpertName,
+      isCourseComplete: true,
     };
   }
 
@@ -195,19 +194,6 @@ export default function useContinueModule(currentUser) {
     if (isModComplete(mod)) completedModulesInSection++;
   }
 
-  // ── Welcome intro: shown first, never gated, never repeated ──────────────
-  const welcomeSection = sortedSections.find((s) => isWelcomeSection(s)) || null;
-  const welcomeModule = welcomeSection
-    ? sortedModules.find(
-        (m) => m.sectionId === welcomeSection.id && pages.some((p) => p.moduleId === m.id)
-      ) || null
-    : null;
-  const welcomeComplete = welcomeModule ? isModComplete(welcomeModule) : true;
-  const welcomeExpertName =
-    welcomeModule && welcomeModule.expertId
-      ? experts.find((e) => e.id === welcomeModule.expertId)?.name || ""
-      : "";
-
   return {
     module: inProgressModule,
     expert,
@@ -227,5 +213,6 @@ export default function useContinueModule(currentUser) {
     welcomeModule,
     welcomeComplete,
     welcomeExpertName,
+    isCourseComplete: false,
   };
 }
