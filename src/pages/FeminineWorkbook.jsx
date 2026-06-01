@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, BookOpen, ArrowRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
@@ -28,24 +29,13 @@ export default function FeminineWorkbook() {
   const saveTimer = useRef(null);
   const initialSectionIdRef = useRef(null);
 
-  // Fetch all modules and sections for continue logic
-  const { data: allModules = [] } = useMemo(() => ({ data: [] }), []);
-  const { data: allSections = [] } = useMemo(() => ({ data: [] }), []);
-  
-  const [modulesData, setModulesData] = useState([]);
-  const [sectionsData, setSectionsData] = useState([]);
-
   useEffect(() => {
     base44.auth.me().then(u => setUser(u)).catch(() => {});
     Promise.all([
       base44.entities.Workbook.filter({ id: WORKBOOK_ID }, null, 1).then(r => r[0] || null),
       base44.entities.WorkbookResponse.filter({ workbook_id: WORKBOOK_ID }, "-created_date", 1),
-      base44.entities.CourseModule.filter({}),
-      base44.entities.CourseSection.filter({}),
-    ]).then(([wb, responses, modules, sections]) => {
+    ]).then(([wb, responses]) => {
       setWorkbook(wb);
-      setModulesData(modules || []);
-      setSectionsData(sections || []);
       if (wb?.expert_id) {
         base44.entities.Expert.filter({ id: wb.expert_id }).then(r => setExpert(r[0] || null));
       }
@@ -62,14 +52,29 @@ export default function FeminineWorkbook() {
     });
   }, []);
 
-  const sections = useMemo(() => workbook?.schema?.sections || [], [workbook]);
+  // Fetch modules and sections for continue logic
+  const { data: allModules = [] } = useQuery({
+    queryKey: ["femAllModules"],
+    queryFn: async () => {
+      const modules = await base44.entities.CourseModule.filter({});
+      return modules || [];
+    },
+  });
 
-  // Build canonical module order (excluding Welcome section)
+  const { data: allSections = [] } = useQuery({
+    queryKey: ["femAllSections"],
+    queryFn: async () => {
+      const sections = await base44.entities.CourseSection.filter({});
+      return sections || [];
+    },
+  });
+
+  // Build canonical module order: sections by order (excluding Welcome), then modules by order
   const canonicalModuleOrder = useMemo(() => {
-    if (!modulesData.length || !sectionsData.length) return [];
+    if (!allModules.length || !allSections.length) return [];
     
     // Filter out Welcome/Intro sections (order 0 or title containing "welcome")
-    const contentSections = sectionsData.filter(s => {
+    const contentSections = allSections.filter(s => {
       const isWelcome = s.order === 0 || (s.title && s.title.toLowerCase().includes("welcome"));
       return !isWelcome;
     });
@@ -80,15 +85,15 @@ export default function FeminineWorkbook() {
     // Build ordered module list
     const orderedModules = [];
     for (const section of contentSections) {
-      const sectionModules = modulesData.filter(m => m.sectionId === section.id);
+      const sectionModules = allModules.filter(m => m.sectionId === section.id);
       sectionModules.sort((a, b) => (a.order || 0) - (b.order || 0));
       orderedModules.push(...sectionModules);
     }
     
     return orderedModules;
-  }, [modulesData, sectionsData]);
+  }, [allModules, allSections]);
 
-  // Continue the Blueprint: navigate to next module after this workbook's module
+  // Continue handler: find this workbook's module by expert_id, navigate to next in canonical order
   const handleContinueBlueprint = useCallback(() => {
     if (!workbook?.expert_id || !canonicalModuleOrder.length) {
       window.location.href = "/Dashboard";
@@ -113,7 +118,9 @@ export default function FeminineWorkbook() {
     const nextModule = canonicalModuleOrder[currentIndex + 1];
     const courseId = nextModule.courseId ? `&courseId=${nextModule.courseId}` : "";
     window.location.href = `/ModulePlayer?moduleId=${nextModule.id}${courseId}`;
-  }, [workbook, canonicalModuleOrder]);
+  }, [workbook?.expert_id, canonicalModuleOrder]);
+
+  const sections = useMemo(() => workbook?.schema?.sections || [], [workbook]);
 
   // Restore last section on load
   useEffect(() => {
