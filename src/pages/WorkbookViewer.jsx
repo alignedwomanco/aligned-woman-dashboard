@@ -9,6 +9,7 @@ import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
 import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
 import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
+import { getNextModuleForWorkbook, isFlowReady } from "@/lib/courseFlow";
 
 function WorkbookPicker() {
   const { data: workbooks, isLoading } = useQuery({
@@ -172,6 +173,22 @@ function WorkbookViewerInner({ workbookId }) {
     },
     enabled: wbAllModules.length > 0,
   });
+
+  const flowReady = isFlowReady(wbAllSections, wbAllModules, wbAllPages);
+  const wbNextModule = useMemo(
+    () => (flowReady ? getNextModuleForWorkbook(workbook, wbAllSections, wbAllModules, wbAllPages) : null),
+    [flowReady, workbook, wbAllSections, wbAllModules, wbAllPages]
+  );
+
+  const handleContinueNext = useCallback(() => {
+    if (!flowReady) return;
+    if (wbNextModule) {
+      const cid = wbCourseId ? `&courseId=${wbCourseId}` : "";
+      window.location.href = `/ModulePlayer?moduleId=${wbNextModule.id}${cid}`;
+    } else {
+      window.location.href = "/Dashboard";
+    }
+  }, [flowReady, wbNextModule, wbCourseId]);
 
 
 
@@ -377,7 +394,7 @@ function WorkbookViewerInner({ workbookId }) {
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
       {showCelebration && (
         <WorkbookCelebration
-          onContinueBlueprint={() => window.location.href = "/Dashboard"}
+          onContinueBlueprint={flowReady ? handleContinueNext : undefined}
           onBackToWorkbook={() => {
             setShowCelebration(false);
             jumpTo(lastSectionIdx);
@@ -397,7 +414,7 @@ function WorkbookViewerInner({ workbookId }) {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={unlockedSections}
-        onContinueNext={() => window.location.href = "/Dashboard"}
+        onContinueNext={flowReady ? handleContinueNext : undefined}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -431,8 +448,8 @@ function WorkbookViewerInner({ workbookId }) {
                  computedScores={computedScores}
                  step={idx === activeSection ? activeStep : 0}
                  onStepChange={idx === activeSection ? setActiveStep : undefined}
-                 onContinueNext={() => window.location.href = "/Dashboard"}
-                />
+                 onContinueNext={flowReady ? handleContinueNext : undefined}
+                 />
               </div>
             </div>
           ))}
