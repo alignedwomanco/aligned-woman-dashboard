@@ -10,6 +10,7 @@ import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
 import FemFieldRenderer from "@/components/workbook/feminine/FemFieldRenderer";
 import FemComputedFields from "@/components/workbook/feminine/FemComputedFields";
 import FoundationRatingField from "@/components/workbook/feminine/FoundationRatingField";
+import { getNextModuleForWorkbook, isFlowReady } from "@/lib/courseFlow";
 
 const WORKBOOK_ID = "6a1958f44abcf0360979ef18";
 
@@ -52,77 +53,49 @@ export default function FeminineWorkbook() {
     });
   }, []);
 
-  // Fetch modules and sections for continue logic
+  const wbCourseId = workbook?.course_id || null;
+
   const { data: allModules = [] } = useQuery({
-    queryKey: ["femAllModules"],
-    queryFn: async () => {
-      const modules = await base44.entities.CourseModule.filter({});
-      return modules || [];
-    },
+    queryKey: ["femAllModules", wbCourseId],
+    queryFn: () => base44.entities.CourseModule.filter({ courseId: wbCourseId }, "order", 500),
+    enabled: !!wbCourseId,
   });
 
   const { data: allSections = [] } = useQuery({
-    queryKey: ["femAllSections"],
-    queryFn: async () => {
-      const sections = await base44.entities.CourseSection.filter({});
-      return sections || [];
-    },
+    queryKey: ["femAllSections", wbCourseId],
+    queryFn: () => base44.entities.CourseSection.filter({ courseId: wbCourseId }, "order", 500),
+    enabled: !!wbCourseId,
   });
 
-  // Build canonical module order: sections by order (excluding Welcome), then modules by order
-  const canonicalModuleOrder = useMemo(() => {
-    if (!allModules.length || !allSections.length) return [];
-    
-    // Filter out Welcome/Intro sections (order 0 or title containing "welcome")
-    const contentSections = allSections.filter(s => {
-      const isWelcome = s.order === 0 || (s.title && s.title.toLowerCase().includes("welcome"));
-      return !isWelcome;
-    });
-    
-    // Sort sections by order
-    contentSections.sort((a, b) => (a.order || 0) - (b.order || 0));
-    
-    // Build ordered module list
-    const orderedModules = [];
-    for (const section of contentSections) {
-      const sectionModules = allModules.filter(m => m.sectionId === section.id);
-      sectionModules.sort((a, b) => (a.order || 0) - (b.order || 0));
-      orderedModules.push(...sectionModules);
-    }
-    
-    return orderedModules;
-  }, [allModules, allSections]);
+  const { data: allPages = [] } = useQuery({
+    queryKey: ["femAllPages", wbCourseId],
+    queryFn: async () => {
+      const results = await Promise.all(
+        allModules.map((m) => base44.entities.CoursePage.filter({ moduleId: m.id }, "order", 500))
+      );
+      return results.flat();
+    },
+    enabled: allModules.length > 0,
+  });
 
-  // Continue handler: find this workbook's module by expert_id, navigate to next in canonical order
+  const flowReady = isFlowReady(allSections, allModules, allPages);
+  const nextModule = useMemo(
+    () => (flowReady ? getNextModuleForWorkbook(workbook, allSections, allModules, allPages) : null),
+    [flowReady, workbook, allSections, allModules, allPages]
+  );
+
   const handleContinueBlueprint = useCallback(() => {
-    if (!workbook?.expert_id || !canonicalModuleOrder.length) {
+    if (!flowReady) return;
+    if (nextModule) {
+      const cid = nextModule.courseId ? `&courseId=${nextModule.courseId}` : "";
+      window.location.href = `/ModulePlayer?moduleId=${nextModule.id}${cid}`;
+    } else {
       window.location.href = "/Dashboard";
-      return;
     }
-
-    // Find this workbook's module by matching expert_id
-    const currentModule = canonicalModuleOrder.find(m => m.expertId === workbook.expert_id);
-    if (!currentModule) {
-      window.location.href = "/Dashboard";
-      return;
-    }
-
-    const currentIndex = canonicalModuleOrder.findIndex(m => m.id === currentModule.id);
-    
-    if (currentIndex === -1 || currentIndex >= canonicalModuleOrder.length - 1) {
-      // No next module - this is the last module, go to Dashboard
-      window.location.href = "/Dashboard";
-      return;
-    }
-
-    const nextModule = canonicalModuleOrder[currentIndex + 1];
-    const courseId = nextModule.courseId ? `&courseId=${nextModule.courseId}` : "";
-    window.location.href = `/ModulePlayer?moduleId=${nextModule.id}${courseId}`;
-  }, [workbook?.expert_id, canonicalModuleOrder]);
+  }, [flowReady, nextModule]);
 
   const sections = useMemo(() => workbook?.schema?.sections || [], [workbook]);
 
-  // Restore last section on load
   useEffect(() => {
     if (!sections.length || !initialSectionIdRef.current) return;
     const idx = sections.findIndex(s => s.section_id === initialSectionIdRef.current);
@@ -220,7 +193,6 @@ export default function FeminineWorkbook() {
     setShowCelebration(true);
   };
 
-  // Attach section_number for sidebar compatibility
   const sectionsWithNumbers = useMemo(() => sections.map((s, i) => ({ ...s, section_number: i })), [sections]);
 
   const lastSectionIdx = sections.length - 1;
@@ -268,6 +240,7 @@ export default function FeminineWorkbook() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={sectionsWithNumbers.map((_, i) => i)}
+        onContinueNext={flowReady ? handleContinueBlueprint : undefined}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -294,6 +267,7 @@ export default function FeminineWorkbook() {
                   isLastSection={idx === lastSectionIdx}
                   isComplete={isComplete}
                   onComplete={handleComplete}
+                  onContinueBlueprint={flowReady ? handleContinueBlueprint : undefined}
                 />
               </div>
             </div>
@@ -338,10 +312,9 @@ export default function FeminineWorkbook() {
   );
 }
 
-function FemSectionContent({ section, answers, onAnswerChange, allSections, isLastSection, isComplete, onComplete }) {
+function FemSectionContent({ section, answers, onAnswerChange, allSections, isLastSection, isComplete, onComplete, onContinueBlueprint }) {
   return (
     <div>
-      {/* Section header — matches WorkbookSectionContent pattern */}
       {section.part_label && (
         <p style={{
           fontFamily: "var(--aw-font-sans)", fontWeight: 700, fontSize: 10,
@@ -390,7 +363,6 @@ function FemSectionContent({ section, answers, onAnswerChange, allSections, isLa
         ))}
       </div>
 
-      {/* Mark Complete — on last section only */}
       {isLastSection && !isComplete && (
         <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--aw-border-light)", textAlign: "center" }}>
           <button
@@ -404,22 +376,29 @@ function FemSectionContent({ section, answers, onAnswerChange, allSections, isLa
       )}
       {isLastSection && isComplete && (
         <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--aw-border-light)", textAlign: "center" }}>
-          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 13, color: "var(--aw-rose-core)", fontWeight: 600 }}>
+          <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 13, color: "var(--aw-rose-core)", fontWeight: 600, marginBottom: 20 }}>
             ✓ Workbook Complete
           </p>
+          {onContinueBlueprint && (
+            <button
+              onClick={onContinueBlueprint}
+              className="wb-btn wb-btn--primary"
+              style={{ fontSize: 11 }}
+            >
+              Continue the Blueprint
+            </button>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// IDs or attribution text of fields to suppress entirely
 const SUPPRESSED_ATTRIBUTIONS = ["THE ASSIGNMENT"];
 
 function FemField({ field, answers, onAnswerChange, allSections }) {
   const value = answers[field.field_id];
 
-  // FIX 4: suppress assignment callout in Part Nine
   if (field.type === "content_block" && field.variant === "callout") {
     const attr = (field.attribution || "").toUpperCase();
     if (SUPPRESSED_ATTRIBUTIONS.some(s => attr.includes(s))) return null;
@@ -431,8 +410,6 @@ function FemField({ field, answers, onAnswerChange, allSections }) {
   if (field.type === "computed_foundation_score") {
     return <FemComputedFields.FoundationScore field={field} answers={answers} allSections={allSections} />;
   }
-
-  // Render foundation_rating type (3-state) — only if field type explicitly says so
   if (field.type === "foundation_rating") {
     return (
       <FoundationRatingField
