@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Lock, Loader2, BookOpen } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useWorkbookUnlock from "@/hooks/useWorkbookUnlock";
 import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
@@ -117,6 +117,7 @@ export default function WorkbookViewer() {
 }
 
 function WorkbookViewerInner({ workbookId }) {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -183,12 +184,11 @@ function WorkbookViewerInner({ workbookId }) {
   const handleContinueNext = useCallback(() => {
     if (!flowReady) return;
     if (wbNextModule) {
-      const cid = wbCourseId ? `&courseId=${wbCourseId}` : "";
-      window.location.href = `/ModulePlayer?moduleId=${wbNextModule.id}${cid}`;
+      navigate(`/ModulePlayer?moduleId=${wbNextModule.id}&courseId=${wbCourseId}`);
     } else {
-      window.location.href = "/Dashboard";
+      navigate("/Dashboard");
     }
-  }, [flowReady, wbNextModule, wbCourseId]);
+  }, [flowReady, wbNextModule, wbCourseId, navigate]);
 
 
 
