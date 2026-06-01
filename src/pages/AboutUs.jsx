@@ -29,7 +29,7 @@ const COMMITMENTS = [
   {
     num: "02",
     title: "We centre dignity, not deficit-based narratives",
-    desc: "We don't build programmes around what women lack. We build around what women carry — and what becomes possible when they're given the right conditions to lead.",
+    desc: "We don't build programmes around what women lack. We build around what women carry, and what becomes possible when they're given the right conditions to lead.",
   },
   {
     num: "03",
