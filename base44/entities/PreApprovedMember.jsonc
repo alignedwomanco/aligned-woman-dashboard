@@ -1,0 +1,113 @@
+{
+  "name": "PreApprovedMember",
+  "type": "object",
+  "description": "Admin-curated list of email addresses that should be granted access automatically the first time that person logs in. Consumed by a service-role backend function at login; never read or written from the browser.",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Lowercased email to match against the user at first login."
+    },
+    "grant_membership_type": {
+      "type": "string",
+      "enum": [
+        "free",
+        "paid"
+      ],
+      "default": "paid",
+      "description": "membership_type to set on the User when this pre-approval is claimed."
+    },
+    "grant_access_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "blueprint_paid"
+      ],
+      "description": "access_tags to add to the User when claimed, e.g. blueprint_paid."
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional admin note, e.g. 'waitlist comp' or the person's name."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "claimed"
+      ],
+      "default": "pending",
+      "description": "pending until the matching user logs in and the grant is applied, then claimed."
+    },
+    "claimed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the grant was applied."
+    },
+    "claimed_user_email": {
+      "type": "string",
+      "description": "The email of the user record that claimed this pre-approval."
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    }
+  }
+}

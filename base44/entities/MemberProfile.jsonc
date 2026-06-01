@@ -1,0 +1,133 @@
+{
+  "name": "MemberProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Foreign key to User. One MemberProfile per User."
+    },
+    "first_name": {
+      "type": "string",
+      "description": "User's first name, used for dashboard greeting"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "User's full name"
+    },
+    "profile_image_url": {
+      "type": "string",
+      "description": "URL to profile image"
+    },
+    "referral_source": {
+      "type": "string",
+      "description": "How the user found the platform"
+    },
+    "affiliate_id": {
+      "type": "string",
+      "description": "GoAffPro affiliate ID captured at signup"
+    },
+    "signup_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the profile was created"
+    },
+    "current_phase": {
+      "type": "string",
+      "enum": [
+        "awareness",
+        "liberation",
+        "intentional_action",
+        "vision",
+        "embodiment"
+      ],
+      "default": "awareness",
+      "description": "Current ALIVE phase the user is in"
+    },
+    "completed_modules_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total modules user has marked complete across all courses"
+    },
+    "has_seen_welcome": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flips to true after the user's first dashboard load"
+    },
+    "computed_archetype_key": {
+      "type": "string",
+      "enum": [
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor"
+      ],
+      "description": "User's archetype key from onboarding quiz. Null until quiz is completed."
+    },
+    "quiz_completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the user completed the onboarding quiz. Null until completed."
+    },
+    "last_module_id": {
+      "type": "string",
+      "description": "Reference to the most recent Module the user accessed. Null if no module accessed yet."
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -12,16 +12,33 @@
     },
     "expert_id": {
       "type": "string",
-      "description": "Relationship \u2192 Expert. One workbook belongs to one expert"
+      "description": "Relationship to Expert. One workbook belongs to one expert"
     },
     "course_id": {
       "type": "string",
-      "description": "Relationship \u2192 Course. Workbook belongs to one course"
+      "description": "Relationship to Course. Workbook belongs to one course"
+    },
+    "module_id": {
+      "type": "string",
+      "description": "Relationship to CourseModule. The CourseModule this workbook belongs to (the module whose lessons it integrates), resolved 1:1 via the shared expert. Optional. Canonical anchor for continue and next-module logic, used instead of resolving the module by expert at runtime."
     },
     "schema": {
       "type": "object",
       "description": "Structured definition of sections and fields. Default: {}",
       "default": {}
+    },
+    "scoring_logic": {
+      "type": "string",
+      "description": "Key identifying which scoring algorithm to run when workbook is completed. e.g. nervous_system_baseline_v1. Null means no scoring."
+    },
+    "renderer_type": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "interactive"
+      ],
+      "default": "standard",
+      "description": "standard = generic schema renderer. interactive = custom React component with diagnostic logic, conditional content, real-time calculations. Interactive workbooks still store answers in the same WorkbookResponse format."
     },
     "blank_pdf_url": {
       "type": "string",
@@ -58,23 +75,5 @@
     "title",
     "expert_id",
     "course_id"
-  ],
-  "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "read": {},
-    "update": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
-    }
-  }
+  ]
 }

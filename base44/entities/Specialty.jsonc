@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Specialty name"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category grouping for browse view"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this specialty is available for selection"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ],
+  "name": "Specialty"
+}
