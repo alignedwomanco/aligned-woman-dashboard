@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { isPreviewMode } from "@/lib/previewMode";
+import { MEMBER_READ_LIMIT } from "@/lib/limits";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -639,17 +640,17 @@ export default function CourseDetail() {
         const allCourses = await base44.entities.Course.list();
         setCourse(allCourses.find((c) => c.id === courseId));
 
-        const rawSections = await base44.entities.CourseSection.filter({ courseId });
+        const rawSections = await base44.entities.CourseSection.filter({ courseId }, "order", MEMBER_READ_LIMIT);
         setSections(sortByOrder(rawSections));
 
-        const rawModules = await base44.entities.CourseModule.filter({ courseId });
+        const rawModules = await base44.entities.CourseModule.filter({ courseId }, "order", MEMBER_READ_LIMIT);
         setModules(sortByOrder(rawModules));
 
-        const rawPages = await base44.entities.CoursePage.filter({ courseId });
+        const rawPages = await base44.entities.CoursePage.filter({ courseId }, "order", MEMBER_READ_LIMIT);
         setPages(rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
         if (email && !isNewUserPreview && !isPreviewMode()) {
-          const prog = await base44.entities.CourseProgress.filter({});
+          const prog = await base44.entities.CourseProgress.filter({}, "-updated_date", MEMBER_READ_LIMIT);
           setProgress(prog);
           const profileArr = await base44.entities.MemberProfile.filter(
             { user_id: me.id }, "-created_date", 1
@@ -669,14 +670,14 @@ export default function CourseDetail() {
 
     const unsubSections = base44.entities.CourseSection.subscribe((event) => {
       if (event.data?.courseId === courseId) {
-        base44.entities.CourseSection.filter({ courseId }).then((s) =>
+        base44.entities.CourseSection.filter({ courseId }, "order", MEMBER_READ_LIMIT).then((s) =>
           setSections(sortByOrder(s))
         );
       }
     });
     const unsubModules = base44.entities.CourseModule.subscribe((event) => {
       if (event.data?.courseId === courseId) {
-        base44.entities.CourseModule.filter({ courseId }).then((m) =>
+        base44.entities.CourseModule.filter({ courseId }, "order", MEMBER_READ_LIMIT).then((m) =>
           setModules(sortByOrder(m))
         );
       }

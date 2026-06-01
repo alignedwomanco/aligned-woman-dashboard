@@ -4,6 +4,7 @@ import { enablePreviewMode, disablePreviewMode } from "@/lib/previewMode";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardState } from "@/lib/dashboardState";
 import { ensureMemberProfile } from "@/lib/ensureMemberProfile";
+import { MEMBER_READ_LIMIT } from "@/lib/limits";
 import useContinueModule from "@/hooks/useContinueModule";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
@@ -134,8 +135,10 @@ export default function Dashboard() {
           profiles = await base44.entities.MemberProfile.list();
         }
 
-        const profile = profiles.length > 0 ? profiles[0] : await ensureMemberProfile(me);
-        if (profile) {
+        const profile = profiles.length > 0
+          ? profiles[0]
+          : await ensureMemberProfile(me);
+        if (profile?.id) {
           await base44.entities.MemberProfile.update(profile.id, {
             computed_archetype_key: quizResult.archetype_key,
             quiz_completed_at: quizResult.completed_at,
@@ -238,7 +241,7 @@ export default function Dashboard() {
 
   const { data: workbookResponses = [] } = useQuery({
     queryKey: ["dashboard-workbook-responses"],
-    queryFn: () => base44.entities.WorkbookResponse.filter({}),
+    queryFn: () => base44.entities.WorkbookResponse.filter({}, "-updated_date", MEMBER_READ_LIMIT),
     initialData: [],
   });
 

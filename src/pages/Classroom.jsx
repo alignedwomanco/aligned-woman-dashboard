@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { isPreviewMode } from "@/lib/previewMode";
+import { hasBlueprintAccess } from "@/lib/entitlement";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 
@@ -311,12 +312,8 @@ export default function Classroom() {
   const hasAccess = (course) => {
     if (isAdmin) return true;
     if (!course.tags || course.tags.length === 0) return true;
-    // Honor paid membership the same way the dashboard does, so a member
-    // marked paid via membership_type is not locked out of the classroom.
-    const effectiveTags = user?.membership_type === "paid"
-      ? [...userTags, "blueprint_paid"]
-      : userTags;
-    return course.tags.some((t) => effectiveTags.includes(t));
+    if (hasBlueprintAccess(user)) return true;
+    return course.tags.some((t) => userTags.includes(t));
   };
 
   const isEnrolledInCourse = (courseId) =>
