@@ -39,6 +39,33 @@ Deno.serve(async (req) => {
       claimed_at: new Date().toISOString(),
     });
 
+    // Enroll user in any courses whose tags match the granted access tags
+    const allCourses = await base44.asServiceRole.entities.Course.list();
+    const now = new Date().toISOString();
+
+    for (const tag of grantTags) {
+      const matchingCourses = allCourses.filter(
+        (c) => Array.isArray(c.tags) && c.tags.includes(tag)
+      );
+
+      for (const course of matchingCourses) {
+        const existing = await base44.asServiceRole.entities.CourseEnrollment.filter({
+          userEmail: email,
+          courseId: course.id,
+        });
+
+        if (!existing || existing.length === 0) {
+          await base44.asServiceRole.entities.CourseEnrollment.create({
+            userEmail: email,
+            courseId: course.id,
+            isPaid: true,
+            paymentSource: "preapproval",
+            enrolledAt: now,
+          });
+        }
+      }
+    }
+
     return Response.json({ granted: true });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
