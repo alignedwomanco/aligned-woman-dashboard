@@ -69,7 +69,7 @@ function WorkbookPicker() {
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 480 }}>
         {workbooks.map(wb => (
-          <a
+          
             key={wb.id}
             href={`/Workbook?id=${wb.id}`}
             style={{
@@ -180,16 +180,6 @@ function WorkbookViewerInner({ workbookId }) {
     enabled: wbAllModules.length > 0,
   });
 
-  // This user's progress for the course. Explicit limit: the default 50 rows
-  // truncates a learner who has worked through several modules, which made
-  // already-finished modules read as incomplete and sent "Continue the
-  // Blueprint" backwards to an earlier module.
-  const { data: wbProgress = [] } = useQuery({
-    queryKey: ["wbCourseProgress", user?.email],
-    queryFn: () => base44.entities.CourseProgress.filter({ created_by: user?.email }, "-created_date", 500),
-    enabled: !!user?.email,
-  });
-
   const wbSortedSections = [...wbAllSections].sort((a, b) => {
     const ao = a.order ?? Infinity;
     const bo = b.order ?? Infinity;
@@ -212,20 +202,23 @@ function WorkbookViewerInner({ workbookId }) {
   const wbContentSectionIds = new Set(
     wbSortedSections.filter((s) => !wbIsWelcomeSection(s)).map((s) => s.id)
   );
-  const wbIsModuleComplete = (mId) => {
-    const mPages = wbAllPages.filter((pg) => pg.moduleId === mId);
-    if (mPages.length === 0) return false;
-    return mPages.every(
-      (pg) => wbProgress.find((pr) => pr.pageId === pg.id)?.status === "completed"
-    );
-  };
+
+  // The module this workbook belongs to, matched by its expert, and the next
+  // module in course order after it. "Continue the Blueprint" steps forward
+  // from the current module rather than jumping to the first incomplete one,
+  // so it never drags back to an earlier module. With one module per expert,
+  // this anchor is exact.
+  const wbCurrentModule =
+    wbSortedModules.find((m) => m.expertId === workbook?.expert_id) || null;
+  const wbCurrentIndex = wbCurrentModule
+    ? wbSortedModules.findIndex((m) => m.id === wbCurrentModule.id)
+    : -1;
   const wbNextModule =
-    wbSortedModules.find(
-      (m) =>
-        wbModulesWithPages.has(m.id) &&
-        wbContentSectionIds.has(m.sectionId) &&
-        !wbIsModuleComplete(m.id)
-    ) || null;
+    wbCurrentIndex >= 0
+      ? wbSortedModules
+          .slice(wbCurrentIndex + 1)
+          .find((m) => wbModulesWithPages.has(m.id) && wbContentSectionIds.has(m.sectionId)) || null
+      : null;
 
   const handleContinueNext = () => {
     if (wbNextModule) {
