@@ -16,7 +16,7 @@ const NAV = {
     { label: "Instagram", href: "https://www.instagram.com/alignedwoman_co/" },
     { label: "YouTube", href: "#" },
     { label: "Email", href: "mailto:hello@alignedwoman.com" },
-    { label: "LinkedIn", href: "#" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/company/the-aligned-woman/" },
   ],
 };
 
