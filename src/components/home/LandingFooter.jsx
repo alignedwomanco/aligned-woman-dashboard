@@ -10,7 +10,6 @@ const NAV = {
   ABOUT: [
     { label: "About Us", href: "/about-us" },
     { label: "Contact", href: "/Contact" },
-    { label: "Press", href: "/Contact" },
     { label: "Terms & Conditions", href: "/terms-and-conditions" },
   ],
   SOCIAL: [
