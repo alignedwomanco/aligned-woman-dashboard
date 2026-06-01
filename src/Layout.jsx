@@ -3,8 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
 import { Bell, LogOut, User, Settings, ChevronDown } from "lucide-react";
-import { hasBlueprintAccess } from "@/lib/entitlement";
-import PendingApproval from "@/components/access/PendingApproval";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +14,8 @@ import {
 import NotificationsDropdown from "../components/navigation/NotificationsDropdown";
 import MessagesDrawer from "../components/navigation/MessagesDrawer";
 import LaurAIChatWidget from "../components/LaurAIChatWidget";
+import { hasBlueprintAccess } from "@/lib/entitlement";
+import PendingApproval from "@/components/access/PendingApproval";
 
 const publicPages = [
 { name: "Home", label: "Home" },
@@ -50,8 +50,6 @@ export default function Layout({ children, currentPageName }) {
   const [siteSettings, setSiteSettings] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
-  const [accessChecked, setAccessChecked] = useState(false);
-  const [showPending, setShowPending] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -106,20 +104,10 @@ export default function Layout({ children, currentPageName }) {
         const authenticated = await base44.auth.isAuthenticated();
         setIsAuthenticated(authenticated);
         if (authenticated) {
-          let userData = await base44.auth.me();
+          const userData = await base44.auth.me();
           setUser(userData);
-
-          const isPrivileged = ["admin", "master_admin", "owner"].includes(userData?.role);
-          if (!isPublicPage && !isPrivileged && !hasBlueprintAccess(userData)) {
-            await base44.functions.invoke("claimPreApproval", {});
-            userData = await base44.auth.me();
-            setUser(userData);
-            if (!hasBlueprintAccess(userData)) {
-              setShowPending(true);
-            }
-          }
-          setAccessChecked(true);
         } else if (!isPublicPage) {
+          // Redirect unauthenticated users away from protected pages
           base44.auth.redirectToLogin(window.location.pathname);
         }
       } catch (e) {
@@ -166,6 +154,41 @@ export default function Layout({ children, currentPageName }) {
     }
     return () => { document.body.style.overflow = ""; };
   }, [showMobileMenu]);
+
+  const PRIVILEGED_ROLES = ["admin", "master_admin", "owner"];
+  const isPrivileged = user && PRIVILEGED_ROLES.includes(user.role);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState(false);
+
+  useEffect(() => {
+    if (!user || isPublicPage || isPrivileged) {
+      setAccessChecked(true);
+      setPendingApproval(false);
+      return;
+    }
+    if (hasBlueprintAccess(user)) {
+      setAccessChecked(true);
+      setPendingApproval(false);
+      return;
+    }
+    // No access yet - try to claim a pre-approval then re-check.
+    const runClaim = async () => {
+      try {
+        await base44.functions.invoke("claimPreApproval", {});
+        const refreshed = await base44.auth.me();
+        if (hasBlueprintAccess(refreshed)) {
+          setUser(refreshed);
+          setPendingApproval(false);
+        } else {
+          setPendingApproval(true);
+        }
+      } catch {
+        setPendingApproval(true);
+      }
+      setAccessChecked(true);
+    };
+    runClaim();
+  }, [user?.id, isPublicPage]);
 
   const isLandingPage = currentPageName === "LandingPage" || currentPageName === "Home";
 
@@ -399,15 +422,22 @@ export default function Layout({ children, currentPageName }) {
 
             }
 
-  // Pending approval gate for authenticated users without access
-  if (!isPublicPage && showPending && user) {
-    const firstName = user.full_name ? user.full_name.trim().split(" ")[0] : "";
-    return <PendingApproval firstName={firstName} />;
-  }
-
   // Dashboard and Workbook pages have their own chrome - render children directly
   if (isDashboardPage || currentPageName === "Workbook") {
     return <>{children}</>;
+  }
+
+  if (!isPublicPage && !isDashboardPage && currentPageName !== "Workbook" && !accessChecked) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!isPublicPage && !isPrivileged && pendingApproval) {
+    const firstName = (user?.full_name || "").split(" ")[0] || null;
+    return <PendingApproval firstName={firstName} />;
   }
 
   const NAV_ITEMS = [
