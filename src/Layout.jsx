@@ -379,45 +379,7 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
 
-        {isLandingPage ? null : <footer className="bg-awburg-core text-paper">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-              <div className="col-span-1 md:col-span-2">
-                <h3 className="text-xl font-bold tracking-tight mb-4">THE ALIGNED WOMAN BLUEPRINT™</h3>
-                <p className="text-white/70 max-w-md">
-                  Your personal operating system for embodied success. Powered by the ALIVE Method™.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4 text-rose-accent">Navigate</h4>
-                <ul className="space-y-2">
-                  <li><a href="/" className="text-white/70 hover:text-white transition-colors text-sm">Home</a></li>
-                  <li><a href="/blueprint" className="text-white/70 hover:text-white transition-colors text-sm">Blueprint</a></li>
-                  <li><a href="/about-us" className="text-white/70 hover:text-white transition-colors text-sm">About Us</a></li>
-                  <li><Link to={createPageUrl("Contact")} className="text-white/70 hover:text-white transition-colors text-sm">Contact</Link></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4 text-rose-accent">Connect</h4>
-                <ul className="space-y-2">
-                  <li>
-                    <Link to={createPageUrl("Contact")} className="text-white/70 hover:text-white transition-colors text-sm">
-                      Contact Us
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to={createPageUrl("Apply")} className="text-white/70 hover:text-white transition-colors text-sm">
-                      Apply Now
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="border-t border-white/10 mt-12 pt-8 text-center text-white/50 text-sm">
-                        © {new Date().getFullYear()} The Aligned Woman Blueprint. All rights reserved.
-                      </div>
-                    </div>
-                  </footer>}
+
                 </div>);
 
             }
