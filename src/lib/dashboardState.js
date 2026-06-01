@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { hasBlueprintAccess } from "@/lib/entitlement";
 
 /**
  * getDashboardState
@@ -43,9 +44,7 @@ export async function getDashboardState() {
   }
 
   // Step 3: Derive flags.
-  const accessTags = Array.isArray(user.access_tags) ? user.access_tags : [];
-  // Admins and owners are always treated as paid for testing purposes.
-  const isPaid = user.membership_type === "paid" || accessTags.includes("blueprint_paid") || ["admin", "owner", "master_admin"].includes(user.role);
+  const isPaid = hasBlueprintAccess(user);
 
   const hasSeenWelcome = profile.has_seen_welcome === true;
   const archetypeKey = profile.computed_archetype_key ?? null;

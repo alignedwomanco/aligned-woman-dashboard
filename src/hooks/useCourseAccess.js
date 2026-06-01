@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { hasBlueprintAccess } from "@/lib/entitlement";
 
 /**
  * Shared hook for course access logic.
@@ -46,10 +47,7 @@ export function useCourseAccess(course) {
   const isAdmin = ["admin", "owner", "master_admin"].includes(user?.role);
   const isComingSoon = course?.isComingSoon === true;
   const isFree = (!course?.tags || course.tags.length === 0) && (!course?.price || course.price === 0);
-  const isPaid =
-    user?.membership_type === "paid" ||
-    (course?.tags?.length > 0 && course.tags.some((t) => (user?.access_tags ?? []).includes(t))) ||
-    hasPaidEnrollment;
+  const isPaid = hasBlueprintAccess(user) || hasPaidEnrollment;
 
   const hasAccess = isAdmin || (!isComingSoon && (isPaid || isFree));
 

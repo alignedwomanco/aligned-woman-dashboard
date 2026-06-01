@@ -14,6 +14,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { getMembershipStatus } from "@/lib/entitlement";
 import MemberDetailDialog from "./MemberDetailDialog";
 import MemberAccessTagEditor from "./MemberAccessTagEditor";
 import ExistingUserPicker from "./ExistingUserPicker";
@@ -132,15 +133,9 @@ export default function MembersManager({ allUsers }) {
     setAddMode("existing");
   };
 
-  const getMembershipStatus = (user) => {
-    if (user.membership_type === "paid") return "paid";
-    const hasPaidEnrollment = enrollments.some(
-      (e) => (e.userEmail || "").toLowerCase() === (user.email || "").toLowerCase() && e.isPaid
-    );
-    return hasPaidEnrollment ? "paid" : "free";
-  };
 
-  const paidCount = filtered.filter((m) => getMembershipStatus(m) === "paid").length;
+
+  const paidCount = filtered.filter((m) => getMembershipStatus(m, enrollments) === "paid").length;
   const freeCount = filtered.length - paidCount;
 
   const toggleNewMemberTag = (tagKey) => {
@@ -224,7 +219,7 @@ export default function MembersManager({ allUsers }) {
                 </TableRow>
               ) : (
                 filtered.map((member) => {
-                  const status = getMembershipStatus(member);
+                  const status = getMembershipStatus(member, enrollments);
                   const isTeamMember = !["user", "member"].includes(member.role);
                   return (
                     <TableRow key={member.id}>
