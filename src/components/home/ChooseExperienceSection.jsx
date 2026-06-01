@@ -22,8 +22,8 @@ const EXPERIENCES = [
     sub: "beyond the soundbite",
     desc: "Long-form dialogue with experts, authors and practitioners. No sound-bites. No guru-speak. Just the work.",
     meta: "Monthly • Live + Archive",
-    cta: "Read →",
-    href: "/blueprint",
+    cta: "Listen Now →",
+    href: "https://www.youtube.com/@AlignedWomanCo",
     dark: false,
   },
   {
@@ -120,9 +120,15 @@ export default function ChooseExperienceSection() {
 
                 {/* CTA */}
                 {exp.href ? (
+                  exp.href.startsWith("http") ? (
+                    <a href={exp.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 600, color: exp.dark ? "rgb(196,132,122)" : "rgb(107,27,61)", textDecoration: "none" }}>
+                      {exp.cta}
+                    </a>
+                  ) : (
                   <Link to={exp.href} style={{ fontSize: 13, fontWeight: 600, color: exp.dark ? "rgb(196,132,122)" : "rgb(107,27,61)", textDecoration: "none" }}>
                     {exp.cta}
                   </Link>
+                  )
                 ) : (
                   <span style={{ fontSize: 13, fontStyle: "italic", color: exp.dark ? "rgba(196,132,122,0.7)" : "rgb(107,27,61)" }}>
                     {exp.cta}
