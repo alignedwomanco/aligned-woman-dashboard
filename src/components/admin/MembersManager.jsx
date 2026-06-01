@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Search, Users, Eye, Trash2, Tag, UserPlus, ChevronDown, Check } from "lucide-react";
+import { Search, Users, Eye, Trash2, Tag, UserPlus, ChevronDown, Check, CheckCircle } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -113,17 +113,51 @@ export default function MembersManager({ allUsers }) {
     },
   });
 
+  const approveMutation = useMutation({
+    mutationFn: async (member) => {
+      const existing = Array.isArray(member.access_tags) ? member.access_tags : [];
+      const mergedTags = [...new Set([...existing, "blueprint_paid"])];
+      await base44.entities.User.update(member.id, {
+        membership_type: "paid",
+        access_tags: mergedTags,
+      });
+      return { id: member.id, mergedTags };
+    },
+    onMutate: async (member) => {
+      await queryClient.cancelQueries({ queryKey: ["allUsers"] });
+      const prev = queryClient.getQueryData(["allUsers"]);
+      queryClient.setQueryData(["allUsers"], (old = []) =>
+        old.map((u) =>
+          u.id === member.id
+            ? { ...u, membership_type: "paid", access_tags: [...new Set([...(u.access_tags || []), "blueprint_paid"])] }
+            : u
+        )
+      );
+      return { prev };
+    },
+    onError: (_err, _member, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(["allUsers"], ctx.prev);
+      alert("Failed to approve member. Please try again.");
+    },
+    onSettled: () => {
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ["allUsers"] }), 1200);
+    },
+  });
+
   const addExistingMutation = useMutation({
     mutationFn: async ({ userId, tags }) => {
       console.log("Adding member with userId:", userId, "tags:", tags);
-      const updateData = { 
+      const updateData = {
         is_member: true,
-        role: "user"
+        role: "user",
       };
       if (tags && tags.length > 0) {
         const user = allUsers.find(u => u.id === userId);
         const existing = user?.access_tags || [];
         updateData.access_tags = [...new Set([...existing, ...tags])];
+        if (tags.includes("blueprint_paid")) {
+          updateData.membership_type = "paid";
+        }
       }
       console.log("Update data:", updateData);
       const result = await base44.entities.User.update(userId, updateData);
@@ -293,6 +327,9 @@ export default function MembersManager({ allUsers }) {
                           </Button>
                           <Button variant="ghost" size="sm" title="Tags" onClick={() => setEditTagsMember(member)} className="h-8 w-8 p-0">
                             <Tag className="w-4 h-4 text-blue-600" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Approve" onClick={() => approveMutation.mutate(member)} disabled={approveMutation.isPending} className="h-8 w-8 p-0">
+                            <CheckCircle className="w-4 h-4 text-green-600" />
                           </Button>
                           <Button variant="ghost" size="sm" title="Delete user" onClick={() => { if (confirm(`Permanently delete ${member.full_name || member.email}? This cannot be undone.`)) removeMemberMutation.mutate(member.id); }} className="h-8 w-8 p-0">
                             <Trash2 className="w-4 h-4 text-red-500" />
