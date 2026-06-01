@@ -72,64 +72,6 @@ export default function ModulePlayer() {
     });
   }, [rawPages]);
 
-  const sortedSections = useMemo(() => {
-    return [...allCourseSections].sort((a, b) => {
-      const aOrder = a.order ?? Infinity;
-      const bOrder = b.order ?? Infinity;
-      if (aOrder !== bOrder) return aOrder - bOrder;
-      return (a.created_date || "").localeCompare(b.created_date || "");
-    });
-  }, [allCourseSections]);
-
-  const sortedCourseModules = useMemo(() => {
-    return sortedSections.flatMap((section) =>
-      [...allCourseModules]
-        .filter((m) => m.sectionId === section.id)
-        .sort((a, b) => {
-          const aOrd = a.order ?? Infinity;
-          const bOrd = b.order ?? Infinity;
-          if (aOrd !== bOrd) return aOrd - bOrd;
-          return (a.created_date || "").localeCompare(b.created_date || "");
-        })
-    );
-  }, [sortedSections, allCourseModules]);
-
-  const modulesWithPages = useMemo(() => {
-    return new Set(allCoursePages.map((p) => p.moduleId));
-  }, [allCoursePages]);
-
-  const expertMap = useMemo(() => {
-    const map = {};
-    allExperts.forEach((e) => { map[e.id] = e; });
-    return map;
-  }, [allExperts]);
-
-  const isWelcomeSection = (s) =>
-    (s?.order === 0) || (s?.title || "").toLowerCase().includes("welcome");
-
-  const contentSectionIds = useMemo(() => {
-    return new Set(
-      sortedSections.filter((s) => !isWelcomeSection(s)).map((s) => s.id)
-    );
-  }, [sortedSections]);
-
-  const courseModulesWithPages = useMemo(() => {
-    return sortedCourseModules.filter(
-      (m) => modulesWithPages.has(m.id) && contentSectionIds.has(m.sectionId)
-    );
-  }, [sortedCourseModules, modulesWithPages, contentSectionIds]);
-
-  const currentContentIdx = useMemo(() => {
-    return courseModulesWithPages.findIndex((m) => m.id === moduleId);
-  }, [courseModulesWithPages, moduleId]);
-
-  const nextModuleInOrder = useMemo(() => {
-    if (currentContentIdx < 0 || currentContentIdx >= courseModulesWithPages.length - 1) {
-      return null;
-    }
-    return courseModulesWithPages[currentContentIdx + 1] || null;
-  }, [courseModulesWithPages, currentContentIdx]);
-
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: () => base44.auth.me(),
@@ -457,8 +399,31 @@ export default function ModulePlayer() {
   const nextPage = pages[currentPageIndex + 1] || null;
   const prevPage = currentPageIndex > 0 ? pages[currentPageIndex - 1] : null;
 
+  const sortedSections = [...allCourseSections].sort((a, b) => {
+    const aOrder = a.order ?? Infinity;
+    const bOrder = b.order ?? Infinity;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return (a.created_date || "").localeCompare(b.created_date || "");
+  });
+
+  const sortedCourseModules = sortedSections.flatMap((section) =>
+    [...allCourseModules]
+      .filter((m) => m.sectionId === section.id)
+      .sort((a, b) => {
+        const aOrd = a.order ?? Infinity;
+        const bOrd = b.order ?? Infinity;
+        if (aOrd !== bOrd) return aOrd - bOrd;
+        return (a.created_date || "").localeCompare(b.created_date || "");
+      })
+  );
+
   const currentModuleIndex = sortedCourseModules.findIndex((m) => m.id === moduleId);
   const moduleNumber = currentModuleIndex >= 0 ? currentModuleIndex + 1 : 1;
+  const modulesWithPages = new Set(allCoursePages.map((p) => p.moduleId));
+  const nextModule =
+    sortedCourseModules
+      .slice(currentModuleIndex + 1)
+      .find((m) => modulesWithPages.has(m.id)) || null;
 
   const courseWorkbook =
     workbooks.find((w) => w.expert_id === module?.expertId) || null;
@@ -466,11 +431,37 @@ export default function ModulePlayer() {
   const moduleSection = sortedSections.find((s) => s.id === module?.sectionId);
   const pillarLabel = moduleSection?.phase_name || moduleSection?.title?.split(" - ")[1] || "";
 
+  const expertMap = {};
+  allExperts.forEach((e) => { expertMap[e.id] = e; });
+
   const phaseNameOf = (section) =>
     (section?.title || "").split(" - ")[1]?.trim() || section?.title || "";
   const phaseLetterOf = (section) => (phaseNameOf(section)[0] || "").toUpperCase();
 
+  const isModuleComplete = (mId) => {
+    const mPages = allCoursePages.filter((pg) => pg.moduleId === mId);
+    if (mPages.length === 0) return false;
+    return mPages.every(
+      (pg) => moduleProgress.find((pr) => pr.pageId === pg.id)?.status === "completed"
+    );
+  };
+
+  const isWelcomeSection = (s) =>
+    (s?.order === 0) || (s?.title || "").toLowerCase().includes("welcome");
+  const contentSectionIds = new Set(
+    sortedSections.filter((s) => !isWelcomeSection(s)).map((s) => s.id)
+  );
+
   const isIntroModule = !!moduleSection && isWelcomeSection(moduleSection);
+
+  const courseModulesWithPages = sortedCourseModules.filter(
+    (m) => modulesWithPages.has(m.id) && contentSectionIds.has(m.sectionId)
+  );
+  const currentContentIdx = courseModulesWithPages.findIndex((m) => m.id === moduleId);
+  const nextModuleInOrder =
+    currentContentIdx >= 0
+      ? courseModulesWithPages[currentContentIdx + 1] || null
+      : null;
 
   const isCourseEnd = currentContentIdx >= 0 && !nextModuleInOrder;
   const isPhaseBoundary =
@@ -502,16 +493,16 @@ export default function ModulePlayer() {
 
   const goToNextModule = () => {
     const nextId = milestoneSnapshot?.nextModuleId || nextModuleInOrder?.id || null;
-    if (!nextId) {
-      navigate("/Dashboard");
-      return;
-    }
     setMilestone(null);
     setMilestoneSnapshot(null);
-    navigate(
-      createPageUrl("ModulePlayer") +
-        `?moduleId=${nextId}&courseId=${courseId}`
-    );
+    if (nextId) {
+      navigate(
+        createPageUrl("ModulePlayer") +
+          `?moduleId=${nextId}&courseId=${courseId}`
+      );
+    } else {
+      navigate("/Dashboard");
+    }
   };
 
   const handleMilestoneContinue = () => {
@@ -553,10 +544,10 @@ export default function ModulePlayer() {
     if (nextPage) {
       handleSelectPage(nextPage);
       setMobileTab("about");
-    } else if (nextModuleInOrder) {
+    } else if (nextModule) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextModuleInOrder.id}&courseId=${courseId}`
+          `?moduleId=${nextModule.id}&courseId=${courseId}`
       );
     } else {
       navigate(createPageUrl("Classroom"));
@@ -584,20 +575,20 @@ export default function ModulePlayer() {
 
   const nextLabel = nextPage
     ? "NEXT LESSON"
-    : nextModuleInOrder
+    : nextModule
     ? "NEXT MODULE"
     : "BACK TO CLASSROOM";
 
   const nextMobileTopLine = nextPage
     ? `UP NEXT · LESSON ${String(currentPageIndex + 2).padStart(2, "0")}`
-    : nextModuleInOrder
+    : nextModule
     ? "NEXT MODULE"
     : "RETURN HOME";
 
   const nextMobileBottomLine = nextPage
     ? nextPage.title
-    : nextModuleInOrder
-    ? nextModuleInOrder.title
+    : nextModule
+    ? nextModule.title
     : "Blueprint Home";
 
   const renderVideo = (roundCorners, cropTop = false) => {
