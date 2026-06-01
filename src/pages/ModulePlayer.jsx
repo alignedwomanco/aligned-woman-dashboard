@@ -34,6 +34,11 @@ export default function ModulePlayer() {
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
   const [milestone, setMilestone] = useState(null); // null | "module" | "phase" | "course"
+  // Frozen copy of the just-finished module, its next module and its phase
+  // boundary, captured at the moment of completion. The milestone reads from
+  // this snapshot rather than the live module, so navigation or a late data
+  // load can never shift the card onto the following module.
+  const [milestoneSnapshot, setMilestoneSnapshot] = useState(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -81,7 +86,12 @@ export default function ModulePlayer() {
   // filter, so different accounts in the same browser never share a cache entry.
   const { data: rawProgress = [] } = useQuery({
     queryKey: ["courseProgress", currentUser?.email],
-    queryFn: () => base44.entities.CourseProgress.filter({ created_by: currentUser?.email }),
+    queryFn: () =>
+      base44.entities.CourseProgress.filter(
+        { created_by: currentUser?.email },
+        "-created_date",
+        500
+      ),
     enabled: !!currentUser?.email,
   });
 
@@ -109,33 +119,32 @@ export default function ModulePlayer() {
 
   const { data: allCourseModules = [] } = useQuery({
     queryKey: ["allCourseModules", courseId],
-    queryFn: () => base44.entities.CourseModule.filter({ courseId }),
+    queryFn: () => base44.entities.CourseModule.filter({ courseId }, "order", 500),
     enabled: !!courseId,
   });
 
   const { data: allCourseSections = [] } = useQuery({
     queryKey: ["allCourseSections", courseId],
-    queryFn: () => base44.entities.CourseSection.filter({ courseId }),
+    queryFn: () => base44.entities.CourseSection.filter({ courseId }, "order", 500),
     enabled: !!courseId,
   });
 
   const { data: workbooks = [] } = useQuery({
     queryKey: ["courseWorkbooks", courseId],
-    queryFn: () => base44.entities.Workbook.filter({ course_id: courseId }),
+    queryFn: () => base44.entities.Workbook.filter({ course_id: courseId }, "order", 500),
     enabled: !!courseId,
   });
 
+  // Load every page for the course in a single query keyed only on courseId,
+  // the same way the dashboard hook does. The previous version mapped over the
+  // module list inside a query that did not track that list, so when the
+  // modules arrived late or partially the page set silently dropped the newest
+  // modules and the course appeared to end early. Sourcing pages directly by
+  // courseId removes that dependency entirely.
   const { data: allCoursePages = [] } = useQuery({
     queryKey: ["allCoursePages", courseId],
-    queryFn: async () => {
-      const results = await Promise.all(
-        allCourseModules.map((m) =>
-          base44.entities.CoursePage.filter({ moduleId: m.id })
-        )
-      );
-      return results.flat();
-    },
-    enabled: allCourseModules.length > 0,
+    queryFn: () => base44.entities.CoursePage.filter({ courseId }, "order", 500),
+    enabled: !!courseId,
   });
 
   const { data: expert } = useQuery({
@@ -158,6 +167,7 @@ export default function ModulePlayer() {
   useEffect(() => {
     setSelectedPage(null);
     setMilestone(null);
+    setMilestoneSnapshot(null);
   }, [moduleId]);
 
   useEffect(() => {
@@ -259,6 +269,7 @@ export default function ModulePlayer() {
           }
         }
         if (!module?.isPhaseIntro) {
+          setMilestoneSnapshot(buildMilestoneSnapshot());
           setMilestone("module");
         }
       } else {
@@ -476,12 +487,33 @@ export default function ModulePlayer() {
     ? expertMap[nextModuleInOrder.expertId]?.name || ""
     : "";
 
+  // Freeze everything the milestone needs at the instant a module is completed.
+  // The card then renders from this snapshot, so it always names the module the
+  // member actually finished and the correct next step, even if the live module
+  // or the route changes underneath it a moment later.
+  const buildMilestoneSnapshot = () => ({
+    moduleTitle: module?.title || "",
+    hasWorkbook: !!courseWorkbook,
+    workbookId: courseWorkbook?.id || null,
+    nextModuleId: nextModuleInOrder?.id || null,
+    nextModuleTitle: nextModuleInOrder?.title || "",
+    nextExpertName,
+    phaseLetter: phaseLetterOf(moduleSection),
+    phaseName: phaseNameOf(moduleSection),
+    phaseTagline: moduleSection?.tagline || "",
+    nextPhaseName: phaseNameOf(nextSection),
+    isCourseEnd,
+    isPhaseBoundary,
+  });
+
   const goToNextModule = () => {
+    const nextId = milestoneSnapshot?.nextModuleId || nextModuleInOrder?.id || null;
     setMilestone(null);
-    if (nextModuleInOrder) {
+    setMilestoneSnapshot(null);
+    if (nextId) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextModuleInOrder.id}&courseId=${courseId}`
+          `?moduleId=${nextId}&courseId=${courseId}`
       );
     } else {
       navigate("/Dashboard");
@@ -490,9 +522,9 @@ export default function ModulePlayer() {
 
   // From the module milestone: move on once the practice is skipped or done.
   const handleMilestoneContinue = () => {
-    if (isCourseEnd) {
+    if (milestoneSnapshot?.isCourseEnd) {
       setMilestone("course");
-    } else if (isPhaseBoundary) {
+    } else if (milestoneSnapshot?.isPhaseBoundary) {
       setMilestone("phase");
     } else {
       goToNextModule();
@@ -500,14 +532,16 @@ export default function ModulePlayer() {
   };
 
   const handleMilestoneStartWorkbook = () => {
-    if (courseWorkbook) {
+    const wbId = milestoneSnapshot?.workbookId || courseWorkbook?.id || null;
+    if (wbId) {
       // /Workbook self-redirects to /NutritionWorkbook for Danielle's workbook.
-      window.location.href = `/Workbook?id=${courseWorkbook.id}`;
+      window.location.href = `/Workbook?id=${wbId}`;
     }
   };
 
   const handleMilestoneDashboard = () => {
     setMilestone(null);
+    setMilestoneSnapshot(null);
     navigate("/Dashboard");
   };
 
@@ -1688,17 +1722,17 @@ export default function ModulePlayer() {
       </div>
 
       <AnimatePresence>
-        {milestone && (
+        {milestone && milestoneSnapshot && (
           <JourneyMilestone
             stage={milestone}
-            moduleTitle={module?.title}
-            hasWorkbook={!!courseWorkbook}
-            nextModuleTitle={nextModuleInOrder?.title}
-            nextExpertName={nextExpertName}
-            phaseLetter={phaseLetterOf(moduleSection)}
-            phaseName={phaseNameOf(moduleSection)}
-            phaseTagline={moduleSection?.tagline}
-            nextPhaseName={phaseNameOf(nextSection)}
+            moduleTitle={milestoneSnapshot.moduleTitle}
+            hasWorkbook={milestoneSnapshot.hasWorkbook}
+            nextModuleTitle={milestoneSnapshot.nextModuleTitle}
+            nextExpertName={milestoneSnapshot.nextExpertName}
+            phaseLetter={milestoneSnapshot.phaseLetter}
+            phaseName={milestoneSnapshot.phaseName}
+            phaseTagline={milestoneSnapshot.phaseTagline}
+            nextPhaseName={milestoneSnapshot.nextPhaseName}
             onStartWorkbook={handleMilestoneStartWorkbook}
             onContinue={handleMilestoneContinue}
             onNextPhase={goToNextModule}
