@@ -65,12 +65,20 @@ export default function MembersManager({ allUsers }) {
 
   const removeMemberMutation = useMutation({
     mutationFn: (userId) => base44.functions.invoke("deleteUser", { userId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      alert("User deleted successfully!");
+    onMutate: async (userId) => {
+      await queryClient.cancelQueries({ queryKey: ["allUsers"] });
+      const prev = queryClient.getQueryData(["allUsers"]);
+      queryClient.setQueryData(["allUsers"], (old = []) =>
+        old.filter((u) => u.id !== userId)
+      );
+      return { prev };
     },
-    onError: (error) => {
-      alert(`Failed to delete user: ${error.message}`);
+    onError: (_err, _userId, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(["allUsers"], ctx.prev);
+      alert("Failed to delete user. Please try again.");
+    },
+    onSettled: () => {
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ["allUsers"] }), 1200);
     },
   });
 
