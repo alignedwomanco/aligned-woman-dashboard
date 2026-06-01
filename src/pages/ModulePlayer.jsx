@@ -439,9 +439,10 @@ export default function ModulePlayer() {
   const isModuleComplete = (mId) => {
     const mPages = allCoursePages.filter((pg) => pg.moduleId === mId);
     if (mPages.length === 0) return false;
-    return mPages.every(
-      (pg) => moduleProgress.find((pr) => pr.pageId === pg.id)?.status === "completed"
-    );
+    return mPages.every((pg) => {
+      const pr = moduleProgress.find((pr) => pr.pageId === pg.id);
+      return pr && (pr.status === "completed" || (pr.progressPercentage ?? 0) >= 100);
+    });
   };
 
   const isWelcomeSection = (s) =>
