@@ -7,15 +7,10 @@ import { hasBlueprintAccess } from "@/lib/entitlement";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function splitTitleForDisplay(title) {
   if (!title) return { main: "", italic: "" };
   const words = title.trim().split(" ");
   if (words.length < 3) return { main: title, italic: "" };
-  // Italicize last 1-2 words (2 if >= 4 words, otherwise 1)
   const italicCount = words.length >= 4 ? 2 : 1;
   const main = words.slice(0, words.length - italicCount).join(" ");
   const italic = words.slice(words.length - italicCount).join(" ");
@@ -24,13 +19,8 @@ function splitTitleForDisplay(title) {
 
 function stripPhasePrefix(sectionTitle) {
   if (!sectionTitle) return "";
-  // Strip "Phase X - " or "Phase X: " prefix
   return sectionTitle.replace(/^Phase\s+\d+\s*[-:]\s*/i, "").trim();
 }
-
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
 
 function ResumeBanner({ profile, modules, sections, courses, progressRecords }) {
   const navigate = useNavigate();
@@ -51,7 +41,6 @@ function ResumeBanner({ profile, modules, sections, courses, progressRecords }) 
   const completedCount = profile.completed_modules_count ?? 0;
   const progressPct = totalCourseModules > 0 ? Math.round((completedCount / totalCourseModules) * 100) : 0;
 
-  // Find resume pageId from progress records
   const resumeProgress = progressRecords
     .filter((p) => p.moduleId === profile.last_module_id)
     .sort((a, b) => {
@@ -78,7 +67,6 @@ function ResumeBanner({ profile, modules, sections, courses, progressRecords }) 
   return (
     <div className="bg-awrose-wash border border-awrose-pale rounded-2xl p-8 md:p-10 mb-10">
       <div className="flex flex-col md:flex-row gap-8 md:gap-10">
-        {/* Left column */}
         <div className="flex-1 md:w-3/5">
           <div className="flex items-center gap-3 mb-3">
             <span className="inline-block w-5 h-px bg-awrose-core flex-shrink-0" />
@@ -99,7 +87,6 @@ function ResumeBanner({ profile, modules, sections, courses, progressRecords }) 
           </p>
         </div>
 
-        {/* Right column */}
         <div className="md:w-2/5 flex flex-col justify-center gap-3">
           <div className="flex items-center justify-between">
             <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core uppercase">
@@ -129,10 +116,9 @@ function ResumeBanner({ profile, modules, sections, courses, progressRecords }) 
 function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) {
   const navigate = useNavigate();
 
-  // Compute progress percentage based on CourseProgress pages
   const courseProgressItems = progressRecords.filter((p) => p.courseId === course.id);
   const completedPages = courseProgressItems.filter((p) => p.status === "completed").length;
-  const totalPages = courseProgressItems.length; // best available proxy
+  const totalPages = courseProgressItems.length;
   const progressPct = totalPages > 0 ? Math.round((completedPages / totalPages) * 100) : 0;
 
   const cta = isLocked
@@ -162,7 +148,6 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) 
         isLocked ? "cursor-not-allowed" : "cursor-pointer hover:shadow-md transition-shadow duration-200"
       }`}
     >
-      {/* Cover area - 16:9 */}
       <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
         {course.coverImage ? (
           <img
@@ -181,14 +166,12 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) 
           </div>
         )}
 
-        {/* Featured badge - top left */}
         {course.isFeatured && (
           <span className="absolute top-3 left-3 bg-awrose-core text-paper rounded-full px-3 py-1 font-body font-bold text-[10px] tracking-eyebrow uppercase">
             FEATURED
           </span>
         )}
 
-        {/* Status badge - top right */}
         {isEnrolled ? (
           <span className="absolute top-3 right-3 bg-awburg-mid text-paper rounded-full px-3 py-1 font-body font-bold text-[10px] tracking-eyebrow uppercase">
             ENROLLED
@@ -200,7 +183,6 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) 
         ) : null}
       </div>
 
-      {/* Card content */}
       <div className="p-5 flex flex-col flex-1">
         {course.category && (
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-2">
@@ -214,7 +196,6 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) 
           </p>
         )}
 
-        {/* Progress hairline (enrolled with progress > 0) */}
         {isEnrolled && progressPct > 0 && (
           <div className="w-full bg-awrose-pale rounded-full mb-3" style={{ height: 3 }}>
             <div
@@ -224,7 +205,6 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) 
           </div>
         )}
 
-        {/* Bottom row */}
         <div className="flex items-center justify-between mt-auto pt-1">
           {isEnrolled ? (
             <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core uppercase">
@@ -250,30 +230,23 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) 
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main Page
-// ---------------------------------------------------------------------------
-
 const FILTERS = ["All", "In Progress", "Not Started", "Completed"];
 
 export default function Classroom() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
-  // Auth
   const { data: user } = useQuery({
     queryKey: ["classroom-user"],
     queryFn: () => base44.auth.me(),
   });
 
-  // Courses
-  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+  const { data: courses = [], isLoading: coursesLoading, isFetching: coursesFetching } = useQuery({
     queryKey: ["classroom-courses"],
     queryFn: () => base44.entities.Course.filter({ isPublished: true }, "order", 500),
     enabled: !!user,
   });
 
-  // Member profile
   const { data: profileArr = [] } = useQuery({
     queryKey: ["classroom-profile", user?.id],
     queryFn: () => base44.entities.MemberProfile.filter({ user_id: user.id }, "-created_date", 1),
@@ -281,31 +254,26 @@ export default function Classroom() {
   });
   const profile = profileArr[0] ?? null;
 
-  // Course progress
   const { data: progressRecords = [] } = useQuery({
     queryKey: ["classroom-progress", user?.email],
     queryFn: () => isPreviewMode() ? [] : base44.entities.CourseProgress.filter({ created_by: user.email }, "-lastAccessedAt", 500),
     enabled: !!user?.email,
   });
 
-  // Modules (for breadcrumb and resume banner)
   const { data: modules = [] } = useQuery({
     queryKey: ["classroom-modules"],
     queryFn: () => base44.entities.CourseModule.filter({}, "order", 500),
     enabled: !!user,
   });
 
-  // Sections (for breadcrumb)
   const { data: sections = [] } = useQuery({
     queryKey: ["classroom-sections"],
     queryFn: () => base44.entities.CourseSection.filter({}, "order", 500),
     enabled: !!user,
   });
 
-  const loading = coursesLoading;
+  const loading = coursesLoading || coursesFetching;
 
-  // Access check: user has access to a course if:
-  // course has no tags, OR user.access_tags includes any course.tag
   const userTags = user?.access_tags ?? [];
   const isAdmin = ["owner", "admin", "master_admin"].includes(user?.role);
 
@@ -322,11 +290,9 @@ export default function Classroom() {
   const isLockedCourse = (course) =>
     !isAdmin && (course.isComingSoon || !hasAccess(course));
 
-  // Filter logic
   const filteredCourses = useMemo(() => {
     let list = courses;
 
-    // Search
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -337,7 +303,6 @@ export default function Classroom() {
       );
     }
 
-    // Filter pill
     if (activeFilter === "In Progress") {
       list = list.filter((c) =>
         progressRecords.some((p) => p.courseId === c.id && p.status === "in_progress")
@@ -356,7 +321,6 @@ export default function Classroom() {
     return list;
   }, [courses, search, activeFilter, progressRecords, userTags, isAdmin]);
 
-  // Dynamic subline
   const subline = useMemo(() => {
     if (activeFilter === "In Progress") return "Your courses in progress.";
     if (activeFilter === "Not Started") return "Your courses to begin.";
@@ -377,7 +341,6 @@ export default function Classroom() {
     <div className="min-h-screen bg-off-white px-6 md:px-10 py-10">
       <div className="max-w-5xl mx-auto">
 
-        {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <span className="inline-block w-5 h-px bg-awrose-core flex-shrink-0" />
@@ -393,7 +356,6 @@ export default function Classroom() {
           </p>
         </div>
 
-        {/* Resume Banner */}
         <ResumeBanner
           profile={profile}
           modules={modules}
@@ -402,9 +364,7 @@ export default function Classroom() {
           progressRecords={progressRecords}
         />
 
-        {/* Search and Filter Row */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-10">
-          {/* Search */}
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" />
             <input
@@ -417,7 +377,6 @@ export default function Classroom() {
             />
           </div>
 
-          {/* Filter pills */}
           <div className="flex items-center gap-2 flex-wrap">
             {FILTERS.map((f) => (
               <button
@@ -435,7 +394,6 @@ export default function Classroom() {
           </div>
         </div>
 
-        {/* Course Grid */}
         {filteredCourses.length === 0 ? (
           <div className="text-center py-20">
             <p className="font-body font-light text-awburg-core/50 text-sm">No courses found.</p>
@@ -455,7 +413,6 @@ export default function Classroom() {
           </div>
         )}
 
-        {/* Footer count */}
         <div className="mt-16 text-center">
           <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase">
             CLASSROOM · {filteredCourses.length} {filteredCourses.length === 1 ? "COURSE" : "COURSES"}

@@ -138,7 +138,7 @@ function WorkbookViewerInner({ workbookId }) {
   const saveTimer = useRef(null);
   const contentRef = useRef(null);
 
-  const { data: workbook, isLoading } = useQuery({
+  const { data: workbook, isLoading: workbookLoading } = useQuery({
     queryKey: ["workbook", workbookId],
     queryFn: async () => {
       const items = await base44.entities.Workbook.filter({ id: workbookId });
@@ -154,7 +154,6 @@ function WorkbookViewerInner({ workbookId }) {
     enabled: !!workbook?.expert_id,
   });
 
-  // ── Next-module navigation for "Continue the Blueprint" ───────────
   const wbCourseId = workbook?.course_id || null;
 
   const { data: wbAllModules = [] } = useQuery({
@@ -203,11 +202,6 @@ function WorkbookViewerInner({ workbookId }) {
     wbSortedSections.filter((s) => !wbIsWelcomeSection(s)).map((s) => s.id)
   );
 
-  // The module this workbook belongs to, matched by its expert, and the next
-  // module in course order after it. "Continue the Blueprint" steps forward
-  // from the current module rather than jumping to the first incomplete one,
-  // so it never drags back to an earlier module. With one module per expert,
-  // this anchor is exact.
   const wbCurrentModule =
     wbSortedModules.find((m) => m.expertId === workbook?.expert_id) || null;
   const wbCurrentIndex = wbCurrentModule
@@ -229,7 +223,6 @@ function WorkbookViewerInner({ workbookId }) {
     }
   };
 
-  // Redirect to interactive NutritionWorkbook for Danielle Venter
   const DANIELLE_EXPERT_ID = "69f48ab57e6d6614129172d8";
   useEffect(() => {
     if (workbook && workbook.expert_id === DANIELLE_EXPERT_ID) {
@@ -281,20 +274,15 @@ function WorkbookViewerInner({ workbookId }) {
 
   const progressiveDisclosure = workbook?.schema?.progressive_disclosure === true;
 
-  // Determine which sections are unlocked for progressive_disclosure workbooks.
-  // A section is unlocked if any section before it has at least one answered field.
-  // The first section is always unlocked. computed_results sections unlock when is_complete.
   const unlockedSections = useMemo(() => {
     if (!progressiveDisclosure) return sections.map((_, i) => i);
-    const unlocked = [0]; // first section always visible
+    const unlocked = [0];
     for (let i = 1; i < sections.length; i++) {
       const prev = sections[i - 1];
       const isComputedResults = prev.type === "computed_results";
       if (isComputedResults) {
-        // computed_results section unlocks next only if workbook is complete
         if (isComplete) unlocked.push(i);
       } else {
-        // previous section has at least one answered field
         const prevAnswered = prev.fields?.some(f => {
           const id = f.id || f.field_id;
           const v = answers[id];
@@ -378,7 +366,7 @@ function WorkbookViewerInner({ workbookId }) {
     return () => document.removeEventListener("keydown", handler);
   }, [sections.length, jumpTo]);
 
-  const stillLoading = isLoading || !responseLoaded || (!!workbook && isCheckingUnlock);
+  const stillLoading = workbookLoading || !responseLoaded || (!!workbook && isCheckingUnlock);
   if (stillLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
@@ -387,7 +375,7 @@ function WorkbookViewerInner({ workbookId }) {
     );
   }
 
-  if (!workbook) {
+  if (workbook === null) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
         <BookOpen className="w-12 h-12 mb-4" style={{ color: "#C4847A" }} />
@@ -471,7 +459,7 @@ function WorkbookViewerInner({ workbookId }) {
           activeSection={activeSection}
           progressPct={progressPct}
           lastSaved={lastSaved}
-          onOpenDrawer={() => setDrawerOpen(true)}
+          onOpenDrawer={() => setDrawerOpen(false)}
         />
 
         <div className="flex-1" ref={contentRef}>
