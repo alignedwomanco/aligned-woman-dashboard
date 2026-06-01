@@ -121,6 +121,30 @@ export default function MembersManager({ allUsers }) {
         membership_type: "paid",
         access_tags: mergedTags,
       });
+
+      // Enroll in any course tagged blueprint_paid
+      const allCourses = await base44.entities.Course.list();
+      const matchingCourses = allCourses.filter(
+        (c) => Array.isArray(c.tags) && c.tags.includes("blueprint_paid")
+      );
+      const memberEmail = (member.email || "").trim().toLowerCase();
+      const now = new Date().toISOString();
+      for (const course of matchingCourses) {
+        const existingEnrollments = await base44.entities.CourseEnrollment.filter({
+          userEmail: memberEmail,
+          courseId: course.id,
+        });
+        if (!existingEnrollments || existingEnrollments.length === 0) {
+          await base44.entities.CourseEnrollment.create({
+            userEmail: memberEmail,
+            courseId: course.id,
+            isPaid: true,
+            paymentSource: "manual",
+            enrolledAt: now,
+          });
+        }
+      }
+
       return { id: member.id, mergedTags };
     },
     onMutate: async (member) => {
