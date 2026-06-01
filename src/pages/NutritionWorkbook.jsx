@@ -377,8 +377,4 @@ export default function NutritionWorkbook() {
           .wb-shell { min-height: auto !important; background: white !important; }
           .wb-page { max-width: 100% !important; padding: 40px 32px !important; margin: 0 !important; }
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-      `}</style>
-    </div>
-  );
-}
+ 
