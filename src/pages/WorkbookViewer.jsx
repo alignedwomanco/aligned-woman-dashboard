@@ -9,6 +9,7 @@ import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
 import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
 import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
+import { getNextModuleForWorkbook, isFlowReady } from "@/lib/courseFlow";
 
 function WorkbookPicker() {
   const { data: workbooks, isLoading } = useQuery({
@@ -69,7 +70,7 @@ function WorkbookPicker() {
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 480 }}>
         {workbooks.map(wb => (
-          <a
+          
             key={wb.id}
             href={`/Workbook?id=${wb.id}`}
             style={{
@@ -179,49 +180,21 @@ function WorkbookViewerInner({ workbookId }) {
     enabled: wbAllModules.length > 0,
   });
 
-  const wbSortedSections = [...wbAllSections].sort((a, b) => {
-    const ao = a.order ?? Infinity;
-    const bo = b.order ?? Infinity;
-    if (ao !== bo) return ao - bo;
-    return (a.created_date || "").localeCompare(b.created_date || "");
-  });
-  const wbSortedModules = wbSortedSections.flatMap((section) =>
-    [...wbAllModules]
-      .filter((m) => m.sectionId === section.id)
-      .sort((a, b) => {
-        const ao = a.order ?? Infinity;
-        const bo = b.order ?? Infinity;
-        if (ao !== bo) return ao - bo;
-        return (a.created_date || "").localeCompare(b.created_date || "");
-      })
-  );
-  const wbModulesWithPages = new Set(wbAllPages.map((p) => p.moduleId));
-  const wbIsWelcomeSection = (s) =>
-    (s?.order === 0) || (s?.title || "").toLowerCase().includes("welcome");
-  const wbContentSectionIds = new Set(
-    wbSortedSections.filter((s) => !wbIsWelcomeSection(s)).map((s) => s.id)
+  const flowReady = isFlowReady(wbAllSections, wbAllModules, wbAllPages);
+  const wbNextModule = useMemo(
+    () => (flowReady ? getNextModuleForWorkbook(workbook, wbAllSections, wbAllModules, wbAllPages) : null),
+    [flowReady, workbook, wbAllSections, wbAllModules, wbAllPages]
   );
 
-  const wbCurrentModule =
-    wbSortedModules.find((m) => m.expertId === workbook?.expert_id) || null;
-  const wbCurrentIndex = wbCurrentModule
-    ? wbSortedModules.findIndex((m) => m.id === wbCurrentModule.id)
-    : -1;
-  const wbNextModule =
-    wbCurrentIndex >= 0
-      ? wbSortedModules
-          .slice(wbCurrentIndex + 1)
-          .find((m) => wbModulesWithPages.has(m.id) && wbContentSectionIds.has(m.sectionId)) || null
-      : null;
-
-  const handleContinueNext = () => {
+  const handleContinueNext = useCallback(() => {
+    if (!flowReady) return;
     if (wbNextModule) {
       const cid = wbCourseId ? `&courseId=${wbCourseId}` : "";
       window.location.href = `/ModulePlayer?moduleId=${wbNextModule.id}${cid}`;
     } else {
       window.location.href = "/Dashboard";
     }
-  };
+  }, [flowReady, wbNextModule, wbCourseId]);
 
   const DANIELLE_EXPERT_ID = "69f48ab57e6d6614129172d8";
   useEffect(() => {
@@ -430,7 +403,7 @@ function WorkbookViewerInner({ workbookId }) {
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
       {showCelebration && (
         <WorkbookCelebration
-          onContinueBlueprint={handleContinueNext}
+          onContinueBlueprint={flowReady ? handleContinueNext : undefined}
           onBackToWorkbook={() => {
             setShowCelebration(false);
             jumpTo(lastSectionIdx);
@@ -450,7 +423,7 @@ function WorkbookViewerInner({ workbookId }) {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={unlockedSections}
-        onContinueNext={handleContinueNext}
+        onContinueNext={flowReady ? handleContinueNext : undefined}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -484,7 +457,7 @@ function WorkbookViewerInner({ workbookId }) {
                  computedScores={computedScores}
                  step={idx === activeSection ? activeStep : 0}
                  onStepChange={idx === activeSection ? setActiveStep : undefined}
-                 onContinueNext={handleContinueNext}
+                 onContinueNext={flowReady ? handleContinueNext : undefined}
                 />
               </div>
             </div>
