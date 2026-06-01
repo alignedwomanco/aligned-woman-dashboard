@@ -6,7 +6,7 @@ const PRINCIPLES = [
   {
     num: "01",
     title: "Designed by practice",
-    desc: "Everything we teach has been tested, lived, and refined. We don't teach theory for theory's sake. We teach what actually creates change — and we show our work.",
+    desc: "Everything we teach has been tested, lived, and refined. We don't teach theory for theory's sake. We teach what actually creates change, and we show our work.",
   },
   {
     num: "02",
@@ -24,7 +24,7 @@ const COMMITMENTS = [
   {
     num: "01",
     title: "We use education as a tool for long-term change",
-    desc: "We believe the most sustainable path to equity and inclusion is through systemic, embodied education — not one-off training or performative gestures. We build for depth, not optics.",
+    desc: "We believe the most sustainable path to equity and inclusion is through systemic, embodied education, not one-off training or performative gestures. We build for depth, not optics.",
   },
   {
     num: "02",
@@ -80,7 +80,7 @@ export default function AboutUs() {
               The Aligned Woman Blueprint is a structured, expert-led programme that gives women the internal frameworks, body literacy, financial fluency, and emotional sovereignty that formal education never provided.
             </p>
             <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.85, color: "rgba(255,255,255,0.55)" }}>
-              We are not a wellness app. We are not a coaching platform. We are an education company — rigorous, evidence-informed, and built around the lived reality of women's lives.
+              We are not a wellness app. We are not a coaching platform. We are an education company, rigorous, evidence-informed, and built around the lived reality of women's lives.
             </p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function AboutUs() {
           {/* Right */}
           <div style={{ paddingTop: "clamp(0px,3vw,48px)" }}>
             <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, lineHeight: 1.85, color: "#4A2030", marginBottom: 24 }}>
-              Women have been taught many things. But almost never the things that matter most — the internal frameworks, body literacy, financial fluency, and emotional sovereignty that make everything else possible.
+              Women have been taught many things. But almost never the things that matter most, the internal frameworks, body literacy, financial fluency, and emotional sovereignty that make everything else possible.
             </p>
             <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, lineHeight: 1.85, color: "#4A2030", marginBottom: 24 }}>
               Formal education was not designed with women's biology, psychology, or lived reality in mind. Women were given rules to follow — not tools to self-navigate.
