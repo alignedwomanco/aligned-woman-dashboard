@@ -365,6 +365,42 @@ export default function ModulePlayer() {
       ? Math.round((completedPageCount / pages.length) * 100)
       : 0;
 
+  // Build the sorted module list with pages for navigation
+  const courseModulesWithPages = useMemo(() => {
+    const sortedSections = [...allCourseSections].sort((a, b) => {
+      const ao = a.order ?? Infinity;
+      const bo = b.order ?? Infinity;
+      if (ao !== bo) return ao - bo;
+      return (a.created_date || "").localeCompare(b.created_date || "");
+    });
+    const sortedModules = sortedSections.flatMap((section) =>
+      [...allCourseModules]
+        .filter((m) => m.sectionId === section.id)
+        .sort((a, b) => {
+          const ao = a.order ?? Infinity;
+          const bo = b.order ?? Infinity;
+          if (ao !== bo) return ao - bo;
+          return (a.created_date || "").localeCompare(b.created_date || "");
+        })
+    );
+    const modulesWithPages = new Set(allCoursePages.map((p) => p.moduleId));
+    return sortedModules.filter((m) => modulesWithPages.has(m.id));
+  }, [allCourseSections, allCourseModules, allCoursePages]);
+
+  // Build milestone snapshot for celebration modal
+  const buildMilestoneSnapshot = () => {
+    const currentModuleIndex = courseModulesWithPages.findIndex((m) => m.id === moduleId);
+    const nextModule = courseModulesWithPages[currentModuleIndex + 1] || null;
+    const currentSection = allCourseSections.find((s) => s.id === module?.sectionId);
+    const isPhaseEnd = currentSection && !allCourseSections.some((s) => s.id === currentSection.id && (s.order ?? 0) > (currentSection.order ?? 0));
+    return {
+      currentModule: module,
+      nextModule,
+      isPhaseEnd,
+      phaseName: currentSection?.title || module?.phase || "",
+    };
+  };
+
   // ── Loading / access gate ────────────────────────────────
 
   if (!module || !selectedPage || accessLoading) {
@@ -372,3 +408,17 @@ export default function ModulePlayer() {
       <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
         <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
       </div>
+    );
+  }
+
+  // TODO: Add the rest of the ModulePlayer component JSX here
+  // The file was truncated and needs the main render logic to be restored
+  
+  return (
+    <div className="min-h-screen bg-[#FAF5F3]">
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-[#4A0E2E] font-body">Module player content was truncated. Please restore the component JSX.</p>
+      </div>
+    </div>
+  );
+}
