@@ -125,7 +125,7 @@ export default function Welcome() {
                 maxWidth: 390,
               }}
             >
-              Create your account with the email you were given. On the next screen, choose "Sign up" to register for the first time.
+              On the next screen, scroll to the bottom and click <strong>"Need an account? Sign up"</strong> to create your account for the first time.
             </p>
           </>
         )}
