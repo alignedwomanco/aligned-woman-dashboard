@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, BookOpen } from "lucide-react";
+import { Loader2, BookOpen, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
@@ -28,13 +28,24 @@ export default function FeminineWorkbook() {
   const saveTimer = useRef(null);
   const initialSectionIdRef = useRef(null);
 
+  // Fetch all modules and sections for continue logic
+  const { data: allModules = [] } = useMemo(() => ({ data: [] }), []);
+  const { data: allSections = [] } = useMemo(() => ({ data: [] }), []);
+  
+  const [modulesData, setModulesData] = useState([]);
+  const [sectionsData, setSectionsData] = useState([]);
+
   useEffect(() => {
     base44.auth.me().then(u => setUser(u)).catch(() => {});
     Promise.all([
       base44.entities.Workbook.filter({ id: WORKBOOK_ID }, null, 1).then(r => r[0] || null),
       base44.entities.WorkbookResponse.filter({ workbook_id: WORKBOOK_ID }, "-created_date", 1),
-    ]).then(([wb, responses]) => {
+      base44.entities.CourseModule.filter({}),
+      base44.entities.CourseSection.filter({}),
+    ]).then(([wb, responses, modules, sections]) => {
       setWorkbook(wb);
+      setModulesData(modules || []);
+      setSectionsData(sections || []);
       if (wb?.expert_id) {
         base44.entities.Expert.filter({ id: wb.expert_id }).then(r => setExpert(r[0] || null));
       }
@@ -52,6 +63,57 @@ export default function FeminineWorkbook() {
   }, []);
 
   const sections = useMemo(() => workbook?.schema?.sections || [], [workbook]);
+
+  // Build canonical module order (excluding Welcome section)
+  const canonicalModuleOrder = useMemo(() => {
+    if (!modulesData.length || !sectionsData.length) return [];
+    
+    // Filter out Welcome/Intro sections (order 0 or title containing "welcome")
+    const contentSections = sectionsData.filter(s => {
+      const isWelcome = s.order === 0 || (s.title && s.title.toLowerCase().includes("welcome"));
+      return !isWelcome;
+    });
+    
+    // Sort sections by order
+    contentSections.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    // Build ordered module list
+    const orderedModules = [];
+    for (const section of contentSections) {
+      const sectionModules = modulesData.filter(m => m.sectionId === section.id);
+      sectionModules.sort((a, b) => (a.order || 0) - (b.order || 0));
+      orderedModules.push(...sectionModules);
+    }
+    
+    return orderedModules;
+  }, [modulesData, sectionsData]);
+
+  // Continue the Blueprint: navigate to next module after this workbook's module
+  const handleContinueBlueprint = useCallback(() => {
+    if (!workbook?.expert_id || !canonicalModuleOrder.length) {
+      window.location.href = "/Dashboard";
+      return;
+    }
+
+    // Find this workbook's module by matching expert_id
+    const currentModule = canonicalModuleOrder.find(m => m.expertId === workbook.expert_id);
+    if (!currentModule) {
+      window.location.href = "/Dashboard";
+      return;
+    }
+
+    const currentIndex = canonicalModuleOrder.findIndex(m => m.id === currentModule.id);
+    
+    if (currentIndex === -1 || currentIndex >= canonicalModuleOrder.length - 1) {
+      // No next module - this is the last module, go to Dashboard
+      window.location.href = "/Dashboard";
+      return;
+    }
+
+    const nextModule = canonicalModuleOrder[currentIndex + 1];
+    const courseId = nextModule.courseId ? `&courseId=${nextModule.courseId}` : "";
+    window.location.href = `/ModulePlayer?moduleId=${nextModule.id}${courseId}`;
+  }, [workbook, canonicalModuleOrder]);
 
   // Restore last section on load
   useEffect(() => {
@@ -181,6 +243,7 @@ export default function FeminineWorkbook() {
       <WorkbookCelebration
         onBackToWorkbook={() => { setShowCelebration(false); jumpTo(lastSectionIdx); }}
         closingText={workbook.closing_text}
+        onContinueBlueprint={handleContinueBlueprint}
       />
     );
   }

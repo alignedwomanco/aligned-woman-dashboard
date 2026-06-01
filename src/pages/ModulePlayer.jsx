@@ -33,15 +33,9 @@ export default function ModulePlayer() {
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
   const [milestone, setMilestone] = useState(null); // null | "module" | "phase" | "course"
-  // Frozen copy of the just-finished module, its next module and its phase
-  // boundary, captured at the moment of completion. The milestone reads from
-  // this snapshot rather than the live module, so navigation or a late data
-  // load can never shift the card onto the following module.
   const [milestoneSnapshot, setMilestoneSnapshot] = useState(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  // ── Queries ──────────────────────────────────────────────
 
   const { data: course } = useQuery({
     queryKey: ["course", courseId],
@@ -81,8 +75,6 @@ export default function ModulePlayer() {
     queryFn: () => base44.auth.me(),
   });
 
-  // Load THIS user's progress, scoped per user in both the cache key and the
-  // filter, so different accounts in the same browser never share a cache entry.
   const { data: rawProgress = [] } = useQuery({
     queryKey: ["courseProgress", currentUser?.email],
     queryFn: () =>
@@ -94,8 +86,6 @@ export default function ModulePlayer() {
     enabled: !!currentUser?.email,
   });
 
-  // Deduplicate: keep only the most recently updated record per pageId so
-  // stale duplicates never shadow a completed record.
   const moduleProgress = useMemo(() => {
     const best = {};
     rawProgress.forEach((p) => {
@@ -134,12 +124,6 @@ export default function ModulePlayer() {
     enabled: !!courseId,
   });
 
-  // Load every page for the course in a single query keyed only on courseId,
-  // the same way the dashboard hook does. The previous version mapped over the
-  // module list inside a query that did not track that list, so when the
-  // modules arrived late or partially the page set silently dropped the newest
-  // modules and the course appeared to end early. Sourcing pages directly by
-  // courseId removes that dependency entirely.
   const { data: allCoursePages = [] } = useQuery({
     queryKey: ["allCoursePages", courseId],
     queryFn: () => base44.entities.CoursePage.filter({ courseId }, "order", 500),
@@ -161,8 +145,6 @@ export default function ModulePlayer() {
     queryFn: () => base44.entities.Expert.list(),
   });
 
-  // ── Effects ──────────────────────────────────────────────
-
   useEffect(() => {
     setSelectedPage(null);
     setMilestone(null);
@@ -174,8 +156,6 @@ export default function ModulePlayer() {
       setSelectedPage(pages[0]);
     }
   }, [pages]);
-
-  // ── Mutations ────────────────────────────────────────────
 
   const updateProgressMutation = useMutation({
     mutationFn: async ({ status, progressPercentage }) => {
@@ -230,8 +210,6 @@ export default function ModulePlayer() {
     },
   });
 
-  // ── Handlers ─────────────────────────────────────────────
-
   const handleTogglePageComplete = async () => {
     const pageProgress = moduleProgress.find((p) => p.pageId === selectedPage.id);
     const isCurrentlyComplete = pageProgress?.status === "completed" || false;
@@ -242,48 +220,48 @@ export default function ModulePlayer() {
     });
 
     if (!isCurrentlyComplete) {
-      // Read CourseProgress fresh from the server right after writing.
-      // Do not trust the cached moduleProgress, which may not have refetched yet.
-      // Treat the page just marked as completed even if the fresh read has not caught it.
       const freshProgress = await base44.entities.CourseProgress.filter(
         { created_by: currentUser?.email },
         "-created_date",
         500
       );
 
-      // Build the set of completed page ids from the fresh progress
       const completedPageIds = new Set(
         freshProgress
           .filter((p) => p.status === "completed" && p.pageId)
           .map((p) => p.pageId)
       );
-      // Add the page just ticked (in case fresh read is not caught up yet)
       completedPageIds.add(selectedPage.id);
 
       const allPagesCompleted = pages.every((page) => completedPageIds.has(page.id));
 
       if (allPagesCompleted) {
         await completeModule();
-        // Welcome intro: send them straight into the first content module
-        // (Awareness), with no module/phase milestone in between.
+        // STOP here - show the end screen and wait for user to click Continue.
+        // Do not navigate, prefetch, or render the next module.
+        // For Welcome intro and final module, decide the milestone stage now.
         const currentSec = allCourseSections.find((s) => s.id === module?.sectionId);
         const onWelcome =
           currentSec &&
           ((currentSec.order ?? 0) === 0 ||
             (currentSec.title || "").toLowerCase().includes("welcome"));
+        
         if (onWelcome) {
-          const firstContent = courseModulesWithPages[0] || null;
-          if (firstContent) {
-            navigate(
-              createPageUrl("ModulePlayer") +
-                `?moduleId=${firstContent.id}&courseId=${courseId}`
-            );
-            return;
+          // Welcome intro: show module milestone, user clicks Continue to go to first content module
+          if (!module?.isPhaseIntro) {
+            setMilestoneSnapshot(buildMilestoneSnapshot());
+            setMilestone("module");
           }
-        }
-        if (!module?.isPhaseIntro) {
+        } else if (isCourseEnd) {
+          // Final module: show course-complete celebration immediately
           setMilestoneSnapshot(buildMilestoneSnapshot());
-          setMilestone("module");
+          setMilestone("course");
+        } else {
+          // Regular module: show module milestone
+          if (!module?.isPhaseIntro) {
+            setMilestoneSnapshot(buildMilestoneSnapshot());
+            setMilestone("module");
+          }
         }
       } else {
         const completedCount = pages.filter((page) => {
@@ -367,8 +345,6 @@ export default function ModulePlayer() {
     });
   };
 
-  // ── Computed values ──────────────────────────────────────
-
   const completedPageCount = pages.filter((page) => {
     const p = moduleProgress.find((pr) => pr.pageId === page.id);
     return p?.status === "completed";
@@ -378,8 +354,6 @@ export default function ModulePlayer() {
     pages.length > 0
       ? Math.round((completedPageCount / pages.length) * 100)
       : 0;
-
-  // ── Loading / access gate ────────────────────────────────
 
   if (!module || !selectedPage || accessLoading) {
     return (
@@ -403,8 +377,6 @@ export default function ModulePlayer() {
       </div>
     );
   }
-
-  // ── Derived state ────────────────────────────────────────
 
   const isPageCompleted = (pageId) => {
     const p = moduleProgress.find((pr) => pr.pageId === pageId);
@@ -448,17 +420,13 @@ export default function ModulePlayer() {
   const moduleSection = sortedSections.find((s) => s.id === module?.sectionId);
   const pillarLabel = moduleSection?.phase_name || moduleSection?.title?.split(" - ")[1] || "";
 
-  // ── Journey milestone data ───────────────────────────────
   const expertMap = {};
   allExperts.forEach((e) => { expertMap[e.id] = e; });
 
-  // Phase name/letter are derived from the section title ("Phase 1 - Awareness"),
-  // since the sections do not store them separately.
   const phaseNameOf = (section) =>
     (section?.title || "").split(" - ")[1]?.trim() || section?.title || "";
   const phaseLetterOf = (section) => (phaseNameOf(section)[0] || "").toUpperCase();
 
-  // A module is complete when all of its pages are completed.
   const isModuleComplete = (mId) => {
     const mPages = allCoursePages.filter((pg) => pg.moduleId === mId);
     if (mPages.length === 0) return false;
@@ -467,22 +435,14 @@ export default function ModulePlayer() {
     );
   };
 
-  // The Welcome section is an intro, not a graded phase: keep it out of progression.
   const isWelcomeSection = (s) =>
     (s?.order === 0) || (s?.title || "").toLowerCase().includes("welcome");
   const contentSectionIds = new Set(
     sortedSections.filter((s) => !isWelcomeSection(s)).map((s) => s.id)
   );
 
-  // The Introduction lives in the Welcome section. There it shows a single
-  // "Start the course" action in place of the usual lesson controls, and the
-  // module overview card is hidden, since neither belongs on a one-lesson intro.
   const isIntroModule = !!moduleSection && isWelcomeSection(moduleSection);
 
-  // Linear progression over content phases only: always advance to the NEXT
-  // module in course order, never the "first incomplete" one. This keeps the
-  // flow moving forward (module -> module -> end of phase -> next phase) even
-  // if an earlier module was left unfinished.
   const courseModulesWithPages = sortedCourseModules.filter(
     (m) => modulesWithPages.has(m.id) && contentSectionIds.has(m.sectionId)
   );
@@ -505,10 +465,6 @@ export default function ModulePlayer() {
     ? expertMap[nextModuleInOrder.expertId]?.name || ""
     : "";
 
-  // Freeze everything the milestone needs at the instant a module is completed.
-  // The card then renders from this snapshot, so it always names the module the
-  // member actually finished and the correct next step, even if the live module
-  // or the route changes underneath it a moment later.
   const buildMilestoneSnapshot = () => ({
     moduleTitle: module?.title || "",
     hasWorkbook: !!courseWorkbook,
@@ -538,7 +494,6 @@ export default function ModulePlayer() {
     }
   };
 
-  // From the module milestone: move on once the practice is skipped or done.
   const handleMilestoneContinue = () => {
     if (milestoneSnapshot?.isCourseEnd) {
       setMilestone("course");
@@ -552,7 +507,6 @@ export default function ModulePlayer() {
   const handleMilestoneStartWorkbook = () => {
     const wbId = milestoneSnapshot?.workbookId || courseWorkbook?.id || null;
     if (wbId) {
-      // /Workbook self-redirects to /NutritionWorkbook for Danielle's workbook.
       window.location.href = `/Workbook?id=${wbId}`;
     }
   };
@@ -563,15 +517,12 @@ export default function ModulePlayer() {
     navigate("/Dashboard");
   };
 
-  // ── Helpers ──────────────────────────────────────────────
-
   const handleSelectPage = (page) => {
     setSelectedPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleNextAction = () => {
-    // Block navigation until the current lesson is marked complete
     if (!isCurrentPageComplete) {
       toast({
         description: "You must mark this lesson complete to move to the next lesson",
@@ -593,9 +544,6 @@ export default function ModulePlayer() {
   };
 
   const handleStartCourse = async () => {
-    // Intro module: mark the single lesson complete (without toggling it back
-    // off if it is already done) and move straight into the first content
-    // module. No milestone in between.
     if (!isCurrentPageComplete) {
       await togglePageCompleteMutation.mutateAsync({
         pageId: selectedPage.id,
@@ -632,11 +580,8 @@ export default function ModulePlayer() {
     ? nextModule.title
     : "Blueprint Home";
 
-  // ── Video renderer (shared between desktop and mobile) ──
-
   const renderVideo = (roundCorners, cropTop = false) => {
     const radius = roundCorners ? "12px" : "0";
-    // cropTop: shift iframe up to hide black letterbox bar from the video source
     const iframeStyle = cropTop
       ? { position: "absolute", top: "-10%", left: "0", width: "100%", height: "120%", border: 0 }
       : { border: 0 };
@@ -761,8 +706,6 @@ export default function ModulePlayer() {
     );
   };
 
-  // ── Expert avatar helper ─────────────────────────────────
-
   const renderExpertAvatar = (size) => {
     if (!expert) return null;
     const initials = expert.name
@@ -804,8 +747,6 @@ export default function ModulePlayer() {
       </div>
     );
   };
-
-  // ── Lesson list (shared between desktop sidebar and mobile tab) ──
 
   const renderLessonList = (onSelect) => (
     <div>
@@ -891,8 +832,6 @@ export default function ModulePlayer() {
     </div>
   );
 
-  // ── Module overview rows (shared) ────────────────────────
-
   const renderModuleOverview = () => (
     <div style={{ background: "white", borderRadius: "12px", padding: "20px" }}>
       <div
@@ -951,11 +890,6 @@ export default function ModulePlayer() {
     </div>
   );
 
-  // ── Continue the Blueprint (shown once the module is complete) ──
-  // A clear, persistent way to move forward to the next module in course
-  // order. It appears only when every lesson in this module is done, and
-  // falls back to the dashboard at the end of the course.
-
   const renderContinueBlueprint = () => {
     if (pages.length === 0 || overallProgress !== 100) return null;
     const label = nextModuleInOrder ? "CONTINUE THE BLUEPRINT" : "BACK TO DASHBOARD";
@@ -990,8 +924,6 @@ export default function ModulePlayer() {
     );
   };
 
-  // ── Title with italic after ampersand ────────────────────
-
   const renderModuleTitle = (fontSize) => {
     const parts = (module?.title || "").split(" & ");
     if (parts.length < 2) {
@@ -1011,10 +943,6 @@ export default function ModulePlayer() {
     );
   };
 
-  // ════════════════════════════════════════════════════════
-  //  RENDER
-  // ════════════════════════════════════════════════════════
-
   return (
     <div className="min-h-screen" style={{ background: "#FAF5F3" }}>
       <style>{`
@@ -1024,7 +952,6 @@ export default function ModulePlayer() {
         }
       `}</style>
 
-      {/* ─── MOBILE STICKY HEADER ─── */}
       <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
         <div className="px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="flex-shrink-0 p-1">
@@ -1064,7 +991,6 @@ export default function ModulePlayer() {
             <Menu className="w-5 h-5" style={{ color: "#4A0E2E" }} />
           </button>
         </div>
-        {/* 2px progress bar */}
         <div style={{ height: "2px", background: "#F5DDD9", width: "100%" }}>
           <div
             style={{
@@ -1077,7 +1003,6 @@ export default function ModulePlayer() {
         </div>
       </div>
 
-      {/* ─── DESKTOP TOP BAR ─── */}
       <div className="hidden md:block sticky top-0 z-40" style={{ background: "#FAF5F3", borderBottom: "1px solid rgba(74,14,46,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -1114,13 +1039,10 @@ export default function ModulePlayer() {
         </div>
       </div>
 
-      {/* ─── PAGE BODY ─── */}
       <div className="pt-0 md:pt-0 pb-24 md:pb-0">
 
-        {/* ═══ DESKTOP LAYOUT ═══ */}
         <div className="hidden md:block max-w-7xl mx-auto px-6 py-8">
 
-          {/* Module Header */}
           <div className="flex justify-between items-start gap-12 mb-12">
             <div style={{ flex: 1 }}>
               <div
@@ -1207,12 +1129,9 @@ export default function ModulePlayer() {
             </div>
           </div>
 
-          {/* Two-column grid */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12">
 
-            {/* Left: lesson content */}
             <div>
-              {/* Video */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={selectedPage.id + "-video"}
@@ -1225,7 +1144,6 @@ export default function ModulePlayer() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Lesson meta line */}
               <div
                 style={{
                   display: "flex",
@@ -1291,7 +1209,6 @@ export default function ModulePlayer() {
                 )}
               </div>
 
-              {/* Lesson title */}
               <h2
                 style={{
                   fontFamily: "'DM Serif Display', serif",
@@ -1305,7 +1222,6 @@ export default function ModulePlayer() {
                 {selectedPage.title}
               </h2>
 
-              {/* Expert byline */}
               {expert && (
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
                   {renderExpertAvatar(40)}
@@ -1318,7 +1234,6 @@ export default function ModulePlayer() {
                 </div>
               )}
 
-              {/* Body copy */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={selectedPage.id + "-body"}
@@ -1341,7 +1256,6 @@ export default function ModulePlayer() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Bottom navigation */}
               <div
                 style={{
                   display: "flex",
@@ -1381,7 +1295,6 @@ export default function ModulePlayer() {
                   </div>
                 ) : (
                   <>
-                    {/* Previous */}
                     <div style={{ minWidth: "100px" }}>
                       {prevPage && (
                         <button
@@ -1406,7 +1319,6 @@ export default function ModulePlayer() {
                       )}
                     </div>
 
-                    {/* Mark complete */}
                     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                       {!isCurrentPageComplete && (
                         <span
@@ -1453,7 +1365,6 @@ export default function ModulePlayer() {
                       </button>
                     </div>
 
-                    {/* Next */}
                     <button
                       onClick={handleNextAction}
                       style={{
@@ -1491,9 +1402,7 @@ export default function ModulePlayer() {
               </div>
             </div>
 
-            {/* Right: sticky sidebar */}
             <div className="hidden lg:block" style={{ position: "sticky", top: "80px", alignSelf: "start" }}>
-              {/* Course content */}
               <div style={{ marginBottom: "24px" }}>
                 <div
                   style={{
@@ -1531,22 +1440,18 @@ export default function ModulePlayer() {
                 {renderLessonList(handleSelectPage)}
               </div>
 
-              {/* Module overview */}
               {!isIntroModule && (
                 <div style={{ marginBottom: "24px" }}>
                   {renderModuleOverview()}
                 </div>
               )}
 
-              {/* Continue the Blueprint */}
               {renderContinueBlueprint()}
             </div>
           </div>
         </div>
 
-        {/* ═══ MOBILE LAYOUT ═══ */}
         <div className="md:hidden pt-[60px]">
-          {/* Video edge-to-edge, cropped to hide source letterbox */}
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage.id + "-mob-video"}
@@ -1559,7 +1464,6 @@ export default function ModulePlayer() {
           </AnimatePresence>
 
           <div className="px-4 pt-5">
-            {/* Lesson meta */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
               <span
                 style={{
@@ -1590,7 +1494,6 @@ export default function ModulePlayer() {
               )}
             </div>
 
-            {/* Title */}
             <h2
               style={{
                 fontFamily: "'DM Serif Display', serif",
@@ -1604,7 +1507,6 @@ export default function ModulePlayer() {
               {selectedPage.title}
             </h2>
 
-            {/* Expert */}
             {expert && (
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
                 {renderExpertAvatar(32)}
@@ -1619,7 +1521,6 @@ export default function ModulePlayer() {
               </div>
             )}
 
-            {/* Tabs */}
             <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid rgba(74,14,46,0.06)", marginBottom: "20px" }}>
               {["about", "course"].map((tab) => (
                 <button
@@ -1645,7 +1546,6 @@ export default function ModulePlayer() {
               ))}
             </div>
 
-            {/* Tab content */}
             {mobileTab === "about" ? (
               <motion.div
                 key="about-tab"
@@ -1689,7 +1589,6 @@ export default function ModulePlayer() {
         </div>
       </div>
 
-      {/* ─── MOBILE STICKY BOTTOM BAR ─── */}
       <div
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center gap-3"
         style={{
