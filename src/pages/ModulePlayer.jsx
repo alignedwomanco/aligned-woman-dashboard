@@ -250,7 +250,7 @@ export default function ModulePlayer() {
             setMilestoneSnapshot(buildMilestoneSnapshot());
             setMilestone("module");
           }
-        } else if (isCourseEnd) {
+        } else if (!nextModuleInOrder) {
           setMilestoneSnapshot(buildMilestoneSnapshot());
           setMilestone("course");
         } else {
@@ -544,13 +544,14 @@ export default function ModulePlayer() {
     if (nextPage) {
       handleSelectPage(nextPage);
       setMobileTab("about");
-    } else if (nextModule) {
+    } else if (nextModuleInOrder) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextModule.id}&courseId=${courseId}`
+          `?moduleId=${nextModuleInOrder.id}&courseId=${courseId}`
       );
     } else {
-      navigate(createPageUrl("Classroom"));
+      setMilestoneSnapshot(buildMilestoneSnapshot());
+      setMilestone("course");
     }
   };
 
@@ -575,20 +576,20 @@ export default function ModulePlayer() {
 
   const nextLabel = nextPage
     ? "NEXT LESSON"
-    : nextModule
+    : nextModuleInOrder
     ? "NEXT MODULE"
     : "BACK TO CLASSROOM";
 
   const nextMobileTopLine = nextPage
     ? `UP NEXT · LESSON ${String(currentPageIndex + 2).padStart(2, "0")}`
-    : nextModule
+    : nextModuleInOrder
     ? "NEXT MODULE"
     : "RETURN HOME";
 
   const nextMobileBottomLine = nextPage
     ? nextPage.title
-    : nextModule
-    ? nextModule.title
+    : nextModuleInOrder
+    ? nextModuleInOrder.title
     : "Blueprint Home";
 
   const renderVideo = (roundCorners, cropTop = false) => {
