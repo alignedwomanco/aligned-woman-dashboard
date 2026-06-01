@@ -749,11 +749,35 @@ export default function AdminSettings() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            {["educator", "expert"].includes(currentUser?.role) || currentUser?.is_educator || currentUser?.is_expert ? (
-              <EducatorAnalyticsContent currentUser={currentUser} />
-            ) : (
-              <AdminMetricsContent />
-            )}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  📊 Google Analytics Dashboard
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 bg-gradient-to-r from-[#F5E8EE] to-white rounded-lg border border-[#6E1D40]/20">
+                  <div>
+                    <p className="font-semibold text-[#6E1D40] text-lg">View Full Analytics</p>
+                    <p className="text-sm text-gray-600 mt-1">Access Google Analytics data including users, sessions, page views, and daily breakdowns.</p>
+                  </div>
+                  <Button
+                    onClick={() => window.location.href = "/analytics"}
+                    className="text-white whitespace-nowrap"
+                    style={{ backgroundColor: '#6E1D40' }}
+                  >
+                    Open Analytics Dashboard →
+                  </Button>
+                </div>
+                <div className="mt-6">
+                  {["educator", "expert"].includes(currentUser?.role) || currentUser?.is_educator || currentUser?.is_expert ? (
+                    <EducatorAnalyticsContent currentUser={currentUser} />
+                  ) : (
+                    <AdminMetricsContent />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* AI Chat Widget Tab */}

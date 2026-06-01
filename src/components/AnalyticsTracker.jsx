@@ -1,29 +1,42 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import Analytics from "analytics";
+import googleAnalytics from "@analytics/google-analytics";
 
-// Google Analytics Measurement ID
-const GA_MEASUREMENT_ID = "G-GVHHRHTQ12";
+// Get measurement ID from environment or use placeholder
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || "G-XXXXXXXXXX";
 
-// Initialize gtag
-if (typeof window !== 'undefined') {
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){window.dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', GA_MEASUREMENT_ID, {
-    send_page_view: false, // We'll manually track page views
-  });
+// Check if GA is properly configured
+const isGAConfigured = GA_MEASUREMENT_ID !== "G-XXXXXXXXXX";
+
+if (!isGAConfigured) {
+  console.warn("Google Analytics not configured. Please set GA_MEASUREMENT_ID secret in Dashboard Settings > Integrations.");
 }
+
+// Initialize analytics instance
+const analytics = Analytics({
+  app: "Aligned Woman Blueprint",
+  plugins: [
+    googleAnalytics({
+      measurementIds: [GA_MEASUREMENT_ID],
+      // Track page views automatically
+      trackPages: true,
+      // Enable debug mode in development
+      debug: import.meta.env.DEV,
+    }),
+  ],
+});
 
 export default function AnalyticsTracker() {
   const location = useLocation();
 
   useEffect(() => {
     // Track page view on route change
-    if (typeof window !== 'undefined' && location.pathname) {
-      window.gtag('config', GA_MEASUREMENT_ID, {
-        page_path: location.pathname,
-        page_title: document.title,
-        page_location: window.location.href,
+    if (location.pathname) {
+      analytics.page({
+        path: location.pathname,
+        url: window.location.href,
+        title: document.title,
       });
     }
   }, [location]);
@@ -31,4 +44,4 @@ export default function AnalyticsTracker() {
   return null;
 }
 
-export { GA_MEASUREMENT_ID };
+export { analytics };
