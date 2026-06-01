@@ -29,10 +29,6 @@ export default function Welcome() {
   }, []);
 
   const handleCreateAccount = () => {
-    base44.auth.redirectToLogin(`${window.location.origin}/Dashboard`, { mode: "signup" });
-  };
-
-  const handleSignIn = () => {
     base44.auth.redirectToLogin(`${window.location.origin}/Dashboard`);
   };
 
@@ -125,29 +121,12 @@ export default function Welcome() {
                 fontSize: 12,
                 lineHeight: 1.6,
                 color: "var(--aw-mid-grey)",
-                margin: "22px auto 12px",
+                margin: "22px auto 0",
                 maxWidth: 390,
               }}
             >
-              First time here? Create your account with the email you were given. Already a member? Sign in below.
+              Create your account with the email you were given. On the next screen, choose "Sign up" to register for the first time.
             </p>
-
-            <button
-              onClick={handleSignIn}
-              style={{
-                background: "none",
-                border: "none",
-                fontFamily: "var(--aw-font-sans, sans-serif)",
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--aw-burg-core)",
-                textDecoration: "underline",
-                cursor: "pointer",
-                padding: 0,
-              }}
-            >
-              Already have an account? Sign in
-            </button>
           </>
         )}
       </div>
