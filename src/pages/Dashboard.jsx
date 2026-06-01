@@ -461,7 +461,7 @@ export default function Dashboard() {
       {isAdmin && adminCheckComplete && (
         <div className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-4 max-w-xs">
           <p className="font-semibold mb-2 text-gray-300">ADMIN: Preview State</p>
-          
+          <a
             href={`/CourseDetail?courseId=69f4885c4fadbeea6d28a9be&preview=new_user`}
             className="block w-full text-center px-3 py-2 rounded mb-3 bg-amber-700 text-white text-xs font-bold hover:bg-amber-600 transition-colors"
             style={{ textDecoration: "none" }}
