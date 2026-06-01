@@ -13,7 +13,7 @@ const NAV = {
     { label: "Terms & Conditions", href: "/terms-and-conditions" },
   ],
   SOCIAL: [
-    { label: "Instagram", href: "#" },
+    { label: "Instagram", href: "https://www.instagram.com/alignedwoman_co/" },
     { label: "YouTube", href: "#" },
     { label: "Email", href: "mailto:hello@alignedwoman.com" },
     { label: "LinkedIn", href: "#" },
