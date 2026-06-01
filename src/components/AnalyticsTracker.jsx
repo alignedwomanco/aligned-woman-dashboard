@@ -3,11 +3,11 @@ import { useLocation } from "react-router-dom";
 import Analytics from "analytics";
 import googleAnalytics from "@analytics/google-analytics";
 
-// Get measurement ID from environment or use placeholder
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || "G-XXXXXXXXXX";
+// Get measurement ID from environment or use the configured value
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || "G-2KVNX7CDX7";
 
 // Check if GA is properly configured
-const isGAConfigured = GA_MEASUREMENT_ID !== "G-XXXXXXXXXX";
+const isGAConfigured = GA_MEASUREMENT_ID !== "G-XXXXXXXXXX" && GA_MEASUREMENT_ID !== "G-2KVNX7CDX7";
 
 if (!isGAConfigured) {
   console.warn("Google Analytics not configured. Please set GA_MEASUREMENT_ID secret in Dashboard Settings > Integrations.");
