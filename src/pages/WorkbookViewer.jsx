@@ -69,7 +69,7 @@ function WorkbookPicker() {
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 480 }}>
         {workbooks.map(wb => (
-          
+          <a
             key={wb.id}
             href={`/Workbook?id=${wb.id}`}
             style={{
