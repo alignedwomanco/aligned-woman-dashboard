@@ -15,7 +15,6 @@ import {
   Check,
   Lock,
   ExternalLink,
-  FileText,
   Menu,
   ChevronLeft,
   ChevronRight,
@@ -911,56 +910,41 @@ export default function ModulePlayer() {
     </div>
   );
 
-  // ── Workbook card (shared) ───────────────────────────────
+  // ── Continue the Blueprint (shown once the module is complete) ──
+  // A clear, persistent way to move forward to the next module in course
+  // order. It appears only when every lesson in this module is done, and
+  // falls back to the dashboard at the end of the course.
 
-  const renderWorkbookCard = () => {
-    if (!courseWorkbook) return null;
+  const renderContinueBlueprint = () => {
+    if (pages.length === 0 || overallProgress !== 100) return null;
+    const label = nextModuleInOrder ? "CONTINUE THE BLUEPRINT" : "BACK TO DASHBOARD";
     return (
       <button
-        onClick={() => {
-          window.location.href = `/Workbook?id=${courseWorkbook.id}`;
-        }}
+        onClick={goToNextModule}
         style={{
           width: "100%",
-          background: "#FDF5F3",
-          border: "1px solid rgba(196,132,122,0.18)",
-          borderRadius: "12px",
-          padding: "16px",
+          background: "#4A0E2E",
+          color: "white",
+          border: "none",
+          borderRadius: "100px",
+          padding: "16px 24px",
+          cursor: "pointer",
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: "11px",
+          fontWeight: 700,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
           display: "flex",
           alignItems: "center",
-          gap: "12px",
-          cursor: "pointer",
+          justifyContent: "center",
+          gap: "8px",
           transition: "background 0.2s",
-          textAlign: "left",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "#F5DDD9")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "#FDF5F3")}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "#3D0F1F")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "#4A0E2E")}
       >
-        <FileText className="w-5 h-5 flex-shrink-0" style={{ color: "#4A0E2E" }} />
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#4A0E2E",
-              marginBottom: "2px",
-            }}
-          >
-            Module workbook
-          </div>
-          <div
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "12px",
-              fontWeight: 400,
-              color: "#8A7A76",
-            }}
-          >
-            PDF · 24 PAGES
-          </div>
-        </div>
-        <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "#4A0E2E" }} />
+        {label}
+        <ChevronRight className="w-3.5 h-3.5" />
       </button>
     );
   };
@@ -1479,8 +1463,8 @@ export default function ModulePlayer() {
                 {renderModuleOverview()}
               </div>
 
-              {/* Workbook */}
-              {renderWorkbookCard()}
+              {/* Continue the Blueprint */}
+              {renderContinueBlueprint()}
             </div>
           </div>
         </div>
@@ -1621,7 +1605,7 @@ export default function ModulePlayer() {
                 <div style={{ marginBottom: "16px" }}>
                   {renderModuleOverview()}
                 </div>
-                {renderWorkbookCard()}
+                {renderContinueBlueprint()}
               </motion.div>
             )}
           </div>
