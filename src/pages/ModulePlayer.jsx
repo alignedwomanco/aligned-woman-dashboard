@@ -351,9 +351,7 @@ export default function ModulePlayer() {
       ? Math.round((completedPageCount / pages.length) * 100)
       : 0;
 
-  const isCoreDataLoading = moduleLoading || pagesLoading || accessLoading;
-
-  if (isCoreDataLoading) {
+  if (moduleLoading || pagesLoading || accessLoading || !selectedPage) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
         <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
@@ -361,7 +359,7 @@ export default function ModulePlayer() {
     );
   }
 
-  if (!module || !selectedPage) {
+  if (!module) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
         <div className="text-center">
