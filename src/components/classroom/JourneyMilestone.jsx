@@ -166,3 +166,4 @@ export default function JourneyMilestone({
     </motion.div>
   );
 }
+
