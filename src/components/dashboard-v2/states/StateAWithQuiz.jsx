@@ -101,7 +101,7 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
             </div>
             {/* Progress */}
             {!isCourseComplete && (
-              <div className="flex-shrink-0 md:text-right">
+              <div className="w-full md:w-auto flex-shrink-0 md:text-right">
                 <p className="text-[10px] tracking-[0.2em] text-white/55 font-medium uppercase mb-1">MODULES COMPLETE</p>
                 <p className="text-3xl text-white font-light mb-2">
                   {completedModules} <span className="text-white/55 text-lg">/ {totalModules}</span>
