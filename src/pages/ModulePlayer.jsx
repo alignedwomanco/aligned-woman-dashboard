@@ -18,10 +18,10 @@ import {
   Menu,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
-import { useToast } from "@/components/ui/use-toast";
 import JourneyMilestone from "@/components/classroom/JourneyMilestone";
 
 export default function ModulePlayer() {
@@ -34,8 +34,8 @@ export default function ModulePlayer() {
   const [mobileTab, setMobileTab] = useState("about");
   const [milestone, setMilestone] = useState(null);
   const [milestoneSnapshot, setMilestoneSnapshot] = useState(null);
+  const [showCompleteHint, setShowCompleteHint] = useState(false);
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ["course", courseId],
@@ -164,6 +164,7 @@ export default function ModulePlayer() {
     setSelectedPage(null);
     setMilestone(null);
     setMilestoneSnapshot(null);
+    setShowCompleteHint(false);
   }, [moduleId]);
 
   useEffect(() => {
@@ -171,6 +172,21 @@ export default function ModulePlayer() {
       setSelectedPage(pages[0]);
     }
   }, [pages]);
+
+  // Hide the "mark complete first" hint whenever the lesson changes, so a
+  // notice raised on one lesson never carries over to the next one.
+  useEffect(() => {
+    setShowCompleteHint(false);
+  }, [selectedPage?.id]);
+
+  // Auto-dismiss the hint after a few seconds. This is a self-contained notice
+  // held in local state, not a global toast, so it cannot outlive the lesson
+  // or follow the member into the next module.
+  useEffect(() => {
+    if (!showCompleteHint) return;
+    const t = setTimeout(() => setShowCompleteHint(false), 4000);
+    return () => clearTimeout(t);
+  }, [showCompleteHint]);
 
   // Serialized, fresh-read progress writer. Every progress write, both the
   // per-page rows and the module rollup row (pageId null), goes through here.
@@ -239,6 +255,10 @@ export default function ModulePlayer() {
   });
 
   const handleTogglePageComplete = async () => {
+    // Marking the lesson resolves the reason the hint was shown, so clear it
+    // immediately rather than waiting for the progress refetch to settle.
+    setShowCompleteHint(false);
+
     const pageProgress = moduleProgress.find((p) => p.pageId === selectedPage.id);
     const isCurrentlyComplete = pageProgress?.status === "completed" || false;
 
@@ -517,15 +537,13 @@ export default function ModulePlayer() {
 
   const handleSelectPage = (page) => {
     setSelectedPage(page);
+    setShowCompleteHint(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleNextAction = () => {
     if (!isCurrentPageComplete) {
-      toast({
-        description: "You must mark this lesson complete to move to the next lesson",
-        duration: 3000,
-      });
+      setShowCompleteHint(true);
       return;
     }
     if (nextPage) {
@@ -951,6 +969,66 @@ export default function ModulePlayer() {
           50% { opacity: 0; transform: scale(1.08); }
         }
       `}</style>
+
+      {showCompleteHint && !isCurrentPageComplete && (
+        <div
+          style={{
+            position: "fixed",
+            top: "70px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 60,
+            width: "calc(100% - 32px)",
+            maxWidth: "420px",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              border: "1px solid rgba(74,14,46,0.12)",
+              borderRadius: "14px",
+              boxShadow: "0 10px 30px rgba(74,14,46,0.14)",
+              padding: "14px 16px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "12px",
+            }}
+          >
+            <span
+              style={{
+                flex: 1,
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#3A2A28",
+                lineHeight: 1.45,
+              }}
+            >
+              Mark this lesson complete to move on to the next one.
+            </span>
+            <button
+              onClick={() => setShowCompleteHint(false)}
+              aria-label="Dismiss"
+              style={{
+                flexShrink: 0,
+                width: "44px",
+                height: "44px",
+                margin: "-12px -12px -8px 0",
+                padding: 0,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "flex-end",
+                lineHeight: 0,
+              }}
+            >
+              <X className="w-4 h-4" style={{ color: "#8A7A76" }} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
         <div className="px-4 py-3 flex items-center justify-between">
@@ -1590,19 +1668,20 @@ export default function ModulePlayer() {
       </div>
 
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center gap-3"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex flex-col"
         style={{
           background: "white",
           borderTop: "1px solid rgba(74,14,46,0.06)",
           padding: "12px 16px",
           paddingBottom: "max(12px, env(safe-area-inset-bottom))",
+          gap: "10px",
         }}
       >
         {isIntroModule ? (
           <button
             onClick={handleStartCourse}
             style={{
-              flex: 1,
+              width: "100%",
               background: "#4A0E2E",
               color: "white",
               border: "none",
@@ -1626,13 +1705,13 @@ export default function ModulePlayer() {
           </button>
         ) : (
           <>
-            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ position: "relative", width: "100%" }}>
               {!isCurrentPageComplete && (
                 <span
                   style={{
                     position: "absolute",
-                    inset: "-4px",
-                    borderRadius: "50%",
+                    inset: "-3px",
+                    borderRadius: "100px",
                     border: "2px solid #C4847A",
                     animation: "mp-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
                     pointerEvents: "none",
@@ -1642,43 +1721,50 @@ export default function ModulePlayer() {
               <button
                 onClick={handleTogglePageComplete}
                 style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  border: isCurrentPageComplete ? "none" : "2px solid #4A0E2E",
-                  background: isCurrentPageComplete ? "#22c55e" : "transparent",
+                  position: "relative",
+                  width: "100%",
+                  minHeight: "48px",
+                  borderRadius: "100px",
+                  border: isCurrentPageComplete ? "none" : "1.5px solid #4A0E2E",
+                  background: isCurrentPageComplete ? "#22c55e" : "#4A0E2E",
+                  color: "white",
+                  cursor: "pointer",
+                  transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  cursor: "pointer",
-                  transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
-                  flexShrink: 0,
+                  gap: "8px",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
                 }}
               >
-                {isCurrentPageComplete
-                  ? <CheckCircle className="w-5 h-5" style={{ color: "white" }} />
-                  : <Check className="w-5 h-5" style={{ color: "#4A0E2E" }} />
-                }
+                <CheckCircle className="w-4 h-4" />
+                {isCurrentPageComplete ? "COMPLETED" : "MARK COMPLETE"}
               </button>
             </div>
+
             <button
               onClick={handleNextAction}
               style={{
-                flex: 1,
+                width: "100%",
+                minHeight: "48px",
                 background: isCurrentPageComplete ? "#C4847A" : "rgba(196,132,122,0.2)",
                 border: "none",
                 borderRadius: "100px",
-                padding: "10px 16px",
+                padding: "8px 18px",
                 cursor: isCurrentPageComplete ? "pointer" : "not-allowed",
                 opacity: isCurrentPageComplete ? 1 : 0.6,
                 transition: "all 0.3s cubic-bezier(0.2, 0.7, 0.2, 1)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                minHeight: "48px",
+                gap: "12px",
               }}
             >
-              <div style={{ textAlign: "left" }}>
+              <div style={{ textAlign: "left", minWidth: 0 }}>
                 <div
                   style={{
                     fontFamily: "'Montserrat', sans-serif",
@@ -1699,7 +1785,6 @@ export default function ModulePlayer() {
                     fontSize: "12px",
                     fontWeight: 600,
                     color: isCurrentPageComplete ? "#4A0E2E" : "#8A7A76",
-                    maxWidth: "200px",
                   }}
                 >
                   {nextMobileBottomLine}
