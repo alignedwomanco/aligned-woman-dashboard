@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -159,23 +159,47 @@ export default function ModulePlayer() {
     }
   }, [pages]);
 
-  const updateProgressMutation = useMutation({
-    mutationFn: async ({ status, progressPercentage }) => {
-      const existing = moduleProgress.find((p) => !p.pageId && p.moduleId === moduleId);
-      if (existing) {
-        return base44.entities.CourseProgress.update(existing.id, {
+  // Serialized, fresh-read progress writer. Every progress write, both the
+  // per-page rows and the module rollup row (pageId null), goes through here.
+  // It reads the user's existing rows for this module straight from the server
+  // immediately before writing, so a stale cache can no longer miss an existing
+  // row and create a duplicate. Writes are chained so two rapid saves cannot
+  // both read "no row yet" and both create one. This is what prevents the
+  // duplicate and stuck rollup rows. It updates one row and never deletes, so
+  // any pre-existing duplicates are left for the separate data cleanup.
+  const writeChainRef = useRef(Promise.resolve());
+
+  const upsertProgress = ({ pageId = null, status, progressPercentage }) => {
+    const run = async () => {
+      const filter = currentUser?.email
+        ? { created_by: currentUser.email, moduleId }
+        : { moduleId };
+      const rows = await base44.entities.CourseProgress.filter(filter, "-created_date", 500);
+      const match = pageId
+        ? rows.find((p) => p.pageId === pageId)
+        : rows.find((p) => !p.pageId);
+      if (match) {
+        return base44.entities.CourseProgress.update(match.id, {
           status,
-          progressPercentage: progressPercentage || existing.progressPercentage || 0,
-        });
-      } else {
-        return base44.entities.CourseProgress.create({
-          courseId,
-          moduleId,
-          status,
-          progressPercentage: progressPercentage || 0,
+          progressPercentage: progressPercentage ?? match.progressPercentage ?? 0,
         });
       }
-    },
+      return base44.entities.CourseProgress.create({
+        courseId,
+        moduleId,
+        ...(pageId ? { pageId } : {}),
+        status,
+        progressPercentage: progressPercentage ?? 0,
+      });
+    };
+    const next = writeChainRef.current.then(run, run);
+    writeChainRef.current = next.catch(() => {});
+    return next;
+  };
+
+  const updateProgressMutation = useMutation({
+    mutationFn: ({ status, progressPercentage }) =>
+      upsertProgress({ pageId: null, status, progressPercentage }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["courseProgress"] });
     },
@@ -190,23 +214,12 @@ export default function ModulePlayer() {
   });
 
   const togglePageCompleteMutation = useMutation({
-    mutationFn: async ({ pageId, isComplete }) => {
-      const existing = moduleProgress.find((p) => p.pageId === pageId);
-      if (existing) {
-        return base44.entities.CourseProgress.update(existing.id, {
-          status: isComplete ? "completed" : "in_progress",
-          progressPercentage: isComplete ? 100 : existing.progressPercentage,
-        });
-      } else {
-        return base44.entities.CourseProgress.create({
-          courseId,
-          moduleId,
-          pageId,
-          status: isComplete ? "completed" : "in_progress",
-          progressPercentage: isComplete ? 100 : 0,
-        });
-      }
-    },
+    mutationFn: ({ pageId, isComplete }) =>
+      upsertProgress({
+        pageId,
+        status: isComplete ? "completed" : "in_progress",
+        progressPercentage: isComplete ? 100 : 0,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["courseProgress"] });
     },
