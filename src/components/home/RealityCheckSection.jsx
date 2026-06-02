@@ -20,7 +20,7 @@ export default function RealityCheckSection() {
         </h2>
 
         {/* Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px,1fr))", gap: 32, marginBottom: 48 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 32, marginBottom: 48 }}>
           <div style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "40px 32px", background: "rgba(255,255,255,0.02)", textAlign: "left" }}>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(196,132,122,0.6)", marginBottom: 16 }}>The Myth</p>
             <p style={{ fontSize: "clamp(18px,3vw,28px)", fontStyle: "italic", fontWeight: 400, lineHeight: 1.4, color: "#fff", marginBottom: 24 }}>
