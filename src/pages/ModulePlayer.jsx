@@ -239,25 +239,12 @@ export default function ModulePlayer() {
 
       if (allPagesCompleted) {
         await completeModule();
-        const currentSec = allCourseSections.find((s) => s.id === module?.sectionId);
-        const onWelcome =
-          currentSec &&
-          ((currentSec.order ?? 0) === 0 ||
-            (currentSec.title || "").toLowerCase().includes("welcome"));
-        
-        if (onWelcome) {
-          if (!module?.isPhaseIntro) {
-            setMilestoneSnapshot(buildMilestoneSnapshot());
-            setMilestone("module");
-          }
-        } else if (!nextModuleInOrder) {
+        if (!nextModuleInOrder) {
           setMilestoneSnapshot(buildMilestoneSnapshot());
           setMilestone("course");
         } else {
-          if (!module?.isPhaseIntro) {
-            setMilestoneSnapshot(buildMilestoneSnapshot());
-            setMilestone("module");
-          }
+          setMilestoneSnapshot(buildMilestoneSnapshot());
+          setMilestone("module");
         }
       } else {
         const completedCount = pages.filter((page) => {
@@ -270,6 +257,16 @@ export default function ModulePlayer() {
           status: "in_progress",
           progressPercentage: pct,
         });
+
+        const idx = pages.findIndex((p) => p.id === selectedPage.id);
+        const np = pages[idx + 1] || null;
+        setMilestoneSnapshot({
+          ...buildMilestoneSnapshot(),
+          lessonTitle: selectedPage.title,
+          nextLessonTitle: np?.title || "",
+          nextLessonId: np?.id || null,
+        });
+        setMilestone("lesson");
       }
     } else {
       const completedCount = pages.filter((page) => {
@@ -428,10 +425,6 @@ export default function ModulePlayer() {
   const expertMap = {};
   allExperts.forEach((e) => { expertMap[e.id] = e; });
 
-  const phaseNameOf = (section) =>
-    (section?.title || "").split(" - ")[1]?.trim() || section?.title || "";
-  const phaseLetterOf = (section) => (phaseNameOf(section)[0] || "").toUpperCase();
-
   const isModuleComplete = (mId) => {
     const mPages = allCoursePages.filter((pg) => pg.moduleId === mId);
     if (mPages.length === 0) return false;
@@ -458,15 +451,6 @@ export default function ModulePlayer() {
       ? courseModulesWithPages[currentContentIdx + 1] || null
       : null;
 
-  const isCourseEnd = currentContentIdx >= 0 && !nextModuleInOrder;
-  const isPhaseBoundary =
-    contentSectionIds.has(module?.sectionId) &&
-    !!nextModuleInOrder &&
-    nextModuleInOrder.sectionId !== module?.sectionId;
-
-  const nextSection = nextModuleInOrder
-    ? sortedSections.find((s) => s.id === nextModuleInOrder.sectionId)
-    : null;
   const nextExpertName = nextModuleInOrder
     ? expertMap[nextModuleInOrder.expertId]?.name || ""
     : "";
@@ -478,12 +462,6 @@ export default function ModulePlayer() {
     nextModuleId: nextModuleInOrder?.id || null,
     nextModuleTitle: nextModuleInOrder?.title || "",
     nextExpertName,
-    phaseLetter: phaseLetterOf(moduleSection),
-    phaseName: phaseNameOf(moduleSection),
-    phaseTagline: moduleSection?.tagline || "",
-    nextPhaseName: phaseNameOf(nextSection),
-    isCourseEnd,
-    isPhaseBoundary,
   });
 
   const goToNextModule = () => {
@@ -500,13 +478,13 @@ export default function ModulePlayer() {
     }
   };
 
-  const handleMilestoneContinue = () => {
-    if (milestoneSnapshot?.isCourseEnd) {
-      setMilestone("course");
-    } else if (milestoneSnapshot?.isPhaseBoundary) {
-      setMilestone("phase");
-    } else {
-      goToNextModule();
+  const handleLessonContinue = () => {
+    const nextId = milestoneSnapshot?.nextLessonId || null;
+    setMilestone(null);
+    setMilestoneSnapshot(null);
+    if (nextId) {
+      const np = pages.find((p) => p.id === nextId);
+      if (np) handleSelectPage(np);
     }
   };
 
@@ -1723,16 +1701,13 @@ export default function ModulePlayer() {
           <JourneyMilestone
             stage={milestone}
             moduleTitle={milestoneSnapshot.moduleTitle}
+            lessonTitle={milestoneSnapshot.lessonTitle}
+            nextLessonTitle={milestoneSnapshot.nextLessonTitle}
             hasWorkbook={milestoneSnapshot.hasWorkbook}
             nextModuleTitle={milestoneSnapshot.nextModuleTitle}
             nextExpertName={milestoneSnapshot.nextExpertName}
-            phaseLetter={milestoneSnapshot.phaseLetter}
-            phaseName={milestoneSnapshot.phaseName}
-            phaseTagline={milestoneSnapshot.phaseTagline}
-            nextPhaseName={milestoneSnapshot.nextPhaseName}
             onStartWorkbook={handleMilestoneStartWorkbook}
-            onContinue={handleMilestoneContinue}
-            onNextPhase={goToNextModule}
+            onContinue={milestone === "lesson" ? handleLessonContinue : goToNextModule}
             onDashboard={handleMilestoneDashboard}
           />
         )}
