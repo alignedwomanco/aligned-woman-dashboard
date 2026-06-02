@@ -1,15 +1,13 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Lock, Loader2, BookOpen } from "lucide-react";
+import { Loader2, BookOpen } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import useWorkbookUnlock from "@/hooks/useWorkbookUnlock";
 import WorkbookSidebar from "@/components/workbook/WorkbookSidebar";
 import WorkbookTopBar from "@/components/workbook/WorkbookTopBar";
 import WorkbookBottomBar from "@/components/workbook/WorkbookBottomBar";
 import WorkbookSectionContent from "@/components/workbook/WorkbookSectionContent";
 import WorkbookCelebration from "@/components/workbook/WorkbookCelebration";
-import { getNextModuleForWorkbook, isFlowReady } from "@/lib/courseFlow";
 
 function WorkbookPicker() {
   const { data: workbooks, isLoading } = useQuery({
@@ -134,6 +132,17 @@ function WorkbookViewerInner({ workbookId }) {
   const saveTimer = useRef(null);
   const contentRef = useRef(null);
 
+  // Keep a synchronous mirror of responseId, plus a single in-flight create
+  // promise. Both autosave paths route their creation through ensureResponseId
+  // so that rapid edits can never create more than one WorkbookResponse row
+  // for this user and workbook.
+  const responseIdRef = useRef(null);
+  const createPromiseRef = useRef(null);
+
+  useEffect(() => {
+    responseIdRef.current = responseId;
+  }, [responseId]);
+
   const { data: workbook, isLoading: workbookLoading } = useQuery({
     queryKey: ["workbook", workbookId],
     queryFn: async () => {
@@ -150,60 +159,38 @@ function WorkbookViewerInner({ workbookId }) {
     enabled: !!workbook?.expert_id,
   });
 
-  const wbCourseId = workbook?.course_id || null;
-
-  const { data: wbAllModules = [] } = useQuery({
-    queryKey: ["wbAllCourseModules", wbCourseId],
-    queryFn: () => base44.entities.CourseModule.filter({ courseId: wbCourseId }, "order", 500),
-    enabled: !!wbCourseId,
-  });
-
-  const { data: wbAllSections = [] } = useQuery({
-    queryKey: ["wbAllCourseSections", wbCourseId],
-    queryFn: () => base44.entities.CourseSection.filter({ courseId: wbCourseId }, "order", 500),
-    enabled: !!wbCourseId,
-  });
-
-  const { data: wbAllPages = [] } = useQuery({
-    queryKey: ["wbAllCoursePages", wbCourseId],
-    queryFn: async () => {
-      const results = await Promise.all(
-        wbAllModules.map((m) => base44.entities.CoursePage.filter({ moduleId: m.id }, "order", 500))
-      );
-      return results.flat();
-    },
-    enabled: wbAllModules.length > 0,
-  });
-
-  const flowReady = isFlowReady(wbAllSections, wbAllModules, wbAllPages);
-  const wbNextModule = useMemo(
-    () => (flowReady ? getNextModuleForWorkbook(workbook, wbAllSections, wbAllModules, wbAllPages) : null),
-    [flowReady, workbook, wbAllSections, wbAllModules, wbAllPages]
-  );
-
-  const handleContinueNext = useCallback(() => {
-    if (!flowReady) return;
-    if (wbNextModule) {
-      navigate(`/ModulePlayer?moduleId=${wbNextModule.id}&courseId=${wbCourseId}`);
-    } else {
-      navigate("/Dashboard");
+  const ensureResponseId = useCallback(async () => {
+    if (responseIdRef.current) return responseIdRef.current;
+    if (!createPromiseRef.current) {
+      createPromiseRef.current = base44.entities.WorkbookResponse
+        .create({ workbook_id: workbookId, answers: {} })
+        .then((created) => {
+          responseIdRef.current = created.id;
+          setResponseId(created.id);
+          return created.id;
+        })
+        .catch((err) => {
+          // Allow a later save to retry creation if this attempt failed.
+          createPromiseRef.current = null;
+          throw err;
+        });
     }
-  }, [flowReady, wbNextModule, wbCourseId, navigate]);
+    return createPromiseRef.current;
+  }, [workbookId]);
 
-
-
-
+  const handleBackToDashboard = useCallback(() => {
+    navigate("/Dashboard");
+  }, [navigate]);
 
   useEffect(() => {
     base44.auth.me().then(u => setUser(u)).catch(() => {});
   }, []);
 
-  const { isUnlocked, isLoading: isCheckingUnlock } = useWorkbookUnlock(workbook);
-
   useEffect(() => {
     base44.entities.WorkbookResponse.filter({ workbook_id: workbookId }, "-created_date", 1)
       .then(responses => {
         if (responses.length > 0) {
+          responseIdRef.current = responses[0].id;
           setResponseId(responses[0].id);
           setAnswers(responses[0].answers || {});
           setIsComplete(responses[0].is_complete || false);
@@ -219,17 +206,17 @@ function WorkbookViewerInner({ workbookId }) {
       const updated = { ...prev, [fieldId]: value };
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(async () => {
-        if (responseId) {
-          await base44.entities.WorkbookResponse.update(responseId, { answers: updated });
-        } else {
-          const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, answers: updated });
-          setResponseId(created.id);
+        try {
+          const id = await ensureResponseId();
+          await base44.entities.WorkbookResponse.update(id, { answers: updated });
+          setLastSaved(new Date());
+        } catch (e) {
+          // Answers remain in local state; the next save attempt will retry.
         }
-        setLastSaved(new Date());
       }, 800);
       return updated;
     });
-  }, [responseId, workbookId]);
+  }, [ensureResponseId]);
 
   const sections = useMemo(() => {
     if (!workbook?.schema?.sections) return [];
@@ -298,16 +285,16 @@ function WorkbookViewerInner({ workbookId }) {
     if (sectionId) {
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(async () => {
-        if (responseId) {
-          await base44.entities.WorkbookResponse.update(responseId, { last_section_id: sectionId });
-        } else {
-          const created = await base44.entities.WorkbookResponse.create({ workbook_id: workbookId, answers: {}, last_section_id: sectionId });
-          setResponseId(created.id);
+        try {
+          const id = await ensureResponseId();
+          await base44.entities.WorkbookResponse.update(id, { last_section_id: sectionId });
+          setLastSaved(new Date());
+        } catch (e) {
+          // Non-critical: section position will be saved on the next change.
         }
-        setLastSaved(new Date());
       }, 800);
     }
-  }, [sections, responseId, workbookId]);
+  }, [sections, ensureResponseId]);
 
   const activeSectionRef = useRef(0);
   activeSectionRef.current = activeSection;
@@ -330,7 +317,7 @@ function WorkbookViewerInner({ workbookId }) {
     return () => document.removeEventListener("keydown", handler);
   }, [sections.length, jumpTo]);
 
-  const stillLoading = workbookLoading || !responseLoaded || (!!workbook && isCheckingUnlock);
+  const stillLoading = workbookLoading || !responseLoaded;
   if (stillLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: "#FAF5F3" }}>
@@ -360,8 +347,15 @@ function WorkbookViewerInner({ workbookId }) {
 
   const handleFinishWorkbook = async () => {
     const now = new Date().toISOString();
-    if (responseId) {
-      await base44.entities.WorkbookResponse.update(responseId, { is_complete: true, completed_at: now });
+    try {
+      const id = await ensureResponseId();
+      await base44.entities.WorkbookResponse.update(id, {
+        answers,
+        is_complete: true,
+        completed_at: now,
+      });
+    } catch (e) {
+      // Local state still advances so the member sees their celebration.
     }
     setIsComplete(true);
     setCompletedAt(now);
@@ -369,24 +363,17 @@ function WorkbookViewerInner({ workbookId }) {
   };
 
   const handleMarkInProgress = async () => {
-    if (responseId) {
-      await base44.entities.WorkbookResponse.update(responseId, { is_complete: false, completed_at: null });
+    const id = responseIdRef.current;
+    if (id) {
+      try {
+        await base44.entities.WorkbookResponse.update(id, { is_complete: false, completed_at: null });
+      } catch (e) {
+        // No-op: local state below reflects the change.
+      }
     }
     setIsComplete(false);
     setCompletedAt(null);
   };
-
-  if (!isUnlocked) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center px-6" style={{ background: "var(--aw-off-white)" }}>
-        <Lock className="w-12 h-12 mb-4" style={{ color: "var(--aw-rose-core)" }} />
-        <h2 style={{ fontFamily: "var(--aw-font-display)", fontSize: 28, color: "var(--aw-burg-core)", marginBottom: 8 }}>Integration Practice Locked</h2>
-        <p style={{ fontFamily: "var(--aw-font-sans)", fontSize: 14, color: "var(--aw-mid-grey)" }}>
-          Finish the lessons in this module to unlock its integration practice.
-        </p>
-      </div>
-    );
-  }
 
   const lastSectionIdx = sections.length - 1;
 
@@ -394,7 +381,7 @@ function WorkbookViewerInner({ workbookId }) {
     <div className="wb-shell" style={{ minHeight: "100vh", background: "var(--aw-off-white)" }}>
       {showCelebration && (
         <WorkbookCelebration
-          onContinueBlueprint={flowReady ? handleContinueNext : undefined}
+          onContinueBlueprint={handleBackToDashboard}
           onBackToWorkbook={() => {
             setShowCelebration(false);
             jumpTo(lastSectionIdx);
@@ -414,7 +401,6 @@ function WorkbookViewerInner({ workbookId }) {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         unlockedSections={unlockedSections}
-        onContinueNext={flowReady ? handleContinueNext : undefined}
       />
 
       <div className="wb-main-col flex flex-col min-h-screen">
@@ -423,7 +409,7 @@ function WorkbookViewerInner({ workbookId }) {
           activeSection={activeSection}
           progressPct={progressPct}
           lastSaved={lastSaved}
-          onOpenDrawer={() => setDrawerOpen(false)}
+          onOpenDrawer={() => setDrawerOpen(true)}
         />
 
         <div className="flex-1" ref={contentRef}>
@@ -448,7 +434,6 @@ function WorkbookViewerInner({ workbookId }) {
                  computedScores={computedScores}
                  step={idx === activeSection ? activeStep : 0}
                  onStepChange={idx === activeSection ? setActiveStep : undefined}
-                 onContinueNext={flowReady ? handleContinueNext : undefined}
                  />
               </div>
             </div>
