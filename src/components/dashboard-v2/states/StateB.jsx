@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { createPageUrl } from "@/utils";
@@ -10,6 +10,14 @@ const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
 
 export default function StateB({ user, profile, workbookData = [], continueData }) {
   const navigate = useNavigate();
+  const quizVideoRef = useRef(null);
+
+  useEffect(() => {
+    const v = quizVideoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, []);
 
   const allPhases = continueData?.allPhasesData || [];
   const currentSection = continueData?.currentSection || null;
@@ -97,6 +105,7 @@ export default function StateB({ user, profile, workbookData = [], continueData 
       <section className="rounded-xl border border-awburg-core/8 p-6 md:p-8 overflow-hidden relative" style={{ minHeight: 180 }}>
         {/* Background video */}
         <video
+          ref={quizVideoRef}
           src="https://pub-e1032a6c8b9241cf9d03513d43a81f17.r2.dev/YourPattern.mp4"
           autoPlay
           muted

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -14,6 +14,22 @@ const KEY_MAP = {
   overrider: "overrider",
   reactor: "reactor",
 };
+
+function AutoplayVideo({ src, type = "video/mp4", className, style, children }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, [src]);
+  return (
+    <video ref={ref} autoPlay loop muted playsInline className={className} style={style}>
+      {src && <source src={src} type={type} />}
+      {children}
+    </video>
+  );
+}
 
 export default function StateAWithQuiz({ user, profile, workbookData, continueData }) {
   const navigate = useNavigate();
@@ -43,8 +59,6 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
   const totalSections = continueData?.totalSections ?? 0;
   const courseId = continueData?.courseId || null;
 
-  // The whole course is finished. The hero becomes a revisit that starts again
-  // from the top of the course at Awareness, rather than a dead phase continue.
   const isCourseComplete = continueData?.isCourseComplete === true;
 
   const continueUrl = continueData?.module
@@ -65,14 +79,25 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
     return n === "VisionEmbodiment" ? "Vision & Embodiment" : n;
   })();
 
+  // Ref for archetype video (rendered conditionally)
+  const archetypeVideoRef = useRef(null);
+  useEffect(() => {
+    const v = archetypeVideoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, [arch?.videoUrl]);
+
   return (
     <div className="space-y-6">
       {/* Phase Indicator + Continue — merged into one block */}
       <div className="relative rounded-xl mb-6 shadow-sm overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
         {/* Background video */}
-        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ zIndex: 0 }}>
-          <source src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4" type="video/mp4" />
-        </video>
+        <AutoplayVideo
+          src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ zIndex: 0 }}
+        />
         {/* Burgundy overlay */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(74,14,46,0.80) 0%, rgba(44,6,26,0.80) 100%)", zIndex: 1 }} />
         {/* Content */}
@@ -214,6 +239,7 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
           >
             {arch?.videoUrl && (
               <video
+                ref={archetypeVideoRef}
                 src={arch.videoUrl}
                 muted
                 playsInline
