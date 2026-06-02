@@ -643,6 +643,7 @@ export default function ModulePlayer() {
                 <video
                   src={embedUrl}
                   controls
+                  playsInline
                   className={cropTop ? "" : "absolute top-0 left-0 w-full h-full"}
                   style={cropTop ? { ...iframeStyle, backgroundColor: "#000" } : { backgroundColor: "#000" }}
                 />
