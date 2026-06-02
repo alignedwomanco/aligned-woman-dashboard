@@ -43,11 +43,27 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
   const totalSections = continueData?.totalSections ?? 0;
   const courseId = continueData?.courseId || null;
 
+  // The whole course is finished. The hero becomes a revisit that starts again
+  // from the top of the course at Awareness, rather than a dead phase continue.
+  const isCourseComplete = continueData?.isCourseComplete === true;
+
   const continueUrl = continueData?.module
     ? createPageUrl("ModulePlayer") + `?moduleId=${continueData.module.id}&courseId=${courseId}`
     : courseId
       ? createPageUrl("CourseDetail") + `?courseId=${courseId}`
       : createPageUrl("Classroom");
+
+  const heroLetter = isCourseComplete
+    ? "E"
+    : currentSection
+      ? (currentSection.title || currentSection.name || "").replace(/^Phase\s*\d+\s*[-–—]\s*/i, "").trim()[0] || "?"
+      : "?";
+
+  const heroPhaseName = (() => {
+    if (isCourseComplete) return "Course complete";
+    const n = (currentSection?.title || currentSection?.name || "").replace(/^Phase\s*\d+\s*[-–—]\s*/i, "").trim();
+    return n === "VisionEmbodiment" ? "Vision & Embodiment" : n;
+  })();
 
   return (
     <div className="space-y-6">
@@ -66,47 +82,57 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
             {/* Large letter */}
             <div className="flex-shrink-0">
               <span className="text-7xl md:text-8xl italic text-[#E8B4AE] leading-none" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-                {currentSection ? (currentSection.title || currentSection.name || "").replace(/^Phase\s*\d+\s*[-–—]\s*/i, "").trim()[0] || "?" : "?"}
+                {heroLetter}
               </span>
             </div>
             {/* Phase name & tagline */}
             <div className="flex-1 min-w-0">
               <p className="text-[10px] tracking-[0.2em] text-white/55 font-medium uppercase mb-1">
-                CURRENT PHASE · {String(phaseIndex || 1).padStart(2, "0")} OF {String(totalSections || 0).padStart(2, "0")}
+                {isCourseComplete
+                  ? "ALL FIVE PHASES COMPLETE"
+                  : `CURRENT PHASE · ${String(phaseIndex || 1).padStart(2, "0")} OF ${String(totalSections || 0).padStart(2, "0")}`}
               </p>
               <h3 className="text-2xl text-white mb-1" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-                {(() => { const n = (currentSection?.title || currentSection?.name || "").replace(/^Phase\s*\d+\s*[-–—]\s*/i, "").trim(); return n === "VisionEmbodiment" ? "Vision & Embodiment" : n; })()}
+                {heroPhaseName}
               </h3>
-              {currentSection?.description && <p className="text-sm text-white/65 italic">"{currentSection.description}"</p>}
+              {isCourseComplete
+                ? <p className="text-sm text-white/65 italic">"This is who I am now."</p>
+                : currentSection?.description && <p className="text-sm text-white/65 italic">"{currentSection.description}"</p>}
             </div>
             {/* Progress */}
-            <div className="flex-shrink-0 md:text-right">
-              <p className="text-[10px] tracking-[0.2em] text-white/55 font-medium uppercase mb-1">MODULES COMPLETE</p>
-              <p className="text-3xl text-white font-light mb-2">
-                {completedModules} <span className="text-white/55 text-lg">/ {totalModules}</span>
-              </p>
-              <div className="w-40 h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(255,255,255,0.15)" }}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0}%`, background: "#E8B4AE" }} />
+            {!isCourseComplete && (
+              <div className="flex-shrink-0 md:text-right">
+                <p className="text-[10px] tracking-[0.2em] text-white/55 font-medium uppercase mb-1">MODULES COMPLETE</p>
+                <p className="text-3xl text-white font-light mb-2">
+                  {completedModules} <span className="text-white/55 text-lg">/ {totalModules}</span>
+                </p>
+                <div className="w-40 h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(255,255,255,0.15)" }}>
+                  <div className="h-full rounded-full transition-all" style={{ width: `${totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0}%`, background: "#E8B4AE" }} />
+                </div>
+                <p className="text-xs text-white/55">{totalModules - completedModules} modules remaining in this phase</p>
               </div>
-              <p className="text-xs text-white/55">{totalModules - completedModules} modules remaining in this phase</p>
-            </div>
+            )}
           </div>
 
           {/* Bottom row: continue CTA */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <p className="font-body font-bold text-[10px] tracking-eyebrow text-white/70 uppercase mb-1">
-                {continueData?.module ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}` : "YOUR NEXT STEP"}
+                {isCourseComplete
+                  ? "YOUR NEXT STEP"
+                  : continueData?.module ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}` : "YOUR NEXT STEP"}
               </p>
               <p className="font-display text-white text-lg leading-snug">
-                {continueData?.module?.title || "Continue your phase"}
+                {isCourseComplete ? "Revisit the course" : continueData?.module?.title || "Continue your phase"}
               </p>
-              {continueData?.expert?.name && (
-                <p className="font-body text-xs text-white/70 mt-1">with {continueData.expert.name}</p>
-              )}
+              {isCourseComplete
+                ? <p className="font-body text-xs text-white/70 mt-1">You have completed all five phases. Begin again from Awareness.</p>
+                : continueData?.expert?.name && (
+                    <p className="font-body text-xs text-white/70 mt-1">with {continueData.expert.name}</p>
+                  )}
             </div>
             <button onClick={() => navigate(continueUrl)} className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0 border border-white/30 ">
-              CONTINUE YOUR PHASE <ArrowRight className="w-4 h-4" />
+              {isCourseComplete ? "REVISIT THE COURSE" : "CONTINUE YOUR PHASE"} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
