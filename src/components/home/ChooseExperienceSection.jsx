@@ -47,11 +47,11 @@ export default function ChooseExperienceSection() {
 
         {/* Label */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 32 }}>
-          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
-          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#A86B6C" }}>
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)", flexShrink: 0 }} />
+          <span className="tracking-[0.15em] sm:tracking-[0.28em]" style={{ fontSize: 16, fontWeight: 700, textTransform: "uppercase", color: "#A86B6C", textAlign: "center", padding: "0 4px" }}>
             Choose Your Aligned Experience
           </span>
-          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
+          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)", flexShrink: 0 }} />
         </div>
 
         {/* Headline */}
