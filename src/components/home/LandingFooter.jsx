@@ -48,15 +48,15 @@ export default function LandingFooter() {
                 {links.map((l) => (
                   <li key={l.label}>
                     {l.href.startsWith("mailto") ? (
-                      <a href={l.href} className="text-white/40 text-sm hover:text-white/80 transition-colors">
+                      <a href={l.href} className="inline-block py-2.5 text-white/40 text-sm hover:text-white/80 transition-colors">
                         {l.label}
                       </a>
                     ) : l.href.startsWith("#") ? (
-                      <a href={l.href} className="text-white/40 text-sm hover:text-white/80 transition-colors">
+                      <a href={l.href} className="inline-block py-2.5 text-white/40 text-sm hover:text-white/80 transition-colors">
                         {l.label}
                       </a>
                     ) : (
-                      <Link to={l.href} className="text-white/40 text-sm hover:text-white/80 transition-colors">
+                      <Link to={l.href} className="inline-block py-2.5 text-white/40 text-sm hover:text-white/80 transition-colors">
                         {l.label}
                       </Link>
                     )}

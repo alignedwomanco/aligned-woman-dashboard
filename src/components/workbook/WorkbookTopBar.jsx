@@ -122,7 +122,7 @@ export default function WorkbookTopBar({
       {/* Media query: show hamburger ≤1024px, reduce padding on mobile */}
       <style>{`
         @media (max-width: 1024px) {
-          .wb-menu-btn { display: flex !important; }
+          .wb-menu-btn { display: flex !important; min-height: 44px; min-width: 44px; }
         }
         @media (max-width: 720px) {
           .wb-topbar-inner { padding: 12px 18px !important; }
