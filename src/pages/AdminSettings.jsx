@@ -267,6 +267,18 @@ export default function AdminSettings() {
   }
 
   const canAccessAdmin = ["owner", "admin", "master_admin", "moderator", "expert", "course_creator", "educator", "facilitator", "support"].includes(currentUser.role);
+
+  // Role guard: anyone who is not staff is redirected to the member dashboard
+  // before any admin panel renders, no matter how they reached this route.
+  if (!canAccessAdmin) {
+    window.location.href = "/Dashboard";
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-t-transparent rounded-full" style={{ borderColor: '#6E1D40', borderTopColor: 'transparent' }} />
+      </div>
+    );
+  }
+
   const isExpertOnly = ["expert", "course_creator"].includes(currentUser.role) && !["owner", "admin", "master_admin", "moderator"].includes(currentUser.role);
 
   const adminUsers = allUsers.filter(u => ["owner", "admin", "master_admin", "moderator", "educator", "facilitator", "expert", "support"].includes(u.role));
