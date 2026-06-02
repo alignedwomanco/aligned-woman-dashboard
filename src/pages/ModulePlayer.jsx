@@ -48,13 +48,17 @@ export default function ModulePlayer() {
 
   const { hasAccess, isLoading: accessLoading } = useCourseAccess(course);
 
-  const { data: module, isLoading: moduleLoading } = useQuery({
+  const { data: moduleRecord, isLoading: moduleRecordLoading } = useQuery({
     queryKey: ["courseModule", moduleId],
     queryFn: async () => {
       const modules = await base44.entities.CourseModule.filter({ id: moduleId });
-      return modules[0];
+      // Never return undefined. React Query treats undefined as an error state,
+      // which turned a transient empty read on a cold load into a permanent
+      // "Module not found". Returning null keeps it a normal, retryable result.
+      return modules[0] || null;
     },
     enabled: !!moduleId,
+    retry: 2,
   });
 
   const { data: rawPages = [], isLoading: pagesLoading } = useQuery({
@@ -108,11 +112,20 @@ export default function ModulePlayer() {
     enabled: !!moduleId,
   });
 
-  const { data: allCourseModules = [] } = useQuery({
+  const { data: allCourseModules = [], isLoading: allModulesLoading } = useQuery({
     queryKey: ["allCourseModules", courseId],
     queryFn: () => base44.entities.CourseModule.filter({ courseId }, "order", 500),
     enabled: !!courseId,
   });
+
+  // Resolve the current module from whichever source answers first. The single
+  // id lookup can come back empty on a cold first load before auth/RLS is warm,
+  // so we fall back to the full course-modules list, which loads reliably by
+  // courseId and always contains this module. This is what removes the
+  // intermittent "Module not found" on first navigation. "Not found" is only
+  // shown once both sources have genuinely settled with nothing.
+  const module = moduleRecord || allCourseModules.find((m) => m.id === moduleId) || null;
+  const moduleResolving = moduleRecordLoading || (!module && allModulesLoading);
 
   const { data: allCourseSections = [] } = useQuery({
     queryKey: ["allCourseSections", courseId],
@@ -270,16 +283,6 @@ export default function ModulePlayer() {
           status: "in_progress",
           progressPercentage: pct,
         });
-
-        const idx = pages.findIndex((p) => p.id === selectedPage.id);
-        const np = pages[idx + 1] || null;
-        setMilestoneSnapshot({
-          ...buildMilestoneSnapshot(),
-          lessonTitle: selectedPage.title,
-          nextLessonTitle: np?.title || "",
-          nextLessonId: np?.id || null,
-        });
-        setMilestone("lesson");
       }
     } else {
       const completedCount = pages.filter((page) => {
@@ -357,7 +360,7 @@ export default function ModulePlayer() {
       ? Math.round((completedPageCount / pages.length) * 100)
       : 0;
 
-  if (moduleLoading || pagesLoading || accessLoading || !selectedPage) {
+  if (accessLoading || moduleResolving) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
         <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
@@ -374,6 +377,14 @@ export default function ModulePlayer() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Go Back
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  if (pagesLoading || !selectedPage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF5F3]">
+        <div className="animate-spin w-8 h-8 border-4 border-[#4A0E2E] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -488,16 +499,6 @@ export default function ModulePlayer() {
       );
     } else {
       navigate("/Dashboard");
-    }
-  };
-
-  const handleLessonContinue = () => {
-    const nextId = milestoneSnapshot?.nextLessonId || null;
-    setMilestone(null);
-    setMilestoneSnapshot(null);
-    if (nextId) {
-      const np = pages.find((p) => p.id === nextId);
-      if (np) handleSelectPage(np);
     }
   };
 
@@ -1714,13 +1715,11 @@ export default function ModulePlayer() {
           <JourneyMilestone
             stage={milestone}
             moduleTitle={milestoneSnapshot.moduleTitle}
-            lessonTitle={milestoneSnapshot.lessonTitle}
-            nextLessonTitle={milestoneSnapshot.nextLessonTitle}
             hasWorkbook={milestoneSnapshot.hasWorkbook}
             nextModuleTitle={milestoneSnapshot.nextModuleTitle}
             nextExpertName={milestoneSnapshot.nextExpertName}
             onStartWorkbook={handleMilestoneStartWorkbook}
-            onContinue={milestone === "lesson" ? handleLessonContinue : goToNextModule}
+            onContinue={goToNextModule}
             onDashboard={handleMilestoneDashboard}
           />
         )}
