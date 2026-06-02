@@ -89,6 +89,7 @@ export default function WorkbookBottomBar({
       <style>{`
         @media (max-width: 720px) {
           .wb-bottombar-inner { padding: 12px 18px !important; }
+          .wb-bottombar .wb-btn { min-height: 44px; }
         }
       `}</style>
     </div>
