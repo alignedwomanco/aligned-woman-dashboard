@@ -459,11 +459,11 @@ export default function Dashboard() {
 
       {/* Admin state preview toggle - fixed position bottom-right */}
       {isAdmin && adminCheckComplete && (
-        <div className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-4 max-w-xs">
+        <div className="fixed bottom-24 left-4 right-4 lg:bottom-6 lg:left-auto lg:right-6 lg:max-w-xs z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-4">
           <p className="font-semibold mb-2 text-gray-300">ADMIN: Preview State</p>
           <a
             href={`/CourseDetail?courseId=69f4885c4fadbeea6d28a9be&preview=new_user`}
-            className="block w-full text-center px-3 py-2 rounded mb-3 bg-amber-700 text-white text-xs font-bold hover:bg-amber-600 transition-colors"
+            className="block w-full text-center px-3 py-2 rounded mb-3 bg-amber-700 text-white text-xs font-bold hover:bg-amber-600 transition-colors min-h-[44px] flex items-center justify-center"
             style={{ textDecoration: "none" }}
           >
             → View Course as New User
@@ -471,7 +471,7 @@ export default function Dashboard() {
           <div className="space-y-2">
             <button
               onClick={() => { enablePreviewMode(); setStateOverride("new_paid_user"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
                 stateOverride === "new_paid_user"
                   ? "bg-amber-600 text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -481,7 +481,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => { disablePreviewMode(); setStateOverride("state_a_no_quiz"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
                 stateOverride === "state_a_no_quiz"
                   ? "bg-awburg-core text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -491,7 +491,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => { disablePreviewMode(); setStateOverride("state_a_with_quiz"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
                 stateOverride === "state_a_with_quiz"
                   ? "bg-awburg-core text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -501,7 +501,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => { disablePreviewMode(); setStateOverride("state_b"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
                 stateOverride === "state_b"
                   ? "bg-awburg-core text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -511,7 +511,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => { disablePreviewMode(); setStateOverride("state_c"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
                 stateOverride === "state_c"
                   ? "bg-awburg-core text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -521,7 +521,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => { disablePreviewMode(); setStateOverride(null); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
                 stateOverride === null
                   ? "bg-awburg-core text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
