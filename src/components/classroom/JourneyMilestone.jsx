@@ -39,23 +39,20 @@ function SecondaryButton({ onClick, children }) {
 }
 
 // Full-screen milestone shown by the module player at completion points.
-// Three stages: "module", "phase", "course".
+// Three stages: "lesson", "module", "course".
 export default function JourneyMilestone({
   stage,
   moduleTitle,
+  lessonTitle,
+  nextLessonTitle,
   hasWorkbook,
   nextModuleTitle,
   nextExpertName,
-  phaseLetter,
-  phaseName,
-  phaseTagline,
-  nextPhaseName,
   onStartWorkbook,
   onContinue,
-  onNextPhase,
   onDashboard,
 }) {
-  const nextUp = nextModuleTitle ? (
+  const nextModuleUp = nextModuleTitle ? (
     <p style={{ fontFamily: FONT_SANS, fontSize: "12px", color: "#8A7A76", marginTop: "28px" }}>
       Up next, <span style={{ color: "#3A2A28", fontWeight: 600 }}>{nextModuleTitle}</span>
       {nextExpertName ? <> with {nextExpertName}</> : null}.
@@ -64,7 +61,38 @@ export default function JourneyMilestone({
 
   let content;
 
-  if (stage === "module") {
+  if (stage === "lesson") {
+    content = (
+      <>
+        <Eyebrow>Lesson complete</Eyebrow>
+        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "40px", lineHeight: 1.1, color: "#4A0E2E", margin: "0 0 20px" }}>
+          {lessonTitle ? (
+            <>You've finished <span style={{ fontStyle: "italic", color: "#C4847A" }}>{lessonTitle}</span>.</>
+          ) : (
+            "Lesson complete."
+          )}
+        </h1>
+        {hasWorkbook ? (
+          <p style={{ fontFamily: FONT_SANS, fontSize: "16px", lineHeight: 1.7, color: "#3A2A28", margin: "0 auto 32px", maxWidth: "520px" }}>
+            This module has an integration practice waiting whenever you want to take what you are learning deeper. It stays open, so there is no rush.
+          </p>
+        ) : (
+          <p style={{ fontFamily: FONT_SANS, fontSize: "16px", lineHeight: 1.7, color: "#3A2A28", margin: "0 auto 32px", maxWidth: "520px" }}>
+            That is one more piece in place. Keep going whenever you are ready.
+          </p>
+        )}
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <PrimaryButton onClick={onContinue}>{nextLessonTitle ? "Next lesson" : "Continue"}</PrimaryButton>
+          {hasWorkbook ? <SecondaryButton onClick={onStartWorkbook}>Open the integration practice</SecondaryButton> : null}
+        </div>
+        {nextLessonTitle ? (
+          <p style={{ fontFamily: FONT_SANS, fontSize: "12px", color: "#8A7A76", marginTop: "28px" }}>
+            Up next, <span style={{ color: "#3A2A28", fontWeight: 600 }}>{nextLessonTitle}</span>.
+          </p>
+        ) : null}
+      </>
+    );
+  } else if (stage === "module") {
     content = (
       <>
         <Eyebrow>Module complete</Eyebrow>
@@ -95,35 +123,7 @@ export default function JourneyMilestone({
             </div>
           </>
         )}
-        {nextUp}
-      </>
-    );
-  } else if (stage === "phase") {
-    content = (
-      <>
-        {phaseLetter ? (
-          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "96px", height: "96px", borderRadius: "20px", background: "#FDF5F3", marginBottom: "20px" }}>
-            <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: "56px", color: "#C4847A", lineHeight: 1 }}>{phaseLetter}</span>
-          </div>
-        ) : null}
-        <Eyebrow>{phaseName ? `${phaseName} complete` : "Phase complete"}</Eyebrow>
-        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "44px", lineHeight: 1.1, color: "#4A0E2E", margin: "0 0 16px" }}>
-          You've moved through{" "}
-          <span style={{ fontStyle: "italic" }}>{phaseName}</span>.
-        </h1>
-        {phaseTagline ? (
-          <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: "22px", lineHeight: 1.4, color: "#C4847A", margin: "0 auto 24px", maxWidth: "560px" }}>
-            "{phaseTagline}"
-          </p>
-        ) : null}
-        <p style={{ fontFamily: FONT_SANS, fontSize: "16px", lineHeight: 1.7, color: "#3A2A28", margin: "0 auto 32px", maxWidth: "520px" }}>
-          Take a breath here. This was real work, and you did it.
-          {nextPhaseName ? ` ${nextPhaseName} builds on everything you have just learned, and it opens whenever you are.` : ""}
-        </p>
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          <PrimaryButton onClick={onNextPhase}>{nextPhaseName ? `Continue to ${nextPhaseName}` : "Continue"}</PrimaryButton>
-          <SecondaryButton onClick={onDashboard}>Back to dashboard</SecondaryButton>
-        </div>
+        {nextModuleUp}
       </>
     );
   } else {
