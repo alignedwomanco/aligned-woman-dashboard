@@ -20,6 +20,55 @@ import CheckoutModal from "@/components/dashboard/CheckoutModal";
 
 const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
 
+function AdminPreviewPanel({ stateOverride, setStateOverride, enablePreviewMode, disablePreviewMode }) {
+  const [minimized, setMinimized] = useState(false);
+
+  return (
+    <div className="fixed bottom-24 left-4 right-4 lg:bottom-6 lg:left-auto lg:right-6 lg:max-w-xs z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg overflow-hidden">
+      {/* Header — always visible */}
+      <div className="flex items-center justify-between px-4 py-3 cursor-pointer select-none" onClick={() => setMinimized(m => !m)}>
+        <p className="font-semibold text-gray-300">ADMIN: Preview State</p>
+        <span className="text-gray-400 text-base leading-none">{minimized ? "▲" : "▼"}</span>
+      </div>
+
+      {/* Body — hidden when minimized */}
+      {!minimized && (
+        <div className="px-4 pb-4">
+          <a
+            href={`/CourseDetail?courseId=69f4885c4fadbeea6d28a9be&preview=new_user`}
+            className="block w-full text-center px-3 py-2 rounded mb-3 bg-amber-700 text-white text-xs font-bold hover:bg-amber-600 transition-colors min-h-[44px] flex items-center justify-center"
+            style={{ textDecoration: "none" }}
+          >
+            → View Course as New User
+          </a>
+          <div className="space-y-2">
+            {[
+              { label: "New paid user (blank)", value: "new_paid_user", preview: true },
+              { label: "A (no quiz)", value: "state_a_no_quiz" },
+              { label: "A (with quiz)", value: "state_a_with_quiz" },
+              { label: "B (welcome)", value: "state_b" },
+              { label: "C (free)", value: "state_c" },
+              { label: "Real", value: null },
+            ].map(({ label, value, preview }) => (
+              <button
+                key={label}
+                onClick={() => { preview ? enablePreviewMode() : disablePreviewMode(); setStateOverride(value); }}
+                className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
+                  stateOverride === value
+                    ? value === "new_paid_user" ? "bg-amber-600 text-white" : "bg-awburg-core text-white"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function formatJoinedDate(timestamp) {
   if (!timestamp) return "";
   const d = new Date(timestamp);
@@ -459,78 +508,12 @@ export default function Dashboard() {
 
       {/* Admin state preview toggle - fixed position bottom-right */}
       {isAdmin && adminCheckComplete && (
-        <div className="fixed bottom-24 left-4 right-4 lg:bottom-6 lg:left-auto lg:right-6 lg:max-w-xs z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-4">
-          <p className="font-semibold mb-2 text-gray-300">ADMIN: Preview State</p>
-          <a
-            href={`/CourseDetail?courseId=69f4885c4fadbeea6d28a9be&preview=new_user`}
-            className="block w-full text-center px-3 py-2 rounded mb-3 bg-amber-700 text-white text-xs font-bold hover:bg-amber-600 transition-colors min-h-[44px] flex items-center justify-center"
-            style={{ textDecoration: "none" }}
-          >
-            → View Course as New User
-          </a>
-          <div className="space-y-2">
-            <button
-              onClick={() => { enablePreviewMode(); setStateOverride("new_paid_user"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
-                stateOverride === "new_paid_user"
-                  ? "bg-amber-600 text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              New paid user (blank)
-            </button>
-            <button
-              onClick={() => { disablePreviewMode(); setStateOverride("state_a_no_quiz"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
-                stateOverride === "state_a_no_quiz"
-                  ? "bg-awburg-core text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              A (no quiz)
-            </button>
-            <button
-              onClick={() => { disablePreviewMode(); setStateOverride("state_a_with_quiz"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
-                stateOverride === "state_a_with_quiz"
-                  ? "bg-awburg-core text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              A (with quiz)
-            </button>
-            <button
-              onClick={() => { disablePreviewMode(); setStateOverride("state_b"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
-                stateOverride === "state_b"
-                  ? "bg-awburg-core text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              B (welcome)
-            </button>
-            <button
-              onClick={() => { disablePreviewMode(); setStateOverride("state_c"); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
-                stateOverride === "state_c"
-                  ? "bg-awburg-core text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              C (free)
-            </button>
-            <button
-              onClick={() => { disablePreviewMode(); setStateOverride(null); }}
-              className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
-                stateOverride === null
-                  ? "bg-awburg-core text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              Real
-            </button>
-          </div>
-        </div>
+        <AdminPreviewPanel
+          stateOverride={stateOverride}
+          setStateOverride={setStateOverride}
+          enablePreviewMode={enablePreviewMode}
+          disablePreviewMode={disablePreviewMode}
+        />
       )}
     </div>
   );
