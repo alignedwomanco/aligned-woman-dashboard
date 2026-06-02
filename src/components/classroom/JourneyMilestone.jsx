@@ -16,7 +16,7 @@ function PrimaryButton({ onClick, children }) {
   return (
     <button
       onClick={onClick}
-      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "15px 30px", borderRadius: "100px", background: "#4A0E2E", color: "#FFFFFF", border: "none", fontFamily: FONT_SANS, fontWeight: 700, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: "opacity 180ms ease" }}
+      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: "44px", padding: "15px 30px", borderRadius: "100px", background: "#4A0E2E", color: "#FFFFFF", border: "none", fontFamily: FONT_SANS, fontWeight: 700, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: "opacity 180ms ease" }}
       onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
       onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
     >
@@ -29,7 +29,7 @@ function SecondaryButton({ onClick, children }) {
   return (
     <button
       onClick={onClick}
-      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "15px 30px", borderRadius: "100px", background: "transparent", color: "#4A0E2E", border: "1px solid #4A0E2E", fontFamily: FONT_SANS, fontWeight: 700, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: "all 180ms ease" }}
+      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: "44px", padding: "15px 30px", borderRadius: "100px", background: "transparent", color: "#4A0E2E", border: "1px solid #4A0E2E", fontFamily: FONT_SANS, fontWeight: 700, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: "all 180ms ease" }}
       onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(74,14,46,0.05)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
