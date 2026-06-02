@@ -1,9 +1,9 @@
 import React from "react";
-import { Menu } from "lucide-react";
+import { Menu, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 /**
- * WorkbookTopBar — position text, saved indicator, progress pill, and progress bar.
+ * WorkbookTopBar - position text, saved indicator, progress pill, and progress bar.
  */
 export default function WorkbookTopBar({
   sections, activeSection, progressPct, lastSaved, onOpenDrawer
@@ -30,8 +30,21 @@ export default function WorkbookTopBar({
     <div className="wb-topbar sticky top-0 z-30" data-wb-topbar style={{ borderBottom: "1px solid var(--aw-border-light)" }}>
       <div style={{ padding: "14px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}
            className="wb-topbar-inner">
-        {/* Left: hamburger (mobile only) + position text */}
+        {/* Left: back (phone only) + hamburger (mobile only) + position text */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
+          <button
+            onClick={() => navigate("/Dashboard")}
+            className="wb-back-mobile flex-shrink-0 flex items-center justify-center"
+            aria-label="Back to Dashboard"
+            style={{
+              width: 44, height: 44, borderRadius: "50%",
+              border: "1px solid var(--aw-border-light)",
+              background: "transparent",
+              display: "none", // shown via media query at 720px and below
+            }}
+          >
+            <ArrowLeft style={{ width: 18, height: 18, color: "var(--aw-burg-core)" }} />
+          </button>
           <button
             onClick={onOpenDrawer}
             className="wb-menu-btn flex-shrink-0 flex items-center justify-center"
@@ -57,7 +70,7 @@ export default function WorkbookTopBar({
 
         {/* Right: back link + saved indicator + progress pill */}
         <div className="flex items-center gap-4 flex-shrink-0">
-          {/* Back to Dashboard — hidden ≤720px */}
+          {/* Back to Dashboard - hidden at 720px and below */}
           <button
             onClick={() => navigate("/Dashboard")}
             className="wb-back-link"
@@ -80,7 +93,7 @@ export default function WorkbookTopBar({
             ← Back to Dashboard
           </button>
 
-          {/* Saved indicator — hidden ≤720px via CSS class */}
+          {/* Saved indicator - hidden at 720px and below via CSS class */}
           <div className="wb-saved-indicator flex items-center gap-1.5">
             <span className="wb-save-dot" />
             <span style={{
@@ -114,12 +127,12 @@ export default function WorkbookTopBar({
         </div>
       </div>
 
-      {/* Progress bar — full bleed under the top bar */}
+      {/* Progress bar - full bleed under the top bar */}
       <div className="wb-progress-track" style={{ marginTop: -1 }}>
         <div className="wb-progress-fill" style={{ width: `${progressPct}%` }} />
       </div>
 
-      {/* Media query: show hamburger ≤1024px, reduce padding on mobile */}
+      {/* Media query: show hamburger at 1024px and below, show phone back button and reduce padding at 720px and below */}
       <style>{`
         @media (max-width: 1024px) {
           .wb-menu-btn { display: flex !important; min-height: 44px; min-width: 44px; }
@@ -127,6 +140,7 @@ export default function WorkbookTopBar({
         @media (max-width: 720px) {
           .wb-topbar-inner { padding: 12px 18px !important; }
           .wb-back-link { display: none !important; }
+          .wb-back-mobile { display: flex !important; }
         }
       `}</style>
     </div>
