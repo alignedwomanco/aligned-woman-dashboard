@@ -650,7 +650,7 @@ export default function CourseDetail() {
         setPages(rawPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
         if (email && !isNewUserPreview && !isPreviewMode()) {
-          const prog = await base44.entities.CourseProgress.filter({}, "-updated_date", MEMBER_READ_LIMIT);
+          const prog = await base44.entities.CourseProgress.filter({ created_by: email }, "-created_date", 500);
           setProgress(prog);
           const profileArr = await base44.entities.MemberProfile.filter(
             { user_id: me.id }, "-created_date", 1
