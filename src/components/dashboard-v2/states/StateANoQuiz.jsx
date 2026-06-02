@@ -17,6 +17,10 @@ export default function StateANoQuiz({ user, profile, workbookData, continueData
   const totalSections = continueData?.totalSections ?? 0;
   const courseId = continueData?.courseId || null;
 
+  // The whole course is finished. The continue action becomes a revisit that
+  // starts again from the top of the course at Awareness.
+  const isCourseComplete = continueData?.isCourseComplete === true;
+
   const continueUrl = continueData?.module
     ? createPageUrl("ModulePlayer") + `?moduleId=${continueData.module.id}&courseId=${courseId}`
     : courseId
@@ -50,6 +54,8 @@ export default function StateANoQuiz({ user, profile, workbookData, continueData
             <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/50 uppercase mb-1">
               {showWelcome
                 ? "START HERE"
+                : isCourseComplete
+                ? "COURSE COMPLETE"
                 : continueData?.module
                 ? `MODULE ${String(continueData.moduleIndex).padStart(2, "0")} OF ${String(totalModules).padStart(2, "0")}`
                 : "YOUR NEXT STEP"}
@@ -57,18 +63,35 @@ export default function StateANoQuiz({ user, profile, workbookData, continueData
             <p className="font-display text-awburg-core text-lg leading-snug">
               {showWelcome
                 ? "Welcome to The Aligned Woman"
+                : isCourseComplete
+                ? "Revisit the course"
                 : continueData?.module?.title || "Continue your phase"}
             </p>
             {showWelcome
               ? welcomeExpertName && (
                   <p className="font-body text-xs text-awburg-core/60 mt-1">with {welcomeExpertName}</p>
                 )
+              : isCourseComplete
+              ? (
+                  <p className="font-body text-xs text-awburg-core/60 mt-1">
+                    You have completed all five phases. Begin again from Awareness.
+                  </p>
+                )
               : continueData?.expert?.name && (
                   <p className="font-body text-xs text-awburg-core/60 mt-1">with {continueData.expert.name}</p>
                 )}
           </div>
-          <button onClick={() => navigate(primaryUrl)} className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0" style={{ animation: "continuePulse 2.5s ease-in-out infinite" }}>
-            {showWelcome ? "START HERE" : "CONTINUE YOUR PHASE"} <ArrowRight className="w-4 h-4" />
+          <button
+            onClick={() => navigate(primaryUrl)}
+            className="inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200 flex-shrink-0"
+            style={isCourseComplete ? undefined : { animation: "continuePulse 2.5s ease-in-out infinite" }}
+          >
+            {showWelcome
+              ? "START HERE"
+              : isCourseComplete
+              ? "REVISIT THE COURSE"
+              : "CONTINUE YOUR PHASE"}{" "}
+            <ArrowRight className="w-4 h-4" />
           </button>
           <style>{`@keyframes continuePulse { 0%,100%{box-shadow:0 0 0 0 rgba(196,132,122,0.45)} 50%{box-shadow:0 0 0 8px rgba(196,132,122,0)} }`}</style>
         </div>
