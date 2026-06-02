@@ -15,19 +15,22 @@ const KEY_MAP = {
   reactor: "reactor",
 };
 
-function AutoplayVideo({ src, type = "video/mp4", className, style, children }) {
+function AutoplayVideo({ src, className, style }) {
   const ref = useRef(null);
   useEffect(() => {
     const v = ref.current;
-    if (!v) return;
+    if (!v || !src) return;
     v.muted = true;
+    v.src = src;
+    v.load();
+    const tryPlay = () => { v.play().catch(() => {}); };
+    v.addEventListener("canplay", tryPlay, { once: true });
+    // Fallback: attempt immediately too (some browsers fire canplay before listener attaches)
     v.play().catch(() => {});
+    return () => v.removeEventListener("canplay", tryPlay);
   }, [src]);
   return (
-    <video ref={ref} autoPlay loop muted playsInline className={className} style={style}>
-      {src && <source src={src} type={type} />}
-      {children}
-    </video>
+    <video ref={ref} autoPlay loop muted playsInline className={className} style={style} />
   );
 }
 
@@ -83,9 +86,14 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
   const archetypeVideoRef = useRef(null);
   useEffect(() => {
     const v = archetypeVideoRef.current;
-    if (!v) return;
+    if (!v || !arch?.videoUrl) return;
     v.muted = true;
+    v.src = arch.videoUrl;
+    v.load();
+    const tryPlay = () => { v.play().catch(() => {}); };
+    v.addEventListener("canplay", tryPlay, { once: true });
     v.play().catch(() => {});
+    return () => v.removeEventListener("canplay", tryPlay);
   }, [arch?.videoUrl]);
 
   return (
@@ -240,7 +248,6 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
             {arch?.videoUrl && (
               <video
                 ref={archetypeVideoRef}
-                src={arch.videoUrl}
                 muted
                 playsInline
                 autoPlay

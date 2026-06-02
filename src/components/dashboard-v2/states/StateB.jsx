@@ -16,7 +16,11 @@ export default function StateB({ user, profile, workbookData = [], continueData 
     const v = quizVideoRef.current;
     if (!v) return;
     v.muted = true;
+    v.load();
+    const tryPlay = () => { v.play().catch(() => {}); };
+    v.addEventListener("canplay", tryPlay, { once: true });
     v.play().catch(() => {});
+    return () => v.removeEventListener("canplay", tryPlay);
   }, []);
 
   const allPhases = continueData?.allPhasesData || [];
