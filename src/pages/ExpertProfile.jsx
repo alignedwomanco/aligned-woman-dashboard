@@ -126,7 +126,7 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
   return (
     <section ref={formRef} id="connect" style={{ background: C.offWhite, padding: "80px 32px" }}>
       <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-        {/* Header — centred above form */}
+        {/* Header - centred above form */}
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 16 }}>Connect</p>
           <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 32, color: C.burgCore, lineHeight: 1.2, margin: "0 0 16px" }}>Get in touch.</h2>
@@ -294,7 +294,7 @@ export default function ExpertProfile() {
   // Parse tags from title
   const titleTags = (expert.title || "").split("|").map(s => s.trim()).filter(Boolean);
 
-  // Social links — only shown if present (we use specialties array as a place to store them, or fallback fields)
+  // Social links - only shown if present (we use specialties array as a place to store them, or fallback fields)
   const socials = [];
   if (expert.linkedin_url) socials.push({ icon: <Linkedin size={18} />, href: expert.linkedin_url, label: `View ${expert.name}'s LinkedIn profile` });
   if (expert.instagram_url) socials.push({ icon: <Instagram size={18} />, href: expert.instagram_url, label: `View ${expert.name}'s Instagram` });
@@ -326,31 +326,22 @@ export default function ExpertProfile() {
         }
       `}</style>
 
-      {/* ── NAV ── */}
-      <nav style={{ background: C.white, borderBottom: "1px solid rgba(74,14,46,0.06)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <Link to="/" aria-label="Back to homepage">
-            <img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"
-              alt="The Aligned Woman"
-              style={{ height: 32, objectFit: "contain" }}
-            />
-          </Link>
+      {/* ── HERO ── */}
+      <section style={{ background: C.offWhite, padding: "32px 32px 64px" }}>
+        {/* Back link - inline, inherits the shared dashboard shell instead of a marketing nav bar */}
+        <div style={{ maxWidth: 1080, margin: "0 auto 24px" }}>
           <Link
             to="/ExpertsDirectory"
-            style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.burgCore, textDecoration: "none" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: sans, fontWeight: 500, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", color: C.burgCore, textDecoration: "none" }}
             onMouseEnter={(e) => e.currentTarget.style.color = C.roseCore}
             onMouseLeave={(e) => e.currentTarget.style.color = C.burgCore}
           >
             <ChevronLeft size={14} /> Back to All Experts
           </Link>
         </div>
-      </nav>
 
-      {/* ── HERO ── */}
-      <section style={{ background: C.offWhite, padding: "64px 32px" }}>
         <div className="hero-grid" style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gridTemplateColumns: "40% 60%", gap: 56, alignItems: "start" }}>
-          {/* Left — photo */}
+          {/* Left - photo */}
           <div>
             <div style={{ borderRadius: 12, overflow: "hidden", maxWidth: 360, aspectRatio: "3/4", boxShadow: "0 8px 32px rgba(74,14,46,0.08)", background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})` }}>
               {expert.profile_picture ? (
@@ -369,7 +360,7 @@ export default function ExpertProfile() {
             </div>
           </div>
 
-          {/* Right — details */}
+          {/* Right - details */}
           <div style={{ paddingTop: 8 }}>
             <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 12 }}>
               {domain}
