@@ -236,12 +236,12 @@ export default function Classroom() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const { data: user } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["classroom-user"],
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: courses = [], isLoading: coursesLoading, isFetching: coursesFetching } = useQuery({
+  const { data: courses = [], isLoading: coursesLoading } = useQuery({
     queryKey: ["classroom-courses"],
     queryFn: () => base44.entities.Course.filter({ isPublished: true }, "order", 500),
     enabled: !!user,
@@ -272,7 +272,14 @@ export default function Classroom() {
     enabled: !!user,
   });
 
-  const loading = coursesLoading || coursesFetching;
+  // Gate the full-page spinner on the genuine first load only. The previous
+  // condition also watched isFetching, which goes true on every background
+  // refetch, and React Query refetches on window focus by default. Inside
+  // in-app browsers, which fire focus and visibility events repeatedly, that
+  // blanked the whole page to a spinner over and over, reading as a looping
+  // loading screen. isLoading is true only while a query is fetching with no
+  // cached data, so refetches no longer hide the page once it has loaded once.
+  const loading = userLoading || coursesLoading;
 
   const userTags = user?.access_tags ?? [];
   const isAdmin = ["owner", "admin", "master_admin"].includes(user?.role);
