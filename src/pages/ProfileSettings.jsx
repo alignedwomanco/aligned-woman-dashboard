@@ -82,10 +82,6 @@ export default function ProfileSettings() {
 
   const accessibleCourses = deriveAccessFromTags(currentUser, courses);
 
-  // Determine if this user signed in with a social provider.
-  // Base44 exposes auth_provider on the user object when it is not "email".
-  const isSocialLogin = currentUser?.auth_provider && currentUser.auth_provider !== "email";
-
   // Save name fields.
   const saveNameMutation = useMutation({
     mutationFn: (data) => base44.auth.updateMe(data),
@@ -137,13 +133,6 @@ export default function ProfileSettings() {
     } catch {
       showToast("Send failed", "We could not send the verification email. Please try again.");
     }
-  };
-
-  // Password reset: Base44 does not expose a direct API for this from the frontend SDK.
-  // The standard flow is to sign out and use "Forgot password?" on the login screen.
-  // We redirect to login with a flag so the user can trigger that flow themselves.
-  const handleChangePassword = () => {
-    base44.auth.logout();
   };
 
   if (!currentUser) {
@@ -259,32 +248,24 @@ export default function ProfileSettings() {
               </div>
             </div>
 
-            {/* Password */}
+            {/* Password (informational only) */}
+            {/* Base44 manages authentication and never exposes the password to the */}
+            {/* app, so it cannot be shown, and the SDK has no in-app reset method. */}
+            {/* Rather than send the member out to the sign-in screen with no */}
+            {/* context, we state the constraint plainly and point them to support. */}
             <div className="space-y-1">
               <Label className="font-body text-xs font-bold tracking-widest uppercase" style={{ color: "var(--aw-burg-core)" }}>
                 Password
               </Label>
-              {isSocialLogin ? (
-                <p className="font-body text-sm" style={{ color: "var(--aw-mid-grey)" }}>
-                  Your sign-in is managed by your provider ({currentUser.auth_provider}). Password changes are handled there.
+              <div
+                className="flex items-start gap-3 rounded-lg p-4"
+                style={{ background: "var(--aw-rose-wash)" }}
+              >
+                <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "var(--aw-burg-core)" }} />
+                <p className="font-body text-sm" style={{ color: "var(--aw-burg-core)" }}>
+                  For your security, your password is never shown here and cannot be changed from this page. To reset it, please contact support.
                 </p>
-              ) : (
-                <div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleChangePassword}
-                    className="font-body text-xs tracking-widest uppercase"
-                    style={{ borderColor: "var(--aw-burg-core)", color: "var(--aw-burg-core)" }}
-                  >
-                    <Lock className="w-4 h-4 mr-2" />
-                    Change Password
-                  </Button>
-                  <p className="font-body text-xs mt-1" style={{ color: "var(--aw-mid-grey)" }}>
-                    You will be signed out so you can use "Forgot password?" on the login screen.
-                  </p>
-                </div>
-              )}
+              </div>
             </div>
 
             {/* Save button */}
