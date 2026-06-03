@@ -513,7 +513,6 @@ const PAGE_CSS = `
   .cd-hero__right { min-width: 0; }
   .cd-hero__title { font-size: 30px; }
   .cd-hero__sub { display: none; }
-  .cd-hero__progress-pct { font-size: 22px; }
   .cd-hero__cta { display: none; }
   .cd-hero__cta-mobile {
     display: grid; grid-template-columns: 1fr auto;
@@ -856,21 +855,25 @@ export default function CourseDetail() {
   if (nextLesson) {
     heroCTACopy = `Continue · ${nextLesson.page.title?.split(":")[0] || "Lesson"}`;
   } else if (isComplete) {
-    heroCTACopy = "Revisit Embodiment";
+    heroCTACopy = "Revisit the Blueprint";
   }
 
   const handleHeroCTA = () => {
     if (nextLesson) {
       goToLesson(nextLesson.page, nextLesson.module);
     } else if (isComplete && phaseSections.length > 0) {
-      // Go to last phase's last lesson
-      const lastSection = phaseSections[phaseSections.length - 1];
-      const lastMods = sortByOrder(modules.filter((m) => m.sectionId === lastSection.id));
-      const lastMod = lastMods[lastMods.length - 1];
-      if (lastMod) {
-        const lastPages = pages.filter((p) => p.moduleId === lastMod.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-        const lastPage = lastPages[lastPages.length - 1];
-        if (lastPage) goToLesson(lastPage, lastMod);
+      // Revisit from the beginning: first phase, first module, first lesson.
+      const firstSection = phaseSections[0];
+      const firstMods = sortByOrder(modules.filter((m) => m.sectionId === firstSection.id));
+      const firstMod = firstMods[0];
+      if (firstMod) {
+        const firstPages = pages.filter((p) => p.moduleId === firstMod.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        const firstPage = firstPages[0];
+        if (firstPage) {
+          goToLesson(firstPage, firstMod);
+        } else {
+          navigate(buildPlayerUrl(firstMod.id, null, courseId));
+        }
       }
     } else if (modules[0]) {
       navigate(buildPlayerUrl(modules[0].id, null, courseId));
