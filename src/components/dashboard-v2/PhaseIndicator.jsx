@@ -1,6 +1,27 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 export default function PhaseIndicator({ section, completedModules, totalModules, phaseIndex, totalPhases }) {
+  const phaseVideoRef = useRef(null);
+
+  // Start playback programmatically rather than relying on the autoPlay
+  // attribute alone. In-app browsers routinely block attribute autoplay even
+  // for muted video, and when the video stays paused iOS draws its native
+  // tap-to-play overlay in a layer that sits above page overlays, which is the
+  // play button that was showing on this card. Calling play() on mount and on
+  // canplay starts the video so that affordance never appears. This mirrors the
+  // quiz-nudge video in StateB. Keyed on section id so it retries when the
+  // phase changes but not on every background refetch.
+  useEffect(() => {
+    const v = phaseVideoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.load();
+    const tryPlay = () => { v.play().catch(() => {}); };
+    v.addEventListener("canplay", tryPlay, { once: true });
+    v.play().catch(() => {});
+    return () => v.removeEventListener("canplay", tryPlay);
+  }, [section?.id]);
+
   if (!section) return null;
 
   // Derive display name: strip "Phase N - " prefix if present
@@ -19,12 +40,13 @@ export default function PhaseIndicator({ section, completedModules, totalModules
     <div className="relative rounded-xl mb-6 shadow-sm overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
       {/* Background video */}
       <video
+        ref={phaseVideoRef}
         autoPlay
         loop
         muted
         playsInline
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ zIndex: 0 }}
+        style={{ zIndex: 0, pointerEvents: "none" }}
       >
         <source src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4" type="video/mp4" />
       </video>
