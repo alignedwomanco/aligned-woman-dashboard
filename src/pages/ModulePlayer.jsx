@@ -35,7 +35,19 @@ export default function ModulePlayer() {
   const [milestone, setMilestone] = useState(null);
   const [milestoneSnapshot, setMilestoneSnapshot] = useState(null);
   const [showCompleteHint, setShowCompleteHint] = useState(false);
+  const mobileTabsRef = useRef(null);
   const queryClient = useQueryClient();
+
+  // The top-right menu on mobile opens the lesson list. That list lives in the
+  // "course" tab lower down the page, below the video, so simply switching the
+  // tab looked like nothing happened from the top. Switch to it and bring it
+  // into view so the menu reads as opening the lessons.
+  const handleOpenMobileLessons = () => {
+    setMobileTab("course");
+    requestAnimationFrame(() => {
+      mobileTabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ["course", courseId],
@@ -1030,17 +1042,27 @@ export default function ModulePlayer() {
         </div>
       )}
 
-      <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
+      <div
+        className="fixed top-0 left-0 right-0 z-[60] md:hidden"
+        style={{
+          background: "#FAF5F3",
+          transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
+          willChange: "transform",
+        }}
+      >
         <div className="px-4 py-3 flex items-center justify-between">
           <button
             onClick={() =>
               navigate(createPageUrl("CourseDetail") + `?courseId=${courseId}`)
             }
-            className="flex-shrink-0 p-1"
+            className="flex-shrink-0 p-2 -m-1"
+            style={{ position: "relative", zIndex: 2 }}
+            aria-label="Back to course"
           >
             <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
           </button>
-          <div className="flex-1 text-center mx-3 min-w-0">
+          <div className="flex-1 text-center mx-3 min-w-0" style={{ pointerEvents: "none" }}>
             <div
               style={{
                 fontFamily: "'Montserrat', sans-serif",
@@ -1068,8 +1090,10 @@ export default function ModulePlayer() {
             </div>
           </div>
           <button
-            onClick={() => setMobileTab("course")}
-            className="flex-shrink-0 p-1"
+            onClick={handleOpenMobileLessons}
+            className="flex-shrink-0 p-2 -m-1"
+            style={{ position: "relative", zIndex: 2 }}
+            aria-label="Open lessons"
           >
             <Menu className="w-5 h-5" style={{ color: "#4A0E2E" }} />
           </button>
@@ -1606,7 +1630,7 @@ export default function ModulePlayer() {
               </div>
             )}
 
-            <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid rgba(74,14,46,0.06)", marginBottom: "20px" }}>
+            <div ref={mobileTabsRef} style={{ display: "flex", gap: "24px", borderBottom: "1px solid rgba(74,14,46,0.06)", marginBottom: "20px", scrollMarginTop: "70px" }}>
               {["about", "course"].map((tab) => (
                 <button
                   key={tab}
