@@ -515,8 +515,8 @@ const PAGE_CSS = `
   .cd-hero__sub { display: none; }
   .cd-hero__cta { display: none; }
   .cd-hero__cta-mobile {
-    display: grid; grid-template-columns: 1fr auto;
-    align-items: center; gap: 12px; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; width: 100%;
     font-family: var(--aw-font-sans, 'Montserrat', sans-serif);
     background: #C4847A; color: #0E0208;
     padding: 12px 18px; border: none; border-radius: 100px;
