@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Upload, Save, Mail, AlertCircle, Lock, BookOpen } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Camera, Upload, Save, AlertCircle, Lock, BookOpen } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import AvatarGenerator from "@/components/admin/AvatarGenerator";
 
 // Derives accessible course titles from the user's access_tags and published courses.
 // CourseEnrollment RLS restricts member reads to admins, so we cannot query it here.
@@ -48,8 +46,6 @@ export default function ProfileSettings() {
   const [currentUser, setCurrentUser] = useState(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [emailChangeDialogOpen, setEmailChangeDialogOpen] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
   const [toast, setToast] = useState({ show: false, title: "", message: "", success: false });
   const queryClient = useQueryClient();
 
@@ -114,27 +110,6 @@ export default function ProfileSettings() {
     setCurrentUser((u) => ({ ...u, profile_picture: file_url }));
   };
 
-  // Email change: sends a verification email through our existing SendEmail integration.
-  const handleEmailChange = async () => {
-    if (!newEmail || !newEmail.includes("@")) {
-      showToast("Invalid email", "Please enter a valid email address.");
-      return;
-    }
-    try {
-      await base44.integrations.Core.SendEmail({
-        to: newEmail,
-        subject: "Verify Your Email Change - The Aligned Woman",
-        body: `You requested to change your email to ${newEmail}.\n\nIf you did not make this request, please ignore this message.\n\n- The Aligned Woman Team`,
-      });
-      setEmailChangeDialogOpen(false);
-      setNewEmail("");
-      showToast("Verification sent", "Check your new inbox for a verification link.", true);
-      setTimeout(dismissToast, 4000);
-    } catch {
-      showToast("Send failed", "We could not send the verification email. Please try again.");
-    }
-  };
-
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -193,59 +168,12 @@ export default function ProfileSettings() {
               </div>
             </div>
 
-            {/* Email (read-only + change dialog) */}
+            {/* Email (read-only) */}
             <div className="space-y-1">
               <Label className="font-body text-xs font-bold tracking-widest uppercase" style={{ color: "var(--aw-burg-core)" }}>
                 Email
               </Label>
-              <div className="flex gap-2">
-                <Input value={currentUser.email} disabled className="bg-gray-50 flex-1 font-body" />
-                <Dialog open={emailChangeDialogOpen} onOpenChange={setEmailChangeDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="font-body flex-shrink-0">
-                      <Mail className="w-4 h-4 mr-1" />
-                      Change
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="font-display" style={{ color: "var(--aw-burg-core)" }}>
-                        Change Email Address
-                      </DialogTitle>
-                      <DialogDescription className="font-body text-sm">
-                        Enter your new email. We will send a verification link to confirm the change.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Alert>
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription className="font-body text-sm">
-                          Current email: {currentUser.email}
-                        </AlertDescription>
-                      </Alert>
-                      <div className="space-y-1">
-                        <Label className="font-body text-xs font-bold tracking-widest uppercase" style={{ color: "var(--aw-burg-core)" }}>
-                          New Email Address
-                        </Label>
-                        <Input
-                          type="email"
-                          value={newEmail}
-                          onChange={(e) => setNewEmail(e.target.value)}
-                          placeholder="newemail@example.com"
-                          className="font-body"
-                        />
-                      </div>
-                      <Button
-                        onClick={handleEmailChange}
-                        className="w-full font-body text-xs tracking-widest uppercase text-white"
-                        style={{ background: "var(--aw-rose-core)" }}
-                      >
-                        Send Verification Email
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+              <Input value={currentUser.email} disabled className="bg-gray-50 font-body" />
             </div>
 
             {/* Password (informational only) */}
@@ -300,28 +228,22 @@ export default function ProfileSettings() {
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="profile-pic" className="cursor-pointer">
-                    <div
-                      className="flex items-center gap-2 px-4 py-2 rounded-full text-white font-body text-xs tracking-widest uppercase transition-opacity hover:opacity-90"
-                      style={{ background: "var(--aw-rose-core)" }}
-                    >
-                      <Upload className="w-4 h-4" />
-                      Change Picture
-                    </div>
-                    <Input
-                      id="profile-pic"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleProfilePicture}
-                    />
-                  </Label>
-                  <AvatarGenerator
-                    currentUser={currentUser}
-                    onAvatarGenerated={(url) => setCurrentUser((u) => ({ ...u, profile_picture: url }))}
+                <Label htmlFor="profile-pic" className="cursor-pointer">
+                  <div
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-white font-body text-xs tracking-widest uppercase transition-opacity hover:opacity-90 w-fit"
+                    style={{ background: "var(--aw-rose-core)" }}
+                  >
+                    <Upload className="w-4 h-4" />
+                    Change Picture
+                  </div>
+                  <Input
+                    id="profile-pic"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleProfilePicture}
                   />
-                </div>
+                </Label>
                 <p className="font-body text-xs" style={{ color: "var(--aw-mid-grey)" }}>
                   JPG or PNG, max 5 MB.
                 </p>
