@@ -518,7 +518,7 @@ export default function ModulePlayer() {
           `?moduleId=${nextId}&courseId=${courseId}`
       );
     } else {
-      navigate("/Dashboard");
+      navigate(createPageUrl("Classroom"));
     }
   };
 
@@ -910,7 +910,7 @@ export default function ModulePlayer() {
 
   const renderContinueBlueprint = () => {
     if (pages.length === 0 || overallProgress !== 100) return null;
-    const label = nextModuleInOrder ? "CONTINUE THE BLUEPRINT" : "BACK TO DASHBOARD";
+    const label = nextModuleInOrder ? "CONTINUE THE BLUEPRINT" : "BACK TO CLASSROOM";
     return (
       <button
         onClick={goToNextModule}
