@@ -20,12 +20,15 @@ export default function StateANoQuiz({ user, profile, workbookData, continueData
   // The whole course is finished. The continue action becomes a revisit that
   // starts again from the top of the course at Awareness.
   const isCourseComplete = continueData?.isCourseComplete === true;
+  const restartModule = continueData?.restartModule || null;
 
   const continueUrl = continueData?.module
     ? createPageUrl("ModulePlayer") + `?moduleId=${continueData.module.id}&courseId=${courseId}`
-    : courseId
-      ? createPageUrl("CourseDetail") + `?courseId=${courseId}`
-      : createPageUrl("Classroom");
+    : isCourseComplete && restartModule
+      ? createPageUrl("ModulePlayer") + `?moduleId=${restartModule.id}&courseId=${courseId}`
+      : courseId
+        ? createPageUrl("CourseDetail") + `?courseId=${courseId}`
+        : createPageUrl("Classroom");
 
   // Welcome intro gate: until the Introduction is complete, the main action is
   // "Start here" and opens it. After that it reverts to the phase continue.
