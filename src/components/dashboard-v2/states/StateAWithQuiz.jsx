@@ -63,12 +63,15 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
   const courseId = continueData?.courseId || null;
 
   const isCourseComplete = continueData?.isCourseComplete === true;
+  const restartModule = continueData?.restartModule || null;
 
   const continueUrl = continueData?.module
     ? createPageUrl("ModulePlayer") + `?moduleId=${continueData.module.id}&courseId=${courseId}`
-    : courseId
-      ? createPageUrl("CourseDetail") + `?courseId=${courseId}`
-      : createPageUrl("Classroom");
+    : isCourseComplete && restartModule
+      ? createPageUrl("ModulePlayer") + `?moduleId=${restartModule.id}&courseId=${courseId}`
+      : courseId
+        ? createPageUrl("CourseDetail") + `?courseId=${courseId}`
+        : createPageUrl("Classroom");
 
   const heroLetter = isCourseComplete
     ? "E"
@@ -98,7 +101,7 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
 
   return (
     <div className="space-y-6">
-      {/* Phase Indicator + Continue — merged into one block */}
+      {/* Phase Indicator + Continue - merged into one block */}
       <div className="relative rounded-xl mb-6 shadow-sm overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
         {/* Background video */}
         <AutoplayVideo
