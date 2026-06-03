@@ -60,6 +60,7 @@ export default function useContinueModule(currentUser) {
       currentSection: null, phaseIndex: 1, totalSections: 0,
       completedModulesInSection: 0, totalModulesInSection: 0,
       allPhasesData: [], courseId: null, isCourseComplete: false,
+      restartModule: null,
     };
   }
 
@@ -141,6 +142,15 @@ export default function useContinueModule(currentUser) {
     }
   }
 
+  // First content module that has lessons. Used as the revisit target when the
+  // course is complete, so "begin again" starts at Awareness lesson one rather
+  // than the final phase.
+  let restartModule = null;
+  for (const mod of sortedModules) {
+    if (!contentSectionIds.has(mod.sectionId)) continue;
+    if (pages.some((p) => p.moduleId === mod.id)) { restartModule = mod; break; }
+  }
+
   // Welcome intro fields, shared across return paths
   const welcomeSection = sortedSections.find((s) => isWelcomeSection(s)) || null;
   const welcomeModule = welcomeSection
@@ -165,6 +175,7 @@ export default function useContinueModule(currentUser) {
       allPhasesData: phasesWithStatus, courseId,
       welcomeModule, welcomeComplete, welcomeExpertName,
       isCourseComplete: true,
+      restartModule,
     };
   }
 
@@ -214,5 +225,6 @@ export default function useContinueModule(currentUser) {
     welcomeComplete,
     welcomeExpertName,
     isCourseComplete: false,
+    restartModule: null,
   };
 }
