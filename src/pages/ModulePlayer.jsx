@@ -1032,7 +1032,12 @@ export default function ModulePlayer() {
 
       <div className="fixed top-0 left-0 right-0 z-50 md:hidden" style={{ background: "#FAF5F3" }}>
         <div className="px-4 py-3 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="flex-shrink-0 p-1">
+          <button
+            onClick={() =>
+              navigate(createPageUrl("CourseDetail") + `?courseId=${courseId}`)
+            }
+            className="flex-shrink-0 p-1"
+          >
             <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
           </button>
           <div className="flex-1 text-center mx-3 min-w-0">
@@ -1084,7 +1089,9 @@ export default function ModulePlayer() {
       <div className="hidden md:block sticky top-0 z-40" style={{ background: "#FAF5F3", borderBottom: "1px solid rgba(74,14,46,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() =>
+              navigate(createPageUrl("CourseDetail") + `?courseId=${courseId}`)
+            }
             className="flex items-center gap-3"
             style={{ background: "none", border: "none", cursor: "pointer" }}
           >
