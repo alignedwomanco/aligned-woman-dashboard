@@ -65,7 +65,7 @@ export default function JourneyMilestone({
     content = (
       <>
         <Eyebrow>Lesson complete</Eyebrow>
-        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "40px", lineHeight: 1.1, color: "#4A0E2E", margin: "0 0 20px" }}>
+        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "clamp(26px, 6.5vw, 40px)", lineHeight: 1.1, color: "#4A0E2E", margin: "0 0 20px" }}>
           {lessonTitle ? (
             <>You've finished <span style={{ fontStyle: "italic", color: "#C4847A" }}>{lessonTitle}</span>.</>
           ) : (
@@ -96,7 +96,7 @@ export default function JourneyMilestone({
     content = (
       <>
         <Eyebrow>Module complete</Eyebrow>
-        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "44px", lineHeight: 1.1, color: "#4A0E2E", margin: "0 0 20px" }}>
+        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "clamp(26px, 7vw, 44px)", lineHeight: 1.1, color: "#4A0E2E", margin: "0 0 20px" }}>
           You've finished{" "}
           <span style={{ fontStyle: "italic", color: "#C4847A" }}>{moduleTitle}</span>.
         </h1>
@@ -130,10 +130,10 @@ export default function JourneyMilestone({
     content = (
       <>
         <Eyebrow>The Aligned Woman Blueprint</Eyebrow>
-        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "48px", lineHeight: 1.05, color: "#4A0E2E", margin: "0 0 20px" }}>
+        <h1 style={{ fontFamily: FONT_SERIF, fontWeight: 400, fontSize: "clamp(28px, 7.5vw, 48px)", lineHeight: 1.05, color: "#4A0E2E", margin: "0 0 20px" }}>
           You've done the whole thing.
         </h1>
-        <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: "24px", lineHeight: 1.35, color: "#C4847A", margin: "0 auto 24px", maxWidth: "560px" }}>
+        <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: "clamp(18px, 5vw, 24px)", lineHeight: 1.35, color: "#C4847A", margin: "0 auto 24px", maxWidth: "560px" }}>
           This was the education you should have been given. Now it belongs to you.
         </p>
         <p style={{ fontFamily: FONT_SANS, fontSize: "16px", lineHeight: 1.7, color: "#3A2A28", margin: "0 auto 32px", maxWidth: "540px" }}>
@@ -148,21 +148,23 @@ export default function JourneyMilestone({
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center px-6 overflow-y-auto"
+      className="fixed inset-0 z-[100] overflow-y-auto"
       style={{ background: "#FAF5F3" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.2, 0.7, 0.2, 1] }}
-        style={{ maxWidth: "640px", width: "100%", textAlign: "center", paddingTop: "40px", paddingBottom: "40px" }}
-      >
-        {content}
-      </motion.div>
+      <div className="min-h-full flex items-center justify-center px-6 py-10">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.2, 0.7, 0.2, 1] }}
+          style={{ maxWidth: "640px", width: "100%", textAlign: "center" }}
+        >
+          {content}
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
