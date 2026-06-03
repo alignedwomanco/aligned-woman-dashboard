@@ -30,5 +30,19 @@
   },
   "required": [
     "points"
-  ]
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

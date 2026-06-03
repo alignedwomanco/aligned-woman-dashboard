@@ -19,5 +19,19 @@
       "description": "Favicon URL for dark theme (white icon)"
     }
   },
-  "required": []
+  "required": [],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
