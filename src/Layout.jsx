@@ -384,8 +384,8 @@ export default function Layout({ children, currentPageName }) {
 
             }
 
-  // Dashboard and Workbook pages have their own chrome - render children directly
-  if (isDashboardPage || currentPageName === "Workbook") {
+  // Dashboard, Workbook, and the course player have their own chrome - render children directly
+  if (isDashboardPage || currentPageName === "Workbook" || currentPageName === "ModulePlayer") {
     return <>{children}</>;
   }
 
@@ -497,8 +497,8 @@ export default function Layout({ children, currentPageName }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link to="/dashboardsettings" className="flex items-center gap-2">
-                      <Settings className="w-4 h-4" /> Dashboard Settings
+                    <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" /> Profile Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
