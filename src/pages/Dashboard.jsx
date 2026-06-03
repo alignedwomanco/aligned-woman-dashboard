@@ -25,13 +25,13 @@ function AdminPreviewPanel({ stateOverride, setStateOverride, enablePreviewMode,
 
   return (
     <div className="fixed bottom-24 left-4 right-4 lg:bottom-6 lg:left-auto lg:right-6 lg:max-w-xs z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg overflow-hidden">
-      {/* Header — always visible */}
+      {/* Header - always visible */}
       <div className="flex items-center justify-between px-4 py-3 cursor-pointer select-none" onClick={() => setMinimized(m => !m)}>
         <p className="font-semibold text-gray-300">ADMIN: Preview State</p>
         <span className="text-gray-400 text-base leading-none">{minimized ? "▲" : "▼"}</span>
       </div>
 
-      {/* Body — hidden when minimized */}
+      {/* Body - hidden when minimized */}
       {!minimized && (
         <div className="px-4 pb-4">
           <a
@@ -491,7 +491,10 @@ export default function Dashboard() {
             </section>
 
             <aside className="lg:col-span-4 order-2 flex flex-col gap-4">
-              <CommunityCard />
+              {/* Community card hidden on mobile, shown from md up */}
+              <div className="hidden md:block">
+                <CommunityCard />
+              </div>
               <ExpertSpotlight />
               <div className="pt-2">
                 <AccountStatusFooter
