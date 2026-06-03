@@ -18,7 +18,11 @@
     "message"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "created_by_id": {
+        "$exists": true
+      }
+    },
     "read": {
       "$or": [
         {
@@ -45,7 +49,9 @@
           "created_by_id": "{{user.id}}"
         },
         {
-          "data.recipientEmail": "{{user.email}}"
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     }

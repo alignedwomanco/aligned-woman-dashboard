@@ -25,7 +25,11 @@
     "badgeName"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "read": {
       "created_by_id": "{{user.id}}"
     },

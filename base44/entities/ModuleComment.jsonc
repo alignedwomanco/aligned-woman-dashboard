@@ -45,7 +45,11 @@
     "comment"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "created_by_id": {
+        "$exists": true
+      }
+    },
     "read": {},
     "update": {
       "$or": [
