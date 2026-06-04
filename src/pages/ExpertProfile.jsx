@@ -82,8 +82,13 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
   const [form, setForm] = useState({ name: "", email: "", regarding: "", message: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
 
-  const firstName = expertName?.split(" ")[0] || "this expert";
+  const firstName = expertName?.split(" ")[0] || "there";
+  // Route to the expert's own contact email, falling back to their linked
+  // login email, and only to the company as a last resort if neither exists.
+  const recipient = (expertEmail || "hello@alignedwomanco.com").trim();
 
   const validate = () => {
     const e = {};
@@ -95,17 +100,31 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
     return e;
   };
 
-  const handleSubmit = (ev) => {
+  const handleSubmit = async (ev) => {
     ev.preventDefault();
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    base44.integrations.Core.SendEmail({
-      to: expertEmail || "hello@alignedwomanco.com",
-      subject: `New message from ${form.name} via The Aligned Woman`,
-      body: `Name: ${form.name}\nEmail: ${form.email}\nRegarding: ${form.regarding}\n\nMessage:\n${form.message}`,
-    }).catch(() => {});
-    base44.analytics.track({ eventName: "expert_profile_connection_request", properties: { expert: expertName } });
-    setSubmitted(true);
+    setSending(true);
+    setSendError("");
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: recipient,
+        subject: `New message from ${form.name} via your Aligned Woman profile`,
+        body:
+          `Hi ${firstName},\n\n` +
+          `You have received a message from ${form.name} via your Aligned Woman profile.\n\n` +
+          `From: ${form.name} (${form.email})\n` +
+          `Regarding: ${form.regarding}\n\n` +
+          `Message:\n${form.message}\n\n` +
+          `Reply directly to ${form.email} to respond.`,
+      });
+      base44.analytics.track({ eventName: "expert_profile_connection_request", properties: { expert: expertName } });
+      setSubmitted(true);
+    } catch (err) {
+      setSendError("We could not send your message just now. Please try again, or email hello@alignedwomanco.com directly.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const inputStyle = (hasError) => ({
@@ -142,9 +161,9 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
               <div style={{ width: 56, height: 56, borderRadius: "50%", background: C.rosePale, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
                 <Check size={24} style={{ color: C.roseCore }} />
               </div>
-              <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.burgCore, marginBottom: 12 }}>Request sent.</p>
+              <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.burgCore, marginBottom: 12 }}>Message sent.</p>
               <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, marginBottom: 20 }}>
-                We have received your connection request for {expertName}. You will hear from us within 48 hours at {form.email}.
+                Your message has been sent to {expertName}. They can reply to you directly at {form.email}.
               </p>
               <Link to="/ExpertsDirectory" style={{ fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em", color: C.roseCore, textDecoration: "none" }}>
                 ← Return to all experts
@@ -224,11 +243,17 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
               <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 11, color: C.midGrey, lineHeight: 1.6 }}>
                 Your message will be shared with {expertName} directly.
               </p>
+              {sendError && (
+                <p role="alert" style={{ fontFamily: sans, fontSize: 12, color: C.roseCore, lineHeight: 1.6 }}>
+                  {sendError}
+                </p>
+              )}
               <button
                 type="submit"
-                style={{ width: "100%", height: 48, background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", cursor: "pointer" }}
+                disabled={sending}
+                style={{ width: "100%", height: 48, background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", cursor: sending ? "default" : "pointer", opacity: sending ? 0.7 : 1 }}
               >
-                Send Message
+                {sending ? "Sending..." : "Send Message"}
               </button>
             </form>
           )}
@@ -543,13 +568,13 @@ export default function ExpertProfile() {
             <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.white, lineHeight: 1.6, marginBottom: 24 }}>
               {featuredQuote}
             </p>
-            <p style={{ fontFamily: sans, fontWeight: 500, fontSize: 13, color: C.roseCore }}>— {expert.name}</p>
+            <p style={{ fontFamily: sans, fontWeight: 500, fontSize: 13, color: C.roseCore }}>{expert.name}</p>
           </div>
         </section>
       )}
 
       {/* ── CONNECTION FORM ── */}
-      <ConnectionForm expertName={expert.name} expertEmail={expert.linked_user_email} formRef={formRef} />
+      <ConnectionForm expertName={expert.name} expertEmail={expert.email || expert.linked_user_email} formRef={formRef} />
 
       {/* ── OTHER EXPERTS ── */}
       {otherExperts.length > 0 && (
