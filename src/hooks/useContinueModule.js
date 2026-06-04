@@ -164,9 +164,26 @@ export default function useContinueModule(currentUser) {
       ? experts.find((e) => e.id === welcomeModule.expertId)?.name || ""
       : "";
 
-  // Every content module is finished: the course is complete. Do not loop back
-  // to module one.
-  if (!inProgressModule) {
+  // ── Course completion guard ──────────────────────────────────────────────
+  // The course is only truly complete when every content module has lessons
+  // and all of them are done. A content module with no lessons yet is still
+  // being built, not finished, so it must never let the dashboard show the
+  // "you have completed all five phases, begin again" screen while later
+  // modules are still having their lessons added. This is what produced the
+  // false "course complete" for a member who had only reached the middle of
+  // the course while later modules had no lessons.
+  const builtContentModules = sortedModules.filter(
+    (m) => contentSectionIds.has(m.sectionId) && pages.some((p) => p.moduleId === m.id)
+  );
+  const hasUnbuiltContentModule = sortedModules.some(
+    (m) => contentSectionIds.has(m.sectionId) && !pages.some((p) => p.moduleId === m.id)
+  );
+  const courseTrulyComplete =
+    !inProgressModule && builtContentModules.length > 0 && !hasUnbuiltContentModule;
+
+  if (courseTrulyComplete) {
+    // Every content module is finished: the course is complete. Do not loop
+    // back to module one.
     return {
       module: null, expert: null, completedPages: 0, totalPages: 0,
       moduleIndex: 1, totalModules: 0, nextPageId: null, isLoading: false,
@@ -176,6 +193,27 @@ export default function useContinueModule(currentUser) {
       welcomeModule, welcomeComplete, welcomeExpertName,
       isCourseComplete: true,
       restartModule,
+    };
+  }
+
+  // Caught up on every built module, but lessons are still being added to later
+  // modules. Keep the member on their last built module rather than telling
+  // them the whole course is finished.
+  if (!inProgressModule) {
+    inProgressModule = builtContentModules[builtContentModules.length - 1] || null;
+  }
+
+  // Nothing has lessons yet. Nothing to continue, and not complete.
+  if (!inProgressModule) {
+    return {
+      module: null, expert: null, completedPages: 0, totalPages: 0,
+      moduleIndex: 1, totalModules: 0, nextPageId: null, isLoading: false,
+      currentSection: null, phaseIndex: 1, totalSections: contentSections.length,
+      completedModulesInSection: 0, totalModulesInSection: 0,
+      allPhasesData: phasesWithStatus, courseId,
+      welcomeModule, welcomeComplete, welcomeExpertName,
+      isCourseComplete: false,
+      restartModule: null,
     };
   }
 
