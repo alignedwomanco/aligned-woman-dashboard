@@ -561,7 +561,21 @@ export default function ModulePlayer() {
     if (nextPage) {
       handleSelectPage(nextPage);
       setMobileTab("about");
-    } else if (nextModuleInOrder) {
+      return;
+    }
+    // Last lesson of the module. When the whole module is complete, show the
+    // completion milestone here too, the module card when more modules follow
+    // and the course card at the very end, so the finishing card appears
+    // whether the member finishes with Mark complete or with Next. Without this
+    // the Next button jumped straight to the following module and the card for
+    // this module was skipped. Only fall through to plain navigation if the
+    // module is somehow not fully complete.
+    if (overallProgress === 100) {
+      setMilestoneSnapshot(buildMilestoneSnapshot());
+      setMilestone(nextModuleInOrder ? "module" : "course");
+      return;
+    }
+    if (nextModuleInOrder) {
       navigate(
         createPageUrl("ModulePlayer") +
           `?moduleId=${nextModuleInOrder.id}&courseId=${courseId}`
