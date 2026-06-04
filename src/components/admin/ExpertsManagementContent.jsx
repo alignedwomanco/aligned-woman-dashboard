@@ -50,6 +50,7 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     category: [],
     specialties: [],
     services: [],
+    teaching_courses: [],
     isPublished: true,
     linked_user_email: "",
   });
@@ -86,6 +87,11 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
   const { data: preApproved = [] } = useQuery({
     queryKey: ["preApprovedMembers"],
     queryFn: () => base44.entities.PreApprovedMember.list(),
+  });
+
+  const { data: allCourses = [] } = useQuery({
+    queryKey: ["adminCourses"],
+    queryFn: () => base44.entities.Course.list(),
   });
 
   const { data: moduleEngagement = [] } = useQuery({
@@ -157,6 +163,7 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
       category: [],
       specialties: [],
       services: [],
+      teaching_courses: [],
       isPublished: true,
       linked_user_email: "",
     });
@@ -804,6 +811,38 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
                   })}
                 </div>
               )}
+            </div>
+
+            <div>
+              <Label>Teaching in</Label>
+              <p className="text-xs text-gray-400 mb-2">Select the courses this expert teaches</p>
+              <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                {allCourses.length === 0 && (
+                  <p className="text-xs text-gray-400">No courses available</p>
+                )}
+                {allCourses.map((course) => {
+                  const selected = (expertForm.teaching_courses || []).includes(course.id);
+                  return (
+                    <label key={course.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-1 py-1">
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => {
+                          const current = expertForm.teaching_courses || [];
+                          setExpertForm({
+                            ...expertForm,
+                            teaching_courses: selected
+                              ? current.filter((id) => id !== course.id)
+                              : [...current, course.id],
+                          });
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm text-gray-700">{course.title}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
