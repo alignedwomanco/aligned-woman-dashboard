@@ -23,6 +23,9 @@ const C = {
 const serif = "'DM Serif Display', Georgia, serif";
 const sans = "Montserrat, sans-serif";
 
+// The Blueprint is the only course with a public marketing page for now.
+const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
+
 const CATEGORY_DOMAIN_MAP = {
   "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
   "69f48a8d1e94ea01a3a8c3fa": "Nervous System",
@@ -163,7 +166,7 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
               </div>
               <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.burgCore, marginBottom: 12 }}>Message sent.</p>
               <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, marginBottom: 20 }}>
-                Your message has been sent to {expertName}. They can reply to you directly at {form.email}.
+                Your message has been sent to {expertName}.
               </p>
               <Link to="/ExpertsDirectory" style={{ fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em", color: C.roseCore, textDecoration: "none" }}>
                 ← Return to all experts
@@ -281,6 +284,11 @@ export default function ExpertProfile() {
     queryFn: () => base44.entities.Expert.filter({ isPublished: true }),
   });
 
+  const { data: allCourses = [] } = useQuery({
+    queryKey: ["all-courses-profile"],
+    queryFn: () => base44.entities.Course.list(),
+  });
+
   const expert = allExperts.find(e => slugify(e.name) === slug) || null;
   const otherExperts = allExperts.filter(e => slugify(e.name) !== slug).slice(0, 4);
 
@@ -335,6 +343,13 @@ export default function ExpertProfile() {
   const experience = Array.isArray(expert.experience_points) ? expert.experience_points : [];
   const expertiseTags = Array.isArray(expert.specialties) ? expert.specialties : [];
   const featuredQuote = expert.featured_quote || null;
+
+  // Courses this expert teaches, resolved from the teaching_courses id list.
+  // Empty list means the Programmes section is hidden entirely.
+  const coursesById = {};
+  allCourses.forEach((c) => { coursesById[c.id] = c; });
+  const teachingCourseIds = Array.isArray(expert.teaching_courses) ? expert.teaching_courses : [];
+  const teachingCourses = teachingCourseIds.map((id) => coursesById[id]).filter(Boolean);
 
   return (
     <main style={{ fontFamily: sans, background: C.offWhite, minHeight: "100vh" }}>
@@ -534,31 +549,42 @@ export default function ExpertProfile() {
       )}
 
       {/* ── PROGRAMME APPEARANCES ── */}
-      <section style={{ padding: "0 32px 56px" }}>
-        <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-          <div style={{ background: C.white, borderRadius: 12, padding: 40, boxShadow: "0 2px 16px rgba(74,14,46,0.04)" }}>
-            <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 8 }}>Programmes</p>
-            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.midGrey, marginBottom: 24 }}>Currently teaching in:</p>
-            <div style={{ border: "1px solid rgba(74,14,46,0.06)", borderRadius: 8, padding: 32 }}>
-              <p style={{ fontFamily: sans, fontWeight: 700, fontSize: 16, color: C.burgCore, marginBottom: 6 }}>THE ALIGNED WOMAN BLUEPRINT™</p>
-              <p style={{ fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.midGrey, marginBottom: 16 }}>
-                Domain: {domain}
-              </p>
-              {expert.module_quote && (
-                <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 15, color: C.burgCore, lineHeight: 1.65, marginBottom: 20 }}>
-                  "{expert.module_quote}"
-                </p>
-              )}
-              <a
-                href="/blueprint"
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.roseCore, textDecoration: "none" }}
-              >
-                Explore the Programme <ArrowRight size={13} />
-              </a>
+      {teachingCourses.length > 0 && (
+        <section style={{ padding: "0 32px 56px" }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <div style={{ background: C.white, borderRadius: 12, padding: 40, boxShadow: "0 2px 16px rgba(74,14,46,0.04)" }}>
+              <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 8 }}>Programmes</p>
+              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.midGrey, marginBottom: 24 }}>Currently teaching in:</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {teachingCourses.map((course) => {
+                  const isBlueprint = course.id === BLUEPRINT_COURSE_ID;
+                  return (
+                    <div key={course.id} style={{ border: "1px solid rgba(74,14,46,0.06)", borderRadius: 8, padding: 32 }}>
+                      <p style={{ fontFamily: sans, fontWeight: 700, fontSize: 16, textTransform: "uppercase", color: C.burgCore, marginBottom: 6 }}>{course.title}</p>
+                      <p style={{ fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.midGrey, marginBottom: isBlueprint ? 16 : 0 }}>
+                        Domain: {domain}
+                      </p>
+                      {isBlueprint && expert.module_quote && (
+                        <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 15, color: C.burgCore, lineHeight: 1.65, marginBottom: 20 }}>
+                          "{expert.module_quote}"
+                        </p>
+                      )}
+                      {isBlueprint && (
+                        <a
+                          href="/blueprint"
+                          style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.roseCore, textDecoration: "none" }}
+                        >
+                          Explore the Programme <ArrowRight size={13} />
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── FEATURED QUOTE ── */}
       {featuredQuote && (
