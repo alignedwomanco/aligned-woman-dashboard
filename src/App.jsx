@@ -31,6 +31,7 @@ import Contact from './pages/Contact';
 import ContactForm from './pages/ContactForm';
 import Welcome from './pages/Welcome';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
       <Route path="/ContactForm" element={<LayoutWrapper currentPageName="blueprint"><ContactForm /></LayoutWrapper>} />
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/analytics" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
+      <Route path="/checkout-success" element={<CheckoutSuccess />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
