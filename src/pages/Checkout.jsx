@@ -9,8 +9,12 @@ import { Lock, Shield, ChevronDown, ChevronUp } from "lucide-react";
 
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU7sN7Vkg8p1Cp5p7eME06";
 
+// Authed entry that claims access on first sign-in and lands the buyer in the
+// course. The success screens and the welcome email all point here.
+const SIGN_IN_URL = "https://app.alignedwomanco.com/Dashboard";
+
 const PURCHASE_TYPES = [
-  { id: "self", label: "Purchase for myself", sub: "Secure your place in the founding cohort." },
+  { id: "self", label: "Purchase for myself", sub: "Secure your place in the course." },
   { id: "friend", label: "Gift to a friend", sub: "Gift access to someone you believe in." },
   { id: "daughter", label: "Gift to my daughter", sub: "Invest in her future." },
   { id: "charity", label: "Gift a seat to a woman in need", sub: "Help another woman access this education." },
@@ -23,35 +27,35 @@ const INCLUDED_ITEMS = [
   "Deep-work workbooks and progress tracking",
   "Private community access",
   "Low Energy Entry Points Guide",
-  "LauraAI Beta access (founding members only)",
+  "LauraAI Beta access",
 ];
 
 const SUCCESS_COPY = {
   self: {
     headline: "You\u2019re in.",
-    body: (f) => `Your place in The Aligned Woman Blueprint\u2122 founding cohort is secured.`,
+    body: () => `Your access to The Aligned Woman Blueprint\u2122 is ready now.`,
     steps: (f) => [
-      { title: "Check your email", body: `A confirmation has been sent to ${f.email}. Keep an eye on your inbox.` },
-      { title: "Access opens 1 June 2026", body: "You\u2019ll receive your login details and onboarding instructions before launch." },
-      { title: "Join the community", body: "Your founding member access to the private community is included. We\u2019ll send the link with your login details." },
+      { title: "Sign in to your course", body: `Use the email you paid with, ${f.email}. That is the address your access is linked to.` },
+      { title: "You land straight in", body: "Signing in takes you into your dashboard with the Blueprint already unlocked. There is nothing to wait for." },
+      { title: "Your community is included", body: "Access to the private community comes with your place. You will find it inside your dashboard." },
     ],
   },
   friend: {
     headline: "Your gift is on its way.",
-    body: (f) => `You\u2019ve secured a place for ${f.friendName || "your friend"} in The Aligned Woman Blueprint\u2122 founding cohort. She\u2019ll receive an enrolment confirmation at ${f.friendEmail} with your personal message.`,
+    body: (f) => `You have given ${f.friendName || "your friend"} access to The Aligned Woman Blueprint\u2122. She will receive an email at ${f.friendEmail} with your message and how to sign in.`,
     steps: (f) => [
-      { title: "She\u2019ll receive an email", body: `Confirmation sent to ${f.friendEmail} with your personal message.` },
-      { title: "Access opens 1 June 2026", body: "She\u2019ll get login details before launch." },
-      { title: "You\u2019ll be notified", body: `A confirmation copy has been sent to ${f.email}.` },
+      { title: "She receives an email", body: `Sent to ${f.friendEmail} with your personal message and a sign-in link.` },
+      { title: "She signs in and she is in", body: "She signs in with that email and lands straight in the course. There is nothing to wait for." },
+      { title: "You are notified", body: `A confirmation copy has been sent to ${f.email}.` },
     ],
   },
   daughter: {
-    headline: "Her place is secured.",
-    body: (f) => `You\u2019ve enrolled ${f.daughterName || "your daughter"} in The Aligned Woman Blueprint\u2122 founding cohort. She\u2019ll receive her enrolment confirmation at ${f.daughterEmail} with your personal message.`,
+    headline: "Her place is ready.",
+    body: (f) => `You have given ${f.daughterName || "your daughter"} access to The Aligned Woman Blueprint\u2122. She will receive an email at ${f.daughterEmail} with your message and how to sign in.`,
     steps: (f) => [
-      { title: "She\u2019ll receive an email", body: `Confirmation sent to ${f.daughterEmail}.` },
-      { title: "Access opens 1 June 2026", body: "She\u2019ll get login details before launch." },
-      { title: "You\u2019ll be notified", body: `A confirmation copy has been sent to ${f.email}.` },
+      { title: "She receives an email", body: `Sent to ${f.daughterEmail} with a sign-in link.` },
+      { title: "She signs in and she is in", body: "She signs in with that email and lands straight in the course. There is nothing to wait for." },
+      { title: "You are notified", body: `A confirmation copy has been sent to ${f.email}.` },
     ],
   },
   charity: {
@@ -60,12 +64,12 @@ const SUCCESS_COPY = {
     steps: (f) => [
       { title: "Confirmation sent", body: `A receipt has been sent to ${f.email}.` },
       { title: "Allocation in progress", body: "Our team will match your gift with a recipient." },
-      { title: "You\u2019ll hear from us", body: "Notification when the seat has been allocated (no recipient details shared for privacy)." },
+      { title: "You will hear from us", body: "We will notify you when the seat has been allocated. No recipient details are shared, for her privacy." },
     ],
   },
   bulk: {
     headline: "Request received.",
-    body: (f) => `We\u2019ve received your team pricing enquiry and will be in touch within 2 business days at ${f.email}.`,
+    body: (f) => `We have received your team pricing enquiry and will be in touch within 2 business days at ${f.email}.`,
     steps: null,
   },
 };
@@ -307,7 +311,7 @@ function OrderSummaryContent() {
         The Aligned Woman Blueprint&trade;
       </div>
       <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#8A7A76", marginBottom: 20 }}>
-        Founding Cohort &middot; 2026
+        Lifetime access &middot; Always open
       </div>
       <div style={{ height: 1, background: "rgba(74,14,46,0.06)", marginBottom: 20 }} />
       <ul className="space-y-2.5" style={{ marginBottom: 20 }}>
@@ -338,23 +342,8 @@ function OrderSummaryContent() {
       <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#8A7A76", marginBottom: 2 }}>
         &asymp; $215 USD
       </div>
-      <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontStyle: "italic", fontSize: 10, color: "#8A7A76", marginBottom: 20 }}>
+      <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontStyle: "italic", fontSize: 10, color: "#8A7A76", marginBottom: 0 }}>
         * Price may vary slightly based on exchange rate
-      </div>
-      {/* Guarantee box */}
-      <div style={{ background: "#FAF5F3", borderRadius: 6, padding: 16 }}>
-        <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
-          <Shield className="shrink-0" style={{ width: 14, height: 14, color: "#4A0E2E" }} />
-          <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "#4A0E2E" }}>
-            30-DAY COMPLETION GUARANTEE
-          </span>
-        </div>
-        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#3A2A28", lineHeight: 1.55 }}>
-          Complete the programme. Feel the shift. Or receive a full refund.{" "}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "#4A0E2E", textDecoration: "underline", textUnderlineOffset: 4 }}>
-            T&rsquo;s &amp; C&rsquo;s apply
-          </a>.
-        </p>
       </div>
     </>
   );
@@ -380,6 +369,9 @@ function TrustSignals() {
 function SuccessScreen({ type, form }) {
   const headingRef = useRef(null);
   const copy = SUCCESS_COPY[type] || SUCCESS_COPY.self;
+
+  // Bulk is an enquiry, not a purchase, so it gets no sign-in action.
+  const showSignIn = type !== "bulk";
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -436,9 +428,31 @@ function SuccessScreen({ type, form }) {
         </div>
       )}
 
-      {type === "self" && (
-        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontStyle: "italic", fontSize: 13, color: "#8A7A76", lineHeight: 1.65, marginBottom: 32 }}>
-          As a founding member, your rate is locked permanently. You also have priority access to LauraAI Beta and future live experiences.
+      {showSignIn && (
+        <a
+          href={SIGN_IN_URL}
+          className="inline-flex items-center justify-center transition-all"
+          style={{
+            height: 56,
+            padding: "0 40px",
+            borderRadius: 100,
+            background: "#C4847A",
+            color: "#0E0208",
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 700,
+            fontSize: 13,
+            letterSpacing: "0.10em",
+            textTransform: "uppercase",
+            textDecoration: "none",
+          }}
+        >
+          Sign in to your course
+        </a>
+      )}
+
+      {showSignIn && (
+        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontStyle: "italic", fontSize: 13, color: "#8A7A76", lineHeight: 1.65, marginTop: 20 }}>
+          Sign in with the same email you paid with. That is the address your access is linked to.
         </p>
       )}
 
@@ -473,7 +487,7 @@ function MobileOrderSummary({ open, onToggle }) {
             The Aligned Woman Blueprint&trade;
           </div>
           <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 400, fontSize: 11, color: "#8A7A76" }}>
-            Founding Cohort &middot; 2026
+            Lifetime access &middot; Always open
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -675,7 +689,7 @@ export default function Checkout() {
             One step away.
           </h1>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 15, color: "#8A7A76", lineHeight: 1.7, maxWidth: 560 }}>
-            Complete your details below to secure your place in the founding cohort.
+            Complete your details below to secure your place.
           </p>
         </div>
 
@@ -900,7 +914,7 @@ export default function Checkout() {
 
             {/* Microcopy */}
             <p className="text-center" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 11, color: "#8A7A76", marginTop: 32 }}>
-              30-day completion guarantee &middot; Founding price &middot; &#128274; Secure checkout
+              Lifetime access &middot; &#128274; Secure checkout
             </p>
 
             {/* CTA */}
