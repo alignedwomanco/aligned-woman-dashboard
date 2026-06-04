@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { CheckCircle, ArrowRight, Heart, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// Authed entry that claims access on first sign-in and lands the buyer in the
+// course.
+const SIGN_IN_URL = "https://app.alignedwomanco.com/Dashboard";
+
 export default function CheckoutComplete() {
   const [params, setParams] = useState({});
 
@@ -19,13 +23,29 @@ export default function CheckoutComplete() {
   }, []);
 
   const messages = {
-    SELF: { headline: "Welcome to Your Transformation", sub: "You've made the best investment of your life — in yourself." },
+    SELF: { headline: "Welcome to Your Transformation", sub: "You've made the best investment of your life, in yourself." },
     FRIEND: { headline: "What a Beautiful Gift", sub: "You've gifted someone you love the journey of a lifetime." },
     DAUGHTER: { headline: "A Gift for Her Future", sub: "The greatest inheritance you can give your daughter is her own alignment." },
     CHARITY: { headline: "Thank You for Your Generosity", sub: "Your sponsorship is changing a woman's life. You are part of the ripple." },
   };
 
   const msg = messages[params.purchaseType] || messages.SELF;
+
+  // Charity is a sponsorship, not a sign-in for the buyer.
+  const showSignIn = params.purchaseType !== "CHARITY";
+
+  const steps = showSignIn
+    ? [
+        "Check your inbox, your welcome email is on its way",
+        "Sign in with the email you paid with, that is the address your access is linked to",
+        "You land straight in your dashboard with the Blueprint already unlocked",
+        "Join the private community from inside your dashboard",
+      ]
+    : [
+        "Check your inbox, your receipt is on its way",
+        "Our team will match your gift with a recipient",
+        "We will notify you when the seat has been allocated",
+      ];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-20" style={{ background: "linear-gradient(160deg,#FDF5F3 0%,#F5E8EE 50%,#DEBECC 100%)" }}>
@@ -60,12 +80,7 @@ export default function CheckoutComplete() {
 
             <div className="space-y-4 text-left mb-10">
               <h3 className="font-bold text-base" style={{ color: "#6E1D40" }}>What happens next:</h3>
-              {[
-                "Check your inbox — your welcome email is on its way",
-                "You'll receive access to the member portal within 24 hours",
-                "Join our private community to meet your cohort sisters",
-                "Your first module unlocks on cohort start date",
-              ].map((step, i) => (
+              {steps.map((step, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5" style={{ background: "#6E1D40" }}>
                     {i + 1}
@@ -76,13 +91,15 @@ export default function CheckoutComplete() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/Dashboard"
-                className="group inline-flex items-center gap-2 text-white font-bold px-8 py-3 rounded-full text-sm transition-all hover:opacity-90 hover:shadow-xl"
-                style={{ background: "linear-gradient(135deg,#6E1D40,#C4847A)" }}
-              >
-                Go to Dashboard <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </a>
+              {showSignIn && (
+                <a
+                  href={SIGN_IN_URL}
+                  className="group inline-flex items-center gap-2 text-white font-bold px-8 py-3 rounded-full text-sm transition-all hover:opacity-90 hover:shadow-xl"
+                  style={{ background: "linear-gradient(135deg,#6E1D40,#C4847A)" }}
+                >
+                  Sign in to your course <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </a>
+              )}
               <a
                 href="/"
                 className="inline-flex items-center gap-2 border-2 font-bold px-8 py-3 rounded-full text-sm transition-all hover:bg-rose-50"
@@ -91,6 +108,12 @@ export default function CheckoutComplete() {
                 <Heart className="w-4 h-4" /> Back to Home
               </a>
             </div>
+
+            {showSignIn && (
+              <p className="text-gray-500 text-xs italic mt-6 leading-relaxed">
+                Sign in with the same email you paid with. That is the address your access is linked to.
+              </p>
+            )}
           </div>
         </div>
 
