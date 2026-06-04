@@ -3,7 +3,17 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 // The Blueprint course ID (hardcoded for now; for multi-product support,
 // read course_id from Stripe metadata on the checkout session)
 const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
-const BLUEPRINT_ACCESS_TAG = `course_${BLUEPRINT_COURSE_ID}_paid`;
+
+// The access tag the rest of the app actually checks. The dashboard gate, the
+// members list, and the pre-approval claim all read "blueprint_paid". The old
+// value here ("course_<id>_paid") was read by nothing, so access granted on
+// purchase was invisible to the app. Keep this in sync with the AccessTag
+// entity and the manual pre-approval grants.
+const BLUEPRINT_ACCESS_TAG = "blueprint_paid";
+
+// Where a new buyer signs in. The welcome email points here, and it is the
+// authed entry that runs the pre-approval claim on first load.
+const LOGIN_URL = "https://app.alignedwomanco.com/Dashboard";
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -60,9 +70,11 @@ Deno.serve(async (req) => {
 
       const session = body.data.object;
 
-      // TODO: Add Stripe signature verification before go-live
+      // TODO: Add Stripe signature verification before go-live.
+      // This endpoint currently trusts any POST. Before public launch, verify
+      // the "stripe-signature" header against the webhook signing secret
+      // (whsec_xxx) using the raw request body, and reject on mismatch.
       // const signature = req.headers.get("stripe-signature");
-      // Verify using webhook signing secret (whsec_xxx)
 
       email = session.customer_details?.email || session.customer_email || "";
       fullName = session.customer_details?.name || "";
@@ -108,21 +120,45 @@ Deno.serve(async (req) => {
     // 1. GRANT COURSE ACCESS
     // ----------------------------------------------------------------
 
-    // Check if user already exists
     const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
     let userId = null;
 
     if (existingUsers.length > 0) {
+      // Existing account: grant access directly so it is live immediately.
       userId = existingUsers[0].id;
-      // Add access tag to existing user
       const currentTags = existingUsers[0].access_tags || [];
-      if (!currentTags.includes(BLUEPRINT_ACCESS_TAG)) {
-        await base44.asServiceRole.entities.User.update(userId, {
-          access_tags: [...currentTags, BLUEPRINT_ACCESS_TAG],
+      const nextTags = currentTags.includes(BLUEPRINT_ACCESS_TAG)
+        ? currentTags
+        : [...currentTags, BLUEPRINT_ACCESS_TAG];
+      await base44.asServiceRole.entities.User.update(userId, {
+        membership_type: "paid",
+        access_tags: nextTags,
+      });
+    } else {
+      // Brand-new buyer with no account yet. Create a pending pre-approval keyed
+      // to the email Stripe captured, so their first sign-in is claimed
+      // automatically and they land straight in the course. This is the same
+      // claim path used for manual pre-approvals. Reuse an existing pending
+      // grant for this email rather than stacking a duplicate.
+      const pending = await base44.asServiceRole.entities.PreApprovedMember.filter({
+        email,
+        status: "pending",
+      });
+      if (!pending || pending.length === 0) {
+        await base44.asServiceRole.entities.PreApprovedMember.create({
+          email,
+          grant_membership_type: "paid",
+          grant_access_tags: [BLUEPRINT_ACCESS_TAG],
+          status: "pending",
+          note: "Stripe purchase",
+        });
+      } else {
+        await base44.asServiceRole.entities.PreApprovedMember.update(pending[0].id, {
+          grant_membership_type: "paid",
+          grant_access_tags: [BLUEPRINT_ACCESS_TAG],
         });
       }
     }
-    // If user doesn't exist yet, the enrollment record will be matched when they sign up
 
     // ----------------------------------------------------------------
     // 2. CREATE / UPDATE ENROLLMENT
@@ -229,24 +265,24 @@ Deno.serve(async (req) => {
     }
 
     // ----------------------------------------------------------------
-    // 6. SEND WELCOME EMAIL
+    // 6. SEND WELCOME EMAIL (best effort)
     // ----------------------------------------------------------------
 
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
-        subject: "Welcome to The Aligned Woman Blueprint! \u{1F389}",
+        subject: "You're in. Welcome to The Aligned Woman Blueprint.",
         body: `
-          <h2>You're In! Welcome to The Aligned Woman Blueprint</h2>
+          <h2>You're in. Welcome to The Aligned Woman Blueprint.</h2>
           <p>Hi ${fullName || "there"},</p>
-          <p>Your purchase is confirmed and your course access is ready!</p>
-          <p><strong>Next Steps:</strong></p>
+          <p>Your payment is confirmed and your Blueprint access is ready.</p>
+          <p><strong>How to get in:</strong></p>
           <ol>
-            <li>Sign up or log in at your learning dashboard</li>
-            <li>Head to the Classroom to start your Blueprint journey</li>
-            <li>Complete the onboarding to personalise your experience</li>
+            <li>Go to <a href="${LOGIN_URL}">${LOGIN_URL}</a></li>
+            <li>Sign in using this email address, ${email}, the same one you paid with</li>
+            <li>You land straight in your dashboard with the Blueprint unlocked</li>
           </ol>
-          <p>If you already have an account, your Blueprint course is now unlocked.</p>
+          <p>Please use the same email you paid with. That is the address your access is linked to.</p>
           <p>With love,<br/>The Aligned Woman Team</p>
         `,
       });
