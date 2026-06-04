@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, UserPlus, TrendingUp, DollarSign, Eye, Plus, X, Edit, Upload } from "lucide-react";
+import { Trash2, UserPlus, TrendingUp, DollarSign, Eye, Plus, X, Edit, Upload, Mail, Copy, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -51,13 +51,20 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     specialties: [],
     services: [],
     isPublished: true,
+    linked_user_email: "",
   });
   const [cropperOpen, setCropperOpen] = useState(false);
   const [tempImage, setTempImage] = useState(null);
   const [socialLinks, setSocialLinks] = useState([]);
+  const [grantBlueprint, setGrantBlueprint] = useState(false);
+  const [inviteSending, setInviteSending] = useState(false);
+  const [inviteMsg, setInviteMsg] = useState("");
+  const [copied, setCopied] = useState(false);
   const queryClient = useQueryClient();
 
   const PLATFORM_OPTIONS = ["Website", "Email", "Instagram", "LinkedIn", "TikTok", "YouTube", "Twitter/X", "Other"];
+
+  const signupLink = typeof window !== "undefined" ? window.location.origin : "";
 
   const { data: expertCategoriesRaw = [] } = useQuery({
     queryKey: ["expertCategories"],
@@ -76,12 +83,17 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     queryFn: () => base44.entities.User.list(),
   });
 
+  const { data: preApproved = [] } = useQuery({
+    queryKey: ["preApprovedMembers"],
+    queryFn: () => base44.entities.PreApprovedMember.list(),
+  });
+
   const { data: moduleEngagement = [] } = useQuery({
     queryKey: ["moduleEngagement"],
     queryFn: () => base44.entities.ModuleEngagement.list("-created_date", 100),
   });
 
-  const expertsAndCreators = allUsers.filter(u => 
+  const expertsAndCreators = allUsers.filter(u =>
     ["expert", "course_creator"].includes(u.role)
   );
 
@@ -118,8 +130,6 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     mutationFn: (data) => base44.entities.Expert.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] });
-      setEditExpertDialogOpen(false);
-      resetForm();
     },
   });
 
@@ -127,8 +137,6 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     mutationFn: ({ id, data }) => base44.entities.Expert.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] });
-      setEditExpertDialogOpen(false);
-      resetForm();
     },
   });
 
@@ -152,9 +160,29 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
       isPublished: true,
       linked_user_email: "",
     });
+    setGrantBlueprint(false);
+    setInviteMsg("");
+    setCopied(false);
+  };
+
+  // Does this email already hold blueprint access on its User record?
+  const emailHasBlueprint = (email) => {
+    const e = (email || "").trim().toLowerCase();
+    if (!e) return false;
+    const u = allUsers.find((x) => x.email && x.email.toLowerCase() === e);
+    return !!(u && Array.isArray(u.access_tags) && u.access_tags.includes("blueprint_paid"));
+  };
+
+  // Is there a queued (unclaimed) blueprint grant waiting for this email?
+  const emailHasPendingGrant = (email) => {
+    const e = (email || "").trim().toLowerCase();
+    if (!e) return false;
+    return preApproved.some((p) => p.email && p.email.toLowerCase() === e && p.status !== "claimed");
   };
 
   const openEditDialog = (expert = null) => {
+    setInviteMsg("");
+    setCopied(false);
     if (expert) {
       setCurrentExpert(expert);
       // Normalize legacy single-string category to array
@@ -163,19 +191,102 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
         : expert.category ? [expert.category] : [];
       setExpertForm({ ...expert, category: normalizedCategory });
       setSocialLinks(Array.isArray(expert.social_links) ? expert.social_links : []);
+      const le = (expert.linked_user_email || "").trim();
+      setGrantBlueprint(emailHasBlueprint(le) || emailHasPendingGrant(le));
     } else {
       resetForm();
       setSocialLinks([]);
+      setGrantBlueprint(false);
     }
     setEditExpertDialogOpen(true);
   };
 
-  const handleSaveExpert = () => {
-    const formWithLinks = { ...expertForm, social_links: socialLinks.filter(l => l.platform && l.url) };
+  // Grant or cancel a queued blueprint grant for an email, keyed by email only.
+  // Membership never lives on the Expert record, so the two stay decoupled.
+  const applyBlueprintGrant = async (email) => {
+    const e = (email || "").trim().toLowerCase();
+    if (!e) return;
+    const alreadyTagged = emailHasBlueprint(e);
+    const pending = preApproved.find((p) => p.email && p.email.toLowerCase() === e && p.status !== "claimed");
+    if (grantBlueprint) {
+      if (!alreadyTagged && !pending) {
+        await base44.entities.PreApprovedMember.create({
+          email: e,
+          grant_membership_type: "paid",
+          grant_access_tags: ["blueprint_paid"],
+          status: "pending",
+          note: expertForm.name || "Expert invite",
+        });
+      }
+    } else if (pending) {
+      await base44.entities.PreApprovedMember.delete(pending.id);
+    }
+  };
+
+  const persistExpert = async () => {
+    const formWithLinks = { ...expertForm, social_links: socialLinks.filter((l) => l.platform && l.url) };
     if (currentExpert) {
-      updateExpertMutation.mutate({ id: currentExpert.id, data: formWithLinks });
-    } else {
-      createExpertMutation.mutate(formWithLinks);
+      await updateExpertMutation.mutateAsync({ id: currentExpert.id, data: formWithLinks });
+      return currentExpert.id;
+    }
+    const created = await createExpertMutation.mutateAsync(formWithLinks);
+    if (created && created.id) setCurrentExpert(created);
+    return created && created.id;
+  };
+
+  const handleSaveOnly = async () => {
+    try {
+      await persistExpert();
+      await applyBlueprintGrant(expertForm.linked_user_email);
+      queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] });
+      queryClient.invalidateQueries({ queryKey: ["preApprovedMembers"] });
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      setEditExpertDialogOpen(false);
+      resetForm();
+    } catch (err) {
+      setInviteMsg("Could not save. " + (err?.message || "Please try again."));
+    }
+  };
+
+  const handleSaveAndInvite = async () => {
+    const email = (expertForm.linked_user_email || "").trim().toLowerCase();
+    if (!email) {
+      setInviteMsg("Add a pre-authorized email before inviting.");
+      return;
+    }
+    setInviteSending(true);
+    setInviteMsg("");
+    try {
+      await persistExpert();
+      await applyBlueprintGrant(email);
+      queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] });
+      queryClient.invalidateQueries({ queryKey: ["preApprovedMembers"] });
+      let note = "";
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: email,
+          subject: "You're pre-approved - The Aligned Woman",
+          body: `Hi,\n\nYou have been pre-approved to access your expert dashboard on The Aligned Woman.\n\nSign in using this email address (${email}) here:\n${signupLink}\n\nOnce you sign in, your profile will be ready to edit.\n\nWarmly,\nThe Aligned Woman team`,
+        });
+        note = "Invite email sent to " + email + ". ";
+      } catch (mailErr) {
+        note = "Saved and access set, but the email did not send (delivery may not be configured). Copy the link below and send it directly. ";
+      }
+      setInviteMsg(note + "They sign in with " + email + " to get access.");
+    } catch (err) {
+      setInviteMsg("Could not complete. " + (err?.message || "Please try again."));
+    } finally {
+      setInviteSending(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(signupLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setInviteMsg("Could not copy automatically. The link is: " + signupLink);
     }
   };
 
@@ -211,7 +322,7 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     const expertModules = moduleEngagement.filter(e => e.created_by === expertEmail);
     const views = expertModules.length;
     const uniqueUsers = new Set(expertModules.map(e => e.created_by)).size;
-    
+
     return {
       views,
       uniqueUsers,
@@ -252,6 +363,15 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
     mutationFn: ({ expertId, email }) => base44.entities.Expert.update(expertId, { linked_user_email: email }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["expertsProfiles"] }),
   });
+
+  const linkedEmailNow = (expertForm.linked_user_email || "").trim();
+  const blueprintStateLabel = !linkedEmailNow
+    ? ""
+    : emailHasBlueprint(linkedEmailNow)
+      ? "This account already has course access."
+      : emailHasPendingGrant(linkedEmailNow)
+        ? "Course access is queued and applies at their next login."
+        : "No course access yet. Toggle on to grant it.";
 
   return (
     <div className="space-y-6">
@@ -565,25 +685,71 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
               />
             </div>
 
-            <div>
-              <Label>Link to User Account</Label>
-              <Select
-                value={expertForm.linked_user_email || ""}
-                onValueChange={(val) => setExpertForm({ ...expertForm, linked_user_email: val === "_none" ? "" : val })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a user account to link..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">No linked account</SelectItem>
-                  {allUsers.filter(u => u.email).map((u) => (
-                    <SelectItem key={u.id} value={u.email}>
-                      {u.full_name || u.email} ({u.role})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-gray-400 mt-1">Link this expert profile to a user login account</p>
+            {/* Access and invite */}
+            <div className="rounded-lg border border-gray-200 p-4 space-y-3">
+              <div>
+                <Label>Pre-authorized email</Label>
+                <Input
+                  type="email"
+                  value={expertForm.linked_user_email || ""}
+                  onChange={(e) => setExpertForm({ ...expertForm, linked_user_email: e.target.value })}
+                  placeholder="them@example.com"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  They sign in with this email to reach their dashboard. Access attaches automatically the first time they log in, whether or not they already have an account.
+                </p>
+              </div>
+
+              <div>
+                <Label className="text-xs text-gray-500">Or pick an existing account</Label>
+                <Select
+                  value={expertForm.linked_user_email || ""}
+                  onValueChange={(val) => setExpertForm({ ...expertForm, linked_user_email: val === "_none" ? "" : val })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an existing user account..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">No linked account</SelectItem>
+                    {allUsers.filter(u => u.email).map((u) => (
+                      <SelectItem key={u.id} value={u.email}>
+                        {u.full_name || u.email} ({u.role})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={grantBlueprint}
+                    onChange={(e) => setGrantBlueprint(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Blueprint paid member (grants course access)</span>
+                </label>
+                {linkedEmailNow && (
+                  <p className="text-xs text-gray-500 mt-1">{blueprintStateLabel}</p>
+                )}
+                {!grantBlueprint && linkedEmailNow && emailHasBlueprint(linkedEmailNow) && (
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Turning this off will not remove access they already have. Remove that from the user admin.
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-1">
+                <Label className="text-xs text-gray-500">Invite link</Label>
+                <div className="flex gap-2">
+                  <Input value={signupLink} readOnly className="flex-1 text-xs" />
+                  <Button type="button" variant="outline" onClick={handleCopyLink}>
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+                {inviteMsg && <p className="text-xs text-gray-600 mt-2">{inviteMsg}</p>}
+              </div>
             </div>
 
             <div>
@@ -805,13 +971,21 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
               </Label>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex flex-wrap gap-2 pt-4">
               <Button
-                onClick={handleSaveExpert}
-                disabled={!expertForm.name || !expertForm.title}
-                className="flex-1 bg-[#6E1D40] hover:bg-[#5A1633]"
+                onClick={handleSaveAndInvite}
+                disabled={!expertForm.name || !expertForm.title || inviteSending}
+                className="flex-1 min-w-[160px] bg-[#6E1D40] hover:bg-[#5A1633]"
               >
-                {currentExpert ? "Update Expert" : "Create Expert"}
+                <Mail className="w-4 h-4 mr-2" />
+                {inviteSending ? "Sending..." : "Save & send invite"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSaveOnly}
+                disabled={!expertForm.name || !expertForm.title}
+              >
+                {currentExpert ? "Update only" : "Save only"}
               </Button>
               <Button
                 variant="outline"
