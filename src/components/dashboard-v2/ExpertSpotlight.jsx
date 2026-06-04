@@ -29,38 +29,45 @@ function buildDisplayExpert(rawExpert) {
   };
 }
 
-const PLACEHOLDER = {
-  id: "placeholder",
-  name: "Cato Vermeulen",
-  firstName: "Cato",
-  lastName: "Vermeulen",
-  initials: "CV",
-  title: "FEMININE BUSINESS",
-  bio: "Feminine sales expert. Forbes featured. Teaches the Visibility & Money modules.",
-  profilePicture: null,
-};
-
 export default function ExpertSpotlight() {
   const [experts, setExperts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [imgFailed, setImgFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    base44.entities.Expert
-      .filter({ isPublished: true }, "created_date")
-      .then((results) => {
-        if (cancelled) return;
-        const built = (results || []).map(buildDisplayExpert).filter(Boolean);
-        setExperts(built);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error("[ExpertSpotlight] Failed to load experts:", err);
-        setExperts([]);
-        setIsLoading(false);
-      });
+
+    // Published experts are a public read, but a fresh sign-in can race the
+    // first load and return empty. Try once, then retry a single time on a
+    // failure or an empty result before settling, so a transient miss does not
+    // leave the card with nothing to show.
+    const fetchExperts = (attempt = 0) => {
+      base44.entities.Expert
+        .filter({ isPublished: true }, "created_date")
+        .then((results) => {
+          if (cancelled) return;
+          const built = (results || []).map(buildDisplayExpert).filter(Boolean);
+          if (built.length === 0 && attempt < 1) {
+            setTimeout(() => { if (!cancelled) fetchExperts(attempt + 1); }, 800);
+            return;
+          }
+          setExperts(built);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          if (attempt < 1) {
+            setTimeout(() => { if (!cancelled) fetchExperts(attempt + 1); }, 800);
+            return;
+          }
+          console.error("[ExpertSpotlight] Failed to load experts:", err);
+          setExperts([]);
+          setIsLoading(false);
+        });
+    };
+
+    fetchExperts();
     return () => { cancelled = true; };
   }, []);
 
@@ -72,7 +79,11 @@ export default function ExpertSpotlight() {
     return () => clearInterval(timer);
   }, [experts.length]);
 
-  const expert = experts.length > 0 ? experts[currentIndex] : PLACEHOLDER;
+  // Reset the image error flag whenever the spotlighted expert changes, so one
+  // expert's broken photo never suppresses the next expert's working one.
+  useEffect(() => {
+    setImgFailed(false);
+  }, [currentIndex, experts.length]);
 
   if (isLoading) {
     return (
@@ -88,14 +99,26 @@ export default function ExpertSpotlight() {
     );
   }
 
+  // No experts to show. Hide the card rather than inventing a placeholder
+  // person, which is what produced the misleading "CV" with no photo.
+  if (experts.length === 0) return null;
+
+  const expert = experts[currentIndex] || experts[0];
+  const showPhoto = !!expert.profilePicture && !imgFailed;
+
   return (
     <div className="rounded-xl border border-awburg-core/8 overflow-hidden mb-4">
       <div className="relative bg-awrose-pale h-44 flex items-center justify-center">
         <span className="absolute top-3 left-4 font-body font-bold text-[9px] tracking-eyebrow text-awrose-core uppercase">
           EXPERT SPOTLIGHT
         </span>
-        {expert.profilePicture ? (
-          <img src={expert.profilePicture} alt={expert.name} className="w-full h-full object-cover" />
+        {showPhoto ? (
+          <img
+            src={expert.profilePicture}
+            alt={expert.name}
+            className="w-full h-full object-cover"
+            onError={() => setImgFailed(true)}
+          />
         ) : (
           <span className="font-display italic text-awrose-deep text-[80px] leading-none">
             {expert.initials}
