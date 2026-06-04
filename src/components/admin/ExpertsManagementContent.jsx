@@ -64,7 +64,7 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
 
   const PLATFORM_OPTIONS = ["Website", "Email", "Instagram", "LinkedIn", "TikTok", "YouTube", "Twitter/X", "Other"];
 
-  const signupLink = typeof window !== "undefined" ? window.location.origin : "";
+  const signupLink = "https://app.alignedwomanco.com/welcome";
 
   const { data: expertCategoriesRaw = [] } = useQuery({
     queryKey: ["expertCategories"],
