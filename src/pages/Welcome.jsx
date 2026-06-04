@@ -9,7 +9,7 @@ const ROSE_DEEP = "#A86460";
 const OFF_WHITE = "#FAF5F3";
 const DARK_GREY = "#3A2A28";
 const MID_GREY = "#8A7A76";
-const SCREENSHOT = "https://media.base44.com/files/public/69f46886a412ee042303f1af/assets/onboarding-signin.png";
+const SCREENSHOT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f095197f6_Screenshot2026-06-04at113418.png";
 
 export default function Welcome() {
   const [checking, setChecking] = useState(true);
