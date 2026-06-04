@@ -53,6 +53,7 @@ function ResumeBanner({ profile, modules, sections, courses, progressRecords }) 
   const resumeUrl =
     createPageUrl("ModulePlayer") +
     `?moduleId=${profile.last_module_id}` +
+    `&courseId=${course.id}` +
     (resumePageId ? `&pageId=${resumePageId}` : "");
 
   const { main: titleMain, italic: titleItalic } = splitTitleForDisplay(module.title);
