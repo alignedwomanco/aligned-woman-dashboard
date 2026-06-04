@@ -9,7 +9,8 @@ const ROSE_DEEP = "#A86460";
 const OFF_WHITE = "#FAF5F3";
 const DARK_GREY = "#3A2A28";
 const MID_GREY = "#8A7A76";
-const SCREENSHOT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f095197f6_Screenshot2026-06-04at113418.png";
+const BURG_DEEP = "#1A0510";
+const SCREENSHOT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/b65a4139a_Dontusethesesign-inoptionsYourealreadypre-approved.png";
 
 export default function Welcome() {
   const [checking, setChecking] = useState(true);
@@ -115,117 +116,17 @@ export default function Welcome() {
         </div>
 
         {/* ── ANNOTATED SCREENSHOT ── */}
-        {/* 
-          outer: position relative, paddingBottom reserves space for the callout card.
-          image wrapper: position relative — % overlays are relative to image bounds.
-          connector + callout: absolute in the outer div.
-        */}
-        <div style={{
-          maxWidth: 480, margin: "0 auto clamp(48px, 7vw, 72px)",
-          position: "relative", paddingBottom: "clamp(80px, 12vw, 104px)",
-        }}>
-
-          {/* Image + overlays */}
-          <div style={{ position: "relative" }}>
-            <img
-              src={SCREENSHOT}
-              alt="The Aligned Woman sign-in screen showing the Need an account? Sign up link at the bottom"
-              style={{
-                width: "100%", display: "block",
-                borderRadius: 8,
-                border: "1px solid rgba(74,14,46,0.1)",
-                boxShadow: "0 8px 32px rgba(8,1,5,0.10)",
-              }}
-            />
-
-            {/* ── Grey veil (top 27.2 %, height 64.6 %) ── */}
-            <div style={{
-              position: "absolute", top: "27.2%", left: 0, right: 0, height: "64.6%",
-              background: "rgba(16,5,14,0.55)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              {/* White pill label */}
-              <div style={{
-                background: "white", borderRadius: 100,
-                padding: "8px 18px",
-                boxShadow: "0 4px 16px rgba(8,1,5,0.14)",
-                maxWidth: "80%", textAlign: "center",
-              }}>
-                <p style={{
-                  fontFamily: SANS, fontWeight: 700, fontSize: 10,
-                  color: BURG, margin: "0 0 2px", lineHeight: 1.4,
-                }}>
-                  Don't use these sign-in options
-                </p>
-                <p style={{
-                  fontFamily: SANS, fontWeight: 600, fontSize: 9,
-                  letterSpacing: "0.16em", textTransform: "uppercase",
-                  color: ROSE_CORE, margin: 0,
-                }}>
-                  You're already pre-approved.
-                </p>
-              </div>
-            </div>
-
-            {/* ── Rose ellipse around "Need an account? Sign up" (top ~90%) ── */}
-            <div style={{
-              position: "absolute",
-              top: "88.5%", left: "6%", right: "6%", height: "5.5%",
-              border: `2.5px solid ${ROSE_CORE}`,
-              borderRadius: "50%",
-              transform: "rotate(-1.5deg)",
-              boxShadow: `0 0 0 5px rgba(196,132,122,0.14)`,
-              pointerEvents: "none",
-            }} />
-          </div>
-
-          {/* ── Connector line with dot ── */}
-          <div style={{
-            position: "absolute",
-            bottom: "clamp(44px, 7vw, 58px)",
-            left: "50%", transform: "translateX(-50%)",
-            width: 1,
-            height: "clamp(40px, 6vw, 52px)",
-            background: ROSE_CORE,
-          }}>
-            {/* Dot at top (touching ellipse connector) */}
-            <div style={{
-              position: "absolute", top: 0, left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 7, height: 7, borderRadius: "50%",
-              background: ROSE_CORE,
-            }} />
-          </div>
-
-          {/* ── Callout card ── */}
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0,
-            display: "flex", justifyContent: "center",
-          }}>
-            <div style={{
-              background: BURG, borderRadius: 10,
-              padding: "clamp(12px, 2.5vw, 16px) clamp(20px, 4vw, 28px)",
-              textAlign: "center",
-              boxShadow: "0 4px 24px rgba(8,1,5,0.22)",
-              width: "max-content", maxWidth: "88%",
-            }}>
-              <p style={{
-                fontFamily: SANS, fontWeight: 700, fontSize: 9,
-                letterSpacing: "0.24em", textTransform: "uppercase",
-                color: ROSE_CORE, margin: "0 0 6px",
-              }}>
-                Start here
-              </p>
-              <p style={{
-                fontFamily: SERIF, fontStyle: "italic", fontWeight: 400,
-                fontSize: "clamp(14px, 2.8vw, 18px)", lineHeight: 1.3,
-                color: "white", margin: 0,
-              }}>
-                Use this sign up to access your course.
-              </p>
-            </div>
-          </div>
-
+        <div style={{ maxWidth: 480, margin: "0 auto clamp(48px, 7vw, 72px)" }}>
+          <img
+            src={SCREENSHOT}
+            alt="The Aligned Woman sign-in screen showing the Need an account? Sign up link at the bottom"
+            style={{
+              width: "100%", display: "block",
+              borderRadius: 8,
+              border: "1px solid rgba(74,14,46,0.1)",
+              boxShadow: "0 8px 32px rgba(8,1,5,0.10)",
+            }}
+          />
         </div>
 
         {/* ── FOOTNOTE ── */}
