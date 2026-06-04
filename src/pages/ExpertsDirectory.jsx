@@ -105,7 +105,7 @@ function ExpertModal({ expert, mode, onClose }) {
     if (Object.keys(e).length) { setErrors(e); return; }
     base44.integrations.Core.SendEmail({
       to: "hello@alignedwomanco.com",
-      subject: `Expert Connection Request — ${expert.name}`,
+      subject: `Expert Connection Request - ${expert.name}`,
       body: `Name: ${form.name}\nEmail: ${form.email}\nExpert: ${expert.name}\n\nMessage:\n${form.reason}`,
     }).catch(() => {});
     base44.analytics.track({ eventName: "expert_request_submit", properties: { expert: expert.name } });
@@ -240,6 +240,295 @@ function ExpertModal({ expert, mode, onClose }) {
   );
 }
 
+// ─── APPLY MODAL (practitioner application) ───
+// Writes an ExpertApplication record, which is the source of truth Laura
+// reviews in Dashboard Settings. The admin email alert is best effort and
+// never blocks the application from being saved. This flow grants nothing on
+// its own: approval and any access are decided by an admin later.
+const INTEREST_OPTIONS = [
+  { key: "marketplace_profile", label: "A profile in the directory", locked: true },
+  { key: "affiliate", label: "The affiliate programme", locked: false },
+  { key: "host_course", label: "Host a course (coming soon)", locked: false },
+];
+
+function ApplyModal({ currentUser, onClose }) {
+  const closeRef = useRef(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [form, setForm] = useState({
+    applicant_name: currentUser?.full_name || currentUser?.name || "",
+    email: currentUser?.email || "",
+    application_type: "individual",
+    business_name: "",
+    headline: "",
+    bio: "",
+    website_url: "",
+    instagram_url: "",
+    linkedin_url: "",
+    category_interest: [],
+    interested_in: ["marketplace_profile"],
+    message: "",
+  });
+
+  useEffect(() => {
+    closeRef.current?.focus();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  const set = (key, value) => {
+    setForm((f) => ({ ...f, [key]: value }));
+    setErrors((er) => ({ ...er, [key]: undefined }));
+  };
+
+  const toggleInArray = (key, value) => {
+    setForm((f) => {
+      const has = f[key].includes(value);
+      return { ...f, [key]: has ? f[key].filter((v) => v !== value) : [...f[key], value] };
+    });
+  };
+
+  const validate = () => {
+    const e = {};
+    if (!form.applicant_name.trim()) e.applicant_name = "Name is required.";
+    if (!form.email.trim()) e.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Please enter a valid email.";
+    if (form.application_type === "business" && !form.business_name.trim()) e.business_name = "Business name is required.";
+    return e;
+  };
+
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    setSaving(true);
+    try {
+      await base44.entities.ExpertApplication.create({
+        applicant_name: form.applicant_name.trim(),
+        email: form.email.trim().toLowerCase(),
+        application_type: form.application_type,
+        business_name: form.application_type === "business" ? form.business_name.trim() : "",
+        headline: form.headline.trim(),
+        bio: form.bio.trim(),
+        website_url: form.website_url.trim(),
+        instagram_url: form.instagram_url.trim(),
+        linkedin_url: form.linkedin_url.trim(),
+        category_interest: form.category_interest,
+        interested_in: form.interested_in,
+        message: form.message.trim(),
+        status: "pending",
+      });
+      base44.integrations.Core.SendEmail({
+        to: "hello@alignedwomanco.com",
+        subject: `New expert application - ${form.applicant_name.trim()}`,
+        body: `Name: ${form.applicant_name}\nEmail: ${form.email}\nType: ${form.application_type}\nInterested in: ${form.interested_in.join(", ")}\n\n${form.message}`,
+      }).catch(() => {});
+      base44.analytics.track({ eventName: "expert_application_submit", properties: { application_type: form.application_type } });
+      setSubmitted(true);
+    } catch (err) {
+      setErrors({ form: "Something went wrong sending your application. Please try again." });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputStyle = (hasError) => ({
+    width: "100%", height: 44, background: C.white, border: `1px solid ${hasError ? C.roseCore : "rgba(74,14,46,0.15)"}`, borderRadius: 6, padding: "0 12px", fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none",
+  });
+  const labelStyle = { display: "block", fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, marginBottom: 6 };
+  const focusOn = (ev) => { ev.target.style.borderColor = C.roseCore; ev.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.15)"; };
+  const focusOff = (ev) => { ev.target.style.borderColor = "rgba(74,14,46,0.15)"; ev.target.style.boxShadow = "none"; };
+
+  const pillStyle = (active) => ({
+    background: active ? C.burgCore : "transparent",
+    color: active ? C.white : C.burgCore,
+    border: `1px solid ${active ? C.burgCore : "rgba(74,14,46,0.15)"}`,
+    borderRadius: 100, padding: "8px 14px", fontFamily: sans, fontWeight: 500, fontSize: 11,
+    cursor: "pointer", minHeight: 40, transition: "background 0.2s, color 0.2s, border-color 0.2s",
+  });
+
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(8,1,5,0.7)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="apply-heading"
+        style={{ background: C.offWhite, borderRadius: 12, padding: "40px 32px", maxWidth: 600, width: "100%", maxHeight: "90vh", overflowY: "auto", position: "relative", animation: "modalIn 0.3s ease" }}
+      >
+        <style>{`@keyframes modalIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }`}</style>
+
+        <button
+          ref={closeRef}
+          onClick={onClose}
+          aria-label="Close"
+          style={{ position: "absolute", top: 16, right: 16, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", borderRadius: 100 }}
+        >
+          <X size={18} style={{ color: C.midGrey }} />
+        </button>
+
+        <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 8 }}>
+          FOR PRACTITIONERS
+        </p>
+        <h2 id="apply-heading" style={{ fontFamily: serif, fontStyle: "italic", fontSize: 26, color: C.burgCore, margin: "0 0 8px", lineHeight: 1.2 }}>
+          Apply to join the directory.
+        </h2>
+        <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, marginBottom: 24 }}>
+          Tell us about your work. Every application is reviewed personally. Applying does not give access to any course; it is a request to be listed.
+        </p>
+
+        {submitted ? (
+          <div style={{ borderLeft: `3px solid ${C.roseCore}`, paddingLeft: 16, marginTop: 8 }}>
+            <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 20, color: C.burgCore, marginBottom: 8 }}>Application received.</p>
+            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, marginBottom: 20 }}>
+              Thank you. We review every application by hand and will be in touch about next steps.
+            </p>
+            <button
+              onClick={onClose}
+              style={{ width: "100%", background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "14px 20px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 48 }}
+            >
+              Close
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Applying as */}
+            <div style={{ marginBottom: 16 }}>
+              <span style={labelStyle}>Applying as</span>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="button" onClick={() => set("application_type", "individual")} style={pillStyle(form.application_type === "individual")}>
+                  Individual
+                </button>
+                <button type="button" onClick={() => set("application_type", "business")} style={pillStyle(form.application_type === "business")}>
+                  Business
+                </button>
+              </div>
+            </div>
+
+            {/* Name */}
+            <div style={{ marginBottom: 14 }}>
+              <label htmlFor="ap-name" style={labelStyle}>
+                Your name <span aria-hidden="true" style={{ color: C.roseCore, marginLeft: 2 }}>*</span>
+              </label>
+              <input id="ap-name" type="text" value={form.applicant_name} onChange={(e) => set("applicant_name", e.target.value)} style={inputStyle(!!errors.applicant_name)} onFocus={focusOn} onBlur={focusOff} />
+              {errors.applicant_name && <p role="alert" style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.applicant_name}</p>}
+            </div>
+
+            {/* Business name (conditional) */}
+            {form.application_type === "business" && (
+              <div style={{ marginBottom: 14 }}>
+                <label htmlFor="ap-business" style={labelStyle}>
+                  Business name <span aria-hidden="true" style={{ color: C.roseCore, marginLeft: 2 }}>*</span>
+                </label>
+                <input id="ap-business" type="text" value={form.business_name} onChange={(e) => set("business_name", e.target.value)} style={inputStyle(!!errors.business_name)} onFocus={focusOn} onBlur={focusOff} />
+                {errors.business_name && <p role="alert" style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.business_name}</p>}
+              </div>
+            )}
+
+            {/* Email (verified login email, read only) */}
+            <div style={{ marginBottom: 14 }}>
+              <label htmlFor="ap-email" style={labelStyle}>
+                Email <span aria-hidden="true" style={{ color: C.roseCore, marginLeft: 2 }}>*</span>
+              </label>
+              <input id="ap-email" type="email" value={form.email} readOnly={!!currentUser?.email} onChange={(e) => set("email", e.target.value)} style={{ ...inputStyle(!!errors.email), background: currentUser?.email ? C.roseWash : C.white }} onFocus={focusOn} onBlur={focusOff} />
+              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 11, color: C.midGrey, marginTop: 4 }}>
+                We will link your dashboard to this email if you are approved.
+              </p>
+              {errors.email && <p role="alert" style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.email}</p>}
+            </div>
+
+            {/* Headline */}
+            <div style={{ marginBottom: 14 }}>
+              <label htmlFor="ap-headline" style={labelStyle}>Your title or headline</label>
+              <input id="ap-headline" type="text" value={form.headline} placeholder="e.g. Registered Dietitian & Metabolic Health Specialist" onChange={(e) => set("headline", e.target.value)} style={inputStyle(false)} onFocus={focusOn} onBlur={focusOff} />
+            </div>
+
+            {/* Bio */}
+            <div style={{ marginBottom: 14 }}>
+              <label htmlFor="ap-bio" style={labelStyle}>A short bio</label>
+              <textarea id="ap-bio" rows={4} value={form.bio} placeholder="Your credentials, your work, and who you help." onChange={(e) => set("bio", e.target.value)} style={{ ...inputStyle(false), height: "auto", padding: "10px 12px", resize: "vertical" }} onFocus={focusOn} onBlur={focusOff} />
+            </div>
+
+            {/* Links */}
+            <div style={{ marginBottom: 14 }}>
+              <label htmlFor="ap-website" style={labelStyle}>Website</label>
+              <input id="ap-website" type="text" value={form.website_url} placeholder="https://" onChange={(e) => set("website_url", e.target.value)} style={inputStyle(false)} onFocus={focusOn} onBlur={focusOff} />
+            </div>
+            <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="ap-instagram" style={labelStyle}>Instagram</label>
+                <input id="ap-instagram" type="text" value={form.instagram_url} placeholder="https://" onChange={(e) => set("instagram_url", e.target.value)} style={inputStyle(false)} onFocus={focusOn} onBlur={focusOff} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="ap-linkedin" style={labelStyle}>LinkedIn</label>
+                <input id="ap-linkedin" type="text" value={form.linkedin_url} placeholder="https://" onChange={(e) => set("linkedin_url", e.target.value)} style={inputStyle(false)} onFocus={focusOn} onBlur={focusOff} />
+              </div>
+            </div>
+
+            {/* Category interest */}
+            <div style={{ marginBottom: 16 }}>
+              <span style={labelStyle}>Which areas best describe your work?</span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {PINNED_CATEGORIES.map((cat) => (
+                  <button key={cat} type="button" onClick={() => toggleInArray("category_interest", cat)} style={pillStyle(form.category_interest.includes(cat))}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Interested in */}
+            <div style={{ marginBottom: 20 }}>
+              <span style={labelStyle}>What are you interested in?</span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {INTEREST_OPTIONS.map((opt) => {
+                  const active = form.interested_in.includes(opt.key);
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => { if (!opt.locked) toggleInArray("interested_in", opt.key); }}
+                      aria-pressed={active}
+                      style={{ ...pillStyle(active), cursor: opt.locked ? "default" : "pointer", opacity: opt.locked ? 0.9 : 1 }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Message */}
+            <div style={{ marginBottom: 20 }}>
+              <label htmlFor="ap-message" style={labelStyle}>Anything else you would like us to know?</label>
+              <textarea id="ap-message" rows={3} value={form.message} onChange={(e) => set("message", e.target.value)} style={{ ...inputStyle(false), height: "auto", padding: "10px 12px", resize: "vertical" }} onFocus={focusOn} onBlur={focusOff} />
+            </div>
+
+            {errors.form && <p role="alert" style={{ fontFamily: sans, fontSize: 12, color: C.roseCore, marginBottom: 12 }}>{errors.form}</p>}
+
+            <button
+              type="submit"
+              disabled={saving}
+              style={{ width: "100%", background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, padding: "16px 20px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.14em", cursor: saving ? "default" : "pointer", minHeight: 48, opacity: saving ? 0.7 : 1 }}
+            >
+              {saving ? "Sending..." : "Submit application +"}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── EXPERT CARD ───
 function ExpertCard({ expert, onConnect, onView, isAdmin }) {
   const [hovered, setHovered] = useState(false);
@@ -354,6 +643,7 @@ export default function ExpertsDirectory() {
   const [showMore, setShowMore] = useState(false);
   const moreRef = useRef(null);
   const [modal, setModal] = useState(null);
+  const [applyOpen, setApplyOpen] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -392,7 +682,15 @@ export default function ExpertsDirectory() {
     base44.analytics.track({ eventName: "view_experts_page" });
   }, []);
 
-  // Use live DB data, mapped to card shape — Laura always first
+  // After a sign-in redirect from the apply button, reopen the form so the
+  // practitioner is not dropped back on the page with no idea what to do next.
+  useEffect(() => {
+    if (currentUser && searchParams.get("apply") === "1") {
+      setApplyOpen(true);
+    }
+  }, [currentUser, searchParams]);
+
+  // Use live DB data, mapped to card shape, Laura always first
   const experts = [...dbExperts]
     .sort((a, b) => {
       const aIsLaura = a.name?.toLowerCase().includes("laura") ? -1 : 0;
@@ -444,6 +742,18 @@ export default function ExpertsDirectory() {
   const openConnect = (expert) => {
     base44.analytics.track({ eventName: "expert_modal_open", properties: { expert: expert.name, mode: "form" } });
     setModal({ expert, mode: "form" });
+  };
+
+  // Practitioner apply. Sign-in first so we capture a verified email to link
+  // to later, then return to this page with the form open.
+  const handleApplyClick = () => {
+    base44.analytics.track({ eventName: "expert_apply_click" });
+    if (!currentUser) {
+      const back = `${window.location.origin}/ExpertsDirectory?apply=1`;
+      base44.auth.redirectToLogin(back);
+      return;
+    }
+    setApplyOpen(true);
   };
 
   return (
@@ -610,6 +920,27 @@ export default function ExpertsDirectory() {
         </div>
       </section>
 
+      {/* ── APPLY TO JOIN (practitioners) ── */}
+      <section style={{ background: C.roseWash, padding: "72px 32px", textAlign: "center" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>
+            For practitioners
+          </p>
+          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(28px, 4vw, 40px)", color: C.burgCore, lineHeight: 1.2, marginBottom: 20 }}>
+            Are you a credentialed expert?
+          </h2>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: C.darkGrey, lineHeight: 1.8, maxWidth: 620, margin: "0 auto 32px" }}>
+            Apply to join the directory as an individual or a business. Every application is reviewed personally. Applying does not give access to any course; it is a request to be listed.
+          </p>
+          <button
+            onClick={handleApplyClick}
+            style={{ display: "inline-block", background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "18px 40px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.14em", minHeight: 48, cursor: "pointer" }}
+          >
+            Apply to join +
+          </button>
+        </div>
+      </section>
+
       {/* ── CLOSING CTA ── */}
       <section style={{ background: "linear-gradient(160deg, #0E0208 0%, #1A0510 35%, #4A0E2E 65%, #1A0510 100%)", padding: "80px 32px", textAlign: "center" }}>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
@@ -632,12 +963,18 @@ export default function ExpertsDirectory() {
         </div>
       </section>
 
-      {/* ── MODAL ── */}
+      {/* ── MODALS ── */}
       {modal && (
         <ExpertModal
           expert={modal.expert}
           mode={modal.mode}
           onClose={() => setModal(null)}
+        />
+      )}
+      {applyOpen && (
+        <ApplyModal
+          currentUser={currentUser}
+          onClose={() => setApplyOpen(false)}
         />
       )}
     </main>

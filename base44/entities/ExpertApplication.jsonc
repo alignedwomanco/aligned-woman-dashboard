@@ -1,0 +1,134 @@
+{
+  "name": "ExpertApplication",
+  "type": "object",
+  "description": "Public applications to join the expert marketplace. Created from the apply form on /ExpertsDirectory after the applicant signs in, then reviewed by an admin in Dashboard Settings. Approval creates a linked Expert record. Affiliate and course-host access are granted selectively by the admin, never automatically, and this flow never grants Blueprint course access.",
+  "properties": {
+    "applicant_name": {
+      "type": "string",
+      "description": "Applicant full name"
+    },
+    "business_name": {
+      "type": "string",
+      "description": "Business name, if applying as a business"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Applicant contact and login email"
+    },
+    "headline": {
+      "type": "string",
+      "description": "Title or role they want displayed on their profile"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short biography"
+    },
+    "profile_picture": {
+      "type": "string",
+      "description": "Profile image URL"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Website URL"
+    },
+    "instagram_url": {
+      "type": "string",
+      "description": "Instagram URL"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn URL"
+    },
+    "category_interest": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Category names or ids the applicant is interested in"
+    },
+    "application_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "business"
+      ],
+      "default": "individual",
+      "description": "Applying as an individual or a business"
+    },
+    "interested_in": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What they are applying for. Allowed values: marketplace_profile, affiliate, host_course"
+    },
+    "message": {
+      "type": "string",
+      "description": "Free-text note from the applicant"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Review status"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the application was reviewed"
+    },
+    "review_notes": {
+      "type": "string",
+      "description": "Admin notes from the review"
+    },
+    "created_expert_id": {
+      "type": "string",
+      "description": "Id of the Expert record created on approval"
+    },
+    "granted_affiliate": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether affiliate access was granted at approval"
+    },
+    "granted_course_host": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether course hosting was granted at approval"
+    }
+  },
+  "required": [
+    "applicant_name",
+    "email",
+    "application_type"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
