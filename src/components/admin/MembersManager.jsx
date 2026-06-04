@@ -86,18 +86,47 @@ export default function MembersManager({ allUsers }) {
     mutationFn: async ({ email, tags }) => {
       const normalizedEmail = email.trim().toLowerCase();
       const grantTags = tags && tags.length > 0 ? tags : ["blueprint_paid"];
-      await base44.entities.PreApprovedMember.create({
+      // Paid only when a paid course tag is granted, otherwise this is a free
+      // pre-approval. Previously every pre-approval was marked paid regardless
+      // of the tags that were ticked.
+      const membershipType = grantTags.includes("blueprint_paid") ? "paid" : "free";
+
+      // Reuse an existing pending pre-approval for this email instead of
+      // stacking a second one. Pre-approving the same person again just
+      // refreshes their tags.
+      const existing = await base44.entities.PreApprovedMember.filter({
         email: normalizedEmail,
-        grant_membership_type: "paid",
-        grant_access_tags: grantTags,
         status: "pending",
       });
-      const loginUrl = window.location.origin;
-      await base44.functions.invoke("sendWelcomeEmail", {
-        recipientEmail: normalizedEmail,
-        loginUrl,
-      });
-      return { email: normalizedEmail };
+      if (existing && existing.length > 0) {
+        await base44.entities.PreApprovedMember.update(existing[0].id, {
+          grant_membership_type: membershipType,
+          grant_access_tags: grantTags,
+        });
+      } else {
+        await base44.entities.PreApprovedMember.create({
+          email: normalizedEmail,
+          grant_membership_type: membershipType,
+          grant_access_tags: grantTags,
+          status: "pending",
+        });
+      }
+
+      // The sign-in email is a courtesy, not the thing that grants access. The
+      // pre-approval above is already saved, so a failed email must never fail
+      // the action. Send it best effort and report whether it went out.
+      let emailSent = false;
+      try {
+        await base44.functions.invoke("sendWelcomeEmail", {
+          recipientEmail: normalizedEmail,
+          loginUrl: window.location.origin,
+        });
+        emailSent = true;
+      } catch (e) {
+        emailSent = false;
+      }
+
+      return { email: normalizedEmail, emailSent };
     },
     onSuccess: (data) => {
       setAddMemberOpen(false);
@@ -106,10 +135,13 @@ export default function MembersManager({ allUsers }) {
       setAddMode("invite");
       setSelectedExistingUser("");
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      alert(`${data.email} has been pre-approved. They can now sign in at ${window.location.origin} and their access will be granted automatically.`);
+      const emailNote = data.emailSent
+        ? "A sign-in email has been sent to them."
+        : "The sign-in email could not be sent, so share the login link with them directly.";
+      alert(`${data.email} is pre-approved. When they sign in at ${window.location.origin}, their access is applied automatically. ${emailNote}`);
     },
     onError: (error) => {
-      alert(`Failed to pre-approve member: ${error.message}`);
+      alert(`Could not pre-approve this email: ${error.message}`);
     },
   });
 
@@ -406,7 +438,7 @@ export default function MembersManager({ allUsers }) {
                   addMode === "invite" ? "bg-[#6E1D40] text-white border-[#6E1D40]" : "bg-white text-gray-600 border-gray-200"
                 }`}
               >
-                Invite New
+                Pre-approve
               </button>
             </div>
 
@@ -428,6 +460,9 @@ export default function MembersManager({ allUsers }) {
                   onChange={(e) => setNewMemberEmail(e.target.value)}
                   placeholder="member@example.com"
                 />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  This pre-approves the email. They get the ticked access the first time they sign in, even if they have not registered yet.
+                </p>
               </div>
             )}
 
@@ -471,7 +506,7 @@ export default function MembersManager({ allUsers }) {
                 className="w-full text-white"
                 style={{ backgroundColor: '#6E1D40' }}
               >
-                {inviteMemberMutation.isPending ? "Sending..." : "Send Invitation"}
+                {inviteMemberMutation.isPending ? "Pre-approving..." : "Pre-approve access"}
               </Button>
             )}
           </div>
