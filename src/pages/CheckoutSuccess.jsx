@@ -4,36 +4,51 @@ import { base44 } from "@/api/base44Client";
 const SUPPORT_EMAIL = "hello@alignedwomanco.com";
 const DASHBOARD_PATH = "/Dashboard";
 const SESSION_KEY = "aw_checkout_session_id";
-const LOGIN_FLAG = "aw_checkout_login_tried";
+const PENDING_KEY = "aw_pending_checkout_session";
 
-function readStorage(key) {
+function readSession() {
   try {
-    return window.sessionStorage.getItem(key) || "";
+    return window.sessionStorage.getItem(SESSION_KEY) || "";
   } catch (_err) {
     return "";
   }
 }
 
-function writeStorage(key, value) {
+function holdSession(sessionId) {
   try {
-    window.sessionStorage.setItem(key, value);
+    window.sessionStorage.setItem(SESSION_KEY, sessionId);
   } catch (_err) {
-    // storage unavailable, fall back to the URL only
+    // session storage unavailable
+  }
+  // localStorage is the backstop the dashboard reads if the buyer signs up and
+  // lands there instead of returning here. It survives the auth round trip.
+  try {
+    window.localStorage.setItem(PENDING_KEY, sessionId);
+  } catch (_err) {
+    // local storage unavailable, the URL still carries the session
   }
 }
 
-function clearStorage(key) {
+function releaseSession() {
   try {
-    window.sessionStorage.removeItem(key);
+    window.sessionStorage.removeItem(SESSION_KEY);
+  } catch (_err) {
+    // nothing to do
+  }
+  try {
+    window.localStorage.removeItem(PENDING_KEY);
   } catch (_err) {
     // nothing to do
   }
 }
 
 function goToRegister() {
-  clearStorage(LOGIN_FLAG);
   window.location.href =
     "/register?from_url=" + encodeURIComponent(window.location.href);
+}
+
+function goToLogin() {
+  base44.auth.redirectToLogin(window.location.href);
 }
 
 function Eyebrow({ children }) {
@@ -56,6 +71,18 @@ function PrimaryButton({ href, onClick, children }) {
   }
   return (
     <button type="button" onClick={onClick} className={cls}>
+      {children}
+    </button>
+  );
+}
+
+function TextLink({ onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-awrose-core text-sm font-body underline underline-offset-4"
+    >
       {children}
     </button>
   );
@@ -91,17 +118,9 @@ export default function CheckoutSuccess() {
       let sessionId = params.get("session_id") || "";
 
       if (sessionId && sessionId !== "{CHECKOUT_SESSION_ID}") {
-        writeStorage(SESSION_KEY, sessionId);
-        // Persist to localStorage as well. If the buyer signs up and lands on
-        // the dashboard instead of returning here, the dashboard reads this key
-        // and claims access. localStorage survives the auth round trip.
-        try {
-          window.localStorage.setItem("aw_pending_checkout_session", sessionId);
-        } catch (_err) {
-          // storage unavailable, the URL and session storage still cover us
-        }
+        holdSession(sessionId);
       } else {
-        sessionId = readStorage(SESSION_KEY);
+        sessionId = readSession();
       }
 
       if (!sessionId || sessionId === "{CHECKOUT_SESSION_ID}") {
@@ -109,9 +128,9 @@ export default function CheckoutSuccess() {
         return;
       }
 
-      // Make sure the buyer is signed in. Paying on Stripe does not sign a
-      // person into the app, so we send them through the register screen once,
-      // keeping the session id so it survives the round trip.
+      // Paying on Stripe does not sign a person into the app. If they are not
+      // signed in, show a payment-confirmed screen that lets them create an
+      // account or sign in, rather than bouncing them to a bare auth page.
       let user = null;
       try {
         user = await base44.auth.me();
@@ -120,22 +139,9 @@ export default function CheckoutSuccess() {
       }
 
       if (!user) {
-        // The buyer has paid but has no session yet. Send them to create their
-        // account, then bring them straight back here so access attaches on
-        // return. The session id rides along in from_url and is also held in
-        // sessionStorage as a fallback. The flag means we only send them once,
-        // so they are never caught in a loop if they return still signed out.
-        if (readStorage(LOGIN_FLAG) !== "1") {
-          writeStorage(LOGIN_FLAG, "1");
-          window.location.href =
-            "/register?from_url=" + encodeURIComponent(window.location.href);
-          return;
-        }
-        if (active) setStatus("needsignin");
+        if (active) setStatus("needauth");
         return;
       }
-
-      clearStorage(LOGIN_FLAG);
 
       try {
         let data;
@@ -156,12 +162,7 @@ export default function CheckoutSuccess() {
 
         if (!active) return;
         if (data.hasAccess) {
-          clearStorage(SESSION_KEY);
-          try {
-            window.localStorage.removeItem("aw_pending_checkout_session");
-          } catch (_err) {
-            // nothing to do
-          }
+          releaseSession();
           setStatus("granted");
         } else if (data.conflict) {
           setStatus("conflict");
@@ -225,22 +226,24 @@ export default function CheckoutSuccess() {
           </div>
         )}
 
-        {status === "needsignin" && (
+        {status === "needauth" && (
           <div>
-            <Eyebrow>One last step</Eyebrow>
+            <Eyebrow>Payment confirmed</Eyebrow>
             <h1 className="font-display text-awburg-core text-3xl leading-tight mb-5">
-              Create your account to unlock
+              One last step to unlock your place
             </h1>
             <p className="text-awburg-core text-base leading-relaxed mb-8">
-              Your payment is confirmed. Create your account with the same email
-              you paid with, or sign in if you already have one, and your
-              Blueprint opens straight away. You can continue with Google or
-              Apple too.
+              Your payment went through. Create your account with the same email
+              you paid with and your Blueprint opens straight away. You can
+              continue with Google or Apple too.
             </p>
             <div className="flex flex-col items-center gap-4">
               <PrimaryButton onClick={goToRegister}>
                 Create my account
               </PrimaryButton>
+              <TextLink onClick={goToLogin}>
+                Already have an account? Sign in
+              </TextLink>
               <SupportLink />
             </div>
           </div>
@@ -258,7 +261,7 @@ export default function CheckoutSuccess() {
               us and we will put it right.
             </p>
             <div className="flex flex-col items-center gap-4">
-              <PrimaryButton href={DASHBOARD_PATH}>Go to sign in</PrimaryButton>
+              <PrimaryButton onClick={goToLogin}>Sign in</PrimaryButton>
               <SupportLink />
             </div>
           </div>
