@@ -1,9 +1,11 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 
-// Faculty comp access. This tag is also listed on the Blueprint course's tags,
-// so granting it unlocks the course with no sale, no coupon, and no "paid"
-// label on someone who never paid.
-const FACULTY_ACCESS_TAG = "blueprint_faculty";
+// Faculty are granted the same blueprint_paid entitlement that buyers receive,
+// so they unlock the course through the access checks the app already
+// recognizes, with no gate changes anywhere. Faculty stay distinguishable from
+// buyers in the data because they have no Sale record and remain membership_type
+// "free"; only buyers ever get a Sale and a paid membership.
+const BLUEPRINT_ACCESS_TAG = "blueprint_paid";
 
 function corsHeaders() {
   return {
@@ -65,16 +67,16 @@ Deno.serve(async (req) => {
     return json({ success: true, isExpert: false, granted: false, hasAccess: false });
   }
 
-  // Grant the faculty tag if it is not already present. Idempotent: a second
-  // call sees the tag and grants nothing. The Set guards against a duplicate
-  // entry if two calls ever overlap.
+  // Grant the blueprint access tag if it is not already present. Idempotent: a
+  // second call sees the tag and grants nothing. The Set guards against a
+  // duplicate entry if two calls ever overlap.
   const currentTags = Array.isArray(user.access_tags) ? user.access_tags : [];
-  if (currentTags.includes(FACULTY_ACCESS_TAG)) {
+  if (currentTags.includes(BLUEPRINT_ACCESS_TAG)) {
     return json({ success: true, isExpert: true, granted: false, hasAccess: true });
   }
 
   try {
-    const nextTags = Array.from(new Set([...currentTags, FACULTY_ACCESS_TAG]));
+    const nextTags = Array.from(new Set([...currentTags, BLUEPRINT_ACCESS_TAG]));
     await base44.asServiceRole.entities.User.update(user.id, { access_tags: nextTags });
   } catch (err) {
     return json(
