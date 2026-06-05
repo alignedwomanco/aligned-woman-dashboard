@@ -28,7 +28,7 @@ export default function ModulePlayer() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const moduleId = searchParams.get("moduleId");
-  const courseId = searchParams.get("courseId");
+  const courseIdParam = searchParams.get("courseId");
   const [selectedPage, setSelectedPage] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [mobileTab, setMobileTab] = useState("about");
@@ -49,17 +49,6 @@ export default function ModulePlayer() {
     });
   };
 
-  const { data: course, isLoading: courseLoading } = useQuery({
-    queryKey: ["course", courseId],
-    queryFn: async () => {
-      const courses = await base44.entities.Course.filter({ id: courseId });
-      return courses[0];
-    },
-    enabled: !!courseId,
-  });
-
-  const { hasAccess, isLoading: accessLoading } = useCourseAccess(course);
-
   const { data: moduleRecord, isLoading: moduleRecordLoading } = useQuery({
     queryKey: ["courseModule", moduleId],
     queryFn: async () => {
@@ -72,6 +61,28 @@ export default function ModulePlayer() {
     enabled: !!moduleId,
     retry: 2,
   });
+
+  // The course id may be absent or the string "null" in the URL, because some
+  // entry points (for example the dashboard Continue button) link to a module
+  // without it. The module record always carries its own courseId, so we fall
+  // back to that. This is the fix that stops a missing url param from blanking
+  // out the whole course, which is what made the course read as "finished".
+  const effectiveCourseId =
+    courseIdParam && courseIdParam !== "null"
+      ? courseIdParam
+      : moduleRecord?.courseId || null;
+  const courseId = effectiveCourseId;
+
+  const { data: course, isLoading: courseLoading } = useQuery({
+    queryKey: ["course", effectiveCourseId],
+    queryFn: async () => {
+      const courses = await base44.entities.Course.filter({ id: effectiveCourseId });
+      return courses[0];
+    },
+    enabled: !!effectiveCourseId,
+  });
+
+  const { hasAccess, isLoading: accessLoading } = useCourseAccess(course);
 
   const { data: rawPages = [], isLoading: pagesLoading } = useQuery({
     queryKey: ["coursePages", moduleId],
@@ -125,9 +136,9 @@ export default function ModulePlayer() {
   });
 
   const { data: allCourseModules = [], isLoading: allModulesLoading } = useQuery({
-    queryKey: ["allCourseModules", courseId],
-    queryFn: () => base44.entities.CourseModule.filter({ courseId }, "order", 500),
-    enabled: !!courseId,
+    queryKey: ["allCourseModules", effectiveCourseId],
+    queryFn: () => base44.entities.CourseModule.filter({ courseId: effectiveCourseId }, "order", 500),
+    enabled: !!effectiveCourseId,
   });
 
   // Resolve the current module from whichever source answers first. The single
@@ -140,21 +151,21 @@ export default function ModulePlayer() {
   const moduleResolving = moduleRecordLoading || (!module && allModulesLoading);
 
   const { data: allCourseSections = [] } = useQuery({
-    queryKey: ["allCourseSections", courseId],
-    queryFn: () => base44.entities.CourseSection.filter({ courseId }, "order", 500),
-    enabled: !!courseId,
+    queryKey: ["allCourseSections", effectiveCourseId],
+    queryFn: () => base44.entities.CourseSection.filter({ courseId: effectiveCourseId }, "order", 500),
+    enabled: !!effectiveCourseId,
   });
 
   const { data: workbooks = [] } = useQuery({
-    queryKey: ["courseWorkbooks", courseId],
-    queryFn: () => base44.entities.Workbook.filter({ course_id: courseId }, "order", 500),
-    enabled: !!courseId,
+    queryKey: ["courseWorkbooks", effectiveCourseId],
+    queryFn: () => base44.entities.Workbook.filter({ course_id: effectiveCourseId }, "order", 500),
+    enabled: !!effectiveCourseId,
   });
 
   const { data: allCoursePages = [] } = useQuery({
-    queryKey: ["allCoursePages", courseId],
-    queryFn: () => base44.entities.CoursePage.filter({ courseId }, "order", 500),
-    enabled: !!courseId,
+    queryKey: ["allCoursePages", effectiveCourseId],
+    queryFn: () => base44.entities.CoursePage.filter({ courseId: effectiveCourseId }, "order", 500),
+    enabled: !!effectiveCourseId,
   });
 
   const { data: expert } = useQuery({
@@ -226,7 +237,7 @@ export default function ModulePlayer() {
         });
       }
       return base44.entities.CourseProgress.create({
-        courseId,
+        courseId: effectiveCourseId,
         moduleId,
         ...(pageId ? { pageId } : {}),
         status,
@@ -297,12 +308,15 @@ export default function ModulePlayer() {
 
       if (allPagesCompleted) {
         await completeModule();
-        if (!nextModuleInOrder) {
+        // Only show a finishing card we can stand behind. If a next module is
+        // known, this is a module milestone. Only call the whole course done
+        // when the course has genuinely loaded and this is its last content
+        // module. If course data has not resolved, show nothing rather than a
+        // false "you finished everything".
+        const stage = resolveCompletionStage();
+        if (stage) {
           setMilestoneSnapshot(buildMilestoneSnapshot());
-          setMilestone("course");
-        } else {
-          setMilestoneSnapshot(buildMilestoneSnapshot());
-          setMilestone("module");
+          setMilestone(stage);
         }
       } else {
         const completedCount = pages.filter((page) => {
@@ -507,6 +521,31 @@ export default function ModulePlayer() {
       ? courseModulesWithPages[currentContentIdx + 1] || null
       : null;
 
+  // Has the course-wide data actually arrived? Sections, modules and pages all
+  // load by courseId. If any of them is empty we do not know the shape of the
+  // course yet, and we must never conclude the course is finished from missing
+  // data. This is the guard that makes a blank course read as "still loading",
+  // not as "you have done the whole thing".
+  const courseDataReady =
+    allCourseSections.length > 0 &&
+    allCourseModules.length > 0 &&
+    allCoursePages.length > 0 &&
+    courseModulesWithPages.length > 0 &&
+    currentContentIdx >= 0;
+
+  const isLastContentModule =
+    courseDataReady && currentContentIdx === courseModulesWithPages.length - 1;
+
+  // Single source of truth for the finishing card. "module" when a real next
+  // module exists, "course" only when we are certain this is the last content
+  // module of a loaded course, and null when the course data has not resolved,
+  // so a failed or empty read can never present itself as completion.
+  const resolveCompletionStage = () => {
+    if (nextModuleInOrder) return "module";
+    if (isLastContentModule) return "course";
+    return null;
+  };
+
   const nextExpertName = nextModuleInOrder
     ? expertMap[nextModuleInOrder.expertId]?.name || ""
     : "";
@@ -527,7 +566,7 @@ export default function ModulePlayer() {
     if (nextId) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextId}&courseId=${courseId}`
+          `?moduleId=${nextId}&courseId=${effectiveCourseId}`
       );
     } else {
       navigate(createPageUrl("Classroom"));
@@ -564,25 +603,35 @@ export default function ModulePlayer() {
       return;
     }
     // Last lesson of the module. When the whole module is complete, show the
-    // completion milestone here too, the module card when more modules follow
-    // and the course card at the very end, so the finishing card appears
-    // whether the member finishes with Mark complete or with Next. Without this
-    // the Next button jumped straight to the following module and the card for
-    // this module was skipped. Only fall through to plain navigation if the
-    // module is somehow not fully complete.
+    // finishing card: the module card when more modules follow and the course
+    // card only at the genuine end of a loaded course. If the module is fully
+    // complete but the course data has not resolved, navigate on to the next
+    // module if we know it, otherwise return to the course rather than ever
+    // claiming the whole course is done from missing data.
     if (overallProgress === 100) {
-      setMilestoneSnapshot(buildMilestoneSnapshot());
-      setMilestone(nextModuleInOrder ? "module" : "course");
+      const stage = resolveCompletionStage();
+      if (stage) {
+        setMilestoneSnapshot(buildMilestoneSnapshot());
+        setMilestone(stage);
+        return;
+      }
+      if (nextModuleInOrder) {
+        navigate(
+          createPageUrl("ModulePlayer") +
+            `?moduleId=${nextModuleInOrder.id}&courseId=${effectiveCourseId}`
+        );
+        return;
+      }
+      navigate(createPageUrl("CourseDetail") + `?courseId=${effectiveCourseId}`);
       return;
     }
     if (nextModuleInOrder) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${nextModuleInOrder.id}&courseId=${courseId}`
+          `?moduleId=${nextModuleInOrder.id}&courseId=${effectiveCourseId}`
       );
     } else {
-      setMilestoneSnapshot(buildMilestoneSnapshot());
-      setMilestone("course");
+      navigate(createPageUrl("CourseDetail") + `?courseId=${effectiveCourseId}`);
     }
   };
 
@@ -598,7 +647,7 @@ export default function ModulePlayer() {
     if (firstContent) {
       navigate(
         createPageUrl("ModulePlayer") +
-          `?moduleId=${firstContent.id}&courseId=${courseId}`
+          `?moduleId=${firstContent.id}&courseId=${effectiveCourseId}`
       );
     } else {
       navigate("/Dashboard");
@@ -1068,7 +1117,7 @@ export default function ModulePlayer() {
         <div className="px-4 py-3 flex items-center justify-between">
           <button
             onClick={() =>
-              navigate(createPageUrl("CourseDetail") + `?courseId=${courseId}`)
+              navigate(createPageUrl("CourseDetail") + `?courseId=${effectiveCourseId}`)
             }
             className="flex-shrink-0 p-2 -m-1"
             style={{ position: "relative", zIndex: 2 }}
@@ -1128,7 +1177,7 @@ export default function ModulePlayer() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
             onClick={() =>
-              navigate(createPageUrl("CourseDetail") + `?courseId=${courseId}`)
+              navigate(createPageUrl("CourseDetail") + `?courseId=${effectiveCourseId}`)
             }
             className="flex items-center gap-3"
             style={{ background: "none", border: "none", cursor: "pointer" }}
