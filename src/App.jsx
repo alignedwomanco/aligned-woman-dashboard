@@ -104,6 +104,7 @@ const AuthenticatedApp = () => {
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
       <Route path="/Contact" element={<LayoutWrapper currentPageName="blueprint"><Contact /></LayoutWrapper>} />
       <Route path="/ContactForm" element={<LayoutWrapper currentPageName="blueprint"><ContactForm /></LayoutWrapper>} />
+      {/* /Apply and /ALIVEMethod routes kept for direct access but removed from nav */}
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/analytics" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
       <Route path="/checkout-success" element={<CheckoutSuccess />} />

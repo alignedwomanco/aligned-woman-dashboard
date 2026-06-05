@@ -21,14 +21,12 @@ const publicPages = [
 { name: "Home", label: "Home" },
 { name: "AWBlueprint", label: "Aligned Woman Blueprint", href: "/blueprint" },
 { name: "OurWhy", label: "Our Why" },
-{ name: "ALIVEMethod", label: "ALIVE Method" },
 { name: "Experts", label: "Experts" },
-{ name: "Apply", label: "Join" },
 { name: "Contact", label: "Contact" },
-{ name: "ContactForm", label: "Contact Form" },
 { name: "about-us", label: "About Us", href: "/about-us" },
 { name: "blueprint", label: "Blueprint", href: "/blueprint" },
-{ name: "CheckoutComplete", label: "Checkout" }];
+{ name: "CheckoutComplete", label: "Checkout" },
+{ name: "ContactForm", label: "Contact Form" }];
 
 
 const appNavigation = [
@@ -336,7 +334,7 @@ export default function Layout({ children, currentPageName }) {
                     </>
                 }
                   <ul className="space-y-2">
-                    {publicPages.filter(item => !["about-us", "blueprint", "CheckoutComplete"].includes(item.name)).map((item) =>
+                    {publicPages.filter(item => !["about-us", "blueprint", "CheckoutComplete", "ContactForm"].includes(item.name)).map((item) =>
                   <li key={item.name}>
                         <Link
                       to={item.href || createPageUrl(item.name)}
