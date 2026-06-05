@@ -311,7 +311,7 @@ function OrderSummaryContent() {
         The Aligned Woman Blueprint&trade;
       </div>
       <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 12, color: "#8A7A76", marginBottom: 20 }}>
-        Lifetime access &middot; Always open
+        Always open
       </div>
       <div style={{ height: 1, background: "rgba(74,14,46,0.06)", marginBottom: 20 }} />
       <ul className="space-y-2.5" style={{ marginBottom: 20 }}>
@@ -487,7 +487,7 @@ function MobileOrderSummary({ open, onToggle }) {
             The Aligned Woman Blueprint&trade;
           </div>
           <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 400, fontSize: 11, color: "#8A7A76" }}>
-            Lifetime access &middot; Always open
+            Always open
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -914,7 +914,7 @@ export default function Checkout() {
 
             {/* Microcopy */}
             <p className="text-center" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 11, color: "#8A7A76", marginTop: 32 }}>
-              Lifetime access &middot; &#128274; Secure checkout
+              &#128274; Secure checkout
             </p>
 
             {/* CTA */}
