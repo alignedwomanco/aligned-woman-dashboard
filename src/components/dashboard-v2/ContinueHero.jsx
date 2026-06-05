@@ -72,7 +72,7 @@ export default function ContinueHero({
   // instead of "#" so the button always has a working destination.
   const courseDetailUrl = `${createPageUrl("CourseDetail")}?courseId=${BLUEPRINT_COURSE_ID}`;
   const playerUrl = module?.id
-    ? `${createPageUrl("ModulePlayer")}?moduleId=${module.id}${nextPageId ? `&pageId=${nextPageId}` : ""}`
+    ? `${createPageUrl("ModulePlayer")}?moduleId=${module.id}&courseId=${module.courseId || ""}${nextPageId ? `&pageId=${nextPageId}` : ""}`
     : courseDetailUrl;
 
   const overviewUrl = module?.id
