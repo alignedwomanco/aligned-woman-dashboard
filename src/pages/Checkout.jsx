@@ -533,17 +533,52 @@ export default function Checkout() {
   const [updates, setUpdates] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-  const [stage, setStage] = useState("form");
+  const [stage, setStage] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("success") === "true" || params.get("session_id")) return "success";
+    }
+    return "form";
+  });
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+
+  // Signed-in buyer. Checkout requires login so the email a person pays with
+  // is their account email, and access links to the same address.
+  const [authUser, setAuthUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const firstInvalidRef = useRef(null);
 
-  // Check for success return from Stripe
+  // Gate the form behind login, and prefill the buyer from their account. On
+  // the success return from Stripe they are already signed in, so we only
+  // prefill and never bounce them to login.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("success") === "true" || params.get("session_id")) {
-      setStage("success");
-    }
+    const isSuccessReturn = params.get("success") === "true" || !!params.get("session_id");
+
+    base44.auth.me()
+      .then((me) => {
+        if (me) {
+          setAuthUser(me);
+          setForm((prev) => ({
+            ...prev,
+            email: me.email || prev.email,
+            name: prev.name || me.full_name || "",
+          }));
+          setAuthChecked(true);
+        } else if (isSuccessReturn) {
+          setAuthChecked(true);
+        } else {
+          base44.auth.redirectToLogin(window.location.href);
+        }
+      })
+      .catch(() => {
+        if (isSuccessReturn) {
+          setAuthChecked(true);
+        } else {
+          base44.auth.redirectToLogin(window.location.href);
+        }
+      });
   }, []);
 
   // Read affiliate code from sessionStorage
@@ -597,6 +632,13 @@ export default function Checkout() {
     if (processing) return;
     if (!validateAll()) return;
 
+    // Safety net: a paid checkout must run as a signed-in account. If the
+    // session lapsed, send them to log in and return here.
+    if (type !== "bulk" && !authUser) {
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+
     setProcessing(true);
     setPaymentError(null);
 
@@ -638,9 +680,11 @@ export default function Checkout() {
         url.searchParams.set("client_reference_id", affiliateCode);
       }
 
-      // Pre-fill email on Stripe checkout
-      if (form.email) {
-        url.searchParams.set("prefilled_email", form.email);
+      // Pre-fill email on Stripe checkout from the signed-in account, so the
+      // payment email matches the account that will receive access.
+      const prefillEmail = (authUser && authUser.email) ? authUser.email : form.email;
+      if (prefillEmail) {
+        url.searchParams.set("prefilled_email", prefillEmail);
       }
 
       window.location.href = url.toString();
@@ -663,6 +707,22 @@ export default function Checkout() {
     return (
       <main id="main-content" style={{ background: "#FAF5F3", minHeight: "80vh" }}>
         <SuccessScreen type={type} form={form} />
+      </main>
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  AUTH GATE (loading until we know who is signed in)               */
+  /* ---------------------------------------------------------------- */
+
+  if (!authChecked) {
+    return (
+      <main id="main-content" style={{ background: "#FAF5F3", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div
+          className="animate-spin"
+          aria-label="Loading"
+          style={{ width: 28, height: 28, border: "3px solid rgba(74,14,46,0.18)", borderTopColor: "#4A0E2E", borderRadius: "50%" }}
+        />
       </main>
     );
   }
@@ -766,7 +826,14 @@ export default function Checkout() {
                 onBlur={() => handleBlur("email")}
                 error={errors.email}
                 touched={touched.email}
+                readOnly={!!authUser}
               />
+
+              {authUser && (
+                <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 11, color: "#8A7A76", lineHeight: 1.6, marginTop: -8 }}>
+                  This is your account email. Your access links to it.
+                </p>
+              )}
 
               {/* Friend fields */}
               {type === "friend" && (
