@@ -5,7 +5,7 @@ import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -32,6 +32,11 @@ import ContactForm from './pages/ContactForm';
 import Welcome from './pages/Welcome';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import CheckoutSuccess from './pages/CheckoutSuccess';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -57,57 +62,61 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
     }
+    // auth_required is now handled by ProtectedRoute per-route
   }
 
   // Render the main app
   return (
     <Routes>
-      <Route path="/Dashboard" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="/CourseDetail" element={<LayoutWrapper currentPageName="CourseDetail"><CourseDetail /></LayoutWrapper>} />
-      <Route path="/SectionDetail" element={<LayoutWrapper currentPageName="SectionDetail"><SectionDetail /></LayoutWrapper>} />
-      <Route path="/Workbook" element={<LayoutWrapper currentPageName="Workbook"><WorkbookViewer /></LayoutWrapper>} />
-      <Route path="/WorkbookViewer" element={<LayoutWrapper currentPageName="Workbook"><WorkbookViewer /></LayoutWrapper>} />
+      {/* ── Auth pages (always public) ── */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* ── Public pages ── */}
       <Route path="/" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       <Route path="/home" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       <Route path="/blueprint" element={<LayoutWrapper currentPageName="blueprint"><BlueprintPage /></LayoutWrapper>} />
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
-      <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/pdf-test" element={<PdfTest />} />
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
       <Route path="/experts/:slug" element={<ExpertProfile />} />
       <Route path="/checkout" element={<Checkout />} />
-      <Route path="/expert-dashboard" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
-      <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
-      <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
       <Route path="/Contact" element={<LayoutWrapper currentPageName="blueprint"><Contact /></LayoutWrapper>} />
       <Route path="/ContactForm" element={<LayoutWrapper currentPageName="blueprint"><ContactForm /></LayoutWrapper>} />
-      {/* /Apply and /ALIVEMethod routes kept for direct access but removed from nav */}
       <Route path="/welcome" element={<Welcome />} />
-      <Route path="/analytics" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
       <Route path="/checkout-success" element={<CheckoutSuccess />} />
+      <Route path="/pdf-test" element={<PdfTest />} />
+
+      {/* ── Protected pages (require login) ── */}
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route path="/Dashboard" element={<LayoutWrapper currentPageName={mainPageKey}><MainPage /></LayoutWrapper>} />
+        {Object.entries(Pages).map(([path, Page]) => (
+          <Route
+            key={path}
+            path={`/${path}`}
+            element={
+              <LayoutWrapper currentPageName={path}>
+                <Page />
+              </LayoutWrapper>
+            }
+          />
+        ))}
+        <Route path="/CourseDetail" element={<LayoutWrapper currentPageName="CourseDetail"><CourseDetail /></LayoutWrapper>} />
+        <Route path="/SectionDetail" element={<LayoutWrapper currentPageName="SectionDetail"><SectionDetail /></LayoutWrapper>} />
+        <Route path="/Workbook" element={<LayoutWrapper currentPageName="Workbook"><WorkbookViewer /></LayoutWrapper>} />
+        <Route path="/WorkbookViewer" element={<LayoutWrapper currentPageName="Workbook"><WorkbookViewer /></LayoutWrapper>} />
+        <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/expert-dashboard" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
+        <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
+        <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
+        <Route path="/analytics" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
+      </Route>
+
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
