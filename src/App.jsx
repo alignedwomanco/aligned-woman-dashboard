@@ -84,6 +84,7 @@ const AuthenticatedApp = () => {
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
       <Route path="/experts/:slug" element={<ExpertProfile />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/Checkout" element={<Checkout />} />
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
       <Route path="/Contact" element={<LayoutWrapper currentPageName="blueprint"><Contact /></LayoutWrapper>} />
       <Route path="/ContactForm" element={<LayoutWrapper currentPageName="blueprint"><ContactForm /></LayoutWrapper>} />
