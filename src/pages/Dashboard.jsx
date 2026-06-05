@@ -261,6 +261,23 @@ export default function Dashboard() {
           } catch (_) {
             // Nothing to claim, or the claim failed. Fall through to re-check.
           }
+
+          // Checkout backstop: a buyer who paid then created their account may
+          // land here instead of returning to the success page. If we are
+          // holding their Stripe session, claim it now so the Blueprint
+          // unlocks wherever they land. verifyCheckoutSession is idempotent and
+          // grants to the signed-in account.
+          try {
+            const pendingSession = localStorage.getItem("aw_pending_checkout_session");
+            if (pendingSession) {
+              await base44.functions.invoke("verifyCheckoutSession", { session_id: pendingSession });
+              localStorage.removeItem("aw_pending_checkout_session");
+            }
+          } catch (_) {
+            // Nothing to claim, or a transient failure. Leave the key so a later
+            // load can retry, and fall through to re-check.
+          }
+
           try {
             me = await base44.auth.me();
           } catch (_) {
