@@ -13,7 +13,7 @@ import {
 "@/components/ui/dropdown-menu";
 import NotificationsDropdown from "../components/navigation/NotificationsDropdown";
 import MessagesDrawer from "../components/navigation/MessagesDrawer";
-import LaurAIChatWidget from "../components/LaurAIChatWidget";
+
 import { hasBlueprintAccess } from "@/lib/entitlement";
 import PendingApproval from "@/components/access/PendingApproval";
 
@@ -567,7 +567,7 @@ export default function Layout({ children, currentPageName }) {
         {showNotifications && <NotificationsDropdown onClose={() => setShowNotifications(false)} />}
 
         <main>{children}</main>
-        <LaurAIChatWidget />
+
       </div>
     </div>
   );
