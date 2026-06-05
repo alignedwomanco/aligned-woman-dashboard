@@ -4,6 +4,12 @@ import { useAuth } from './AuthContext';
 import { base44 } from '@/api/base44Client';
 import { pagesConfig } from '@/pages.config';
 
+const PENDING_CHECKOUT_KEY = "aw_pending_checkout_session";
+
+// Guards against double-invoking the claim when several navigations fire while
+// the verify call is still in flight. Module scope so it survives re-renders.
+let checkoutClaimInFlight = false;
+
 export default function NavigationTracker() {
     const location = useLocation();
     const { isAuthenticated } = useAuth();
@@ -45,6 +51,50 @@ export default function NavigationTracker() {
             });
         }
     }, [location, isAuthenticated, Pages, mainPageKey]);
+
+    // Checkout claim. A buyer who paid then created their account can be dropped
+    // on any page by the auth screen, not the dashboard. Wherever a signed-in
+    // person lands with a paid session waiting, unlock the course and send them
+    // to the dashboard. This runs its own sign-in check so it works on public
+    // pages too, and it only acts when a pending session is present.
+    useEffect(() => {
+        if (checkoutClaimInFlight) return;
+
+        let pending = "";
+        try {
+            pending = window.localStorage.getItem(PENDING_CHECKOUT_KEY) || "";
+        } catch (_err) {
+            pending = "";
+        }
+        if (!pending) return;
+
+        checkoutClaimInFlight = true;
+        (async () => {
+            try {
+                const authed = await base44.auth.isAuthenticated();
+                if (!authed) return; // not signed in yet, the finally resets the guard
+
+                await base44.functions.invoke("verifyCheckoutSession", { session_id: pending });
+
+                try {
+                    window.localStorage.removeItem(PENDING_CHECKOUT_KEY);
+                } catch (_err) {
+                    // nothing to do
+                }
+
+                // Land them in their unlocked course rather than wherever the
+                // auth screen left them.
+                if (window.location.pathname.toLowerCase() !== "/dashboard") {
+                    window.location.href = "/Dashboard";
+                }
+            } catch (_err) {
+                // Transient failure or nothing to claim. Leave the key so a
+                // later page load can retry.
+            } finally {
+                checkoutClaimInFlight = false;
+            }
+        })();
+    }, [location, isAuthenticated]);
 
     return null;
 }
