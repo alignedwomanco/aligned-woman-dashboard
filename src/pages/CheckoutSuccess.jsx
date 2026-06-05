@@ -30,9 +30,10 @@ function clearStorage(key) {
   }
 }
 
-function goToLogin() {
+function goToRegister() {
   clearStorage(LOGIN_FLAG);
-  base44.auth.redirectToLogin(window.location.href);
+  window.location.href =
+    "/register?from_url=" + encodeURIComponent(window.location.href);
 }
 
 function Eyebrow({ children }) {
@@ -91,6 +92,14 @@ export default function CheckoutSuccess() {
 
       if (sessionId && sessionId !== "{CHECKOUT_SESSION_ID}") {
         writeStorage(SESSION_KEY, sessionId);
+        // Persist to localStorage as well. If the buyer signs up and lands on
+        // the dashboard instead of returning here, the dashboard reads this key
+        // and claims access. localStorage survives the auth round trip.
+        try {
+          window.localStorage.setItem("aw_pending_checkout_session", sessionId);
+        } catch (_err) {
+          // storage unavailable, the URL and session storage still cover us
+        }
       } else {
         sessionId = readStorage(SESSION_KEY);
       }
@@ -101,7 +110,7 @@ export default function CheckoutSuccess() {
       }
 
       // Make sure the buyer is signed in. Paying on Stripe does not sign a
-      // person into the app, so we send them through the sign-in screen once,
+      // person into the app, so we send them through the register screen once,
       // keeping the session id so it survives the round trip.
       let user = null;
       try {
@@ -111,9 +120,15 @@ export default function CheckoutSuccess() {
       }
 
       if (!user) {
+        // The buyer has paid but has no session yet. Send them to create their
+        // account, then bring them straight back here so access attaches on
+        // return. The session id rides along in from_url and is also held in
+        // sessionStorage as a fallback. The flag means we only send them once,
+        // so they are never caught in a loop if they return still signed out.
         if (readStorage(LOGIN_FLAG) !== "1") {
           writeStorage(LOGIN_FLAG, "1");
-          base44.auth.redirectToLogin(window.location.href);
+          window.location.href =
+            "/register?from_url=" + encodeURIComponent(window.location.href);
           return;
         }
         if (active) setStatus("needsignin");
@@ -142,6 +157,11 @@ export default function CheckoutSuccess() {
         if (!active) return;
         if (data.hasAccess) {
           clearStorage(SESSION_KEY);
+          try {
+            window.localStorage.removeItem("aw_pending_checkout_session");
+          } catch (_err) {
+            // nothing to do
+          }
           setStatus("granted");
         } else if (data.conflict) {
           setStatus("conflict");
@@ -209,16 +229,17 @@ export default function CheckoutSuccess() {
           <div>
             <Eyebrow>One last step</Eyebrow>
             <h1 className="font-display text-awburg-core text-3xl leading-tight mb-5">
-              Sign in to unlock your place
+              Create your account to unlock
             </h1>
             <p className="text-awburg-core text-base leading-relaxed mb-8">
-              Your payment is confirmed. Sign in with the same email you paid
-              with and your Blueprint opens straight away. No separate sign up
-              needed, just continue with Google or Apple.
+              Your payment is confirmed. Create your account with the same email
+              you paid with, or sign in if you already have one, and your
+              Blueprint opens straight away. You can continue with Google or
+              Apple too.
             </p>
             <div className="flex flex-col items-center gap-4">
-              <PrimaryButton onClick={goToLogin}>
-                Sign in to unlock
+              <PrimaryButton onClick={goToRegister}>
+                Create my account
               </PrimaryButton>
               <SupportLink />
             </div>
