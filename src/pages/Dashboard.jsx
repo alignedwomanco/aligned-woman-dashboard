@@ -198,9 +198,15 @@ export default function Dashboard() {
         window.location.reload();
       } catch (err) {
         console.error("Failed to process quiz result:", err);
-        // Only clear localStorage if it was a data error, not an auth error
+        // Only act if this was a data error, not an auth error. Clear the bad
+        // result so the reload cannot loop, then reload so load() resolves to a
+        // real state instead of sitting on the loading skeleton (which load()
+        // shows while a quiz result is pending).
         const authed = await base44.auth.isAuthenticated().catch(() => false);
-        if (authed) localStorage.removeItem("aw_quiz_result");
+        if (authed) {
+          localStorage.removeItem("aw_quiz_result");
+          window.location.reload();
+        }
       }
     };
 
@@ -226,6 +232,16 @@ export default function Dashboard() {
   const load = async () => {
     setStatus("loading");
     setErrorMsg("");
+
+    // A free member who just finished the quiz arrives with a pending result in
+    // localStorage. processPendingQuiz owns that first pass: it creates the
+    // MemberProfile, writes the archetype, then reloads. Defer to it so load()
+    // does not race ahead into the not-registered wall. On the reload the result
+    // is cleared and the profile is in place, so load() resolves to state_c.
+    if (localStorage.getItem("aw_quiz_result")) {
+      return; // stay on the loading skeleton; processPendingQuiz finishes and reloads
+    }
+
     try {
       const result = await getDashboardState();
       setData(result);
