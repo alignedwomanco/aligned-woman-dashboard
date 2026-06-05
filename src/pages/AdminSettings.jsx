@@ -346,7 +346,6 @@ export default function AdminSettings() {
               <div className="flex flex-nowrap sm:flex-wrap gap-1.5 sm:gap-2 pb-1">
                 {[
                   { value: "integrations", label: "Integrations", icon: "🔗" },
-                  { value: "ai-chat", label: "AI Chat", icon: "🤖" },
                   { value: "support", label: "Support", icon: "🎧" },
                   { value: "logos", label: "Logos", icon: "🎨" },
                   { value: "access-tags", label: "Access Tags", icon: "🏷️" },
@@ -790,11 +789,6 @@ export default function AdminSettings() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* AI Chat Widget Tab */}
-          <TabsContent value="ai-chat">
-            <AIChatWidgetSettings />
           </TabsContent>
 
           {/* Support Room Tab */}
