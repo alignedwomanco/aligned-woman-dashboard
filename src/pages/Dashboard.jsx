@@ -9,7 +9,6 @@ import useContinueModule from "@/hooks/useContinueModule";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
 import DashboardHeader from "@/components/dashboard-v2/DashboardHeader";
-import CommunityCard from "@/components/dashboard-v2/CommunityCard";
 import ExpertSpotlight from "@/components/dashboard-v2/ExpertSpotlight";
 import AccountStatusFooter from "@/components/dashboard-v2/AccountStatusFooter";
 import StateB from "@/components/dashboard-v2/states/StateB";
@@ -491,10 +490,6 @@ export default function Dashboard() {
             </section>
 
             <aside className="lg:col-span-4 order-2 flex flex-col gap-4">
-              {/* Community card hidden on mobile, shown from md up */}
-              <div className="hidden md:block">
-                <CommunityCard />
-              </div>
               <ExpertSpotlight />
               <div className="pt-2">
                 <AccountStatusFooter
