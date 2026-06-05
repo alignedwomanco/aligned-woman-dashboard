@@ -60,6 +60,12 @@ export default function NavigationTracker() {
     useEffect(() => {
         if (checkoutClaimInFlight) return;
 
+        // The dedicated success page owns the claim. Acting here as well would
+        // fire a second, simultaneous verify for the same session and duplicate
+        // the Sale and the welcome email. Stand down on that page and only back
+        // up other pages, where nothing else is verifying.
+        if (window.location.pathname.toLowerCase().startsWith("/checkout-success")) return;
+
         let pending = "";
         try {
             pending = window.localStorage.getItem(PENDING_CHECKOUT_KEY) || "";
