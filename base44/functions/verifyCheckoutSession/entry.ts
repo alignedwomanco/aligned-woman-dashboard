@@ -3,6 +3,11 @@ import { createClientFromRequest } from "npm:@base44/sdk@0.8.23";
 const BLUEPRINT_ACCESS_TAG = "blueprint_paid";
 const STRIPE_API_BASE = "https://api.stripe.com/v1";
 
+// Where the confirmation email sends the buyer. If your dashboard route is
+// lower case, change this to APP_URL + "/dashboard".
+const APP_URL = "https://app.alignedwomanco.com";
+const DASHBOARD_URL = APP_URL + "/Dashboard";
+
 function corsHeaders(): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": "*",
@@ -226,6 +231,61 @@ Deno.serve(async (req: Request) => {
       } catch (_err) {
         // The Sale already carries the affiliate fields, so commission is
         // recoverable from Sales even if this rollup write fails.
+      }
+    }
+
+    // Send the buyer a warm, on-brand confirmation with a link back into the
+    // dashboard, and log the send. Best-effort by design: any failure here is
+    // recorded and then swallowed so it can never block access.
+    const fullName = user.full_name || stripeName || "";
+    const firstName = (fullName.split(" ")[0] || "").trim() || "there";
+    const recipient = userEmail || stripeEmail;
+    if (recipient) {
+      const subject = "Welcome to The Aligned Woman Blueprint";
+      const html =
+        '<div style="margin:0;padding:0;background-color:#F7F2EE;">' +
+          '<div style="max-width:560px;margin:0 auto;padding:40px 24px;font-family:\'Montserrat\',Helvetica,Arial,sans-serif;color:#3A2B30;">' +
+            '<div style="background-color:#FFFFFF;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(74,14,46,0.08);">' +
+              '<div style="height:6px;background:linear-gradient(90deg,#4A0E2E,#C4847A);"></div>' +
+              '<div style="padding:40px 36px;">' +
+                '<p style="margin:0 0 24px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#C4847A;font-weight:600;">Your place is held</p>' +
+                '<h1 style="margin:0 0 20px;font-family:\'DM Serif Display\',Georgia,serif;font-size:30px;line-height:1.2;color:#4A0E2E;font-weight:400;">Welcome to The Aligned <span style="font-style:italic;">Woman</span> Blueprint</h1>' +
+                '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Hi ' + firstName + ',</p>' +
+                '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Your payment is confirmed and your Blueprint is open. This is the education you should have been given a long time ago, and it is yours now, in your own time, for the year ahead.</p>' +
+                '<p style="margin:0 0 28px;font-size:16px;line-height:1.7;">Sign in whenever you are ready and begin with Phase One. Everything unlocks from there.</p>' +
+                '<a href="' + DASHBOARD_URL + '" style="display:inline-block;background-color:#4A0E2E;color:#FFFFFF;text-decoration:none;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;padding:16px 30px;border-radius:999px;">Open my dashboard</a>' +
+                '<p style="margin:32px 0 0;font-size:14px;line-height:1.7;color:#6B5B61;">With you on the way,<br/>The Aligned Woman team</p>' +
+              '</div>' +
+            '</div>' +
+            '<p style="margin:20px 0 0;text-align:center;font-size:12px;line-height:1.6;color:#9A8B90;">You are receiving this because you purchased The Aligned Woman Blueprint.</p>' +
+          '</div>' +
+        '</div>';
+
+      let emailStatus = "sent";
+      let emailError = "";
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: recipient,
+          subject,
+          body: html,
+        });
+      } catch (err) {
+        emailStatus = "failed";
+        emailError = (err as any)?.message || "send_failed";
+      }
+
+      try {
+        await base44.asServiceRole.entities.EmailLog.create({
+          to_email: recipient,
+          to_name: fullName || firstName,
+          subject,
+          type: "welcome",
+          status: emailStatus,
+          error_message: emailError,
+          sent_at: new Date().toISOString(),
+        });
+      } catch (_err) {
+        // Logging is best-effort. Never block the response on it.
       }
     }
   }
