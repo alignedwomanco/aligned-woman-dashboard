@@ -4,11 +4,31 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+
+// After registering, return the person to where they came from (for example the
+// checkout success page), falling back to the dashboard. Only ever returns to
+// our own app, never an external address.
+function getPostAuthDestination() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("from_url");
+    if (fromUrl) {
+      if (fromUrl.startsWith("/")) return fromUrl;
+      const url = new URL(fromUrl, window.location.origin);
+      if (url.origin === window.location.origin) {
+        return url.pathname + url.search + url.hash;
+      }
+    }
+  } catch (_err) {
+    // fall through to the default
+  }
+  return "/Dashboard";
+}
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -45,7 +65,7 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
-      window.location.href = "/";
+      window.location.href = getPostAuthDestination();
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {
@@ -66,20 +86,19 @@ export default function Register() {
     }
   };
 
-  const handleGoogle = () => base44.auth.loginWithProvider("google", "/Dashboard");
-  const handleMicrosoft = () => base44.auth.loginWithProvider("microsoft", "/Dashboard");
-  const handleFacebook = () => base44.auth.loginWithProvider("facebook", "/Dashboard");
-  const handleApple = () => base44.auth.loginWithProvider("apple", "/Dashboard");
+  const handleGoogle = () => base44.auth.loginWithProvider("google", getPostAuthDestination());
+  const handleMicrosoft = () => base44.auth.loginWithProvider("microsoft", getPostAuthDestination());
+  const handleFacebook = () => base44.auth.loginWithProvider("facebook", getPostAuthDestination());
+  const handleApple = () => base44.auth.loginWithProvider("apple", getPostAuthDestination());
 
   if (showOtp) {
     return (
       <AuthLayout
-        icon={Mail}
         title="Verify your email"
         subtitle={`We sent a code to ${email}`}
       >
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-body">
             {error}
           </div>
         )}
@@ -102,7 +121,7 @@ export default function Register() {
           </InputOTP>
         </div>
         <Button
-          className="w-full h-12 font-medium"
+          className="w-full h-12 font-body bg-awburg-core hover:bg-awburg-core/90 text-white"
           onClick={handleVerify}
           disabled={loading || otpCode.length < 6}
         >
@@ -115,9 +134,9 @@ export default function Register() {
             "Verify"
           )}
         </Button>
-        <p className="text-center text-sm text-muted-foreground mt-4">
+        <p className="text-center text-sm text-awburg-core/70 mt-4 font-body">
           Didn't receive the code?{" "}
-          <button onClick={handleResend} className="text-primary font-medium hover:underline">
+          <button onClick={handleResend} className="text-awrose-core font-medium hover:underline">
             Resend
           </button>
         </p>
@@ -127,32 +146,31 @@ export default function Register() {
 
   return (
     <AuthLayout
-      icon={UserPlus}
       title="Create your account"
       subtitle="Sign up to get started"
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" className="text-primary font-medium hover:underline">
+          <Link to="/login" className="text-awrose-core font-medium hover:underline">
             Log in
           </Link>
         </>
       }
     >
       <div className="space-y-3 mb-6">
-        <Button variant="outline" className="w-full h-12 text-sm font-medium" onClick={handleGoogle}>
+        <Button variant="outline" className="w-full h-12 text-sm font-body" onClick={handleGoogle}>
           <GoogleIcon className="w-5 h-5 mr-2" />
           Continue with Google
         </Button>
-        <Button variant="outline" className="w-full h-12 text-sm font-medium" onClick={handleMicrosoft}>
+        <Button variant="outline" className="w-full h-12 text-sm font-body" onClick={handleMicrosoft}>
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#00a4ef" d="M13 1h10v10H13z"/><path fill="#7fba00" d="M1 13h10v10H1z"/><path fill="#ffb900" d="M13 13h10v10H13z"/></svg>
           Continue with Microsoft
         </Button>
-        <Button variant="outline" className="w-full h-12 text-sm font-medium" onClick={handleFacebook}>
+        <Button variant="outline" className="w-full h-12 text-sm font-body" onClick={handleFacebook}>
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.93-1.956 1.886v2.256h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
           Continue with Facebook
         </Button>
-        <Button variant="outline" className="w-full h-12 text-sm font-medium" onClick={handleApple}>
+        <Button variant="outline" className="w-full h-12 text-sm font-body" onClick={handleApple}>
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/></svg>
           Continue with Apple
         </Button>
@@ -160,24 +178,24 @@ export default function Register() {
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
+          <div className="w-full border-t border-awburg-core/15" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
+          <span className="bg-white px-3 text-awburg-core/50 tracking-eyebrow">or</span>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-body">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="font-body text-awburg-core">Email</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" aria-hidden="true" />
             <Input
               id="email"
               type="email"
@@ -186,15 +204,15 @@ export default function Register() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
+              className="pl-10 h-12 font-body"
               required
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password" className="font-body text-awburg-core">Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" aria-hidden="true" />
             <Input
               id="password"
               type="password"
@@ -202,15 +220,15 @@ export default function Register() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
+              className="pl-10 h-12 font-body"
               required
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
+          <Label htmlFor="confirm" className="font-body text-awburg-core">Confirm Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" aria-hidden="true" />
             <Input
               id="confirm"
               type="password"
@@ -218,12 +236,12 @@ export default function Register() {
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-12"
+              className="pl-10 h-12 font-body"
               required
             />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+        <Button type="submit" className="w-full h-12 font-body bg-awburg-core hover:bg-awburg-core/90 text-white" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
