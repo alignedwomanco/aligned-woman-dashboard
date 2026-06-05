@@ -62,10 +62,14 @@ function useExpertData() {
 
   const expert = adminExpertId ? expertById : (experts[0] || null);
 
+  // Resolve the affiliate by the expert being shown, not by the logged-in
+  // account. The real link is Affiliate.expert_id pointing at this Expert.
+  // Matching on email returned the viewer's own affiliate record and broke
+  // entirely when a stored affiliate email had stray whitespace.
   const { data: affiliates = [], isLoading: loadingAffiliate } = useQuery({
-    queryKey: ["expert-affiliate", expert?.linked_user_email || userEmail],
-    queryFn: () => base44.entities.Affiliate.filter({ email: expert?.linked_user_email || userEmail }),
-    enabled: !!expert,
+    queryKey: ["expert-affiliate", expert?.id],
+    queryFn: () => base44.entities.Affiliate.filter({ expert_id: expert.id }),
+    enabled: !!expert?.id,
   });
 
   const affiliateCode = affiliates[0]?.unique_code || "";
@@ -720,7 +724,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         </div>
       )}
 
-      {/* ── WYSIWYG PROFILE CARD — mirrors public ExpertProfile hero layout ── */}
+      {/* WYSIWYG PROFILE CARD - mirrors public ExpertProfile hero layout */}
       <div
         className="rounded-xl overflow-visible"
         style={{
@@ -739,11 +743,11 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
           </div>
         )}
 
-        {/* Hero section — matches public profile 40/60 grid */}
+        {/* Hero section - matches public profile 40/60 grid */}
         <div className="p-6 md:p-8">
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,3fr)", gap: 40, alignItems: "start" }}>
 
-            {/* LEFT — Large photo (3:4 ratio like public profile) */}
+            {/* LEFT - Large photo (3:4 ratio like public profile) */}
             <div>
               <div
                 className="relative group"
@@ -779,7 +783,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
               </div>
             </div>
 
-            {/* RIGHT — details */}
+            {/* RIGHT - details */}
             <div style={{ paddingTop: 4 }}>
               {/* Domain eyebrow */}
               <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: "#C4847A", marginBottom: 12 }}>
@@ -800,7 +804,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                 </h2>
               )}
 
-              {/* Title — shown as plain text on public profile */}
+              {/* Title - shown as plain text on public profile */}
               {isEditing ? (
                 <input
                   value={formData.title}
@@ -814,7 +818,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                 </p>
               )}
 
-              {/* Title tags (split by |) — shown as pill tags on public profile */}
+              {/* Title tags (split by |) - shown as pill tags on public profile */}
               {titleTags.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
                   {titleTags.map((tag, i) => (
@@ -847,7 +851,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                       </span>
                     ))}
 
-                    {/* Typeahead input — only in edit mode */}
+                    {/* Typeahead input - only in edit mode */}
                     {isEditing && (
                       <div style={{ position: "relative" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -859,7 +863,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                             }}
                             onFocus={() => { if (specialtySearch.trim()) setShowSpecialtyDropdown(true); }}
                             onBlur={() => setTimeout(() => setShowSpecialtyDropdown(false), 150)}
-                            placeholder="Search specialties…"
+                            placeholder="Search specialties..."
                             style={{ fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px dashed rgba(74,14,46,0.25)", borderRadius: 100, padding: "6px 14px", outline: "none", background: "transparent", width: 160 }}
                           />
                           {/* Browse all button */}
@@ -958,7 +962,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                 </div>
               )}
 
-              {/* Social link icons — one per fixed field + custom links */}
+              {/* Social link icons - one per fixed field + custom links */}
               <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
                 {SOCIAL_FIELDS.map(({ key, label, Icon: SIcon, placeholder }) => {
                   const hasValue = !!formData[key];
@@ -1048,7 +1052,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                             type="text"
                             value={cl.url || ""}
                             onChange={(e) => setFormData((f) => ({ ...f, custom_links: f.custom_links.map((l, idx) => idx === i ? { ...l, url: e.target.value } : l) }))}
-                            placeholder="https://…"
+                            placeholder="https://..."
                             onKeyDown={(e) => { if (e.key === "Enter") setActiveCustomLink(null); }}
                             style={{ width: "100%", fontFamily: sans, fontSize: 12, color: "#3A2A28", border: "1px solid rgba(74,14,46,0.15)", borderRadius: 6, padding: "8px 10px", outline: "none", boxSizing: "border-box", marginBottom: 8 }}
                           />
@@ -1061,7 +1065,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                   );
                 })}
 
-                {/* Add custom link button — only in edit mode, max 2 */}
+                {/* Add custom link button - only in edit mode, max 2 */}
                 {isEditing && formData.custom_links.length < MAX_CUSTOM_LINKS && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <button
@@ -1083,7 +1087,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                 )}
               </div>
 
-              {/* CTA buttons — non-editable, for visual context only */}
+              {/* CTA buttons - non-editable, for visual context only */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                 <div style={{ background: "#C4847A", color: "#0E0208", borderRadius: 100, padding: "12px 24px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5, userSelect: "none" }}>
                   Send a Message
@@ -1095,7 +1099,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
             </div>
           </div>
 
-          {/* BIO — full width below the hero, matching public profile "About" card */}
+          {/* BIO - full width below the hero, matching public profile "About" card */}
           <div style={{ marginTop: 28 }}>
             <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: "#C4847A", marginBottom: 12 }}>About</p>
             {isEditing ? (
@@ -1103,7 +1107,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
                 value={formData.bio}
                 onChange={(e) => setFormData((f) => ({ ...f, bio: e.target.value }))}
                 rows={6}
-                placeholder="Write your biography…"
+                placeholder="Write your biography..."
                 style={{ width: "100%", fontFamily: sans, fontWeight: 300, fontSize: 14, color: "#3A2A28", lineHeight: 1.85, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 8, padding: "12px 14px", outline: "none", resize: "vertical", boxSizing: "border-box", background: "#FFFFFF" }}
               />
             ) : (
@@ -1124,7 +1128,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
               disabled={saving}
               style={{ display: "flex", alignItems: "center", gap: 8, background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 100, padding: "13px 28px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", cursor: saving ? "wait" : "pointer", opacity: saving ? 0.6 : 1 }}
             >
-              {saving ? <><Loader2 className="animate-spin" style={{ width: 15, height: 15 }} /> Saving…</> : <><Save style={{ width: 14, height: 14 }} /> Save Changes</>}
+              {saving ? <><Loader2 className="animate-spin" style={{ width: 15, height: 15 }} /> Saving...</> : <><Save style={{ width: 14, height: 14 }} /> Save Changes</>}
             </button>
             <button
               onClick={handleCancel}
@@ -1149,7 +1153,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
         )}
       </div>
 
-      {/* ── VIEW PUBLIC PROFILE LINK ── */}
+      {/* VIEW PUBLIC PROFILE LINK */}
       <div className="rounded-xl p-5 flex items-center justify-between" style={{ background: "#FDF5F3", border: "1px solid rgba(74,14,46,0.06)" }}>
         <div>
           <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 13, color: "#4A0E2E" }}>Your public profile</span>
@@ -1245,7 +1249,7 @@ export default function ExpertDashboard() {
 
         <div className="mb-8">
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "#C4847A", marginBottom: 8 }}>
-            {isAdminMode ? "ADMIN — EXPERT PROFILE" : "EXPERT DASHBOARD"}
+            {isAdminMode ? "ADMIN - EXPERT PROFILE" : "EXPERT DASHBOARD"}
           </p>
           <h1 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(24px, 4vw, 32px)", color: "#4A0E2E", marginBottom: 4 }}>
             {isAdminMode ? expert.name : `Welcome back, ${expert.name?.split(" ")[0] || "Expert"}`}
