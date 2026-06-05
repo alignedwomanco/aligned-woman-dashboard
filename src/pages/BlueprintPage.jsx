@@ -1148,7 +1148,7 @@ function ALIVEMethod() {
           </p>
         </SectionReveal>
 
-        {/* 5 phases — each triggers independently */}
+        {/* 5 phases, each triggers independently */}
         <div className="space-y-6">
           {ALIVE_PHASES.map((phase, i) => (
             <AlivePhase key={i} phase={phase} />
@@ -1736,6 +1736,14 @@ function StickyMobileCTA() {
 
 export default function AWBlueprint() {
   useAliveParallax();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const aff = (new URLSearchParams(window.location.search).get("aff") || "").trim();
+    if (aff) {
+      sessionStorage.setItem("aff", aff);
+    }
+  }, []);
 
   return (
     <div style={{ fontFamily: sans }}>
