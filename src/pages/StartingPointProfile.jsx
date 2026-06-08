@@ -328,7 +328,7 @@ export default function StartingPointProfile() {
       completed_at: new Date().toISOString(),
     };
     localStorage.setItem("aw_quiz_result", JSON.stringify(quizResult));
-    window.location.href = "/Dashboard";
+    window.location.href = "/register?from_url=/Dashboard";
   };
 
   const restart = () => {
