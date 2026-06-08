@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "natural_key": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "_ScratchIdempotencyProbe"
+}

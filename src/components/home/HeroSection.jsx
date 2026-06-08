@@ -167,7 +167,7 @@ export default function HeroSection({ onWaitlist }) {
               transition: "border-color 0.2s, color 0.2s",
             }}
           >
-            Explore The Programme
+            Start For Free!
           </button>
         </div>
       </div>
