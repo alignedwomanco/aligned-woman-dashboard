@@ -227,6 +227,24 @@ export default function Layout({ children, currentPageName }) {
               )}
             </Link>
 
+            <nav className="hidden md:flex items-center gap-6 lg:gap-8">
+              {publicPages.filter((item) => !["about-us", "blueprint", "CheckoutComplete", "ContactForm"].includes(item.name)).map((item) =>
+              <Link
+                key={item.name}
+                to={item.href || createPageUrl(item.name)}
+                className={`font-body text-sm font-medium tracking-wide transition-colors ${isLandingPage ? "text-white/90 hover:text-white" : "text-awburg-core/80 hover:text-awburg-core"}`}>
+
+                  {item.label}
+                </Link>
+              )}
+              <a
+                href="/about-us"
+                className={`font-body text-sm font-medium tracking-wide transition-colors ${isLandingPage ? "text-white/90 hover:text-white" : "text-awburg-core/80 hover:text-awburg-core"}`}>
+
+                About Us
+              </a>
+            </nav>
+
             <div className="flex items-center gap-3 flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -265,6 +283,7 @@ export default function Layout({ children, currentPageName }) {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+              <div className="md:hidden">
               {/* Pill circular hamburger - matches reference site */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -288,6 +307,7 @@ export default function Layout({ children, currentPageName }) {
                 <span className={`block transition-all duration-300 rounded-sm ${isLandingPage ? "bg-awrose-core" : "bg-awburg-core"}`} style={{ width: 18, height: 2 }} />
                 <span className={`block transition-all duration-300 rounded-sm ${isLandingPage ? "bg-awrose-core" : "bg-awburg-core"}`} style={{ width: 18, height: 2 }} />
               </button>
+              </div>
             </div>
           </div>
         </div>
