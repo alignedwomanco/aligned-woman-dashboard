@@ -91,6 +91,7 @@ const AuthenticatedApp = () => {
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/checkout-success" element={<CheckoutSuccess />} />
       <Route path="/pdf-test" element={<PdfTest />} />
+      <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
 
       {/* ── Protected pages (require login) ── */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
@@ -113,7 +114,7 @@ const AuthenticatedApp = () => {
         <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/expert-dashboard" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
-        <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
+
         <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
         <Route path="/analytics" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
       </Route>
