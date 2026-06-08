@@ -151,8 +151,8 @@ export default function HeroSection({ onWaitlist }) {
           >
             Begin Your Blueprint +
           </Link>
-          <button
-            onClick={scrollToExplore}
+          <a
+            href="https://app.alignedwomanco.com/StartingPointProfile"
             style={{
               background: "transparent",
               color: "rgba(255,255,255,0.6)",
@@ -165,10 +165,12 @@ export default function HeroSection({ onWaitlist }) {
               border: "1px solid rgba(255,255,255,0.2)",
               cursor: "pointer",
               transition: "border-color 0.2s, color 0.2s",
+              textDecoration: "none",
+              display: "inline-block",
             }}
           >
             Start For Free!
-          </button>
+          </a>
         </div>
       </div>
 
