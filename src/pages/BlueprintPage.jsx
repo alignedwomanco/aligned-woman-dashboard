@@ -668,7 +668,7 @@ function VideoSection() {
             ) : (
               <iframe
                 className="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/AoWQvwZkFmU?autoplay=1"
+                src="https://www.youtube-nocookie.com/embed/AoWQvwZkFmU?autoplay=1&rel=0"
                 title="Blueprint Introduction"
                 frameBorder="0"
                 allow="autoplay; encrypted-media; picture-in-picture"
