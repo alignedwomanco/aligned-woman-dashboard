@@ -652,17 +652,28 @@ function VideoSection() {
           >
             {!playing ? (
               <div className="absolute inset-0 flex items-center justify-center">
+                <img
+                  src="https://img.youtube.com/vi/AoWQvwZkFmU/maxresdefault.jpg"
+                  alt="Blueprint Introduction"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0" style={{ background: "rgba(14,2,8,0.35)" }} />
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
+                  className="relative w-20 h-20 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
                   style={{ background: C.roseCore }}
                 >
                   <Play className="w-8 h-8 ml-1" style={{ color: C.burgDeep }} fill={C.burgDeep} />
                 </div>
               </div>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-white/40 text-sm">
-                Video player placeholder
-              </div>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/AoWQvwZkFmU?autoplay=1"
+                title="Blueprint Introduction"
+                frameBorder="0"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
             )}
           </div>
           <p
