@@ -27,6 +27,7 @@ import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
 import FeminineWorkbook from './pages/FeminineWorkbook';
 import TermsAndConditions from './pages/TermsAndConditions';
+import Competition from './pages/Competition';
 import Contact from './pages/Contact';
 import ContactForm from './pages/ContactForm';
 import Welcome from './pages/Welcome';
@@ -86,6 +87,7 @@ const AuthenticatedApp = () => {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/Checkout" element={<Checkout />} />
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
+      <Route path="/competition" element={<Competition />} />
       <Route path="/Contact" element={<LayoutWrapper currentPageName="blueprint"><Contact /></LayoutWrapper>} />
       <Route path="/ContactForm" element={<LayoutWrapper currentPageName="blueprint"><ContactForm /></LayoutWrapper>} />
       <Route path="/welcome" element={<Welcome />} />

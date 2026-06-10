@@ -11,6 +11,7 @@ const NAV = {
     { label: "About Us", href: "/about-us" },
     { label: "Contact", href: "/Contact" },
     { label: "Terms & Conditions", href: "/terms-and-conditions" },
+    { label: "Giveaway T&Cs", href: "/competition" },
   ],
   SOCIAL: [
     { label: "Instagram", href: "https://www.instagram.com/alignedwoman_co/" },
