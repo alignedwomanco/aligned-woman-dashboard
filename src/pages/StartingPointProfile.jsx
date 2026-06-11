@@ -361,7 +361,7 @@ export default function StartingPointProfile() {
           <p style={{ margin: centered ? (mobile ? "20px 0 0" : "24px auto 0") : (mobile ? "20px 0 0" : "24px 0 0"), fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 560, fontWeight: 300 }}>
             This is not a personality quiz. It is a diagnostic built from the work of thirteen specialists across psychology, neuroscience, health, money, and leadership. It reads the pattern running beneath your ambition, your exhaustion, and the gap between what you are capable of and what you are actually doing.
           </p>
-          <div style={{ marginTop: mobile ? 28 : 36 }}>
+          <div style={{ marginTop: mobile ? 28 : 36, textAlign: mobile ? "center" : "left" }}>
             <button
               onClick={() => transition(() => setScreen("quiz"))}
               style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "16px 28px" : "18px 36px", borderRadius: 100, background: ROSE, color: "#FFFFFF", border: "none", fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `background 180ms ${EASE}` }}
@@ -380,7 +380,7 @@ export default function StartingPointProfile() {
               You will recognise yourself in more than one answer. That is how patterns work. They overlap. Pick the one that runs first, the response you default to before you have time to choose a better one. This is not reading your best day. It is reading your operating system.
             </p>
           </div>
-          <div style={{ marginTop: mobile ? 36 : 48 }}>
+          <div style={{ marginTop: mobile ? 36 : 48, textAlign: mobile ? "center" : "left" }}>
             <button
               onClick={() => transition(() => setScreen("quiz"))}
               style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "16px 28px" : "18px 36px", borderRadius: 100, background: ROSE, color: "#FFFFFF", border: "none", fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `background 180ms ${EASE}` }}
