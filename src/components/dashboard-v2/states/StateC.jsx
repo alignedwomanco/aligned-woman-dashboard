@@ -91,7 +91,7 @@ export default function StateC({ user, profile, onCheckout }) {
             }}
           >
             <video
-              src="https://pub-a26ceee6cec44b839c223b51dba09333.r2.dev/Phoebe-Greenacre-Intro-Yin-stress-digest.mp4"
+              src={arch?.videoUrl}
               muted
               playsInline
               autoPlay
