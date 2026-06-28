@@ -25,6 +25,7 @@ import { PaymentProvider } from './context/PaymentContext';
 import Checkout from './pages/Checkout';
 import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
+import YourMoneyStory from './pages/YourMoneyStory';
 import FeminineWorkbook from './pages/FeminineWorkbook';
 import TermsAndConditions from './pages/TermsAndConditions';
 import Competition from './pages/Competition';
@@ -94,6 +95,7 @@ const AuthenticatedApp = () => {
       <Route path="/checkout-success" element={<CheckoutSuccess />} />
       <Route path="/pdf-test" element={<PdfTest />} />
       <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
+      <Route path="/YourMoneyStory" element={<YourMoneyStory />} />
 
       {/* ── Protected pages (require login) ── */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
