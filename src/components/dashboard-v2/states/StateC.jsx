@@ -191,11 +191,10 @@ export default function StateC({ user, profile, onCheckout }) {
           A free, unhurried half hour with one of our practitioners. No pitch, no pressure. The reset is the practice. You will know after it whether you want what comes next.
         </p>
 
-        <div className="mb-6 max-w-2xl">
+        <div className="mb-6 max-w-2xl" style={{ position: "relative", width: "100%", paddingBottom: "56.25%", height: 0, overflow: "hidden", borderRadius: "12px" }}>
           <iframe
             src="https://drive.google.com/file/d/1pEjiiWfD6H5mYkj4otMjAK897h35yKv6/preview"
-            width="100%"
-            style={{ aspectRatio: "16/9", borderRadius: "12px", border: "none" }}
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
             allow="autoplay; encrypted-media"
             allowFullScreen
           />
