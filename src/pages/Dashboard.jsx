@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { enablePreviewMode, disablePreviewMode } from "@/lib/previewMode";
+import { enablePreviewMode, disablePreviewMode, isPreviewMode } from "@/lib/previewMode";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardState } from "@/lib/dashboardState";
 import { ensureMemberProfile } from "@/lib/ensureMemberProfile";
@@ -139,7 +139,7 @@ export default function Dashboard() {
   const [status, setStatus] = useState("loading");
   const [data, setData] = useState({ state: null, user: null, profile: null });
   const [errorMsg, setErrorMsg] = useState("");
-  const [stateOverride, setStateOverride] = useState(null);
+  const [stateOverride, setStateOverride] = useState(() => isPreviewMode() ? "new_paid_user" : null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCheckComplete, setAdminCheckComplete] = useState(false);
