@@ -24,11 +24,19 @@ export default function StateCNoQuiz({ user, profile, onCheckout }) {
           WELCOME IN
         </p>
         <h2 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
-          This is your <span className="italic text-awrose-core">starting place</span>.
+          Welcome to the Aligned <span className="italic text-awrose-core">Woman</span> Co dashboard.
         </h2>
-        <p className="font-body font-light text-awburg-core/75 text-sm md:text-base leading-relaxed max-w-xl">
-          You are in, and two things are open to you right now with nothing to pay. Find your pattern in a short diagnostic, and work through Your Money Story whenever you are ready. When the time feels right, the full Blueprint is here too.
-        </p>
+        <div className="font-body font-light text-awburg-core/75 text-sm md:text-base leading-relaxed max-w-xl space-y-4">
+          <p>
+            You have just stepped into the first platform of its kind, dedicated to helping women build their personal and professional lives through world class experts, courses, community, and resources. All in one place. Finally.
+          </p>
+          <p>
+            You have two free resources open to you. The Pattern, a mirror for your whole life, and Your Money Story, a closer look at your relationship with money. Both stand on their own. Do either one, do both, in whatever order feels right.
+          </p>
+          <p>
+            When the time feels right, the full Blueprint is here too.
+          </p>
+        </div>
       </section>
 
       {/* Quiz invitation */}
