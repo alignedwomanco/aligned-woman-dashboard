@@ -114,7 +114,7 @@ function ResumeBanner({ profile, modules, sections, courses, progressRecords }) 
   );
 }
 
-function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked }) {
+function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, isPurchasable }) {
   const navigate = useNavigate();
 
   const courseProgressItems = progressRecords.filter((p) => p.courseId === course.id);
