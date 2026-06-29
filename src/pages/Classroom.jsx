@@ -6,6 +6,7 @@ import { isPreviewMode } from "@/lib/previewMode";
 import { hasBlueprintAccess } from "@/lib/entitlement";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
+import CheckoutModal from "@/components/dashboard/CheckoutModal";
 
 function splitTitleForDisplay(title) {
   if (!title) return { main: "", italic: "" };
@@ -114,7 +115,7 @@ function ResumeBanner({ profile, modules, sections, courses, progressRecords }) 
   );
 }
 
-function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, isPurchasable }) {
+function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, isPurchasable, onPurchase }) {
   const navigate = useNavigate();
 
   const courseProgressItems = progressRecords.filter((p) => p.courseId === course.id);
@@ -124,8 +125,6 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
 
   const cta = isLocked
     ? null
-    : isPurchasable
-    ? "GET ACCESS →"
     : progressPct === 0
     ? "BEGIN →"
     : progressPct >= 100
@@ -134,17 +133,17 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
 
   const firstLetter = (course.title || "?")[0].toUpperCase();
 
-  const clickable = !isLocked;
+  const clickable = !isLocked && !isPurchasable;
 
   const handleClick = () => {
-    if (isLocked) return;
-    if (isPurchasable) {
-      base44.analytics.track({ eventName: "course_purchase_click", properties: { course_id: course.id } });
-      navigate(createPageUrl("blueprint"));
-      return;
-    }
+    if (!clickable) return;
     base44.analytics.track({ eventName: "course_card_click", properties: { course_id: course.id } });
     navigate(createPageUrl("CourseDetail") + `?id=${course.id}`);
+  };
+
+  const handlePurchase = () => {
+    base44.analytics.track({ eventName: "course_purchase_click", properties: { course_id: course.id } });
+    if (onPurchase) onPurchase(course);
   };
 
   return (
@@ -155,7 +154,11 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
       onKeyDown={(e) => { if (clickable && (e.key === "Enter" || e.key === " ")) handleClick(); }}
       aria-label={clickable ? `Open course: ${course.title}` : undefined}
       className={`bg-paper rounded-2xl border border-awburg-core/8 overflow-hidden flex flex-col ${
-        clickable ? "cursor-pointer hover:shadow-md transition-shadow duration-200" : "cursor-not-allowed"
+        clickable
+          ? "cursor-pointer hover:shadow-md transition-shadow duration-200"
+          : isPurchasable
+          ? "hover:shadow-md transition-shadow duration-200"
+          : "cursor-not-allowed"
       }`}
     >
       <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
@@ -219,26 +222,45 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-auto pt-1">
-          {isEnrolled ? (
-            <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core uppercase">
-              {progressPct}% · {completedPages}/{totalPages}
-            </p>
-          ) : (
-            <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase">
-              {isLocked ? "NOT YET AVAILABLE" : ""}
-            </p>
-          )}
-          {isLocked ? (
-            <p className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/55 uppercase">
-              COMING SOON
-            </p>
-          ) : (
-            <p className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core uppercase">
-              {cta}
-            </p>
-          )}
-        </div>
+        {isPurchasable ? (
+          <div className="flex items-center gap-3 mt-auto pt-1">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handlePurchase(); }}
+              className="flex-1 bg-awrose-core text-paper rounded-full py-2.5 font-body font-bold text-[11px] tracking-eyebrow uppercase hover:bg-awrose-deep transition-colors"
+            >
+              GET ACCESS
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); navigate(createPageUrl("blueprint")); }}
+              className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core uppercase hover:text-awrose-deep transition-colors"
+            >
+              LEARN MORE →
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between mt-auto pt-1">
+            {isEnrolled ? (
+              <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core uppercase">
+                {progressPct}% · {completedPages}/{totalPages}
+              </p>
+            ) : (
+              <p className="font-body font-bold text-[10px] tracking-eyebrow text-awburg-core/55 uppercase">
+                {isLocked ? "NOT YET AVAILABLE" : ""}
+              </p>
+            )}
+            {isLocked ? (
+              <p className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core/55 uppercase">
+                COMING SOON
+              </p>
+            ) : (
+              <p className="font-body font-bold text-[11px] tracking-eyebrow text-awburg-core uppercase">
+                {cta}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -249,6 +271,7 @@ const FILTERS = ["All", "In Progress", "Not Started", "Completed"];
 export default function Classroom() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["classroom-user"],
@@ -433,6 +456,7 @@ export default function Classroom() {
                 isEnrolled={isEnrolledInCourse(course.id)}
                 isLocked={isComingSoonCourse(course)}
                 isPurchasable={isPurchasableCourse(course)}
+                onPurchase={() => setCheckoutOpen(true)}
               />
             ))}
           </div>
@@ -445,6 +469,8 @@ export default function Classroom() {
         </div>
 
       </div>
+
+      <CheckoutModal open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </div>
   );
 }
