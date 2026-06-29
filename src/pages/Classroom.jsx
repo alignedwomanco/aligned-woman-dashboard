@@ -124,6 +124,8 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
 
   const cta = isLocked
     ? null
+    : isPurchasable
+    ? "GET ACCESS →"
     : progressPct === 0
     ? "BEGIN →"
     : progressPct >= 100
