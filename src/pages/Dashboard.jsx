@@ -15,6 +15,7 @@ import StateB from "@/components/dashboard-v2/states/StateB";
 import StateANoQuiz from "@/components/dashboard-v2/states/StateANoQuiz";
 import StateAWithQuiz from "@/components/dashboard-v2/states/StateAWithQuiz";
 import StateC from "@/components/dashboard-v2/states/StateC";
+import StateCNoQuiz from "@/components/dashboard-v2/states/StateCNoQuiz";
 import CheckoutModal from "@/components/dashboard/CheckoutModal";
 
 const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
@@ -307,8 +308,14 @@ export default function Dashboard() {
         }
 
         if (!isPaid) {
-          // Logged in, but this email genuinely has no access to the course.
-          setStatus("not_registered");
+          // Logged in with no Blueprint access: a free member, for example one
+          // arriving through the Your Money Story funnel. Give them a free profile
+          // and resolve to the free home instead of the not-registered wall. The
+          // wrong-email buyer path now lives as a quiet link on the free home.
+          await ensureMemberProfile(me);
+          const result = await getDashboardState();
+          setData(result);
+          setStatus("ready");
           return;
         }
 
@@ -481,6 +488,7 @@ export default function Dashboard() {
   else if (effectiveState === "state_a_no_quiz" || isNewPaidUserPreview) StateComponent = StateANoQuiz;
   else if (effectiveState === "state_a_with_quiz") StateComponent = StateAWithQuiz;
   else if (effectiveState === "state_c") StateComponent = StateC;
+  else if (effectiveState === "state_c_no_quiz") StateComponent = StateCNoQuiz;
 
   return (
     <div className="min-h-screen bg-off-white">
