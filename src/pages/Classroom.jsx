@@ -150,12 +150,12 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
   return (
     <div
       onClick={handleClick}
-      role={isLocked ? undefined : "button"}
-      tabIndex={isLocked ? -1 : 0}
-      onKeyDown={(e) => { if (!isLocked && (e.key === "Enter" || e.key === " ")) handleClick(); }}
-      aria-label={isLocked ? undefined : `Open course: ${course.title}`}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : -1}
+      onKeyDown={(e) => { if (clickable && (e.key === "Enter" || e.key === " ")) handleClick(); }}
+      aria-label={clickable ? `Open course: ${course.title}` : undefined}
       className={`bg-paper rounded-2xl border border-awburg-core/8 overflow-hidden flex flex-col ${
-        isLocked ? "cursor-not-allowed" : "cursor-pointer hover:shadow-md transition-shadow duration-200"
+        clickable ? "cursor-pointer hover:shadow-md transition-shadow duration-200" : "cursor-not-allowed"
       }`}
     >
       <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
