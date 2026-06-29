@@ -186,6 +186,10 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
           <span className="absolute top-3 right-3 bg-awburg-mid text-paper rounded-full px-3 py-1 font-body font-bold text-[10px] tracking-eyebrow uppercase">
             ENROLLED
           </span>
+        ) : isPurchasable ? (
+          <span className="absolute top-3 right-3 bg-awrose-core text-paper rounded-full px-3 py-1 font-body font-bold text-[10px] tracking-eyebrow uppercase">
+            UNLOCK
+          </span>
         ) : isLocked ? (
           <span className="absolute top-3 right-3 bg-paper border border-awburg-core/20 text-awburg-core rounded-full px-3 py-1 font-body font-bold text-[10px] tracking-eyebrow uppercase">
             LOCKED
