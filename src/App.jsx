@@ -97,7 +97,7 @@ const AuthenticatedApp = () => {
       <Route path="/pdf-test" element={<PdfTest />} />
       <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
       <Route path="/YourMoneyStory" element={<YourMoneyStory />} />
-      <Route path="/MoneyStoryLanding" element={<MoneyStoryLanding />} />
+      <Route path="/money-story" element={<MoneyStoryLanding />} />
 
       {/* ── Protected pages (require login) ── */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
