@@ -1,62 +1,62 @@
 import React from "react";
 import { ArrowRight } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import MoneyStoryCard from "@/components/dashboard-v2/MoneyStoryCard";
 
+/**
+ * StateCNoQuiz - free member home for an account with no archetype yet, for
+ * example one arriving through the Your Money Story funnel rather than the quiz.
+ * Shows only free content: the quiz invitation, the Money Story card, and a
+ * Blueprint invitation. It never renders Blueprint course material. A quiet link
+ * lets a buyer who signed in on the wrong email switch accounts.
+ */
 export default function StateCNoQuiz({ user, profile, onCheckout }) {
+  const handleWrongEmail = () => {
+    base44.auth.logout(`${window.location.origin}/Dashboard`);
+  };
+
   return (
     <div className="space-y-6">
-
-      {/* Take the quiz prompt — replaces archetype diagnosis */}
+      {/* Welcome / orientation */}
       <section className="bg-awrose-pale rounded-xl p-6 md:p-8">
         <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-deep uppercase mb-4">
           <span className="inline-block w-3 h-px bg-awrose-deep mr-2 align-middle" />
-          YOUR STARTING POINT
+          WELCOME IN
         </p>
-        <div className="max-w-2xl">
-          <h2 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
-            Before you decide, <span className="italic text-awrose-core">find your pattern</span>.
-          </h2>
-          <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed mb-6">
-            A short diagnostic that reveals how you show up — at your best and at your worst. It takes a few minutes, and it will name what you have always felt but never had language for.
-          </p>
-          <div className="flex flex-wrap gap-4 items-center">
-            <button
-              onClick={() => window.location.href = "/StartingPointProfile"}
-              className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-all duration-200"
-            >
-              TAKE THE DIAGNOSTIC <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        <h2 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
+          This is your <span className="italic text-awrose-core">starting place</span>.
+        </h2>
+        <p className="font-body font-light text-awburg-core/75 text-sm md:text-base leading-relaxed max-w-xl">
+          You are in, and two things are open to you right now with nothing to pay. Find your pattern in a short diagnostic, and work through Your Money Story whenever you are ready. When the time feels right, the full Blueprint is here too.
+        </p>
       </section>
 
-      {/* 30-minute reset */}
-      <section className="bg-paper rounded-xl border border-awburg-core/8 p-6 md:p-8">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-4">
-          <span className="inline-block w-3 h-px bg-awrose-core mr-2 align-middle" />
-          BEFORE YOU DECIDE · 30 MINUTES
-        </p>
-        <h3 className="font-display text-awburg-core text-[28px] md:text-[34px] leading-tight mb-4">
-          Reset with <span className="italic text-awrose-core">Phoebe</span> for 30 minutes.
+      {/* Quiz invitation */}
+      <section className="rounded-xl border border-awburg-core/8 p-6 md:p-8 overflow-hidden relative" style={{ minHeight: 180 }}>
+        <video
+          src="https://pub-e1032a6c8b9241cf9d03513d43a81f17.r2.dev/YourPattern.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+        />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(10,2,6,0.55)", pointerEvents: "none" }} />
+        <h3 className="relative font-display text-paper text-[26px] md:text-[30px] leading-tight mb-3">
+          Find your <span className="italic text-awrose-light">pattern</span>.
         </h3>
-        <p className="font-body font-light text-awburg-core/80 text-sm md:text-base leading-relaxed mb-6 max-w-xl">
-          A free, unhurried half hour with one of our practitioners. No pitch, no pressure. The reset is the practice. You will know after it whether you want what comes next.
+        <p className="relative font-body font-light text-white text-sm leading-relaxed mb-5 max-w-lg">
+          A short diagnostic. It will not change what you have access to. It will sharpen what you notice in the work.
         </p>
-
-        <div className="mb-6 max-w-2xl" style={{ position: "relative", width: "100%", paddingBottom: "56.25%", height: 0, overflow: "hidden", borderRadius: "12px" }}>
-          <video
-            src="https://pub-92fd07e9117b4774bd919918a55b163b.r2.dev/Phoebe-Greenacre-Intro-Yin-stress-digest.mp4"
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
-            controls
-            playsInline
-            preload="metadata"
-          />
-        </div>
+        <button onClick={() => window.location.href = "/StartingPointProfile"} className="relative font-body font-bold text-[11px] tracking-eyebrow text-paper hover:text-awrose-light uppercase inline-flex items-center gap-2 transition-colors">
+          TAKE THE QUIZ <ArrowRight className="w-3.5 h-3.5" />
+        </button>
       </section>
 
+      {/* Your Money Story */}
       <MoneyStoryCard />
 
-      {/* Purchase CTA - dark editorial */}
+      {/* Blueprint invitation - dark editorial (mirrors StateC) */}
       <section
         className="rounded-xl p-8 md:p-10"
         style={{
@@ -69,14 +69,13 @@ export default function StateCNoQuiz({ user, profile, onCheckout }) {
           style={{ color: "#E8B4AE" }}
         >
           <span className="inline-block w-5 h-px mr-3 align-middle" style={{ background: "#E8B4AE" }} />
-          YOUR NEXT STEP · CHAPTER 02
+          WHEN YOU ARE READY
         </p>
         <h3
           className="font-display text-[34px] md:text-[48px] leading-tight mb-5 max-w-xl"
           style={{ color: "#FAF5F3", fontWeight: 400 }}
         >
-          Built for <span className="italic" style={{ color: "#E8B4AE" }}>exactly</span><br />
-          this woman.
+          The room beyond <span className="italic" style={{ color: "#E8B4AE" }}>the doorway</span>.
         </h3>
         <p
           className="font-body font-light text-sm md:text-base leading-relaxed mb-8 max-w-lg"
@@ -125,6 +124,17 @@ export default function StateCNoQuiz({ user, profile, onCheckout }) {
           </button>
         </div>
       </section>
+
+      {/* Quiet path for a buyer who signed in on the wrong email */}
+      <p className="font-body text-xs text-awburg-core/55 text-center pt-1">
+        Already purchased the Blueprint?{" "}
+        <button
+          onClick={handleWrongEmail}
+          className="font-bold text-awburg-core/75 hover:text-awburg-core underline underline-offset-2 transition-colors"
+        >
+          Log in with the email you bought on
+        </button>
+      </p>
     </div>
   );
 }
