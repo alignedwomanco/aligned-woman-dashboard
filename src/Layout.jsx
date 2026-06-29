@@ -395,7 +395,8 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  if (!isPublicPage && !isPrivileged && pendingApproval) {
+  const FREE_ACCESS_PAGES = ["Classroom", "ExpertsDirectory"];
+  if (!isPublicPage && !isPrivileged && pendingApproval && !FREE_ACCESS_PAGES.includes(currentPageName)) {
     const firstName = (user?.full_name || "").split(" ")[0] || null;
     return <PendingApproval firstName={firstName} />;
   }
