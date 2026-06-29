@@ -134,8 +134,15 @@ function CourseCard({ course, progressRecords, modules, isEnrolled, isLocked, is
 
   const firstLetter = (course.title || "?")[0].toUpperCase();
 
+  const clickable = !isLocked;
+
   const handleClick = () => {
     if (isLocked) return;
+    if (isPurchasable) {
+      base44.analytics.track({ eventName: "course_purchase_click", properties: { course_id: course.id } });
+      navigate(createPageUrl("blueprint"));
+      return;
+    }
     base44.analytics.track({ eventName: "course_card_click", properties: { course_id: course.id } });
     navigate(createPageUrl("CourseDetail") + `?id=${course.id}`);
   };
