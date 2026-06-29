@@ -1,5 +1,5 @@
 /**
- * Archetype data — single source of truth.
+ * Archetype data: single source of truth.
  *
  * Used by:
  *   - Quiz result screen (QuizResult.jsx)        → name, mirrorLine, atBest, atWorst, videoUrl, posterImage
@@ -80,21 +80,21 @@ const ARCHETYPES = {
       "You know how to build systems, create space, and let other people do what they do well. You are strategic. You are not threatened by delegation. You can hold complexity without needing to control every detail. When this pattern is working for you, it looks like wisdom.",
 
     atWorst:
-      "The distance that protects you also keeps you from the thing you want most. You have handed your financial agency, your emotional decisions, or your power to someone else and called it a preference. 'I am just not a numbers person.' 'I trust my partner with that.' These are not preferences. They are patterns. You are competent everywhere except the areas that actually determine your freedom.",
+      "The distance that protects you also keeps you from the thing you want most. You have handed your decisions, your emotional choices, or your power to someone else and called it a preference. 'I trust them with that.' 'I am just not the one who deals with it.' These are not preferences. They are patterns. You are competent everywhere except the areas that actually determine your freedom.",
 
     fullDescription:
-      "You earn well. You may even earn exceptionally. But somewhere along the way, you handed your financial agency to someone else, or to avoidance itself, and called it a personality trait. 'I am just not a numbers person.' 'I trust my partner with that.' 'I have someone who handles it.' These are not preferences. They are patterns. And they are costing you the one thing money is actually supposed to buy: freedom.",
+      "You are capable, often exceptionally so. But somewhere along the way you handed your decisions, your authority, or your hardest choices to someone else, or to avoidance itself, and called it a personality trait. 'I am just not the one who handles that.' 'I trust them with it.' 'Someone else takes care of it.' These are not preferences. They are patterns. And they are quietly costing you the one thing they were never meant to: your own freedom.",
 
-    primaryPillar: "Money & Financial Agency",
+    primaryPillar: "Leadership, Authority & Career",
     primaryPillarNote:
-      "where you will trace the scripts you inherited and replace them with sovereignty over your own financial decisions.",
+      "where you will reclaim authority over the decisions that shape your life instead of handing them to someone else.",
 
     secondaryPillar: "Mindset & Behaviour",
     secondaryPillarNote:
       "where the deeper pattern of delegating power and avoiding discomfort is made visible and addressable.",
 
     foundation:
-      "The foundation you are missing is not a spreadsheet. It is the belief that you are someone who commands money.",
+      "The foundation you are missing is not competence. You already have that. It is the belief that you are someone who keeps her own authority rather than handing it away.",
 
     videoUrl: "https://pub-e1032a6c8b9241cf9d03513d43a81f17.r2.dev/vertical%20The%20Delegator%20.mp4",
     posterImage: "",
