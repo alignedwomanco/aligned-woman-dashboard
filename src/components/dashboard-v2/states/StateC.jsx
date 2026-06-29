@@ -193,11 +193,12 @@ export default function StateC({ user, profile, onCheckout }) {
         </p>
 
         <div className="mb-6 max-w-2xl" style={{ position: "relative", width: "100%", paddingBottom: "56.25%", height: 0, overflow: "hidden", borderRadius: "12px" }}>
-          <iframe
-            src="https://drive.google.com/file/d/1pEjiiWfD6H5mYkj4otMjAK897h35yKv6/preview"
+          <video
+            src="https://pub-92fd07e9117b4774bd919918a55b163b.r2.dev/Phoebe-Greenacre-Intro-Yin-stress-digest.mp4"
             style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
-            allow="autoplay; encrypted-media"
-            allowFullScreen
+            controls
+            playsInline
+            preload="metadata"
           />
         </div>
 
