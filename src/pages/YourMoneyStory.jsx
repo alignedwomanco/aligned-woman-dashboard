@@ -1061,8 +1061,7 @@ function Story({ a, set, dom, homeObj, desireObj, chosenScripts }) {
         <p>
           This was the doorway. The Aligned Woman Blueprint is the room. Thirteen specialists, hand
           picked to teach ambitious women the things we were never taught, across body, nervous
-          system, mind, money, and power. There is no rush. Your money story is welcome to come too,
-          whenever the time is right for you.
+          system, mind, money, and power.
         </p>
         <button className="ym-cta" onClick={() => { window.location.href = "/blueprint"; }}>Explore the Blueprint</button>
       </div>
