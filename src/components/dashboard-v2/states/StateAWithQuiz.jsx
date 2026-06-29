@@ -6,6 +6,7 @@ import { createPageUrl } from "@/utils";
 import { getArchetype } from "@/data/archetypes";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
 import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
+import MoneyStoryCard from "@/components/dashboard-v2/MoneyStoryCard";
 
 const KEY_MAP = {
   performer: "performer",
@@ -179,6 +180,8 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
 
       {/* Workbooks */}
       <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
+
+      <MoneyStoryCard />
 
       {/* Intake / Archetype card */}
       <section className="bg-awrose-pale rounded-xl p-6 md:p-8">
