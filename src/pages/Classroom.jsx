@@ -308,8 +308,11 @@ export default function Classroom() {
   const isEnrolledInCourse = (courseId) =>
     progressRecords.some((p) => p.courseId === courseId);
 
-  const isLockedCourse = (course) =>
-    !isAdmin && (course.isComingSoon || !hasAccess(course));
+  const isComingSoonCourse = (course) =>
+    !isAdmin && course.isComingSoon;
+
+  const isPurchasableCourse = (course) =>
+    !isAdmin && !course.isComingSoon && !hasAccess(course);
 
   const filteredCourses = useMemo(() => {
     let list = courses;
@@ -428,7 +431,8 @@ export default function Classroom() {
                 progressRecords={progressRecords}
                 modules={modules}
                 isEnrolled={isEnrolledInCourse(course.id)}
-                isLocked={isLockedCourse(course)}
+                isLocked={isComingSoonCourse(course)}
+                isPurchasable={isPurchasableCourse(course)}
               />
             ))}
           </div>
