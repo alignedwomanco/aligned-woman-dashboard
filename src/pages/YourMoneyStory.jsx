@@ -686,19 +686,26 @@ function Thermostat({ a, set }) {
       <H2>Why more money can feel <span className="ym-it">unsafe</span>.</H2>
       <Teach label="The science">
         <p>
-          Here is what that one rule, familiar is safe, does to money. Because your system treats
-          familiar as safe, it holds a money setpoint, exactly the way a thermostat holds a
-          temperature. Earn or hold more than feels familiar, and a part of you, below awareness,
-          gets uneasy and works to bring you back down to the number it knows. Drop too low and it
-          scrambles to climb back up.
+          Think for a moment about how a thermostat works. You set it to a temperature, and from
+          then on it has one task, to hold the room at that number. If the room gets too warm, it
+          cools it down. If it gets too cold, it warms it up. It is not trying to make the room
+          comfortable. It is defending the setting it was given.
         </p>
         <p>
-          This is not weakness, and it is not bad maths. It is regulation. It is why roughly{" "}
-          <Stat>70%</Stat> of lottery winners are broke within a few years, why most people who
-          inherit money lose it, and why about seventy percent of wealthy families have lost the
-          wealth by the second generation, and ninety percent by the third. The amount changed. The
-          setpoint did not. Once you see this, what looked like self-sabotage starts to look like a
-          thermostat simply doing its job.
+          Your nervous system runs a thermostat for money, and this is where that one rule, familiar
+          is safe, becomes concrete. Early on, from everything you absorbed, your system quietly
+          settled on a normal, an amount of money that feels familiar and therefore safe. And like
+          any thermostat, it now defends that number. Earn or hold more than feels familiar, and a
+          part of you, below awareness, grows uneasy and finds quiet ways to bring you back down.
+          Drop too far below it, and the same system scrambles to climb back up.
+        </p>
+        <p>
+          This is not weakness, and it is not bad maths. It is regulation. It is why research finds
+          that roughly <Stat>70%</Stat> of lottery winners are broke within a few years, why most
+          people who inherit money lose it, and why around 70% of wealthy families have lost the
+          money by the second generation, and 90% by the third. The amount changed. The setting did
+          not. Once you can see this, what looked like self-sabotage starts to look like a thermostat
+          simply doing the job it was given.
         </p>
       </Teach>
       <Prompt>Where does money feel set for you right now. A felt sense, not your actual balance.</Prompt>
