@@ -648,20 +648,29 @@ function VideoSection() {
           <div
             className="relative rounded-lg overflow-hidden cursor-pointer group"
             style={{ aspectRatio: "16/9", border: `1px solid rgba(74,14,46,0.08)`, background: C.burgDeep }}
-            onClick={() => window.open("https://youtu.be/AoWQvwZkFmU", "_blank")}
+            onClick={() => setPlaying(true)}
           >
-            <img
-              src="https://img.youtube.com/vi/AoWQvwZkFmU/maxresdefault.jpg"
-              alt="Blueprint Introduction"
+            <video
+              src="https://pub-92fd07e9117b4774bd919918a55b163b.r2.dev/AlignedWoman_Horizontal_Final_UPD_SHORT.mp4"
+              autoPlay={playing}
+              loop
+              muted
+              playsInline
               className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0" style={{ background: "rgba(14,2,8,0.35)" }} />
-            <div
-              className="relative w-20 h-20 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
-              style={{ background: C.roseCore }}
-            >
-              <Play className="w-8 h-8 ml-1" style={{ color: C.burgDeep }} fill={C.burgDeep} />
-            </div>
+            {!playing && (
+              <div
+                className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                style={{ background: "rgba(14,2,8,0.35)" }}
+              >
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
+                  style={{ background: C.roseCore }}
+                >
+                  <Play className="w-8 h-8 ml-1" style={{ color: C.burgDeep }} fill={C.burgDeep} />
+                </div>
+              </div>
+            )}
           </div>
           <p
             className="text-center mt-6 text-[10px] font-semibold uppercase tracking-[0.22em]"
