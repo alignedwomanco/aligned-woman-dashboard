@@ -5,6 +5,7 @@ import { createPageUrl } from "@/utils";
 import PhaseIndicator from "@/components/dashboard-v2/PhaseIndicator";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
 import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
+import MoneyStoryCard from "@/components/dashboard-v2/MoneyStoryCard";
 
 export default function StateANoQuiz({ user, profile, workbookData, continueData }) {
   const navigate = useNavigate();
@@ -105,6 +106,8 @@ export default function StateANoQuiz({ user, profile, workbookData, continueData
 
       {/* Workbooks */}
       <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
+
+      <MoneyStoryCard />
 
       {/* Quiz nudge */}
       <section className="rounded-xl border border-awburg-core/8 p-6 md:p-8 overflow-hidden relative" style={{ minHeight: 180 }}>
