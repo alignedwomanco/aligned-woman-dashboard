@@ -10,6 +10,7 @@ import { hasBlueprintAccess } from "@/lib/entitlement";
  *   "state_a_no_quiz"   paid user, returning, no archetype yet
  *   "state_a_with_quiz" paid user, returning, archetype resolved
  *   "state_c"           free user with archetype resolved
+ *   "state_c_no_quiz"   free user with no archetype yet (Money Story funnel)
  *
  * NOTE: When this function returns "state_b", the calling dashboard page is
  * responsible for flipping MemberProfile.has_seen_welcome to true AFTER the
@@ -60,12 +61,11 @@ export async function getDashboardState() {
   } else if (!isPaid && archetypeKey !== null) {
     state = "state_c";
   } else {
-    // Fallback: free user with no quiz data. At launch this combination should
-    // not occur (free users enter via the quiz signup path and always have
-    // computed_archetype_key by the time they reach the dashboard). Returning
-    // state_a_no_quiz is the safest fallback because it renders the quiz
-    // invitation card, nudging the user toward completing it.
-    state = "state_a_no_quiz";
+    // Free member with no archetype yet, for example arriving through the Your
+    // Money Story funnel rather than the quiz. Render the free home, which shows
+    // the quiz invitation and the Money Story card and never any Blueprint
+    // content. Paid users never reach this branch.
+    state = "state_c_no_quiz";
   }
 
   return { state, user, profile };
