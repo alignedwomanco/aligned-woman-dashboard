@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { getArchetype } from "@/data/archetypes";
+import MoneyStoryCard from "@/components/dashboard-v2/MoneyStoryCard";
 
 const KEY_MAP = {
   performer: "performer",
@@ -202,6 +203,8 @@ export default function StateC({ user, profile, onCheckout }) {
 
 
       </section>
+
+      <MoneyStoryCard />
 
       {/* Purchase CTA - dark editorial */}
       <section
