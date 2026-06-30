@@ -22,7 +22,7 @@ function buildMimeMessage({ to, subject, htmlBody, fromName, fromEmail }) {
   return lines.join("\r\n");
 }
 
-const CHECKOUT_URL = 'https://app.base44.com/checkout';
+const CHECKOUT_URL = 'https://app.alignedwomanco.com/Checkout';
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
 Deno.serve(async (req) => {
@@ -73,6 +73,12 @@ Deno.serve(async (req) => {
       const firstName = cart.first_name || 'there';
       const planLabel = cart.selected_plan === 'payment_plan' ? 'payment plan' : 'full access';
 
+      // Build checkout URL with affiliate code if present
+      let checkoutUrl = CHECKOUT_URL;
+      if (cart.affiliate_code) {
+        checkoutUrl += `?aff=${encodeURIComponent(cart.affiliate_code)}`;
+      }
+
       const htmlBody = `
 <!DOCTYPE html>
 <html>
@@ -97,13 +103,13 @@ Deno.serve(async (req) => {
           </p>
           <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
             <tr><td style="background:#C4847A;border-radius:100px;padding:14px 36px;">
-              <a href="${CHECKOUT_URL}" style="color:#ffffff;font-family:Montserrat,Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;text-decoration:none;">
+              <a href="${checkoutUrl}" style="color:#ffffff;font-family:Montserrat,Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;text-decoration:none;">
                 Complete My Enrolment →
               </a>
             </td></tr>
           </table>
           <p style="margin:24px 0 0;font-size:12px;color:#8A7A76;word-break:break-all;">
-            ${CHECKOUT_URL}
+            ${checkoutUrl}
           </p>
         </td></tr>
         <tr><td style="background:#f5ddd9;padding:20px 36px;text-align:center;">
