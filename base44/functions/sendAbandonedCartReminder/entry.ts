@@ -70,6 +70,18 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      // Check if this person has already enrolled — skip if so
+      const enrolments = await base44.asServiceRole.entities.CourseEnrollment.filter({
+        userEmail: cart.email,
+      });
+
+      if (enrolments.length > 0) {
+        // Mark cart as recovered so it's never picked up again
+        await base44.asServiceRole.entities.AbandonedCart.update(cart.id, { recovered: true });
+        results.push({ cartId: cart.id, email: cart.email, skipped: 'already_enrolled' });
+        continue;
+      }
+
       const firstName = cart.first_name || 'there';
       const planLabel = cart.selected_plan === 'payment_plan' ? 'payment plan' : 'full access';
 
