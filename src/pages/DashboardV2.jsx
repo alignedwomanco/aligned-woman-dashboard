@@ -973,6 +973,12 @@ export default function DashboardV2() {
                 )}
               </p>
               <div className="flex items-center gap-4">
+                <span
+                  aria-disabled="true"
+                  className="font-body text-[11px] text-awburg-core/30 cursor-default select-none"
+                >
+                  Talk to LaurAI · coming soon
+                </span>
                 <Link
                   to="/ProfileSettings"
                   className="font-body text-[11px] text-awburg-core/55 hover:text-awburg-core transition-colors"
