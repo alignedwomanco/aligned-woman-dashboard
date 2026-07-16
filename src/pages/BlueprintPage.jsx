@@ -936,7 +936,7 @@ function Faculty() {
 
                 {/* CTA */}
                 <a
-                  href={`/experts/${expert.name.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={`/experts/${(expert.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`}
                   className="text-[9px] font-bold uppercase tracking-[0.18em] hover:opacity-60 transition-opacity mt-auto pt-1"
                   style={{ fontFamily: sans, color: C.burgCore }}
                 >
