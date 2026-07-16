@@ -334,7 +334,7 @@ export default function Layout({ children, currentPageName }) {
                     </>
                 }
                   <ul className="space-y-2">
-                    {publicPages.filter(item => !["about-us", "blueprint", "CheckoutComplete", "ContactForm"].includes(item.name)).map((item) =>
+                    {publicPages.filter(item => !["about-us", "blueprint", "CheckoutComplete", "ContactForm", "Experts"].includes(item.name)).map((item) =>
                   <li key={item.name}>
                         <Link
                       to={item.href || createPageUrl(item.name)}
