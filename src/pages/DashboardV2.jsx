@@ -119,6 +119,21 @@ const DARK_PANEL_STYLE = {
     "linear-gradient(135deg, var(--aw-burg-dark) 0%, var(--aw-burg-core) 60%, var(--aw-burg-mid) 100%)",
 };
 
+// ── Soft-focus radial washes (AWB handoff, July 2026) ──
+// Deep burgundy (#644242) anchored off-centre, diffusing into the cream
+// page background (#f6efee) at ~40% — an atmospheric glow, not a hard
+// geometric gradient. Used on the page body, the hero overlay, and the
+// Trusted Help cards.
+const PAGE_BG_STYLE = {
+  backgroundColor: "#f6efee",
+  backgroundImage:
+    "radial-gradient(120% 80% at 10% 0%, rgba(100,66,66,0.16) 0%, rgba(168,138,138,0.10) 38%, rgba(246,239,238,0) 72%)",
+};
+const SOFT_RADIAL_OVERLAY =
+  "radial-gradient(130% 120% at 18% 12%, rgba(100,66,66,0.46) 0%, rgba(168,138,138,0.40) 42%, rgba(246,239,238,0.22) 74%, rgba(246,239,238,0.10) 100%)";
+const SOFT_RADIAL_CARD =
+  "radial-gradient(120% 120% at 18% 0%, rgba(100,66,66,0.14) 0%, rgba(168,138,138,0.08) 46%, rgba(246,239,238,0) 82%)";
+
 // Background video + burgundy overlay for the Blueprint learning cards.
 const BLUEPRINT_BG_VIDEO =
   "https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4";
@@ -175,13 +190,10 @@ function PatternHero({ profile, isPaid }) {
         src={PATTERN_VIDEO_URL}
         className="absolute inset-0 w-full h-full object-cover"
       />
-      {/* Legibility overlay, same values used on the live dashboard hero. */}
+      {/* Soft radial burgundy wash, ~40%, diffusing into cream. */}
       <div
         className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(74,14,46,0.40) 0%, rgba(44,6,26,0.40) 100%)",
-        }}
+        style={{ background: SOFT_RADIAL_OVERLAY }}
       />
       <div className="relative z-10 p-6 md:p-8">
         <div style={TEXT_SHADOW}>
@@ -260,13 +272,10 @@ function ProfileInviteHero({ variant, onDismiss }) {
         src={PATTERN_VIDEO_URL}
         className="absolute inset-0 w-full h-full object-cover"
       />
-      {/* Legibility overlay, same values used on the live dashboard hero. */}
+      {/* Soft radial burgundy wash, ~40%, diffusing into cream. */}
       <div
         className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(74,14,46,0.80) 0%, rgba(44,6,26,0.80) 100%)",
-        }}
+        style={{ background: SOFT_RADIAL_OVERLAY }}
       />
       <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
         <div className="flex-1 min-w-0" style={TEXT_SHADOW}>
@@ -433,7 +442,7 @@ function DirectoryBand() {
     <section>
       <SectionLabel>Trusted help, when you want it</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className={`${GLASS_CARD} p-6 md:p-8`}>
+        <div className={`${GLASS_CARD} p-6 md:p-8`} style={{ background: SOFT_RADIAL_CARD }}>
           <Tag>Practitioners</Tag>
           <h3 className="font-display text-awburg-core text-[20px] leading-tight mt-4 mb-3">
             Find an AW Verified practitioner
@@ -447,7 +456,7 @@ function DirectoryBand() {
             Browse practitioners <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-        <div className={`${GLASS_CARD} p-6 md:p-8`}>
+        <div className={`${GLASS_CARD} p-6 md:p-8`} style={{ background: SOFT_RADIAL_CARD }}>
           <Tag>Businesses</Tag>
           <h3 className="font-display text-awburg-core text-[20px] leading-tight mt-4 mb-3">
             Find an AW Verified business
@@ -666,7 +675,7 @@ export default function DashboardV2() {
   };
 
   return (
-    <div className="min-h-screen flex bg-paper">
+    <div className="min-h-screen flex" style={PAGE_BG_STYLE}>
       {/* ── Sidebar, desktop ── */}
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-paper border-r border-awburg-core/8 flex-col z-40">
         <div className="p-6 pb-8">
