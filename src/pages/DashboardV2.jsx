@@ -523,13 +523,8 @@ function DirectoryBand() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div
           className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`}
-          style={{ background: SOFT_RADIAL_CARD }}
+          style={{ background: "#F4E9E4" }}
         >
-          {/* Decorative rose glow, per the reference design. */}
-          <div
-            aria-hidden="true"
-            className="absolute -right-8 bottom-0 w-56 h-56 rounded-full bg-awrose-light/40 blur-3xl pointer-events-none"
-          />
           {/* AW Verified seal */}
           <img
             src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4e806aa77_aw-verified-badge.svg"
@@ -549,7 +544,7 @@ function DirectoryBand() {
             Browse practitioners <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-        <div className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`} style={{ background: SOFT_RADIAL_CARD }}>
+        <div className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`} style={{ background: "#F4E9E4" }}>
           {/* AW Verified seal */}
           <img
             src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4e806aa77_aw-verified-badge.svg"
