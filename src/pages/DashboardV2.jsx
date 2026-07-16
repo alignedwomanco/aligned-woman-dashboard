@@ -582,7 +582,7 @@ function ApplyStrip() {
       <h3 className="font-display text-awburg-core text-[18px] leading-tight mb-2 pr-16 md:pr-20">
         Do you serve women too?
       </h3>
-      <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5 max-w-xl">
+      <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5 max-w-xl pr-16 md:pr-20">
         We would love to meet you. AW Verification is free, and Verified practitioners can
         bring their courses here.
       </p>
