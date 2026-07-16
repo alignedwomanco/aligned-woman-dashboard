@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, ChevronDown } from "lucide-react";
@@ -62,6 +62,45 @@ const KEY_MAP = {
 
 // Supply the Cloudflare R2 mp4 URL to switch this card on.
 const YIN_VIDEO_URL = "";
+
+// Background video for the pattern band (02), all states.
+const PATTERN_VIDEO_URL =
+  "https://pub-e1032a6c8b9241cf9d03513d43a81f17.r2.dev/YourPattern.mp4";
+
+// Legibility shadow for copy sitting over the video.
+const TEXT_SHADOW = { textShadow: "0 2px 14px rgba(0,0,0,0.55)" };
+
+// Muted looped background video. muted + playsInline + the canplay retry
+// is the combination that autoplays on iOS Safari and Android Chrome;
+// same approach already proven in StateAWithQuiz.
+function AutoplayVideo({ src, className }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || !src) return;
+    v.muted = true;
+    v.src = src;
+    v.load();
+    const tryPlay = () => {
+      v.play().catch(() => {});
+    };
+    v.addEventListener("canplay", tryPlay, { once: true });
+    v.play().catch(() => {});
+    return () => v.removeEventListener("canplay", tryPlay);
+  }, [src]);
+  return (
+    <video
+      ref={ref}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      aria-hidden="true"
+      className={className}
+    />
+  );
+}
 
 // Button recipes, per the handoff global spec.
 const BTN_FILLED =
@@ -127,16 +166,34 @@ function PatternHero({ profile, isPaid }) {
   const arch = getArchetype(archKey);
 
   return (
-    <section className="rounded-2xl overflow-hidden text-white" style={DARK_PANEL_STYLE}>
-      <div className="p-6 md:p-8">
-        <EyebrowOnDark>Your pattern</EyebrowOnDark>
-        <h2 className="font-display text-[26px] md:text-[30px] leading-tight mb-3">
-          {arch?.name || "Your pattern"}
-        </h2>
-        <p className="font-body font-light text-sm leading-relaxed text-white/90 max-w-xl mb-6">
-          {arch?.mirrorLine ||
-            (arch?.atBest ? arch.atBest.split(". ").slice(0, 2).join(". ") + "." : "")}
-        </p>
+    <section
+      className="relative rounded-2xl overflow-hidden text-white"
+      style={DARK_PANEL_STYLE}
+    >
+      {/* Background video; gradient beneath remains the fallback. */}
+      <AutoplayVideo
+        src={PATTERN_VIDEO_URL}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      {/* Legibility overlay, same values used on the live dashboard hero. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(74,14,46,0.80) 0%, rgba(44,6,26,0.80) 100%)",
+        }}
+      />
+      <div className="relative z-10 p-6 md:p-8">
+        <div style={TEXT_SHADOW}>
+          <EyebrowOnDark>Your pattern</EyebrowOnDark>
+          <h2 className="font-display text-[26px] md:text-[30px] leading-tight mb-3">
+            {arch?.name || "Your pattern"}
+          </h2>
+          <p className="font-body font-light text-sm leading-relaxed text-white/90 max-w-xl mb-6">
+            {arch?.mirrorLine ||
+              (arch?.atBest ? arch.atBest.split(". ").slice(0, 2).join(". ") + "." : "")}
+          </p>
+        </div>
         <div className="flex flex-wrap items-center gap-4">
           {/* Free member with a pattern has no Continue, so this is her
               single filled action. Paid members get the outline tier. */}
@@ -159,7 +216,10 @@ function PatternHero({ profile, isPaid }) {
             Pattern page once that page is built; inline keeps the law of
             no dead ends until then. */}
         {expanded && (
-          <div className="mt-6 pt-6 border-t border-white/15 space-y-4 max-w-2xl">
+          <div
+            className="mt-6 pt-6 border-t border-white/15 space-y-4 max-w-2xl"
+            style={TEXT_SHADOW}
+          >
             {arch?.fullDescription && (
               <p className="font-body font-light text-sm leading-relaxed text-white/90">
                 {arch.fullDescription}
@@ -191,9 +251,25 @@ function PatternHero({ profile, isPaid }) {
 function ProfileInviteHero({ variant, onDismiss }) {
   const isFree = variant === "c";
   return (
-    <section className="rounded-2xl overflow-hidden text-white" style={DARK_PANEL_STYLE}>
-      <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
-        <div className="flex-1 min-w-0">
+    <section
+      className="relative rounded-2xl overflow-hidden text-white"
+      style={DARK_PANEL_STYLE}
+    >
+      {/* Background video; gradient beneath remains the fallback. */}
+      <AutoplayVideo
+        src={PATTERN_VIDEO_URL}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      {/* Legibility overlay, same values used on the live dashboard hero. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(74,14,46,0.80) 0%, rgba(44,6,26,0.80) 100%)",
+        }}
+      />
+      <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+        <div className="flex-1 min-w-0" style={TEXT_SHADOW}>
           <EyebrowOnDark>{isFree ? "Begin here" : "Your starting point"}</EyebrowOnDark>
           <h2 className="font-display text-[24px] md:text-[28px] leading-tight mb-3">
             {isFree
