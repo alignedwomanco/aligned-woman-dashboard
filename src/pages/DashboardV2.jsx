@@ -186,9 +186,54 @@ function timeGreeting() {
 
 function SectionLabel({ children }) {
   return (
-    <p className="font-body font-bold text-[11px] tracking-eyebrow uppercase text-awburg-core mb-6">
+    <p className="font-body font-semibold text-[14px] text-awburg-core mb-6">
       {children}
     </p>
+  );
+}
+
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five",
+  "six", "seven", "eight", "nine", "ten",
+];
+
+function numberWord(n, capitalize = false) {
+  const w = n >= 0 && n <= 10 ? NUMBER_WORDS[n] : String(n);
+  return capitalize ? w.charAt(0).toUpperCase() + w.slice(1) : w;
+}
+
+// Whole-course percent ring for the learning card.
+function ProgressRing({ percent }) {
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+  return (
+    <div className="relative w-24 h-24 flex-shrink-0" aria-label={`${clamped}% complete`}>
+      <svg viewBox="0 0 72 72" className="w-24 h-24 -rotate-90">
+        <circle
+          cx="36"
+          cy="36"
+          r={r}
+          fill="none"
+          stroke="rgba(255,255,255,0.15)"
+          strokeWidth="5"
+        />
+        <circle
+          cx="36"
+          cy="36"
+          r={r}
+          fill="none"
+          stroke="var(--aw-rose-light)"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c - (c * clamped) / 100}
+        />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center font-body font-semibold text-white text-sm">
+        {clamped}%
+      </span>
+    </div>
   );
 }
 
@@ -344,7 +389,7 @@ function ProfileInviteHero({ variant, onDismiss }) {
 }
 
 // ── 03 · Learning card, paid states ──
-function LearningCardPaid({ continueData, courseId }) {
+function LearningCardPaid({ continueData, courseId, coursePercent }) {
   const navigate = useNavigate();
   const phaseIndex = continueData?.phaseIndex ?? 1;
   const totalSections = continueData?.totalSections ?? 0;
@@ -382,31 +427,30 @@ function LearningCardPaid({ continueData, courseId }) {
       />
       <div className="absolute inset-0" style={{ background: BLUEPRINT_VIDEO_OVERLAY }} />
       <div className="relative p-6 md:p-8">
-        <span className="inline-flex items-center gap-2 font-body font-bold text-[9px] tracking-eyebrow uppercase text-awrose-pale bg-white/10 rounded-full px-3 py-1.5 mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-awrose-light" />
-          {isComplete
-            ? "Complete · all five phases"
-            : `In progress · Phase ${phaseIndex} of ${totalSections || 5}`}
-        </span>
-        <h3 className="font-display text-[24px] md:text-[28px] leading-tight mb-2">
-          The Aligned <span className="italic text-awrose-light">Woman</span> Blueprint
-        </h3>
-        <p className="font-body font-light text-sm text-white/90 mb-6">
-          {isComplete
-            ? "You have completed all five phases. Begin again from Awareness whenever you like."
-            : phaseName
-              ? `You are in ${phaseName}. ${remaining} ${remaining === 1 ? "module" : "modules"} left in this phase.`
-              : "Pick up where you left off."}
-        </p>
-        {!isComplete && total > 0 && (
-          <div className="w-full max-w-xs h-1.5 rounded-full bg-white/15 overflow-hidden mb-6">
-            <div
-              className="h-full rounded-full bg-awrose-light transition-all"
-              style={{ width: `${Math.round((completed / total) * 100)}%` }}
-            />
+        <div className="flex items-center justify-between gap-6">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-2 font-body font-bold text-[9px] tracking-eyebrow uppercase text-awrose-pale bg-white/10 rounded-full px-3 py-1.5 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-awrose-light" />
+              {isComplete
+                ? "Complete · all five phases"
+                : `In progress · Phase ${phaseIndex} of ${totalSections || 5}`}
+            </span>
+            <h3 className="font-display text-[24px] md:text-[28px] leading-tight mb-2">
+              The Aligned <span className="italic text-awrose-light">Woman</span> Blueprint
+            </h3>
+            <p className="font-body font-light text-sm text-white/90">
+              {isComplete
+                ? "You have completed all five phases. Begin again from Awareness whenever you like."
+                : phaseName
+                  ? `You are in ${phaseName}. ${numberWord(remaining, true)} ${remaining === 1 ? "module" : "modules"} left in this phase.`
+                  : "Pick up where you left off."}
+            </p>
           </div>
-        )}
-        <div className="flex flex-wrap items-center gap-4">
+          {!isComplete && typeof coursePercent === "number" && (
+            <ProgressRing percent={coursePercent} />
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-4 mt-7">
           <button onClick={() => navigate(continueUrl)} className={BTN_FILLED_ROSE}>
             Continue <ArrowRight className="w-3.5 h-3.5" />
           </button>
@@ -476,7 +520,15 @@ function DirectoryBand() {
     <section>
       <SectionLabel>Trusted help, when you want it</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className={`${GLASS_CARD} p-6 md:p-8`} style={{ background: SOFT_RADIAL_CARD }}>
+        <div
+          className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`}
+          style={{ background: SOFT_RADIAL_CARD }}
+        >
+          {/* Decorative rose glow, per the reference design. */}
+          <div
+            aria-hidden="true"
+            className="absolute -right-8 bottom-0 w-56 h-56 rounded-full bg-awrose-light/40 blur-3xl pointer-events-none"
+          />
           <Tag>Practitioners</Tag>
           <h3 className="font-display text-awburg-core text-[20px] leading-tight mt-4 mb-3">
             Find an AW Verified practitioner
@@ -667,6 +719,47 @@ export default function DashboardV2() {
   const courseId =
     (courses.find((c) => c.tags?.includes("blueprint_paid")) || courses[0])?.id || null;
 
+  // Honest whole-course percent for the learning card ring: completed
+  // content modules over total content modules, using the SAME completion
+  // rules as useContinueModule (explicit module-level record, or every
+  // page complete). Kept here rather than in the shared hook so the live
+  // dashboard's code path is untouched.
+  const { data: coursePercent = null } = useQuery({
+    queryKey: ["v2-course-percent", courseId, resolvedUser?.email],
+    enabled: !!isPrivileged && !!courseId && !!resolvedUser?.email,
+    queryFn: async () => {
+      const [modules, pages, progress] = await Promise.all([
+        base44.entities.CourseModule.filter({ courseId, isPublished: true }),
+        base44.entities.CoursePage.filter({ courseId }),
+        base44.entities.CourseProgress.filter({ created_by: resolvedUser.email }),
+      ]);
+      const pagesByModule = {};
+      for (const p of pages) {
+        if (!p.moduleId) continue;
+        if (!pagesByModule[p.moduleId]) pagesByModule[p.moduleId] = [];
+        pagesByModule[p.moduleId].push(p);
+      }
+      const completedPageIds = new Set(
+        progress.filter((p) => p.status === "completed" && p.pageId).map((p) => p.pageId)
+      );
+      const moduleLevelComplete = new Set(
+        progress
+          .filter((p) => p.status === "completed" && !p.pageId && p.moduleId)
+          .map((p) => p.moduleId)
+      );
+      const contentModules = modules.filter(
+        (m) => (pagesByModule[m.id] || []).length > 0
+      );
+      if (contentModules.length === 0) return null;
+      const done = contentModules.filter(
+        (m) =>
+          moduleLevelComplete.has(m.id) ||
+          (pagesByModule[m.id] || []).every((pg) => completedPageIds.has(pg.id))
+      ).length;
+      return Math.round((done / contentModules.length) * 100);
+    },
+  });
+
   if (currentUser === undefined && !user) {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center">
@@ -832,7 +925,11 @@ export default function DashboardV2() {
             <SectionLabel>Your learning</SectionLabel>
             <div className="flex flex-col lg:flex-row gap-5">
               {isPaidState ? (
-                <LearningCardPaid continueData={continueData} courseId={courseId} />
+                <LearningCardPaid
+                  continueData={continueData}
+                  courseId={courseId}
+                  coursePercent={coursePercent}
+                />
               ) : (
                 <LearningCardFree />
               )}
