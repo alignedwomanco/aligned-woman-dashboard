@@ -643,20 +643,8 @@ function FreeResources({ userEmail, isPaid }) {
         </div>
 
         <YinVideoCard />
-
-        <FutureResourceSlot />
       </div>
     </section>
-  );
-}
-
-function FutureResourceSlot() {
-  return (
-    <div className="rounded-2xl border-2 border-dashed border-awrose-core/35 bg-white/25 p-6 flex items-center justify-center min-h-[220px]">
-      <p className="font-body font-light text-[12px] leading-relaxed text-awburg-core/45 text-center max-w-[220px]">
-        Future resource card. Same shape: type, title, one warm line, one action.
-      </p>
-    </div>
   );
 }
 
