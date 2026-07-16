@@ -124,10 +124,44 @@ const DARK_PANEL_STYLE = {
 // page background (#f6efee) at ~40% — an atmospheric glow, not a hard
 // geometric gradient. Used on the page body, the hero overlay, and the
 // Trusted Help cards.
+// Two-layer page background (AWB handoff, July 2026):
+// 1. Base — a soft diagonal wash through warm blush neutrals. Reads as
+//    almost-neutral warmth; the mid-tones are the darkest it gets.
+// 2. Atmosphere orbs — fixed, behind content (z-0, pointer-events-none):
+//    a faint rose sphere bleeding off the right edge, and a white haze
+//    brightening the top-left. Glass cards pick both up through their
+//    backdrop blur.
 const PAGE_BG_STYLE = {
-  backgroundColor: "#f6efee",
+  backgroundColor: "#F6EEEA",
   backgroundImage:
-    "radial-gradient(120% 80% at 10% 0%, rgba(100,66,66,0.16) 0%, rgba(168,138,138,0.10) 38%, rgba(246,239,238,0) 72%)",
+    "linear-gradient(168deg, #F6EEEA 0%, #EEDAD3 30%, #E9D3CD 55%, #F1E3DD 80%, #F8F1ED 100%)",
+};
+const ROSE_SPHERE_STYLE = {
+  position: "fixed",
+  right: "-160px",
+  top: "44%",
+  width: "680px",
+  height: "680px",
+  borderRadius: "50%",
+  backgroundImage:
+    "radial-gradient(circle at 32% 28%, #F3E0D9 0%, #E6C4BA 40%, #DDB5AA 70%, #D8AEA4 100%)",
+  filter: "blur(28px)",
+  opacity: 0.38,
+  zIndex: 0,
+  pointerEvents: "none",
+  transform: "translateY(-50%)",
+};
+const TOP_HAZE_STYLE = {
+  position: "fixed",
+  left: "-220px",
+  top: "-260px",
+  width: "760px",
+  height: "760px",
+  borderRadius: "50%",
+  background: "rgba(255,245,240,0.85)",
+  filter: "blur(120px)",
+  zIndex: 0,
+  pointerEvents: "none",
 };
 const SOFT_RADIAL_OVERLAY =
   "radial-gradient(130% 120% at 18% 12%, rgba(100,66,66,0.46) 0%, rgba(168,138,138,0.40) 42%, rgba(246,239,238,0.22) 74%, rgba(246,239,238,0.10) 100%)";
@@ -675,7 +709,10 @@ export default function DashboardV2() {
   };
 
   return (
-    <div className="min-h-screen flex" style={PAGE_BG_STYLE}>
+    <div className="min-h-screen flex relative" style={PAGE_BG_STYLE}>
+      {/* Atmosphere orbs — fixed behind all content. */}
+      <div aria-hidden="true" style={TOP_HAZE_STYLE} />
+      <div aria-hidden="true" style={ROSE_SPHERE_STYLE} />
       {/* ── Sidebar, desktop ── */}
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-paper border-r border-awburg-core/8 flex-col z-40">
         <div className="p-6 pb-8">
@@ -722,7 +759,7 @@ export default function DashboardV2() {
       </aside>
 
       {/* ── Main ── */}
-      <div className="flex-1 lg:ml-60">
+      <div className="flex-1 lg:ml-60 relative z-10">
         {/* Admin preview banner: remove at cutover */}
         <div className="bg-awburg-core text-paper px-6 py-2">
           <p className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-center">
