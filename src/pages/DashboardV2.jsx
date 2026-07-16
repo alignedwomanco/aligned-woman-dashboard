@@ -879,7 +879,7 @@ export default function DashboardV2() {
           </div>
         </div>
 
-        <main className="max-w-5xl mx-auto px-5 md:px-6 py-10 space-y-14 lg:space-y-24">
+        <main className="max-w-5xl mx-auto px-5 md:px-6 py-8 space-y-8 lg:space-y-12">
           {/* 01 · Greeting */}
           <section>
             <h1 className="font-display text-[30px] md:text-[34px] text-awburg-core leading-tight">
