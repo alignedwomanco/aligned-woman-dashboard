@@ -48,7 +48,6 @@ const NAV_ITEMS = [
   { label: "Dashboard", path: "/DashboardV2", active: true },
   { label: "Classroom", path: "/Classroom" },
   { label: "Directory", path: "/ExpertsDirectory" },
-  { label: "Community", path: "/Community" },
   { label: "My Profile", path: "/ProfileSettings" },
 ];
 
@@ -839,6 +838,17 @@ export default function DashboardV2() {
           </ul>
         </nav>
         <div className="px-8 pb-6 space-y-2">
+          {/* LaurAI is not built yet: greyed and non-interactive, so no dead
+              link. Becomes a real route when LaurAI ships. */}
+          <p
+            aria-disabled="true"
+            className="font-body font-semibold text-[10px] tracking-eyebrow uppercase text-awburg-core/30 cursor-default select-none"
+          >
+            Talk to LaurAI
+            <span className="ml-2 normal-case tracking-normal text-[9px] font-medium text-awburg-core/40">
+              coming soon
+            </span>
+          </p>
           <Link
             to="/Support"
             className="block font-body font-semibold text-[10px] tracking-eyebrow uppercase text-awburg-core/55 hover:text-awburg-core transition-colors"
