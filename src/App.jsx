@@ -40,6 +40,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import DashboardV2 from './pages/DashboardV2';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -102,6 +103,8 @@ const AuthenticatedApp = () => {
       {/* ── Protected pages (require login) ── */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/Dashboard" element={<LayoutWrapper currentPageName={mainPageKey}><MainPage /></LayoutWrapper>} />
+        {/* DashboardV2: hidden rebuild, admin-only preview, own chrome. Cutover swaps what /Dashboard renders. */}
+        <Route path="/DashboardV2" element={<DashboardV2 />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route
             key={path}
