@@ -84,7 +84,7 @@ const DARK_PANEL_STYLE = {
 const BLUEPRINT_BG_VIDEO =
   "https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4";
 const BLUEPRINT_VIDEO_OVERLAY =
-  "linear-gradient(135deg, rgba(26,5,16,0.30) 0%, rgba(74,14,46,0.30) 60%, rgba(107,22,66,0.30) 100%)";
+  "linear-gradient(135deg, rgba(26,5,16,0.60) 0%, rgba(74,14,46,0.60) 60%, rgba(107,22,66,0.60) 100%)";
 
 const GLASS_CARD =
   "rounded-2xl border border-awburg-core/10 bg-white/40 backdrop-blur-2xl shadow-sm";
