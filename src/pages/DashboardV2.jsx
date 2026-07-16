@@ -109,7 +109,7 @@ const BTN_FILLED =
 const BTN_FILLED_ROSE =
   "inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-white font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
 const BTN_OUTLINE =
-  "inline-flex items-center gap-2 bg-transparent border border-awburg-core/35 text-awburg-core hover:bg-awburg-core hover:text-paper font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
+  "inline-flex items-center gap-2 bg-awburg-core border border-awburg-core text-paper hover:bg-awrose-pale hover:text-awburg-core active:bg-awrose-pale active:text-awburg-core font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
 const BTN_OUTLINE_DARK =
   "inline-flex items-center gap-2 bg-transparent border border-white/40 text-white hover:bg-white/15 font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
 const LINK_ON_DARK =
