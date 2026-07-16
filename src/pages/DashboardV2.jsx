@@ -573,8 +573,13 @@ function DirectoryBand() {
 // ── 05 · Apply strip ──
 function ApplyStrip() {
   return (
-    <section className={`${GLASS_CARD} p-6 md:p-8`}>
-      <h3 className="font-display text-awburg-core text-[18px] leading-tight mb-2">
+    <section className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`}>
+      <img
+        src="https://media.base44.com/images/public/69f46886a412ee042303f1af/f61a42b24_aw-verified-seal.png"
+        alt="AW Verified 2026"
+        className="absolute top-5 right-5 w-12 h-12 md:w-14 md:h-14 object-contain"
+      />
+      <h3 className="font-display text-awburg-core text-[18px] leading-tight mb-2 pr-16 md:pr-20">
         Do you serve women too?
       </h3>
       <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5 max-w-xl">
