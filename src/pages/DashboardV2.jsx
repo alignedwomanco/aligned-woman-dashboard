@@ -80,6 +80,12 @@ const DARK_PANEL_STYLE = {
     "linear-gradient(135deg, var(--aw-burg-dark) 0%, var(--aw-burg-core) 60%, var(--aw-burg-mid) 100%)",
 };
 
+// Background video + burgundy overlay for the Blueprint learning cards.
+const BLUEPRINT_BG_VIDEO =
+  "https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4";
+const BLUEPRINT_VIDEO_OVERLAY =
+  "linear-gradient(135deg, rgba(26,5,16,0.82) 0%, rgba(74,14,46,0.78) 60%, rgba(107,22,66,0.72) 100%)";
+
 const GLASS_CARD =
   "rounded-2xl border border-awburg-core/10 bg-white/40 backdrop-blur-2xl shadow-sm";
 
@@ -245,8 +251,18 @@ function LearningCardPaid({ continueData, courseId }) {
     : createPageUrl("Classroom");
 
   return (
-    <section className="rounded-2xl overflow-hidden text-white flex-1" style={DARK_PANEL_STYLE}>
-      <div className="p-6 md:p-8">
+    <section className="rounded-2xl overflow-hidden text-white flex-1 relative" style={DARK_PANEL_STYLE}>
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src={BLUEPRINT_BG_VIDEO}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+      <div className="absolute inset-0" style={{ background: BLUEPRINT_VIDEO_OVERLAY }} />
+      <div className="relative p-6 md:p-8">
         <span className="inline-flex items-center gap-2 font-body font-bold text-[9px] tracking-eyebrow uppercase text-awrose-pale bg-white/10 rounded-full px-3 py-1.5 mb-4">
           <span className="w-1.5 h-1.5 rounded-full bg-awrose-light" />
           {isComplete
@@ -287,8 +303,18 @@ function LearningCardPaid({ continueData, courseId }) {
 // ── 03 · Learning card, free member ──
 function LearningCardFree() {
   return (
-    <section className="rounded-2xl overflow-hidden text-white flex-1" style={DARK_PANEL_STYLE}>
-      <div className="p-6 md:p-8">
+    <section className="rounded-2xl overflow-hidden text-white flex-1 relative" style={DARK_PANEL_STYLE}>
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src={BLUEPRINT_BG_VIDEO}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+      <div className="absolute inset-0" style={{ background: BLUEPRINT_VIDEO_OVERLAY }} />
+      <div className="relative p-6 md:p-8">
         <span className="inline-block font-body font-bold text-[9px] tracking-eyebrow uppercase text-awrose-pale bg-white/10 rounded-full px-3 py-1.5 mb-4">
           The flagship
         </span>
