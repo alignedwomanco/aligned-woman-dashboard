@@ -60,7 +60,8 @@ const KEY_MAP = {
 };
 
 // Supply the Cloudflare R2 mp4 URL to switch this card on.
-const YIN_VIDEO_URL = "";
+const YIN_VIDEO_URL =
+  "https://pub-92fd07e9117b4774bd919918a55b163b.r2.dev/Phoebe-Greenacre-Intro-Yin-stress-digest.mp4";
 
 // Background video for the pattern band (02), all states.
 const PATTERN_VIDEO_URL =
