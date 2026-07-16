@@ -8,6 +8,7 @@ import { getDashboardState } from "@/lib/dashboardState";
 import useContinueModule from "@/hooks/useContinueModule";
 import { getArchetype } from "@/data/archetypes";
 import { createPageUrl } from "@/utils";
+import YinVideoCard from "@/components/dashboard-v2/YinVideoCard";
 
 // ────────────────────────────────────────────────────────────────
 // DashboardV2 · parallel rebuild of the member dashboard
@@ -634,35 +635,7 @@ function FreeResources({ userEmail, isPaid }) {
           </div>
         </div>
 
-        {YIN_VIDEO_URL ? (
-          <div className={`${GLASS_CARD} p-6 flex flex-col`}>
-            <div>
-              <Tag>Video practice</Tag>
-            </div>
-            <h3 className="font-display text-awburg-core text-[19px] leading-tight mt-4 mb-2">
-              Yin, with Phoebe
-            </h3>
-            <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-4 flex-1">
-              A slow yin practice with Phoebe Greenacre, somatic therapist and nervous
-              system coach. For the days your body needs to arrive before your mind can.
-            </p>
-            <p className="font-body text-[11px] text-awburg-core/55 mb-4">
-              20 minutes · watch anytime
-            </p>
-            <div>
-              <a
-                href={YIN_VIDEO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={BTN_OUTLINE}
-              >
-                Watch now
-              </a>
-            </div>
-          </div>
-        ) : (
-          <FutureResourceSlot />
-        )}
+        <YinVideoCard />
 
         <FutureResourceSlot />
       </div>
