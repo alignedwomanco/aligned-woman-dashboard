@@ -180,7 +180,7 @@ function PatternHero({ profile, isPaid }) {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(135deg, rgba(74,14,46,0.80) 0%, rgba(44,6,26,0.80) 100%)",
+            "linear-gradient(135deg, rgba(74,14,46,0.40) 0%, rgba(44,6,26,0.40) 100%)",
         }}
       />
       <div className="relative z-10 p-6 md:p-8">
