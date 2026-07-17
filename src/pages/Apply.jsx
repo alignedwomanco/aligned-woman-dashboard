@@ -274,6 +274,15 @@ export default function Apply() {
             </li>
           ))}
         </ol>
+        <p className="font-body font-light text-[12.5px] text-awburg-core/60 mt-6">
+          <Link
+            to="/theawstandard"
+            className="underline underline-offset-2 text-awburg-core hover:text-awrose-deep"
+          >
+            Read the Aligned Woman Standard in full
+          </Link>{" "}
+          before you apply.
+        </p>
       </section>
 
       {/* Application form */}
