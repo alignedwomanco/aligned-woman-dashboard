@@ -623,6 +623,8 @@ export default function CourseDetail() {
   const [profile, setProfile] = useState(null);
   const [workbooks, setWorkbooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
   const [activeTabIdx, setActiveTabIdx] = useState(0);
   const pillsRef = useRef(null);
@@ -632,6 +634,8 @@ export default function CourseDetail() {
   // ── Data loading (preserved from live code) ──
   useEffect(() => {
     if (!courseId) { setLoading(false); return; }
+    let cancelled = false;
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const loadData = async () => {
       try {
         const me = await base44.auth.me();
@@ -662,11 +666,30 @@ export default function CourseDetail() {
         setWorkbooks(wb);
       } catch (e) {
         console.error(e);
-      } finally {
+        throw e;
+      }
+    };
+    // Transient fetch failures used to be swallowed here, which left
+    // course as null and rendered "Course not found." for a course that
+    // exists; a refresh would win the retry. Retry quietly instead, and
+    // only surface an error state if every attempt fails.
+    const loadWithRetry = async () => {
+      setLoadError(false);
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          await loadData();
+          if (!cancelled) setLoading(false);
+          return;
+        } catch (_) {
+          if (attempt < 2) await sleep(600 * (attempt + 1));
+        }
+      }
+      if (!cancelled) {
+        setLoadError(true);
         setLoading(false);
       }
     };
-    loadData();
+    loadWithRetry();
 
     const unsubSections = base44.entities.CourseSection.subscribe((event) => {
       if (event.data?.courseId === courseId) {
@@ -682,8 +705,8 @@ export default function CourseDetail() {
         );
       }
     });
-    return () => { unsubSections(); unsubModules(); };
-  }, [courseId]);
+    return () => { cancelled = true; unsubSections(); unsubModules(); };
+  }, [courseId, retryKey]);
 
   // ── Build progressMap: pageId -> status ──
   // When duplicate CourseProgress records exist for the same pageId
@@ -835,6 +858,25 @@ export default function CourseDetail() {
             ))}
           </div>
           <div className="cd-skel cd-skel__shimmer" style={{ height: 400, marginTop: 20 }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError && !course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6"
+        style={{ background: "var(--aw-off-white, #FAF5F3)" }}>
+        <div className="text-center max-w-sm">
+          <p className="mb-4" style={{ fontFamily: "var(--aw-font-sans)", color: "#8A7A76" }}>
+            Something quiet went wrong loading this course. Nothing is lost.
+          </p>
+          <button
+            onClick={() => { setLoading(true); setRetryKey((k) => k + 1); }}
+            className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
+          >
+            Try again
+          </button>
         </div>
       </div>
     );
