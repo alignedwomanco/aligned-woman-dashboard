@@ -54,72 +54,20 @@ const CTA_GRAD = "linear-gradient(135deg, #5C4349 0%, #382A2E 100%)";
 
 const CARD = "rounded-2xl shadow-[0_8px_30px_rgba(62,30,38,0.06)]";
 
-// The approved AW Verified seal: 16-point plum starburst with
-// AW / VERIFIED / 2026 centred, and a small rose checkmark badge
-// overlapping the bottom-right.
+// The approved AW Verified seal image (16-point plum starburst with
+// AW / VERIFIED / 2026 and a rose checkmark badge).
+const SEAL_IMAGE_URL =
+  "https://media.base44.com/images/public/69f46886a412ee042303f1af/c01141aed_aw-verified-seal.png";
+
 function AWSeal({ size = 128 }) {
-  const badge = size * 0.34;
   return (
-    <div className="relative inline-block" style={{ width: size, height: size }}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 160 160"
-        width={size}
-        height={size}
-        aria-label="AW Verified seal"
-      >
-        <path
-          d="M155.0,80.0L154.6,82.0L153.6,83.9L151.9,85.7L149.8,87.3L147.4,88.9L145.0,90.3L142.8,91.6L141.0,93.0L139.6,94.3L138.9,95.8L138.8,97.4L139.3,99.3L140.2,101.3L141.5,103.6L142.8,106.0L144.1,108.5L145.1,111.0L145.6,113.4L145.6,115.6L145.0,117.5L143.7,119.0L141.8,120.1L139.4,120.8L136.8,121.2L133.9,121.4L131.2,121.4L128.6,121.5L126.3,121.7L124.5,122.2L123.1,123.1L122.2,124.5L121.7,126.3L121.5,128.6L121.4,131.2L121.4,133.9L121.2,136.8L120.8,139.4L120.1,141.8L119.0,143.7L117.5,145.0L115.6,145.6L113.4,145.6L111.0,145.1L108.5,144.1L106.0,142.8L103.6,141.5L101.3,140.2L99.3,139.3L97.4,138.8L95.8,138.9L94.3,139.6L93.0,141.0L91.6,142.8L90.3,145.0L88.9,147.4L87.3,149.8L85.7,151.9L83.9,153.6L82.0,154.6L80.0,155.0L78.0,154.6L76.1,153.6L74.3,151.9L72.7,149.8L71.1,147.4L69.7,145.0L68.4,142.8L67.0,141.0L65.7,139.6L64.2,138.9L62.6,138.8L60.7,139.3L58.7,140.2L56.4,141.5L54.0,142.8L51.5,144.1L49.0,145.1L46.6,145.6L44.4,145.6L42.5,145.0L41.0,143.7L39.9,141.8L39.2,139.4L38.8,136.8L38.6,133.9L38.6,131.2L38.5,128.6L38.3,126.3L37.8,124.5L36.9,123.1L35.5,122.2L33.7,121.7L31.4,121.5L28.8,121.4L26.1,121.4L23.2,121.2L20.6,120.8L18.2,120.1L16.3,119.0L15.0,117.5L14.4,115.6L14.4,113.4L14.9,111.0L15.9,108.5L17.2,106.0L18.5,103.6L19.8,101.3L20.7,99.3L21.2,97.4L21.1,95.8L20.4,94.3L19.0,93.0L17.2,91.6L15.0,90.3L12.6,88.9L10.2,87.3L8.1,85.7L6.4,83.9L5.4,82.0L5.0,80.0L5.4,78.0L6.4,76.1L8.1,74.3L10.2,72.7L12.6,71.1L15.0,69.7L17.2,68.4L19.0,67.0L20.4,65.7L21.1,64.2L21.2,62.6L20.7,60.7L19.8,58.7L18.5,56.4L17.2,54.0L15.9,51.5L14.9,49.0L14.4,46.6L14.4,44.4L15.0,42.5L16.3,41.0L18.2,39.9L20.6,39.2L23.2,38.8L26.1,38.6L28.8,38.6L31.4,38.5L33.7,38.3L35.5,37.8L36.9,36.9L37.8,35.5L38.3,33.7L38.5,31.4L38.6,28.8L38.6,26.1L38.8,23.2L39.2,20.6L39.9,18.2L41.0,16.3L42.5,15.0L44.4,14.4L46.6,14.4L49.0,14.9L51.5,15.9L54.0,17.2L56.4,18.5L58.7,19.8L60.7,20.7L62.6,21.2L64.2,21.1L65.7,20.4L67.0,19.0L68.4,17.2L69.7,15.0L71.1,12.6L72.7,10.2L74.3,8.1L76.1,6.4L78.0,5.4L80.0,5.0L82.0,5.4L83.9,6.4L85.7,8.1L87.3,10.2L88.9,12.6L90.3,15.0L91.6,17.2L93.0,19.0L94.3,20.4L95.8,21.1L97.4,21.2L99.3,20.7L101.3,19.8L103.6,18.5L106.0,17.2L108.5,15.9L111.0,14.9L113.4,14.4L115.6,14.4L117.5,15.0L119.0,16.3L120.1,18.2L120.8,20.6L121.2,23.2L121.4,26.1L121.4,28.8L121.5,31.4L121.7,33.7L122.2,35.5L123.1,36.9L124.5,37.8L126.3,38.3L128.6,38.5L131.2,38.6L133.9,38.6L136.8,38.8L139.4,39.2L141.8,39.9L143.7,41.0L145.0,42.5L145.6,44.4L145.6,46.6L145.1,49.0L144.1,51.5L142.8,54.0L141.5,56.4L140.2,58.7L139.3,60.7L138.8,62.6L138.9,64.2L139.6,65.7L141.0,67.0L142.8,68.4L145.0,69.7L147.4,71.1L149.8,72.7L151.9,74.3L153.6,76.1L154.6,78.0L155.0,80.0Z"
-          fill={SEAL_DARK}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span
-          className="font-display text-white"
-          style={{ fontSize: size * 0.3, lineHeight: 1 }}
-        >
-          AW
-        </span>
-        <span
-          className="font-body font-bold uppercase"
-          style={{
-            fontSize: size * 0.075,
-            letterSpacing: "0.22em",
-            color: SEAL_ROSE,
-            marginTop: size * 0.04,
-          }}
-        >
-          Verified
-        </span>
-        <span
-          className="font-body font-semibold"
-          style={{
-            fontSize: size * 0.065,
-            letterSpacing: "0.14em",
-            color: "rgba(255,255,255,0.7)",
-            marginTop: size * 0.02,
-          }}
-        >
-          2026
-        </span>
-      </div>
-      {/* Small rose checkmark badge, bottom-right overlay */}
-      <div
-        className="absolute flex items-center justify-center rounded-full border-2"
-        style={{
-          width: badge,
-          height: badge,
-          right: -badge * 0.12,
-          bottom: -badge * 0.12,
-          background: SEAL_ROSE,
-          borderColor: CARD_BG,
-        }}
-      >
-        <Check
-          style={{ width: badge * 0.55, height: badge * 0.55, color: "#fff", strokeWidth: 3 }}
-        />
-      </div>
-    </div>
+    <img
+      src={SEAL_IMAGE_URL}
+      alt="AW Verified seal"
+      width={size}
+      height={size}
+      style={{ width: size, height: size, objectFit: "contain" }}
+    />
   );
 }
 
