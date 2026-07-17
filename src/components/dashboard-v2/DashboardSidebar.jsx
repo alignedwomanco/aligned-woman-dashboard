@@ -4,7 +4,24 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
-export default function DashboardSidebar({ siteSettings, memberSince, isBlueprintOwner }) {
+// ────────────────────────────────────────────────────────────────
+// Live member sidebar, shared by the live Dashboard and Layout.jsx.
+// Restyled July 2026 to the approved floating-card design: serif
+// wordmark, sentence-case items, active white pill with rose dot,
+// hairline separators, quiet LaurAI + Support block.
+//
+// Behavior preserved from the previous version:
+// - Approved experts (login email linked to an Expert record) see
+//   My Profile → /expert-dashboard. Members who are not experts never
+//   see that item.
+// - The member-since caption renders only when the caller passes it.
+// - The wordmark links Home, as the logo did.
+//
+// Pages using this must offset their content with lg:pl-72 / lg:ml-72
+// to clear the floating card (left-6 + w-60 + gap).
+// ────────────────────────────────────────────────────────────────
+
+export default function DashboardSidebar({ memberSince, isBlueprintOwner }) {
   const location = useLocation();
 
   const { data: currentUser } = useQuery({
@@ -14,8 +31,7 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
 
   // An approved expert is anyone whose login email is linked to an Expert
   // record. That link is set on invite or application approval and is
-  // independent of Blueprint access, so members who are not experts never see
-  // the item, and approved experts always do.
+  // independent of Blueprint access.
   const { data: linkedExperts = [] } = useQuery({
     queryKey: ["sidebar-expert-link", currentUser?.email],
     queryFn: () => base44.entities.Expert.filter({ linked_user_email: currentUser.email }),
@@ -31,7 +47,7 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
   const navItems = [
     { name: "Dashboard", to: createPageUrl("Dashboard"), active: isActive("Dashboard") },
     { name: "Classroom", to: createPageUrl("Classroom"), active: isActive("Classroom") },
-    { name: "Experts", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
+    { name: "Directory", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
   ];
   if (isApprovedExpert) {
     navItems.push({
@@ -42,43 +58,71 @@ export default function DashboardSidebar({ siteSettings, memberSince, isBlueprin
   }
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-paper border-r border-awburg-core/8 flex-col z-40">
-      <div className="p-6 pb-8">
-        <Link to={createPageUrl("Home")}>
-          <img
-            src={siteSettings?.dark_logo || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png"}
-            alt="The Aligned Woman"
-            className="h-10 w-auto object-contain"
-            style={{ filter: "brightness(0) saturate(100%) invert(11%) sepia(60%) saturate(1500%) hue-rotate(300deg) brightness(75%)" }}
-          />
+    <aside className="hidden lg:block fixed left-6 top-8 w-60 z-40">
+      <div className="rounded-[28px] bg-white/55 backdrop-blur-2xl border border-white/60 shadow-xl pt-8 pb-7 px-4">
+        <Link to={createPageUrl("Home")} className="block px-4 mb-8">
+          <p className="font-display text-[14px] tracking-[0.1em] text-awburg-core">
+            THE ALIGNED <span className="italic">WOMAN</span>
+          </p>
         </Link>
-      </div>
 
-      <nav className="flex-1 px-4">
-        <ul className="space-y-1">
-          {navItems.map((item) => (
-            <li key={item.name}>
-              <Link
-                to={item.to}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                  item.active
-                    ? "bg-awrose-pale text-awburg-core font-medium"
-                    : "text-awburg-core/70 hover:text-awburg-core hover:bg-awrose-wash"
-                }`}
-              >
-                {item.active && <div className="w-1.5 h-1.5 rounded-full bg-awrose-core flex-shrink-0" />}
-                <span className="font-body font-bold text-[11px] tracking-eyebrow uppercase">{item.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+        <nav>
+          <ul>
+            {navItems.map((item, i) => {
+              const isLast = i === navItems.length - 1;
+              return (
+                <li key={item.name}>
+                  <Link
+                    to={item.to}
+                    aria-current={item.active ? "page" : undefined}
+                    className={
+                      item.active
+                        ? "flex items-center gap-3 bg-white rounded-full shadow-md px-5 py-3 mb-1"
+                        : `flex items-center gap-3 px-5 py-3 text-awburg-core/70 hover:text-awburg-core transition-colors ${
+                            isLast ? "" : "border-b border-awburg-core/8"
+                          }`
+                    }
+                  >
+                    {item.active && (
+                      <span className="w-2 h-2 rounded-full bg-awrose-core flex-shrink-0" />
+                    )}
+                    <span
+                      className={`font-body text-[15px] ${
+                        item.active ? "font-semibold text-awburg-core" : "font-normal"
+                      }`}
+                    >
+                      {item.name}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      <div className="p-6 pt-4">
-        <p className="font-body font-bold text-[9px] tracking-[0.18em] text-awburg-core/55 uppercase leading-relaxed">
-          MEMBER SINCE {memberSince || "APRIL 2026"}
-          {isBlueprintOwner && " · BLUEPRINT OWNER"}
-        </p>
+        <div className="mt-8 pt-5 border-t border-awburg-core/10 px-4 space-y-3">
+          {/* LaurAI is not built yet: greyed and non-interactive, so no dead
+              link. Becomes a real route when LaurAI ships. */}
+          <p
+            aria-disabled="true"
+            className="font-body text-[13px] text-awburg-core/35 cursor-default select-none"
+          >
+            Talk to LaurAI
+            <span className="ml-2 text-[11px] text-awburg-core/40">coming soon</span>
+          </p>
+          <Link
+            to={createPageUrl("Support")}
+            className="block font-body text-[13px] text-awburg-core/60 hover:text-awburg-core transition-colors"
+          >
+            Support
+          </Link>
+          {memberSince && (
+            <p className="font-body font-bold text-[9px] tracking-[0.18em] text-awburg-core/55 uppercase leading-relaxed pt-2">
+              MEMBER SINCE {memberSince}
+              {isBlueprintOwner && " · BLUEPRINT OWNER"}
+            </p>
+          )}
+        </div>
       </div>
     </aside>
   );
