@@ -49,13 +49,13 @@ export default function DashboardSidebar({ memberSince, isBlueprintOwner }) {
     { name: "Classroom", to: createPageUrl("Classroom"), active: isActive("Classroom") },
     { name: "Directory", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
   ];
-  if (isApprovedExpert) {
-    navItems.push({
-      name: "My Profile",
-      to: "/expert-dashboard",
-      active: location.pathname === "/expert-dashboard",
-    });
-  }
+  navItems.push({
+    name: "My Profile",
+    to: isApprovedExpert ? "/expert-dashboard" : createPageUrl("ProfileSettings"),
+    active: isApprovedExpert
+      ? location.pathname === "/expert-dashboard"
+      : isActive("ProfileSettings"),
+  });
 
   return (
     <aside className="hidden lg:block fixed left-6 top-8 w-60 z-40">
