@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
+import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 
 // ── Phase metadata fallback ──
 const PHASE_QUOTES = {
@@ -1070,6 +1071,13 @@ export default function CourseDetail() {
                   No course sections available yet.
                 </p>
               </div>
+            )}
+
+            {/* Integration practices · moved here from the dashboard (July 2026).
+                Blueprint only. Same component, same wiring: it fetches its own
+                workbooks, experts, and responses. */}
+            {course?.tags?.includes("blueprint_paid") && (
+              <WorkbooksSection phaseIndex={(currentPhaseIndex ?? 0) + 1} />
             )}
 
             {/* Footer */}
