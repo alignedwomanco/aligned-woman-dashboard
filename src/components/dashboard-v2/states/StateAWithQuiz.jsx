@@ -5,7 +5,6 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { getArchetype } from "@/data/archetypes";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
-import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 import MoneyStoryCard from "@/components/dashboard-v2/MoneyStoryCard";
 
 const KEY_MAP = {
@@ -179,7 +178,6 @@ export default function StateAWithQuiz({ user, profile, workbookData, continueDa
       <PhaseBoxes allPhasesData={allPhases} courseId={courseId} />
 
       {/* Workbooks */}
-      <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
 
       <MoneyStoryCard />
 
