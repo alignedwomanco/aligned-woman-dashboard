@@ -4,7 +4,6 @@ import { ArrowRight } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import PhaseIndicator from "@/components/dashboard-v2/PhaseIndicator";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
-import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 import MoneyStoryCard from "@/components/dashboard-v2/MoneyStoryCard";
 
 const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
@@ -104,7 +103,6 @@ export default function StateB({ user, profile, workbookData = [], continueData 
       <PhaseBoxes allPhasesData={allPhases} courseId={courseId} />
 
       {/* Workbooks */}
-      <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
 
       <MoneyStoryCard />
 
