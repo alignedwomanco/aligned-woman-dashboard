@@ -16,6 +16,7 @@ import MessagesDrawer from "../components/navigation/MessagesDrawer";
 
 import { hasBlueprintAccess } from "@/lib/entitlement";
 import PendingApproval from "@/components/access/PendingApproval";
+import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 
 const publicPages = [
 { name: "Home", label: "Home" },
@@ -404,7 +405,7 @@ export default function Layout({ children, currentPageName }) {
   const NAV_ITEMS = [
     { name: "Dashboard", path: "Dashboard" },
     { name: "Classroom", path: "Classroom" },
-    { name: "Experts", path: "ExpertsDirectory" },
+    { name: "Directory", path: "ExpertsDirectory" },
   ];
 
   const isActive = (pageName) => currentPageName === pageName;
@@ -413,50 +414,11 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div className="min-h-screen flex">
 
-      {/* Left Sidebar - matches DashboardSidebar exactly */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-paper border-r border-awburg-core/8 flex-col z-40">
-        <div className="p-6 pb-8">
-          <Link to={createPageUrl("Home")}>
-            <img
-            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
-            alt="The Aligned Woman"
-            className="h-10 w-auto object-contain"
-            />
-          </Link>
-        </div>
-
-        <nav className="flex-1 px-4">
-          <ul className="space-y-1">
-            {NAV_ITEMS.map((item) => {
-              const active = isActive(item.path);
-              return (
-                <li key={item.name}>
-                  <Link
-                    to={createPageUrl(item.path)}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                      active
-                        ? "bg-awrose-pale text-awburg-core font-medium"
-                        : "text-awburg-core/70 hover:text-awburg-core hover:bg-awrose-wash"
-                    }`}
-                  >
-                    {active && <div className="w-1.5 h-1.5 rounded-full bg-awrose-core flex-shrink-0" />}
-                    <span className="font-body font-bold text-[11px] tracking-eyebrow uppercase">{item.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        <div className="p-6 pt-4">
-          <p className="font-body font-bold text-[9px] tracking-[0.18em] text-awburg-core/55 uppercase leading-relaxed">
-            THE ALIGNED WOMAN
-          </p>
-        </div>
-      </aside>
+      {/* Left Sidebar - shared floating-card sidebar, one source of truth */}
+      <DashboardSidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-60 overflow-x-hidden">
+      <div className="flex-1 lg:ml-72 overflow-x-hidden">
         {/* Top Header - matches Dashboard TopBar style */}
         <header className="sticky top-0 z-40 border-b border-awburg-core/8 bg-paper">
           <div className="flex items-center justify-between gap-4 px-6 py-3">
