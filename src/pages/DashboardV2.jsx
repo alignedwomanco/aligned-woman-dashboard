@@ -291,7 +291,7 @@ function PatternHero({ profile, isPaid }) {
               single filled action. Paid members get the outline tier. */}
           <button
             onClick={() => setExpanded((v) => !v)}
-            className={isPaid ? BTN_OUTLINE_DARK : BTN_FILLED_ROSE}
+            className={BTN_FILLED}
           >
             Read your full pattern
             <ChevronDown
