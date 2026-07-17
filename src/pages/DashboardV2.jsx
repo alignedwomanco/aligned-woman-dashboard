@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -27,10 +27,10 @@ import YinVideoCard from "@/components/dashboard-v2/YinVideoCard";
 // Keep Dashboard.jsx in place as the instant rollback. Then remove
 // the admin gate and the preview banner below.
 //
-// CUTOVER TODO: the live Dashboard owns flipping
-// MemberProfile.has_seen_welcome after the state_b welcome renders.
-// This preview deliberately does NOT write it. At cutover, move that
-// write here.
+// CUTOVER (July 2026): this page IS the live member dashboard, routed at
+// /Dashboard. The previous dashboard remains at src/pages/Dashboard.jsx,
+// unrouted, as the instant rollback. This page owns the
+// MemberProfile.has_seen_welcome write for state_b.
 //
 // Design source: the approved AWB handoff pack (July 2026).
 // State map, design → data:
@@ -43,8 +43,6 @@ import YinVideoCard from "@/components/dashboard-v2/YinVideoCard";
 // Token note: the handoff's #F8ECE7 eyebrow-on-dark is not a token.
 // Nearest token is awrose-pale, used for all eyebrows on dark panels.
 // ────────────────────────────────────────────────────────────────
-
-const PRIVILEGED_ROLES = ["admin", "master_admin", "owner"];
 
 const KEY_MAP = {
   performer: "performer",
@@ -665,15 +663,23 @@ export default function DashboardV2() {
   }, []);
 
   const resolvedUser = currentUser === undefined ? user : currentUser;
-  const isPrivileged =
-    resolvedUser && PRIVILEGED_ROLES.includes(resolvedUser.role);
 
   useEffect(() => {
-    if (!isPrivileged) return;
+    if (!resolvedUser) return;
     getDashboardState()
       .then(setDash)
       .catch((e) => setDashError(e?.message || "Could not load your dashboard state."));
-  }, [isPrivileged]);
+  }, [resolvedUser?.id]);
+
+  // state_b is the one-time first welcome for a paid member. Flip
+  // has_seen_welcome after it renders so her next visit resolves to
+  // state A. This page owns that write since cutover.
+  useEffect(() => {
+    if (dash?.state !== "state_b" || !dash?.profile?.id) return;
+    base44.entities.MemberProfile.update(dash.profile.id, { has_seen_welcome: true }).catch(
+      () => {}
+    );
+  }, [dash?.state, dash?.profile?.id]);
 
   const continueData = useContinueModule(dash?.user || resolvedUser);
 
@@ -681,7 +687,7 @@ export default function DashboardV2() {
   const { data: courses = [] } = useQuery({
     queryKey: ["v2-courses"],
     queryFn: () => base44.entities.Course.filter({ isPublished: true }),
-    enabled: !!isPrivileged,
+    enabled: !!resolvedUser,
   });
   const courseId =
     (courses.find((c) => c.tags?.includes("blueprint_paid")) || courses[0])?.id || null;
@@ -693,7 +699,7 @@ export default function DashboardV2() {
   // dashboard's code path is untouched.
   const { data: coursePercent = null } = useQuery({
     queryKey: ["v2-course-percent", courseId, resolvedUser?.email],
-    enabled: !!isPrivileged && !!courseId && !!resolvedUser?.email,
+    enabled: !!courseId && !!resolvedUser?.email,
     queryFn: async () => {
       const [modules, pages, progress] = await Promise.all([
         base44.entities.CourseModule.filter({ courseId, isPublished: true }),
@@ -736,9 +742,6 @@ export default function DashboardV2() {
   }
 
   // Members never see the rebuild. They go to the live dashboard.
-  if (currentUser !== undefined && !isPrivileged) {
-    return <Navigate to="/Dashboard" replace />;
-  }
 
   const firstName = (resolvedUser?.full_name || "").split(" ")[0] || "there";
   const state = dash?.state || null;
@@ -774,13 +777,6 @@ export default function DashboardV2() {
       <div aria-hidden="true" style={TOP_HAZE_STYLE} />
       <div aria-hidden="true" style={ROSE_SPHERE_STYLE} />
       <AppShellV2 active="dashboard">
-        {/* Admin preview banner: remove at cutover */}
-        <div className="bg-awburg-core text-paper px-6 py-2">
-          <p className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-center">
-            Dashboard rebuild · admin preview only · members still see the current dashboard
-          </p>
-        </div>
-
         <main className="max-w-5xl mx-auto px-5 md:px-6 py-8 space-y-8 lg:space-y-12">
           {/* 01 · Greeting */}
           <section>
