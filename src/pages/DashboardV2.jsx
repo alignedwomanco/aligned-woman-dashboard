@@ -8,6 +8,7 @@ import { getDashboardState } from "@/lib/dashboardState";
 import useContinueModule from "@/hooks/useContinueModule";
 import { getArchetype } from "@/data/archetypes";
 import { createPageUrl } from "@/utils";
+import AppShellV2 from "@/components/dashboard-v2/AppShellV2";
 import YinVideoCard from "@/components/dashboard-v2/YinVideoCard";
 
 // ────────────────────────────────────────────────────────────────
@@ -44,13 +45,6 @@ import YinVideoCard from "@/components/dashboard-v2/YinVideoCard";
 // ────────────────────────────────────────────────────────────────
 
 const PRIVILEGED_ROLES = ["admin", "master_admin", "owner"];
-
-const NAV_ITEMS = [
-  { label: "Dashboard", path: "/DashboardV2", active: true },
-  { label: "Classroom", path: "/Classroom" },
-  { label: "Directory", path: "/ExpertsDirectory" },
-  { label: "My Profile", path: "/ProfileSettings" },
-];
 
 const KEY_MAP = {
   performer: "performer",
@@ -779,92 +773,12 @@ export default function DashboardV2() {
       {/* Atmosphere orbs — fixed behind all content. */}
       <div aria-hidden="true" style={TOP_HAZE_STYLE} />
       <div aria-hidden="true" style={ROSE_SPHERE_STYLE} />
-      {/* ── Sidebar, desktop ── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-60 bg-paper border-r border-awburg-core/8 flex-col z-40">
-        <div className="p-6 pb-8">
-          <img
-            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
-            alt="The Aligned Woman"
-            className="h-10 w-auto object-contain"
-          />
-        </div>
-        <nav className="flex-1 px-4">
-          <ul className="space-y-1">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.label}>
-                <Link
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                    item.active
-                      ? "bg-awrose-pale text-awburg-core font-medium"
-                      : "text-awburg-core/70 hover:text-awburg-core hover:bg-awrose-wash"
-                  }`}
-                >
-                  {item.active && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-awrose-core flex-shrink-0" />
-                  )}
-                  <span className="font-body font-bold text-[11px] tracking-eyebrow uppercase">
-                    {item.label}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="px-8 pb-6 space-y-2">
-          {/* LaurAI is not built yet: greyed and non-interactive, so no dead
-              link. Becomes a real route when LaurAI ships. */}
-          <p
-            aria-disabled="true"
-            className="font-body font-semibold text-[10px] tracking-eyebrow uppercase text-awburg-core/30 cursor-default select-none"
-          >
-            Talk to LaurAI
-            <span className="ml-2 normal-case tracking-normal text-[9px] font-medium text-awburg-core/40">
-              coming soon
-            </span>
-          </p>
-          <Link
-            to="/Support"
-            className="block font-body font-semibold text-[10px] tracking-eyebrow uppercase text-awburg-core/55 hover:text-awburg-core transition-colors"
-          >
-            Support
-          </Link>
-          <p className="font-body font-bold text-[9px] tracking-[0.18em] text-awburg-core/55 uppercase leading-relaxed pt-2">
-            THE ALIGNED WOMAN
-          </p>
-        </div>
-      </aside>
-
-      {/* ── Main ── */}
-      <div className="flex-1 lg:ml-60 relative z-10">
+      <AppShellV2 active="dashboard">
         {/* Admin preview banner: remove at cutover */}
         <div className="bg-awburg-core text-paper px-6 py-2">
           <p className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-center">
             Dashboard rebuild · admin preview only · members still see the current dashboard
           </p>
-        </div>
-
-        {/* Mobile top bar */}
-        <div className="lg:hidden px-5 py-4 border-b border-awburg-core/8 flex items-center justify-between">
-          <img
-            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
-            alt="The Aligned Woman"
-            className="h-8 w-auto object-contain"
-          />
-          <div className="flex items-center gap-4">
-            <Link
-              to="/Classroom"
-              className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-awburg-core/70"
-            >
-              Classroom
-            </Link>
-            <Link
-              to="/ExpertsDirectory"
-              className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-awburg-core/70"
-            >
-              Directory
-            </Link>
-          </div>
         </div>
 
         <main className="max-w-5xl mx-auto px-5 md:px-6 py-8 space-y-8 lg:space-y-12">
@@ -969,7 +883,7 @@ export default function DashboardV2() {
             </footer>
           </section>
         </main>
-      </div>
+      </AppShellV2>
     </div>
   );
 }
