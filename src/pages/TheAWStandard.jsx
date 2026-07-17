@@ -399,12 +399,6 @@ export default function TheAWStandard() {
           </p>
         </section>
 
-        <p
-          className="font-body text-center pb-4"
-          style={{ fontSize: 12.5, color: INK_SOFT }}
-        >
-          Take what you need. It will all be here when you come back.
-        </p>
       </main>
     </div>
   );
