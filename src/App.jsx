@@ -41,6 +41,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardV2 from './pages/DashboardV2';
+import TheAWStandard from './pages/TheAWStandard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -97,6 +98,9 @@ const AuthenticatedApp = () => {
       <Route path="/checkout-success" element={<CheckoutSuccess />} />
       <Route path="/pdf-test" element={<PdfTest />} />
       <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
+      {/* The Aligned Woman Standard: public on purpose, the AW Verified seal
+          on practitioners' own sites links here. */}
+      <Route path="/theawstandard" element={<TheAWStandard />} />
       <Route path="/YourMoneyStory" element={<YourMoneyStory />} />
       <Route path="/money-story" element={<MoneyStoryLanding />} />
 
