@@ -24,8 +24,7 @@ import YinVideoCard from "@/components/dashboard-v2/YinVideoCard";
 //   User, MemberProfile, CourseProgress, Course, MoneyStoryResponse.
 // When the rebuild is complete, cutover is a one-line swap in
 // App.jsx so /Dashboard renders this page instead of Dashboard.jsx.
-// Keep Dashboard.jsx in place as the instant rollback. Then remove
-// the admin gate and the preview banner below.
+// Keep Dashboard.jsx in place as the instant rollback.
 //
 // CUTOVER (July 2026): this page IS the live member dashboard, routed at
 // /Dashboard. The previous dashboard remains at src/pages/Dashboard.jsx,
@@ -740,8 +739,6 @@ export default function DashboardV2() {
       </div>
     );
   }
-
-  // Members never see the rebuild. They go to the live dashboard.
 
   const firstName = (resolvedUser?.full_name || "").split(" ")[0] || "there";
   const state = dash?.state || null;
