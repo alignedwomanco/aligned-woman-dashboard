@@ -41,7 +41,7 @@ function WorkbookCard({ workbook, expertName, status }) {
     <div
       className="relative rounded-2xl overflow-hidden flex flex-col"
       style={{
-        aspectRatio: "3/4",
+        aspectRatio: "4/5",
         background: hasCover ? "transparent" : "linear-gradient(160deg, #5C1433 0%, #3A0B20 100%)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
       }}
@@ -64,7 +64,7 @@ function WorkbookCard({ workbook, expertName, status }) {
       />
 
       {/* Status badge top right */}
-      <div className="relative z-10 flex justify-end p-4">
+      <div className="relative z-10 flex justify-end p-3">
         <div
           className="flex items-center gap-2 px-3 py-1.5 rounded-full"
           style={{ background: "rgba(60,10,30,0.65)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)" }}
@@ -80,22 +80,22 @@ function WorkbookCard({ workbook, expertName, status }) {
       <div className="flex-1" />
 
       {/* Bottom content */}
-      <div className="relative z-10 px-5 pb-5">
+      <div className="relative z-10 px-4 pb-4">
         {/* Title */}
         <h4
           className="text-white leading-snug mb-1"
-          style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.25rem", fontStyle: "italic", fontWeight: 700 }}
+          style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "1.05rem", fontStyle: "italic", fontWeight: 700 }}
         >
           {workbook.title}
         </h4>
 
         {/* Expert */}
-        <p className="text-white/55 mb-4" style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", fontFamily: "Montserrat, sans-serif", fontWeight: 600 }}>
+        <p className="text-white/55 mb-3" style={{ fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", fontFamily: "Montserrat, sans-serif", fontWeight: 600 }}>
           {expertName}
         </p>
 
         {/* Divider */}
-        <div style={{ height: "1px", background: "rgba(255,255,255,0.15)", marginBottom: "14px" }} />
+        <div style={{ height: "1px", background: "rgba(255,255,255,0.15)", marginBottom: "10px" }} />
 
         {/* Actions row */}
         <div className="flex items-center justify-between">
@@ -252,7 +252,7 @@ export default function WorkbooksSection({ phaseIndex }) {
   if (!enriched.length) return null;
 
   return (
-    <div style={{ background: "white", border: "1px solid #f0f0f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", marginBottom: "24px" }}>
+    <div style={{ background: "white", border: "1px solid #f0f0f0", borderRadius: "16px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", marginBottom: "24px" }}>
       {/* Header row: kicker */}
       <div className="flex items-center mb-4">
         <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B1B3D", fontFamily: "Montserrat, sans-serif" }}>
@@ -263,7 +263,7 @@ export default function WorkbooksSection({ phaseIndex }) {
 
       {/* Filter chips: scrollable on narrow screens */}
       <div
-        className="flex items-center gap-2 mb-5 overflow-x-auto"
+        className="flex items-center gap-2 mb-4 overflow-x-auto"
         style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
       >
         {filters.map(f => (
@@ -279,7 +279,7 @@ export default function WorkbooksSection({ phaseIndex }) {
       {/* Grid for "all" filter (full grid), snap rail for everything else */}
       {visible.length > 0 ? (
         activeFilter === "all" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {visible.map(({ wb, status }) => (
               <WorkbookCard
                 key={wb.id}
@@ -291,13 +291,13 @@ export default function WorkbooksSection({ phaseIndex }) {
           </div>
         ) : (
           <div
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1"
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1"
             style={{ scrollbarWidth: "thin", WebkitOverflowScrolling: "touch" }}
           >
             {visible.map(({ wb, status }) => (
               <div
                 key={wb.id}
-                className="snap-start shrink-0 w-[78%] sm:w-[calc((100%-2rem)/3)]"
+                className="snap-start shrink-0 w-[72%] sm:w-[calc((100%-1.5rem)/4)]"
               >
                 <WorkbookCard
                   workbook={wb}
