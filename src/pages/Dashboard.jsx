@@ -402,7 +402,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-off-white">
         <DashboardSidebar />
         <MobileTabBar />
-        <div className="lg:pl-60 pb-20 lg:pb-0">
+        <div className="lg:pl-72 pb-20 lg:pb-0">
           <main className="px-6 md:px-10 py-10 max-w-[1400px]">
             <div className="mb-10">
               <div className="h-3 w-32 bg-awburg-core/8 rounded mb-4 animate-pulse" />
@@ -428,7 +428,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-off-white">
         <DashboardSidebar />
         <MobileTabBar />
-        <div className="lg:pl-60 pb-20 lg:pb-0">
+        <div className="lg:pl-72 pb-20 lg:pb-0">
           <main className="px-6 md:px-10 py-10 max-w-[1400px]">
             <div className="min-h-[60vh] flex items-center justify-center">
               <div className="bg-paper rounded-xl border border-awburg-core/8 p-8 max-w-md text-center">
@@ -464,7 +464,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-off-white">
         <DashboardSidebar />
         <MobileTabBar />
-        <div className="lg:pl-60 pb-20 lg:pb-0">
+        <div className="lg:pl-72 pb-20 lg:pb-0">
           <main className="px-6 md:px-10 py-10 max-w-[1400px]">
             <DashboardError message={errorMsg} onRetry={load} onLogout={handleLogout} />
           </main>
@@ -498,7 +498,7 @@ export default function Dashboard() {
       />
       <MobileTabBar />
 
-      <div className="lg:pl-60 pb-20 lg:pb-0">
+      <div className="lg:pl-72 pb-20 lg:pb-0">
         <main className="px-6 md:px-10 py-10 max-w-[1400px]">
           {/* Preview banner when override is active */}
           {stateOverride && isAdmin && (
