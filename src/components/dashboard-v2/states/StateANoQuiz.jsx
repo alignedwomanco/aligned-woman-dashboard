@@ -4,7 +4,6 @@ import { ArrowRight } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import PhaseIndicator from "@/components/dashboard-v2/PhaseIndicator";
 import PhaseBoxes from "@/components/dashboard-v2/PhaseBoxes";
-import WorkbooksSection from "@/components/dashboard-v2/WorkbooksSection";
 import MoneyStoryCard from "@/components/dashboard-v2/MoneyStoryCard";
 
 export default function StateANoQuiz({ user, profile, workbookData, continueData }) {
@@ -105,7 +104,6 @@ export default function StateANoQuiz({ user, profile, workbookData, continueData
       <PhaseBoxes allPhasesData={allPhases} courseId={courseId} />
 
       {/* Workbooks */}
-      <WorkbooksSection workbooks={workbookData} phaseIndex={phaseIndex} />
 
       <MoneyStoryCard />
 
