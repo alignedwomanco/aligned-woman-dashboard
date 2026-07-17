@@ -69,7 +69,7 @@ const PATTERN_VIDEO_URL =
   "https://pub-e1032a6c8b9241cf9d03513d43a81f17.r2.dev/YourPattern.mp4";
 
 // Legibility shadow for copy sitting over the video.
-const TEXT_SHADOW = { textShadow: "0 2px 14px rgba(0,0,0,0.55)" };
+const TEXT_SHADOW = { textShadow: "0 2px 8px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.7)" };
 
 // Muted looped background video. muted + playsInline + the canplay retry
 // is the combination that autoplays on iOS Safari and Android Chrome;
