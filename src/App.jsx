@@ -102,8 +102,11 @@ const AuthenticatedApp = () => {
 
       {/* ── Protected pages (require login) ── */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route path="/Dashboard" element={<LayoutWrapper currentPageName={mainPageKey}><MainPage /></LayoutWrapper>} />
-        {/* DashboardV2: hidden rebuild, admin-only preview, own chrome. Cutover swaps what /Dashboard renders. */}
+        {/* Cutover (July 2026): /Dashboard renders the rebuilt dashboard.
+            The previous dashboard remains at src/pages/Dashboard.jsx,
+            unrouted, as the instant rollback. */}
+        <Route path="/Dashboard" element={<DashboardV2 />} />
+        {/* Legacy preview alias for the same page */}
         <Route path="/DashboardV2" element={<DashboardV2 />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route
