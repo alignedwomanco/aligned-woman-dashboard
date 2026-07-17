@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
 import { createPageUrl } from "@/utils";
+import LandingFooter from "@/components/home/LandingFooter";
 
 // ────────────────────────────────────────────────────────────────
 // The Aligned Woman Standard · public page at /theawstandard.
@@ -144,29 +145,7 @@ function AWVerifiedPill() {
 
 export default function TheAWStandard() {
   return (
-    <div className="min-h-screen" style={{ background: PAGE_BG }}>
-      {/* Light public header */}
-      <header
-        className="px-5 md:px-8 py-5 flex items-center justify-between"
-        style={{ borderBottom: `1px solid ${SEAL_DARK}14` }}
-      >
-        <Link to={createPageUrl("Home")}>
-          <p
-            className="font-display text-[14px] tracking-[0.1em]"
-            style={{ color: INK }}
-          >
-            THE ALIGNED <span className="italic">WOMAN</span>
-          </p>
-        </Link>
-        <Link
-          to="/Apply"
-          className="font-body font-semibold text-[12px] transition-colors hover:opacity-70"
-          style={{ color: INK_SOFT }}
-        >
-          Apply to become AW Verified
-        </Link>
-      </header>
-
+    <div className="min-h-screen pt-20" style={{ background: PAGE_BG }}>
       <main className="max-w-3xl mx-auto px-5 md:px-6 py-12 space-y-8">
         {/* Header + seal */}
         <section className={`${CARD} p-6 md:p-10`} style={{ background: CARD_BG }}>
@@ -400,6 +379,8 @@ export default function TheAWStandard() {
         </section>
 
       </main>
+
+      <LandingFooter />
     </div>
   );
 }

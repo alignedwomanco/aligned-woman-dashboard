@@ -100,7 +100,7 @@ const AuthenticatedApp = () => {
       <Route path="/StartingPointProfile" element={<StartingPointProfile />} />
       {/* The Aligned Woman Standard: public on purpose, the AW Verified seal
           on practitioners' own sites links here. */}
-      <Route path="/theawstandard" element={<TheAWStandard />} />
+      <Route path="/theawstandard" element={<LayoutWrapper currentPageName="TheAWStandard"><TheAWStandard /></LayoutWrapper>} />
       <Route path="/YourMoneyStory" element={<YourMoneyStory />} />
       <Route path="/money-story" element={<MoneyStoryLanding />} />
 
