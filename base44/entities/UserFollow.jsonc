@@ -12,9 +12,7 @@
   ],
   "rls": {
     "create": {
-      "created_by_id": {
-        "$exists": true
-      }
+      "created_by_id": "{{user.id}}"
     },
     "read": {
       "$or": [
@@ -35,6 +33,9 @@
       "$or": [
         {
           "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.followingEmail": "{{user.email}}"
         },
         {
           "user_condition": {
