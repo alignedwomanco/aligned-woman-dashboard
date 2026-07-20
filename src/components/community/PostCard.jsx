@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -142,7 +143,7 @@ export default function PostCard({
           <div className="mb-3">
             <div
               className="prose prose-sm max-w-none mb-3 text-white [&_p]:text-white [&_strong]:text-white [&_em]:text-white"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
             />
             
             {/* Media Gallery */}

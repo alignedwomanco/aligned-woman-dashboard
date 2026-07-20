@@ -23,6 +23,7 @@ import {
 import CourseAccessGate from "@/components/classroom/CourseAccessGate";
 import { useCourseAccess } from "@/hooks/useCourseAccess";
 import JourneyMilestone from "@/components/classroom/JourneyMilestone";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 
 export default function ModulePlayer() {
   const navigate = useNavigate();
@@ -1423,7 +1424,7 @@ export default function ModulePlayer() {
                       lineHeight: 1.85,
                       marginBottom: "48px",
                     }}
-                    dangerouslySetInnerHTML={{ __html: selectedPage.content || "" }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedPage.content || "") }}
                   />
                 </motion.div>
               </AnimatePresence>

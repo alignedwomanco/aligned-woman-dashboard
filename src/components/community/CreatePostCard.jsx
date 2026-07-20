@@ -75,27 +75,9 @@ export default function CreatePostCard({ currentUser, onPostCreated }) {
 
   const awardPoints = async (points, reason) => {
     try {
-      const userPoints = await base44.entities.UserPoints.filter({});
-      const current = userPoints[0];
-      
-      if (current) {
-        const newTotal = (current.points || 0) + points;
-        await base44.entities.UserPoints.update(current.id, {
-          points: newTotal,
-          level: Math.floor(newTotal / 100) + 1,
-        });
-      } else {
-        await base44.entities.UserPoints.create({
-          points,
-          level: 1,
-        });
-      }
-
-      // Update user's community points
-      await base44.auth.updateMe({
-        total_community_points: ((currentUser.total_community_points || 0) + points),
-        last_active_community_date: new Date().toISOString(),
-      });
+      // Points are calculated and applied server-side to prevent clients
+      // from awarding themselves arbitrary totals.
+      await base44.functions.invoke("awardCommunityPoints", { reason });
     } catch (error) {
       console.error("Failed to award points:", error);
     }

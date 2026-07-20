@@ -30,7 +30,17 @@ Deno.serve(async (req) => {
     // This function is invoked by the entity automation on CourseProgress changes.
     // The payload includes: event, data (current record), old_data (previous), changed_fields.
     const body = await req.json();
-    const { data, old_data } = body;
+    const { entity_id, old_data } = body;
+
+    if (!entity_id) {
+      return Response.json({ skipped: true, reason: 'missing entity_id' });
+    }
+
+    // Fetch the real record from the database rather than trusting the
+    // request payload — a direct (non-automation) call could otherwise spoof
+    // completion data and trigger emails for modules that were not finished.
+    const records = await base44.asServiceRole.entities.CourseProgress.filter({ id: entity_id });
+    const data = records?.[0];
 
     // Only act on page completions
     if (!data || data.status !== 'completed') {

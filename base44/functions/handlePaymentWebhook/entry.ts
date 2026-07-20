@@ -38,58 +38,36 @@ Deno.serve(async (req) => {
     const rawBody = await req.text();
 
     // ----------------------------------------------------------------
-    // REQUEST AUTHENTICATION
-    // The unauthenticated manual { email, ... } payload path has been removed
-    // entirely — it could be used to grant arbitrary paid course access.
-    // When the Stripe webhook signing secret is configured, every request is
-    // signature-verified. Until then, only well-formed Stripe event payloads
-    // are processed. Set STRIPE_WEBHOOK_SECRET to enforce full verification.
+    // STRIPE SIGNATURE VERIFICATION (mandatory)
+    // This endpoint grants paid course access, so every request must be
+    // verified as a genuine Stripe webhook using the signing secret.
+    // Unsigned / manually-constructed payloads are rejected.
     // ----------------------------------------------------------------
+    const stripeKey = Deno.env.get("stripe");
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-    let event = null;
+    if (!stripeKey || !webhookSecret) {
+      return Response.json({ error: "Webhook is not configured" }, {
+        status: 500,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
 
-    if (webhookSecret) {
-      const stripeKey = Deno.env.get("stripe");
-      if (!stripeKey) {
-        return Response.json({ error: "Webhook is not configured" }, {
-          status: 500,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
-      }
-      const stripe = new Stripe(stripeKey);
-      const signature = req.headers.get("stripe-signature");
-      try {
-        event = await stripe.webhooks.constructEvent(
-          rawBody,
-          signature,
-          webhookSecret
-        );
-      } catch (err) {
-        console.error("Stripe signature verification failed:", err.message);
-        return Response.json({ error: "Invalid signature" }, {
-          status: 400,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
-      }
-    } else {
-      console.warn(
-        "handlePaymentWebhook: STRIPE_WEBHOOK_SECRET not set — processing unsigned Stripe event payload. Configure the webhook secret to enforce signature verification."
+    const stripe = new Stripe(stripeKey);
+    const signature = req.headers.get("stripe-signature");
+
+    let event;
+    try {
+      event = await stripe.webhooks.constructEventAsync(
+        rawBody,
+        signature,
+        webhookSecret
       );
-      try {
-        event = JSON.parse(rawBody);
-      } catch {
-        return Response.json({ error: "Invalid JSON body" }, {
-          status: 400,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
-      }
-      // Require a genuine Stripe event shape — reject anything else.
-      if (!event || !event.type || !event.data || !event.data.object) {
-        return Response.json({ error: "Unsupported payload" }, {
-          status: 400,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
-      }
+    } catch (err) {
+      console.error("Stripe signature verification failed:", err.message);
+      return Response.json({ error: "Invalid signature" }, {
+        status: 400,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
     }
 
     // Only handle checkout.session.completed

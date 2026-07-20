@@ -12,10 +12,24 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
 
-    const { entity_id, data } = payload;
+    const { entity_id } = payload;
+
+    if (!entity_id) {
+      return Response.json({ skipped: true, reason: "no entity_id" });
+    }
+
+    // Fetch the real record from the database rather than trusting the
+    // request payload — a direct (non-automation) call could otherwise supply
+    // arbitrary answers and overwrite another user's computed scores.
+    const records = await base44.asServiceRole.entities.WorkbookResponse.filter({ id: entity_id });
+    const data = records?.[0];
+
+    if (!data) {
+      return Response.json({ skipped: true, reason: "response not found" });
+    }
 
     // Only process if is_complete is true
-    if (!data?.is_complete) {
+    if (!data.is_complete) {
       return Response.json({ skipped: true, reason: "not complete" });
     }
 
