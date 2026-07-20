@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import Stripe from 'npm:stripe@17.7.0';
 
 // The Blueprint course ID (hardcoded for now; for multi-product support,
 // read course_id from Stripe metadata on the checkout session)
@@ -34,77 +35,76 @@ Deno.serve(async (req) => {
 
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
 
     // ----------------------------------------------------------------
-    // DETECT FORMAT: Stripe event vs custom/manual call
+    // STRIPE SIGNATURE VERIFICATION
+    // This endpoint is invoked by Stripe. Verify every request was genuinely
+    // sent by Stripe using the webhook signing secret, and reject anything
+    // else. Unauthenticated manual payloads are no longer accepted.
     // ----------------------------------------------------------------
+    const stripeKey = Deno.env.get("stripe");
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    if (!stripeKey || !webhookSecret) {
+      return Response.json({ error: "Webhook is not configured" }, {
+        status: 500,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    const stripe = new Stripe(stripeKey);
+    const signature = req.headers.get("stripe-signature");
+    const rawBody = await req.text();
+
+    let event;
+    try {
+      event = await stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        webhookSecret
+      );
+    } catch (err) {
+      console.error("Stripe signature verification failed:", err.message);
+      return Response.json({ error: "Invalid signature" }, {
+        status: 400,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    // Only handle checkout.session.completed
+    if (event.type !== "checkout.session.completed") {
+      return Response.json({
+        success: true,
+        message: `Event type ${event.type} acknowledged but not processed`,
+      }, {
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    const session = event.data.object;
 
     let email = "";
     let fullName = "";
-    let courseId = BLUEPRINT_COURSE_ID;
+    const courseId = BLUEPRINT_COURSE_ID;
     let transactionId = "";
-    let paymentSource = "webhook";
+    const paymentSource = "stripe";
     let amount = 0;
     let currency = "ZAR";
     let affiliateCode = "";
     let stripeSessionId = "";
-    let purchaseType = "self";
-    let isStripeEvent = false;
+    const purchaseType = "self";
 
-    if (body.type && body.data && body.data.object) {
-      // ---------------------------------------------------------------
-      // STRIPE WEBHOOK EVENT
-      // ---------------------------------------------------------------
-      isStripeEvent = true;
+    email = session.customer_details?.email || session.customer_email || "";
+    fullName = session.customer_details?.name || "";
+    stripeSessionId = session.id || "";
+    transactionId = session.payment_intent || session.id || "";
+    affiliateCode = session.client_reference_id || "";
+    currency = (session.currency || "zar").toUpperCase();
 
-      // Only handle checkout.session.completed for now
-      if (body.type !== "checkout.session.completed") {
-        return Response.json({
-          success: true,
-          message: `Event type ${body.type} acknowledged but not processed`,
-        }, {
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
-      }
+    // amount_total is in cents (e.g. 399700 = R3,997.00)
+    amount = session.amount_total ? session.amount_total / 100 : 0;
 
-      const session = body.data.object;
-
-      // TODO: Add Stripe signature verification before go-live.
-      // This endpoint currently trusts any POST. Before public launch, verify
-      // the "stripe-signature" header against the webhook signing secret
-      // (whsec_xxx) using the raw request body, and reject on mismatch.
-      // const signature = req.headers.get("stripe-signature");
-
-      email = session.customer_details?.email || session.customer_email || "";
-      fullName = session.customer_details?.name || "";
-      stripeSessionId = session.id || "";
-      transactionId = session.payment_intent || session.id || "";
-      paymentSource = "stripe";
-      affiliateCode = session.client_reference_id || "";
-      currency = (session.currency || "zar").toUpperCase();
-
-      // amount_total is in cents (e.g. 399700 = R3,997.00)
-      amount = session.amount_total ? session.amount_total / 100 : 0;
-
-      // For multi-product support in future: read course_id from metadata
-      // courseId = session.metadata?.course_id || BLUEPRINT_COURSE_ID;
-
-    } else {
-      // ---------------------------------------------------------------
-      // CUSTOM / MANUAL CALL (existing format, backward compatible)
-      // ---------------------------------------------------------------
-      email = body.email || "";
-      fullName = body.full_name || "";
-      courseId = body.courseId || BLUEPRINT_COURSE_ID;
-      transactionId = body.transactionId || "";
-      paymentSource = body.paymentSource || "webhook";
-      amount = body.amount || 0;
-      currency = body.currency || "ZAR";
-      affiliateCode = body.affiliate_code || "";
-      stripeSessionId = body.stripe_session_id || "";
-      purchaseType = body.purchase_type || "self";
-    }
+    // For multi-product support in future: read course_id from metadata
+    // courseId = session.metadata?.course_id || BLUEPRINT_COURSE_ID;
 
     // Basic validation
     if (!email) {

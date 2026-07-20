@@ -25,6 +25,18 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { affiliate_id } = body;
 
+    // Authenticate the caller — only the affiliate owner or an admin may
+    // generate Stripe Connect onboarding links for an affiliate.
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (e) {
+      return Response.json({ error: "Authentication required" }, {
+        status: 401,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
     if (!affiliate_id) {
       return Response.json({ error: "affiliate_id is required" }, {
         status: 400,
@@ -56,6 +68,19 @@ Deno.serve(async (req) => {
     }
 
     const affiliate = affiliates[0];
+
+    // Authorization: the caller must own this affiliate record or be an admin.
+    const PRIVILEGED_ROLES = ["admin", "master_admin", "owner"];
+    const isOwner =
+      affiliate.email &&
+      user.email &&
+      affiliate.email.toLowerCase() === user.email.toLowerCase();
+    if (!PRIVILEGED_ROLES.includes(user.role) && !isOwner) {
+      return Response.json({ error: "Unauthorized" }, {
+        status: 403,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
 
     // If they already have a Stripe account, generate a new onboarding link
     let accountId = affiliate.stripe_account_id;
