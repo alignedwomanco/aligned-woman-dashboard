@@ -19,11 +19,11 @@ export default function OurWhy() {
       <section className="py-20 text-center max-w-2xl mx-auto px-6">
         <EYEBROW>Why this education has</EYEBROW>
         <h1 className="font-display text-4xl sm:text-5xl text-[#4A0E2E] leading-tight mb-6">
-          Why this education has<br />
+          Why this has<br />
           <ITALIC_SERIF>never existed.</ITALIC_SERIF>
         </h1>
         <p className="text-[#6B4C55] text-base leading-relaxed max-w-xl mx-auto">
-          Women have always been the most influential people in any ecosystem. Yet the education system has never been designed with the female brain, body, or lived experience at its centre.
+          Women have always been the most influential people in any ecosystem. Yet almost nothing, not education, not healthcare, not the systems women build their lives inside, was designed with the female brain, body, or lived experience at its centre.
         </p>
       </section>
 
@@ -51,7 +51,7 @@ export default function OurWhy() {
         {/* Quote block */}
         <div className="max-w-3xl mx-auto px-6 mt-16">
           <div className="bg-[#4A0E2E] rounded-2xl p-8 text-center">
-            <p className="text-white text-base sm:text-lg leading-relaxed font-body">Women weren't excluded from mainstream education because they weren't capable. They were excluded because the system was never designed to include them. It wasn't built around their bodies, their biology, their cycles, or their way of knowing. And that gap, that vast, deliberate gap, is exactly what we exist to close.
+            <p className="text-white text-base sm:text-lg leading-relaxed font-body">Women weren't excluded from these systems because they weren't capable. They were excluded because the systems were never designed to include them. Not built around their bodies, their biology, their cycles, or their way of knowing. And that gap, that vast, deliberate gap, is exactly what we exist to close.
 
             </p>
           </div>
@@ -103,8 +103,8 @@ export default function OurWhy() {
           </div>
         </div>
         <p className="mt-10 text-center text-sm text-[#6B4C55] italic">
-          This education system will never be offered in schools.<br />
-          It has to exist beyond conventional training.
+          None of this will ever be offered in schools.<br />
+          So we built the place where it lives: the diagnostics, the education, the professionals, and the community, in one system.
         </p>
       </section>
 
@@ -114,8 +114,8 @@ export default function OurWhy() {
           <div className="text-center mb-12">
             <EYEBROW>Our reason for being</EYEBROW>
             <h2 className="font-display text-3xl sm:text-4xl text-[#4A0E2E]">
-              Why The Aligned Woman<br />
-              <ITALIC_SERIF>Blueprint™</ITALIC_SERIF> exists.
+              Why The Aligned Woman Co.<br />
+              <ITALIC_SERIF>exists.</ITALIC_SERIF>
             </h2>
             <p className="mt-4 text-sm text-[#6B4C55] max-w-lg mx-auto">
               Because no single domain can address the full complexity of a woman's experience. She needs an integrated system.
@@ -138,6 +138,7 @@ export default function OurWhy() {
                 ["Business Coaching", "Strategy, sales, mindset", "Biology, identity, embodiment"],
                 ["Therapy / Psychology", "Mental health support", "Performance, leadership, ambition"],
                 ["Hormone Clinics", "Medical treatment", "Self-directed education, tools"],
+                ["Online Directories", "Endless listings", "Vetting, matching, accountability"],
                 ["Social Media", "Information overload", "Coherent, structured, safe to learn"]].
                 map(([what, delivers, missing]) =>
                 <tr key={what} className="border-t border-[#E8B4AE]/30">
@@ -151,8 +152,8 @@ export default function OurWhy() {
           </div>
 
           <p className="mt-8 text-center text-base font-bold text-[#4A0E2E]">
-            All in one coherent, structured and safe to learn <br />
-            <span className="font-display italic text-xl">Education.</span>
+            One platform that starts with a diagnostic, teaches through vetted experts, connects you to vetted professionals, and puts the community in the same room. <br />
+            <span className="font-display italic text-xl">That is what was missing.</span>
           </p>
         </div>
       </section>
@@ -186,18 +187,18 @@ export default function OurWhy() {
       <section className="bg-[#4A0E2E] py-24 text-center px-6">
         <p className="font-display text-3xl sm:text-4xl text-white leading-tight max-w-2xl mx-auto mb-8">
           Women don't need more <ITALIC_SERIF>motivation.</ITALIC_SERIF><br />
-          They need the education<br />
+          They need the system<br />
           they were <ITALIC_SERIF>never given.</ITALIC_SERIF>
         </p>
         <p className="text-white/60 text-sm mb-8 max-w-md mx-auto">
-          The Aligned Woman Blueprint is the first education system built entirely around the female brain, body, and lived experience.
+          The Aligned Woman Co. is built entirely around the female brain, body, and lived experience. Start with a free diagnostic and see how you actually operate.
         </p>
         <div className="flex justify-center">
           <Link
-            to="/blueprint"
+            to="/StartingPointProfile"
             className="inline-flex items-center justify-center px-12 py-4 rounded-full border border-white/30 text-white font-bold text-base tracking-widest uppercase hover:bg-white/10 transition-colors">
             
-            Learn More
+            Take The Pattern
           </Link>
         </div>
 
