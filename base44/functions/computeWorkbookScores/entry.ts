@@ -18,15 +18,19 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: "no entity_id" });
     }
 
-    // Identify the caller when present. Entity automations invoke this
-    // function without a user session (me() resolves to null); a direct call
-    // from a logged-in user is authenticated and ownership is enforced below.
+    // Require an authenticated caller. Unauthenticated requests are rejected
+    // so the ownership check below cannot be bypassed by omitting a token.
+    // (The entity automation for this function is currently inactive; if it is
+    // re-enabled it must be reworked to authenticate system invocations.)
     let caller = null;
     try { caller = await base44.auth.me(); } catch { caller = null; }
+    if (!caller) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Fetch the real record from the database rather than trusting the
-    // request payload — a direct (non-automation) call could otherwise supply
-    // arbitrary answers and overwrite another user's computed scores.
+    // request payload — a direct call could otherwise supply arbitrary
+    // answers and overwrite another user's computed scores.
     const records = await base44.asServiceRole.entities.WorkbookResponse.filter({ id: entity_id });
     const data = records?.[0];
 
@@ -34,10 +38,8 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: "response not found" });
     }
 
-    // Ownership check: if a user invoked this endpoint directly, they must
-    // own the record. Automation invocations (no caller) proceed, relying on
-    // the DB-sourced data above to prevent score manipulation.
-    if (caller && data.created_by_id && data.created_by_id !== caller.id) {
+    // Ownership check: the caller must own the record being recomputed.
+    if (data.created_by_id && data.created_by_id !== caller.id) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 

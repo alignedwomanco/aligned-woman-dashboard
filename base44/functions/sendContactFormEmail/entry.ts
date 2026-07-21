@@ -31,6 +31,12 @@ Deno.serve(async (req) => {
 
     const { submissionId, recipientEmail, submissionType, firstName } = await req.json();
 
+    // Prevent open mail relay: the thank-you may only go to the authenticated
+    // user's own email. Clients cannot send to arbitrary external addresses.
+    if (!recipientEmail || recipientEmail !== user.email) {
+      return Response.json({ error: 'Recipient must match your account email' }, { status: 403 });
+    }
+
     // Get Gmail access token
     const { accessToken } = await base44.asServiceRole.connectors.getConnection("gmail");
 
