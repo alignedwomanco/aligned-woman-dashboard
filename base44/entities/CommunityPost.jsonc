@@ -46,6 +46,11 @@
     "shareCount": {
       "type": "number",
       "default": 0
+    },
+    "points_awarded": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether community points have already been granted for creating this post (dedupe flag for the awardCommunityPoints function)"
     }
   },
   "required": [
