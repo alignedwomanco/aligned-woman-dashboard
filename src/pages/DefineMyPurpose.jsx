@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Loader2, Sparkles, CheckCircle, BookOpen } from "lucide-react";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import {
   Accordion,
   AccordionContent,
@@ -292,7 +293,7 @@ export default function DefineMyPurpose() {
           <Card className="bg-white/5 border-white/10 p-6 mb-6">
             <div
               className="prose prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: resultsHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(resultsHtml) }}
             />
           </Card>
 

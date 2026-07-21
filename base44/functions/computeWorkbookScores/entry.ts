@@ -18,6 +18,12 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: "no entity_id" });
     }
 
+    // Identify the caller when present. Entity automations invoke this
+    // function without a user session (me() resolves to null); a direct call
+    // from a logged-in user is authenticated and ownership is enforced below.
+    let caller = null;
+    try { caller = await base44.auth.me(); } catch { caller = null; }
+
     // Fetch the real record from the database rather than trusting the
     // request payload — a direct (non-automation) call could otherwise supply
     // arbitrary answers and overwrite another user's computed scores.
@@ -26,6 +32,13 @@ Deno.serve(async (req) => {
 
     if (!data) {
       return Response.json({ skipped: true, reason: "response not found" });
+    }
+
+    // Ownership check: if a user invoked this endpoint directly, they must
+    // own the record. Automation invocations (no caller) proceed, relying on
+    // the DB-sourced data above to prevent score manipulation.
+    if (caller && data.created_by_id && data.created_by_id !== caller.id) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Only process if is_complete is true

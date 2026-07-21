@@ -269,17 +269,20 @@ Deno.serve(async (req) => {
     // ----------------------------------------------------------------
 
     try {
+      const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const safeName = esc(fullName || "there");
+      const safeEmail = esc(email);
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
         subject: "You're in. Welcome to The Aligned Woman Blueprint.",
         body: `
           <h2>You're in. Welcome to The Aligned Woman Blueprint.</h2>
-          <p>Hi ${fullName || "there"},</p>
+          <p>Hi ${safeName},</p>
           <p>Your payment is confirmed and your Blueprint access is ready.</p>
           <p><strong>How to get in:</strong></p>
           <ol>
             <li>Go to <a href="${LOGIN_URL}">${LOGIN_URL}</a></li>
-            <li>Sign in using this email address, ${email}, the same one you paid with</li>
+            <li>Sign in using this email address, ${safeEmail}, the same one you paid with</li>
             <li>You land straight in your dashboard with the Blueprint unlocked</li>
           </ol>
           <p>Please use the same email you paid with. That is the address your access is linked to.</p>
