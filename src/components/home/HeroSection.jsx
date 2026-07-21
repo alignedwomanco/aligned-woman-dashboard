@@ -116,16 +116,11 @@ export default function HeroSection({ onWaitlist }) {
         </div>
 
         {/* Sub copy */}
-        <div style={{ marginBottom: 6 }}>
-          <p style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.75, color: "rgba(255,255,255,0.8)" }}>
-            One platform where women learn, connect, and grow with people who are actually qualified to help.<br />
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.7, color: "#EBE6E3" }}>
+            One platform where women learn, connect, and grow with people<br />
+            who are actually qualified to help.<br />
             Free diagnostics, expert-led courses, vetted professionals, and a community that meets in real life.
-          </p>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.75, color: "rgba(255,255,255,0.7)" }}>
-            Learn about our flagship course, The Aligned Woman Blueprint
           </p>
         </div>
 
@@ -134,43 +129,42 @@ export default function HeroSection({ onWaitlist }) {
           <Link
             to="/StartingPointProfile"
             style={{
-              background: "rgb(196,132,122)",
-              color: "#fff",
+              background: "#F7F1EF",
+              color: "#1A1717",
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              padding: "16px 36px",
+              padding: "16px 32px",
               borderRadius: "100px",
-              boxShadow: "rgba(196,132,122,0.28) 0px 8px 32px",
               textDecoration: "none",
-              display: "inline-block",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
               transition: "background 0.2s",
-              textAlign: "center",
             }}
           >
-            Find Your Pattern For Free
+            Find Your Pattern (Free) <span aria-hidden>→</span>
           </Link>
-          <a
-            href="https://app.alignedwomanco.com/StartingPointProfile"
+          <Link
+            to="/blueprint"
             style={{
               background: "transparent",
-              color: "rgba(255,255,255,0.6)",
+              color: "#EBE6E3",
               fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: "0.16em",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
               textTransform: "uppercase",
-              padding: "15px 36px",
+              padding: "15px 32px",
               borderRadius: "100px",
-              border: "1px solid rgba(255,255,255,0.2)",
-              cursor: "pointer",
-              transition: "border-color 0.2s, color 0.2s",
+              border: "1px solid #EBE6E3",
               textDecoration: "none",
               display: "inline-block",
+              transition: "background 0.2s, color 0.2s",
             }}
           >
-            Start For Free!
-          </a>
+            See The Blueprint
+          </Link>
         </div>
       </div>
 
