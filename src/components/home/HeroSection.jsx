@@ -131,7 +131,7 @@ export default function HeroSection({ onWaitlist }) {
         {/* CTAs — side by side */}
         <div className="flex flex-row items-center justify-center flex-wrap" style={{ gap: 12, marginBottom: 20 }}>
           <Link
-            to="/blueprint"
+            to="/StartingPointProfile"
             style={{
               background: "rgb(196,132,122)",
               color: "#fff",
@@ -148,7 +148,7 @@ export default function HeroSection({ onWaitlist }) {
               textAlign: "center",
             }}
           >
-            Begin Your Blueprint +
+            Find Your Pattern For Free
           </Link>
           <a
             href="https://app.alignedwomanco.com/StartingPointProfile"
