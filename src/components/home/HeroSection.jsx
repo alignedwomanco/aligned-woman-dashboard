@@ -118,7 +118,8 @@ export default function HeroSection({ onWaitlist }) {
         {/* Sub copy */}
         <div style={{ marginBottom: 6 }}>
           <p style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.75, color: "rgba(255,255,255,0.8)" }}>
-            One platform where women learn, connect, and grow with people who are actually qualified to help. Free diagnostics, expert-led courses, vetted professionals, and a community that meets in real life.
+            One platform where women learn, connect, and grow with people who are actually qualified to help.<br />
+            Free diagnostics, expert-led courses, vetted professionals, and a community that meets in real life.
           </p>
         </div>
 
