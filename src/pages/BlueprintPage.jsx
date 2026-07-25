@@ -640,6 +640,17 @@ function YouAreNotFailing() {
 
 function VideoSection() {
   const [playing, setPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  const handlePlay = () => {
+    if (playing) return;
+    setPlaying(true);
+    const v = videoRef.current;
+    if (v) {
+      v.currentTime = 0;
+      v.play().catch(() => {});
+    }
+  };
 
   return (
     <section className="py-14 md:py-24 px-6 md:px-8" style={{ background: C.offWhite }}>
@@ -648,14 +659,16 @@ function VideoSection() {
           <div
             className="relative rounded-lg overflow-hidden cursor-pointer group"
             style={{ aspectRatio: "16/9", border: `1px solid rgba(74,14,46,0.08)`, background: C.burgDeep }}
-            onClick={() => setPlaying(true)}
+            onClick={handlePlay}
           >
             <video
+              ref={videoRef}
               src="https://pub-92fd07e9117b4774bd919918a55b163b.r2.dev/AlignedWoman_Horizontal_Final_UPD_SHORT.mp4"
-              autoPlay={playing}
               loop
               muted
               playsInline
+              preload="metadata"
+              controls={playing}
               className="absolute inset-0 w-full h-full object-cover"
             />
             {!playing && (
