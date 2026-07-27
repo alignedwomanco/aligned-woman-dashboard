@@ -937,7 +937,7 @@ export default function ExpertsDirectory() {
   };
 
   return (
-    <main id="main-content" style={{ fontFamily: sans, background: C.offWhite, minHeight: "100vh" }}>
+    <main id="main-content" style={{ fontFamily: sans, background: `linear-gradient(170deg, ${C.roseWash} 0%, ${C.rosePale} 55%, ${C.roseWash} 100%)`, minHeight: "100vh", padding: "32px 24px 0" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
         *:focus-visible { outline: 2px solid #C4847A !important; outline-offset: 3px !important; }
@@ -948,27 +948,32 @@ export default function ExpertsDirectory() {
         }
       `}</style>
 
-      {/* ── HERO ── */}
-      <section style={{ background: C.offWhite, padding: "80px 32px 64px", textAlign: "center" }}>
-        <div style={{ maxWidth: 920, margin: "0 auto" }}>
-          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>
+      {/* ── HERO AND FILTERS ──
+          One rounded panel rather than a full bleed hero above a separate
+          sticky bar. The filters belong to the invitation, not to the page. */}
+      <section style={{ maxWidth: 1180, margin: "0 auto", background: C.roseWash, borderRadius: 28, padding: "56px 48px 48px", position: "relative", overflow: "hidden", boxShadow: "0 8px 30px rgba(62,30,38,0.05)" }}>
+        <img
+          src={SEAL_IMAGE_URL}
+          alt=""
+          aria-hidden="true"
+          style={{ position: "absolute", top: 32, right: 40, width: 74, height: 74, objectFit: "contain", pointerEvents: "none" }}
+        />
+        <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
+          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 16 }}>
             Credentialed practitioners · Verified expertise
           </p>
-          <h1 style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(40px, 6vw, 64px)", color: C.burgCore, lineHeight: 1.1, marginBottom: 28 }}>
-            Connect with an expert.
+          <h1 style={{ fontFamily: serif, fontSize: "clamp(30px, 4vw, 42px)", color: C.burgCore, lineHeight: 1.15, marginBottom: 22 }}>
+            Connect with a verified expert.
           </h1>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 16, color: C.darkGrey, lineHeight: 1.8, maxWidth: 780, margin: "0 auto 20px" }}>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, margin: "0 auto 16px" }}>
             The Aligned Woman Co works exclusively with credentialed practitioners, researchers, and specialists whose expertise has been verified, not self-reported. Every expert on this platform has been selected for depth of qualification, relevance to the women we serve, and the ability to deliver measurable outcomes.
           </p>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontStyle: "italic", fontSize: 15, color: C.midGrey, lineHeight: 1.85, maxWidth: 780, margin: "0 auto" }}>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.midGrey, lineHeight: 1.8, margin: "0 auto" }}>
             We do not use influencers. We do not platform anyone whose credentials would not hold up under professional scrutiny. This is a deliberate decision. The women who trust this platform deserve practitioners who have earned their authority through years of clinical practice, academic research, or demonstrated professional results. Not through audience size.
           </p>
         </div>
-      </section>
 
-      {/* ── STICKY FILTER BAR ── */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: C.offWhite, borderBottom: "1px solid rgba(74,14,46,0.06)", padding: "20px 32px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ maxWidth: 900, margin: "36px auto 0" }}>
           {/* Search bar */}
           <div style={{ position: "relative", marginBottom: 16 }}>
             <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: C.midGrey, pointerEvents: "none" }} />
@@ -1098,7 +1103,7 @@ export default function ExpertsDirectory() {
           {/* How they work. Second, because it filters the widest. Most people
               leave it on Either and never think about it again, which is
               exactly what a good default does. */}
-          <p style={{ ...FILTER_EYEBROW, marginTop: 18 }}>How they work</p>
+          <p style={{ ...FILTER_EYEBROW, marginTop: 18 }}>How you meet</p>
           <div className="filter-scroll" style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
             {DELIVERY_OPTIONS.map((opt) => {
               const active = deliveryFilter === opt.value;
@@ -1165,11 +1170,11 @@ export default function ExpertsDirectory() {
             )}
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ── DIRECTORY ── */}
-      <section style={{ background: C.offWhite, padding: "56px 32px 80px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <section style={{ padding: "48px 0 72px" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
           {/* Result line. With three axes, Clear all is not enough. She needs
               to drop one filter without resetting the whole thing, so each
               active filter carries its own removable chip. */}
@@ -1240,7 +1245,7 @@ export default function ExpertsDirectory() {
               )}
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24, alignItems: "stretch" }}>
               {filtered.map((expert) => (
                 <ExpertCard
                   key={expert.id}
