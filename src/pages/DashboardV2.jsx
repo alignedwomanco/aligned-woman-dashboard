@@ -574,7 +574,10 @@ function DirectoryBand() {
               <h3 className="font-display text-[#35081F] text-[20px] leading-tight mt-4 mb-3">
                 {card.heading}
               </h3>
-              <p className="font-body font-light text-[11.5px] leading-relaxed text-[#35081F] mb-5 max-w-[300px]">
+              <p
+                className="font-body font-light text-[11.5px] leading-relaxed text-[#35081F] mb-5 max-w-[300px]"
+                style={{ textShadow: "0 1px 3px rgba(250,245,243,0.95), 0 2px 8px rgba(250,245,243,0.85)" }}
+              >
                 {card.body}
               </p>
               <Link
