@@ -953,6 +953,15 @@ export default function ExpertsDirectory() {
         *:focus-visible { outline: 2px solid #C4847A !important; outline-offset: 3px !important; }
         .filter-scroll::-webkit-scrollbar { display: none; }
         .filter-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (max-width: 640px) {
+          .hero-seal {
+            position: relative !important;
+            top: auto !important;
+            right: auto !important;
+            display: block;
+            margin: 0 auto 20px !important;
+          }
+        }
         @media (prefers-reduced-motion: reduce) {
           * { transition: none !important; animation: none !important; }
         }
@@ -966,6 +975,7 @@ export default function ExpertsDirectory() {
           src={SEAL_IMAGE_URL}
           alt=""
           aria-hidden="true"
+          className="hero-seal"
           style={{ position: "absolute", top: 32, right: 40, width: 74, height: 74, objectFit: "contain", pointerEvents: "none" }}
         />
         <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
