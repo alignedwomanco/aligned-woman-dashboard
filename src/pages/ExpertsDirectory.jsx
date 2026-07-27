@@ -46,6 +46,11 @@ const CATEGORY_DOMAIN_MAP = {
   "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
 };
 
+// The approved AW Verified seal, the same asset TheAWStandard.jsx uses. One
+// source for the mark, so the directory and the Standard page cannot drift.
+const SEAL_IMAGE_URL =
+  "https://media.base44.com/images/public/69f46886a412ee042303f1af/c01141aed_aw-verified-seal.png";
+
 // How they work. "Either" is the filter default and never narrows anything,
 // which is what a good default does.
 const DELIVERY_LABELS = {
@@ -588,51 +593,51 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         background: C.roseWash,
-        padding: 32,
+        padding: 26,
         border: `1px solid ${hovered ? "rgba(196,132,122,0.35)" : "rgba(74,14,46,0.04)"}`,
-        borderRadius: 24,
+        borderRadius: 20,
         display: "flex",
         flexDirection: "column",
-        gap: 18,
+        gap: 14,
         boxShadow: hovered ? "0 16px 40px rgba(74,14,46,0.10)" : "0 8px 30px rgba(62,30,38,0.05)",
         transform: hovered ? "translateY(-3px)" : "none",
         transition: "border-color 0.25s, box-shadow 0.25s, transform 0.25s",
       }}
     >
       {/* Header row: avatar left, domain and verification and name right */}
-      <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
         <div
           aria-hidden="true"
-          style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.roseCore}, ${C.burgCore})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+          style={{ width: 48, height: 48, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.roseCore}, ${C.burgCore})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
         >
           {expert.profile_picture ? (
             <img src={expert.profile_picture} alt={`Headshot of ${expert.name}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
-            <span style={{ fontFamily: serif, fontSize: 22, color: C.white, letterSpacing: "0.04em" }}>
+            <span style={{ fontFamily: serif, fontSize: 15, color: C.white, letterSpacing: "0.04em" }}>
               {expert.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}
             </span>
           )}
         </div>
         <div style={{ minWidth: 0 }}>
-          <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.2em", color: C.roseCore, display: "block", marginBottom: 8 }}>
+          <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.2em", color: C.roseCore, display: "block", marginBottom: 5 }}>
             {expert.domain}
           </span>
-          <div style={{ marginBottom: 8 }}>
+          <div style={{ marginBottom: 5 }}>
             <VerifiedBadge />
           </div>
-          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: C.burgCore, lineHeight: 1.15, margin: 0 }}>
+          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 19, color: C.burgCore, lineHeight: 1.2, margin: 0 }}>
             {expert.name}
           </h3>
         </div>
       </div>
 
       {/* Title */}
-      <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 14, color: C.roseCore, lineHeight: 1.45, margin: 0 }}>
+      <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 12, color: C.roseCore, lineHeight: 1.45, margin: 0 }}>
         {expert.role}
       </p>
 
       {/* Bio */}
-      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.75, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical" }}>
+      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.7, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical" }}>
         {expert.bio}
       </p>
 
@@ -660,12 +665,12 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
       {expert.specialties.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {expert.specialties.slice(0, 4).map((s, i) => (
-            <span key={i} style={{ background: C.white, padding: "8px 16px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 12, color: C.burgCore, boxShadow: "0 2px 8px rgba(62,30,38,0.05)" }}>
+            <span key={i} style={{ background: C.white, padding: "6px 12px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, boxShadow: "0 2px 8px rgba(62,30,38,0.05)" }}>
               {s}
             </span>
           ))}
           {expert.specialties.length > 4 && (
-            <span style={{ background: "transparent", padding: "8px 16px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 12, color: C.midGrey, border: "1px solid rgba(74,14,46,0.12)" }}>
+            <span style={{ background: "transparent", padding: "6px 12px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.midGrey, border: "1px solid rgba(74,14,46,0.12)" }}>
               +{expert.specialties.length - 4} more
             </span>
           )}
@@ -677,7 +682,7 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
         <button
           onClick={() => onView(expert)}
           aria-label={`View profile of ${expert.name}`}
-          style={{ background: "transparent", color: C.burgCore, border: `1px solid ${C.burgCore}`, borderRadius: 100, padding: "14px 30px", fontFamily: sans, fontWeight: 500, fontSize: 14, cursor: "pointer", minHeight: 48, transition: "background 0.2s, color 0.2s" }}
+          style={{ background: "transparent", color: C.burgCore, border: `1px solid ${C.burgCore}`, borderRadius: 100, padding: "11px 24px", fontFamily: sans, fontWeight: 500, fontSize: 13, cursor: "pointer", minHeight: 44, transition: "background 0.2s, color 0.2s" }}
           onMouseEnter={(e) => { e.currentTarget.style.background = C.burgCore; e.currentTarget.style.color = C.white; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.burgCore; }}
         >
