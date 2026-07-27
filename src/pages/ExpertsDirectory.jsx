@@ -46,6 +46,20 @@ const CATEGORY_DOMAIN_MAP = {
   "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
 };
 
+// How they work. "Either" is the filter default and never narrows anything,
+// which is what a good default does.
+const DELIVERY_LABELS = {
+  online: ["Online"],
+  in_person: ["In person"],
+  both: ["In person", "Online"],
+};
+
+const DELIVERY_OPTIONS = [
+  { value: "either", label: "Either" },
+  { value: "online", label: "Online" },
+  { value: "in_person", label: "In person" },
+];
+
 // Fallback credential chips derived from title
 function credentialsFromTitle(title) {
   if (!title) return [];
@@ -586,6 +600,22 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
       <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }}>
         {expert.bio}
       </p>
+
+      {/* Where and how they work */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+        {expert.locations.map((loc, i) => (
+          <span key={`loc-${i}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, border: "1px solid rgba(74,14,46,0.12)", padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.burgCore }}>
+            <MapPin style={{ width: 11, height: 11, color: C.roseCore }} aria-hidden="true" />
+            {loc.label}
+          </span>
+        ))}
+        {(DELIVERY_LABELS[expert.deliveryMode] || DELIVERY_LABELS.online).map((label) => (
+          <span key={label} style={{ display: "inline-flex", alignItems: "center", gap: 5, border: "1px solid rgba(74,14,46,0.12)", padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.burgCore }}>
+            {label === "Online" && <Video style={{ width: 11, height: 11, color: C.roseCore }} aria-hidden="true" />}
+            {label}
+          </span>
+        ))}
+      </div>
 
       {/* Specialty tags */}
       {expert.specialties.length > 0 && (
