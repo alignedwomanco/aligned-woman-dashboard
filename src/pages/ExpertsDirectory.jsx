@@ -747,26 +747,124 @@ export default function ExpertsDirectory() {
     if (match) setModal({ expert: mapDbExpert(match), mode: "viewOnly" });
   }, [dbExperts, searchParams]);
 
-  // Filtering
-  const filtered = experts.filter(expert => {
-    // Category filter
-    if (activeCategory !== "ALL") {
-      const categorySpecialties = categoryMap[activeCategory] || [];
-      const hasMatch = categorySpecialties.some(sp =>
-        expert.specialties.map(s => s.toLowerCase()).includes(sp.toLowerCase())
-      );
-      if (!hasMatch) return false;
+  // ─── FILTERING ───
+  // Each axis is its own predicate, so the empty-state cascade can relax them
+  // one at a time without restating the matching rules.
+  const matchesSpecialty = (expert, cat) => {
+    if (cat === "ALL") return true;
+    const catSpecialties = (categoryMap[cat] || []).map((s) => s.toLowerCase());
+    return expert.specialties.some((s) => catSpecialties.includes(s.toLowerCase()));
+  };
+
+  const matchesDelivery = (expert, mode) => {
+    if (mode === "either") return true;
+    if (mode === "online") return expert.deliveryMode === "online" || expert.deliveryMode === "both";
+    return expert.deliveryMode === "in_person" || expert.deliveryMode === "both";
+  };
+
+  const matchesLocation = (expert, loc) => {
+    if (!loc) return true;
+    return expert.locations.some((l) => l.label.toLowerCase() === loc.toLowerCase());
+  };
+
+  const matchesSearch = (expert, text) => {
+    const q = text.trim().toLowerCase();
+    if (!q) return true;
+    if (expert.name?.toLowerCase().includes(q)) return true;
+    if (expert.role?.toLowerCase().includes(q)) return true;
+    if (expert.specialties.some((s) => s.toLowerCase().includes(q))) return true;
+    // City is searchable from the main box too, per the design.
+    if (expert.locations.some((l) => l.label.toLowerCase().includes(q))) return true;
+    return false;
+  };
+
+  const applyFilters = (cat, mode, loc) =>
+    experts.filter(
+      (e) =>
+        matchesSpecialty(e, cat) &&
+        matchesDelivery(e, mode) &&
+        matchesLocation(e, loc) &&
+        matchesSearch(e, searchText)
+    );
+
+  const filtered = applyFilters(activeCategory, deliveryFilter, locationFilter);
+
+  // Only offer a filter that can actually return someone. This is what makes
+  // the bar maintain itself as practitioners are onboarded, and what retires a
+  // pill the moment nobody sits behind it.
+  const availableCategories = allCategoryNames.filter((cat) =>
+    experts.some((e) => matchesSpecialty(e, cat))
+  );
+  const pinnedAvailable = PINNED_CATEGORIES.filter((c) => availableCategories.includes(c));
+  const moreCategories = availableCategories.filter((c) => !PINNED_CATEGORIES.includes(c));
+
+  const availableLocations = Array.from(
+    new Set(experts.flatMap((e) => e.locations.map((l) => l.label)))
+  ).sort((a, b) => a.localeCompare(b));
+
+  const locationSuggestions = availableLocations.filter((l) =>
+    l.toLowerCase().includes(locationQuery.trim().toLowerCase())
+  );
+
+  // ─── EMPTY-STATE CASCADE ───
+  // Strict order, never deviated from: drop the location first because it is
+  // the softest constraint, then the delivery mode. The specialty is never
+  // touched, because it is the reason she came.
+  let relaxed = null;
+  if (!isLoading && filtered.length === 0) {
+    const subject = activeCategory === "ALL" ? "practitioners" : `${activeCategory.toLowerCase()} practitioners`;
+    if (locationFilter) {
+      const wider = applyFilters(activeCategory, deliveryFilter, "");
+      if (wider.length > 0) {
+        relaxed = {
+          message: `No ${subject} in ${locationFilter}.`,
+          action: `Show ${wider.length} available elsewhere`,
+          onApply: () => { setLocationFilter(""); setLocationQuery(""); },
+        };
+      }
     }
-    // Search filter
-    if (searchText.trim()) {
-      const q = searchText.toLowerCase();
-      const nameMatch = expert.name?.toLowerCase().includes(q);
-      const titleMatch = expert.role?.toLowerCase().includes(q);
-      const specialtyMatch = expert.specialties.some(s => s.toLowerCase().includes(q));
-      if (!nameMatch && !titleMatch && !specialtyMatch) return false;
+    if (!relaxed && deliveryFilter !== "either") {
+      const wider = applyFilters(activeCategory, "either", locationFilter);
+      if (wider.length > 0) {
+        relaxed = {
+          message: `No ${subject} working that way${locationFilter ? ` in ${locationFilter}` : ""}.`,
+          action: `Show ${wider.length} working either way`,
+          onApply: () => setDeliveryFilter("either"),
+        };
+      }
     }
-    return true;
-  });
+    if (!relaxed && locationFilter && deliveryFilter !== "either") {
+      const wider = applyFilters(activeCategory, "either", "");
+      if (wider.length > 0) {
+        relaxed = {
+          message: "Nothing matches all of those together.",
+          action: `Show ${wider.length} in this specialty`,
+          onApply: () => { setLocationFilter(""); setLocationQuery(""); setDeliveryFilter("either"); },
+        };
+      }
+    }
+  }
+
+  // Active filter chips. A default state is not a filter, so "All" and
+  // "Either" never get a chip. That would be noise.
+  const activeChips = [];
+  if (activeCategory !== "ALL") {
+    activeChips.push({ key: "cat", label: activeCategory, onRemove: () => setActiveCategory("ALL") });
+  }
+  if (deliveryFilter !== "either") {
+    activeChips.push({
+      key: "delivery",
+      label: DELIVERY_OPTIONS.find((o) => o.value === deliveryFilter)?.label || deliveryFilter,
+      onRemove: () => setDeliveryFilter("either"),
+    });
+  }
+  if (locationFilter) {
+    activeChips.push({
+      key: "loc",
+      label: locationFilter,
+      onRemove: () => { setLocationFilter(""); setLocationQuery(""); },
+    });
+  }
 
   const handleFilter = (cat) => {
     setActiveCategory(cat);
