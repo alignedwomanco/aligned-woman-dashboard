@@ -1116,15 +1116,74 @@ export default function ExpertsDirectory() {
       {/* ── DIRECTORY ── */}
       <section style={{ background: C.offWhite, padding: "56px 32px 80px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          {/* Result count */}
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, letterSpacing: "0.06em", textAlign: "center", marginBottom: 32 }}>
-            <strong style={{ fontWeight: 600 }}>{filtered.length}</strong> of <strong style={{ fontWeight: 600 }}>{experts.length}</strong> {filtered.length === 1 ? "expert" : "experts"} shown
-          </p>
+          {/* Result line. With three axes, Clear all is not enough. She needs
+              to drop one filter without resetting the whole thing, so each
+              active filter carries its own removable chip. */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginBottom: 32 }}>
+            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, letterSpacing: "0.06em", textAlign: "center", margin: 0 }}>
+              <strong style={{ fontWeight: 600 }}>{filtered.length}</strong> of <strong style={{ fontWeight: 600 }}>{experts.length}</strong> {filtered.length === 1 ? "expert" : "experts"} shown
+            </p>
+            {activeChips.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+                {activeChips.map((chip) => (
+                  <span
+                    key={chip.key}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, background: C.roseLight, color: C.burgCore, borderRadius: 100, padding: "6px 8px 6px 14px", fontFamily: sans, fontWeight: 500, fontSize: 11 }}
+                  >
+                    {chip.label}
+                    <button
+                      onClick={chip.onRemove}
+                      aria-label={`Remove ${chip.label} filter`}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 0, color: C.burgCore }}
+                    >
+                      <X style={{ width: 12, height: 12 }} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Grid */}
           {isLoading ? (
             <div style={{ textAlign: "center", padding: "60px 0", fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.midGrey }}>
               Loading experts…
+            </div>
+          ) : filtered.length === 0 ? (
+            /* Empty state. Relax in strict order: the location first because it
+               is the softest constraint, then the delivery mode. The specialty
+               is never touched. If there is genuinely nobody in it, say so
+               plainly rather than fudging the result set. */
+            <div style={{ textAlign: "center", padding: "48px 24px", maxWidth: 540, margin: "0 auto" }}>
+              <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.burgCore, lineHeight: 1.35, margin: "0 0 12px" }}>
+                {relaxed ? relaxed.message : "No one here yet."}
+              </p>
+              {relaxed ? (
+                <button
+                  onClick={relaxed.onApply}
+                  style={{ marginTop: 8, background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "12px 24px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 44 }}
+                >
+                  {relaxed.action}
+                </button>
+              ) : (
+                <>
+                  <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.75, margin: "0 0 22px" }}>
+                    We have not yet verified a practitioner in this area. We would rather tell you that plainly than show you someone who is not the right fit.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setActiveCategory("ALL");
+                      setDeliveryFilter("either");
+                      setLocationFilter("");
+                      setLocationQuery("");
+                      setSearchText("");
+                    }}
+                    style={{ background: "transparent", color: C.burgCore, border: `1px solid ${C.roseCore}`, borderRadius: 100, padding: "12px 24px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 44 }}
+                  >
+                    Clear all filters
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
