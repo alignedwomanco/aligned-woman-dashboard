@@ -152,7 +152,16 @@ function App() {
           <AnalyticsTracker />
           <AuthenticatedApp />
         </Router>
-        <Toaster />
+        {/* The toast viewport is a fixed, full width, z-100 bar pinned to the
+            top of the screen below 640px. Even with no toasts it is 32px tall,
+            so it was swallowing every tap in the top 32px of every page, which
+            is exactly where the lesson player header controls sit.
+            pointer-events is an inherited property, so this lets taps pass
+            through the empty viewport. Real toasts carry pointer-events-auto
+            from toastVariants and stay fully interactive. */}
+        <div style={{ pointerEvents: "none" }}>
+          <Toaster />
+        </div>
         <VisualEditAgent />
         </PaymentProvider>
       </QueryClientProvider>
