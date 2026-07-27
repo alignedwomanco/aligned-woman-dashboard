@@ -1108,20 +1108,26 @@ export default function ModulePlayer() {
 
       <div
         className="fixed top-0 left-0 right-0 z-[60] md:hidden"
-        style={{
-          background: "#FAF5F3",
-          transform: "translateZ(0)",
-          WebkitTransform: "translateZ(0)",
-          willChange: "transform",
-        }}
+        style={{ background: "#FAF5F3" }}
       >
-        <div className="px-4 py-3 flex items-center justify-between">
+        <div className="px-4 py-2 flex items-center justify-between">
           <button
             onClick={() =>
               navigate(createPageUrl("CourseDetail") + `?courseId=${effectiveCourseId}`)
             }
-            className="flex-shrink-0 p-2 -m-1"
-            style={{ position: "relative", zIndex: 2 }}
+            className="flex-shrink-0 flex items-center justify-center"
+            style={{
+              position: "relative",
+              zIndex: 2,
+              width: "44px",
+              height: "44px",
+              padding: 0,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
+            }}
             aria-label="Back to course"
           >
             <ChevronLeft className="w-5 h-5" style={{ color: "#4A0E2E" }} />
@@ -1155,8 +1161,19 @@ export default function ModulePlayer() {
           </div>
           <button
             onClick={handleOpenMobileLessons}
-            className="flex-shrink-0 p-2 -m-1"
-            style={{ position: "relative", zIndex: 2 }}
+            className="flex-shrink-0 flex items-center justify-center"
+            style={{
+              position: "relative",
+              zIndex: 2,
+              width: "44px",
+              height: "44px",
+              padding: 0,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
+            }}
             aria-label="Open lessons"
           >
             <Menu className="w-5 h-5" style={{ color: "#4A0E2E" }} />
@@ -1624,7 +1641,7 @@ export default function ModulePlayer() {
           </div>
         </div>
 
-        <div className="md:hidden pt-[60px]">
+        <div className="md:hidden pt-[62px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage.id + "-mob-video"}
