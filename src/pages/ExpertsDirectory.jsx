@@ -603,7 +603,7 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
       <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
         <div
           aria-hidden="true"
-          style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.roseCore}, ${C.burgMid})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+          style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.roseCore}, ${C.burgCore})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
         >
           {expert.profile_picture ? (
             <img src={expert.profile_picture} alt={`Headshot of ${expert.name}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
