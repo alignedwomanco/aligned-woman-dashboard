@@ -674,6 +674,11 @@ export default function ExpertsDirectory() {
 
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [searchText, setSearchText] = useState("");
+  const [deliveryFilter, setDeliveryFilter] = useState("either");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [locationOpen, setLocationOpen] = useState(false);
+  const locationRef = useRef(null);
   const [showMore, setShowMore] = useState(false);
   const moreRef = useRef(null);
   const [modal, setModal] = useState(null);
@@ -699,14 +704,15 @@ export default function ExpertsDirectory() {
     return acc;
   }, {});
 
-  // All category names from DB (for "+ MORE" dropdown)
-  const allCategories = Object.keys(categoryMap);
-  const moreCategories = allCategories.filter(c => !PINNED_CATEGORIES.includes(c));
+  // All category names from DB. Which of them are actually offered is decided
+  // further down, once the practitioner list has loaded.
+  const allCategoryNames = Object.keys(categoryMap);
 
   // Close "more" dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (moreRef.current && !moreRef.current.contains(e.target)) setShowMore(false);
+      if (locationRef.current && !locationRef.current.contains(e.target)) setLocationOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
