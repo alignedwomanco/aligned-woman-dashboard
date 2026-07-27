@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
-import { X, Search, ChevronDown, Pencil, MapPin, Video } from "lucide-react";
+import { X, Search, ChevronDown, Pencil, MapPin, Video, Check } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
 const C = {
@@ -558,6 +558,26 @@ function ApplyModal({ currentUser, onClose }) {
 }
 
 // ─── EXPERT CARD ───
+// Every practitioner in the directory is vetted before publication, so the
+// badge is a property of being listed at all, not a per-record flag. The full
+// starburst seal lives on /theawstandard; at card size it would be illegible,
+// so this is the compact form of the same mark.
+function VerifiedBadge() {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <span
+        aria-hidden="true"
+        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, borderRadius: "50%", background: C.burgCore, flexShrink: 0 }}
+      >
+        <Check style={{ width: 10, height: 10, color: C.white }} strokeWidth={3} />
+      </span>
+      <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.18em", color: C.burgCore }}>
+        AW Verified
+      </span>
+    </span>
+  );
+}
+
 function ExpertCard({ expert, onConnect, onView, isAdmin }) {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
@@ -567,61 +587,70 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: C.white,
-        padding: 28,
-        border: `1px solid ${hovered ? "rgba(196,132,122,0.4)" : "rgba(74,14,46,0.06)"}`,
-        borderRadius: 6,
+        background: C.roseWash,
+        padding: 32,
+        border: `1px solid ${hovered ? "rgba(196,132,122,0.35)" : "rgba(74,14,46,0.04)"}`,
+        borderRadius: 24,
         display: "flex",
         flexDirection: "column",
-        gap: 16,
-        boxShadow: hovered ? "0 12px 32px rgba(74,14,46,0.08)" : "none",
-        transform: hovered ? "translateY(-2px)" : "none",
+        gap: 18,
+        boxShadow: hovered ? "0 16px 40px rgba(74,14,46,0.10)" : "0 8px 30px rgba(62,30,38,0.05)",
+        transform: hovered ? "translateY(-3px)" : "none",
         transition: "border-color 0.25s, box-shadow 0.25s, transform 0.25s",
       }}
     >
-      {/* Header row */}
-      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+      {/* Header row: avatar left, domain and verification and name right */}
+      <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
         <div
           aria-hidden="true"
-          style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+          style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${C.roseCore}, ${C.burgMid})`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
         >
           {expert.profile_picture ? (
             <img src={expert.profile_picture} alt={`Headshot of ${expert.name}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
-            <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 20, color: C.burgCore }}>
-              {expert.name.split(" ").map(p => p[0]).join("").slice(0, 2)}
+            <span style={{ fontFamily: serif, fontSize: 22, color: C.white, letterSpacing: "0.04em" }}>
+              {expert.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}
             </span>
           )}
         </div>
-        <div>
-          <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.2em", color: C.roseCore, display: "block", marginBottom: 4 }}>
+        <div style={{ minWidth: 0 }}>
+          <span style={{ fontFamily: sans, fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.2em", color: C.roseCore, display: "block", marginBottom: 8 }}>
             {expert.domain}
           </span>
-          <h3 style={{ fontFamily: sans, fontWeight: 600, fontSize: 15, color: C.burgCore, lineHeight: 1.3, margin: 0 }}>
+          <div style={{ marginBottom: 8 }}>
+            <VerifiedBadge />
+          </div>
+          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: C.burgCore, lineHeight: 1.15, margin: 0 }}>
             {expert.name}
           </h3>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.midGrey, margin: "2px 0 0" }}>
-            {expert.role}
-          </p>
         </div>
       </div>
 
+      {/* Title */}
+      <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 14, color: C.roseCore, lineHeight: 1.45, margin: 0 }}>
+        {expert.role}
+      </p>
+
       {/* Bio */}
-      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.darkGrey, lineHeight: 1.65, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }}>
+      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.75, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical" }}>
         {expert.bio}
       </p>
 
       {/* Where and how they work */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
         {expert.locations.map((loc, i) => (
-          <span key={`loc-${i}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, border: "1px solid rgba(74,14,46,0.12)", padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.burgCore }}>
-            <MapPin style={{ width: 11, height: 11, color: C.roseCore }} aria-hidden="true" />
+          <span key={`loc-${i}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.midGrey }}>
+            <MapPin style={{ width: 12, height: 12, color: C.roseCore }} aria-hidden="true" />
             {loc.label}
           </span>
         ))}
         {(DELIVERY_LABELS[expert.deliveryMode] || DELIVERY_LABELS.online).map((label) => (
-          <span key={label} style={{ display: "inline-flex", alignItems: "center", gap: 5, border: "1px solid rgba(74,14,46,0.12)", padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.burgCore }}>
-            {label === "Online" && <Video style={{ width: 11, height: 11, color: C.roseCore }} aria-hidden="true" />}
+          <span key={label} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.midGrey }}>
+            {label === "Online" ? (
+              <Video style={{ width: 12, height: 12, color: C.roseCore }} aria-hidden="true" />
+            ) : (
+              <MapPin style={{ width: 12, height: 12, color: C.roseCore }} aria-hidden="true" />
+            )}
             {label}
           </span>
         ))}
@@ -629,14 +658,14 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
 
       {/* Specialty tags */}
       {expert.specialties.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {expert.specialties.slice(0, 4).map((s, i) => (
-            <span key={i} style={{ background: C.rosePale, padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.burgCore }}>
+            <span key={i} style={{ background: C.white, padding: "8px 16px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 12, color: C.burgCore, boxShadow: "0 2px 8px rgba(62,30,38,0.05)" }}>
               {s}
             </span>
           ))}
           {expert.specialties.length > 4 && (
-            <span style={{ background: "transparent", padding: "4px 10px", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 10, color: C.midGrey, border: "1px solid rgba(74,14,46,0.12)" }}>
+            <span style={{ background: "transparent", padding: "8px 16px", borderRadius: 100, fontFamily: sans, fontWeight: 500, fontSize: 12, color: C.midGrey, border: "1px solid rgba(74,14,46,0.12)" }}>
               +{expert.specialties.length - 4} more
             </span>
           )}
@@ -644,11 +673,13 @@ function ExpertCard({ expert, onConnect, onView, isAdmin }) {
       )}
 
       {/* Actions */}
-      <div style={{ display: "flex", gap: 10 }}>
+      <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: "auto", paddingTop: 6 }}>
         <button
           onClick={() => onView(expert)}
           aria-label={`View profile of ${expert.name}`}
-          style={{ flex: 1, background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "12px 20px", fontFamily: sans, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer", minHeight: 44 }}
+          style={{ background: "transparent", color: C.burgCore, border: `1px solid ${C.burgCore}`, borderRadius: 100, padding: "14px 30px", fontFamily: sans, fontWeight: 500, fontSize: 14, cursor: "pointer", minHeight: 48, transition: "background 0.2s, color 0.2s" }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = C.burgCore; e.currentTarget.style.color = C.white; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.burgCore; }}
         >
           View profile
         </button>
