@@ -1068,7 +1068,7 @@ export default function ExpertsDirectory() {
               leave it on Either and never think about it again, which is
               exactly what a good default does. */}
           <p style={{ ...FILTER_EYEBROW, marginTop: 18 }}>How they work</p>
-          <div className="filter-scroll" style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "wrap", alignItems: "center" }}>
+          <div className="filter-scroll" style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
             {DELIVERY_OPTIONS.map((opt) => {
               const active = deliveryFilter === opt.value;
               return (
