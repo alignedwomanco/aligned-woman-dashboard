@@ -684,9 +684,18 @@ export default function ModulePlayer() {
           width: "100%",
           aspectRatio: "16 / 9",
           position: "relative",
+          zIndex: 0,
           background: "linear-gradient(135deg, #3D0F1F 0%, #4A0E2E 50%, #3D0F1F 100%)",
           borderRadius: radius,
           overflow: "hidden",
+          // The mobile crop sizes the iframe to 120% height at top -10%, so it
+          // extends above this box and into the fixed header. iOS Safari paints
+          // that overflow correctly but does not reliably clip a cross origin
+          // iframe's touch region, so the video was swallowing taps on the back
+          // arrow and the menu button. clip-path is honoured for hit testing
+          // where overflow hidden alone is not.
+          clipPath: `inset(0 round ${radius})`,
+          WebkitClipPath: `inset(0 round ${radius})`,
         }}
       >
         {selectedPage.videoUrl ? (
