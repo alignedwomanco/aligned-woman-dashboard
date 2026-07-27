@@ -676,7 +676,7 @@ export default function ModulePlayer() {
   const renderVideo = (roundCorners, cropTop = false) => {
     const radius = roundCorners ? "12px" : "0";
     const iframeStyle = cropTop
-      ? { position: "absolute", top: "-10%", left: "0", width: "100%", height: "120%", border: 0 }
+      ? { position: "absolute", top: "0", left: "0", width: "100%", height: "120%", border: 0 }
       : { border: 0 };
     return (
       <div
@@ -1116,7 +1116,7 @@ export default function ModulePlayer() {
       )}
 
       <div
-        className="fixed top-0 left-0 right-0 z-[60] md:hidden"
+        className="sticky top-0 z-[60] md:hidden"
         style={{ background: "#FAF5F3" }}
       >
         <div className="px-4 py-2 flex items-center justify-between">
@@ -1650,7 +1650,7 @@ export default function ModulePlayer() {
           </div>
         </div>
 
-        <div className="md:hidden pt-[62px]">
+        <div className="md:hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage.id + "-mob-video"}
