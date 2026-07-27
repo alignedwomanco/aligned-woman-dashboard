@@ -51,6 +51,11 @@ const CATEGORY_DOMAIN_MAP = {
 const SEAL_IMAGE_URL =
   "https://media.base44.com/images/public/69f46886a412ee042303f1af/c01141aed_aw-verified-seal.png";
 
+// The verified mockup collage behind the practitioner apply band. Already
+// hosted and already used on the dashboard, so there is one copy of it.
+const APPLY_BAND_IMAGE_URL =
+  "https://media.base44.com/images/public/69f46886a412ee042303f1af/2053763ab_awb-verified-mockup-grid2.png";
+
 // How they work. "Either" is the filter default and never narrows anything,
 // which is what a good default does.
 const DELIVERY_LABELS = {
@@ -1265,21 +1270,30 @@ export default function ExpertsDirectory() {
         </div>
       </section>
 
-      {/* ── APPLY TO JOIN (practitioners) ── */}
-      <section style={{ background: C.roseWash, padding: "72px 32px", textAlign: "center" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>
+      {/* ── APPLY TO JOIN (practitioners) ──
+          Inset rounded card. The collage sits behind a heavy wash so the copy
+          stays the thing you read, not the thing you read over. */}
+      <section style={{ maxWidth: 1180, margin: "0 auto 32px", borderRadius: 24, overflow: "hidden", position: "relative", textAlign: "center", boxShadow: "0 8px 30px rgba(62,30,38,0.05)" }}>
+        <img
+          src={APPLY_BAND_IMAGE_URL}
+          alt=""
+          aria-hidden="true"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.5 }}
+        />
+        <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "rgba(253,245,243,0.82)" }} />
+        <div style={{ position: "relative", maxWidth: 640, margin: "0 auto", padding: "64px 32px" }}>
+          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 16 }}>
             For practitioners
           </p>
-          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(28px, 4vw, 40px)", color: C.burgCore, lineHeight: 1.2, marginBottom: 20 }}>
+          <h2 style={{ fontFamily: serif, fontSize: "clamp(26px, 3.4vw, 34px)", color: C.burgCore, lineHeight: 1.2, marginBottom: 18 }}>
             Are you a credentialed expert?
           </h2>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: C.darkGrey, lineHeight: 1.8, maxWidth: 620, margin: "0 auto 32px" }}>
-            Apply to join the directory as an individual or a business. Every application is reviewed personally. Applying does not give access to any course; it is a request to be listed.
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, maxWidth: 560, margin: "0 auto 28px" }}>
+            Apply to join the directory as an individual or a business. Every application is reviewed personally. Applying does not give access to any course, it is a request to be listed.
           </p>
           <button
             onClick={handleApplyClick}
-            style={{ display: "inline-block", background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "18px 40px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.14em", minHeight: 48, cursor: "pointer" }}
+            style={{ display: "inline-block", background: C.burgCore, color: C.white, border: "none", borderRadius: 100, padding: "15px 34px", fontFamily: sans, fontWeight: 600, fontSize: 12, letterSpacing: "0.04em", minHeight: 46, cursor: "pointer" }}
           >
             Apply to join +
           </button>
@@ -1287,21 +1301,21 @@ export default function ExpertsDirectory() {
       </section>
 
       {/* ── CLOSING CTA ── */}
-      <section style={{ background: "linear-gradient(160deg, #0E0208 0%, #1A0510 35%, #4A0E2E 65%, #1A0510 100%)", padding: "80px 32px", textAlign: "center" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>
+      <section style={{ maxWidth: 1180, margin: "0 auto", borderRadius: 24, background: `linear-gradient(150deg, ${C.burgCore} 0%, ${C.burgDeep} 100%)`, padding: "72px 32px", textAlign: "center", marginBottom: 48 }}>
+        <div style={{ maxWidth: 640, margin: "0 auto" }}>
+          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 16 }}>
             Not sure who to start with
           </p>
-          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(28px, 4vw, 40px)", color: C.white, lineHeight: 1.2, marginBottom: 20 }}>
+          <h2 style={{ fontFamily: serif, fontSize: "clamp(26px, 3.4vw, 34px)", color: C.white, lineHeight: 1.25, marginBottom: 18 }}>
             Tell us what you are navigating. We will match you to the right practitioner.
           </h2>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.75, marginBottom: 32 }}>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "rgba(255,255,255,0.62)", lineHeight: 1.8, marginBottom: 28 }}>
             Every match is reviewed personally by our team. We do not auto-route. Each connection is considered against the practitioner's current focus areas and capacity.
           </p>
           <a
             href="mailto:hello@alignedwomanco.com?subject=Expert%20Connection%20Request"
             onClick={() => base44.analytics.track({ eventName: "matched_intro_click" })}
-            style={{ display: "inline-block", background: C.roseCore, color: C.burgDeep, borderRadius: 100, padding: "18px 40px", fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.14em", minHeight: 48, textDecoration: "none", lineHeight: "12px" }}
+            style={{ display: "inline-block", background: C.roseCore, color: C.white, borderRadius: 100, padding: "15px 34px", fontFamily: sans, fontWeight: 600, fontSize: 12, letterSpacing: "0.04em", minHeight: 46, textDecoration: "none", lineHeight: "16px" }}
           >
             Request a matched introduction +
           </a>
