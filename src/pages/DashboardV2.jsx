@@ -513,48 +513,85 @@ function DirectoryBand() {
       <SectionLabel>Trusted help, when you want it</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div
-          className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`}
+          className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8 min-h-[340px] flex flex-col justify-end`}
           style={{ background: "#F4E9E4" }}
         >
+          {/* Soft-focus mockup collage */}
+          <img
+            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/2053763ab_awb-verified-mockup-grid2.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          {/* Legibility wash over the mockup */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(90deg, #F4E9E4 0%, rgba(244,233,228,0.92) 45%, rgba(244,233,228,0.55) 100%)",
+            }}
+          />
           {/* AW Verified seal */}
           <img
             src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4e806aa77_aw-verified-badge.svg"
             alt="AW Verified"
-            className="absolute top-5 right-5 w-9 h-9"
+            className="absolute top-5 right-5 w-9 h-9 z-10"
           />
-          <Tag>Practitioners</Tag>
-          <h3 className="font-display text-awburg-core text-[20px] leading-tight mt-4 mb-3">
-            Find an AW Verified practitioner
-          </h3>
-          {/* "vetted" lives in this copy only, by design. */}
-          <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5">
-            Every AW Verified practitioner has been vetted by us, credentials, proof, and a
-            real conversation. Women you do not have to second-guess.
-          </p>
-          <Link to="/ExpertsDirectory" className={BTN_OUTLINE}>
-            Browse practitioners <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <div className="relative z-10">
+            <Tag>Practitioners</Tag>
+            <h3 className="font-display text-awburg-core text-[20px] leading-tight mt-4 mb-3">
+              Find an AW Verified practitioner
+            </h3>
+            {/* "vetted" lives in this copy only, by design. */}
+            <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5">
+              Every AW Verified practitioner has been vetted by us, credentials, proof, and a
+              real conversation. Women you do not have to second-guess.
+            </p>
+            <Link to="/ExpertsDirectory" className={BTN_OUTLINE}>
+              Browse practitioners <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
-        <div className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`} style={{ background: "#F4E9E4" }}>
+        <div
+          className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8 min-h-[340px] flex flex-col justify-end`}
+          style={{ background: "#F4E9E4" }}
+        >
+          {/* Soft-focus directory mockup */}
+          <img
+            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4c8c78821_awb-verified-two-up-v2.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          {/* Legibility wash over the mockup */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(90deg, #F4E9E4 0%, rgba(244,233,228,0.92) 45%, rgba(244,233,228,0.55) 100%)",
+            }}
+          />
           {/* AW Verified seal */}
           <img
             src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4e806aa77_aw-verified-badge.svg"
             alt="AW Verified"
-            className="absolute top-5 right-5 w-9 h-9"
+            className="absolute top-5 right-5 w-9 h-9 z-10"
           />
-          <Tag>Businesses</Tag>
-          <h3 className="font-display text-awburg-core text-[20px] leading-tight mt-4 mb-3">
-            Find an AW Verified business
-          </h3>
-          <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5">
-            Women-owned businesses we trust enough to put our name near. Find the ones doing
-            the work you need done.
-          </p>
-          {/* type=business is a forward param; the directory adopts it when
-              the business filter ships. Until then it lands on the directory. */}
-          <Link to="/ExpertsDirectory?type=business" className={BTN_OUTLINE}>
-            Browse businesses <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <div className="relative z-10">
+            <Tag>Businesses</Tag>
+            <h3 className="font-display text-awburg-core text-[20px] leading-tight mt-4 mb-3">
+              Find an AW Verified business
+            </h3>
+            <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5">
+              Women-owned businesses we trust enough to put our name near. Find the ones doing
+              the work you need done.
+            </p>
+            {/* type=business is a forward param; the directory adopts it when
+                the business filter ships. Until then it lands on the directory. */}
+            <Link to="/ExpertsDirectory?type=business" className={BTN_OUTLINE}>
+              Browse businesses <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
