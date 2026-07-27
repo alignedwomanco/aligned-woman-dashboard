@@ -1002,48 +1002,67 @@ export default function ExpertsDirectory() {
               );
             })}
 
-            {/* + MORE dropdown */}
+            {/* + MORE toggle. The panel it opens is rendered below the row,
+                not inside it, so the row can never clip it. */}
             {moreCategories.length > 0 && (
-              <div ref={moreRef} style={{ position: "relative" }}>
-                <button
-                  onClick={() => setShowMore(v => !v)}
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 4,
-                    background: moreCategories.includes(activeCategory) ? C.burgCore : "transparent",
-                    color: moreCategories.includes(activeCategory) ? C.white : C.burgCore,
-                    border: `1px solid ${moreCategories.includes(activeCategory) ? C.burgCore : "rgba(74,14,46,0.15)"}`,
-                    borderRadius: 100, padding: "8px 14px",
-                    fontFamily: sans, fontWeight: 500, fontSize: 11,
-                    textTransform: "uppercase", letterSpacing: "0.08em",
-                    minHeight: 40, cursor: "pointer", whiteSpace: "nowrap",
-                    transition: "background 0.2s, color 0.2s",
-                  }}
-                >
-                  {moreCategories.includes(activeCategory) ? activeCategory : "+ More"}
-                  <ChevronDown style={{ width: 13, height: 13, transform: showMore ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-                </button>
-                {showMore && (
-                  <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, background: C.white, border: "1px solid rgba(74,14,46,0.1)", borderRadius: 10, padding: "8px 0", minWidth: 220, boxShadow: "0 8px 28px rgba(74,14,46,0.12)", zIndex: 100 }}>
-                    {moreCategories.map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => handleFilter(cat)}
-                        style={{
-                          display: "block", width: "100%", textAlign: "left",
-                          padding: "10px 16px", background: activeCategory === cat ? C.rosePale : "transparent",
-                          border: "none", cursor: "pointer",
-                          fontFamily: sans, fontWeight: activeCategory === cat ? 600 : 400,
-                          fontSize: 12, color: C.burgCore,
-                        }}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <button
+                ref={moreBtnRef}
+                onClick={() => setShowMore((v) => !v)}
+                aria-expanded={showMore}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  background: moreCategories.includes(activeCategory) ? C.burgCore : "transparent",
+                  color: moreCategories.includes(activeCategory) ? C.white : C.burgCore,
+                  border: `1px solid ${moreCategories.includes(activeCategory) ? C.burgCore : "rgba(74,14,46,0.15)"}`,
+                  borderRadius: 100, padding: "8px 14px",
+                  fontFamily: sans, fontWeight: 500, fontSize: 11,
+                  textTransform: "uppercase", letterSpacing: "0.08em",
+                  minHeight: 40, cursor: "pointer", whiteSpace: "nowrap",
+                  transition: "background 0.2s, color 0.2s",
+                }}
+              >
+                {moreCategories.includes(activeCategory) ? activeCategory : "+ More"}
+                <ChevronDown style={{ width: 13, height: 13, transform: showMore ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+              </button>
             )}
           </div>
+
+          {/* The More panel. A wrapped block under the row rather than an
+              absolutely positioned dropdown, so it cannot be clipped and
+              cannot run off the right edge of a phone. Same pill treatment as
+              the row above, which also reads better on mobile than a narrow
+              list of twelve items. */}
+          {showMore && moreCategories.length > 0 && (
+            <div
+              ref={moreRef}
+              role="group"
+              aria-label="More specialties"
+              style={{ marginTop: 10, background: C.white, border: "1px solid rgba(74,14,46,0.1)", borderRadius: 14, padding: 12, display: "flex", flexWrap: "wrap", gap: 8, boxShadow: "0 8px 28px rgba(74,14,46,0.10)" }}
+            >
+              {moreCategories.map((cat) => {
+                const active = activeCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => handleFilter(cat)}
+                    aria-pressed={active}
+                    style={{
+                      background: active ? C.burgCore : "transparent",
+                      color: active ? C.white : C.burgCore,
+                      border: `1px solid ${active ? C.burgCore : "rgba(74,14,46,0.15)"}`,
+                      borderRadius: 100, padding: "8px 16px",
+                      fontFamily: sans, fontWeight: 500, fontSize: 11,
+                      textTransform: "uppercase", letterSpacing: "0.08em",
+                      minHeight: 40, cursor: "pointer", whiteSpace: "nowrap",
+                      transition: "background 0.2s, color 0.2s, border-color 0.2s",
+                    }}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* How they work. Second, because it filters the widest. Most people
               leave it on Either and never think about it again, which is
