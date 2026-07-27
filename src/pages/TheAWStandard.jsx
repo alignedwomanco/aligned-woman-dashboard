@@ -123,13 +123,7 @@ export default function TheAWStandard() {
             style={{ fontSize: 13, color: INK_SOFT }}
           >
             This is Version 1 of the Standard. We review it annually, and when it changes,
-            every Verified practitioner is held to the new version at her next renewal.{" "}
-            <span
-              className="font-bold underline underline-offset-2"
-              style={{ color: INK }}
-            >
-              Download the Standard in full (PDF)
-            </span>
+            every Verified practitioner is held to the new version at her next renewal.
           </p>
           <div className="flex items-center gap-5 flex-wrap">
             <AWSeal size={132} />
