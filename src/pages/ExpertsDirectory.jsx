@@ -1093,7 +1093,7 @@ export default function ExpertsDirectory() {
               ref={moreRef}
               role="group"
               aria-label="More specialties"
-              style={{ marginTop: 10, background: C.white, border: "1px solid rgba(74,14,46,0.1)", borderRadius: 14, padding: 12, display: "flex", flexWrap: "wrap", gap: 8, boxShadow: "0 8px 28px rgba(74,14,46,0.10)" }}
+              style={{ marginTop: 10, background: C.white, border: "1px solid rgba(74,14,46,0.1)", borderRadius: 14, padding: 12, display: "flex", flexWrap: "wrap", gap: 8, boxShadow: "0 8px 28px rgba(74,14,46,0.10)", maxWidth: "100%", boxSizing: "border-box", overflow: "hidden" }}
             >
               {moreCategories.map((cat) => {
                 const active = activeCategory === cat;
@@ -1109,7 +1109,8 @@ export default function ExpertsDirectory() {
                       borderRadius: 100, padding: "8px 16px",
                       fontFamily: sans, fontWeight: 500, fontSize: 11,
                       textTransform: "uppercase", letterSpacing: "0.08em",
-                      minHeight: 40, cursor: "pointer", whiteSpace: "nowrap",
+                      lineHeight: 1.3, minHeight: 40, cursor: "pointer",
+                      maxWidth: "100%", whiteSpace: "normal", textAlign: "center",
                       transition: "background 0.2s, color 0.2s, border-color 0.2s",
                     }}
                   >
