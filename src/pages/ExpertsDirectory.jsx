@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
-import { X, Search, ChevronDown, Pencil, MapPin, Video, Check } from "lucide-react";
+import { X, Search, ChevronDown, Pencil, MapPin, Video } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
 const C = {
