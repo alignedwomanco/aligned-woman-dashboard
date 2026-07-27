@@ -60,6 +60,16 @@ const DELIVERY_OPTIONS = [
   { value: "in_person", label: "In person" },
 ];
 
+const FILTER_EYEBROW = {
+  fontFamily: sans,
+  fontWeight: 600,
+  fontSize: 9,
+  textTransform: "uppercase",
+  letterSpacing: "0.22em",
+  color: C.midGrey,
+  margin: "0 0 8px",
+};
+
 // Fallback credential chips derived from title
 function credentialsFromTitle(title) {
   if (!title) return [];
