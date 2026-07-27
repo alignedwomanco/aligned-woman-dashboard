@@ -691,6 +691,7 @@ export default function ExpertsDirectory() {
   const locationRef = useRef(null);
   const [showMore, setShowMore] = useState(false);
   const moreRef = useRef(null);
+  const moreBtnRef = useRef(null);
   const [modal, setModal] = useState(null);
   const [applyOpen, setApplyOpen] = useState(false);
   const navigate = useNavigate();
@@ -721,7 +722,7 @@ export default function ExpertsDirectory() {
   // Close "more" dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (moreRef.current && !moreRef.current.contains(e.target)) setShowMore(false);
+      if (moreRef.current && !moreRef.current.contains(e.target) && moreBtnRef.current && !moreBtnRef.current.contains(e.target)) setShowMore(false);
       if (locationRef.current && !locationRef.current.contains(e.target)) setLocationOpen(false);
     };
     document.addEventListener("mousedown", handler);
@@ -960,12 +961,15 @@ export default function ExpertsDirectory() {
               compromise on location and format before she compromises on the
               person knowing what she is talking about. */}
           <p style={FILTER_EYEBROW}>Specialty</p>
-          {/* Category pills */}
+          {/* Category pills. overflowX is deliberately not set on this row. It
+              wraps, so it can never overflow horizontally, and any overflow
+              value other than visible clips an absolutely positioned child in
+              both axes. That is what hid the More panel on desktop. */}
           <div
             role="tablist"
             aria-label="Filter by category"
             className="filter-scroll"
-            style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "wrap", alignItems: "center" }}
+            style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}
           >
             {/* ALL pill */}
             {["ALL", ...pinnedAvailable].map((cat) => {
