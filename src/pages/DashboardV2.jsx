@@ -480,7 +480,10 @@ function LearningCardFree() {
           The education you should have been given. Five phases, taught by women who have
           lived them, at your own pace, yours for life.
         </p>
-        <Link to={createPageUrl("BlueprintPage")} className={BTN_OUTLINE_DARK}>
+        {/* The sales page route is registered lowercase as "/blueprint" in App.jsx.
+            createPageUrl("BlueprintPage") returns "/BlueprintPage", which matches
+            no route and falls through to the 404. Link to the registered path. */}
+        <Link to="/blueprint" className={BTN_OUTLINE_DARK}>
           Explore the Blueprint <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
