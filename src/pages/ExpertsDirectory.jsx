@@ -1040,6 +1040,76 @@ export default function ExpertsDirectory() {
               </div>
             )}
           </div>
+
+          {/* How they work. Second, because it filters the widest. Most people
+              leave it on Either and never think about it again, which is
+              exactly what a good default does. */}
+          <p style={{ ...FILTER_EYEBROW, marginTop: 18 }}>How they work</p>
+          <div className="filter-scroll" style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "wrap", alignItems: "center" }}>
+            {DELIVERY_OPTIONS.map((opt) => {
+              const active = deliveryFilter === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setDeliveryFilter(opt.value);
+                    base44.analytics.track({ eventName: "filter_change", properties: { delivery: opt.value } });
+                  }}
+                  aria-pressed={active}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, background: active ? C.burgCore : "transparent", color: active ? C.white : C.burgCore, border: `1px solid ${active ? C.burgCore : "rgba(74,14,46,0.15)"}`, borderRadius: 100, padding: "8px 16px", fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", minHeight: 40, cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.2s, color 0.2s, border-color 0.2s" }}
+                >
+                  {opt.value === "online" && <Video style={{ width: 12, height: 12 }} aria-hidden="true" />}
+                  {opt.value === "in_person" && <MapPin style={{ width: 12, height: 12 }} aria-hidden="true" />}
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Location. Last and deliberately small. A 340px field, not a full
+              width bar, because a full width input reads as a primary action
+              and this is a refinement. The width communicates the rank. */}
+          <p style={{ ...FILTER_EYEBROW, marginTop: 18 }}>Location</p>
+          <div ref={locationRef} style={{ position: "relative", maxWidth: 340 }}>
+            <MapPin style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 15, height: 15, color: C.midGrey, pointerEvents: "none" }} aria-hidden="true" />
+            <input
+              type="text"
+              value={locationQuery}
+              onChange={(e) => { setLocationQuery(e.target.value); setLocationFilter(""); setLocationOpen(true); }}
+              onFocus={() => setLocationOpen(true)}
+              placeholder="City, country or region"
+              aria-label="Filter by location"
+              style={{ width: "100%", height: 42, paddingLeft: 40, paddingRight: locationQuery ? 40 : 14, background: C.white, border: "1px solid rgba(74,14,46,0.12)", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none" }}
+            />
+            {locationQuery && (
+              <button
+                onClick={() => { setLocationFilter(""); setLocationQuery(""); setLocationOpen(false); }}
+                aria-label="Clear location"
+                style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4, lineHeight: 0 }}
+              >
+                <X style={{ width: 14, height: 14, color: C.midGrey }} />
+              </button>
+            )}
+            {locationOpen && locationSuggestions.length > 0 && (
+              <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, background: C.white, border: "1px solid rgba(74,14,46,0.1)", borderRadius: 10, padding: "6px 0", boxShadow: "0 8px 28px rgba(74,14,46,0.12)", zIndex: 120, maxHeight: 260, overflowY: "auto" }}>
+                {locationSuggestions.map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => {
+                      setLocationFilter(loc);
+                      setLocationQuery(loc);
+                      setLocationOpen(false);
+                      base44.analytics.track({ eventName: "filter_change", properties: { location: loc } });
+                    }}
+                    style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 16px", background: locationFilter === loc ? C.rosePale : "transparent", border: "none", cursor: "pointer", fontFamily: sans, fontWeight: locationFilter === loc ? 600 : 400, fontSize: 12, color: C.burgCore }}
+                  >
+                    <MapPin style={{ width: 12, height: 12, color: C.roseCore }} aria-hidden="true" />
+                    {loc}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
