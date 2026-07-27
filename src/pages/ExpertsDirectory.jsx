@@ -934,7 +934,7 @@ export default function ExpertsDirectory() {
               type="text"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Search by name, specialty, or topic..."
+              placeholder="Search by name, specialty, or city..."
               style={{ width: "100%", height: 44, paddingLeft: 42, paddingRight: searchText ? 42 : 14, background: C.white, border: "1px solid rgba(74,14,46,0.12)", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none" }}
               onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.12)"; }}
               onBlur={(e) => { e.target.style.borderColor = "rgba(74,14,46,0.12)"; e.target.style.boxShadow = "none"; }}
@@ -946,6 +946,10 @@ export default function ExpertsDirectory() {
             )}
           </div>
 
+          {/* Specialty. First, because it is the only non-negotiable. She will
+              compromise on location and format before she compromises on the
+              person knowing what she is talking about. */}
+          <p style={FILTER_EYEBROW}>Specialty</p>
           {/* Category pills */}
           <div
             role="tablist"
@@ -954,7 +958,7 @@ export default function ExpertsDirectory() {
             style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "wrap", alignItems: "center" }}
           >
             {/* ALL pill */}
-            {["ALL", ...PINNED_CATEGORIES].map((cat) => {
+            {["ALL", ...pinnedAvailable].map((cat) => {
               const active = activeCategory === cat;
               return (
                 <button
