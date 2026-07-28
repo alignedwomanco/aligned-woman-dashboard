@@ -1,31 +1,46 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { Linkedin, Instagram, Globe, Mail, MapPin, Video, Check, ArrowRight } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Shield, Check, Linkedin, Instagram, Globe, Mail, ChevronLeft, ArrowRight, Pencil } from "lucide-react";
+import { createPageUrl } from "@/utils";
+import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 
-// ─── DESIGN TOKENS ───
+// ────────────────────────────────────────────────────────────────
+// Expert profile · the end of the directory journey and the start of a
+// working relationship. Everything answers one question: is she qualified,
+// and how do I reach her? Credibility first, contact second, discovery last.
+//
+// This page sits behind ProtectedRoute. Nothing in the directory is public.
+// ────────────────────────────────────────────────────────────────
+
 const C = {
-  burgDeep: "#0E0208",
-  burgCore: "#4A0E2E",
-  burgMid: "#6B1642",
-  roseCore: "#C4847A",
-  roseLight: "#E8B4AE",
-  rosePale: "#F5DDD9",
-  roseWash: "#FDF5F3",
-  offWhite: "#FAF5F3",
-  white: "#FFFFFF",
-  midGrey: "#8A7A76",
-  darkGrey: "#3A2A28",
+  burg: "#4A0E2E",
+  rose: "#C4847A",
+  roseDeep: "#A86460",
+  roseSoft: "#E9B7AC",
+  ink: "#2B1220",
+  meta: "#92707D",
+  onDark: "#F8ECE7",
 };
 
+const GLASS = "rgba(255,255,255,0.42)";
+const GLASS_HOVER = "rgba(255,255,255,0.58)";
+const DARK_PANEL = "rgba(40,8,24,0.58)";
+const CARD_SHADOW = "0 20px 50px rgba(74,14,46,0.09), inset 0 1px 0 rgba(255,255,255,0.55)";
+const EASE = "320ms cubic-bezier(0.2,0.7,0.2,1)";
+
 const serif = "'DM Serif Display', Georgia, serif";
-const sans = "Montserrat, sans-serif";
+const sans = "'Montserrat', system-ui, sans-serif";
 
-// The Blueprint is the only course with a public marketing page for now.
-const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
+const SEAL_IMAGE_URL =
+  "https://media.base44.com/images/public/69f46886a412ee042303f1af/c01141aed_aw-verified-seal.png";
 
+// Domain label per category id. The record carries an array, and the first
+// non-Founder entry is the one that prints. Indexing this map with the raw
+// array returns undefined, which is what made every profile read "Identity &
+// Visibility" regardless of who it was.
 const CATEGORY_DOMAIN_MAP = {
   "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
   "69f48a8d1e94ea01a3a8c3fa": "Nervous System",
@@ -36,47 +51,69 @@ const CATEGORY_DOMAIN_MAP = {
   "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
 };
 
+const DELIVERY_LABELS = {
+  online: ["Online"],
+  in_person: ["In person"],
+  both: ["In person", "Online"],
+};
+
+function resolveDomain(expert) {
+  if (!expert) return "";
+  const ids = Array.isArray(expert.category) ? expert.category : expert.category ? [expert.category] : [];
+  return ids.map((id) => CATEGORY_DOMAIN_MAP[id]).find(Boolean) || "";
+}
+
 function slugify(name) {
-  return name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "";
+  return (name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
 }
 
-function Initials({ name, size = 72 }) {
-  const parts = (name || "").split(" ");
-  const initials = (parts[0]?.[0] || "") + (parts[1]?.[0] || "");
-  return (
-    <div style={{ width: size, height: size, borderRadius: "50%", background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-      <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: size * 0.28, color: C.burgCore }}>{initials.toUpperCase()}</span>
-    </div>
-  );
+function initials(name) {
+  return (name || "")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2);
 }
 
-// ─── MINI EXPERT CARD (for "Other Experts") ───
-function MiniExpertCard({ expert }) {
-  const slug = slugify(expert.name);
-  const domain = CATEGORY_DOMAIN_MAP[expert.category] || "Identity & Visibility";
-
+// ─── AW VERIFIED MARK ───
+// The full starburst seal is used at hero scale. This is the compact form for
+// inline use, where the wordmark inside the seal would be illegible.
+function VerifiedMark({ onDark = false }) {
+  const fg = onDark ? C.onDark : C.burg;
   return (
-    <div style={{ background: C.white, border: "1px solid rgba(74,14,46,0.07)", borderRadius: 8, padding: 24, minWidth: 260, maxWidth: 300, flexShrink: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-      <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-        <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {expert.profile_picture
-            ? <img src={expert.profile_picture} alt={`${expert.name}, expert at The Aligned Woman Co`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <Initials name={expert.name} size={56} />}
-        </div>
-        <div>
-          <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 8, textTransform: "uppercase", letterSpacing: "0.2em", color: C.roseCore, display: "block", marginBottom: 3 }}>{domain}</span>
-          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 13, color: C.burgCore, margin: 0, lineHeight: 1.3 }}>{expert.name}</p>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 11, color: C.midGrey, margin: "2px 0 0" }}>{expert.title}</p>
-        </div>
-      </div>
-      {expert.bio && <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.darkGrey, lineHeight: 1.65, margin: 0, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{expert.bio}</p>}
-      <Link
-        to={`/experts/${slug}`}
-        style={{ display: "inline-block", textAlign: "center", background: C.burgCore, color: C.white, borderRadius: 100, padding: "10px 16px", fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", textDecoration: "none", marginTop: "auto", minHeight: 40, lineHeight: "20px" }}
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <span
+        aria-hidden="true"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 15,
+          height: 15,
+          borderRadius: "50%",
+          background: onDark ? "rgba(248,236,231,0.9)" : C.burg,
+          flexShrink: 0,
+        }}
       >
-        View Profile
-      </Link>
-    </div>
+        <Check style={{ width: 9, height: 9, color: onDark ? C.burg : "#FFFFFF" }} strokeWidth={3} />
+      </span>
+      <span
+        style={{
+          fontFamily: sans,
+          fontWeight: 700,
+          fontSize: 10,
+          textTransform: "uppercase",
+          letterSpacing: "0.18em",
+          color: fg,
+        }}
+      >
+        AW Verified
+      </span>
+    </span>
   );
 }
 
@@ -89,8 +126,6 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
   const [sendError, setSendError] = useState("");
 
   const firstName = expertName?.split(" ")[0] || "there";
-  // Route to the expert's own contact email, falling back to their linked
-  // login email, and only to the company as a last resort if neither exists.
   const recipient = (expertEmail || "hello@alignedwomanco.com").trim();
 
   const validate = () => {
@@ -106,7 +141,10 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
   const handleSubmit = async (ev) => {
     ev.preventDefault();
     const e = validate();
-    if (Object.keys(e).length) { setErrors(e); return; }
+    if (Object.keys(e).length) {
+      setErrors(e);
+      return;
+    }
     setSending(true);
     setSendError("");
     try {
@@ -121,148 +159,234 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
           `Message:\n${form.message}\n\n` +
           `Reply directly to ${form.email} to respond.`,
       });
-      base44.analytics.track({ eventName: "expert_profile_connection_request", properties: { expert: expertName } });
+      base44.analytics.track({
+        eventName: "expert_profile_connection_request",
+        properties: { expert: expertName },
+      });
       setSubmitted(true);
     } catch (err) {
-      setSendError("We could not send your message just now. Please try again, or email hello@alignedwomanco.com directly.");
+      setSendError(
+        "We could not send your message just now. Please try again, or email hello@alignedwomanco.com directly."
+      );
     } finally {
       setSending(false);
     }
   };
 
+  const labelStyle = {
+    display: "block",
+    fontFamily: sans,
+    fontWeight: 700,
+    fontSize: 10.5,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: C.burg,
+    marginBottom: 8,
+  };
+
   const inputStyle = (hasError) => ({
     width: "100%",
-    height: 48,
-    background: C.white,
-    border: `1px solid ${hasError ? C.roseCore : "rgba(74,14,46,0.15)"}`,
-    borderRadius: 6,
-    padding: "0 16px",
+    background: "rgba(255,255,255,0.65)",
+    border: `1px solid ${hasError ? C.roseDeep : "rgba(74,14,46,0.18)"}`,
+    borderRadius: 14,
+    padding: "13px 16px",
     fontFamily: sans,
     fontWeight: 400,
-    fontSize: 14,
-    color: C.darkGrey,
+    fontSize: 13,
+    color: C.ink,
     boxSizing: "border-box",
     outline: "none",
+    transition: `border-color ${EASE}`,
   });
 
+  const errorStyle = {
+    fontFamily: sans,
+    fontWeight: 500,
+    fontSize: 11,
+    color: C.roseDeep,
+    margin: "6px 0 0",
+  };
+
+  if (submitted) {
+    return (
+      <section ref={formRef} id="connect" className="aw-card" style={{ padding: "56px 40px", textAlign: "center" }}>
+        <p style={{ fontFamily: serif, fontSize: 26, color: C.burg, margin: "0 0 10px" }}>Message sent.</p>
+        <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.ink, opacity: 0.82, margin: 0 }}>
+          {firstName} will be in touch with you directly.
+        </p>
+      </section>
+    );
+  }
+
   return (
-    <section ref={formRef} id="connect" style={{ background: C.offWhite, padding: "80px 32px" }}>
-      <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-        {/* Header - centred above form */}
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 16 }}>Connect</p>
-          <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 32, color: C.burgCore, lineHeight: 1.2, margin: "0 0 16px" }}>Get in touch.</h2>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, margin: 0 }}>
+    <section ref={formRef} id="connect" className="aw-card aw-card--orb" style={{ padding: "56px 40px" }}>
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <p
+            style={{
+              fontFamily: sans,
+              fontWeight: 700,
+              fontSize: 10.5,
+              textTransform: "uppercase",
+              letterSpacing: "0.2em",
+              color: C.rose,
+              margin: "0 0 12px",
+            }}
+          >
+            Connect
+          </p>
+          <h2 style={{ fontFamily: serif, fontSize: 30, color: C.burg, lineHeight: 1.2, margin: "0 0 10px" }}>
+            Get in touch.
+          </h2>
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12.5, color: C.meta, margin: 0 }}>
             Send a message directly to {expertName}.
           </p>
         </div>
 
-        {/* Form */}
-        <div style={{ background: C.white, borderRadius: 12, padding: 32, boxShadow: "0 4px 20px rgba(74,14,46,0.06)", maxWidth: 600, margin: "0 auto" }}>
-          {submitted ? (
-            <div style={{ textAlign: "center", padding: "24px 0" }}>
-              <div style={{ width: 56, height: 56, borderRadius: "50%", background: C.rosePale, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-                <Check size={24} style={{ color: C.roseCore }} />
-              </div>
-              <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.burgCore, marginBottom: 12 }}>Message sent.</p>
-              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 1.8, marginBottom: 20 }}>
-                Your message has been sent to {expertName}.
-              </p>
-              <Link to="/ExpertsDirectory" style={{ fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em", color: C.roseCore, textDecoration: "none" }}>
-                ← Return to all experts
-              </Link>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {/* Name */}
-              <div>
-                <label style={{ display: "block", fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, marginBottom: 6 }}>
-                  Your full name <span style={{ color: C.roseCore }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Your name"
-                  value={form.name}
-                  onChange={(e) => { setForm(f => ({ ...f, name: e.target.value })); setErrors(er => ({ ...er, name: undefined })); }}
-                  style={inputStyle(errors.name)}
-                  onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.12)"; }}
-                  onBlur={(e) => { e.target.style.borderColor = errors.name ? C.roseCore : "rgba(74,14,46,0.15)"; e.target.style.boxShadow = "none"; }}
-                />
-                {errors.name && <p style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.name}</p>}
-              </div>
-              {/* Email */}
-              <div>
-                <label style={{ display: "block", fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, marginBottom: 6 }}>
-                  Email address <span style={{ color: C.roseCore }}>*</span>
-                </label>
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={(e) => { setForm(f => ({ ...f, email: e.target.value })); setErrors(er => ({ ...er, email: undefined })); }}
-                  style={inputStyle(errors.email)}
-                  onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.12)"; }}
-                  onBlur={(e) => { e.target.style.borderColor = errors.email ? C.roseCore : "rgba(74,14,46,0.15)"; e.target.style.boxShadow = "none"; }}
-                />
-                {errors.email && <p style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.email}</p>}
-              </div>
-              {/* Regarding */}
-              <div>
-                <label style={{ display: "block", fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, marginBottom: 6 }}>
-                  What is this regarding? <span style={{ color: C.roseCore }}>*</span>
-                </label>
-                <select
-                  value={form.regarding}
-                  onChange={(e) => { setForm(f => ({ ...f, regarding: e.target.value })); setErrors(er => ({ ...er, regarding: undefined })); }}
-                  style={{ ...inputStyle(errors.regarding), appearance: "none", cursor: "pointer" }}
-                  onFocus={(e) => { e.target.style.borderColor = C.roseCore; }}
-                  onBlur={(e) => { e.target.style.borderColor = errors.regarding ? C.roseCore : "rgba(74,14,46,0.15)"; }}
-                >
-                  <option value="">Select a reason</option>
-                  <option value="Professional consultation">Professional consultation</option>
-                  <option value="Speaking or media enquiry">Speaking or media enquiry</option>
-                  <option value="Collaboration opportunity">Collaboration opportunity</option>
-                  <option value="Programme-related question">Programme-related question</option>
-                  <option value="Other">Other</option>
-                </select>
-                {errors.regarding && <p style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.regarding}</p>}
-              </div>
-              {/* Message */}
-              <div>
-                <label style={{ display: "block", fontFamily: sans, fontWeight: 500, fontSize: 11, color: C.burgCore, marginBottom: 6 }}>
-                  Your message <span style={{ color: C.roseCore }}>*</span>
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder={`Your message to ${expertName}...`}
-                  value={form.message}
-                  onChange={(e) => { setForm(f => ({ ...f, message: e.target.value })); setErrors(er => ({ ...er, message: undefined })); }}
-                  style={{ width: "100%", background: C.white, border: `1px solid ${errors.message ? C.roseCore : "rgba(74,14,46,0.15)"}`, borderRadius: 6, padding: "12px 16px", fontFamily: sans, fontWeight: 400, fontSize: 14, color: C.darkGrey, boxSizing: "border-box", outline: "none", resize: "vertical" }}
-                  onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.12)"; }}
-                  onBlur={(e) => { e.target.style.borderColor = errors.message ? C.roseCore : "rgba(74,14,46,0.15)"; e.target.style.boxShadow = "none"; }}
-                />
-                {errors.message && <p style={{ fontFamily: sans, fontSize: 11, color: C.roseCore, marginTop: 4 }}>{errors.message}</p>}
-              </div>
-              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 11, color: C.midGrey, lineHeight: 1.6 }}>
-                Your message will be shared with {expertName} directly.
-              </p>
-              {sendError && (
-                <p role="alert" style={{ fontFamily: sans, fontSize: 12, color: C.roseCore, lineHeight: 1.6 }}>
-                  {sendError}
-                </p>
-              )}
-              <button
-                type="submit"
-                disabled={sending}
-                style={{ width: "100%", height: 48, background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, fontFamily: sans, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", cursor: sending ? "default" : "pointer", opacity: sending ? 0.7 : 1 }}
-              >
-                {sending ? "Sending..." : "Send Message"}
-              </button>
-            </form>
-          )}
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ marginBottom: 20 }}>
+            <label htmlFor="cf-name" style={labelStyle}>Your full name</label>
+            <input
+              id="cf-name"
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Your name"
+              style={inputStyle(!!errors.name)}
+            />
+            {errors.name && <p style={errorStyle}>{errors.name}</p>}
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label htmlFor="cf-email" style={labelStyle}>Email address</label>
+            <input
+              id="cf-email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="you@example.com"
+              style={inputStyle(!!errors.email)}
+            />
+            {errors.email && <p style={errorStyle}>{errors.email}</p>}
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label htmlFor="cf-regarding" style={labelStyle}>What is this regarding?</label>
+            <select
+              id="cf-regarding"
+              value={form.regarding}
+              onChange={(e) => setForm({ ...form, regarding: e.target.value })}
+              style={inputStyle(!!errors.regarding)}
+            >
+              <option value="">Select a reason</option>
+              <option value="Working together">Working together</option>
+              <option value="A speaking or media request">A speaking or media request</option>
+              <option value="A question about her work">A question about her work</option>
+              <option value="Something else">Something else</option>
+            </select>
+            {errors.regarding && <p style={errorStyle}>{errors.regarding}</p>}
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label htmlFor="cf-message" style={labelStyle}>Your message</label>
+            <textarea
+              id="cf-message"
+              rows={5}
+              value={form.message}
+              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              placeholder={`Your message to ${expertName}...`}
+              style={{ ...inputStyle(!!errors.message), height: "auto", resize: "vertical" }}
+            />
+            {errors.message && <p style={errorStyle}>{errors.message}</p>}
+          </div>
+
+          {/* Reassurance sits above the action, never below it. */}
+          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 11.5, color: C.meta, margin: "0 0 18px" }}>
+            Your message will be shared with {expertName} directly.
+          </p>
+
+          {sendError && <p style={{ ...errorStyle, marginBottom: 14 }}>{sendError}</p>}
+
+          <button type="button" onClick={handleSubmit} disabled={sending} className="aw-btn aw-btn--filled">
+            {sending ? "Sending..." : "Send message"}
+            <ArrowRight style={{ width: 13, height: 13 }} />
+          </button>
         </div>
       </div>
     </section>
+  );
+}
+
+// ─── FACULTY CARD ───
+function FacultyCard({ person }) {
+  const domain = resolveDomain(person);
+  return (
+    <Link to={`/experts/${slugify(person.name)}`} className="aw-faculty" style={{ textDecoration: "none" }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 14 }}>
+        <div
+          aria-hidden="true"
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: "50%",
+            flexShrink: 0,
+            background: `linear-gradient(135deg, ${C.rose}, ${C.burg})`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+          }}
+        >
+          {person.profile_picture ? (
+            <img src={person.profile_picture} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <span style={{ fontFamily: serif, fontSize: 14, color: "#FFFFFF" }}>{initials(person.name)}</span>
+          )}
+        </div>
+        <div style={{ minWidth: 0 }}>
+          {domain && (
+            <span
+              style={{
+                display: "block",
+                fontFamily: sans,
+                fontWeight: 700,
+                fontSize: 9,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: C.rose,
+                marginBottom: 4,
+              }}
+            >
+              {domain}
+            </span>
+          )}
+          <div style={{ marginBottom: 4 }}>
+            <VerifiedMark />
+          </div>
+          <h3
+            className="aw-clamp-2"
+            style={{ fontFamily: serif, fontWeight: 400, fontSize: 17, color: C.burg, lineHeight: 1.2, margin: 0 }}
+          >
+            {person.name}
+          </h3>
+        </div>
+      </div>
+      <p
+        className="aw-clamp-2"
+        style={{ fontFamily: sans, fontWeight: 600, fontSize: 11.5, color: C.rose, lineHeight: 1.45, margin: "0 0 10px" }}
+      >
+        {person.title}
+      </p>
+      <p
+        className="aw-clamp-3"
+        style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.ink, opacity: 0.82, lineHeight: 1.65, margin: "0 0 18px" }}
+      >
+        {person.bio}
+      </p>
+      <span className="aw-btn aw-btn--outline" style={{ pointerEvents: "none" }}>
+        View profile
+      </span>
+    </Link>
   );
 }
 
@@ -271,13 +395,6 @@ export default function ExpertProfile() {
   const { slug } = useParams();
   const formRef = useRef(null);
   const { user } = useAuth();
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
-  }, []);
-
-  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "owner";
 
   const { data: allExperts = [], isLoading } = useQuery({
     queryKey: ["all-experts-profile"],
@@ -289,13 +406,12 @@ export default function ExpertProfile() {
     queryFn: () => base44.entities.Course.list(),
   });
 
-  const expert = allExperts.find(e => slugify(e.name) === slug) || null;
-  const otherExperts = allExperts.filter(e => slugify(e.name) !== slug).slice(0, 4);
+  const expert = allExperts.find((e) => slugify(e.name) === slug) || null;
+  const otherExperts = allExperts.filter((e) => slugify(e.name) !== slug).slice(0, 3);
 
-  const domain = expert ? (CATEGORY_DOMAIN_MAP[expert.category] || "Identity & Visibility") : "";
+  const domain = resolveDomain(expert);
   const firstName = expert?.name?.split(" ")[0] || "";
 
-  // Scroll to form
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -303,356 +419,466 @@ export default function ExpertProfile() {
   useEffect(() => {
     if (expert) {
       base44.analytics.track({ eventName: "view_expert_profile", properties: { expert: expert.name } });
-      document.title = `${expert.name} | ${domain} Expert | The Aligned Woman Co`;
+      document.title = `${expert.name} | The Aligned Woman Co`;
     }
-  }, [expert, domain]);
+  }, [expert]);
+
+  const pageStyles = (
+    <style>{`
+      .aw-profile {
+        background: linear-gradient(168deg, #F6EEEA 0%, #EEDAD3 30%, #E9D3CD 55%, #F1E3DD 80%, #F8F1ED 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+      }
+      .aw-orb { position: fixed; z-index: 0; pointer-events: none; border-radius: 50%; }
+      .aw-orb--haze { top: -220px; left: -180px; width: 760px; height: 760px;
+        background: radial-gradient(circle, rgba(233,183,172,0.55), rgba(233,183,172,0)); filter: blur(120px); }
+      .aw-orb--sphere { top: 44%; right: -160px; width: 680px; height: 680px; opacity: 0.38;
+        background: radial-gradient(circle, ${C.rose}, rgba(196,132,122,0)); filter: blur(28px); }
+      .aw-orb--burg { bottom: -160px; left: -120px; width: 540px; height: 540px;
+        background: radial-gradient(circle, rgba(74,14,46,0.35), rgba(74,14,46,0)); filter: blur(110px); }
+
+      .aw-card {
+        position: relative;
+        background: ${GLASS};
+        backdrop-filter: blur(32px);
+        -webkit-backdrop-filter: blur(32px);
+        border-radius: 36px;
+        box-shadow: ${CARD_SHADOW};
+        transition: background ${EASE};
+      }
+      .aw-card:hover { background: ${GLASS_HOVER}; }
+      .aw-card--orb { overflow: hidden; }
+      .aw-card--orb::before {
+        content: ""; position: absolute; top: -140px; right: -120px;
+        width: 460px; height: 460px; border-radius: 50%; z-index: 0; pointer-events: none;
+        background: radial-gradient(circle, rgba(196,132,122,0.34), rgba(196,132,122,0));
+        filter: blur(40px);
+      }
+
+      .aw-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        border-radius: 999px; font-family: ${sans}; font-weight: 600; font-size: 12.5px;
+        padding: 13px 26px; cursor: pointer; border: none; text-decoration: none;
+        transition: background ${EASE}, color ${EASE}, transform ${EASE}, border-color ${EASE};
+      }
+      .aw-btn:active { transform: scale(0.96); }
+      .aw-btn--filled { background: ${C.rose}; color: #FFFFFF; }
+      .aw-btn--filled:hover { background: ${C.roseDeep}; }
+      .aw-btn--filled:disabled { opacity: 0.6; cursor: default; }
+      .aw-btn--outline { background: transparent; color: ${C.burg}; border: 1.5px solid rgba(74,14,46,0.35); }
+      .aw-btn--outline:hover { background: ${C.burg}; color: #FFFFFF; border-color: ${C.burg}; }
+      .aw-btn--on-dark { background: transparent; color: ${C.onDark}; border: 1px solid rgba(255,255,255,0.4); }
+      .aw-btn--on-dark:hover { background: rgba(255,255,255,0.12); }
+
+      .aw-social {
+        width: 38px; height: 38px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid rgba(255,255,255,0.28); color: ${C.onDark};
+        transition: background ${EASE};
+      }
+      .aw-social:hover { background: rgba(255,255,255,0.16); }
+
+      .aw-fact {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.28);
+        border-radius: 999px; padding: 7px 14px;
+        font-family: ${sans}; font-weight: 500; font-size: 11.5px; color: ${C.onDark};
+      }
+
+      .aw-chip {
+        display: inline-block; background: rgba(255,255,255,0.55);
+        border-radius: 999px; padding: 8px 16px;
+        font-family: ${sans}; font-weight: 600; font-size: 10.5px; color: ${C.burg};
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+      }
+
+      .aw-faculty {
+        display: block; background: ${GLASS}; backdrop-filter: blur(32px);
+        -webkit-backdrop-filter: blur(32px); border-radius: 28px; padding: 26px;
+        box-shadow: 0 10px 28px rgba(74,14,46,0.06), inset 0 1px 0 rgba(255,255,255,0.55);
+        transition: background ${EASE};
+      }
+      .aw-faculty:hover { background: ${GLASS_HOVER}; }
+
+      .aw-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .aw-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+      .aw-stack > * + * { margin-top: 96px; }
+      .aw-hero-grid { display: grid; grid-template-columns: 210px 1fr; gap: 36px; align-items: center; }
+      .aw-services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      .aw-faculty-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+      *:focus-visible { outline: 2px solid ${C.roseDeep} !important; outline-offset: 3px !important; }
+
+      @media (max-width: 1100px) {
+        .aw-faculty-grid { grid-template-columns: repeat(2, 1fr); }
+        .aw-services { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 980px) {
+        .aw-stack > * + * { margin-top: 56px; }
+        .aw-hero-grid { grid-template-columns: 1fr; text-align: left; }
+        .aw-faculty-grid { grid-template-columns: 1fr; }
+        .aw-card { border-radius: 28px; }
+      }
+      @media (max-width: 700px) {
+        .aw-btn { padding: 14px 22px; }
+        .aw-social { width: 44px; height: 44px; }
+      }
+    `}</style>
+  );
 
   if (isLoading) {
     return (
-      <div style={{ minHeight: "100vh", background: C.offWhite, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.midGrey }}>Loading…</div>
+      <div className="aw-profile" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {pageStyles}
+        <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.meta }}>Loading...</p>
       </div>
     );
   }
 
   if (!expert) {
     return (
-      <div style={{ minHeight: "100vh", background: C.offWhite, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
-        <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 28, color: C.burgCore }}>Expert not found.</p>
-        <Link to="/ExpertsDirectory" style={{ fontFamily: sans, fontWeight: 500, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", color: C.roseCore, textDecoration: "none" }}>← Back to all experts</Link>
+      <div
+        className="aw-profile"
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}
+      >
+        {pageStyles}
+        <p style={{ fontFamily: serif, fontSize: 28, color: C.burg }}>Expert not found.</p>
+        <Link to={createPageUrl("ExpertsDirectory")} className="aw-btn aw-btn--outline">
+          Back to all experts
+        </Link>
       </div>
     );
   }
 
-  // Parse tags from title
-  const titleTags = (expert.title || "").split("|").map(s => s.trim()).filter(Boolean);
-
-  // Social links - only shown if present (we use specialties array as a place to store them, or fallback fields)
   const socials = [];
-  if (expert.linkedin_url) socials.push({ icon: <Linkedin size={18} />, href: expert.linkedin_url, label: `View ${expert.name}'s LinkedIn profile` });
-  if (expert.instagram_url) socials.push({ icon: <Instagram size={18} />, href: expert.instagram_url, label: `View ${expert.name}'s Instagram` });
-  if (expert.website_url) socials.push({ icon: <Globe size={18} />, href: expert.website_url, label: `Visit ${expert.name}'s website` });
-  if (expert.email) socials.push({ icon: <Mail size={18} />, href: `mailto:${expert.email}`, label: `Email ${expert.name}` });
+  if (expert.linkedin_url) socials.push({ icon: <Linkedin size={16} />, href: expert.linkedin_url, label: `${expert.name} on LinkedIn` });
+  if (expert.instagram_url) socials.push({ icon: <Instagram size={16} />, href: expert.instagram_url, label: `${expert.name} on Instagram` });
+  if (expert.website_url) socials.push({ icon: <Globe size={16} />, href: expert.website_url, label: `${expert.name}'s website` });
+  if (expert.email) socials.push({ icon: <Mail size={16} />, href: `mailto:${expert.email}`, label: `Email ${expert.name}` });
 
-  // Bio paragraphs
   const bioParagraphs = (expert.bio || "").split(/\n\n+/).filter(Boolean);
-
-  // Qualifications and experience from specialties (split by type)
-  // We store qualifications in specialties array, and experience as extra items
-  const qualifications = Array.isArray(expert.qualifications) ? expert.qualifications : [];
-  const experience = Array.isArray(expert.experience_points) ? expert.experience_points : [];
+  const leadSentence = bioParagraphs[0] || "";
+  const restParagraphs = bioParagraphs.slice(1);
   const expertiseTags = Array.isArray(expert.specialties) ? expert.specialties : [];
-  const featuredQuote = expert.featured_quote || null;
+  const services = Array.isArray(expert.services) ? expert.services.filter((s) => s && s.name) : [];
+  const locations = Array.isArray(expert.locations) ? expert.locations.filter((l) => l && l.label) : [];
+  const deliveryLabels = DELIVERY_LABELS[expert.delivery_mode] || DELIVERY_LABELS.online;
 
-  // Courses this expert teaches, resolved from the teaching_courses id list.
-  // Empty list means the Programmes section is hidden entirely.
+  // Programmes she teaches. Everyone currently teaches the Blueprint. An
+  // internal course resolves to its course page, an external one to its url.
   const coursesById = {};
   allCourses.forEach((c) => { coursesById[c.id] = c; });
-  const teachingCourseIds = Array.isArray(expert.teaching_courses) ? expert.teaching_courses : [];
-  const teachingCourses = teachingCourseIds.map((id) => coursesById[id]).filter(Boolean);
+  const programmes = (Array.isArray(expert.programmes) ? expert.programmes : []).filter((p) => p && (p.course_id || p.url));
+  const primaryProgramme = programmes[0] || null;
+  const programmeHref = primaryProgramme
+    ? primaryProgramme.course_id
+      ? `${createPageUrl("CourseDetail")}?courseId=${primaryProgramme.course_id}`
+      : primaryProgramme.url
+    : null;
+  const programmeLabel = programmes.length > 1 ? "View programmes" : "View programme";
 
   return (
-    <main style={{ fontFamily: sans, background: C.offWhite, minHeight: "100vh" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
-        *:focus-visible { outline: 2px solid #C4847A !important; outline-offset: 3px !important; }
-        .social-icon-btn { transition: background 0.2s, color 0.2s; }
-        .social-icon-btn:hover { background: ${C.burgCore} !important; color: #fff !important; }
-        .social-icon-btn:hover svg { stroke: #fff !important; }
-        @media (max-width: 768px) {
-          .hero-grid { grid-template-columns: 1fr !important; }
-          .creds-grid { grid-template-columns: 1fr !important; }
-          .other-experts-row { flex-wrap: wrap !important; overflow-x: unset !important; }
-        }
-      `}</style>
+    <div className="min-h-screen flex aw-profile">
+      {pageStyles}
 
-      {/* ── HERO ── */}
-      <section style={{ background: C.offWhite, padding: "32px 32px 64px" }}>
-        {/* Back link - inline, inherits the shared dashboard shell instead of a marketing nav bar */}
-        <div style={{ maxWidth: 1080, margin: "0 auto 24px" }}>
+      <div className="aw-orb aw-orb--haze" aria-hidden="true" />
+      <div className="aw-orb aw-orb--sphere" aria-hidden="true" />
+      <div className="aw-orb aw-orb--burg" aria-hidden="true" />
+
+      <DashboardSidebar />
+
+      <div className="flex-1 lg:ml-72" style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 40px 104px" }}>
+
+          {/* Back link pulls up into the gap so it reads as a page affordance,
+              not a section of its own. */}
           <Link
-            to="/ExpertsDirectory"
-            style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: sans, fontWeight: 500, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", color: C.burgCore, textDecoration: "none" }}
-            onMouseEnter={(e) => e.currentTarget.style.color = C.roseCore}
-            onMouseLeave={(e) => e.currentTarget.style.color = C.burgCore}
+            to={createPageUrl("ExpertsDirectory")}
+            style={{
+              display: "inline-block",
+              fontFamily: sans,
+              fontWeight: 600,
+              fontSize: 10.5,
+              textTransform: "uppercase",
+              letterSpacing: "0.18em",
+              color: C.rose,
+              textDecoration: "none",
+              marginBottom: 24,
+            }}
           >
-            <ChevronLeft size={14} /> Back to All Experts
+            Back to all experts
           </Link>
-        </div>
 
-        <div className="hero-grid" style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gridTemplateColumns: "40% 60%", gap: 56, alignItems: "start" }}>
-          {/* Left - photo */}
-          <div>
-            <div style={{ borderRadius: 12, overflow: "hidden", maxWidth: 360, aspectRatio: "3/4", boxShadow: "0 8px 32px rgba(74,14,46,0.08)", background: `linear-gradient(135deg, ${C.rosePale}, ${C.roseCore})` }}>
-              {expert.profile_picture ? (
-                <img
-                  src={expert.profile_picture}
-                  alt={`${expert.name}, ${domain} specialist at The Aligned Woman Co`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                />
-              ) : (
-                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontFamily: serif, fontStyle: "italic", fontSize: 72, color: C.burgCore }}>
-                    {expert.name.split(" ").map(p => p[0]).join("").slice(0, 2)}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+          <div className="aw-stack">
 
-          {/* Right - details */}
-          <div style={{ paddingTop: 8 }}>
-            <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 12 }}>
-              {domain}
-            </p>
-            <h1 style={{ fontFamily: serif, fontSize: 40, color: C.burgCore, lineHeight: 1.1, margin: "0 0 12px" }}>
-              {expert.name}
-            </h1>
-            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 16, color: C.midGrey, margin: "0 0 20px" }}>
-              {expert.title}
-            </p>
+            {/* ─── HERO · the credibility block ───
+                Order is load-bearing: eyebrow, verification, name, role,
+                socials, facts, actions. Verification precedes identity
+                because trust precedes identity. */}
+            <section
+              style={{
+                position: "relative",
+                background: DARK_PANEL,
+                backdropFilter: "blur(32px)",
+                WebkitBackdropFilter: "blur(32px)",
+                borderRadius: 36,
+                padding: "48px 52px",
+                overflow: "hidden",
+              }}
+            >
+              <img
+                src={SEAL_IMAGE_URL}
+                alt="AW Verified"
+                className="aw-seal"
+                style={{ position: "absolute", top: 28, right: 32, width: 124, height: 124, objectFit: "contain" }}
+              />
 
-            {/* Title tags */}
-            {titleTags.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
-                {titleTags.map((tag, i) => (
-                  <span key={i} style={{ fontFamily: sans, fontWeight: 400, fontSize: 11, color: C.burgCore, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 100, padding: "6px 14px" }}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Social icons */}
-            {socials.length > 0 && (
-              <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
-                {socials.map((s, i) => (
-                  <a
-                    key={i}
-                    href={s.href}
-                    target={s.href.startsWith("mailto") ? undefined : "_blank"}
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    className="social-icon-btn"
-                    style={{ width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(74,14,46,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: C.burgCore, textDecoration: "none" }}
-                  >
-                    {s.icon}
-                  </a>
-                ))}
-              </div>
-            )}
-
-            {/* CTAs */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-              <button
-                onClick={scrollToForm}
-                style={{ background: C.roseCore, color: C.burgDeep, border: "none", borderRadius: 100, padding: "14px 32px", fontFamily: sans, fontWeight: 600, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer", minHeight: 48 }}
-              >
-                Send a Message
-              </button>
-              <a
-                href="/blueprint"
-                style={{ background: "transparent", color: C.burgCore, border: "1px solid rgba(74,14,46,0.2)", borderRadius: 100, padding: "14px 32px", fontFamily: sans, fontWeight: 600, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", textDecoration: "none", minHeight: 48, display: "inline-flex", alignItems: "center" }}
-              >
-                View Programme
-              </a>
-              {isAdmin && expert?.id && (
-                <a
-                  href={`/expert-dashboard?expert_id=${expert.id}`}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#4A0E2E", color: "#FFFFFF", border: "none", borderRadius: 100, padding: "14px 24px", fontFamily: sans, fontWeight: 600, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", textDecoration: "none", minHeight: 48 }}
+              <div className="aw-hero-grid">
+                <div
+                  aria-hidden={expert.profile_picture ? undefined : "true"}
+                  style={{
+                    width: 210,
+                    height: 210,
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    flexShrink: 0,
+                    boxShadow: "0 0 0 2px rgba(233,183,172,0.45), 0 18px 44px rgba(8,1,5,0.35)",
+                    background: `linear-gradient(135deg, ${C.rose}, ${C.burg})`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  <Pencil size={14} /> Edit Profile
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+                  {expert.profile_picture ? (
+                    <img
+                      src={expert.profile_picture}
+                      alt={`Portrait of ${expert.name}`}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <span style={{ fontFamily: serif, fontSize: 56, color: "#FFFFFF" }}>{initials(expert.name)}</span>
+                  )}
+                </div>
 
-      {/* ── ABOUT ── */}
-      {bioParagraphs.length > 0 && (
-        <section style={{ padding: "0 32px 40px" }}>
-          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-            <div style={{ background: C.white, borderRadius: 12, padding: "40px", boxShadow: "0 2px 16px rgba(74,14,46,0.04)" }}>
-              <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>About</p>
-              <div>
-                {bioParagraphs.map((p, i) => (
-                  <p key={i} style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: C.darkGrey, lineHeight: 1.88, margin: i < bioParagraphs.length - 1 ? "0 0 20px" : 0 }}>
-                    {p}
+                <div style={{ minWidth: 0, paddingRight: 140 }}>
+                  {domain && (
+                    <p
+                      style={{
+                        fontFamily: sans,
+                        fontWeight: 700,
+                        fontSize: 10.5,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.2em",
+                        color: C.onDark,
+                        margin: "0 0 10px",
+                      }}
+                    >
+                      {domain}
+                    </p>
+                  )}
+
+                  <div style={{ marginBottom: 12 }}>
+                    <VerifiedMark onDark />
+                  </div>
+
+                  <h1 style={{ fontFamily: serif, fontWeight: 400, fontSize: "clamp(32px, 4vw, 46px)", color: C.onDark, lineHeight: 1.1, margin: "0 0 10px" }}>
+                    {expert.name}
+                  </h1>
+
+                  <p style={{ fontFamily: sans, fontWeight: 400, fontSize: 13.5, color: C.onDark, opacity: 0.9, lineHeight: 1.6, margin: "0 0 22px" }}>
+                    {expert.title}
                   </p>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
-      {/* ── CREDENTIALS ── */}
-      {(qualifications.length > 0 || experience.length > 0) && (
-        <section style={{ padding: "0 32px 40px" }}>
-          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-            <div style={{ background: C.white, borderRadius: 12, padding: "40px", boxShadow: "0 2px 16px rgba(74,14,46,0.04)" }}>
-              <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 28 }}>Credentials</p>
-              <div className="creds-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
-                {qualifications.length > 0 && (
-                  <div>
-                    <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: C.burgCore, marginBottom: 16 }}>Qualifications</p>
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                      {qualifications.map((q, i) => (
-                        <li key={i} style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.roseCore, flexShrink: 0, marginTop: 6 }} />
-                          <span style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 2 }}>{q}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {experience.length > 0 && (
-                  <div>
-                    <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: C.burgCore, marginBottom: 16 }}>Experience</p>
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                      {experience.map((ex, i) => (
-                        <li key={i} style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.roseCore, flexShrink: 0, marginTop: 6 }} />
-                          <span style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.darkGrey, lineHeight: 2 }}>{ex}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-              <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid rgba(74,14,46,0.06)", display: "flex", alignItems: "center", gap: 8 }}>
-                <Shield size={12} style={{ color: C.midGrey, flexShrink: 0 }} />
-                <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, fontStyle: "italic", color: C.midGrey, margin: 0 }}>
-                  All credentials listed on this page have been independently verified by The Aligned Woman Co.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── AREAS OF EXPERTISE ── */}
-      {expertiseTags.length > 0 && (
-        <section style={{ padding: "16px 32px 56px" }}>
-          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-            <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 20 }}>Areas of Expertise</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-              {expertiseTags.map((tag, i) => (
-                <span key={i} style={{ background: C.rosePale, color: C.burgCore, borderRadius: 100, padding: "10px 20px", fontFamily: sans, fontWeight: 400, fontSize: 13 }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── PROGRAMME APPEARANCES ── */}
-      {teachingCourses.length > 0 && (
-        <section style={{ padding: "0 32px 56px" }}>
-          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-            <div style={{ background: C.white, borderRadius: 12, padding: 40, boxShadow: "0 2px 16px rgba(74,14,46,0.04)" }}>
-              <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 8 }}>Programmes</p>
-              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: C.midGrey, marginBottom: 24 }}>Currently teaching in:</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {teachingCourses.map((course) => {
-                  const isBlueprint = course.id === BLUEPRINT_COURSE_ID;
-                  return (
-                    <div key={course.id} style={{ border: "1px solid rgba(74,14,46,0.06)", borderRadius: 8, padding: 32 }}>
-                      <p style={{ fontFamily: sans, fontWeight: 700, fontSize: 16, textTransform: "uppercase", color: C.burgCore, marginBottom: 6 }}>{course.title}</p>
-                      <p style={{ fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.midGrey, marginBottom: isBlueprint ? 16 : 0 }}>
-                        Domain: {domain}
-                      </p>
-                      {isBlueprint && expert.module_quote && (
-                        <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 15, color: C.burgCore, lineHeight: 1.65, marginBottom: 20 }}>
-                          "{expert.module_quote}"
-                        </p>
-                      )}
-                      {isBlueprint && (
-                        <a
-                          href="/blueprint"
-                          style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: sans, fontWeight: 500, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.roseCore, textDecoration: "none" }}
-                        >
-                          Explore the Programme <ArrowRight size={13} />
+                  {socials.length > 0 && (
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22 }}>
+                      {socials.map((s, i) => (
+                        <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="aw-social">
+                          {s.icon}
                         </a>
-                      )}
+                      ))}
                     </div>
-                  );
-                })}
+                  )}
+
+                  {/* Fact pills carry the same axes the directory filters on,
+                      so a filtered result and its profile always agree. */}
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 26 }}>
+                    {locations.map((loc, i) => (
+                      <span key={`loc-${i}`} className="aw-fact">
+                        <MapPin style={{ width: 12, height: 12 }} aria-hidden="true" />
+                        {loc.label}
+                      </span>
+                    ))}
+                    {deliveryLabels.map((label) => (
+                      <span key={label} className="aw-fact">
+                        {label === "Online" ? (
+                          <Video style={{ width: 12, height: 12 }} aria-hidden="true" />
+                        ) : (
+                          <MapPin style={{ width: 12, height: 12 }} aria-hidden="true" />
+                        )}
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Exactly one filled button above the fold. */}
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                    <button type="button" onClick={scrollToForm} className="aw-btn aw-btn--filled">
+                      Send a message
+                      <ArrowRight style={{ width: 13, height: 13 }} />
+                    </button>
+                    {programmeHref && (
+                      <a
+                        href={programmeHref}
+                        className="aw-btn aw-btn--on-dark"
+                        onClick={() =>
+                          base44.analytics.track({
+                            eventName: "expert_programme_click",
+                            properties: { expert: expert.name },
+                          })
+                        }
+                      >
+                        {programmeLabel}
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </section>
-      )}
+            </section>
 
-      {/* ── FEATURED QUOTE ── */}
-      {featuredQuote && (
-        <section style={{ background: "linear-gradient(160deg, #0E0208 0%, #1A0510 35%, #4A0E2E 65%, #1A0510 100%)", padding: "80px 32px", textAlign: "center" }}>
-          <div style={{ maxWidth: 720, margin: "0 auto" }}>
-            <div style={{ fontFamily: serif, fontSize: 120, color: "rgba(196,132,122,0.15)", lineHeight: 0.6, marginBottom: 32, userSelect: "none" }}>"</div>
-            <p style={{ fontFamily: serif, fontStyle: "italic", fontSize: 24, color: C.white, lineHeight: 1.6, marginBottom: 24 }}>
-              {featuredQuote}
-            </p>
-            <p style={{ fontFamily: sans, fontWeight: 500, fontSize: 13, color: C.roseCore }}>{expert.name}</p>
-          </div>
-        </section>
-      )}
+            {/* ─── EXPERTISE ───
+                Unwrapped on purpose. A scannable index between two heavy
+                blocks; a card here would flatten the rhythm. */}
+            {expertiseTags.length > 0 && (
+              <section>
+                <h2 style={{ fontFamily: sans, fontWeight: 600, fontSize: 13, color: C.burg, margin: "0 0 16px" }}>
+                  Areas of expertise
+                </h2>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {expertiseTags.map((tag, i) => (
+                    <span key={i} className="aw-chip">{tag}</span>
+                  ))}
+                </div>
+              </section>
+            )}
 
-      {/* ── CONNECTION FORM ── */}
-      <ConnectionForm expertName={expert.name} expertEmail={expert.email || expert.linked_user_email} formRef={formRef} />
+            {/* ─── ABOUT, with services nested ─── */}
+            {(leadSentence || services.length > 0) && (
+              <section className="aw-card aw-card--orb" style={{ padding: "48px 52px" }}>
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <p
+                    style={{
+                      fontFamily: sans,
+                      fontWeight: 700,
+                      fontSize: 10.5,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.2em",
+                      color: C.rose,
+                      margin: "0 0 18px",
+                    }}
+                  >
+                    About
+                  </p>
 
-      {/* ── OTHER EXPERTS ── */}
-      {otherExperts.length > 0 && (
-        <section style={{ padding: "56px 32px 80px", background: C.offWhite }}>
-          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-            <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.22em", color: C.roseCore, marginBottom: 12 }}>Other Experts</p>
-            <h2 style={{ fontFamily: serif, fontStyle: "italic", fontSize: 28, color: C.burgCore, marginBottom: 32 }}>More from the faculty.</h2>
-            <div className="other-experts-row" style={{ display: "flex", gap: 20, overflowX: "auto", paddingBottom: 8 }}>
-              {otherExperts.map(e => <MiniExpertCard key={e.id} expert={e} />)}
-            </div>
-            <div style={{ marginTop: 24 }}>
-              <Link
-                to="/ExpertsDirectory"
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: sans, fontWeight: 500, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", color: C.roseCore, textDecoration: "none" }}
-              >
-                View all experts <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+                  {leadSentence && (
+                    <p style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: C.burg, lineHeight: 1.35, maxWidth: 720, margin: "0 0 24px" }}>
+                      {leadSentence}
+                    </p>
+                  )}
 
-      {/* ── FOOTER ── */}
-      <footer style={{ background: C.burgCore, color: C.white }}>
-        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "56px 32px 32px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 40, marginBottom: 40 }}>
-            <div>
-              <p style={{ fontFamily: sans, fontWeight: 700, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>THE ALIGNED WOMAN BLUEPRINT™</p>
-              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.75 }}>
-                Your personal operating system for embodied success. Powered by the ALIVE Method™.
-              </p>
-            </div>
-            <div>
-              <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: C.roseCore, marginBottom: 12 }}>Navigate</p>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                {[["Home", "/"], ["Blueprint", "/blueprint"], ["About Us", "/about-us"], ["Experts", "/ExpertsDirectory"]].map(([label, href]) => (
-                  <li key={label}><a href={href} style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "rgba(255,255,255,0.65)", textDecoration: "none" }}>{label}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p style={{ fontFamily: sans, fontWeight: 600, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: C.roseCore, marginBottom: 12 }}>Connect</p>
-              <a href="mailto:hello@alignedwomanco.com" style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "rgba(255,255,255,0.65)", textDecoration: "none" }}>hello@alignedwomanco.com</a>
-            </div>
-          </div>
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 24, textAlign: "center" }}>
-            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
-              © {new Date().getFullYear()} The Aligned Woman Blueprint. All rights reserved.
-            </p>
+                  {restParagraphs.map((para, i) => (
+                    <p
+                      key={i}
+                      style={{
+                        fontFamily: sans,
+                        fontWeight: 300,
+                        fontSize: 12.5,
+                        color: C.ink,
+                        opacity: 0.82,
+                        lineHeight: 1.85,
+                        maxWidth: 720,
+                        margin: "0 0 16px",
+                      }}
+                    >
+                      {para}
+                    </p>
+                  ))}
+
+                  {services.length > 0 && (
+                    <div style={{ borderTop: "1px solid rgba(74,14,46,0.12)", paddingTop: 30, marginTop: 30 }}>
+                      <p
+                        style={{
+                          fontFamily: sans,
+                          fontWeight: 700,
+                          fontSize: 10.5,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.2em",
+                          color: C.rose,
+                          margin: "0 0 20px",
+                        }}
+                      >
+                        Services
+                      </p>
+                      <div className="aw-services">
+                        {services.map((s, i) => (
+                          <div key={i} style={{ background: "rgba(255,255,255,0.5)", borderRadius: 22, padding: 24 }}>
+                            <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 17, color: C.burg, lineHeight: 1.25, margin: "0 0 8px" }}>
+                              {s.name}
+                            </h3>
+                            {s.description && (
+                              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12, color: C.ink, opacity: 0.82, lineHeight: 1.65, margin: 0 }}>
+                                {s.description}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* ─── CONTACT ─── */}
+            <ConnectionForm expertName={expert.name} expertEmail={expert.email} formRef={formRef} />
+
+            {/* ─── FACULTY ───
+                Discovery sits after contact deliberately. */}
+            {otherExperts.length > 0 && (
+              <section>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+                  <h2 style={{ fontFamily: sans, fontWeight: 600, fontSize: 13, color: C.burg, margin: 0 }}>
+                    More from the faculty
+                  </h2>
+                  <Link
+                    to={createPageUrl("ExpertsDirectory")}
+                    style={{
+                      fontFamily: sans,
+                      fontWeight: 700,
+                      fontSize: 10.5,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.16em",
+                      color: C.rose,
+                      textDecoration: "none",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    View all experts +
+                  </Link>
+                </div>
+                <div className="aw-faculty-grid">
+                  {otherExperts.map((person) => (
+                    <FacultyCard key={person.id} person={person} />
+                  ))}
+                </div>
+              </section>
+            )}
+
           </div>
         </div>
-      </footer>
-    </main>
+      </div>
+    </div>
   );
 }
