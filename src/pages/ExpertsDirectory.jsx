@@ -730,6 +730,9 @@ export default function ExpertsDirectory() {
 
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [searchText, setSearchText] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchIndex, setSearchIndex] = useState(-1);
+  const searchRef = useRef(null);
   const [deliveryFilter, setDeliveryFilter] = useState("either");
   const [locationFilter, setLocationFilter] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
@@ -770,6 +773,7 @@ export default function ExpertsDirectory() {
     const handler = (e) => {
       if (moreRef.current && !moreRef.current.contains(e.target) && moreBtnRef.current && !moreBtnRef.current.contains(e.target)) setShowMore(false);
       if (locationRef.current && !locationRef.current.contains(e.target)) setLocationOpen(false);
+      if (searchRef.current && !searchRef.current.contains(e.target)) { setSearchOpen(false); setSearchIndex(-1); }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -901,6 +905,64 @@ export default function ExpertsDirectory() {
       }
     }
   }
+
+  // Typeahead over everything the search box can already match: people,
+  // specialties, locations and domains. Sourced from the live practitioner
+  // set, so it can only ever suggest a term that returns a result.
+  const searchSuggestions = (() => {
+    const q = searchText.trim().toLowerCase();
+    if (q.length < 2) return [];
+    const seen = new Set();
+    const out = [];
+    const push = (label, kind) => {
+      if (!label) return;
+      const lower = label.toLowerCase();
+      if (!lower.includes(q)) return;
+      const key = `${kind}:${lower}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push({ label, kind, starts: lower.startsWith(q) });
+    };
+    experts.forEach((e) => {
+      push(e.name, "Practitioner");
+      push(e.domain, "Domain");
+      e.specialties.forEach((s) => push(s, "Specialty"));
+      e.locations.forEach((l) => push(l.label, "Location"));
+    });
+    // Anything starting with what she typed comes first. That is closer to
+    // what she is reaching for than a mid-word match.
+    return out
+      .sort((a, b) => (a.starts === b.starts ? a.label.localeCompare(b.label) : Number(b.starts) - Number(a.starts)))
+      .slice(0, 8);
+  })();
+
+  const applySuggestion = (s) => {
+    setSearchText(s.label);
+    setSearchOpen(false);
+    setSearchIndex(-1);
+    base44.analytics.track({ eventName: "search_suggestion", properties: { kind: s.kind } });
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (!searchOpen || searchSuggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSearchIndex((i) => (i + 1) % searchSuggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSearchIndex((i) => (i <= 0 ? searchSuggestions.length - 1 : i - 1));
+    } else if (e.key === "Enter") {
+      if (searchIndex >= 0) {
+        e.preventDefault();
+        applySuggestion(searchSuggestions[searchIndex]);
+      } else {
+        setSearchOpen(false);
+      }
+    } else if (e.key === "Escape") {
+      setSearchOpen(false);
+      setSearchIndex(-1);
+    }
+  };
 
   // Active filter chips. A default state is not a filter, so "All" and
   // "Either" never get a chip. That would be noise.
