@@ -90,7 +90,7 @@ function credentialsFromTitle(title) {
 function mapDbExpert(e) {
   // Support both legacy string and new array for category
   const categoryIds = Array.isArray(e.category) ? e.category : e.category ? [e.category] : [];
-  // Founder override — Laura Thomas carries a composite domain string rather
+  // Founder override. Laura Thomas carries a composite domain string rather
   // than the single first-mapped category the rest of the directory uses.
   const isLauraThomas = (e.name || "").toLowerCase().includes("laura thomas");
   const domain = isLauraThomas
