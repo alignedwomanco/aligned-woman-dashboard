@@ -1,559 +1,919 @@
-import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { enablePreviewMode, disablePreviewMode, isPreviewMode } from "@/lib/previewMode";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { getDashboardState } from "@/lib/dashboardState";
-import { ensureMemberProfile } from "@/lib/ensureMemberProfile";
-import { MEMBER_READ_LIMIT } from "@/lib/limits";
 import useContinueModule from "@/hooks/useContinueModule";
-import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
-import MobileTabBar from "@/components/dashboard-v2/MobileTabBar";
-import DashboardHeader from "@/components/dashboard-v2/DashboardHeader";
-import ExpertSpotlight from "@/components/dashboard-v2/ExpertSpotlight";
-import AccountStatusFooter from "@/components/dashboard-v2/AccountStatusFooter";
-import StateB from "@/components/dashboard-v2/states/StateB";
-import StateANoQuiz from "@/components/dashboard-v2/states/StateANoQuiz";
-import StateAWithQuiz from "@/components/dashboard-v2/states/StateAWithQuiz";
-import StateC from "@/components/dashboard-v2/states/StateC";
-import StateCNoQuiz from "@/components/dashboard-v2/states/StateCNoQuiz";
-import CheckoutModal from "@/components/dashboard/CheckoutModal";
+import { getArchetype } from "@/data/archetypes";
+import { createPageUrl } from "@/utils";
+import AppShellV2 from "@/components/dashboard-v2/AppShellV2";
+import YinVideoCard from "@/components/dashboard-v2/YinVideoCard";
 
-const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
+// ────────────────────────────────────────────────────────────────
+// Dashboard · the member dashboard. Previous version kept, unrouted, in
+// DashboardLegacy.jsx as a rollback.
+//
+// ADMIN-ONLY PREVIEW while we build. Members never see this page:
+// anyone without an admin role is sent to the live /Dashboard.
+// The live Dashboard.jsx is untouched.
+//
+// CUTOVER NOTE (agreed with Laura, on record):
+// No data or schema migrates at cutover. This page binds to the
+// SAME live entities the current dashboard uses today:
+//   User, MemberProfile, CourseProgress, Course, MoneyStoryResponse.
+// When the rebuild is complete, cutover is a one-line swap in
+// App.jsx so /Dashboard renders this page instead of Dashboard.jsx.
+// Keep Dashboard.jsx in place as the instant rollback.
+//
+// CUTOVER (July 2026): this page IS the live member dashboard, routed at
+// /Dashboard. The previous dashboard remains at src/pages/Dashboard.jsx,
+// unrouted, as the instant rollback. This page owns the
+// MemberProfile.has_seen_welcome write for state_b.
+//
+// Design source: the approved AWB handoff pack (July 2026).
+// State map, design → data:
+//   Design A (pattern + course)  → state_a_with_quiz
+//   Design B (course, no pattern)→ state_a_no_quiz and state_b
+//   Design C (free member)       → state_c_no_quiz; state_c (free
+//     WITH a pattern) shows the pattern hero, filled CTA on
+//     "Read your full pattern" since there is no course to continue.
+//
+// Token note: the handoff's #F8ECE7 eyebrow-on-dark is not a token.
+// Nearest token is awrose-pale, used for all eyebrows on dark panels.
+// ────────────────────────────────────────────────────────────────
 
-function AdminPreviewPanel({ stateOverride, setStateOverride, enablePreviewMode, disablePreviewMode }) {
-  const [minimized, setMinimized] = useState(false);
+const KEY_MAP = {
+  performer: "performer",
+  over_functioner: "overFunctioner",
+  delegator: "delegator",
+  overrider: "overrider",
+  reactor: "reactor",
+};
+
+// Supply the Cloudflare R2 mp4 URL to switch this card on.
+const YIN_VIDEO_URL =
+  "https://pub-92fd07e9117b4774bd919918a55b163b.r2.dev/Phoebe-Greenacre-Intro-Yin-stress-digest.mp4";
+
+// Background video for the pattern band (02), all states.
+const PATTERN_VIDEO_URL =
+  "https://pub-e1032a6c8b9241cf9d03513d43a81f17.r2.dev/YourPattern.mp4";
+
+// Legibility shadow for copy sitting over the video.
+const TEXT_SHADOW = { textShadow: "0 2px 8px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.7)" };
+
+// Muted looped background video. muted + playsInline + the canplay retry
+// is the combination that autoplays on iOS Safari and Android Chrome;
+// same approach already proven in StateAWithQuiz.
+function AutoplayVideo({ src, className }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || !src) return;
+    v.muted = true;
+    v.src = src;
+    v.load();
+    const tryPlay = () => {
+      v.play().catch(() => {});
+    };
+    v.addEventListener("canplay", tryPlay, { once: true });
+    v.play().catch(() => {});
+    return () => v.removeEventListener("canplay", tryPlay);
+  }, [src]);
+  return (
+    <video
+      ref={ref}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      aria-hidden="true"
+      className={className}
+    />
+  );
+}
+
+// Button recipes, per the handoff global spec.
+const BTN_FILLED =
+  "inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
+const BTN_FILLED_ROSE =
+  "inline-flex items-center gap-2 bg-awrose-core hover:bg-awrose-deep text-white font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
+const BTN_OUTLINE =
+  "inline-flex items-center gap-2 bg-awburg-core border border-awburg-core text-paper hover:bg-awrose-pale hover:text-awburg-core active:bg-awrose-pale active:text-awburg-core font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
+const BTN_OUTLINE_DARK =
+  "inline-flex items-center gap-2 bg-transparent border border-white/40 text-white hover:bg-white/15 font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200";
+const LINK_ON_DARK =
+  "font-body font-bold text-[11px] tracking-eyebrow uppercase text-white/75 hover:text-white underline underline-offset-4 transition-colors";
+
+const DARK_PANEL_STYLE = {
+  background:
+    "linear-gradient(135deg, var(--aw-burg-dark) 0%, var(--aw-burg-core) 60%, var(--aw-burg-mid) 100%)",
+};
+
+// ── Soft-focus radial washes (AWB handoff, July 2026) ──
+// Deep burgundy (#644242) anchored off-centre, diffusing into the cream
+// page background (#f6efee) at ~40% — an atmospheric glow, not a hard
+// geometric gradient. Used on the page body, the hero overlay, and the
+// Trusted Help cards.
+// Two-layer page background (AWB handoff, July 2026):
+// 1. Base — a soft diagonal wash through warm blush neutrals. Reads as
+//    almost-neutral warmth; the mid-tones are the darkest it gets.
+// 2. Atmosphere orbs — fixed, behind content (z-0, pointer-events-none):
+//    a faint rose sphere bleeding off the right edge, and a white haze
+//    brightening the top-left. Glass cards pick both up through their
+//    backdrop blur.
+const PAGE_BG_STYLE = {
+  backgroundColor: "#F6EEEA",
+  backgroundImage:
+    "linear-gradient(168deg, #F6EEEA 0%, #EEDAD3 30%, #E9D3CD 55%, #F1E3DD 80%, #F8F1ED 100%)",
+};
+const ROSE_SPHERE_STYLE = {
+  position: "fixed",
+  right: "-160px",
+  top: "44%",
+  width: "680px",
+  height: "680px",
+  borderRadius: "50%",
+  backgroundImage:
+    "radial-gradient(circle at 32% 28%, #F3E0D9 0%, #E6C4BA 40%, #DDB5AA 70%, #D8AEA4 100%)",
+  filter: "blur(28px)",
+  opacity: 0.38,
+  zIndex: 0,
+  pointerEvents: "none",
+  transform: "translateY(-50%)",
+};
+const TOP_HAZE_STYLE = {
+  position: "fixed",
+  left: "-220px",
+  top: "-260px",
+  width: "760px",
+  height: "760px",
+  borderRadius: "50%",
+  background: "rgba(255,245,240,0.85)",
+  filter: "blur(120px)",
+  zIndex: 0,
+  pointerEvents: "none",
+};
+const SOFT_RADIAL_OVERLAY =
+  "radial-gradient(130% 120% at 18% 12%, rgba(100,66,66,0.46) 0%, rgba(168,138,138,0.40) 42%, rgba(246,239,238,0.22) 74%, rgba(246,239,238,0.10) 100%)";
+const SOFT_RADIAL_CARD =
+  "radial-gradient(120% 120% at 18% 0%, rgba(100,66,66,0.14) 0%, rgba(168,138,138,0.08) 46%, rgba(246,239,238,0) 82%)";
+
+// Background video + burgundy overlay for the Blueprint learning cards.
+const BLUEPRINT_BG_VIDEO =
+  "https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/6102718_Smoky%20Smoke%20Plume%20Vapor_By_Via_Films_Artlist_HD.mp4";
+const BLUEPRINT_VIDEO_OVERLAY =
+  "linear-gradient(135deg, rgba(26,5,16,0.80) 0%, rgba(74,14,46,0.80) 60%, rgba(107,22,66,0.80) 100%)";
+
+const GLASS_CARD =
+  "rounded-2xl border border-awburg-core/10 bg-white/40 backdrop-blur-2xl shadow-sm";
+
+function timeGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function SectionLabel({ children }) {
+  return (
+    <p className="font-body font-semibold text-[14px] text-awburg-core mb-6">
+      {children}
+    </p>
+  );
+}
+
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five",
+  "six", "seven", "eight", "nine", "ten",
+];
+
+function numberWord(n, capitalize = false) {
+  const w = n >= 0 && n <= 10 ? NUMBER_WORDS[n] : String(n);
+  return capitalize ? w.charAt(0).toUpperCase() + w.slice(1) : w;
+}
+
+// Whole-course percent ring for the learning card.
+function ProgressRing({ percent }) {
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+  return (
+    <div className="relative w-24 h-24 flex-shrink-0" aria-label={`${clamped}% complete`}>
+      <svg viewBox="0 0 72 72" className="w-24 h-24 -rotate-90">
+        <circle
+          cx="36"
+          cy="36"
+          r={r}
+          fill="none"
+          stroke="rgba(255,255,255,0.15)"
+          strokeWidth="5"
+        />
+        <circle
+          cx="36"
+          cy="36"
+          r={r}
+          fill="none"
+          stroke="var(--aw-rose-light)"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c - (c * clamped) / 100}
+        />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center font-body font-semibold text-white text-sm">
+        {clamped}%
+      </span>
+    </div>
+  );
+}
+
+function EyebrowOnDark({ children }) {
+  return (
+    <p className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-awrose-pale mb-2">
+      {children}
+    </p>
+  );
+}
+
+function Tag({ children }) {
+  return (
+    <span className="inline-block font-body font-bold text-[9px] tracking-eyebrow uppercase text-awburg-core bg-awrose-pale/70 rounded-full px-3 py-1">
+      {children}
+    </span>
+  );
+}
+
+// ── 02 · Pattern hero, design state A (pattern known) ──
+function PatternHero({ profile, isPaid }) {
+  const [expanded, setExpanded] = useState(false);
+  const archKey = KEY_MAP[profile?.computed_archetype_key] || "performer";
+  const arch = getArchetype(archKey);
 
   return (
-    <div className="fixed bottom-24 left-4 right-4 lg:bottom-6 lg:left-auto lg:right-6 lg:max-w-xs z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg overflow-hidden">
-      {/* Header - always visible */}
-      <div className="flex items-center justify-between px-4 py-3 cursor-pointer select-none" onClick={() => setMinimized(m => !m)}>
-        <p className="font-semibold text-gray-300">ADMIN: Preview State</p>
-        <span className="text-gray-400 text-base leading-none">{minimized ? "▲" : "▼"}</span>
-      </div>
-
-      {/* Body - hidden when minimized */}
-      {!minimized && (
-        <div className="px-4 pb-4">
-          <a
-            href={`/CourseDetail?courseId=69f4885c4fadbeea6d28a9be&preview=new_user`}
-            className="block w-full text-center px-3 py-2 rounded mb-3 bg-amber-700 text-white text-xs font-bold hover:bg-amber-600 transition-colors min-h-[44px] flex items-center justify-center"
-            style={{ textDecoration: "none" }}
-          >
-            → View Course as New User
-          </a>
-          <div className="space-y-2">
-            {[
-              { label: "New paid user (blank)", value: "new_paid_user", preview: true },
-              { label: "A (no quiz)", value: "state_a_no_quiz" },
-              { label: "A (with quiz)", value: "state_a_with_quiz" },
-              { label: "B (welcome)", value: "state_b" },
-              { label: "C (free)", value: "state_c" },
-              { label: "Real", value: null },
-            ].map(({ label, value, preview }) => (
-              <button
-                key={label}
-                onClick={() => { preview ? enablePreviewMode() : disablePreviewMode(); setStateOverride(value); }}
-                className={`w-full text-left px-3 py-2 rounded transition-colors min-h-[44px] ${
-                  stateOverride === value
-                    ? value === "new_paid_user" ? "bg-amber-600 text-white" : "bg-awburg-core text-white"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+    <section
+      className="relative rounded-2xl overflow-hidden text-white"
+      style={DARK_PANEL_STYLE}
+    >
+      {/* Background video; gradient beneath remains the fallback. */}
+      <AutoplayVideo
+        src={PATTERN_VIDEO_URL}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      {/* Soft radial burgundy wash, ~40%, diffusing into cream. */}
+      <div
+        className="absolute inset-0"
+        style={{ background: SOFT_RADIAL_OVERLAY }}
+      />
+      <div className="relative z-10 p-6 md:p-8">
+        <div style={TEXT_SHADOW}>
+          <EyebrowOnDark>Your pattern</EyebrowOnDark>
+          <h2 className="font-display text-[26px] md:text-[30px] leading-tight mb-3">
+            {arch?.name || "Your pattern"}
+          </h2>
+          <p className="font-body font-light text-sm leading-relaxed text-white/90 max-w-xl mb-6">
+            {arch?.mirrorLine ||
+              (arch?.atBest ? arch.atBest.split(". ").slice(0, 2).join(". ") + "." : "")}
+          </p>
         </div>
-      )}
-    </div>
-  );
-}
-
-function formatJoinedDate(timestamp) {
-  if (!timestamp) return "";
-  const d = new Date(timestamp);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
-}
-
-function getMembershipLabel(user) {
-  const tags = Array.isArray(user?.access_tags) ? user.access_tags : [];
-  const isPaid = user?.membership_type === "paid" || tags.includes("blueprint_paid");
-  return isPaid ? "Blueprint owner" : "Free member";
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-12 w-2/3 bg-awburg-core/8 rounded" />
-      <div className="h-64 bg-awburg-core/8 rounded-xl" />
-      <div className="h-40 bg-awburg-core/8 rounded-xl" />
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-24 bg-awburg-core/8 rounded-lg" />
-        ))}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-44 bg-awburg-core/8 rounded-xl" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DashboardError({ message, onRetry, onLogout }) {
-  return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="bg-paper rounded-xl border border-awburg-core/8 p-8 max-w-md text-center">
-        <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-3">
-          SOMETHING WENT WRONG
-        </p>
-        <h2 className="font-display text-awburg-core text-2xl leading-tight mb-3">
-          We could not load your dashboard.
-        </h2>
-        <p className="font-body font-light text-awburg-core/75 text-sm leading-relaxed mb-6">
-          {message || "Please try again, or sign out and back in."}
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Free member with a pattern has no Continue, so this is her
+              single filled action. Paid members get the outline tier. */}
           <button
-            onClick={onRetry}
-            className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
+            onClick={() => setExpanded((v) => !v)}
+            className={BTN_FILLED}
           >
-            REFRESH
+            Read your full pattern
+            <ChevronDown
+              className="w-3.5 h-3.5 transition-transform duration-200"
+              style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
+            />
           </button>
-          {onLogout && (
-            <button
-              onClick={onLogout}
-              className="inline-flex items-center gap-2 border border-awburg-core/30 text-awburg-core hover:bg-awburg-core/5 text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
-            >
-              LOG OUT
-            </button>
+          <Link to="/StartingPointProfile" className={LINK_ON_DARK}>
+            Retake the profile
+          </Link>
+        </div>
+
+        {/* Inline full-pattern narrative. Becomes a route to the Full
+            Pattern page once that page is built; inline keeps the law of
+            no dead ends until then. */}
+        {expanded && (
+          <div
+            className="mt-6 pt-6 border-t border-white/15 space-y-4 max-w-2xl"
+            style={TEXT_SHADOW}
+          >
+            {arch?.fullDescription && (
+              <p className="font-body font-light text-sm leading-relaxed text-white/90">
+                {arch.fullDescription}
+              </p>
+            )}
+            {arch?.primaryPillar && (
+              <p className="font-body font-light text-sm leading-relaxed text-white/90">
+                The Aligned Woman Blueprint Course addresses this through two pillars. Your
+                primary work begins in{" "}
+                <span className="font-medium text-white">{arch.primaryPillar}</span>,{" "}
+                {arch.primaryPillarNote} Your secondary work sits in{" "}
+                <span className="font-medium text-white">{arch.secondaryPillar}</span>,{" "}
+                {arch.secondaryPillarNote}
+              </p>
+            )}
+            {arch?.foundation && (
+              <p className="font-display italic text-sm leading-relaxed text-awrose-pale">
+                {arch.foundation}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ── 02 · Profile invitation hero, design states B and C ──
+function ProfileInviteHero({ variant, onDismiss }) {
+  const isFree = variant === "c";
+  return (
+    <section
+      className="relative rounded-2xl overflow-hidden text-white"
+      style={DARK_PANEL_STYLE}
+    >
+      {/* Background video; gradient beneath remains the fallback. */}
+      <AutoplayVideo
+        src={PATTERN_VIDEO_URL}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      {/* Soft radial burgundy wash, ~40%, diffusing into cream. */}
+      <div
+        className="absolute inset-0"
+        style={{ background: SOFT_RADIAL_OVERLAY }}
+      />
+      <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+        <div className="flex-1 min-w-0" style={TEXT_SHADOW}>
+          <EyebrowOnDark>{isFree ? "Begin here" : "Your starting point"}</EyebrowOnDark>
+          <h2 className="font-display text-[24px] md:text-[28px] leading-tight mb-3">
+            {isFree
+              ? "Where should you start? Let's find out together."
+              : "Want the work to fit you even better?"}
+          </h2>
+          <p className="font-body font-light text-sm leading-relaxed text-white/90 max-w-xl">
+            {isFree
+              ? "A few quiet minutes, a handful of honest questions, and we will show you the pattern that has been running the show, and the gentlest place to start."
+              : "A few quiet minutes, a handful of honest questions, and we will show you the pattern that has been running the show. It is entirely optional, and it makes everything after it more yours."}
+          </p>
+        </div>
+        <div className="flex items-center gap-4 flex-shrink-0">
+          {/* State C: single filled CTA lives here because there is no
+              course to continue. State B: outline, Continue stays filled. */}
+          <Link
+            to="/StartingPointProfile"
+            className={isFree ? BTN_FILLED_ROSE : BTN_OUTLINE_DARK}
+          >
+            Take the profile <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <button onClick={onDismiss} className={LINK_ON_DARK}>
+            Maybe later
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── 03 · Learning card, paid states ──
+function LearningCardPaid({ continueData, courseId, coursePercent }) {
+  const navigate = useNavigate();
+  const phaseIndex = continueData?.phaseIndex ?? 1;
+  const totalSections = continueData?.totalSections ?? 0;
+  const completed = continueData?.completedModulesInSection ?? 0;
+  const total = continueData?.totalModulesInSection ?? 0;
+  const remaining = Math.max(total - completed, 0);
+  const isComplete = continueData?.isCourseComplete === true;
+
+  const phaseName = (() => {
+    const raw = continueData?.currentSection?.title || continueData?.currentSection?.name || "";
+    return raw.replace(/^Phase\s*\d+\s*[-]\s*/i, "").trim();
+  })();
+
+  const continueUrl = continueData?.module
+    ? createPageUrl("ModulePlayer") +
+      `?moduleId=${continueData.module.id}&courseId=${courseId}`
+    : courseId
+      ? createPageUrl("CourseDetail") + `?courseId=${courseId}`
+      : createPageUrl("Classroom");
+
+  const openCourseUrl = courseId
+    ? createPageUrl("CourseDetail") + `?courseId=${courseId}`
+    : createPageUrl("Classroom");
+
+  return (
+    <section className="rounded-2xl overflow-hidden text-white flex-1 relative" style={DARK_PANEL_STYLE}>
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src={BLUEPRINT_BG_VIDEO}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+      <div className="absolute inset-0" style={{ background: BLUEPRINT_VIDEO_OVERLAY }} />
+      <div className="relative p-6 md:p-8">
+        <div className="flex items-center justify-between gap-6">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-2 font-body font-bold text-[9px] tracking-eyebrow uppercase text-awrose-pale bg-white/10 rounded-full px-3 py-1.5 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-awrose-light" />
+              {isComplete
+                ? "Complete · all five phases"
+                : `In progress · Phase ${phaseIndex} of ${totalSections || 5}`}
+            </span>
+            <h3 className="font-display text-[24px] md:text-[28px] leading-tight mb-2">
+              The Aligned <span className="italic text-awrose-light">Woman</span> Blueprint
+            </h3>
+            <p className="font-body font-light text-sm text-white/90">
+              {isComplete
+                ? "You have completed all five phases. Begin again from Awareness whenever you like."
+                : phaseName
+                  ? `You are in ${phaseName}. ${numberWord(remaining, true)} ${remaining === 1 ? "module" : "modules"} left in this phase.`
+                  : "Pick up where you left off."}
+            </p>
+          </div>
+          {!isComplete && typeof coursePercent === "number" && (
+            <ProgressRing percent={coursePercent} />
           )}
         </div>
+        <div className="flex flex-wrap items-center gap-4 mt-7">
+          <button onClick={() => navigate(continueUrl)} className={BTN_FILLED_ROSE}>
+            Continue <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => navigate(openCourseUrl)} className={LINK_ON_DARK}>
+            Open the course
+          </button>
+        </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+// ── 03 · Learning card, free member ──
+function LearningCardFree() {
+  return (
+    <section className="rounded-2xl overflow-hidden text-white flex-1 relative" style={DARK_PANEL_STYLE}>
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src={BLUEPRINT_BG_VIDEO}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+      <div className="absolute inset-0" style={{ background: BLUEPRINT_VIDEO_OVERLAY }} />
+      <div className="relative p-6 md:p-8">
+        <span className="inline-block font-body font-bold text-[9px] tracking-eyebrow uppercase text-awrose-pale bg-white/10 rounded-full px-3 py-1.5 mb-4">
+          The flagship
+        </span>
+        <h3 className="font-display text-[24px] md:text-[28px] leading-tight mb-2">
+          The Aligned <span className="italic text-awrose-light">Woman</span> Blueprint
+        </h3>
+        <p className="font-body font-light text-sm text-white/90 mb-6 max-w-md">
+          The education you should have been given. Five phases, taught by women who have
+          lived them, at your own pace, yours for life.
+        </p>
+        {/* The sales page route is registered lowercase as "/blueprint" in App.jsx.
+            createPageUrl("BlueprintPage") returns "/BlueprintPage", which matches
+            no route and falls through to the 404. Link to the registered path. */}
+        <Link to="/blueprint" className={BTN_OUTLINE_DARK}>
+          Explore the Blueprint <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function MoreCoursesCard() {
+  return (
+    <section className={`${GLASS_CARD} p-6 md:p-8 lg:w-72 flex-shrink-0`}>
+      <h3 className="font-display text-awburg-core text-[20px] leading-tight mb-3">
+        More courses are coming.
+      </h3>
+      <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5">
+        AW Verified experts are bringing their work here, taught the Aligned{" "}
+        <span className="font-display italic">Woman</span> way. Have a look at what is
+        arriving.
+      </p>
+      <Link to="/Classroom" className={BTN_OUTLINE}>
+        Explore courses
+      </Link>
+    </section>
+  );
+}
+
+// ── 04 · Directory band ──
+function DirectoryBand() {
+  return (
+    <section>
+      <SectionLabel>Trusted help, when you want it</SectionLabel>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {[
+          {
+            tag: "Practitioners",
+            heading: "Find an AW Verified practitioner",
+            body: (
+              <>
+                Every AW Verified practitioner has been vetted by us, credentials, proof, and a
+                real conversation. Women you do not have to second-guess.
+              </>
+            ),
+            cta: "Browse practitioners",
+            to: "/ExpertsDirectory",
+            img: "https://media.base44.com/images/public/69f46886a412ee042303f1af/2053763ab_awb-verified-mockup-grid2.png",
+            imgStyle: { objectFit: "cover", objectPosition: "58% 46%", transform: "scale(1.55)", transformOrigin: "58% 46%" },
+          },
+          {
+            tag: "Businesses",
+            heading: "Find an AW Verified business",
+            body: (
+              <>
+                Women-owned businesses we trust enough to put our name near. Find the ones doing
+                the work you need done.
+              </>
+            ),
+            cta: "Browse businesses",
+            to: "/ExpertsDirectory?type=business",
+            img: "https://media.base44.com/images/public/69f46886a412ee042303f1af/4c8c78821_awb-verified-two-up-v2.png",
+            imgStyle: { objectFit: "contain", objectPosition: "right center", transform: "translateX(9%)", transformOrigin: "right center" },
+          },
+        ].map((card) => (
+          <div
+            key={card.tag}
+            className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`}
+            style={{ background: "#FAF5F3" }}
+          >
+            {/* Full-bleed image layer */}
+            <img
+              src={card.img}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full"
+              style={card.imgStyle}
+            />
+            {/* Legibility scrim — 96deg, near-solid behind text, clear over imagery */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(96deg, rgba(250,245,243,0.98) 0%, rgba(250,245,243,0.94) 33%, rgba(250,245,243,0.66) 56%, rgba(250,245,243,0.2) 78%, rgba(250,245,243,0) 100%)",
+              }}
+            />
+            {/* AW Verified seal */}
+            <img
+              src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4e806aa77_aw-verified-badge.svg"
+              alt="AW Verified"
+              className="absolute top-5 right-5 w-9 h-9 z-10"
+            />
+            <div className="relative z-10">
+              <Tag>{card.tag}</Tag>
+              <h3 className="font-display text-[#35081F] text-[20px] leading-tight mt-4 mb-3">
+                {card.heading}
+              </h3>
+              <p
+                className="font-body font-light text-[11.5px] leading-relaxed text-[#35081F] mb-5 max-w-[300px]"
+                style={{ textShadow: "0 1px 3px rgba(250,245,243,0.95), 0 2px 8px rgba(250,245,243,0.85)" }}
+              >
+                {card.body}
+              </p>
+              <Link
+                to={card.to}
+                className="inline-flex items-center gap-2 bg-[#35081F] hover:bg-[#2A061A] text-[#FAF5F3] font-body font-bold text-[11px] tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors duration-200"
+              >
+                {card.cta} <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── 05 · Apply strip ──
+function ApplyStrip() {
+  return (
+    <section className={`${GLASS_CARD} relative overflow-hidden p-6 md:p-8`}>
+      <img
+        src="https://media.base44.com/images/public/69f46886a412ee042303f1af/f61a42b24_aw-verified-seal.png"
+        alt="AW Verified 2026"
+        className="absolute top-5 right-5 w-12 h-12 md:w-14 md:h-14 object-contain"
+      />
+      <h3 className="font-display text-awburg-core text-[18px] leading-tight mb-2 pr-16 md:pr-20">
+        Do you serve women too?
+      </h3>
+      <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5 max-w-xl pr-16 md:pr-20">
+        We would love to meet you. AW Verification is free, and Verified practitioners can
+        bring their courses here.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <Link to="/Apply" className={BTN_OUTLINE}>
+          Apply to become AW Verified
+        </Link>
+        <Link to="/Apply?intent=course" className={BTN_OUTLINE}>
+          Apply to feature your course
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+// ── 06 · Free resources ──
+function FreeResources({ userEmail, isPaid }) {
+  const navigate = useNavigate();
+
+  // Any response on record means she has started: Begin becomes Continue.
+  const { data: moneyStoryStarted = false } = useQuery({
+    queryKey: ["v2-money-story", userEmail],
+    queryFn: async () => {
+      try {
+        const rows = await base44.entities.MoneyStoryResponse.filter(
+          userEmail ? { created_by: userEmail } : {},
+          "-created_date",
+          1
+        );
+        return (rows?.length ?? 0) > 0;
+      } catch (_) {
+        return false;
+      }
+    },
+    enabled: !!userEmail,
+  });
+
+  return (
+    <section>
+      <SectionLabel>Free resources</SectionLabel>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className={`${GLASS_CARD} p-6 flex flex-col`}>
+          <div>
+            <Tag>Workbook</Tag>
+          </div>
+          <h3 className="font-display text-awburg-core text-[19px] leading-tight mt-4 mb-2">
+            Your Money Story
+          </h3>
+          <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-4 flex-1">
+            The beliefs you inherited about money are running quietly underneath every
+            decision. Meet them on paper.
+          </p>
+          <p className="font-body text-[11px] text-awburg-core/55 mb-4">
+            {moneyStoryStarted
+              ? "In progress · resume where you left off"
+              : "Free · about 30 minutes"}
+          </p>
+          <div>
+            <button onClick={() => navigate("/YourMoneyStory")} className={BTN_OUTLINE}>
+              {moneyStoryStarted ? "Continue" : "Begin"}
+            </button>
+          </div>
+        </div>
+
+        <YinVideoCard />
+      </div>
+    </section>
   );
 }
 
 export default function Dashboard() {
-  const [status, setStatus] = useState("loading");
-  const [data, setData] = useState({ state: null, user: null, profile: null });
-  const [errorMsg, setErrorMsg] = useState("");
-  const [stateOverride, setStateOverride] = useState(() => isPreviewMode() ? "new_paid_user" : null);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminCheckComplete, setAdminCheckComplete] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(undefined); // undefined = loading
+  const [dash, setDash] = useState(null); // { state, user, profile }
+  const [dashError, setDashError] = useState("");
+  const [inviteDismissed, setInviteDismissed] = useState(
+    () => sessionStorage.getItem("aw_v2_invite_dismissed") === "1"
+  );
 
-  // A member arriving from an emailed link may not be signed in yet.
-  // Send them to Base44's own sign-in, then return them here.
   useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const authed = await base44.auth.isAuthenticated();
-        if (!authed && active) {
-          base44.auth.redirectToLogin(window.location.href);
-        }
-      } catch (e) {
-        // If the check fails, leave the page to render its normal state.
-      }
-    })();
-    return () => { active = false; };
+    base44.auth
+      .me()
+      .then(setCurrentUser)
+      .catch(() => setCurrentUser(null));
   }, []);
 
-  // Process pending quiz result from localStorage (set by StartingPointProfile after quiz completion)
+  const resolvedUser = currentUser === undefined ? user : currentUser;
+
   useEffect(() => {
-    const processPendingQuiz = async () => {
-      const raw = localStorage.getItem("aw_quiz_result");
-      if (!raw) return;
+    if (!resolvedUser) return;
+    getDashboardState()
+      .then(setDash)
+      .catch((e) => setDashError(e?.message || "Could not load your dashboard state."));
+  }, [resolvedUser?.id]);
 
-      try {
-        // Check auth first - if not logged in, leave localStorage and bail
-        const authed = await base44.auth.isAuthenticated();
-        if (!authed) return;
-
-        const quizResult = JSON.parse(raw);
-        const me = await base44.auth.me();
-        if (!me) return;
-
-        let profiles = [];
-        try {
-          profiles = await base44.entities.MemberProfile.filter({ user_id: me.id });
-        } catch (_) {
-          profiles = await base44.entities.MemberProfile.list();
-        }
-
-        const profile = profiles.length > 0
-          ? profiles[0]
-          : await ensureMemberProfile(me);
-        if (profile?.id) {
-          await base44.entities.MemberProfile.update(profile.id, {
-            computed_archetype_key: quizResult.archetype_key,
-            quiz_completed_at: quizResult.completed_at,
-            has_seen_welcome: true,
-          });
-        }
-
-        localStorage.removeItem("aw_quiz_result");
-        window.location.reload();
-      } catch (err) {
-        console.error("Failed to process quiz result:", err);
-        // Only act if this was a data error, not an auth error. Clear the bad
-        // result so the reload cannot loop, then reload so load() resolves to a
-        // real state instead of sitting on the loading skeleton (which load()
-        // shows while a quiz result is pending).
-        const authed = await base44.auth.isAuthenticated().catch(() => false);
-        if (authed) {
-          localStorage.removeItem("aw_quiz_result");
-          window.location.reload();
-        }
-      }
-    };
-
-    processPendingQuiz();
-  }, []);
-
-  // Check if user is admin on mount
+  // state_b is the one-time first welcome for a paid member. Flip
+  // has_seen_welcome after it renders so her next visit resolves to
+  // state A. This page owns that write since cutover.
   useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const user = await base44.auth.me();
-        const isAdminUser = user?.role && ['owner', 'admin', 'master_admin'].includes(user.role);
-        setIsAdmin(isAdminUser);
-      } catch (err) {
-        console.error("Failed to check admin status:", err);
-        setIsAdmin(false);
+    if (dash?.state !== "state_b" || !dash?.profile?.id) return;
+    base44.entities.MemberProfile.update(dash.profile.id, { has_seen_welcome: true }).catch(
+      () => {}
+    );
+  }, [dash?.state, dash?.profile?.id]);
+
+  const continueData = useContinueModule(dash?.user || resolvedUser);
+
+  // Blueprint course id, same selection rule the continue hook uses.
+  const { data: courses = [] } = useQuery({
+    queryKey: ["v2-courses"],
+    queryFn: () => base44.entities.Course.filter({ isPublished: true }),
+    enabled: !!resolvedUser,
+  });
+  const courseId =
+    (courses.find((c) => c.tags?.includes("blueprint_paid")) || courses[0])?.id || null;
+
+  // Honest whole-course percent for the learning card ring: completed
+  // content modules over total content modules, using the SAME completion
+  // rules as useContinueModule (explicit module-level record, or every
+  // page complete). Kept here rather than in the shared hook so the live
+  // dashboard's code path is untouched.
+  const { data: coursePercent = null } = useQuery({
+    queryKey: ["v2-course-percent", courseId, resolvedUser?.email],
+    enabled: !!courseId && !!resolvedUser?.email,
+    queryFn: async () => {
+      const [modules, pages, progress] = await Promise.all([
+        base44.entities.CourseModule.filter({ courseId, isPublished: true }),
+        base44.entities.CoursePage.filter({ courseId }),
+        base44.entities.CourseProgress.filter({ created_by: resolvedUser.email }),
+      ]);
+      const pagesByModule = {};
+      for (const p of pages) {
+        if (!p.moduleId) continue;
+        if (!pagesByModule[p.moduleId]) pagesByModule[p.moduleId] = [];
+        pagesByModule[p.moduleId].push(p);
       }
-      setAdminCheckComplete(true);
-    };
-    checkAdmin();
-  }, []);
+      const completedPageIds = new Set(
+        progress.filter((p) => p.status === "completed" && p.pageId).map((p) => p.pageId)
+      );
+      const moduleLevelComplete = new Set(
+        progress
+          .filter((p) => p.status === "completed" && !p.pageId && p.moduleId)
+          .map((p) => p.moduleId)
+      );
+      const contentModules = modules.filter(
+        (m) => (pagesByModule[m.id] || []).length > 0
+      );
+      if (contentModules.length === 0) return null;
+      const done = contentModules.filter(
+        (m) =>
+          moduleLevelComplete.has(m.id) ||
+          (pagesByModule[m.id] || []).every((pg) => completedPageIds.has(pg.id))
+      ).length;
+      return Math.round((done / contentModules.length) * 100);
+    },
+  });
 
-  const load = async () => {
-    setStatus("loading");
-    setErrorMsg("");
+  if (currentUser === undefined && !user) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-awrose-pale border-t-awburg-core rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-    // A free member who just finished the quiz arrives with a pending result in
-    // localStorage. processPendingQuiz owns that first pass: it creates the
-    // MemberProfile, writes the archetype, then reloads. Defer to it so load()
-    // does not race ahead into the not-registered wall. On the reload the result
-    // is cleared and the profile is in place, so load() resolves to state_c.
-    if (localStorage.getItem("aw_quiz_result")) {
-      return; // stay on the loading skeleton; processPendingQuiz finishes and reloads
-    }
+  const firstName = (resolvedUser?.full_name || "").split(" ")[0] || "there";
+  const state = dash?.state || null;
+  const profile = dash?.profile || null;
 
-    try {
-      const result = await getDashboardState();
-      setData(result);
-      setStatus("ready");
-      return;
-    } catch (err) {
-      const msg = err?.message || "Unknown error";
+  const isPaidState =
+    state === "state_a_with_quiz" || state === "state_a_no_quiz" || state === "state_b";
+  const isFreeState = state === "state_c" || state === "state_c_no_quiz";
+  const hasPattern = state === "state_a_with_quiz" || state === "state_c";
 
-      // Anything other than a missing profile: show the generic error card.
-      if (!msg.toLowerCase().includes("no memberprofile")) {
-        setErrorMsg(msg);
-        setStatus("error");
-        return;
-      }
+  const greetingLine = isFreeState && !hasPattern ? "Welcome" : `${timeGreeting()}`;
+  const greetingSub =
+    isFreeState && !hasPattern
+      ? "You are in the right place. Here is where to begin."
+      : "This is your space. Pick up where you left off, or wander.";
 
-      // No MemberProfile yet. Branch on whether this account is entitled.
-      try {
-        let me = await base44.auth.me();
-        let tags = Array.isArray(me?.access_tags) ? me.access_tags : [];
-        let isPaid =
-          me?.membership_type === "paid" ||
-          tags.includes("blueprint_paid") ||
-          ["admin", "owner", "master_admin"].includes(me?.role);
+  const memberSince = (() => {
+    const raw = resolvedUser?.created_date;
+    if (!raw) return null;
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  })();
 
-        // First-login race: a pre-approved member may not have been granted
-        // access yet, because claimPreApproval is still running in the
-        // background. Before showing the not-registered screen, run the claim
-        // here, wait for it, and re-read the account. Only treat them as not
-        // registered if they still have no access after the claim has run.
-        if (!isPaid) {
-          try {
-            await base44.functions.invoke("claimPreApproval", {});
-          } catch (_) {
-            // Nothing to claim, or the claim failed. Fall through to re-check.
-          }
-
-          // Checkout backstop: a buyer who paid then created their account may
-          // land here instead of returning to the success page. If we are
-          // holding their Stripe session, claim it now so the Blueprint
-          // unlocks wherever they land. verifyCheckoutSession is idempotent and
-          // grants to the signed-in account.
-          try {
-            const pendingSession = localStorage.getItem("aw_pending_checkout_session");
-            if (pendingSession) {
-              await base44.functions.invoke("verifyCheckoutSession", { session_id: pendingSession });
-              localStorage.removeItem("aw_pending_checkout_session");
-            }
-          } catch (_) {
-            // Nothing to claim, or a transient failure. Leave the key so a later
-            // load can retry, and fall through to re-check.
-          }
-
-          try {
-            me = await base44.auth.me();
-          } catch (_) {
-            // Keep the earlier value if the refetch fails.
-          }
-          tags = Array.isArray(me?.access_tags) ? me.access_tags : [];
-          isPaid =
-            me?.membership_type === "paid" ||
-            tags.includes("blueprint_paid") ||
-            ["admin", "owner", "master_admin"].includes(me?.role);
-        }
-
-        if (!isPaid) {
-          // Logged in with no Blueprint access: a free member, for example one
-          // arriving through the Your Money Story funnel. Give them a free profile
-          // and resolve to the free home instead of the not-registered wall. The
-          // wrong-email buyer path now lives as a quiet link on the free home.
-          await ensureMemberProfile(me);
-          const result = await getDashboardState();
-          setData(result);
-          setStatus("ready");
-          return;
-        }
-
-        // Entitled but no profile yet (pre-approval just claimed, or added
-        // manually): create one, then retry.
-        await ensureMemberProfile(me);
-        const result = await getDashboardState();
-        setData(result);
-        setStatus("ready");
-      } catch (e2) {
-        setErrorMsg(e2?.message || msg);
-        setStatus("error");
-      }
-    }
+  const dismissInvite = () => {
+    sessionStorage.setItem("aw_v2_invite_dismissed", "1");
+    setInviteDismissed(true);
   };
-
-  const handleLogout = () => {
-    // Log out, then land back on the dashboard, which prompts a fresh sign-in.
-    base44.auth.logout(`${window.location.origin}/Dashboard`);
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  // Real course progress data from useContinueModule
-  const continueData = useContinueModule(data.user);
-
-  // Workbook queries at Dashboard level so ALL states can use them
-  const { data: workbooks = [] } = useQuery({
-    queryKey: ["dashboard-workbooks"],
-    queryFn: () => base44.entities.Workbook.filter({ course_id: BLUEPRINT_COURSE_ID, status: "published" }),
-    initialData: [],
-  });
-
-  const { data: workbookResponses = [] } = useQuery({
-    queryKey: ["dashboard-workbook-responses"],
-    queryFn: () => base44.entities.WorkbookResponse.filter({}, "-updated_date", MEMBER_READ_LIMIT),
-    initialData: [],
-  });
-
-  const { data: allExperts = [] } = useQuery({
-    queryKey: ["dashboard-experts"],
-    queryFn: () => base44.entities.Expert.filter({}),
-    initialData: [],
-  });
-
-  // Build workbook data with real completion status
-  const workbookData = workbooks.map(wb => {
-    const response = workbookResponses.find(r => r.workbook_id === wb.id);
-    const expert = wb.expert_id ? allExperts.find(e => e.id === wb.expert_id) : null;
-
-    let wbStatus = "not_started";
-    if (response?.is_complete) {
-      wbStatus = "completed";
-    } else if (response) {
-      const hasAnswers = response.answers && Object.keys(response.answers).length > 0;
-      wbStatus = hasAnswers ? "in_progress" : "not_started";
-    }
-
-    return {
-      id: wb.id,
-      title: wb.title,
-      expert: expert?.name || "",
-      status: wbStatus,
-    };
-  });
-
-  // Side effect: flip has_seen_welcome when state_b renders
-  useEffect(() => {
-    if (status !== "ready") return;
-    if (data.state !== "state_b") return;
-    if (!data.profile?.id) return;
-
-    base44.entities.MemberProfile
-      .update(data.profile.id, { has_seen_welcome: true })
-      .catch((err) => {
-        console.error("[Dashboard] Failed to flip has_seen_welcome:", err);
-      });
-  }, [status, data.state, data.profile?.id]);
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-off-white">
-        <DashboardSidebar />
-        <MobileTabBar />
-        <div className="lg:pl-72 pb-20 lg:pb-0">
-          <main className="px-6 md:px-10 py-10 max-w-[1400px]">
-            <div className="mb-10">
-              <div className="h-3 w-32 bg-awburg-core/8 rounded mb-4 animate-pulse" />
-              <div className="h-12 w-2/3 bg-awburg-core/8 rounded animate-pulse" />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <section className="lg:col-span-8">
-                <DashboardSkeleton />
-              </section>
-              <aside className="lg:col-span-4 space-y-4">
-                <div className="h-60 bg-awburg-core/8 rounded-xl animate-pulse" />
-                <div className="h-72 bg-awburg-core/8 rounded-xl animate-pulse" />
-              </aside>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === "not_registered") {
-    return (
-      <div className="min-h-screen bg-off-white">
-        <DashboardSidebar />
-        <MobileTabBar />
-        <div className="lg:pl-72 pb-20 lg:pb-0">
-          <main className="px-6 md:px-10 py-10 max-w-[1400px]">
-            <div className="min-h-[60vh] flex items-center justify-center">
-              <div className="bg-paper rounded-xl border border-awburg-core/8 p-8 max-w-md text-center">
-                <p className="font-body font-bold text-[10px] tracking-eyebrow text-awrose-core uppercase mb-3">
-                  WELCOME
-                </p>
-                <h2 className="font-display text-awburg-core text-2xl leading-tight mb-3">
-                  Oops! You don't seem to be registered for this course.
-                </h2>
-                <p className="font-body font-light text-awburg-core/75 text-sm leading-relaxed mb-6">
-                  If you have paid for this course, you may have tried to enter on another email address. Log out and sign in with the email you used when you joined.
-                </p>
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-2 bg-awburg-core hover:bg-awburg-dark text-paper text-xs font-bold tracking-eyebrow uppercase py-3 px-6 rounded-full transition-colors"
-                >
-                  LOG OUT AND TRY ANOTHER EMAIL
-                </button>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === "error") {
-    if (errorMsg && typeof errorMsg === "string" && errorMsg.toLowerCase().includes("auth")) {
-      window.location.href = "/";
-      return null;
-    }
-    return (
-      <div className="min-h-screen bg-off-white">
-        <DashboardSidebar />
-        <MobileTabBar />
-        <div className="lg:pl-72 pb-20 lg:pb-0">
-          <main className="px-6 md:px-10 py-10 max-w-[1400px]">
-            <DashboardError message={errorMsg} onRetry={load} onLogout={handleLogout} />
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  const { state, user, profile } = data;
-  const joinedDate = formatJoinedDate(profile?.signup_timestamp);
-  const membershipLabel = getMembershipLabel(user);
-  const isBlueprintOwner = membershipLabel === "Blueprint owner";
-
-  // Use override state if set, otherwise use real state
-  const effectiveState = stateOverride || state;
-
-  const isNewPaidUserPreview = effectiveState === "new_paid_user";
-
-  let StateComponent = null;
-  if (effectiveState === "state_b") StateComponent = StateB;
-  else if (effectiveState === "state_a_no_quiz" || isNewPaidUserPreview) StateComponent = StateANoQuiz;
-  else if (effectiveState === "state_a_with_quiz") StateComponent = StateAWithQuiz;
-  else if (effectiveState === "state_c") StateComponent = StateC;
-  else if (effectiveState === "state_c_no_quiz") StateComponent = StateCNoQuiz;
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <DashboardSidebar
-        memberSince={joinedDate.toUpperCase()}
-        isBlueprintOwner={isBlueprintOwner}
-      />
-      <MobileTabBar />
+    <div className="min-h-screen flex relative" style={PAGE_BG_STYLE}>
+      {/* Atmosphere orbs — fixed behind all content. */}
+      <div aria-hidden="true" style={TOP_HAZE_STYLE} />
+      <div aria-hidden="true" style={ROSE_SPHERE_STYLE} />
+      <AppShellV2 active="dashboard">
+        <main className="max-w-5xl mx-auto px-5 md:px-6 py-8 space-y-8 lg:space-y-12">
+          {/* 01 · Greeting */}
+          <section>
+            <h1 className="font-display text-[30px] md:text-[34px] text-awburg-core leading-tight">
+              {greetingLine}, {firstName}.
+            </h1>
+            <p className="font-body font-light text-[14px] text-awburg-core/60 mt-1">
+              {greetingSub}
+            </p>
+          </section>
 
-      <div className="lg:pl-72 pb-20 lg:pb-0">
-        <main className="px-6 md:px-10 py-10 max-w-[1400px]">
-          {/* Preview banner when override is active */}
-          {stateOverride && isAdmin && (
-            <div className="mb-6 bg-amber-100 border border-amber-300 rounded-lg px-4 py-3 text-center">
-              <span className="text-amber-900 text-sm font-semibold">
-                PREVIEWING: {stateOverride.replace(/_/g, ' ').toUpperCase()}
-              </span>
-            </div>
+          {dashError && (
+            <section className={`${GLASS_CARD} p-6`}>
+              <p className="font-body text-[13px] text-awburg-core/80">
+                Something quiet went wrong loading your space. Refresh to try again, or{" "}
+                <Link to="/Support" className="underline underline-offset-2">
+                  reach Support
+                </Link>{" "}
+                and we will sort it out together.
+              </p>
+            </section>
           )}
 
-          <DashboardHeader firstName={profile?.first_name} user={user} />
+          {/* 02 · State block */}
+          {!dashError && !state && (
+            <section className="rounded-2xl bg-awrose-wash animate-pulse h-44" />
+          )}
+          {state && hasPattern && (
+            <PatternHero profile={profile} isPaid={isPaidState} />
+          )}
+          {state && !hasPattern && !inviteDismissed && (
+            <ProfileInviteHero
+              variant={isFreeState ? "c" : "b"}
+              onDismiss={dismissInvite}
+            />
+          )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <section className="lg:col-span-8 order-1">
-              {StateComponent ? (
-                <StateComponent
-                  user={user}
-                  profile={profile}
-                  workbookData={isNewPaidUserPreview ? [] : workbookData}
-                  continueData={isNewPaidUserPreview ? null : continueData}
-                  onCheckout={() => setCheckoutOpen(true)}
+          {/* 03 · Your learning */}
+          <section>
+            <SectionLabel>Your learning</SectionLabel>
+            <div className="flex flex-col lg:flex-row gap-5">
+              {isPaidState ? (
+                <LearningCardPaid
+                  continueData={continueData}
+                  courseId={courseId}
+                  coursePercent={coursePercent}
                 />
               ) : (
-                <DashboardError
-                  message={`Unrecognised dashboard state: ${state}`}
-                  onRetry={load}
-                  onLogout={handleLogout}
-                />
+                <LearningCardFree />
               )}
-            </section>
+              <MoreCoursesCard />
+            </div>
+          </section>
 
-            <aside className="lg:col-span-4 order-2 flex flex-col gap-4">
-              <ExpertSpotlight />
-              <div className="pt-2">
-                <AccountStatusFooter
-                  joinedDate={joinedDate}
-                  membershipLabel={membershipLabel}
-                />
+          {/* 04 · Directory */}
+          <DirectoryBand />
+
+          {/* 05 · For practitioners */}
+          <ApplyStrip />
+
+          {/* 06 · Free resources */}
+          <FreeResources userEmail={resolvedUser?.email || null} isPaid={isPaidState} />
+
+          {/* Closing line + footer */}
+          <section className="pt-2">
+            <p className="font-body font-light text-[12.5px] text-awburg-core/70 text-center mb-10">
+              Take what you need. It will all be here when you come back.
+            </p>
+            <footer className="border-t border-awburg-core/8 pt-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <p className="font-body text-[11px] text-awburg-core/55">
+                {memberSince ? `Member since ${memberSince} · ` : ""}
+                {isPaidState ? (
+                  <>
+                    The Aligned <span className="font-display italic">Woman</span> Blueprint
+                  </>
+                ) : (
+                  "Free member"
+                )}
+              </p>
+              <div className="flex items-center gap-4">
+                <span
+                  aria-disabled="true"
+                  className="font-body text-[11px] text-awburg-core/30 cursor-default select-none"
+                >
+                  Talk to LaurAI · coming soon
+                </span>
+                <Link
+                  to="/ProfileSettings"
+                  className="font-body text-[11px] text-awburg-core/55 hover:text-awburg-core transition-colors"
+                >
+                  Your profile
+                </Link>
+                <Link
+                  to="/Support"
+                  className="font-body text-[11px] text-awburg-core/55 hover:text-awburg-core transition-colors"
+                >
+                  Support
+                </Link>
               </div>
-            </aside>
-          </div>
+            </footer>
+          </section>
         </main>
-      </div>
-
-      <CheckoutModal open={checkoutOpen} onOpenChange={setCheckoutOpen} />
-
-      {/* Admin state preview toggle - fixed position bottom-right */}
-      {isAdmin && adminCheckComplete && (
-        <AdminPreviewPanel
-          stateOverride={stateOverride}
-          setStateOverride={setStateOverride}
-          enablePreviewMode={enablePreviewMode}
-          disablePreviewMode={disablePreviewMode}
-        />
-      )}
+      </AppShellV2>
     </div>
   );
 }
