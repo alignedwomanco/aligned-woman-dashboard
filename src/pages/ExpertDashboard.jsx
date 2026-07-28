@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/AuthContext";
+import { resolveDomain } from "@/lib/expertDomain";
 import { motion } from "framer-motion";
 import {
   Copy,
@@ -544,15 +545,6 @@ const SOCIAL_FIELDS = [
 
 const MAX_CUSTOM_LINKS = 2;
 
-const CATEGORY_DOMAIN_MAP_DASH = {
-  "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
-  "69f48a8d1e94ea01a3a8c3fa": "Nervous System",
-  "69f48a8d1e94ea01a3a8c3fb": "Mindset & Behaviour",
-  "69f48a8d1e94ea01a3a8c3fc": "Money",
-  "69f48a8d1e94ea01a3a8c3fd": "Leadership & Authority",
-  "69f48a8d1e94ea01a3a8c3fe": "Relationships",
-  "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
-};
 
 function SocialLinkIcon({ platform, size = 18 }) {
   const s = { width: size, height: size, flexShrink: 0 };
@@ -703,7 +695,7 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
 
   const sans = "Montserrat, sans-serif";
   const serif = "'DM Serif Display', Georgia, serif";
-  const domain = CATEGORY_DOMAIN_MAP_DASH[expert.category] || "Identity & Visibility";
+  const domain = resolveDomain(expert);
   const publicSlug = (formData.name || expert.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   // Title tags (split by |)
