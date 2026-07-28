@@ -1037,7 +1037,7 @@ export default function ExpertsDirectory() {
       {/* ── HERO AND FILTERS ──
           One rounded panel rather than a full bleed hero above a separate
           sticky bar. The filters belong to the invitation, not to the page. */}
-      <section style={{ maxWidth: 1180, margin: "0 auto", background: C.roseWash, borderRadius: 28, padding: "56px 48px 48px", position: "relative", overflow: "hidden", boxShadow: "0 8px 30px rgba(62,30,38,0.05)" }}>
+      <section style={{ maxWidth: 1180, margin: "0 auto", background: C.roseWash, borderRadius: 28, padding: "56px 48px 48px", position: "relative", boxShadow: "0 8px 30px rgba(62,30,38,0.05)" }}>
         <img
           src={SEAL_IMAGE_URL}
           alt=""
@@ -1062,21 +1062,63 @@ export default function ExpertsDirectory() {
 
         <div style={{ maxWidth: 900, margin: "36px auto 0" }}>
           {/* Search bar */}
-          <div style={{ position: "relative", marginBottom: 16 }}>
+          <div ref={searchRef} style={{ position: "relative", marginBottom: 16, zIndex: 130 }}>
             <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: C.midGrey, pointerEvents: "none" }} />
             <input
               type="text"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Search by name, specialty, or city..."
-              style={{ width: "100%", height: 44, paddingLeft: 42, paddingRight: searchText ? 42 : 14, background: C.white, border: "1px solid rgba(74,14,46,0.12)", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none" }}
-              onFocus={(e) => { e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.12)"; }}
+              onChange={(e) => { setSearchText(e.target.value); setSearchOpen(true); setSearchIndex(-1); }}
+              onFocus={(e) => { setSearchOpen(true); e.target.style.borderColor = C.roseCore; e.target.style.boxShadow = "0 0 0 3px rgba(196,132,122,0.12)"; }}
               onBlur={(e) => { e.target.style.borderColor = "rgba(74,14,46,0.12)"; e.target.style.boxShadow = "none"; }}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Search by name, specialty, or city..."
+              role="combobox"
+              aria-expanded={searchOpen && searchSuggestions.length > 0}
+              aria-controls="aw-search-suggestions"
+              aria-autocomplete="list"
+              autoComplete="off"
+              style={{ width: "100%", height: 44, paddingLeft: 42, paddingRight: searchText ? 42 : 14, background: C.white, border: "1px solid rgba(74,14,46,0.12)", borderRadius: 100, fontFamily: sans, fontWeight: 400, fontSize: 13, color: C.darkGrey, boxSizing: "border-box", outline: "none" }}
             />
             {searchText && (
-              <button onClick={() => setSearchText("")} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}>
+              <button onClick={() => { setSearchText(""); setSearchOpen(false); setSearchIndex(-1); }} aria-label="Clear search" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}>
                 <X style={{ width: 14, height: 14, color: C.midGrey }} />
               </button>
+            )}
+
+            {/* Typeahead. Every suggestion comes from a live practitioner, so
+                picking one can never land on an empty result. */}
+            {searchOpen && searchSuggestions.length > 0 && (
+              <ul
+                id="aw-search-suggestions"
+                role="listbox"
+                style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, listStyle: "none", margin: 0, background: C.white, border: "1px solid rgba(74,14,46,0.1)", borderRadius: 14, padding: "6px 0", boxShadow: "0 12px 34px rgba(74,14,46,0.14)", zIndex: 140, maxHeight: 320, overflowY: "auto" }}
+              >
+                {searchSuggestions.map((s, i) => {
+                  const q = searchText.trim();
+                  const at = s.label.toLowerCase().indexOf(q.toLowerCase());
+                  const before = at >= 0 ? s.label.slice(0, at) : s.label;
+                  const hit = at >= 0 ? s.label.slice(at, at + q.length) : "";
+                  const after = at >= 0 ? s.label.slice(at + q.length) : "";
+                  return (
+                    <li key={`${s.kind}-${s.label}`} role="option" aria-selected={i === searchIndex}>
+                      <button
+                        onClick={() => applySuggestion(s)}
+                        onMouseEnter={() => setSearchIndex(i)}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, width: "100%", textAlign: "left", padding: "10px 16px", background: i === searchIndex ? C.rosePale : "transparent", border: "none", cursor: "pointer", fontFamily: sans, fontSize: 13, color: C.burgCore }}
+                      >
+                        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {before}
+                          <strong style={{ fontWeight: 700 }}>{hit}</strong>
+                          {after}
+                        </span>
+                        <span style={{ flexShrink: 0, fontFamily: sans, fontWeight: 600, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.14em", color: C.midGrey }}>
+                          {s.kind}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </div>
 
