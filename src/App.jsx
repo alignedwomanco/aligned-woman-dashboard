@@ -40,7 +40,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import DashboardV2 from './pages/DashboardV2';
+import Dashboard from './pages/Dashboard';
 import TheAWStandard from './pages/TheAWStandard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -106,12 +106,11 @@ const AuthenticatedApp = () => {
 
       {/* ── Protected pages (require login) ── */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        {/* Cutover (July 2026): /Dashboard renders the rebuilt dashboard.
-            The previous dashboard remains at src/pages/Dashboard.jsx,
-            unrouted, as the instant rollback. */}
-        <Route path="/Dashboard" element={<DashboardV2 />} />
-        {/* Legacy preview alias for the same page */}
-        <Route path="/DashboardV2" element={<DashboardV2 />} />
+        {/* /Dashboard is declared explicitly, ahead of the generic loop, so it
+            renders without the Layout wrapper. The dashboard brings its own
+            shell via AppShellV2. The previous dashboard is kept unrouted in
+            src/pages/DashboardLegacy.jsx as a rollback. */}
+        <Route path="/Dashboard" element={<Dashboard />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route
             key={path}
