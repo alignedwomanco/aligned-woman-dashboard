@@ -36,16 +36,6 @@ const PINNED_CATEGORIES = [
   "Branding & Visibility",
 ];
 
-// Category ID → domain label mapping (matches DB category IDs)
-const CATEGORY_DOMAIN_MAP = {
-  "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
-  "69f48a8d1e94ea01a3a8c3fa": "Nervous System",
-  "69f48a8d1e94ea01a3a8c3fb": "Mindset & Behaviour",
-  "69f48a8d1e94ea01a3a8c3fc": "Money",
-  "69f48a8d1e94ea01a3a8c3fd": "Leadership & Authority",
-  "69f48a8d1e94ea01a3a8c3fe": "Relationships",
-  "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
-};
 
 // The approved AW Verified seal, the same asset TheAWStandard.jsx uses. One
 // source for the mark, so the directory and the Standard page cannot drift.
