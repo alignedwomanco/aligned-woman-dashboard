@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
+import { CATEGORY_DOMAIN_MAP, resolveDomain } from "@/lib/expertDomain";
 import { X, Search, ChevronDown, Pencil, MapPin, Video, Check } from "lucide-react";
 
 // ─── DESIGN TOKENS ───
@@ -88,14 +89,10 @@ function credentialsFromTitle(title) {
 
 // Map a DB expert record to the card shape
 function mapDbExpert(e) {
-  // Support both legacy string and new array for category
   const categoryIds = Array.isArray(e.category) ? e.category : e.category ? [e.category] : [];
-  // Founder override. Laura Thomas carries a composite domain string rather
-  // than the single first-mapped category the rest of the directory uses.
-  const isLauraThomas = (e.name || "").toLowerCase().includes("laura thomas");
-  const domain = isLauraThomas
-    ? "AW Founder | Leadership & Authority | Mindset & Behaviour | Women's Retreat Guide"
-    : categoryIds.map(id => CATEGORY_DOMAIN_MAP[id]).find(Boolean) || "Identity & Visibility";
+  // Domain label, including the founder override, comes from @/lib/expertDomain
+  // so the card, the profile hero and the expert dashboard cannot disagree.
+  const domain = resolveDomain(e);
   return {
     id: e.id,
     name: e.name,
