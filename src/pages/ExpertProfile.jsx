@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Linkedin, Instagram, Globe, Mail, MapPin, Video, Check, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
+import { resolveDomain } from "@/lib/expertDomain";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 
 // ────────────────────────────────────────────────────────────────
@@ -43,36 +44,11 @@ const sans = "'Montserrat', system-ui, sans-serif";
 const SEAL_IMAGE_URL =
   "https://media.base44.com/images/public/69f46886a412ee042303f1af/c01141aed_aw-verified-seal.png";
 
-// Domain label per category id. The record carries an array, and the first
-// non-Founder entry is the one that prints. Indexing this map with the raw
-// array returns undefined, which is what made every profile read "Identity &
-// Visibility" regardless of who it was.
-const CATEGORY_DOMAIN_MAP = {
-  "69f48a8d1e94ea01a3a8c3f9": "Health & Hormones",
-  "69f48a8d1e94ea01a3a8c3fa": "Nervous System",
-  "69f48a8d1e94ea01a3a8c3fb": "Mindset & Behaviour",
-  "69f48a8d1e94ea01a3a8c3fc": "Money",
-  "69f48a8d1e94ea01a3a8c3fd": "Leadership & Authority",
-  "69f48a8d1e94ea01a3a8c3fe": "Relationships",
-  "69f48a8d1e94ea01a3a8c3ff": "Identity & Visibility",
-};
-
 const DELIVERY_LABELS = {
   online: ["Online"],
   in_person: ["In person"],
   both: ["In person", "Online"],
 };
-
-function resolveDomain(expert) {
-  if (!expert) return "";
-  // Founder override — Laura Thomas carries a composite domain string rather
-  // than the single first-mapped category the rest of the profiles use.
-  if ((expert.name || "").toLowerCase().includes("laura thomas")) {
-    return "AW Founder | Leadership & Authority | Mindset & Behaviour | Women's Retreat Guide";
-  }
-  const ids = Array.isArray(expert.category) ? expert.category : expert.category ? [expert.category] : [];
-  return ids.map((id) => CATEGORY_DOMAIN_MAP[id]).find(Boolean) || "";
-}
 
 function slugify(name) {
   return (name || "")
