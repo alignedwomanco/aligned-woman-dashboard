@@ -87,7 +87,6 @@ const AuthenticatedApp = () => {
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
-      <Route path="/experts/:slug" element={<ExpertProfile />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/Checkout" element={<Checkout />} />
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
@@ -111,6 +110,12 @@ const AuthenticatedApp = () => {
             shell via AppShellV2. The previous dashboard is kept unrouted in
             src/pages/DashboardLegacy.jsx as a rollback. */}
         <Route path="/Dashboard" element={<Dashboard />} />
+        {/* Practitioner profiles. Nothing in the directory is public, so this
+            sits behind ProtectedRoute alongside /ExpertsDirectory. It brings
+            its own sidebar, so it is declared here rather than in the generic
+            loop, which would wrap it in Layout as well. /theawstandard remains
+            the only public directory-adjacent page. */}
+        <Route path="/experts/:slug" element={<ExpertProfile />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route
             key={path}
