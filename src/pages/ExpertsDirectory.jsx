@@ -90,7 +90,12 @@ function credentialsFromTitle(title) {
 function mapDbExpert(e) {
   // Support both legacy string and new array for category
   const categoryIds = Array.isArray(e.category) ? e.category : e.category ? [e.category] : [];
-  const domain = categoryIds.map(id => CATEGORY_DOMAIN_MAP[id]).find(Boolean) || "Identity & Visibility";
+  // Founder override — Laura Thomas carries a composite domain string rather
+  // than the single first-mapped category the rest of the directory uses.
+  const isLauraThomas = (e.name || "").toLowerCase().includes("laura thomas");
+  const domain = isLauraThomas
+    ? "AW Founder | Leadership & Authority | Mindset & Behaviour | Women's Retreat Guide"
+    : categoryIds.map(id => CATEGORY_DOMAIN_MAP[id]).find(Boolean) || "Identity & Visibility";
   return {
     id: e.id,
     name: e.name,

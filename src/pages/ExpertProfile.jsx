@@ -65,6 +65,11 @@ const DELIVERY_LABELS = {
 
 function resolveDomain(expert) {
   if (!expert) return "";
+  // Founder override — Laura Thomas carries a composite domain string rather
+  // than the single first-mapped category the rest of the profiles use.
+  if ((expert.name || "").toLowerCase().includes("laura thomas")) {
+    return "AW Founder | Leadership & Authority | Mindset & Behaviour | Women's Retreat Guide";
+  }
   const ids = Array.isArray(expert.category) ? expert.category : expert.category ? [expert.category] : [];
   return ids.map((id) => CATEGORY_DOMAIN_MAP[id]).find(Boolean) || "";
 }
