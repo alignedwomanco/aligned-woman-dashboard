@@ -3,7 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Linkedin, Instagram, Globe, Mail, MapPin, Video, Check, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useAuth } from "@/lib/AuthContext";
 import { createPageUrl } from "@/utils";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
 
@@ -23,6 +22,13 @@ const C = {
   ink: "#2B1220",
   meta: "#92707D",
   onDark: "#F8ECE7",
+  // Blush dreamscape gradient stops, named rather than left inline so the
+  // surface is defined in one place like every other colour on the page.
+  bg1: "#F6EEEA",
+  bg2: "#EEDAD3",
+  bg3: "#E9D3CD",
+  bg4: "#F1E3DD",
+  bg5: "#F8F1ED",
 };
 
 const GLASS = "rgba(255,255,255,0.42)";
@@ -394,7 +400,6 @@ function FacultyCard({ person }) {
 export default function ExpertProfile() {
   const { slug } = useParams();
   const formRef = useRef(null);
-  const { user } = useAuth();
 
   const { data: allExperts = [], isLoading } = useQuery({
     queryKey: ["all-experts-profile"],
@@ -426,7 +431,7 @@ export default function ExpertProfile() {
   const pageStyles = (
     <style>{`
       .aw-profile {
-        background: linear-gradient(168deg, #F6EEEA 0%, #EEDAD3 30%, #E9D3CD 55%, #F1E3DD 80%, #F8F1ED 100%);
+        background: linear-gradient(168deg, ${C.bg1} 0%, ${C.bg2} 30%, ${C.bg3} 55%, ${C.bg4} 80%, ${C.bg5} 100%);
         min-height: 100vh;
         position: relative;
         overflow-x: hidden;
