@@ -106,6 +106,10 @@ export function CommunityStyles() {
       }
       .aw-c .page { position:relative; max-width:1280px; margin:0; padding:32px 40px 96px 8px; }
       .aw-c .main { display:flex; flex-direction:column; gap:20px; }
+      /* Two stacked blocks with no section title between them, which is the
+         event strip sitting under Start your own group, would otherwise have
+         zero gap while every other section break has 44px. */
+      .aw-c .main + .main { margin-top:44px; }
 
       .aw-c .card {
         position:relative; background:var(--card); border-radius:var(--r-card);
