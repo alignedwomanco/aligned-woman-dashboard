@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Play, X } from "lucide-react";
 
 const YIN_VIDEO_URL =
@@ -108,10 +109,22 @@ function YinVideoModal({ src, onClose }) {
     ref.current?.play().catch(() => {});
   }, []);
 
-  return (
+  // Rendered into document.body rather than in place. The shell wraps page
+  // content in a div with position relative and a z-index, which creates a
+  // stacking context: any z-index used inside it is resolved within that
+  // context, so the modal could never rise above the sidebar no matter how
+  // high it was set. A portal makes it a sibling of the app root instead.
+  return createPortal(
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6"
-      style={{ background: "rgba(26,5,16,0.78)", backdropFilter: "blur(4px)" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Video"
+      style={{
+        background: "rgba(26,5,16,0.72)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+      }}
       onClick={onClose}
     >
       <div
@@ -137,6 +150,7 @@ function YinVideoModal({ src, onClose }) {
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
