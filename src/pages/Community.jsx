@@ -65,7 +65,7 @@ export default function Community() {
             <p>Rooms to meet people, ask questions, and hear from the women who know.</p>
           </div>
 
-          <p className="section-title">Your groups</p>
+          <p className="section-title" style={{ marginBottom: 18 }}>Your groups</p>
           <div className="main">
             {isLoading ? (
               <div className="card quiet">
@@ -93,7 +93,7 @@ export default function Community() {
             <OpeningSoonCard />
           </div>
 
-          <p className="section-title">Start your own group</p>
+          <p className="section-title" style={{ marginBottom: 18 }}>Start your own group</p>
           <div className="main">
             <div className="card quiet banner">
               <div className="banner-row">
