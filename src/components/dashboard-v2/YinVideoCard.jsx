@@ -10,7 +10,7 @@ const GLASS_CARD =
   "rounded-2xl border border-awburg-core/10 bg-white/40 backdrop-blur-2xl shadow-sm";
 
 // Design spec hexes (AWB handoff, July 2026).
-const INK = "#4a2a32"; // dark burgundy — play button, title
+const INK = "#4a2a32"; // dark burgundy, play button and title
 const BODY = "#706666"; // muted body text
 const META = "#8a7c7c"; // meta line
 const BADGE_BG = "#fcfaf9";
@@ -50,7 +50,7 @@ export default function YinVideoCard() {
           20 minutes • watch anytime
         </p>
 
-        {/* Video thumbnail — clicking opens the modal, never navigates. */}
+        {/* Video thumbnail. Clicking opens the modal, never navigates. */}
         <button
           type="button"
           onClick={() => setOpen(true)}
