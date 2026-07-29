@@ -11,7 +11,7 @@ import {
 
 // ────────────────────────────────────────────────────────────────
 // Community index · Your groups, then Discover, then the two quiet
-// strips. Two states: nothing joined, and in one or more groups.
+// banners. Two states: nothing joined, and in one or more groups.
 // ────────────────────────────────────────────────────────────────
 
 export default function Community() {
@@ -69,11 +69,11 @@ export default function Community() {
           <div className="main">
             {isLoading ? (
               <div className="card quiet">
-                <p style={{ fontSize: 12.5, color: "#92707D", margin: 0 }}>Loading...</p>
+                <p style={{ fontSize: 12.5, color: "var(--note)", margin: 0 }}>Loading...</p>
               </div>
             ) : joined.length === 0 ? (
-              <div className="card quiet">
-                <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "#92707D", margin: 0, lineHeight: 1.7 }}>
+              <div className="empty">
+                <p style={{ margin: 0 }}>
                   You have not joined a group yet.{" "}
                   {discover[0] ? `${discover[0].name} is open to everyone.` : "New groups are opening soon."}
                 </p>
@@ -85,49 +85,60 @@ export default function Community() {
             )}
           </div>
 
-          {discover.length > 0 && (
-            <>
-              <p className="section-title">Discover</p>
-              <div className="main">
-                {discover.map((g) => (
-                  <DiscoverCard key={g.id} group={g} session={nextByGroup[g.id]} />
-                ))}
-              </div>
-            </>
-          )}
+          <p className="section-title">Discover</p>
+          <div className="main discover-row">
+            {discover.map((g) => (
+              <DiscoverCard key={g.id} group={g} session={nextByGroup[g.id]} />
+            ))}
+            <OpeningSoonCard />
+          </div>
 
           <p className="section-title">Start your own group</p>
           <div className="main">
-            <div className="card quiet">
-              <Chip>Private</Chip>
-              <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 22, color: "#4A0E2E", margin: "14px 0 10px" }}>
-                Start your own group
-              </h3>
-              <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12.5, color: "#2B1220", opacity: 0.82, lineHeight: 1.75, margin: "0 0 20px", maxWidth: 520 }}>
-                Bring together the women you already know. A book club, an accountability circle, or the friends you met at an event. Only the people you invite can see it.
-              </p>
-              {/* Private groups are Phase 3. Until then this captures interest
-                  rather than opening a door that leads nowhere. */}
-              <Link to={createPageUrl("Support")} className="btn ghost">
-                Tell us you want this
-              </Link>
+            <div className="card quiet banner">
+              <div className="banner-row">
+                <div className="banner-body">
+                  <Chip>Private</Chip>
+                  <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 22, color: "var(--burg)", margin: "14px 0 10px" }}>
+                    Start your own group
+                  </h3>
+                  <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "var(--ink)", opacity: 0.82, lineHeight: 1.75, margin: 0, maxWidth: 520 }}>
+                    Bring together the women you already know. A book club, an accountability circle, or the friends you met at an event. Only the people you invite can see it.
+                  </p>
+                </div>
+                <div className="banner-action">
+                  {/* Private groups are Phase 3. Until then this captures interest
+                      rather than opening a door that leads nowhere. */}
+                  <Link to={createPageUrl("Support")} className="btn ghost">
+                    Create a group
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="card quiet" style={{ marginTop: 20, textAlign: "center" }}>
-            <Eyebrow>November 2026 · Cape Town</Eyebrow>
-            <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 26, color: "#4A0E2E", margin: "14px 0 12px" }}>
-              One Day Women's Wellness Event
-            </h3>
-            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12.5, color: "#2B1220", opacity: 0.82, lineHeight: 1.75, margin: "0 auto 20px", maxWidth: 520 }}>
-              A day in Cape Town. The date and tickets are on the way. Everyone who comes gets a group here, so the conversation keeps going after you leave the room.
-            </p>
-            <Link to={createPageUrl("Support")} className="btn ghost">
-              Register your interest
-            </Link>
-            <p style={{ fontFamily: sans, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#92707D", margin: "16px 0 0" }}>
-              Date to be announced
-            </p>
+          <div className="main">
+            <div className="card quiet banner">
+              <div className="banner-row">
+                <div className="banner-body">
+                  <div className="badge-row">
+                    <Eyebrow>November 2026 · Cape Town</Eyebrow>
+                    <Eyebrow>Date to be announced</Eyebrow>
+                  </div>
+                  <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: "var(--burg)", margin: "0 0 10px", lineHeight: 1.2 }}>
+                    One Day Women's Wellness Event
+                  </h3>
+                  <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "var(--ink)", opacity: 0.82, lineHeight: 1.75, margin: 0, maxWidth: 560 }}>
+                    A day in Cape Town. The date and tickets are on the way. Everyone who comes gets a group here, so the conversation keeps going after you leave the room.
+                  </p>
+                </div>
+                <div className="banner-action">
+                  <Link to={createPageUrl("Support")} className="btn ghost">
+                    Register your interest
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -168,24 +179,44 @@ function JoinedCard({ group, membership, session }) {
 function DiscoverCard({ group, session }) {
   return (
     <div className="card">
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ maxWidth: 560 }}>
-          <Chip>{group.group_type === "event" ? "Event group" : "Live group"}</Chip>
-          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: "#4A0E2E", margin: "12px 0 8px", lineHeight: 1.2 }}>
-            {group.name}
-          </h3>
-          <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 12.5, color: "#2B1220", opacity: 0.82, lineHeight: 1.75, margin: "0 0 10px" }}>
-            {group.blurb}
-          </p>
-          <p style={{ fontSize: 11.5, color: "#92707D", margin: 0 }}>
-            {group.member_count || 0} {group.member_count === 1 ? "member" : "members"}
-            {session ? ` · Next live ${sessionDateLabel(session.scheduled_for, { short: true })}` : ""}
-          </p>
+      <Chip>{group.group_type === "event" ? "Event group" : "Live group"}</Chip>
+      <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: "var(--burg)", margin: "14px 0 10px", lineHeight: 1.2 }}>
+        {group.name}
+      </h3>
+      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "var(--ink)", opacity: 0.82, lineHeight: 1.75, margin: "0 0 12px" }}>
+        {group.blurb}
+      </p>
+      <p style={{ fontSize: 12, color: "var(--note)", margin: 0 }}>
+        {group.member_count || 0} {group.member_count === 1 ? "member" : "members"}
+      </p>
+      {session && (
+        <div className="next-live">
+          <span className="eyebrow">Next live</span>
+          <span className="nl-date">{sessionDateLabel(session.scheduled_for, { short: true })}</span>
         </div>
-        <Link to={`/Community/${group.slug}`} className="btn ghost">
-          Have a look
+      )}
+      <div className="actions">
+        <Link to={`/Community/${group.slug}`} className="btn rose">
+          Join the group <Knob />
+        </Link>
+        <Link to={`/Community/${group.slug}`} className="textlink">
+          Have a look first
         </Link>
       </div>
+    </div>
+  );
+}
+
+function OpeningSoonCard() {
+  return (
+    <div className="card">
+      <Chip dot={false}>Opening soon</Chip>
+      <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: "var(--burg)", margin: "14px 0 10px", lineHeight: 1.2 }}>
+        More rooms are coming.
+      </h3>
+      <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "var(--ink)", opacity: 0.82, lineHeight: 1.75, margin: 0 }}>
+        We are opening a group for each pillar as the practitioners come on board. Money, nervous system and perimenopause are next.
+      </p>
     </div>
   );
 }

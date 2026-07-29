@@ -10,13 +10,15 @@ import React from "react";
 // ────────────────────────────────────────────────────────────────
 
 export const T = {
-  burg: "#4A0E2E",
-  rose: "#C4847A",
-  roseDeep: "#A86460",
-  roseSoft: "#E9B7AC",
-  ink: "#2B1220",
-  note: "#92707D",
+  burg: "#3d2b2d",
+  rose: "#c8a29e",
+  roseDeep: "#b08984",
+  roseSoft: "#ddc0bb",
+  ink: "#3d2b2d",
+  note: "#8a7068",
   white: "#FFFFFF",
+  sand: "#f2e8e6",
+  cream: "#f9f2f0",
 };
 
 export const serif = "'DM Serif Display', Georgia, serif";
@@ -91,21 +93,16 @@ export function CommunityStyles() {
       .aw-c {
         --burg:${T.burg}; --rose:${T.rose}; --rose-deep:${T.roseDeep};
         --rose-soft:${T.roseSoft}; --ink:${T.ink}; --note:${T.note};
-        --card:rgba(255,255,255,0.72); --card-quiet:rgba(255,255,255,0.44);
+        --card:${T.cream}; --card-quiet:${T.cream};
         --r-card:24px; --r-sm:16px;
-        --shadow:0 18px 44px rgba(74,14,46,0.10);
-        --shadow-dark:0 22px 52px rgba(43,18,32,0.28);
+        --shadow:0 14px 40px rgba(61,43,45,0.07);
+        --shadow-dark:0 22px 52px rgba(61,43,45,0.22);
         --ease:cubic-bezier(0.2,0.7,0.2,1);
         font-family:${sans};
         color:var(--ink);
         line-height:1.55;
         min-height:100vh;
-        background:linear-gradient(168deg,
-          rgba(233,183,172,0.20) 0%,
-          rgba(196,132,122,0.30) 32%,
-          rgba(196,132,122,0.22) 58%,
-          rgba(233,183,172,0.16) 82%,
-          rgba(255,255,255,0) 100%), #fff;
+        background:${T.sand};
       }
       .aw-c .page { position:relative; max-width:1440px; margin:0 auto; padding:32px 40px 96px; }
       .aw-c .main { display:flex; flex-direction:column; gap:20px; }
@@ -113,8 +110,23 @@ export function CommunityStyles() {
       .aw-c .card {
         position:relative; background:var(--card); border-radius:var(--r-card);
         padding:32px 36px; box-shadow:var(--shadow);
+        border:1px solid rgba(61,43,45,0.06);
       }
       .aw-c .card.quiet { background:var(--card-quiet); }
+      .aw-c .card.banner { padding:28px 36px; }
+
+      .aw-c .discover-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+      .aw-c .banner-row { display:flex; flex-wrap:wrap; gap:24px; align-items:center; justify-content:space-between; }
+      .aw-c .banner-body { flex:1 1 360px; min-width:0; }
+      .aw-c .banner-action { flex:none; }
+      .aw-c .badge-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+      .aw-c .actions { display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-top:22px; }
+      .aw-c .next-live {
+        display:inline-flex; align-items:center; gap:10px; margin-top:16px;
+        padding:8px 14px; border-radius:999px; background:rgba(200,162,158,0.18);
+      }
+      .aw-c .next-live .eyebrow { color:var(--rose-deep); }
+      .aw-c .next-live .nl-date { font-size:12.5px; font-weight:600; color:var(--burg); }
       .aw-c .card.dark {
         background:linear-gradient(152deg,#4A0E2E 0%,#3A0B24 55%,#2B1220 100%);
         color:#fff; box-shadow:var(--shadow-dark);
@@ -183,9 +195,14 @@ export function CommunityStyles() {
       @media (max-width: 980px) {
         .aw-c .page { padding:20px 18px 56px; }
         .aw-c .card { padding:26px 22px; }
+        .aw-c .card.banner { padding:24px 22px; }
         .aw-c .section-title { margin-top:26px; padding:2px 4px 0; }
         .aw-c .page-head h1 { font-size:30px; }
         .aw-c .btn { padding:14px 22px; }
+        .aw-c .discover-row { grid-template-columns:1fr; }
+        .aw-c .banner-row { flex-direction:column; align-items:flex-start; }
+        .aw-c .banner-action { width:100%; }
+        .aw-c .banner-action .btn { width:100%; }
       }
     `}</style>
   );
