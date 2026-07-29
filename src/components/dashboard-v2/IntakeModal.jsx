@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -25,9 +26,16 @@ export default function IntakeModal({ isOpen, onClose, concerns, archetype, diag
     { q: "When did you last feel aligned?", a: "Honestly? Years ago." },
   ];
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-awburg-dark/40" onClick={onClose} />
+  // Portalled to document.body for the same reason as the video modal: the
+  // shell's content wrapper carries a z-index, which fences any z-index used
+  // inside it below the sidebar.
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div
+        className="absolute inset-0 bg-awburg-dark/40"
+        style={{ backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
+        onClick={onClose}
+      />
 
       <div className="relative bg-paper rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl z-10">
         <div className="sticky top-0 bg-paper border-b border-awburg-core/8 p-5 flex items-start justify-between z-10 rounded-t-2xl">
@@ -104,6 +112,7 @@ export default function IntakeModal({ isOpen, onClose, concerns, archetype, diag
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
