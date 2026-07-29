@@ -104,7 +104,7 @@ export function CommunityStyles() {
         min-height:100vh;
         background:${T.sand};
       }
-      .aw-c .page { position:relative; max-width:1280px; margin:0; padding:32px 40px 96px; }
+      .aw-c .page { position:relative; max-width:1280px; margin:0; padding:32px 40px 96px 8px; }
       .aw-c .main { display:flex; flex-direction:column; gap:20px; }
 
       .aw-c .card {
