@@ -85,7 +85,7 @@ export default function Community() {
             )}
           </div>
 
-          <p className="section-title">Discover</p>
+          <p className="section-title" style={{ marginBottom: 18 }}>Discover</p>
           <div className="main discover-row">
             {discover.map((g) => (
               <DiscoverCard key={g.id} group={g} session={nextByGroup[g.id]} />
