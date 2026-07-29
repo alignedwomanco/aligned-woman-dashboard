@@ -4,6 +4,7 @@ import Classroom from './pages/Classroom.jsx';
 import Contact from './pages/Contact';
 import DailyCheckIn from './pages/DailyCheckIn';
 import Dashboard from './pages/Dashboard';
+import Community from './pages/Community';
 import DefineMyPurpose from './pages/DefineMyPurpose';
 
 import ExpertsDirectory from './pages/ExpertsDirectory.jsx';
@@ -32,6 +33,7 @@ export const PAGES = {
     "Contact": Contact,
     "DailyCheckIn": DailyCheckIn,
     "Dashboard": Dashboard,
+    "Community": Community,
     "DefineMyPurpose": DefineMyPurpose,
 
     "ExpertsDirectory": ExpertsDirectory,
