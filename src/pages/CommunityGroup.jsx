@@ -370,13 +370,6 @@ export default function CommunityGroup() {
                   This group is for information and connection. It is not medical care, and nothing here replaces a consultation with your own doctor.
                 </p>
               </div>
-              <p style={{ marginTop: 14, fontSize: 11.5, color: "#92707D", lineHeight: 1.7 }}>
-                If you are struggling and need help now, please{" "}
-                <Link to={createPageUrl("Support")} style={{ fontWeight: 600, color: "#4A0E2E", textDecoration: "underline", textUnderlineOffset: 3 }}>
-                  reach out here
-                </Link>
-                . We would always rather you told us.
-              </p>
             </div>
           </div>
         </div>
