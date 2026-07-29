@@ -1,0 +1,69 @@
+{
+  "description": "The ambient conversation inside a group, between live sessions. Replies nest one level only, via parent_id. No likes, no reactions, no points: this is a waiting room, not a social network.",
+  "name": "GroupPost",
+  "properties": {
+    "author_avatar": {
+      "description": "Author avatar URL at time of posting",
+      "type": "string"
+    },
+    "author_is_practitioner": {
+      "default": false,
+      "description": "Author is an AW Verified practitioner, so the card can mark them",
+      "type": "boolean"
+    },
+    "author_name": {
+      "description": "Display name captured at post time, so the feed does not need a user lookup per row",
+      "type": "string"
+    },
+    "body": {
+      "description": "Post text",
+      "type": "string"
+    },
+    "group_id": {
+      "description": "Group this post belongs to",
+      "type": "string"
+    },
+    "is_deleted": {
+      "default": false,
+      "description": "Soft delete. Removed posts leave the thread structure intact rather than orphaning their replies.",
+      "type": "boolean"
+    },
+    "parent_id": {
+      "description": "Empty for a top level post, or the id of the post being replied to. Replies nest one level only.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "group_id",
+    "body"
+  ],
+  "rls": {
+    "create": true,
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  },
+  "type": "object"
+}

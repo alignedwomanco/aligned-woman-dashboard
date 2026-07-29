@@ -1,0 +1,79 @@
+{
+  "description": "A member reporting a post or another member. Read is restricted to admins: a reporter must never be able to see other people's reports, and the person reported must never see that they were.",
+  "name": "Report",
+  "properties": {
+    "detail": {
+      "description": "Free text from the reporter",
+      "type": "string"
+    },
+    "group_id": {
+      "description": "Group the report was raised in, for context in the admin queue",
+      "type": "string"
+    },
+    "reason": {
+      "description": "Selected reason",
+      "enum": [
+        "harassment",
+        "misinformation",
+        "spam",
+        "off_topic",
+        "safety_concern",
+        "other"
+      ],
+      "type": "string"
+    },
+    "resolution_notes": {
+      "description": "Admin notes on what was done",
+      "type": "string"
+    },
+    "status": {
+      "description": "Review status. Treat an empty value as open, because a field carrying both enum and default is rejected by the schema API.",
+      "enum": [
+        "open",
+        "actioned",
+        "dismissed"
+      ],
+      "type": "string"
+    },
+    "target_id": {
+      "description": "Id of the reported post or member",
+      "type": "string"
+    },
+    "target_preview": {
+      "description": "Snapshot of the reported content at report time, so the queue still makes sense after a deletion",
+      "type": "string"
+    },
+    "target_type": {
+      "description": "What was reported",
+      "enum": [
+        "post",
+        "member"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "target_type",
+    "target_id",
+    "reason"
+  ],
+  "rls": {
+    "create": true,
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object"
+}

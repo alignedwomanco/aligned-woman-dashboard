@@ -1,0 +1,85 @@
+{
+  "description": "A one way live session inside a group. Created in Phase 1 so the group page can render its next live and last replay blocks. The streaming, question queue and host console arrive in Phase 2.",
+  "name": "LiveSession",
+  "properties": {
+    "description": {
+      "description": "What the session covers",
+      "type": "string"
+    },
+    "duration_minutes": {
+      "description": "Length of the recording, shown on the replay card",
+      "type": "number"
+    },
+    "ended_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "expert_id": {
+      "description": "Expert record for the host, so the card can pull her name, title and portrait",
+      "type": "string"
+    },
+    "group_id": {
+      "description": "Group this session belongs to",
+      "type": "string"
+    },
+    "playback_id": {
+      "description": "Phase 2. Stream playback identifier for the recording.",
+      "type": "string"
+    },
+    "recording_url": {
+      "description": "Phase 2. Replay source once the session has ended.",
+      "type": "string"
+    },
+    "scheduled_for": {
+      "description": "When the session starts. Drives the countdown and decides upcoming against past.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "started_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "status": {
+      "description": "Lifecycle. Treat an empty value as scheduled.",
+      "enum": [
+        "scheduled",
+        "live",
+        "ended",
+        "cancelled"
+      ],
+      "type": "string"
+    },
+    "stream_id": {
+      "description": "Phase 2. Stream identifier from the video provider.",
+      "type": "string"
+    },
+    "title": {
+      "description": "Session title, for example Hormones, stress and the female body",
+      "type": "string"
+    }
+  },
+  "required": [
+    "group_id",
+    "title",
+    "scheduled_for"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object"
+}

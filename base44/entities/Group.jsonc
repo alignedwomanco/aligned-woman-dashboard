@@ -1,0 +1,82 @@
+{
+  "description": "A community room. Interest groups are created by an admin and open to any registered member. Private groups are created by members and invite only. Event groups are populated from a ticket list.",
+  "name": "Group",
+  "properties": {
+    "blurb": {
+      "description": "One line shown on cards and under the group name",
+      "type": "string"
+    },
+    "cover_image": {
+      "description": "Optional cover image URL. Falls back to a brand gradient when empty.",
+      "type": "string"
+    },
+    "description": {
+      "description": "Longer About copy for the group page",
+      "type": "string"
+    },
+    "group_type": {
+      "description": "interest is admin created and open, private is member created and invite only, event is populated from an attendee list",
+      "enum": [
+        "interest",
+        "private",
+        "event"
+      ],
+      "type": "string"
+    },
+    "is_active": {
+      "default": true,
+      "description": "Inactive groups are hidden from Discover but remain readable to members",
+      "type": "boolean"
+    },
+    "member_count": {
+      "default": 0,
+      "description": "Denormalised count, kept in step by the join and leave actions so cards do not have to aggregate GroupMember on every render",
+      "type": "number"
+    },
+    "name": {
+      "description": "Display name, for example Hormone Health",
+      "type": "string"
+    },
+    "order": {
+      "default": 0,
+      "description": "Sort order in Discover, ascending",
+      "type": "number"
+    },
+    "slug": {
+      "description": "URL segment, for example hormone-health. Unique.",
+      "type": "string"
+    },
+    "visibility": {
+      "description": "public is listed and joinable, private is listed and join by request, secret is invisible unless invited",
+      "enum": [
+        "public",
+        "private",
+        "secret"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object"
+}

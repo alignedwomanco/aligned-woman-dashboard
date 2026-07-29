@@ -1,0 +1,70 @@
+{
+  "description": "Membership of a group, plus the per member read state that drives the unread marker. One row per member per group.",
+  "name": "GroupMember",
+  "properties": {
+    "group_id": {
+      "description": "Group this membership belongs to",
+      "type": "string"
+    },
+    "joined_at": {
+      "description": "When they joined, used for the you joined in June line",
+      "format": "date-time",
+      "type": "string"
+    },
+    "last_read_at": {
+      "description": "Last time this member opened the group. Posts newer than this drive the new posts since you were here marker. Kept here rather than on the post so a post is never rewritten when someone reads it.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "muted": {
+      "default": false,
+      "description": "Member has muted notifications for this group",
+      "type": "boolean"
+    },
+    "role": {
+      "description": "owner and moderator can manage the group, member cannot",
+      "enum": [
+        "owner",
+        "moderator",
+        "member"
+      ],
+      "type": "string"
+    },
+    "user_email": {
+      "description": "Member login email. Denormalised alongside created_by so membership can be read without a join.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "group_id"
+  ],
+  "rls": {
+    "create": true,
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  },
+  "type": "object"
+}
