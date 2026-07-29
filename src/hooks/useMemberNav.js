@@ -44,6 +44,9 @@ export default function useMemberNav() {
   return [
     { name: "Dashboard", to: createPageUrl("Dashboard"), active: isActive("Dashboard") },
     { name: "Classroom", to: createPageUrl("Classroom"), active: isActive("Classroom") },
+    // Community stays active on a group page too, so the sidebar does not
+    // go blank once you are inside /Community/hormone-health.
+    { name: "Community", to: createPageUrl("Community"), active: location.pathname.toLowerCase().startsWith("/community") },
     { name: "Directory", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
     {
       name: "My Profile",
