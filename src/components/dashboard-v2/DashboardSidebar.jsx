@@ -29,33 +29,10 @@ export default function DashboardSidebar({ memberSince, isBlueprintOwner }) {
     queryFn: () => base44.auth.me(),
   });
 
-  // An approved expert is anyone whose login email is linked to an Expert
-  // record. That link is set on invite or application approval and is
-  // independent of Blueprint access.
-  const { data: linkedExperts = [] } = useQuery({
-    queryKey: ["sidebar-expert-link", currentUser?.email],
-    queryFn: () => base44.entities.Expert.filter({ linked_user_email: currentUser.email }),
-    enabled: !!currentUser?.email,
-  });
-  const isApprovedExpert = linkedExperts.length > 0;
-
-  const isActive = (pageName) => {
-    const url = createPageUrl(pageName);
-    return location.pathname === url || location.pathname === `/${pageName}`;
-  };
-
-  const navItems = [
-    { name: "Dashboard", to: createPageUrl("Dashboard"), active: isActive("Dashboard") },
-    { name: "Classroom", to: createPageUrl("Classroom"), active: isActive("Classroom") },
-    { name: "Directory", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
-  ];
-  navItems.push({
-    name: "My Profile",
-    to: isApprovedExpert ? "/expert-dashboard" : createPageUrl("ProfileSettings"),
-    active: isApprovedExpert
-      ? location.pathname === "/expert-dashboard"
-      : isActive("ProfileSettings"),
-  });
+  // Nav comes from @/hooks/useMemberNav so the sidebar, the mobile drawer
+  // and anything else that lists these pages cannot drift apart. It shares
+  // this component's query keys, so it costs no extra requests.
+  const navItems = useMemberNav();
 
   return (
     <aside className="hidden lg:block fixed left-6 top-8 w-60 z-40">
