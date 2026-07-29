@@ -16,28 +16,149 @@ import {
 } from "@/components/ui/accordion";
 import { HelpCircle, Send, CheckCircle } from "lucide-react";
 
+// Platform wide FAQs, grouped. Kept accurate to what actually exists:
+// the previous set described a four phase ALIVE Method (it is five), a
+// capacity score that gates module unlocking (nothing gates on capacity),
+// and daily check ins driving module recommendations. Answering questions
+// with features that do not exist creates support tickets rather than
+// preventing them.
 const faqs = [
+  // ── Getting started ──
   {
-    question: "How does the ALIVE Method work?",
-    answer: "The ALIVE Method is a four-phase framework (Awareness, Liberation, Intention, Vision & Embodiment) designed to guide you through personal transformation. Your diagnostic determines which phase you need most right now.",
+    category: "Getting started",
+    question: "What is The Aligned Woman Co?",
+    answer:
+      "A learning platform for women, built around The Aligned Woman Blueprint, a directory of credentialed practitioners, and a community where you can ask questions and join live sessions. You can use any part of it on its own.",
   },
   {
-    question: "How do I unlock new modules?",
-    answer: "Modules unlock based on your progress, capacity score, and completion of prerequisite modules. Your personalized pathway adapts to your journey.",
+    category: "Getting started",
+    question: "Do I have to buy anything to use it?",
+    answer:
+      "No. Registering is free, and it gives you the Directory, the Community, The Pattern and the free resources. The Blueprint is the one thing you buy.",
   },
   {
-    question: "What is my capacity score?",
-    answer: "Your capacity score (1-10) reflects how resourced you feel. It's used to personalize your daily guidance and module recommendations.",
+    category: "Getting started",
+    question: "What is The Pattern?",
+    answer:
+      "A short set of honest questions that shows you which of five patterns has been running the show: The Performer, The Over-Functioner, The Delegator, The Overrider or The Reactor. It is free, it takes a few minutes, and you can retake it whenever you like from your dashboard.",
+  },
+
+  // ── The Blueprint ──
+  {
+    category: "The Blueprint",
+    question: "What is the ALIVE Method?",
+    answer:
+      "The five phases The Blueprint moves through: Awareness, Liberation, Intention, Vision and Embodiment. You work through them in order, and each phase holds several modules taught by a different expert.",
   },
   {
-    question: "How often should I check in?",
-    answer: "Daily check-ins are recommended for the most accurate guidance, but you can adjust your snapshot frequency in settings.",
+    category: "The Blueprint",
+    question: "How do modules unlock?",
+    answer:
+      "You move through The Blueprint in order. Mark each lesson complete as you finish it and the next one opens. Nothing is locked behind a score or a streak, and nothing expires, so you can take as long as you need.",
   },
   {
-    question: "Can I change my primary phase?",
-    answer: "Your phase is determined by your diagnostic and evolves with your progress. You can retake the diagnostic from Profile Settings to update your pathway.",
+    category: "The Blueprint",
+    question: "How long do I have access?",
+    answer:
+      "Your access does not expire. Come back to any lesson or workbook whenever you want, as often as you want.",
+  },
+  {
+    category: "The Blueprint",
+    question: "What are the workbooks?",
+    answer:
+      "Companion workbooks that sit alongside the modules. Your answers save as you go, so you can close the tab and pick it up later. You will find them in the Classroom next to the module they belong to.",
+  },
+  {
+    category: "The Blueprint",
+    question: "A video will not play. What do I do?",
+    answer:
+      "Try a different browser first, Safari or Chrome, and check you are not on a very slow connection. If it still will not play, send us a ticket with the module and lesson name and we will fix it.",
+  },
+
+  // ── The Directory ──
+  {
+    category: "The Directory",
+    question: "What does AW Verified mean?",
+    answer:
+      "Every practitioner in the Directory has had their credentials checked by us before being listed. Qualifications, proof, and a real conversation. We do not list influencers, and being listed cannot be bought.",
+  },
+  {
+    category: "The Directory",
+    question: "How do I find the right practitioner?",
+    answer:
+      "Filter by specialty first, then by how you want to meet, online or in person, then by location. If nothing comes back, widen the location before you widen the specialty. The specialty is usually the thing that matters.",
+  },
+  {
+    category: "The Directory",
+    question: "Does contacting a practitioner cost anything?",
+    answer:
+      "No. Sending a message through her profile is free. Anything you arrange with her after that is between the two of you, at her rates.",
+  },
+  {
+    category: "The Directory",
+    question: "I am a practitioner. How do I apply?",
+    answer:
+      "There is an Apply link at the bottom of the Directory. Every application is read personally. Applying does not give you access to any course, it is a request to be listed.",
+  },
+
+  // ── Community ──
+  {
+    category: "Community",
+    question: "What is the Community?",
+    answer:
+      "Groups where you can ask questions and hear from practitioners directly. Hormone Health is the first, and it is open to every registered member at no cost. More are opening as practitioners come on board.",
+  },
+  {
+    category: "Community",
+    question: "What happens in a live session?",
+    answer:
+      "A practitioner goes live and answers questions for an hour. You can send your question in beforehand and vote on the ones you most want covered. You are never on camera, and the recording stays on the page afterwards.",
+  },
+  {
+    category: "Community",
+    question: "Is the Community medical advice?",
+    answer:
+      "No. It is information and connection. Nothing said in a group or a live session replaces a consultation with your own doctor, and no practitioner there is treating you.",
+  },
+  {
+    category: "Community",
+    question: "Someone has posted something upsetting. What do I do?",
+    answer:
+      "Use Report on the post. It comes to us, not to the group, and the person is never told who reported them. If you are worried about someone's safety, report it and send us a ticket as well so we see it faster.",
+  },
+
+  // ── Account and payment ──
+  {
+    category: "Account and payment",
+    question: "How do I change my details or password?",
+    answer:
+      "Everything lives in My Profile. If you are locked out entirely, use the reset link on the sign in page.",
+  },
+  {
+    category: "Account and payment",
+    question: "How do payments work?",
+    answer:
+      "All payments go through Stripe. We never see or store your card details. Your receipt arrives by email as soon as the payment clears.",
+  },
+  {
+    category: "Account and payment",
+    question: "Can I get a refund?",
+    answer:
+      "Send us a ticket and tell us what happened. We would rather hear from you than have you sit with something that is not working.",
+  },
+  {
+    category: "Account and payment",
+    question: "How do I delete my account?",
+    answer:
+      "Send us a ticket and we will remove your account and your data. Tell us if you want your workbook answers sent to you first.",
   },
 ];
+
+// Preserves the order the questions are written in above.
+const faqCategories = faqs.reduce((acc, f) => {
+  if (!acc.includes(f.category)) acc.push(f.category);
+  return acc;
+}, []);
 
 export default function Support() {
   const [subject, setSubject] = useState("");
@@ -102,18 +223,29 @@ export default function Support() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Accordion type="single" collapsible>
-                  {faqs.map((faq, index) => (
-                    <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger className="text-left">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-gray-600">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+                {/* Grouped rather than a flat list. Twenty questions in one
+                    run is a wall; five groups of four is scannable. */}
+                {faqCategories.map((category) => (
+                  <div key={category} className="mb-6 last:mb-0">
+                    <p className="font-body text-[10.5px] font-bold uppercase tracking-[0.18em] text-awrose-deep mb-1">
+                      {category}
+                    </p>
+                    <Accordion type="single" collapsible>
+                      {faqs
+                        .filter((f) => f.category === category)
+                        .map((faq) => (
+                          <AccordionItem key={faq.question} value={faq.question}>
+                            <AccordionTrigger className="text-left">
+                              {faq.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-gray-600">
+                              {faq.answer}
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                    </Accordion>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>
