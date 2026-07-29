@@ -1,7 +1,6 @@
 import AdminSettings from './pages/AdminSettings';
 import Apply from './pages/Apply';
 import Classroom from './pages/Classroom.jsx';
-import Community from './pages/Community';
 import Contact from './pages/Contact';
 import DailyCheckIn from './pages/DailyCheckIn';
 import Dashboard from './pages/Dashboard';
@@ -30,7 +29,6 @@ export const PAGES = {
     "dashboardsettings": AdminSettings,
     "Apply": Apply,
     "Classroom": Classroom,
-    "Community": Community,
     "Contact": Contact,
     "DailyCheckIn": DailyCheckIn,
     "Dashboard": Dashboard,
