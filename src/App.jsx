@@ -41,6 +41,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
+import CommunityGroup from './pages/CommunityGroup';
 import TheAWStandard from './pages/TheAWStandard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -110,6 +111,10 @@ const AuthenticatedApp = () => {
             shell via AppShellV2. The previous dashboard is kept unrouted in
             src/pages/DashboardLegacy.jsx as a rollback. */}
         <Route path="/Dashboard" element={<Dashboard />} />
+        {/* Group pages are a param route, so they cannot come from the
+            generic Pages loop. They bring their own sidebar, same as the
+            practitioner profile. */}
+        <Route path="/Community/:slug" element={<CommunityGroup />} />
         {/* Practitioner profiles. Nothing in the directory is public, so this
             sits behind ProtectedRoute alongside /ExpertsDirectory. It brings
             its own sidebar, so it is declared here rather than in the generic
