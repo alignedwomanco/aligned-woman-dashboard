@@ -221,10 +221,7 @@ export default function CommunityGroup() {
                       Join the group <Knob />
                     </button>
                   )}
-                  {/* Only members and admins ever see management actions. */}
-                  {isAdmin && (
-                    <Link to={createPageUrl("Dashboard")} className="textlink light">Group settings</Link>
-                  )}
+
                 </div>
               </div>
             </div>
