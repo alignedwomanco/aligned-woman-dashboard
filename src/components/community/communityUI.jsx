@@ -208,6 +208,14 @@ export function CommunityStyles() {
         .aw-c .banner-action { width:100%; }
         .aw-c .banner-action .btn { width:100%; }
       }
+      /* Tablet only — tighten the two banner blocks so the gap under
+         each title is not as wide as it is on desktop. */
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .aw-c .card.banner { padding:18px 24px; }
+        .aw-c .card.banner h3 { margin-top:10px; margin-bottom:6px; }
+        .aw-c .card.banner .banner-body p { font-size:12.5px; line-height:1.6; }
+        .aw-c .badge-row { margin-bottom:8px; }
+      }
     `}</style>
   );
 }
