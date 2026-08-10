@@ -141,9 +141,9 @@ export default function RealityCheckSection() {
       `}</style>
 
       <div className="inner">
-        <h2>
-          We help women develop the literacy to understand themselves and{" "}
-          <em>the wisdom to shape the lives around them.</em>
+        <h2 className="[font-family:'Libre_Baskerville',_serif] font-bold">We help women develop the literacy to understand themselves and the wisdom to shape the lives around them.
+
+
         </h2>
 
         <p className="lede">
@@ -172,6 +172,6 @@ export default function RealityCheckSection() {
           <span aria-hidden="true">&#8594;</span>
         </Link>
       </div>
-    </section>
-  );
+    </section>);
+
 }
