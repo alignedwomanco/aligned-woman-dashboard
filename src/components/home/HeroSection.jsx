@@ -32,10 +32,10 @@ export default function HeroSection() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        textAlign: "center",
+        textAlign: "center"
       }}
-      className="aw-hero"
-    >
+      className="aw-hero">
+      
       <style>{`
         .aw-hero { padding: 110px 80px 96px; }
         .aw-hero .eyebrow {
@@ -144,7 +144,7 @@ export default function HeroSection() {
       <p className="eyebrow">The Aligned Woman Co.</p>
 
       <h1>
-        Women have been given <em>fragmented answers</em> to deeply interconnected problems.
+        Women have been given <em className="[font-family:'Libre_Baskerville',_serif]">fragmented answers</em> to deeply interconnected problems.
       </h1>
 
       <p className="kicker">We built the system that connects them.</p>
@@ -162,12 +162,12 @@ export default function HeroSection() {
           Take the Starting Point Profile
         </Link>
         {/* The Community itself sits behind login, so this goes to
-            registration. Hormone Health is free to registered members, so
-            the promise is honoured as soon as she signs up. */}
+             registration. Hormone Health is free to registered members, so
+             the promise is honoured as soon as she signs up. */}
         <Link to="/register" className="btn outline">
           Join the community
         </Link>
       </div>
-    </section>
-  );
+    </section>);
+
 }
