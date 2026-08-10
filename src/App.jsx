@@ -42,6 +42,7 @@ import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import Community from './pages/Community';
+import Apply from './pages/Apply';
 import CommunityGroup from './pages/CommunityGroup';
 import TheAWStandard from './pages/TheAWStandard';
 
@@ -89,6 +90,11 @@ const AuthenticatedApp = () => {
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
+      {/* Applying to be listed is for practitioners who are not members
+          yet, so it cannot sit behind login. ExpertApplication has an
+          unrestricted create rule, so an anonymous submission works. */}
+      <Route path="/Apply" element={<LayoutWrapper currentPageName="Apply"><Apply /></LayoutWrapper>} />
+      <Route path="/apply" element={<LayoutWrapper currentPageName="Apply"><Apply /></LayoutWrapper>} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/Checkout" element={<Checkout />} />
       <Route path="/terms-and-conditions" element={<LayoutWrapper currentPageName="blueprint"><TermsAndConditions /></LayoutWrapper>} />
