@@ -96,7 +96,7 @@ export default function ChooseExperienceSection() {
              italic clause in the serif. */
           font-family: ${serif};
           font-style: italic;
-          color: ${ROSE_SOFT};
+          color: ${BURGUNDY};
         }
         .aw-bbb .sub {
           margin: 16px 0 0;
