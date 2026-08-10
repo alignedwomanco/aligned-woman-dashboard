@@ -22,7 +22,7 @@ const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
 const sans = "'Montserrat', system-ui, sans-serif";
 
 const MOCKUP =
-  "https://media.base44.com/images/public/69f46886a412ee042303f1af/4c8c78821_awb-verified-two-up-v2.png";
+  "https://media.base44.com/images/public/69f46886a412ee042303f1af/05df72448_awb-verified-two-up-transparent.png";
 
 const CHECKS = [
   "Qualifications and credentials",
