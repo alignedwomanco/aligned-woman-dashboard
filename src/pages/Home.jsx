@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import HeroSection from "@/components/home/HeroSection";
+import AsSeenIn from "@/components/blueprint/AsSeenIn";
 import RealityCheckSection from "@/components/home/RealityCheckSection";
 import ChooseExperienceSection from "@/components/home/ChooseExperienceSection";
 import AlignedWomanSection from "@/components/home/AlignedWomanSection";
@@ -29,6 +30,7 @@ export default function Home() {
   return (
     <div className="overflow-x-hidden scroll-smooth">
       <HeroSection />
+      <AsSeenIn />
       <RealityCheckSection />
       <ChooseExperienceSection />
       <AlignedWomanSection />
