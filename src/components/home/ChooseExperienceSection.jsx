@@ -39,14 +39,18 @@ const PRINCIPLES = {
     label: "Body",
     cx: 500, cy: 350,
     restX: 500, restY: 362,
-    titleX: 500, titleY: 172, listY: 232, listX: 500,
+    // The Beliefs and Belonging arcs both cross the centre line at y=417,
+    // and the Inner life ring starts at 413. Eight terms at the old 232
+    // start and 25 spacing ran to 407, which put Nature on top of them.
+    // Sitting the list closer under the heading clears all three.
+    titleX: 500, titleY: 172, listY: 212, listX: 500, gap: 23,
     terms: ["Nervous system", "Sleep", "Hormones", "Nutrition", "Movement", "Energy", "Recovery", "Nature"],
   },
   beliefs: {
     label: "Beliefs",
     cx: 335, cy: 655,
     restX: 300, restY: 667,
-    titleX: 236, titleY: 628, listY: 668, listX: 262,
+    titleX: 236, titleY: 628, listY: 668, listX: 262, gap: 25,
     terms: ["Subconscious patterns", "Self-worth", "Identity", "Conditioning", "Reflection", "Meditation", "Meaning"],
   },
   belonging: {
@@ -56,7 +60,7 @@ const PRINCIPLES = {
     // x=625 at this height, and Belonging is a wide word, so centring it
     // on its own circle puts the B straight through that line.
     restX: 750, restY: 667,
-    titleX: 768, titleY: 628, listY: 668, listX: 742,
+    titleX: 768, titleY: 628, listY: 668, listX: 742, gap: 25,
     terms: ["Community", "Relationships", "Support", "Connection", "Trust"],
   },
 };
@@ -265,7 +269,7 @@ export default function ChooseExperienceSection() {
                 style={{ font: `300 15px ${sans}`, fill: "rgba(250,245,243,0.78)" }}
               >
                 {p.terms.map((t, i) => (
-                  <text key={t} x={p.listX} y={p.listY + i * 25}>{t}</text>
+                  <text key={t} x={p.listX} y={p.listY + i * p.gap}>{t}</text>
                 ))}
               </g>
             </g>
