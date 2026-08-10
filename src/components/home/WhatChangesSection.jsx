@@ -12,7 +12,8 @@ import { Link } from "react-router-dom";
 // photograph takes over from the gradient. Nothing else changes.
 // ────────────────────────────────────────────────────────────────
 
-const EVENT_IMAGE = "";
+const EVENT_IMAGE =
+  "https://media.base44.com/images/public/69f46886a412ee042303f1af/27e4dcbf7_Screenshot2026-08-10at121322.png";
 
 const OLIVE = "#4F5636";
 const OLIVE_DEEP = "#314323";
