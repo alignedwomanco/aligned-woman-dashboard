@@ -20,7 +20,7 @@ import React, { useState } from "react";
 // this section. Drop a URL into BG_IMAGE and it takes over.
 // ────────────────────────────────────────────────────────────────
 
-const BG_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/6b04686db_PhotographyPortfolioWebsiteinWhiteBlackLightModernMinimalStyle.png";
+const BG_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/600e9a440_Screenshot2026-08-05at125145.png";
 
 const INK = "#080105";
 const SAND = "#FAF5F3";
