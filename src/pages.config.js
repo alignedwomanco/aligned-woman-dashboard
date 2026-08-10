@@ -1,5 +1,4 @@
 import AdminSettings from './pages/AdminSettings';
-import Apply from './pages/Apply';
 import Classroom from './pages/Classroom.jsx';
 import Contact from './pages/Contact';
 import DailyCheckIn from './pages/DailyCheckIn';
@@ -27,7 +26,6 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "dashboardsettings": AdminSettings,
-    "Apply": Apply,
     "Classroom": Classroom,
     "Contact": Contact,
     "DailyCheckIn": DailyCheckIn,
