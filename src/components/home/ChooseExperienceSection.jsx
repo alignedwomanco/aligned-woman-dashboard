@@ -182,7 +182,7 @@ export default function ChooseExperienceSection() {
       {BG_IMAGE && (
         <div aria-hidden="true" style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(8,1,5,0.72) 0%, rgba(8,1,5,0.62) 50%, rgba(8,1,5,0.78) 100%)",
+          background: "rgba(76,109,79,0.8)",
         }} />
       )}
 
