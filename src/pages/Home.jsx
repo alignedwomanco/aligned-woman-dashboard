@@ -4,7 +4,6 @@ import { base44 } from "@/api/base44Client";
 import HeroSection from "@/components/home/HeroSection";
 import AsSeenIn from "@/components/blueprint/AsSeenIn";
 import RealityCheckSection from "@/components/home/RealityCheckSection";
-import ChooseExperienceSection from "@/components/home/ChooseExperienceSection";
 import AlignedWomanSection from "@/components/home/AlignedWomanSection";
 import FounderQuoteSection from "@/components/home/FounderQuoteSection";
 import BlueprintIntroSection from "@/components/home/BlueprintIntroSection";
@@ -32,7 +31,6 @@ export default function Home() {
       <HeroSection />
       <AsSeenIn />
       <RealityCheckSection />
-      <ChooseExperienceSection />
       <AlignedWomanSection />
       <FounderQuoteSection />
       <BlueprintIntroSection />
