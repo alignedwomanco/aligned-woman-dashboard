@@ -56,7 +56,14 @@ export default function HeroSection() {
           color: ${BURG};
           max-width: 920px;
         }
-        .aw-hero h1 em { font-style: italic; color: ${ROSE}; }
+        .aw-hero h1 em {
+          /* Restated because index.css has a universal font-family rule
+             that matches this em directly, overriding what it would
+             otherwise inherit from the h1. */
+          font-family: ${serif};
+          font-style: italic;
+          color: ${ROSE};
+        }
         .aw-hero .kicker {
           margin: 26px 0 0;
           font-family: ${serif};
