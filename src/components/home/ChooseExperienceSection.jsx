@@ -76,8 +76,7 @@ export default function ChooseExperienceSection() {
       <style>{`
         .aw-bbb { padding: 150px 80px 140px; }
         .aw-bbb .bg {
-          position: absolute; top: -2%; left: -2%; width: 104%; height: 104%;
-          filter: blur(14px);
+          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         }
         .aw-bbb .bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .aw-bbb .inner { position: relative; max-width: 1160px; margin: 0 auto; text-align: center; }
@@ -106,7 +105,7 @@ export default function ChooseExperienceSection() {
           line-height: 1.8;
           color: rgba(250,245,243,0.8);
         }
-        .aw-bbb svg { display: block; width: 100%; max-width: 740px; margin: 40px auto 0; overflow: visible; }
+        .aw-bbb svg { display: block; width: 100%; max-width: 920px; margin: 40px auto 0; overflow: visible; }
 
         /* Continuous motion */
         @keyframes awBreathe { 0%, 100% { transform: scale(1); opacity: 0.75; } 50% { transform: scale(1.07); opacity: 1; } }
@@ -251,7 +250,7 @@ export default function ChooseExperienceSection() {
                 textAnchor="middle"
                 style={{
                   font: `700 40px ${serif}`,
-                  fill: isOn(key) ? BURGUNDY : "#FFFFFF",
+                  fill: "#FFFFFF",
                   // The travel distance is held as custom properties so the
                   // mobile media query can apply it without JS, where the
                   // terms are always shown and the name must always be up.
