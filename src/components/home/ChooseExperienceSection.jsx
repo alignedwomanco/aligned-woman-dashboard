@@ -30,23 +30,26 @@ const ROSE_PALE = "#EFCFC8";
 const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
 const sans = "'Montserrat', system-ui, sans-serif";
 
+// titleX and titleY position the principle name. They are kept separate
+// from listX and listY so a name can be nudged clear of the geometry
+// without dragging its term list along with it.
 const PRINCIPLES = {
   body: {
     label: "Body",
     cx: 500, cy: 350,
-    titleY: 192, listY: 232, listX: 500,
+    titleX: 500, titleY: 172, listY: 232, listX: 500,
     terms: ["Nervous system", "Sleep", "Hormones", "Nutrition", "Movement", "Energy", "Recovery", "Nature"],
   },
   beliefs: {
     label: "Beliefs",
     cx: 335, cy: 655,
-    titleY: 628, listY: 668, listX: 262,
+    titleX: 236, titleY: 628, listY: 668, listX: 262,
     terms: ["Subconscious patterns", "Self-worth", "Identity", "Conditioning", "Reflection", "Meditation", "Meaning"],
   },
   belonging: {
     label: "Belonging",
     cx: 665, cy: 655,
-    titleY: 628, listY: 668, listX: 742,
+    titleX: 768, titleY: 628, listY: 668, listX: 742,
     terms: ["Community", "Relationships", "Support", "Connection", "Trust"],
   },
 };
@@ -230,7 +233,7 @@ export default function ChooseExperienceSection() {
               />
               <text
                 className="principle-title"
-                x={p.listX} y={p.titleY}
+                x={p.titleX} y={p.titleY}
                 textAnchor="middle"
                 style={{ font: `400 40px ${serif}`, fill: isOn(key) ? ROSE_PALE : SAND }}
               >
