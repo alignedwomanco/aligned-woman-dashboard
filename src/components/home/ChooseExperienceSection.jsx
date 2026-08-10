@@ -88,7 +88,15 @@ export default function ChooseExperienceSection() {
           line-height: 1.1;
           color: ${SAND};
         }
-        .aw-bbb h2 em { font-style: italic; color: ${ROSE_SOFT}; }
+        .aw-bbb h2 em {
+          /* index.css carries a universal * { font-family: Montserrat }
+             rule, which matches this em directly and beats the family
+             inherited from the h2. Restating it here is what keeps the
+             italic clause in the serif. */
+          font-family: ${serif};
+          font-style: italic;
+          color: ${ROSE_SOFT};
+        }
         .aw-bbb .sub {
           margin: 16px 0 0;
           font-family: ${sans};
