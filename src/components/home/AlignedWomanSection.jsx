@@ -1,101 +1,247 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+
+// ────────────────────────────────────────────────────────────────
+// Your path to alignment · rebuilt to the August 2026 landing design.
+// Replaces the "Who she is" block.
+//
+// An accordion of the five ways into the ecosystem. Built as buttons
+// with real state rather than <details>, because the design animates the
+// open and close and native details snaps.
+//
+// The first item is open on load, as drawn, so the pattern is obvious
+// without anyone having to click to discover it.
+// ────────────────────────────────────────────────────────────────
+
+const SAND = "#FAF5F3";
+const BURG = "#4A0E2E";
+const ROSE = "#C4847A";
+const INK = "#0E0208";
+
+const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
+const sans = "'Montserrat', system-ui, sans-serif";
+
+const PATHS = [
+  {
+    id: "profile",
+    title: "Start with the Starting Point Profile",
+    body: "Discover the patterns influencing the way you are currently operating and receive personalised guidance based on your results.",
+    actions: [{ label: "Start here", to: "/StartingPointProfile", kind: "solid" }],
+  },
+  {
+    id: "practitioner",
+    title: "Find an AW Verified practitioner",
+    body: "Connect with a trusted specialist whose work aligns with your needs, or apply to become part of our growing network of practitioners and experts.",
+    // The Directory sits behind login, so this goes to registration
+    // rather than a route that would bounce her to a sign in screen.
+    actions: [
+      { label: "Search the directory", to: "/register", kind: "solid" },
+      { label: "Apply to the AW Standard", to: "/theawstandard", kind: "outline" },
+    ],
+    note: "Account required. Takes under a minute to register. No credit card required.",
+  },
+  {
+    id: "education",
+    title: "Learn through expert-led education",
+    body: "Begin with The Aligned Woman Blueprint, our flagship programme, or apply to host and share your own expertise within the ecosystem.",
+    actions: [{ label: "Start here", to: "/blueprint", kind: "solid" }],
+  },
+  {
+    id: "community",
+    title: "Join the community",
+    body: "Become part of private groups, specialist discussions, live sessions and event communities designed around genuine connection rather than performance.",
+    actions: [{ label: "Start here", to: "/register", kind: "solid" }],
+  },
+  {
+    id: "events",
+    title: "Attend events and retreats",
+    body: "Experience the work in practice through carefully designed gatherings built around body, beliefs and belonging.",
+    // No public events page exists yet, so this captures interest.
+    actions: [{ label: "Find out more", to: "/Contact", kind: "solid" }],
+  },
+];
 
 export default function AlignedWomanSection() {
+  const [open, setOpen] = useState("profile");
+
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{ background: "#3a0d22", minHeight: "80vh" }}
-    >
-      {/* Faded portrait overlay */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&q=80&fit=crop&crop=face')",
-          opacity: 0.18,
-        }}
-      />
+    <section className="aw-path" style={{ background: SAND }}>
+      <style>{`
+        .aw-path { padding: 96px 80px; }
+        .aw-path .inner { max-width: 1160px; margin: 0 auto; }
+        .aw-path .eyebrow {
+          margin: 0 0 20px;
+          font-family: ${sans};
+          font-weight: 700;
+          font-size: 9.5px;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: ${BURG};
+          text-align: center;
+        }
+        .aw-path h2 {
+          margin: 0 auto;
+          font-family: ${serif};
+          font-weight: 400;
+          font-size: 44px;
+          line-height: 1.1;
+          color: ${BURG};
+          text-align: center;
+          max-width: 880px;
+        }
+        .aw-path h2 em {
+          font-family: ${serif};
+          font-style: italic;
+          color: ${ROSE};
+        }
+        .aw-path .lede {
+          margin: 20px auto 0;
+          font-family: ${sans};
+          font-weight: 300;
+          font-size: 15px;
+          line-height: 1.8;
+          color: rgba(42,10,28,0.75);
+          text-align: center;
+          max-width: 640px;
+        }
+        .aw-path .list { max-width: 760px; margin: 56px auto 0; }
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 py-24">
+        .aw-path .row { border-top: 1px solid rgba(74,14,46,0.15); }
+        .aw-path .row:last-child { border-bottom: 1px solid rgba(74,14,46,0.15); }
+        .aw-path .head {
+          display: flex; align-items: center; justify-content: space-between; gap: 16px;
+          width: 100%; padding: 24px 4px; background: none; border: none;
+          cursor: pointer; text-align: left; font-family: inherit;
+        }
+        .aw-path .head h3 {
+          margin: 0;
+          font-family: ${serif};
+          font-weight: 400;
+          font-size: 24px;
+          line-height: 1.3;
+          color: ${BURG};
+          transition: color 320ms cubic-bezier(0.2,0.7,0.2,1);
+        }
+        .aw-path .head:hover h3 { color: ${ROSE}; }
+        .aw-path .sign {
+          font-family: ${sans}; font-weight: 300; font-size: 22px; color: ${ROSE};
+          flex-shrink: 0; line-height: 1;
+          transition: transform 320ms cubic-bezier(0.2,0.7,0.2,1);
+        }
+        .aw-path .head[aria-expanded="true"] .sign { transform: rotate(45deg); }
 
-        {/* Label */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 32 }}>
-          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
-          <p style={{
-            fontFamily: "Montserrat, sans-serif",
-            fontSize: 16,
-            fontWeight: 700,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "#A86B6C",
-            margin: 0,
-          }}>
-            WHO SHE IS
-          </p>
-          <div style={{ width: 36, height: 1, background: "rgba(168,107,108,0.4)" }} />
-        </div>
+        /* Grid rows animate from 0fr to 1fr, which gives a real height
+           transition without measuring the content in JS. */
+        .aw-path .panel {
+          display: grid; grid-template-rows: 0fr;
+          transition: grid-template-rows 380ms cubic-bezier(0.2,0.7,0.2,1);
+        }
+        .aw-path .panel.open { grid-template-rows: 1fr; }
+        .aw-path .panel > .clip { overflow: hidden; }
+        .aw-path .panel p.body {
+          margin: 0; padding: 0 4px 18px;
+          font-family: ${sans}; font-weight: 300; font-size: 14.5px; line-height: 1.85;
+          color: rgba(42,10,28,0.75);
+        }
+        .aw-path .actions {
+          padding: 0 4px 26px; display: flex; flex-direction: column;
+          align-items: flex-start; gap: 12px;
+        }
+        .aw-path .actions .row-btns { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .aw-path .note {
+          margin: 0; font-family: ${sans}; font-weight: 300; font-size: 12.5px;
+          line-height: 1.7; color: rgba(42,10,28,0.6);
+        }
 
-        {/* Big heading */}
-        <h2 className="text-center mb-14 leading-none">
-          <span
-            style={{
-              display: "block",
-              fontFamily: "Montserrat, sans-serif",
-              fontSize: "clamp(40px, 7vw, 64px)",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.04em",
-              color: "#ffffff",
-            }}
-          >
-            WHAT IS AN
-          </span>
-          <span
-            style={{
-              display: "block",
-              fontFamily: "'DM Serif Display', Georgia, serif",
-              fontSize: "clamp(40px, 7vw, 64px)",
-              fontWeight: 400,
-              fontStyle: "italic",
-              textTransform: "none",
-              letterSpacing: "0.01em",
-              color: "#A96B6D",
-            }}
-          >
-            Aligned Woman?
-          </span>
+        .aw-path .btn {
+          display: inline-block; border-radius: 100px; text-decoration: none;
+          font-family: ${sans}; font-weight: 700; font-size: 10px;
+          letter-spacing: 0.2em; text-transform: uppercase; white-space: nowrap;
+          transition: background 320ms cubic-bezier(0.2,0.7,0.2,1),
+                      color 320ms cubic-bezier(0.2,0.7,0.2,1),
+                      border-color 320ms cubic-bezier(0.2,0.7,0.2,1),
+                      transform 320ms cubic-bezier(0.2,0.7,0.2,1);
+        }
+        .aw-path .btn:active { transform: scale(0.96); }
+        .aw-path .btn.solid {
+          background: ${ROSE}; color: ${INK}; padding: 15px 28px;
+          border: 1.5px solid ${ROSE};
+        }
+        .aw-path .btn.solid:hover { background: #A86460; border-color: #A86460; color: #fff; }
+        .aw-path .btn.outline {
+          border: 1.5px solid ${BURG}; color: ${BURG}; padding: 14px 28px; background: transparent;
+        }
+        .aw-path .btn.outline:hover { background: ${BURG}; color: #fff; }
+        .aw-path *:focus-visible { outline: 2px solid #A86460; outline-offset: 3px; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .aw-path .panel, .aw-path .sign, .aw-path .head h3 { transition: none; }
+        }
+
+        @media (max-width: 980px) {
+          .aw-path { padding: 80px 40px; }
+          .aw-path h2 { font-size: 34px; }
+        }
+        @media (max-width: 700px) {
+          .aw-path { padding: 64px 24px; }
+          .aw-path h2 { font-size: 27px; line-height: 1.2; }
+          .aw-path .lede { font-size: 14px; }
+          .aw-path .list { margin-top: 40px; }
+          .aw-path .head { padding: 20px 2px; }
+          .aw-path .head h3 { font-size: 19px; }
+          .aw-path .actions .row-btns { width: 100%; flex-direction: column; align-items: stretch; }
+          .aw-path .btn { display: block; text-align: center; }
+        }
+      `}</style>
+
+      <div className="inner">
+        <p className="eyebrow">Your path to alignment</p>
+        <h2>
+          There is no single path <em>to alignment.</em>
         </h2>
+        <p className="lede">
+          Every woman enters the ecosystem differently, but every path is designed to create deeper understanding, stronger connection and lasting change.
+        </p>
 
-        {/* Two-column body text */}
-        <div className="grid md:grid-cols-2 gap-x-16 gap-y-6 max-w-5xl mx-auto">
+        <div className="list">
+          {PATHS.map((p) => {
+            const isOpen = open === p.id;
+            return (
+              <div className="row" key={p.id}>
+                <button
+                  type="button"
+                  className="head"
+                  aria-expanded={isOpen}
+                  aria-controls={`aw-path-${p.id}`}
+                  onClick={() => setOpen(isOpen ? null : p.id)}
+                >
+                  <h3>{p.title}</h3>
+                  <span className="sign" aria-hidden="true">+</span>
+                </button>
 
-          {/* Left column */}
-          <div className="space-y-5 text-center md:text-left">
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", lineHeight: 1.6 }}>
-              An aligned woman is not someone who has it all figured out.
-            </p>
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
-              She is a woman who is learning to listen to herself again.
-            </p>
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
-              An aligned woman understands that clarity does not come from doing more, but from becoming more honest about what no longer fits. She recognises when her body is tired, when her nervous system is overloaded, and when her life is out of sync with her values.
-            </p>
-          </div>
-
-          {/* Right column */}
-          <div className="space-y-5 text-center md:text-left">
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 400, color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
-              She makes decisions with awareness, intention, and self-respect.<br />
-              She allows her seasons to change.<br />
-              She leads, works, loves, and rests in ways that honour her biology, emotions, and lived reality.
-            </p>
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", lineHeight: 1.6 }}>
-              An aligned woman is not perfect or polished.
-            </p>
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", lineHeight: 1.6 }}>
-              She is present, grounded, and willing to choose herself without guilt.
-            </p>
-          </div>
-
+                <div id={`aw-path-${p.id}`} className={isOpen ? "panel open" : "panel"} role="region">
+                  <div className="clip">
+                    <p className="body">{p.body}</p>
+                    <div className="actions">
+                      <div className="row-btns">
+                        {p.actions.map((a) => (
+                          <Link
+                            key={a.label}
+                            to={a.to}
+                            className={`btn ${a.kind}`}
+                            tabIndex={isOpen ? 0 : -1}
+                          >
+                            {a.label} &#8594;
+                          </Link>
+                        ))}
+                      </div>
+                      {p.note && <p className="note">{p.note}</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
