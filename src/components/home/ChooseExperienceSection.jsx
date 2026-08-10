@@ -1,20 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 
 // ────────────────────────────────────────────────────────────────
-// Body. Beliefs. Belonging. · rebuilt to the August 2026 landing
-// design. Replaces the "Choose Your Aligned Experience" card grid.
+// Body. Beliefs. Belonging. · the sacred geometry composition.
 //
-// The three principles are drawn as one sacred geometry composition:
-// three overlapping circles meeting at Inner life, with Regulation,
-// Safety and Worth as satellites. It is a single inline SVG so it
-// scales to any width without a raster asset, and the labels stay real
-// text, which means they are selectable and readable by a screen
-// reader rather than baked into a picture.
+// The diagram opens quiet: only the three principle names, the three
+// satellites and Inner life. The supporting terms are hidden until a
+// circle is hovered, so the eye lands on the structure first and the
+// detail is something she chooses to look at rather than a wall of
+// twenty words.
+//
+// Hover does not exist on touch, so each circle is also a real button,
+// and below 700px all three groups are revealed by default. Nobody on a
+// phone should have to discover that a shape is tappable.
+//
+// Two things move on their own: the glow behind Inner life breathes,
+// and the outer ring turns slowly. Both stop under reduced motion.
 //
 // BACKGROUND IMAGE: the design specifies a blurred photograph behind
-// this section. That asset lives inside Claude Design and could not be
-// fetched, so a brand gradient stands in. Drop a URL into BG_IMAGE and
-// the photograph takes over, blur and all, with no other change.
+// this section. Drop a URL into BG_IMAGE and it takes over.
 // ────────────────────────────────────────────────────────────────
 
 const BG_IMAGE = "";
@@ -27,11 +30,32 @@ const ROSE_PALE = "#EFCFC8";
 const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
 const sans = "'Montserrat', system-ui, sans-serif";
 
-const BODY_TERMS = ["Nervous system", "Sleep", "Hormones", "Nutrition", "Movement", "Energy", "Recovery", "Nature"];
-const BELIEF_TERMS = ["Subconscious patterns", "Self-worth", "Identity", "Conditioning", "Reflection", "Meditation", "Meaning"];
-const BELONGING_TERMS = ["Community", "Relationships", "Support", "Connection", "Trust"];
+const PRINCIPLES = {
+  body: {
+    label: "Body",
+    cx: 500, cy: 350,
+    titleY: 192, listY: 232, listX: 500,
+    terms: ["Nervous system", "Sleep", "Hormones", "Nutrition", "Movement", "Energy", "Recovery", "Nature"],
+  },
+  beliefs: {
+    label: "Beliefs",
+    cx: 335, cy: 655,
+    titleY: 628, listY: 668, listX: 262,
+    terms: ["Subconscious patterns", "Self-worth", "Identity", "Conditioning", "Reflection", "Meditation", "Meaning"],
+  },
+  belonging: {
+    label: "Belonging",
+    cx: 665, cy: 655,
+    titleY: 628, listY: 668, listX: 742,
+    terms: ["Community", "Relationships", "Support", "Connection", "Trust"],
+  },
+};
 
 export default function ChooseExperienceSection() {
+  const [active, setActive] = useState(null);
+
+  const isOn = (key) => active === key;
+
   return (
     <section className="aw-bbb" style={{ position: "relative", overflow: "hidden", background: INK }}>
       <style>{`
@@ -59,31 +83,68 @@ export default function ChooseExperienceSection() {
           line-height: 1.8;
           color: rgba(250,245,243,0.8);
         }
-        .aw-bbb svg { display: block; width: 100%; max-width: 740px; margin: 56px auto 0; overflow: visible; }
+        .aw-bbb .hint {
+          margin: 28px 0 0;
+          font-family: ${sans};
+          font-weight: 300;
+          font-size: 11.5px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(250,245,243,0.42);
+        }
+        .aw-bbb svg { display: block; width: 100%; max-width: 740px; margin: 40px auto 0; overflow: visible; }
 
-        @keyframes awBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
-        @keyframes awPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
-        .aw-bbb .breathe { transform-box: fill-box; transform-origin: center; animation: awBreathe 12s ease-in-out infinite; }
-        .aw-bbb .pulse-a { animation: awPulse 16s ease-in-out infinite; }
-        .aw-bbb .pulse-b { animation: awPulse 18s ease-in-out infinite; animation-delay: -7s; }
-        .aw-bbb .pulse-c { animation: awPulse 17s ease-in-out infinite; animation-delay: -11s; }
+        /* Continuous motion */
+        @keyframes awBreathe { 0%, 100% { transform: scale(1); opacity: 0.75; } 50% { transform: scale(1.07); opacity: 1; } }
+        @keyframes awTurn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .aw-bbb .breathe {
+          transform-box: fill-box; transform-origin: center;
+          animation: awBreathe 6s ease-in-out infinite;
+        }
+        .aw-bbb .turn {
+          transform-box: view-box; transform-origin: 500px 560px;
+          animation: awTurn 120s linear infinite;
+        }
+        .aw-bbb .turn-slow {
+          transform-box: view-box; transform-origin: 500px 560px;
+          animation: awTurn 180s linear infinite reverse;
+        }
 
-        /* Anyone who has asked their system to stop moving things gets a
-           still composition rather than a breathing one. */
+        /* Reveal on hover. The group fades and lifts a few units, so it
+           arrives rather than blinking on. */
+        .aw-bbb .terms {
+          opacity: 0;
+          transform: translateY(6px);
+          transition: opacity 520ms cubic-bezier(0.2,0.7,0.2,1), transform 520ms cubic-bezier(0.2,0.7,0.2,1);
+          pointer-events: none;
+        }
+        .aw-bbb .terms.on { opacity: 1; transform: translateY(0); }
+
+        .aw-bbb .ring {
+          transition: stroke 420ms cubic-bezier(0.2,0.7,0.2,1), fill 420ms cubic-bezier(0.2,0.7,0.2,1);
+        }
+        .aw-bbb .principle-title {
+          transition: fill 420ms cubic-bezier(0.2,0.7,0.2,1);
+        }
+        .aw-bbb .hit { cursor: pointer; outline: none; }
+        .aw-bbb .hit:focus-visible .ring { stroke: ${ROSE_SOFT}; }
+
         @media (prefers-reduced-motion: reduce) {
-          .aw-bbb .breathe, .aw-bbb .pulse-a, .aw-bbb .pulse-b, .aw-bbb .pulse-c { animation: none; }
+          .aw-bbb .breathe, .aw-bbb .turn, .aw-bbb .turn-slow { animation: none; }
+          .aw-bbb .terms { transition: none; }
         }
 
         @media (max-width: 980px) {
           .aw-bbb { padding: 104px 40px 96px; }
           .aw-bbb h2 { font-size: 38px; }
-          .aw-bbb svg { margin-top: 44px; }
         }
         @media (max-width: 700px) {
           .aw-bbb { padding: 72px 16px; }
           .aw-bbb h2 { font-size: 30px; line-height: 1.15; }
           .aw-bbb .sub { margin-top: 12px; font-size: 13.5px; line-height: 1.75; }
-          .aw-bbb svg { margin-top: 32px; }
+          /* No hover on touch, so nothing stays hidden. */
+          .aw-bbb .terms { opacity: 1; transform: none; }
+          .aw-bbb .hint { display: none; }
         }
       `}</style>
 
@@ -107,12 +168,13 @@ export default function ChooseExperienceSection() {
           Body. Beliefs. <em>Belonging.</em>
         </h2>
         <p className="sub">Everything we create is built around three principles.</p>
+        <p className="hint">Hover a circle to look closer</p>
 
-        <svg viewBox="0 0 1000 1120" role="img" aria-label="Sacred geometry composition of Body, Beliefs and Belonging">
+        <svg viewBox="0 0 1000 1120" role="img" aria-label="Body, Beliefs and Belonging meeting at your inner life">
           <defs>
             <radialGradient id="aw-sg-ctr">
-              <stop offset="0%" stopColor={ROSE_PALE} stopOpacity="0.4" />
-              <stop offset="55%" stopColor="#C4847A" stopOpacity="0.14" />
+              <stop offset="0%" stopColor={ROSE_PALE} stopOpacity="0.45" />
+              <stop offset="55%" stopColor="#C4847A" stopOpacity="0.16" />
               <stop offset="100%" stopColor="#C4847A" stopOpacity="0" />
             </radialGradient>
             <radialGradient id="aw-sg-node">
@@ -121,21 +183,72 @@ export default function ChooseExperienceSection() {
             </radialGradient>
           </defs>
 
-          {/* Outer containing rings */}
-          <circle cx="500" cy="560" r="490" fill="none" stroke="rgba(250,245,243,0.12)" strokeWidth="2" />
-          <circle cx="500" cy="560" r="440" fill="none" stroke="rgba(250,245,243,0.07)" strokeWidth="2" />
+          {/* Outer rings, turning against each other so the movement reads
+              as rotation rather than drift. Dashes make the turn visible;
+              a plain circle would look static however fast it spun. */}
+          <g className="turn">
+            <circle
+              cx="500" cy="560" r="490"
+              fill="none" stroke="rgba(250,245,243,0.14)" strokeWidth="2"
+              strokeDasharray="2 26" strokeLinecap="round"
+            />
+          </g>
+          <g className="turn-slow">
+            <circle
+              cx="500" cy="560" r="440"
+              fill="none" stroke="rgba(250,245,243,0.08)" strokeWidth="2"
+              strokeDasharray="1 18" strokeLinecap="round"
+            />
+          </g>
 
-          {/* Spokes out to the three satellites */}
+          {/* Spokes to the satellites */}
           <line x1="500" y1="553" x2="180" y2="288" stroke="rgba(250,245,243,0.15)" strokeWidth="2" />
           <line x1="500" y1="553" x2="820" y2="288" stroke="rgba(250,245,243,0.15)" strokeWidth="2" />
           <line x1="500" y1="693" x2="500" y2="932" stroke="rgba(250,245,243,0.15)" strokeWidth="2" />
 
           {/* The three principles */}
-          <circle cx="500" cy="350" r="290" fill="rgba(250,245,243,0.025)" stroke="rgba(250,245,243,0.55)" strokeWidth="2.5" />
-          <circle cx="335" cy="655" r="290" fill="rgba(250,245,243,0.025)" stroke="rgba(250,245,243,0.55)" strokeWidth="2.5" />
-          <circle cx="665" cy="655" r="290" fill="rgba(250,245,243,0.025)" stroke="rgba(250,245,243,0.55)" strokeWidth="2.5" />
+          {Object.entries(PRINCIPLES).map(([key, p]) => (
+            <g
+              key={key}
+              className="hit"
+              tabIndex={0}
+              role="button"
+              aria-expanded={isOn(key)}
+              aria-label={`${p.label}: ${p.terms.join(", ")}`}
+              onMouseEnter={() => setActive(key)}
+              onMouseLeave={() => setActive((cur) => (cur === key ? null : cur))}
+              onFocus={() => setActive(key)}
+              onBlur={() => setActive((cur) => (cur === key ? null : cur))}
+              onClick={() => setActive((cur) => (cur === key ? null : key))}
+            >
+              <circle
+                className="ring"
+                cx={p.cx} cy={p.cy} r="290"
+                fill={isOn(key) ? "rgba(232,180,174,0.07)" : "rgba(250,245,243,0.025)"}
+                stroke={isOn(key) ? "rgba(232,180,174,0.9)" : "rgba(250,245,243,0.55)"}
+                strokeWidth="2.5"
+              />
+              <text
+                className="principle-title"
+                x={p.listX} y={p.titleY}
+                textAnchor="middle"
+                style={{ font: `400 40px ${serif}`, fill: isOn(key) ? ROSE_PALE : SAND }}
+              >
+                {p.label}
+              </text>
+              <g
+                className={isOn(key) ? "terms on" : "terms"}
+                textAnchor="middle"
+                style={{ font: `300 15px ${sans}`, fill: "rgba(250,245,243,0.78)" }}
+              >
+                {p.terms.map((t, i) => (
+                  <text key={t} x={p.listX} y={p.listY + i * 25}>{t}</text>
+                ))}
+              </g>
+            </g>
+          ))}
 
-          {/* Where the three meet */}
+          {/* Where the three meet. The glow breathes continuously. */}
           <g className="breathe">
             <circle cx="500" cy="553" r="210" fill="url(#aw-sg-ctr)" />
           </g>
@@ -144,34 +257,10 @@ export default function ChooseExperienceSection() {
             Inner life
           </text>
 
-          {/* Body */}
-          <text x="500" y="192" textAnchor="middle" style={{ font: `400 40px ${serif}`, fill: SAND }}>Body</text>
-          <g textAnchor="middle" style={{ font: `300 15px ${sans}`, fill: "rgba(250,245,243,0.72)" }}>
-            {BODY_TERMS.map((t, i) => (
-              <text key={t} x="500" y={232 + i * 25}>{t}</text>
-            ))}
-          </g>
-
-          {/* Beliefs */}
-          <text x="262" y="628" textAnchor="middle" style={{ font: `400 40px ${serif}`, fill: SAND }}>Beliefs</text>
-          <g textAnchor="middle" style={{ font: `300 15px ${sans}`, fill: "rgba(250,245,243,0.72)" }}>
-            {BELIEF_TERMS.map((t, i) => (
-              <text key={t} x="262" y={668 + i * 25}>{t}</text>
-            ))}
-          </g>
-
-          {/* Belonging */}
-          <text x="742" y="628" textAnchor="middle" style={{ font: `400 40px ${serif}`, fill: SAND }}>Belonging</text>
-          <g textAnchor="middle" style={{ font: `300 15px ${sans}`, fill: "rgba(250,245,243,0.72)" }}>
-            {BELONGING_TERMS.map((t, i) => (
-              <text key={t} x="742" y={668 + i * 25}>{t}</text>
-            ))}
-          </g>
-
-          {/* Satellites */}
-          <g className="pulse-a"><circle cx="150" cy="262" r="120" fill="url(#aw-sg-node)" /></g>
-          <g className="pulse-b"><circle cx="850" cy="262" r="120" fill="url(#aw-sg-node)" /></g>
-          <g className="pulse-c"><circle cx="500" cy="1012" r="120" fill="url(#aw-sg-node)" /></g>
+          {/* Satellites, always visible */}
+          <circle cx="150" cy="262" r="120" fill="url(#aw-sg-node)" />
+          <circle cx="850" cy="262" r="120" fill="url(#aw-sg-node)" />
+          <circle cx="500" cy="1012" r="120" fill="url(#aw-sg-node)" />
           <circle cx="150" cy="262" r="78" fill="none" stroke="rgba(250,245,243,0.4)" strokeWidth="2.5" />
           <circle cx="850" cy="262" r="78" fill="none" stroke="rgba(250,245,243,0.4)" strokeWidth="2.5" />
           <circle cx="500" cy="1012" r="78" fill="none" stroke="rgba(250,245,243,0.4)" strokeWidth="2.5" />
