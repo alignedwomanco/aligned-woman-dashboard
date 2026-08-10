@@ -182,7 +182,7 @@ export default function ChooseExperienceSection() {
       {BG_IMAGE && (
         <div aria-hidden="true" style={{
           position: "absolute", inset: 0,
-          background: "rgba(76,109,79,0.8)",
+          background: "rgba(76,109,79,0.5)",
         }} />
       )}
 
