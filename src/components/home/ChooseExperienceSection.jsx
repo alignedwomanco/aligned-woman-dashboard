@@ -30,25 +30,29 @@ const ROSE_PALE = "#EFCFC8";
 const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
 const sans = "'Montserrat', system-ui, sans-serif";
 
-// titleX and titleY position the principle name. They are kept separate
-// from listX and listY so a name can be nudged clear of the geometry
-// without dragging its term list along with it.
+// Each principle name has two positions. At rest it sits in the middle
+// of its own circle, so the diagram reads as three named shapes. When
+// the circle is opened the name travels to its heading position and the
+// terms fill the space it left.
 const PRINCIPLES = {
   body: {
     label: "Body",
     cx: 500, cy: 350,
+    restX: 500, restY: 362,
     titleX: 500, titleY: 172, listY: 232, listX: 500,
     terms: ["Nervous system", "Sleep", "Hormones", "Nutrition", "Movement", "Energy", "Recovery", "Nature"],
   },
   beliefs: {
     label: "Beliefs",
     cx: 335, cy: 655,
+    restX: 300, restY: 667,
     titleX: 236, titleY: 628, listY: 668, listX: 262,
     terms: ["Subconscious patterns", "Self-worth", "Identity", "Conditioning", "Reflection", "Meditation", "Meaning"],
   },
   belonging: {
     label: "Belonging",
     cx: 665, cy: 655,
+    restX: 700, restY: 667,
     titleX: 768, titleY: 628, listY: 668, listX: 742,
     terms: ["Community", "Relationships", "Support", "Connection", "Trust"],
   },
@@ -127,14 +131,15 @@ export default function ChooseExperienceSection() {
           transition: stroke 420ms cubic-bezier(0.2,0.7,0.2,1), fill 420ms cubic-bezier(0.2,0.7,0.2,1);
         }
         .aw-bbb .principle-title {
-          transition: fill 420ms cubic-bezier(0.2,0.7,0.2,1);
+          transition: fill 420ms cubic-bezier(0.2,0.7,0.2,1),
+                      transform 520ms cubic-bezier(0.2,0.7,0.2,1);
         }
         .aw-bbb .hit { cursor: pointer; outline: none; }
         .aw-bbb .hit:focus-visible .ring { stroke: ${ROSE_SOFT}; }
 
         @media (prefers-reduced-motion: reduce) {
           .aw-bbb .breathe, .aw-bbb .turn, .aw-bbb .turn-slow { animation: none; }
-          .aw-bbb .terms { transition: none; }
+          .aw-bbb .terms, .aw-bbb .principle-title { transition: none; }
         }
 
         @media (max-width: 980px) {
@@ -145,7 +150,8 @@ export default function ChooseExperienceSection() {
           .aw-bbb { padding: 72px 16px; }
           .aw-bbb h2 { font-size: 30px; line-height: 1.15; }
           .aw-bbb .sub { margin-top: 12px; font-size: 13.5px; line-height: 1.75; }
-          /* No hover on touch, so nothing stays hidden. */
+          /* No hover on touch, so nothing stays hidden and the names sit
+             in their heading positions from the start. */
           .aw-bbb .terms { opacity: 1; transform: none; }
           .aw-bbb .hint { display: none; }
         }
@@ -233,9 +239,15 @@ export default function ChooseExperienceSection() {
               />
               <text
                 className="principle-title"
-                x={p.titleX} y={p.titleY}
+                x={p.restX} y={p.restY}
                 textAnchor="middle"
-                style={{ font: `400 40px ${serif}`, fill: isOn(key) ? ROSE_PALE : SAND }}
+                style={{
+                  font: `400 40px ${serif}`,
+                  fill: isOn(key) ? ROSE_PALE : SAND,
+                  transform: isOn(key)
+                    ? `translate(${p.titleX - p.restX}px, ${p.titleY - p.restY}px)`
+                    : "translate(0px, 0px)",
+                }}
               >
                 {p.label}
               </text>
