@@ -189,15 +189,15 @@ export default function ChooseExperienceSection() {
           <g className="turn">
             <circle
               cx="500" cy="560" r="490"
-              fill="none" stroke="rgba(250,245,243,0.14)" strokeWidth="2"
-              strokeDasharray="2 26" strokeLinecap="round"
+              fill="none" stroke="rgba(250,245,243,0.24)" strokeWidth="5"
+              strokeDasharray="3 30" strokeLinecap="round"
             />
           </g>
           <g className="turn-slow">
             <circle
               cx="500" cy="560" r="440"
-              fill="none" stroke="rgba(250,245,243,0.08)" strokeWidth="2"
-              strokeDasharray="1 18" strokeLinecap="round"
+              fill="none" stroke="rgba(250,245,243,0.15)" strokeWidth="4"
+              strokeDasharray="2 22" strokeLinecap="round"
             />
           </g>
 
