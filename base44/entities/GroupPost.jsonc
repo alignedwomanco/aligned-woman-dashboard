@@ -38,11 +38,14 @@
     "body"
   ],
   "rls": {
-    "create": true,
-    "delete": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
       "$or": [
         {
-          "created_by": "{{user.email}}"
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -51,11 +54,10 @@
         }
       ]
     },
-    "read": {},
-    "update": {
+    "delete": {
       "$or": [
         {
-          "created_by": "{{user.email}}"
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
