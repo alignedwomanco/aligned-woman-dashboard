@@ -39,7 +39,7 @@ export default function FounderQuoteSection() {
         .aw-trust { padding: 0 80px 96px; }
         .aw-trust .inner {
           max-width: 1160px; margin: 0 auto;
-          border-top: 2px solid ${BURG}; padding-top: 64px;
+          padding-top: 64px;
         }
         .aw-trust .head { text-align: center; margin-bottom: 56px; }
         .aw-trust .eyebrow {
