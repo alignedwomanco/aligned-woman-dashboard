@@ -105,7 +105,7 @@ function VerifiedMark({ onDark = false }) {
 }
 
 // ─── CONNECTION FORM ───
-function ConnectionForm({ expertName, expertEmail, formRef }) {
+function ConnectionForm({ expertName, expertEmail, expertLinkedEmail, formRef }) {
   const [form, setForm] = useState({ name: "", email: "", regarding: "", message: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -113,7 +113,15 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
   const [sendError, setSendError] = useState("");
 
   const firstName = expertName?.split(" ")[0] || "there";
-  const recipient = (expertEmail || "hello@alignedwomanco.com").trim();
+
+  // Where the enquiry goes. Her own contact address first, then the
+  // address her account is linked to, then us. A record with neither is
+  // a data problem, not a member problem: rather than quietly routing
+  // her enquiries to head office and letting the practitioner wonder why
+  // nobody ever writes, the form says plainly that direct messaging is
+  // not available and offers a route that does work.
+  const recipient = (expertEmail || expertLinkedEmail || "").trim();
+  const canEmailDirectly = !!recipient;
 
   const validate = () => {
     const e = {};
@@ -137,6 +145,10 @@ function ConnectionForm({ expertName, expertEmail, formRef }) {
     try {
       await base44.integrations.Core.SendEmail({
         to: recipient,
+        // Replies go to the member, not to the platform, so the
+        // practitioner can answer from her own inbox.
+        reply_to: form.email,
+        from_name: "The Aligned Woman Co",
         subject: `New message from ${form.name} via your Aligned Woman profile`,
         body:
           `Hi ${firstName},\n\n` +
