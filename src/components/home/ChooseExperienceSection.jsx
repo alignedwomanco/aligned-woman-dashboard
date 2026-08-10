@@ -52,7 +52,10 @@ const PRINCIPLES = {
   belonging: {
     label: "Belonging",
     cx: 665, cy: 655,
-    restX: 700, restY: 667,
+    // 750 rather than the circle centre. The Beliefs arc passes through
+    // x=625 at this height, and Belonging is a wide word, so centring it
+    // on its own circle puts the B straight through that line.
+    restX: 750, restY: 667,
     titleX: 768, titleY: 628, listY: 668, listX: 742,
     terms: ["Community", "Relationships", "Support", "Connection", "Trust"],
   },
