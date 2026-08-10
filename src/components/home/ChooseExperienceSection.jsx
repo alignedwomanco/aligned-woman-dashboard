@@ -131,9 +131,11 @@ export default function ChooseExperienceSection() {
           transition: stroke 420ms cubic-bezier(0.2,0.7,0.2,1), fill 420ms cubic-bezier(0.2,0.7,0.2,1);
         }
         .aw-bbb .principle-title {
+          transform: translate(0px, 0px);
           transition: fill 420ms cubic-bezier(0.2,0.7,0.2,1),
                       transform 520ms cubic-bezier(0.2,0.7,0.2,1);
         }
+        .aw-bbb .principle-title.on { transform: translate(var(--dx), var(--dy)); }
         .aw-bbb .hit { cursor: pointer; outline: none; }
         .aw-bbb .hit:focus-visible .ring { stroke: ${ROSE_SOFT}; }
 
@@ -153,6 +155,7 @@ export default function ChooseExperienceSection() {
           /* No hover on touch, so nothing stays hidden and the names sit
              in their heading positions from the start. */
           .aw-bbb .terms { opacity: 1; transform: none; }
+          .aw-bbb .principle-title { transform: translate(var(--dx), var(--dy)); }
           .aw-bbb .hint { display: none; }
         }
       `}</style>
@@ -238,15 +241,17 @@ export default function ChooseExperienceSection() {
                 strokeWidth="2.5"
               />
               <text
-                className="principle-title"
+                className={isOn(key) ? "principle-title on" : "principle-title"}
                 x={p.restX} y={p.restY}
                 textAnchor="middle"
                 style={{
                   font: `400 40px ${serif}`,
                   fill: isOn(key) ? ROSE_PALE : SAND,
-                  transform: isOn(key)
-                    ? `translate(${p.titleX - p.restX}px, ${p.titleY - p.restY}px)`
-                    : "translate(0px, 0px)",
+                  // The travel distance is held as custom properties so the
+                  // mobile media query can apply it without JS, where the
+                  // terms are always shown and the name must always be up.
+                  "--dx": `${p.titleX - p.restX}px`,
+                  "--dy": `${p.titleY - p.restY}px`,
                 }}
               >
                 {p.label}
