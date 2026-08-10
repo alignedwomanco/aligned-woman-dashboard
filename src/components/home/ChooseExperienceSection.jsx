@@ -180,12 +180,6 @@ export default function ChooseExperienceSection() {
           />
         )}
       </div>
-      {BG_IMAGE && (
-        <div aria-hidden="true" style={{
-          position: "absolute", inset: 0,
-          background: "rgba(49,67,35,0.5)",
-        }} />
-      )}
 
       <div className="inner">
         <h2>
