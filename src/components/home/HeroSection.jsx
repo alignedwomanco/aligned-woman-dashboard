@@ -1,178 +1,171 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
-export default function HeroSection({ onWaitlist }) {
-  const sectionRef = useRef(null);
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+// ────────────────────────────────────────────────────────────────
+// Home hero · rebuilt to the August 2026 landing design.
+//
+// Replaces the full bleed dark photographic hero with the light,
+// centred, type led treatment. It ends at its natural height rather
+// than filling the viewport, so the section below is visible on load
+// and the page reads as a document rather than a splash screen.
+//
+// The design specifies Baskerville Display, which the platform does not
+// license or load. DM Serif Display is used instead: same character,
+// already loaded everywhere else, and it is what the brand rules name.
+// ────────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const rect = sectionRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      setMousePos({
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height,
-      });
-    };
-    const el = sectionRef.current;
-    if (el) el.addEventListener("mousemove", handleMouseMove);
-    return () => { if (el) el.removeEventListener("mousemove", handleMouseMove); };
-  }, []);
+const SAND = "#FAF5F3";
+const BURG = "#4A0E2E";
+const ROSE = "#C4847A";
+const INK = "#0E0208";
+const BODY = "rgba(42,10,28,0.82)";
 
-  const scrollToExplore = () => {
-    document.getElementById("experience")?.scrollIntoView({ behavior: "smooth" });
-  };
+const serif = "'DM Serif Display', Georgia, serif";
+const sans = "'Montserrat', system-ui, sans-serif";
 
-  const gradientX = `${mousePos.x * 100}%`;
-  const gradientY = `${mousePos.y * 100}%`;
-
+export default function HeroSection() {
   return (
     <section
-      ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{ minHeight: "100vh", paddingBottom: 32 }}
+      style={{
+        background: SAND,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        textAlign: "center",
+      }}
+      className="aw-hero"
     >
-      {/* Background Image */}
-      <img
-        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693c1af736e30d6ce22780c4/19e69afb3_laptop-computer-girl-woman-home-technology-female-2025-01-29-14-44-55-utc.jpg"
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      <style>{`
+        .aw-hero { padding: 110px 80px 96px; }
+        .aw-hero .eyebrow {
+          margin: 0 0 28px;
+          font-family: ${sans};
+          font-weight: 700;
+          font-size: 10.5px;
+          letter-spacing: 0.34em;
+          text-transform: uppercase;
+          color: ${BURG};
+        }
+        .aw-hero h1 {
+          margin: 0;
+          font-family: ${serif};
+          font-weight: 400;
+          font-size: 62px;
+          line-height: 1.08;
+          color: ${BURG};
+          max-width: 920px;
+        }
+        .aw-hero h1 em { font-style: italic; color: ${ROSE}; }
+        .aw-hero .kicker {
+          margin: 26px 0 0;
+          font-family: ${serif};
+          font-style: italic;
+          font-size: 34px;
+          line-height: 1.2;
+          color: ${ROSE};
+        }
+        .aw-hero .lede {
+          margin: 38px 0 0;
+          font-family: ${sans};
+          font-weight: 300;
+          font-size: 15.5px;
+          line-height: 1.85;
+          color: ${BODY};
+          max-width: 640px;
+        }
+        .aw-hero .lede + .lede { margin-top: 18px; }
+        .aw-hero .actions {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-top: 40px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .aw-hero .btn {
+          display: inline-block;
+          border-radius: 100px;
+          font-family: ${sans};
+          font-weight: 700;
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          text-decoration: none;
+          transition: background 320ms cubic-bezier(0.2,0.7,0.2,1),
+                      color 320ms cubic-bezier(0.2,0.7,0.2,1),
+                      border-color 320ms cubic-bezier(0.2,0.7,0.2,1),
+                      transform 320ms cubic-bezier(0.2,0.7,0.2,1);
+        }
+        .aw-hero .btn:active { transform: scale(0.96); }
+        .aw-hero .btn.solid {
+          background: ${ROSE};
+          color: ${INK};
+          padding: 17px 32px;
+          border: 1.5px solid ${ROSE};
+        }
+        .aw-hero .btn.solid:hover { background: #A86460; border-color: #A86460; color: #fff; }
+        .aw-hero .btn.outline {
+          border: 1.5px solid ${BURG};
+          color: ${BURG};
+          padding: 16px 30px;
+          background: transparent;
+        }
+        .aw-hero .btn.outline:hover { background: ${BURG}; color: #fff; }
+        .aw-hero *:focus-visible { outline: 2px solid #A86460; outline-offset: 3px; }
 
-      {/* Dark overlay */}
-      <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(155deg, rgba(8,1,5,0.92) 0%, rgba(26,5,16,0.88) 40%, rgba(45,8,25,0.85) 70%, rgba(14,2,8,0.92) 100%)" }}
-      />
+        @media (max-width: 980px) {
+          .aw-hero { padding: 78px 40px 64px; }
+          .aw-hero h1 { font-size: 46px; line-height: 1.12; }
+          .aw-hero .kicker { font-size: 28px; }
+        }
+        @media (max-width: 700px) {
+          .aw-hero { padding: 64px 24px 56px; }
+          .aw-hero .eyebrow { margin-bottom: 20px; font-size: 9.5px; letter-spacing: 0.3em; }
+          .aw-hero h1 { font-size: 36px; line-height: 1.14; }
+          .aw-hero .kicker { margin-top: 20px; font-size: 23px; line-height: 1.25; }
+          .aw-hero .lede { margin-top: 26px; font-size: 14px; }
+          .aw-hero .lede + .lede { margin-top: 14px; }
+          .aw-hero .actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            margin-top: 32px;
+            width: 100%;
+            max-width: 320px;
+          }
+          .aw-hero .btn { display: block; text-align: center; }
+          .aw-hero .btn.solid { padding: 17px 24px; }
+          .aw-hero .btn.outline { padding: 16px 24px; }
+        }
+      `}</style>
 
-      {/* Mouse-tracking radial light */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(55% 45% at ${gradientX} ${gradientY}, rgba(196,132,122,0.25) 0%, rgba(26,5,16,0.08) 55%, transparent 100%)`,
-          transition: "background 0.1s",
-        }}
-      />
+      <p className="eyebrow">The Aligned Woman Co.</p>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 text-center w-full" style={{ paddingTop: "clamp(80px, 14vw, 120px)", paddingBottom: 0 }}>
+      <h1>
+        Women have been given <em>fragmented answers</em> to deeply interconnected problems.
+      </h1>
 
-        {/* Badge */}
-        <div className="inline-flex items-center justify-center" style={{ marginBottom: 20 }}>
-          <span style={{
-            fontSize: 14,
-            fontWeight: 600,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "rgba(232,180,174,0.9)",
-            background: "rgba(196,132,122,0.1)",
-            border: "1px solid rgba(196,132,122,0.25)",
-            borderRadius: "100px",
-            padding: "10px 20px",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-          }}>
-            <span style={{ color: "rgba(196,132,122,0.8)", fontSize: 10 }}>●</span>
-            The Education Women Should Have Been Given
-          </span>
-        </div>
+      <p className="kicker">We built the system that connects them.</p>
 
-        {/* Typographic hero title */}
-        <div style={{ marginBottom: 20, lineHeight: 1, maxWidth: "clamp(280px, 48vw, 520px)", margin: "0 auto 20px" }}>
-          <div style={{
-            fontFamily: "Montserrat, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(52px, 10vw, 110px)",
-            textTransform: "uppercase",
-            letterSpacing: "-0.02em",
-            color: "#ffffff",
-            lineHeight: 1.0,
-          }}>
-            THE ALIGNED
-          </div>
-          <div style={{
-            fontFamily: "'DM Serif Display', Georgia, serif",
-            fontWeight: 400,
-            fontStyle: "italic",
-            fontSize: "clamp(64px, 13vw, 140px)",
-            color: "#C4847A",
-            lineHeight: 0.95,
-            letterSpacing: "-0.01em",
-          }}>
-            Woman
-          </div>
-          <div style={{
-            fontFamily: "Montserrat, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(36px, 7vw, 80px)",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: "#ffffff",
-            lineHeight: 1.1,
-          }}>
-            CO.
-          </div>
-        </div>
+      <p className="lede">
+        The Aligned Woman Co. is a trusted ecosystem designed to help women understand themselves more deeply and consciously shape the lives around them.
+      </p>
 
-        {/* Sub copy */}
-        <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.7, color: "#EBE6E3" }}>
-            One platform where women learn, connect, and grow with people<br />
-            who are actually qualified to help.<br />
-            Free diagnostics, expert-led courses, vetted professionals, and a community that meets in real life.
-          </p>
-        </div>
+      <p className="lede">
+        Through diagnostics, community, verified practitioners, events and personalised guidance, we help women understand what is happening within them and discover what to do next.
+      </p>
 
-        {/* CTAs — side by side */}
-        <div className="flex flex-row items-center justify-center flex-wrap" style={{ gap: 12, marginBottom: 20 }}>
-          <Link
-            to="/StartingPointProfile"
-            style={{
-              background: "#F7F1EF",
-              color: "#1A1717",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              padding: "16px 32px",
-              borderRadius: "100px",
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-              transition: "background 0.2s",
-            }}
-          >
-            Find Your Pattern (Free) <span aria-hidden>→</span>
-          </Link>
-          <Link
-            to="/blueprint"
-            style={{
-              background: "transparent",
-              color: "#EBE6E3",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              padding: "15px 32px",
-              borderRadius: "100px",
-              border: "1px solid #EBE6E3",
-              textDecoration: "none",
-              display: "inline-block",
-              transition: "background 0.2s, color 0.2s",
-            }}
-          >
-            See The Blueprint
-          </Link>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-        <div className="w-6 h-9 border-2 border-white/40 rounded-full flex justify-center pt-1.5">
-          <div className="w-1 h-2 bg-white/60 rounded-full animate-bounce" />
-        </div>
+      <div className="actions">
+        <Link to="/StartingPointProfile" className="btn solid">
+          Take the Starting Point Profile
+        </Link>
+        {/* The Community itself sits behind login, so this goes to
+            registration. Hormone Health is free to registered members, so
+            the promise is honoured as soon as she signs up. */}
+        <Link to="/register" className="btn outline">
+          Join the community
+        </Link>
       </div>
     </section>
   );
