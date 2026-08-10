@@ -8,10 +8,6 @@ import { Link } from "react-router-dom";
 // centred, type led treatment. It ends at its natural height rather
 // than filling the viewport, so the section below is visible on load
 // and the page reads as a document rather than a splash screen.
-//
-// The design specifies Baskerville Display, which the platform does not
-// license or load. DM Serif Display is used instead: same character,
-// already loaded everywhere else, and it is what the brand rules name.
 // ────────────────────────────────────────────────────────────────
 
 const SAND = "#FAF5F3";
@@ -20,7 +16,12 @@ const ROSE = "#C4847A";
 const INK = "#0E0208";
 const BODY = "rgba(42,10,28,0.82)";
 
-const serif = "'DM Serif Display', Georgia, serif";
+// The design specifies Baskerville Display PT. Baskervville is the
+// Google Fonts release of the same Baskerville revival and is what the
+// platform loads, in index.html. DM Serif Display stays as the fallback
+// so a font load failure lands on the platform face rather than on a
+// browser default.
+const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
 const sans = "'Montserrat', system-ui, sans-serif";
 
 export default function HeroSection() {
