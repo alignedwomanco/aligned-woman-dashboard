@@ -73,7 +73,7 @@ export default function AlignedWomanSection() {
   const [open, setOpen] = useState("profile");
 
   return (
-    <section className="aw-path" style={{ background: SAND }}>
+    <section className="aw-path" style={{ background: "#FFFFFF" }}>
       <style>{`
         .aw-path { padding: 96px 80px; }
         .aw-path .inner { max-width: 1160px; margin: 0 auto; }
