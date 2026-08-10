@@ -18,6 +18,14 @@ const BURG = "#4A0E2E";
 const ROSE = "#C4847A";
 const INK = "#0E0208";
 
+// Events and retreats carry their own colour, an olive that appears
+// nowhere else on the page. Deliberate: the gatherings are a different
+// kind of offer from the digital ones, and the shift in colour is what
+// says so before the copy does.
+const OLIVE = "#314323";
+const OLIVE_HOVER = "#25331A";
+const OLIVE_TEXT = "#E8E0CB";
+
 const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
 const sans = "'Montserrat', system-ui, sans-serif";
 
@@ -57,7 +65,7 @@ const PATHS = [
     title: "Attend events and retreats",
     body: "Experience the work in practice through carefully designed gatherings built around body, beliefs and belonging.",
     // No public events page exists yet, so this captures interest.
-    actions: [{ label: "Find out more", to: "/Contact", kind: "solid" }],
+    actions: [{ label: "Find out more", to: "/Contact", kind: "olive" }],
   },
 ];
 
@@ -172,6 +180,11 @@ export default function AlignedWomanSection() {
           border: 1.5px solid ${BURG}; color: ${BURG}; padding: 14px 28px; background: transparent;
         }
         .aw-path .btn.outline:hover { background: ${BURG}; color: #fff; }
+        .aw-path .btn.olive {
+          background: ${OLIVE}; color: ${OLIVE_TEXT}; padding: 15px 28px;
+          border: 1.5px solid ${OLIVE};
+        }
+        .aw-path .btn.olive:hover { background: ${OLIVE_HOVER}; border-color: ${OLIVE_HOVER}; color: #fff; }
         .aw-path *:focus-visible { outline: 2px solid #A86460; outline-offset: 3px; }
 
         @media (prefers-reduced-motion: reduce) {
