@@ -256,8 +256,8 @@ export default function ChooseExperienceSection() {
                 x={p.restX} y={p.restY}
                 textAnchor="middle"
                 style={{
-                  font: `400 40px ${serif}`,
-                  fill: isOn(key) ? BURGUNDY : SAND,
+                  font: `700 40px ${serif}`,
+                  fill: isOn(key) ? BURGUNDY : "#FFFFFF",
                   // The travel distance is held as custom properties so the
                   // mobile media query can apply it without JS, where the
                   // terms are always shown and the name must always be up.
@@ -270,7 +270,7 @@ export default function ChooseExperienceSection() {
               <g
                 className={isOn(key) ? "terms on" : "terms"}
                 textAnchor="middle"
-                style={{ font: `300 15px ${sans}`, fill: "rgba(250,245,243,0.78)" }}
+                style={{ font: `700 15px ${sans}`, fill: "#FFFFFF" }}
               >
                 {p.terms.map((t, i) => (
                   <text key={t} x={p.listX} y={p.listY + i * p.gap}>{t}</text>
@@ -284,7 +284,7 @@ export default function ChooseExperienceSection() {
             <circle cx="500" cy="553" r="210" fill="url(#aw-sg-ctr)" />
           </g>
           <circle cx="500" cy="553" r="140" fill="none" stroke="rgba(250,245,243,0.7)" strokeWidth="2.5" />
-          <text x="500" y="563" textAnchor="middle" style={{ font: `italic 400 30px ${serif}`, fill: BURGUNDY }}>
+          <text x="500" y="563" textAnchor="middle" style={{ font: `italic 700 30px ${serif}`, fill: "#FFFFFF" }}>
             Inner life
           </text>
 
@@ -295,9 +295,9 @@ export default function ChooseExperienceSection() {
           <circle cx="150" cy="262" r="78" fill="none" stroke="rgba(250,245,243,0.4)" strokeWidth="2.5" />
           <circle cx="850" cy="262" r="78" fill="none" stroke="rgba(250,245,243,0.4)" strokeWidth="2.5" />
           <circle cx="500" cy="1012" r="78" fill="none" stroke="rgba(250,245,243,0.4)" strokeWidth="2.5" />
-          <text x="150" y="269" textAnchor="middle" style={{ font: `400 20px ${serif}`, fill: BURGUNDY }}>Regulation</text>
-          <text x="850" y="269" textAnchor="middle" style={{ font: `400 20px ${serif}`, fill: BURGUNDY }}>Safety</text>
-          <text x="500" y="1019" textAnchor="middle" style={{ font: `400 20px ${serif}`, fill: BURGUNDY }}>Worth</text>
+          <text x="150" y="269" textAnchor="middle" style={{ font: `700 20px ${serif}`, fill: "#FFFFFF" }}>Regulation</text>
+          <text x="850" y="269" textAnchor="middle" style={{ font: `700 20px ${serif}`, fill: "#FFFFFF" }}>Safety</text>
+          <text x="500" y="1019" textAnchor="middle" style={{ font: `700 20px ${serif}`, fill: "#FFFFFF" }}>Worth</text>
         </svg>
       </div>
     </section>
