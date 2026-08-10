@@ -28,7 +28,7 @@ export default function Home() {
 
   return (
     <div className="overflow-x-hidden scroll-smooth">
-      <HeroSection onWaitlist={() => {}} />
+      <HeroSection />
       <RealityCheckSection />
       <ChooseExperienceSection />
       <AlignedWomanSection />
