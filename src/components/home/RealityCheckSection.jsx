@@ -43,7 +43,14 @@ export default function RealityCheckSection() {
           line-height: 1.18;
           color: ${BURG};
         }
-        .aw-literacy h2 em { font-style: italic; color: ${ROSE}; }
+        .aw-literacy h2 em {
+          /* Restated because index.css has a universal font-family rule
+             that matches this em directly, overriding what it would
+             otherwise inherit from the h2. */
+          font-family: ${serif};
+          font-style: italic;
+          color: ${ROSE};
+        }
         .aw-literacy .lede {
           margin: 28px 0 0;
           font-family: ${sans};
