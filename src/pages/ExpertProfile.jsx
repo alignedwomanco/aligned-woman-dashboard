@@ -206,6 +206,24 @@ function ConnectionForm({ expertName, expertEmail, expertLinkedEmail, formRef })
     margin: "6px 0 0",
   };
 
+  // No address on the record means the form cannot do what it promises.
+  // Better to say so and point at a route that works than to take her
+  // message and send it somewhere she did not choose.
+  if (!canEmailDirectly) {
+    return (
+      <section ref={formRef} id="connect" className="aw-card" style={{ padding: "56px 40px", textAlign: "center" }}>
+        <p style={{ fontFamily: serif, fontSize: 26, color: C.burg, margin: "0 0 10px" }}>Get in touch.</p>
+        <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: C.ink, opacity: 0.82, margin: "0 auto 22px", maxWidth: 460, lineHeight: 1.75 }}>
+          {firstName} is not taking messages through the platform at the moment. Write to us and we will put you in touch.
+        </p>
+        <a href={`mailto:hello@alignedwomanco.com?subject=${encodeURIComponent(`Introduction to ${expertName}`)}`} className="aw-btn aw-btn--filled">
+          Email us
+          <ArrowRight style={{ width: 13, height: 13 }} />
+        </a>
+      </section>
+    );
+  }
+
   if (submitted) {
     return (
       <section ref={formRef} id="connect" className="aw-card" style={{ padding: "56px 40px", textAlign: "center" }}>
@@ -840,7 +858,12 @@ export default function ExpertProfile() {
             )}
 
             {/* ─── CONTACT ─── */}
-            <ConnectionForm expertName={expert.name} expertEmail={expert.email} formRef={formRef} />
+            <ConnectionForm
+              expertName={expert.name}
+              expertEmail={expert.email}
+              expertLinkedEmail={expert.linked_user_email}
+              formRef={formRef}
+            />
 
             {/* ─── FACULTY ───
                 Discovery sits after contact deliberately. */}
