@@ -20,7 +20,7 @@ import React, { useState } from "react";
 // this section. Drop a URL into BG_IMAGE and it takes over.
 // ────────────────────────────────────────────────────────────────
 
-const BG_IMAGE = "";
+const BG_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/6b04686db_PhotographyPortfolioWebsiteinWhiteBlackLightModernMinimalStyle.png";
 
 const INK = "#080105";
 const SAND = "#FAF5F3";
@@ -179,6 +179,12 @@ export default function ChooseExperienceSection() {
           />
         )}
       </div>
+      {BG_IMAGE && (
+        <div aria-hidden="true" style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(180deg, rgba(8,1,5,0.72) 0%, rgba(8,1,5,0.62) 50%, rgba(8,1,5,0.78) 100%)",
+        }} />
+      )}
 
       <div className="inner">
         <h2>
