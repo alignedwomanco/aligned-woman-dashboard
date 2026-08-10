@@ -105,15 +105,6 @@ export default function ChooseExperienceSection() {
           line-height: 1.8;
           color: rgba(250,245,243,0.8);
         }
-        .aw-bbb .hint {
-          margin: 28px 0 0;
-          font-family: ${sans};
-          font-weight: 300;
-          font-size: 11.5px;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          color: rgba(250,245,243,0.42);
-        }
         .aw-bbb svg { display: block; width: 100%; max-width: 740px; margin: 40px auto 0; overflow: visible; }
 
         /* Continuous motion */
@@ -171,7 +162,6 @@ export default function ChooseExperienceSection() {
              in their heading positions from the start. */
           .aw-bbb .terms { opacity: 1; transform: none; }
           .aw-bbb .principle-title { transform: translate(var(--dx), var(--dy)); }
-          .aw-bbb .hint { display: none; }
         }
       `}</style>
 
@@ -195,7 +185,6 @@ export default function ChooseExperienceSection() {
           Body. Beliefs. <em>Belonging.</em>
         </h2>
         <p className="sub">Everything we create is built around three principles.</p>
-        <p className="hint">Hover a circle to look closer</p>
 
         <svg viewBox="0 0 1000 1120" role="img" aria-label="Body, Beliefs and Belonging meeting at your inner life">
           <defs>
