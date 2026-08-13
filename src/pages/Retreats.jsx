@@ -799,7 +799,7 @@ export default function Retreats() {
         style={{
           position: "relative",
           backgroundImage:
-            "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/6ed175f44_Screenshot2026-08-13at172035.png')",
+            "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/91cbf4366_efca8aa6761e6e74544ba4e9681156c9.jpg')",
           backgroundAttachment: "fixed",
           backgroundPosition: "center",
           backgroundSize: "cover",
