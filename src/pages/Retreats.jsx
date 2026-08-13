@@ -812,7 +812,7 @@ export default function Retreats() {
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(250,245,243,0.4)",
+            background: "rgba(250,245,243,0.5)",
             pointerEvents: "none",
             zIndex: 0
           }}
