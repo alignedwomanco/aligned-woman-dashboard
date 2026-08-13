@@ -797,6 +797,7 @@ export default function Retreats() {
       {/* FIXED BACKDROP — "Not just rest" + "Most retreats" */}
       <div
         style={{
+          position: "relative",
           backgroundImage:
             "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/6ed175f44_Screenshot2026-08-13at172035.png')",
           backgroundAttachment: "fixed",
@@ -806,8 +807,18 @@ export default function Retreats() {
           width: "100%"
         }}
       >
+        {/* fade the backdrop image to 60% so content stays legible */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(250,245,243,0.4)",
+            pointerEvents: "none",
+            zIndex: 0
+          }}
+        />
         {/* 02 NOT REST */}
-        <section className="rt-sec" style={{ position: "relative", background: "transparent" }}>
+        <section className="rt-sec" style={{ position: "relative", zIndex: 1, background: "transparent" }}>
           <div
             style={{
               position: "absolute",
@@ -837,7 +848,7 @@ export default function Retreats() {
         </section>
 
         {/* 03 THE BALANCE */}
-        <section className="rt-sec rt-sec--tall" style={{ background: "transparent" }}>
+        <section className="rt-sec rt-sec--tall" style={{ position: "relative", zIndex: 1, background: "transparent" }}>
           <Rise className="rt-w680">
             <h2 className="rt-h2" style={{ marginBottom: "24px", color: "var(--rt-burg)" }}>
               Most retreats sit at one end or the other. We built ours in the middle.
