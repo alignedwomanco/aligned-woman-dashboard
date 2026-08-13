@@ -761,7 +761,7 @@ export default function Retreats() {
           muted
           playsInline
           preload="auto"
-          src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/retreat.mp4"
+          src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/retreat-1.mp4"
           style={{ objectFit: "cover", objectPosition: "center" }}
         />
         <div
