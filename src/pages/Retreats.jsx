@@ -754,13 +754,20 @@ export default function Retreats() {
 
       {/* 01 HERO */}
       <section className="rt-hero">
-        <Slot
-          src={IMAGES.hero}
-          alt="A woman on retreat with The Aligned Woman Co."
-          brief=""
+        <video
           className="rt-fill"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/retreat.mp4"
+          style={{ objectFit: "cover", objectPosition: "center" }}
         />
-        <div className="rt-veil" />
+        <div
+          className="rt-veil"
+          style={{ background: "rgba(49,67,35,0.5)" }}
+        />
         <div className="rt-hero__copy">
           <p className="rt-eyebrow" style={{ marginBottom: "20px", color: "var(--rt-cream)" }}>
             Retreats
