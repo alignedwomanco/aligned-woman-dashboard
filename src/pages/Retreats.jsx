@@ -757,7 +757,7 @@ export default function Retreats() {
         <Slot
           src={IMAGES.hero}
           alt="A woman on retreat with The Aligned Woman Co."
-          brief="Hero portrait, South African woman, direct gaze, real environment, warm and deep"
+          brief=""
           className="rt-fill"
         />
         <div className="rt-veil" />
