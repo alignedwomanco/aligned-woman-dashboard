@@ -794,59 +794,73 @@ export default function Retreats() {
         </div>
       </section>
 
-      {/* 02 NOT REST */}
-      <section className="rt-sec rt-bg-page">
-        <Rise className="rt-w680">
-          <h2 className="rt-h2" style={{ marginBottom: "32px" }}>
-            Not just rest. <i>Awakening.</i>
-          </h2>
-          <p className="rt-p" style={{ marginBottom: "24px" }}>
-            A retreat with us is not designed to help you recover from your life. It is designed
-            to change your relationship with it.
-          </p>
-          <p className="rt-p" style={{ marginBottom: "24px" }}>
-            Together we bring the subconscious to the conscious. The patterns that have been running
-            quietly underneath your decisions become something you can see clearly, understand fully,
-            and finally work with rather than around. That is where clarity comes from. Not from
-            stepping away, but from finally seeing accurately.
-          </p>
-          <p className="rt-p">
-            You do not need to arrive with the answers. You only need to arrive open.
-          </p>
-        </Rise>
-      </section>
+      {/* FIXED BACKDROP — "Not just rest" + "Most retreats" */}
+      <div
+        style={{
+          backgroundImage:
+            "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/6ed175f44_Screenshot2026-08-13at172035.png')",
+          backgroundAttachment: "fixed",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          width: "100%"
+        }}
+      >
+        {/* 02 NOT REST */}
+        <section className="rt-sec" style={{ background: "transparent" }}>
+          <Rise className="rt-w680">
+            <h2 className="rt-h2" style={{ marginBottom: "32px" }}>
+              Not just rest. <i>Awakening.</i>
+            </h2>
+            <p className="rt-p" style={{ marginBottom: "24px" }}>
+              A retreat with us is not designed to help you recover from your life. It is designed
+              to change your relationship with it.
+            </p>
+            <p className="rt-p" style={{ marginBottom: "24px" }}>
+              Together we bring the subconscious to the conscious. The patterns that have been running
+              quietly underneath your decisions become something you can see clearly, understand fully,
+              and finally work with rather than around. That is where clarity comes from. Not from
+              stepping away, but from finally seeing accurately.
+            </p>
+            <p className="rt-p">
+              You do not need to arrive with the answers. You only need to arrive open.
+            </p>
+          </Rise>
+        </section>
 
-      {/* 03 THE BALANCE */}
-      <section className="rt-sec rt-sec--tall rt-bg-hunter">
-        <Rise className="rt-w680">
-          <h2 className="rt-h2" style={{ marginBottom: "24px", color: "var(--rt-cream)" }}>
-            Most retreats sit at one end or the other. We built ours in the middle.
-          </h2>
-          <p className="rt-standfirst" style={{ marginBottom: "40px" }}>
-            The balance is the method.
-          </p>
-          <p className="rt-p rt-p--onDark" style={{ marginBottom: "24px" }}>
-            After years of research and practice, we found that retreats rarely support women in the
-            way real change requires.
-          </p>
-          <p className="rt-p rt-p--onDark" style={{ marginBottom: "24px" }}>
-            They are either too spiritual, without enough grounded practice to survive an ordinary
-            Tuesday. Or too clinical, with nothing in them that reaches the parts of you that
-            thinking alone cannot change.
-          </p>
-          <p className="rt-p rt-p--onDark" style={{ marginBottom: "24px" }}>
-            The balance between the two is where alignment actually happens. Our retreats are built
-            to hold both.
-          </p>
-          <p className="rt-p rt-p--onDark" style={{ marginBottom: "56px" }}>
-            No two are the same. But every one of them follows the same method, and the same three
-            elements are always present.
-          </p>
-          <p className="rt-pull">
-            Body opens. Behaviour does the work. <span>Belonging carries it home.</span>
-          </p>
-        </Rise>
-      </section>
+        {/* 03 THE BALANCE */}
+        <section className="rt-sec rt-sec--tall" style={{ background: "transparent" }}>
+          <Rise className="rt-w680">
+            <h2 className="rt-h2" style={{ marginBottom: "24px", color: "var(--rt-burg)" }}>
+              Most retreats sit at one end or the other. We built ours in the middle.
+            </h2>
+            <p className="rt-standfirst" style={{ marginBottom: "40px", color: "var(--rt-rose-deep)" }}>
+              The balance is the method.
+            </p>
+            <p className="rt-p" style={{ marginBottom: "24px" }}>
+              After years of research and practice, we found that retreats rarely support women in the
+              way real change requires.
+            </p>
+            <p className="rt-p" style={{ marginBottom: "24px" }}>
+              They are either too spiritual, without enough grounded practice to survive an ordinary
+              Tuesday. Or too clinical, with nothing in them that reaches the parts of you that
+              thinking alone cannot change.
+            </p>
+            <p className="rt-p" style={{ marginBottom: "24px" }}>
+              The balance between the two is where alignment actually happens. Our retreats are built
+              to hold both.
+            </p>
+            <p className="rt-p" style={{ marginBottom: "56px" }}>
+              No two are the same. But every one of them follows the same method, and the same three
+              elements are always present.
+            </p>
+            <p className="rt-pull" style={{ color: "var(--rt-burg)" }}>
+              Body opens. Behaviour does the work.{" "}
+              <span style={{ color: "var(--rt-rose-deep)" }}>Belonging carries it home.</span>
+            </p>
+          </Rise>
+        </section>
+      </div>
 
       {/* 04 BODY BEHAVIOUR BELONGING */}
       <section className="rt-parts">
