@@ -794,29 +794,8 @@ export default function Retreats() {
         </div>
       </section>
 
-      {/* FIXED BACKDROP — "Not just rest" + "Most retreats" */}
-      <div
-        style={{
-          position: "relative",
-          backgroundImage:
-            "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/91cbf4366_efca8aa6761e6e74544ba4e9681156c9.jpg')",
-          backgroundAttachment: "fixed",
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          width: "100%"
-        }}
-      >
-        {/* fade the backdrop image to 60% so content stays legible */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(250,245,243,0.5)",
-            pointerEvents: "none",
-            zIndex: 0
-          }}
-        />
+      {/* "Not just rest" + "Most retreats" */}
+      <div className="rt-bg-page" style={{ position: "relative", width: "100%" }}>
         {/* 02 NOT REST */}
         <section className="rt-sec" style={{ position: "relative", zIndex: 1, background: "transparent" }}>
           <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
