@@ -987,7 +987,13 @@ export default function Retreats() {
           <div className="rt-split__media">
             <video
               src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/SCOTY.mp4"
-              className={`rt-img ${"rt-fill" || ""}`}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                borderRadius: "inherit"
+              }}
               autoPlay
               muted
               loop
