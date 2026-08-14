@@ -846,7 +846,7 @@ export default function Retreats() {
             </p>
             <p className="rt-pull" style={{ color: "var(--rt-burg)" }}>
               Body opens. Behaviour does the work.{" "}
-              <span style={{ color: "var(--rt-rose-deep)" }}>Belonging carries it home.</span>
+              <span style={{ color: "var(--rt-rose-deep)" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
             </p>
           </Rise>
         </section>
@@ -866,7 +866,7 @@ export default function Retreats() {
               color: "var(--rt-cream-page)"
             }}>
             
-            Body. Behaviour. <em style={{ color: "var(--rt-rose-light)" }}>Belonging.</em>
+            Body. Behaviour. <em style={{ color: "var(--rt-rose-light)" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging.</em>
           </h2>
           <p
             style={{
