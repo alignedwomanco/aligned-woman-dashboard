@@ -14,7 +14,7 @@ const IMAGES = {
   founder: "https://media.base44.com/images/public/69f46886a412ee042303f1af/012ea2a9d_DSC08133.JPG",
   diagramBackdrop: "",
   how01: "https://media.base44.com/images/public/69f46886a412ee042303f1af/746fee3f4_cfe01d31250750b899d3ae137c9a44d9.jpg",
-  how02: "",
+  how02: "https://media.base44.com/images/public/69f46886a412ee042303f1af/27864d491_Screenshot2026-08-14at222748.png",
   how03: "",
   how04: "",
   how05: "",
