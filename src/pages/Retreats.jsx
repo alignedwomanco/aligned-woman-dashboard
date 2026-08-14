@@ -958,14 +958,6 @@ export default function Retreats() {
 
       {/* 06 THE LAND */}
       <section>
-        <div style={{ position: "relative", height: "clamp(420px, 68vh, 640px)" }}>
-          <img
-            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/47bbbccc7_Screenshot2026-08-13at171858.png"
-            alt="South African landscape at golden hour"
-            className="rt-fill rt-img" />
-
-          <div style={{ position: "absolute", inset: 0, background: "rgba(49,67,35,0.5)", pointerEvents: "none" }} />
-        </div>
         <div
           className="rt-bg-hunter"
           style={{ padding: "clamp(72px, 12vw, 120px) clamp(24px, 6vw, 80px)" }}>
