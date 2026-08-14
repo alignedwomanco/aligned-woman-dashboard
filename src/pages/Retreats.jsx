@@ -959,13 +959,12 @@ export default function Retreats() {
       {/* 06 THE LAND */}
       <section>
         <div style={{ position: "relative", height: "clamp(420px, 68vh, 640px)" }}>
-          <Slot
-            src={IMAGES.land}
-            alt="South African landscape"
-            brief="South African landscape, fynbos, Cape mountain, Karoo or indigenous garden, warm and deep"
-            className="rt-fill" />
-          
-          <div className="rt-veil" />
+          <img
+            src="https://media.base44.com/images/public/69f46886a412ee042303f1af/47bbbccc7_Screenshot2026-08-13at171858.png"
+            alt="South African landscape at golden hour"
+            className="rt-fill rt-img" />
+
+          <div style={{ position: "absolute", inset: 0, background: "rgba(49,67,35,0.5)", pointerEvents: "none" }} />
         </div>
         <div
           className="rt-bg-hunter"
