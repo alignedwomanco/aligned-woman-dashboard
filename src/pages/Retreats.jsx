@@ -922,8 +922,29 @@ export default function Retreats() {
       </section>
 
       {/* 05 WHAT TO EXPECT */}
-      <section className="rt-sec rt-bg-blush">
-        <Rise className="rt-w680">
+      <section
+        className="rt-sec"
+        style={{
+          position: "relative",
+          backgroundImage:
+            "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/fda595f0e_Screenshot2026-08-03at112544.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat"
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            background: "rgba(245,221,217,0.5)",
+            pointerEvents: "none",
+            zIndex: 0
+          }}
+        />
+        <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
           <h2 className="rt-h2" style={{ marginBottom: "clamp(48px, 7vw, 72px)" }}>
             What to expect
           </h2>
