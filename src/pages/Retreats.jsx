@@ -985,11 +985,13 @@ export default function Retreats() {
       <section className="rt-sec rt-bg-cream">
         <div className="rt-w1100 rt-split rt-split--centre">
           <div className="rt-split__media">
-            <Slot
-              src={IMAGES.equine}
-              alt="A woman standing with a horse"
-              brief="A woman with a horse, forehead close or hand on neck, real paddock or veld, warm and deep" />
-            
+            <video
+              src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/SCOTY.mp4"
+              className={`rt-img ${"rt-fill" || ""}`}
+              autoPlay
+              muted
+              loop
+              playsInline />
           </div>
           <Rise className="rt-split__copy">
             <h2
