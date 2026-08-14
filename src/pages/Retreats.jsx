@@ -945,12 +945,12 @@ export default function Retreats() {
           }}
         />
         <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
-          <h2 className="rt-h2" style={{ marginBottom: "clamp(48px, 7vw, 72px)", color: "#FFFFFF" }}>
+          <h2 className="rt-h2" style={{ marginBottom: "clamp(48px, 7vw, 72px)", color: "#E8DFCA" }}>
             What to expect
           </h2>
           <div className="rt-expect">
             {EXPECT.map((line) =>
-            <p key={line} style={{ color: "#FFFFFF" }}>{line}</p>
+            <p key={line} style={{ color: "#E8DFCA" }}>{line}</p>
             )}
           </div>
         </Rise>
