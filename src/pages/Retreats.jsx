@@ -565,10 +565,10 @@ export default function Retreats() {
           display: block; width: 100%; max-width: 740px;
           margin: 56px auto 0; overflow: visible;
         }
-        .rt-dgTitle { font: 400 40px var(--rt-display); fill: var(--rt-cream-page); }
-        .rt-dgCentre { font: italic 400 30px var(--rt-display); fill: var(--rt-rose-pale); }
-        .rt-dgBody { font: 300 15px var(--rt-sans); fill: rgba(250,245,243,0.72); }
-        .rt-dgNode { font: 400 20px var(--rt-display); fill: var(--rt-rose-light); }
+        .rt-dgTitle { font: 400 40px var(--rt-display); fill: #E8DFCA; }
+        .rt-dgCentre { font: italic 400 30px var(--rt-display); fill: #E8DFCA; }
+        .rt-dgBody { font: 300 15px var(--rt-sans); fill: #E8DFCA; }
+        .rt-dgNode { font: 400 20px var(--rt-display); fill: #E8DFCA; }
         .rt-breathe { transform-box: fill-box; transform-origin: center; animation: rtBreathe 12s ease-in-out infinite; }
         .rt-pulse { animation: rtPulse 16s ease-in-out infinite; }
         .rt-pulse--b { animation-duration: 18s; animation-delay: -7s; }
@@ -584,19 +584,19 @@ export default function Retreats() {
           .rt-stack.rt-mobileOnly { display: grid; }
         }
         .rt-stack__mark {
-          width: 64px; height: 64px; border: 2px solid rgba(250,245,243,0.55);
+          width: 64px; height: 64px; border: 2px solid #E8DFCA;
           border-radius: 50%; display: flex; align-items: center; justify-content: center;
           margin-bottom: 20px; font-family: var(--rt-display); font-style: italic;
-          font-size: 18px; color: var(--rt-rose-pale);
+          font-size: 18px; color: #E8DFCA;
         }
         .rt-stack h3 {
           margin-bottom: 14px; font-family: var(--rt-display); font-weight: 400;
-          font-size: 30px; line-height: 1.2; color: var(--rt-cream-page);
+          font-size: 30px; line-height: 1.2; color: #E8DFCA;
         }
-        .rt-stack p { font-size: 15px; font-weight: 300; line-height: 1.75; color: rgba(250,245,243,0.72); }
+        .rt-stack p { font-size: 15px; font-weight: 300; line-height: 1.75; color: #E8DFCA; }
         .rt-stack__node {
           margin-top: 14px; font-family: var(--rt-display); font-size: 17px;
-          color: var(--rt-rose-light);
+          color: #E8DFCA;
         }
 
         /* ---------- 05 expect ---------- */
@@ -889,10 +889,10 @@ export default function Retreats() {
             style={{
               fontSize: "clamp(34px, 5.5vw, 48px)",
               lineHeight: 1.1,
-              color: "var(--rt-cream-page)"
+              color: "#E8DFCA"
             }}>
             
-            Body. Behaviour. <em style={{ color: "var(--rt-rose-light)" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging.</em>
+            Body. Behaviour. <em style={{ color: "#E8DFCA" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging.</em>
           </h2>
           <p
             style={{
@@ -900,7 +900,7 @@ export default function Retreats() {
               fontSize: "15px",
               fontWeight: 300,
               lineHeight: 1.8,
-              color: "rgba(250,245,243,0.8)"
+              color: "#E8DFCA"
             }}>
             
             Everything we create is built around three principles.
