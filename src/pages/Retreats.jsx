@@ -797,7 +797,7 @@ export default function Retreats() {
       {/* "Not just rest" + "Most retreats" */}
       <div className="rt-bg-page" style={{ position: "relative", width: "100%" }}>
         {/* 02 NOT REST */}
-        <section className="rt-sec" style={{ position: "relative", zIndex: 1, background: "transparent" }}>
+        <section className="rt-sec" style={{ position: "relative", zIndex: 1, background: "#E8DFCA" }}>
           <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
             <h2 className="rt-h2" style={{ marginBottom: "32px", color: "var(--rt-burg)" }}>
               Not just rest. <i>Awakening.</i>
