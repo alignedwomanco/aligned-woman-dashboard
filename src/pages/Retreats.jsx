@@ -11,7 +11,7 @@ const IMAGES = {
   hero: "",
   land: "",
   equine: "",
-  founder: "",
+  founder: "https://media.base44.com/images/public/69f46886a412ee042303f1af/012ea2a9d_DSC08133.JPG",
   diagramBackdrop: "",
   how01: "",
   how02: "",
