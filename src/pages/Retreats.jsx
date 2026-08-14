@@ -322,8 +322,14 @@ function Diagram() {
         </radialGradient>
       </defs>
 
-      <circle cx="500" cy="560" r="490" fill="none" stroke="rgba(250,245,243,0.12)" strokeWidth="2" />
-      <circle cx="500" cy="560" r="440" fill="none" stroke="rgba(250,245,243,0.07)" strokeWidth="2" />
+      <g>
+        <circle cx="500" cy="560" r="490" fill="none" stroke="rgba(250,245,243,0.5)" strokeWidth="2.5" strokeDasharray="2 14" strokeLinecap="round" />
+        <animateTransform attributeName="transform" type="rotate" from="0 500 560" to="360 500 560" dur="60s" repeatCount="indefinite" />
+      </g>
+      <g>
+        <circle cx="500" cy="560" r="440" fill="none" stroke="rgba(250,245,243,0.4)" strokeWidth="2.5" strokeDasharray="2 14" strokeLinecap="round" />
+        <animateTransform attributeName="transform" type="rotate" from="360 500 560" to="0 500 560" dur="45s" repeatCount="indefinite" />
+      </g>
       <line x1="500" y1="553" x2="180" y2="288" stroke="rgba(250,245,243,0.15)" strokeWidth="2" />
       <line x1="500" y1="553" x2="820" y2="288" stroke="rgba(250,245,243,0.15)" strokeWidth="2" />
       <line x1="500" y1="693" x2="500" y2="932" stroke="rgba(250,245,243,0.15)" strokeWidth="2" />
