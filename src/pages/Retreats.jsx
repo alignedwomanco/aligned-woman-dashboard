@@ -847,32 +847,32 @@ export default function Retreats() {
             }}
           />
           <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
-            <h2 className="rt-h2" style={{ marginBottom: "24px", color: "var(--rt-burg)" }}>
+            <h2 className="rt-h2" style={{ marginBottom: "24px", color: "#000000" }}>
               Most retreats sit at one end or the other. We built ours in the middle.
             </h2>
-            <p className="rt-standfirst" style={{ marginBottom: "40px", color: "var(--rt-burgundy)" }}>
+            <p className="rt-standfirst" style={{ marginBottom: "40px", color: "#000000" }}>
               The balance is the method.
             </p>
-            <p className="rt-p" style={{ marginBottom: "24px", color: "#FFFFFF" }}>
+            <p className="rt-p" style={{ marginBottom: "24px", color: "#000000" }}>
               After years of research and practice, we found that retreats rarely support women in the
               way real change requires.
             </p>
-            <p className="rt-p" style={{ marginBottom: "24px", color: "#FFFFFF" }}>
+            <p className="rt-p" style={{ marginBottom: "24px", color: "#000000" }}>
               They are either too spiritual, without enough grounded practice to survive an ordinary
               Tuesday. Or too clinical, with nothing in them that reaches the parts of you that
               thinking alone cannot change.
             </p>
-            <p className="rt-p" style={{ marginBottom: "24px", color: "#FFFFFF" }}>
+            <p className="rt-p" style={{ marginBottom: "24px", color: "#000000" }}>
               The balance between the two is where alignment actually happens. Our retreats are built
               to hold both.
             </p>
-            <p className="rt-p" style={{ marginBottom: "56px", color: "#FFFFFF" }}>
+            <p className="rt-p" style={{ marginBottom: "56px", color: "#000000" }}>
               No two are the same. But every one of them follows the same method, and the same three
               elements are always present.
             </p>
-            <p className="rt-pull" style={{ color: "var(--rt-burg)" }}>
+            <p className="rt-pull" style={{ color: "#000000" }}>
               Body opens. Behaviour does the work.{" "}
-              <span style={{ color: "var(--rt-burgundy)" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
+              <span style={{ color: "#000000" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
             </p>
           </Rise>
         </section>
