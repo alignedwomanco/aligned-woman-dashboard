@@ -837,7 +837,7 @@ export default function Retreats() {
               inset: 0,
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
-              background: "rgba(232,223,202,0.4)",
+              background: "rgba(232,223,202,0.8)",
               pointerEvents: "none",
               zIndex: 0
             }}
