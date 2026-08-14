@@ -34,226 +34,226 @@ const APPLY_URL = "/Apply";
 const REGISTER_URL = "/Apply";
 
 const THREE_PARTS = [
-  {
-    number: "01",
-    title: "Body",
-    node: "Regulation",
-    body:
-      "Something has to change in your physiology before anything changes in your thinking. Every retreat opens in the body, because self-assessment done while you are still braced produces nothing you can use."
-  },
-  {
-    number: "02",
-    title: "Behaviour",
-    node: "Safety",
-    body:
-      "This is the depth work. Not a conversation about patterns in general, but the identification of yours specifically, named and read with practitioners in the room."
-  },
-  {
-    number: "03",
-    title: "Belonging",
-    node: "Worth",
-    body:
-      "Belonging is a mechanism, not a feeling. You leave connected to the women who were there with you and clear on exactly what you are doing next."
-  }
-];
+{
+  number: "01",
+  title: "Body",
+  node: "Regulation",
+  body:
+  "Something has to change in your physiology before anything changes in your thinking. Every retreat opens in the body, because self-assessment done while you are still braced produces nothing you can use."
+},
+{
+  number: "02",
+  title: "Behaviour",
+  node: "Safety",
+  body:
+  "This is the depth work. Not a conversation about patterns in general, but the identification of yours specifically, named and read with practitioners in the room."
+},
+{
+  number: "03",
+  title: "Belonging",
+  node: "Worth",
+  body:
+  "Belonging is a mechanism, not a feeling. You leave connected to the women who were there with you and clear on exactly what you are doing next."
+}];
+
 
 const EXPECT = [
-  "To go deep, and to be guided the whole way down.",
-  "To be fully accepted for who you are, whatever that looks like on the day you arrive.",
-  "To be able to show every part of yourself, because every part of you is welcome here.",
-  "To be given space. To be held. To breathe.",
-  "To be given the knowledge and the wisdom to find yourself.",
-  "And to leave with tools you will still be using long after you have unpacked."
-];
+"To go deep, and to be guided the whole way down.",
+"To be fully accepted for who you are, whatever that looks like on the day you arrive.",
+"To be able to show every part of yourself, because every part of you is welcome here.",
+"To be given space. To be held. To breathe.",
+"To be given the knowledge and the wisdom to find yourself.",
+"And to leave with tools you will still be using long after you have unpacked."];
+
 
 const PRACTICES = [
-  {
-    key: "how01",
-    title: "Trauma-informed somatic practice",
-    body: "Working with what the body holds, at a pace your system can take. Nothing is forced open.",
-    brief: "Practitioner's hands near a woman's back, not touching, cropped close, warm"
-  },
-  {
-    key: "how02",
-    title: "Polyvagal-informed nervous system regulation",
-    body:
-      "Understanding why you shut down, brace or over-function, and learning to shift your state deliberately.",
-    brief: "Light on skin, shoulder and collarbone, documentary, deep and warm"
-  },
-  {
-    key: "how03",
-    title: "Internal Family Systems",
-    body:
-      "Meeting the parts of yourself you have spent years trying to silence, and understanding what each has been protecting.",
-    brief: "Two hands resting on a table in conversation, cropped close, real environment"
-  },
-  {
-    key: "how04",
-    title: "Neuro Linguistic Programming",
-    body:
-      "Working with the language you use about yourself, and the patterns underneath it. Changing what you say changes what you believe is possible.",
-    brief: "A woman mid-sentence, profile, caught not staged, warm and deep"
-  },
-  {
-    key: "how05",
-    title: "Womb work",
-    body:
-      "Held space for what women carry in the body and rarely speak about. Cycles, birth, loss, longing.",
-    brief: "Hands resting low on the belly, fabric texture, cropped close, warm"
-  },
-  {
-    key: "how06",
-    title: "Embodiment work",
-    body:
-      "Reconnecting with your body as somewhere you live rather than somewhere you manage. Learning to feel a decision, not only think it.",
-    brief: "Bare feet on ground, earth or stone, real texture, documentary"
-  },
-  {
-    key: "how07",
-    title: "Anger work",
-    body:
-      "Anger is information. Here it is given somewhere to go, safely and with structure, instead of being swallowed for another decade.",
-    brief: "Clenched fists or tensed back and shoulders, movement, cropped close, deep tones"
-  },
-  {
-    key: "how08",
-    title: "Facilitated dialogue and council",
-    body: "Group work with a real structure, where every woman is heard and no one has to perform.",
-    brief: "Women seated in council, shot from behind shoulders, real room with depth"
-  },
-  {
-    key: "how09",
-    title: "Sound healing",
-    body:
-      "Sound used to settle the nervous system and quieten the thinking mind, so the work that follows lands deeper than analysis.",
-    brief: "A hand mid-strike near an instrument, motion blur acceptable"
-  },
-  {
-    key: "how10",
-    title: "Floating sound baths",
-    body:
-      "Held in water, weightless, with sound moving through you rather than around you. One of the fastest routes we know into genuine stillness.",
-    brief: "Water surface, light moving through it, texture only, deep and warm"
-  },
-  {
-    key: "how11",
-    title: "Spiritual and ceremonial practice",
-    body:
-      "Ritual, stillness and meaning, held with the same care as everything else. Depending on the edition, this may include cacao ceremony.",
-    brief: "Hands holding a cup, steam, texture and skin"
-  }
-];
+{
+  key: "how01",
+  title: "Trauma-informed somatic practice",
+  body: "Working with what the body holds, at a pace your system can take. Nothing is forced open.",
+  brief: "Practitioner's hands near a woman's back, not touching, cropped close, warm"
+},
+{
+  key: "how02",
+  title: "Polyvagal-informed nervous system regulation",
+  body:
+  "Understanding why you shut down, brace or over-function, and learning to shift your state deliberately.",
+  brief: "Light on skin, shoulder and collarbone, documentary, deep and warm"
+},
+{
+  key: "how03",
+  title: "Internal Family Systems",
+  body:
+  "Meeting the parts of yourself you have spent years trying to silence, and understanding what each has been protecting.",
+  brief: "Two hands resting on a table in conversation, cropped close, real environment"
+},
+{
+  key: "how04",
+  title: "Neuro Linguistic Programming",
+  body:
+  "Working with the language you use about yourself, and the patterns underneath it. Changing what you say changes what you believe is possible.",
+  brief: "A woman mid-sentence, profile, caught not staged, warm and deep"
+},
+{
+  key: "how05",
+  title: "Womb work",
+  body:
+  "Held space for what women carry in the body and rarely speak about. Cycles, birth, loss, longing.",
+  brief: "Hands resting low on the belly, fabric texture, cropped close, warm"
+},
+{
+  key: "how06",
+  title: "Embodiment work",
+  body:
+  "Reconnecting with your body as somewhere you live rather than somewhere you manage. Learning to feel a decision, not only think it.",
+  brief: "Bare feet on ground, earth or stone, real texture, documentary"
+},
+{
+  key: "how07",
+  title: "Anger work",
+  body:
+  "Anger is information. Here it is given somewhere to go, safely and with structure, instead of being swallowed for another decade.",
+  brief: "Clenched fists or tensed back and shoulders, movement, cropped close, deep tones"
+},
+{
+  key: "how08",
+  title: "Facilitated dialogue and council",
+  body: "Group work with a real structure, where every woman is heard and no one has to perform.",
+  brief: "Women seated in council, shot from behind shoulders, real room with depth"
+},
+{
+  key: "how09",
+  title: "Sound healing",
+  body:
+  "Sound used to settle the nervous system and quieten the thinking mind, so the work that follows lands deeper than analysis.",
+  brief: "A hand mid-strike near an instrument, motion blur acceptable"
+},
+{
+  key: "how10",
+  title: "Floating sound baths",
+  body:
+  "Held in water, weightless, with sound moving through you rather than around you. One of the fastest routes we know into genuine stillness.",
+  brief: "Water surface, light moving through it, texture only, deep and warm"
+},
+{
+  key: "how11",
+  title: "Spiritual and ceremonial practice",
+  body:
+  "Ritual, stillness and meaning, held with the same care as everything else. Depending on the edition, this may include cacao ceremony.",
+  brief: "Hands holding a cup, steam, texture and skin"
+}];
+
 
 const STANDARD = [
-  { term: "Paper.", detail: "Qualifications reviewed." },
-  { term: "Register.", detail: "Professional registration checked where it applies." },
-  { term: "Person.", detail: "Interviewed directly, not vetted on paper alone." },
-  { term: "Promise.", detail: "Ethical commitments signed." },
-  { term: "Present tense.", detail: "Renewed annually, not granted once." }
-];
+{ term: "Paper.", detail: "Qualifications reviewed." },
+{ term: "Register.", detail: "Professional registration checked where it applies." },
+{ term: "Person.", detail: "Interviewed directly, not vetted on paper alone." },
+{ term: "Promise.", detail: "Ethical commitments signed." },
+{ term: "Present tense.", detail: "Renewed annually, not granted once." }];
+
 
 const CREDENTIALS = [
-  {
-    title: "NLP Life and Business Coach",
-    body: "Neuro Linguistic Practitioner, internationally accredited with the American Board of NLP"
-  },
-  {
-    title: "Time Line Therapy Practitioner",
-    body:
-      "Internationally accredited with the American Board of Hypnotherapy and the Time Line Therapy Association"
-  },
-  {
-    title: "Woman Within Circle Guide Facilitator",
-    body: "Trained through Woman Within International"
-  },
-  {
-    title: "Certified Director, Cum Laude",
-    body: "Institute of Directors South Africa, 2021"
-  },
-  {
-    title: "Degree in Brand Communications, Marketing and Media",
-    body: "Specialising in copywriting, Vega School of Brand Leadership"
-  }
-];
+{
+  title: "NLP Life and Business Coach",
+  body: "Neuro Linguistic Practitioner, internationally accredited with the American Board of NLP"
+},
+{
+  title: "Time Line Therapy Practitioner",
+  body:
+  "Internationally accredited with the American Board of Hypnotherapy and the Time Line Therapy Association"
+},
+{
+  title: "Woman Within Circle Guide Facilitator",
+  body: "Trained through Woman Within International"
+},
+{
+  title: "Certified Director, Cum Laude",
+  body: "Institute of Directors South Africa, 2021"
+},
+{
+  title: "Degree in Brand Communications, Marketing and Media",
+  body: "Specialising in copywriting, Vega School of Brand Leadership"
+}];
+
 
 const VALUES = [
-  {
-    title: "Privacy",
-    body:
-      "What is shared here stays here. Small groups, closed rooms, and no cameras where the work is happening. For many of the women who come to us, this is the first place in years they have been able to speak without calculating who might hear it. We take that seriously."
-  },
-  {
-    title: "Qualified practitioners",
-    body:
-      "Everyone who holds a room for us is qualified to be in it. We check before they stand in front of you, not after. It is the reason we say no far more often than we say yes."
-  },
-  {
-    title: "Holistic practice",
-    body:
-      "Body, mind and spirit are not separate problems with separate solutions. We work with all of it, because you do not experience your life in categories."
-  },
-  {
-    title: "Joy",
-    body:
-      "Not everything has to be heavy to be meaningful. There will be depth, and there will also be long dinners, real laughter and the kind of lightness you forgot you had access to. The two have never been opposites."
-  }
-];
+{
+  title: "Privacy",
+  body:
+  "What is shared here stays here. Small groups, closed rooms, and no cameras where the work is happening. For many of the women who come to us, this is the first place in years they have been able to speak without calculating who might hear it. We take that seriously."
+},
+{
+  title: "Qualified practitioners",
+  body:
+  "Everyone who holds a room for us is qualified to be in it. We check before they stand in front of you, not after. It is the reason we say no far more often than we say yes."
+},
+{
+  title: "Holistic practice",
+  body:
+  "Body, mind and spirit are not separate problems with separate solutions. We work with all of it, because you do not experience your life in categories."
+},
+{
+  title: "Joy",
+  body:
+  "Not everything has to be heavy to be meaningful. There will be depth, and there will also be long dinners, real laughter and the kind of lightness you forgot you had access to. The two have never been opposites."
+}];
+
 
 const FOR_YOU_IF = [
-  "You want real connection. With other women, and with yourself.",
-  "You are searching for answers you know you carry, and cannot seem to reach.",
-  "You know there is a better version of you in there. You just do not know how to get to her.",
-  "You want to know who you actually are, underneath all of it.",
-  "You are ready to release the things you have been too ashamed to touch."
-];
+"You want real connection. With other women, and with yourself.",
+"You are searching for answers you know you carry, and cannot seem to reach.",
+"You know there is a better version of you in there. You just do not know how to get to her.",
+"You want to know who you actually are, underneath all of it.",
+"You are ready to release the things you have been too ashamed to touch."];
+
 
 const EXPERIENCE = [
-  "Sound baths held on the water, beside a waterfall",
-  "Ceremony",
-  "NLP rewiring",
-  "Somatic and nervous system reset",
-  "Anger and shame release",
-  "Equine work",
-  "EFT tapping",
-  "Ritual and breathwork journeys",
-  "Nature immersion in the Western Cape"
-];
+"Sound baths held on the water, beside a waterfall",
+"Ceremony",
+"NLP rewiring",
+"Somatic and nervous system reset",
+"Anger and shame release",
+"Equine work",
+"EFT tapping",
+"Ritual and breathwork journeys",
+"Nature immersion in the Western Cape"];
+
 
 const DIFFERENT = [
-  {
-    heading: "You will not spend four days talking about yourself.",
-    paragraphs: [
-      "You already know your story. You can explain yourself to anyone who asks, and somewhere along the way the explaining became another place to hide.",
-      "This retreat works underneath that. Through the body, through horses, through movement and sound and the subconscious, which does not care how articulate you are and does not respond to a well-told story. That is exactly why it reaches what talking has not."
-    ]
-  },
-  {
-    heading: "You will leave knowing something specific about yourself.",
-    paragraphs: [
-      "Not a feeling of insight that dissolves by Tuesday. A named result about how you operate, identified during the retreat and handed to you, so you know precisely what you are working with rather than carrying home a general sense that something changed."
-    ]
-  },
-  {
-    heading: "It does not end when you leave.",
-    paragraphs: [
-      "Everything you learn is waiting in your private space on our platform. We check in. And ninety days later we look again and show you what actually held."
-    ]
-  },
-  {
-    heading: "Nobody has to know you were here.",
-    paragraphs: [
-      "Every woman in the room signs the same confidentiality agreement you do. No lists, no tagging, no cameras where the work happens. For most women who come to us, this is the first place in years they have been able to speak without calculating who might hear it."
-    ]
-  }
-];
+{
+  heading: "You will not spend four days talking about yourself.",
+  paragraphs: [
+  "You already know your story. You can explain yourself to anyone who asks, and somewhere along the way the explaining became another place to hide.",
+  "This retreat works underneath that. Through the body, through horses, through movement and sound and the subconscious, which does not care how articulate you are and does not respond to a well-told story. That is exactly why it reaches what talking has not."]
+
+},
+{
+  heading: "You will leave knowing something specific about yourself.",
+  paragraphs: [
+  "Not a feeling of insight that dissolves by Tuesday. A named result about how you operate, identified during the retreat and handed to you, so you know precisely what you are working with rather than carrying home a general sense that something changed."]
+
+},
+{
+  heading: "It does not end when you leave.",
+  paragraphs: [
+  "Everything you learn is waiting in your private space on our platform. We check in. And ninety days later we look again and show you what actually held."]
+
+},
+{
+  heading: "Nobody has to know you were here.",
+  paragraphs: [
+  "Every woman in the room signs the same confidentiality agreement you do. No lists, no tagging, no cameras where the work happens. For most women who come to us, this is the first place in years they have been able to speak without calculating who might hear it."]
+
+}];
+
 
 const DETAILS = [
-  { label: "Dates", value: "28 to 31 January 2027" },
-  { label: "Location", value: "Western Cape, South Africa", note: "Venue announced to applicants" },
-  { label: "Duration", value: "Three nights, four days" },
-  { label: "Group size", value: "Twelve women" },
-  { label: "Included", value: "All sessions, accommodation and meals" }
-];
+{ label: "Dates", value: "28 to 31 January 2027" },
+{ label: "Location", value: "Western Cape, South Africa", note: "Venue announced to applicants" },
+{ label: "Duration", value: "Three nights, four days" },
+{ label: "Group size", value: "Twelve women" },
+{ label: "Included", value: "All sessions, accommodation and meals" }];
+
 
 /* ------------------------------------------------------------------
    MANIFESTO
@@ -273,8 +273,8 @@ function Rise({ children, className, style, as = "div" }) {
     return (
       <Tag className={className} style={style}>
         {children}
-      </Tag>
-    );
+      </Tag>);
+
   }
 
   return (
@@ -284,11 +284,11 @@ function Rise({ children, className, style, as = "div" }) {
       initial={{ opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
-      transition={{ duration: 0.6, ease: [0.2, 0.7, 0.2, 1] }}
-    >
+      transition={{ duration: 0.6, ease: [0.2, 0.7, 0.2, 1] }}>
+      
       {children}
-    </MotionTag>
-  );
+    </MotionTag>);
+
 }
 
 function Slot({ src, alt, brief, className }) {
@@ -298,8 +298,8 @@ function Slot({ src, alt, brief, className }) {
   return (
     <div className={`rt-slot ${className || ""}`} role="img" aria-label={alt}>
       <span className="rt-slotText">{brief}</span>
-    </div>
-  );
+    </div>);
+
 }
 
 function Diagram() {
@@ -308,8 +308,8 @@ function Diagram() {
       viewBox="0 0 1000 1120"
       role="img"
       aria-label="Sacred geometry composition of Body, Behaviour and Belonging"
-      className="rt-diagram rt-desktopOnly"
-    >
+      className="rt-diagram rt-desktopOnly">
+      
       <defs>
         <radialGradient id="rt-sg-ctr">
           <stop offset="0%" stopColor="var(--rt-rose-pale)" stopOpacity="0.4" />
@@ -385,8 +385,8 @@ function Diagram() {
       <text x="150" y="269" textAnchor="middle" className="rt-dgNode">Regulation</text>
       <text x="850" y="269" textAnchor="middle" className="rt-dgNode">Safety</text>
       <text x="500" y="1019" textAnchor="middle" className="rt-dgNode">Worth</text>
-    </svg>
-  );
+    </svg>);
+
 }
 
 export default function Retreats() {
@@ -762,12 +762,12 @@ export default function Retreats() {
           playsInline
           preload="auto"
           src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/retreat-1.mp4"
-          style={{ objectFit: "cover", objectPosition: "center" }}
-        />
+          style={{ objectFit: "cover", objectPosition: "center" }} />
+        
         <div
           className="rt-veil"
-          style={{ background: "rgba(49,67,35,0.5)" }}
-        />
+          style={{ background: "rgba(49,67,35,0.5)" }} />
+        
         <div className="rt-hero__copy">
           <p className="rt-eyebrow" style={{ marginBottom: "20px", color: "var(--rt-cream)" }}>
             Retreats
@@ -783,8 +783,8 @@ export default function Retreats() {
               fontSize: "clamp(16px, 1.8vw, 18px)",
               lineHeight: 1.7,
               color: "rgba(250,245,243,0.94)"
-            }}
-          >
+            }}>
+            
             Immersive, multi-day experiences in South Africa, created for the woman who senses
             there is more available to her and wants to understand what has been standing in the way.
           </p>
@@ -800,7 +800,7 @@ export default function Retreats() {
         <section className="rt-sec" style={{ position: "relative", zIndex: 1, background: "#E8DFCA" }}>
           <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
             <h2 className="rt-h2" style={{ marginBottom: "32px", color: "var(--rt-burg)" }}>
-              Not just rest. <i>Awakening.</i>
+              Not just rest. <i className="[font-family:'Libre_Baskerville',_serif]">Awakening.</i>
             </h2>
             <p className="rt-p" style={{ marginBottom: "24px" }}>
               A retreat with us is not designed to help you recover from your life. It is designed
@@ -864,8 +864,8 @@ export default function Retreats() {
               fontSize: "clamp(34px, 5.5vw, 48px)",
               lineHeight: 1.1,
               color: "var(--rt-cream-page)"
-            }}
-          >
+            }}>
+            
             Body. Behaviour. <em style={{ color: "var(--rt-rose-light)" }}>Belonging.</em>
           </h2>
           <p
@@ -875,22 +875,22 @@ export default function Retreats() {
               fontWeight: 300,
               lineHeight: 1.8,
               color: "rgba(250,245,243,0.8)"
-            }}
-          >
+            }}>
+            
             Everything we create is built around three principles.
           </p>
 
           <Diagram />
 
           <div className="rt-stack rt-mobileOnly">
-            {THREE_PARTS.map((part) => (
-              <div key={part.title}>
+            {THREE_PARTS.map((part) =>
+            <div key={part.title}>
                 <div className="rt-stack__mark">{part.number}</div>
                 <h3>{part.title}</h3>
                 <p>{part.body}</p>
                 <p className="rt-stack__node">{part.node}</p>
               </div>
-            ))}
+            )}
           </div>
         </Rise>
       </section>
@@ -902,9 +902,9 @@ export default function Retreats() {
             What to expect
           </h2>
           <div className="rt-expect">
-            {EXPECT.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
+            {EXPECT.map((line) =>
+            <p key={line}>{line}</p>
+            )}
           </div>
         </Rise>
       </section>
@@ -916,14 +916,14 @@ export default function Retreats() {
             src={IMAGES.land}
             alt="South African landscape"
             brief="South African landscape, fynbos, Cape mountain, Karoo or indigenous garden, warm and deep"
-            className="rt-fill"
-          />
+            className="rt-fill" />
+          
           <div className="rt-veil" />
         </div>
         <div
           className="rt-bg-hunter"
-          style={{ padding: "clamp(72px, 12vw, 120px) clamp(24px, 6vw, 80px)" }}
-        >
+          style={{ padding: "clamp(72px, 12vw, 120px) clamp(24px, 6vw, 80px)" }}>
+          
           <Rise className="rt-w680">
             <h2 className="rt-h2" style={{ marginBottom: "32px", color: "var(--rt-cream)" }}>
               The land does some of the work
@@ -950,14 +950,14 @@ export default function Retreats() {
             <Slot
               src={IMAGES.equine}
               alt="A woman standing with a horse"
-              brief="A woman with a horse, forehead close or hand on neck, real paddock or veld, warm and deep"
-            />
+              brief="A woman with a horse, forehead close or hand on neck, real paddock or veld, warm and deep" />
+            
           </div>
           <Rise className="rt-split__copy">
             <h2
               className="rt-h2"
-              style={{ marginBottom: "28px", fontSize: "clamp(30px, 4.5vw, 48px)" }}
-            >
+              style={{ marginBottom: "28px", fontSize: "clamp(30px, 4.5vw, 48px)" }}>
+              
               Equine-assisted work
             </h2>
             <p className="rt-p" style={{ marginBottom: "24px" }}>
@@ -987,8 +987,8 @@ export default function Retreats() {
                 fontSize: "clamp(20px, 2.2vw, 25px)",
                 lineHeight: 1.4,
                 color: "var(--rt-burg)"
-              }}
-            >
+              }}>
+              
               Laura
             </p>
           </Rise>
@@ -1009,21 +1009,21 @@ export default function Retreats() {
         </Rise>
 
         <div className="rt-carousel" ref={carRef}>
-          {PRACTICES.map((practice) => (
-            <div className="rt-card" data-card="1" key={practice.key}>
+          {PRACTICES.map((practice) =>
+          <div className="rt-card" data-card="1" key={practice.key}>
               <Slot
-                src={IMAGES[practice.key]}
-                alt={practice.title}
-                brief={practice.brief}
-                className="rt-fill"
-              />
+              src={IMAGES[practice.key]}
+              alt={practice.title}
+              brief={practice.brief}
+              className="rt-fill" />
+            
               <div className="rt-veil rt-veil--card" />
               <div className="rt-card__copy">
                 <p className="rt-card__title">{practice.title}</p>
                 <p className="rt-card__body">{practice.body}</p>
               </div>
             </div>
-          ))}
+          )}
         </div>
 
         <div className="rt-w1100" style={{ padding: "0 clamp(24px, 6vw, 80px)" }}>
@@ -1032,16 +1032,16 @@ export default function Retreats() {
               type="button"
               className="rt-arrow"
               aria-label="Previous practice"
-              onClick={() => scrollCar(-1)}
-            >
+              onClick={() => scrollCar(-1)}>
+              
               ←
             </button>
             <button
               type="button"
               className="rt-arrow"
               aria-label="Next practice"
-              onClick={() => scrollCar(1)}
-            >
+              onClick={() => scrollCar(1)}>
+              
               →
             </button>
           </div>
@@ -1053,8 +1053,8 @@ export default function Retreats() {
               fontWeight: 300,
               lineHeight: 1.7,
               color: "var(--rt-burg)"
-            }}
-          >
+            }}>
+            
             Nothing is compulsory. You can be in every room and speak in none of them.
           </p>
         </div>
@@ -1068,17 +1068,17 @@ export default function Retreats() {
           </h2>
           <p
             className="rt-p rt-p--onDark"
-            style={{ marginBottom: "clamp(48px, 7vw, 64px)", maxWidth: "620px" }}
-          >
+            style={{ marginBottom: "clamp(48px, 7vw, 64px)", maxWidth: "620px" }}>
+            
             Every practitioner who holds a room for us is drawn from the same register we hold every
             specialist to.
           </p>
-          {STANDARD.map((row) => (
-            <div className="rt-row" key={row.term}>
+          {STANDARD.map((row) =>
+          <div className="rt-row" key={row.term}>
               <p className="rt-h3 rt-row__term">{row.term}</p>
               <p className="rt-row__detail">{row.detail}</p>
             </div>
-          ))}
+          )}
         </Rise>
       </section>
 
@@ -1090,8 +1090,8 @@ export default function Retreats() {
               <Slot
                 src={IMAGES.founder}
                 alt="Laura, founder of The Aligned Woman Co."
-                brief="Laura, founder portrait, direct gaze, natural expression, real environment"
-              />
+                brief="Laura, founder portrait, direct gaze, natural expression, real environment" />
+              
             </div>
           </div>
 
@@ -1106,8 +1106,8 @@ export default function Retreats() {
                 fontWeight: 400,
                 fontSize: "clamp(26px, 3.2vw, 36px)",
                 lineHeight: 1.35
-              }}
-            >
+              }}>
+              
               Hi, I'm Laura, the founder of The Aligned Woman Co.
             </p>
 
@@ -1169,8 +1169,8 @@ export default function Retreats() {
                 fontWeight: 400,
                 fontSize: "clamp(20px, 2.2vw, 25px)",
                 lineHeight: 1.5
-              }}
-            >
+              }}>
+              
               How does this happen to someone who looks so good on paper?
             </p>
 
@@ -1227,8 +1227,8 @@ export default function Retreats() {
                 fontSize: "clamp(24px, 3vw, 32px)",
                 lineHeight: 1.4,
                 color: "var(--rt-burg)"
-              }}
-            >
+              }}>
+              
               Join me on the journey back to yourself.
             </p>
             <p style={{ marginBottom: "4px", fontSize: "15px", fontWeight: 600 }}>Laura</p>
@@ -1238,16 +1238,16 @@ export default function Retreats() {
                 fontSize: "13px",
                 fontWeight: 300,
                 color: "var(--rt-body-mid)"
-              }}
-            >
+              }}>
+              
               Founder, The Aligned Woman Co.
             </p>
 
             <div style={{ borderTop: "1px solid var(--rt-burg)", paddingTop: "32px" }}>
               <p
                 className="rt-eyebrow"
-                style={{ marginBottom: "8px", letterSpacing: "0.24em", color: "var(--rt-burg)" }}
-              >
+                style={{ marginBottom: "8px", letterSpacing: "0.24em", color: "var(--rt-burg)" }}>
+                
                 Laura Thomas
               </p>
               <p
@@ -1257,8 +1257,8 @@ export default function Retreats() {
                   fontWeight: 300,
                   lineHeight: 1.6,
                   color: "var(--rt-body-soft)"
-                }}
-              >
+                }}>
+                
                 Award-winning business strategist, published author and speaker.
               </p>
               <div
@@ -1266,25 +1266,25 @@ export default function Retreats() {
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
                   gap: "20px 40px"
-                }}
-              >
-                {CREDENTIALS.map((credential) => (
-                  <div key={credential.title}>
+                }}>
+                
+                {CREDENTIALS.map((credential) =>
+                <div key={credential.title}>
                     <p style={{ marginBottom: "4px", fontSize: "13px", fontWeight: 600, lineHeight: 1.5 }}>
                       {credential.title}
                     </p>
                     <p
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 300,
-                        lineHeight: 1.6,
-                        color: "var(--rt-body-soft)"
-                      }}
-                    >
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 300,
+                      lineHeight: 1.6,
+                      color: "var(--rt-body-soft)"
+                    }}>
+                    
                       {credential.body}
                     </p>
                   </div>
-                ))}
+                )}
               </div>
               <p
                 style={{
@@ -1292,8 +1292,8 @@ export default function Retreats() {
                   fontSize: "12px",
                   fontWeight: 300,
                   color: "var(--rt-meta)"
-                }}
-              >
+                }}>
+                
                 If you are struggling, please reach out. SADAG, 0800 567 567.
               </p>
             </div>
@@ -1306,8 +1306,8 @@ export default function Retreats() {
         <Rise className="rt-w1240">
           <p
             className="rt-eyebrow"
-            style={{ marginBottom: "20px", textAlign: "center", color: "var(--rt-burg)" }}
-          >
+            style={{ marginBottom: "20px", textAlign: "center", color: "var(--rt-burg)" }}>
+            
             Our values
           </p>
           <h2
@@ -1316,17 +1316,17 @@ export default function Retreats() {
               margin: "0 auto clamp(48px, 7vw, 72px)",
               maxWidth: "880px",
               textAlign: "center"
-            }}
-          >
+            }}>
+            
             What we hold <em style={{ color: "var(--rt-olive-label)" }}>without exception.</em>
           </h2>
           <div className="rt-values">
-            {VALUES.map((value) => (
-              <div className="rt-valueCard" key={value.title}>
+            {VALUES.map((value) =>
+            <div className="rt-valueCard" key={value.title}>
                 <h3>{value.title}</h3>
                 <p>{value.body}</p>
               </div>
-            ))}
+            )}
           </div>
         </Rise>
       </section>
@@ -1368,14 +1368,14 @@ export default function Retreats() {
               fontSize: "clamp(44px, 9vw, 88px)",
               lineHeight: 1.12,
               color: "var(--rt-cream-edition)"
-            }}
-          >
+            }}>
+            
             Release and Restart
           </h2>
           <p
             className="rt-standfirst"
-            style={{ marginBottom: "clamp(28px, 4vw, 40px)", fontSize: "clamp(21px, 3vw, 30px)" }}
-          >
+            style={{ marginBottom: "clamp(28px, 4vw, 40px)", fontSize: "clamp(21px, 3vw, 30px)" }}>
+            
             What if four days could change everything?
           </p>
           <p
@@ -1386,8 +1386,8 @@ export default function Retreats() {
               letterSpacing: "0.24em",
               textTransform: "uppercase",
               color: "rgba(248,244,239,0.85)"
-            }}
-          >
+            }}>
+            
             28 to 31 January 2027 · Western Cape · Twelve places
           </p>
           <div style={{ width: "100%", height: "1px", background: "rgba(248,244,239,0.22)" }} />
@@ -1398,24 +1398,24 @@ export default function Retreats() {
       <section className="rt-sec--band rt-bg-edition">
         <Rise className="rt-w680">
           {[
-            "There is a particular relief in being somewhere that asks nothing of you except to be exactly who you are, at your core.",
-            "For four days in the Western Cape, held by Mama Africa, you will be guided and released from everything you thought you needed to be. You will put down the invisible shackles. You will find a space safe enough to return to yourself, and to meet what you are actually capable of.",
-            "You will not be the capable one. You will not hold anything, manage anyone or explain yourself. You will be guided, fed, held, and left alone when you need to be, among eleven women who understand exactly why you came without you having to say it.",
-            "Some of it will be hard. The work that reaches what talking has not usually is. But you will not be taken anywhere you are not carried through, and you will not be asked to do anything you do not want to do."
-          ].map((line) => (
-            <p
-              key={line.slice(0, 24)}
-              style={{
-                marginBottom: "24px",
-                fontSize: "clamp(17px, 1.8vw, 20px)",
-                fontWeight: 300,
-                lineHeight: 1.8,
-                color: "var(--rt-ink-soft)"
-              }}
-            >
+          "There is a particular relief in being somewhere that asks nothing of you except to be exactly who you are, at your core.",
+          "For four days in the Western Cape, held by Mama Africa, you will be guided and released from everything you thought you needed to be. You will put down the invisible shackles. You will find a space safe enough to return to yourself, and to meet what you are actually capable of.",
+          "You will not be the capable one. You will not hold anything, manage anyone or explain yourself. You will be guided, fed, held, and left alone when you need to be, among eleven women who understand exactly why you came without you having to say it.",
+          "Some of it will be hard. The work that reaches what talking has not usually is. But you will not be taken anywhere you are not carried through, and you will not be asked to do anything you do not want to do."].
+          map((line) =>
+          <p
+            key={line.slice(0, 24)}
+            style={{
+              marginBottom: "24px",
+              fontSize: "clamp(17px, 1.8vw, 20px)",
+              fontWeight: 300,
+              lineHeight: 1.8,
+              color: "var(--rt-ink-soft)"
+            }}>
+            
               {line}
             </p>
-          ))}
+          )}
           <p
             style={{
               marginBottom: "clamp(32px, 5vw, 44px)",
@@ -1423,8 +1423,8 @@ export default function Retreats() {
               fontWeight: 300,
               lineHeight: 1.8,
               color: "var(--rt-ink-soft)"
-            }}
-          >
+            }}>
+            
             This is finally a space where every part of you is welcome and every part of you is seen.
             And what you have been looking for is not something we give you. It is already in you,
             and this is where you find it.
@@ -1436,8 +1436,8 @@ export default function Retreats() {
               fontSize: "clamp(25px, 3.6vw, 38px)",
               lineHeight: 1.4,
               color: "var(--rt-burg)"
-            }}
-          >
+            }}>
+            
             You will leave feeling more yourself than you have in years. You will leave aligned.
           </p>
         </Rise>
@@ -1449,15 +1449,15 @@ export default function Retreats() {
           <Rise
             as="p"
             className="rt-eyebrow"
-            style={{ marginBottom: "clamp(20px, 3vw, 28px)", color: "var(--rt-burg)" }}
-          >
+            style={{ marginBottom: "clamp(20px, 3vw, 28px)", color: "var(--rt-burg)" }}>
+            
             This retreat is for you if
           </Rise>
-          {FOR_YOU_IF.map((line) => (
-            <Rise as="p" className="rt-editionRow" key={line}>
+          {FOR_YOU_IF.map((line) =>
+          <Rise as="p" className="rt-editionRow" key={line}>
               {line}
             </Rise>
-          ))}
+          )}
           <Rise as="p" className="rt-editionRow">
             And you have decided that 2027 is your year.
           </Rise>
@@ -1470,16 +1470,16 @@ export default function Retreats() {
           <Rise
             as="p"
             className="rt-eyebrow"
-            style={{ marginBottom: "clamp(24px, 4vw, 36px)", color: "var(--rt-rose-light)" }}
-          >
+            style={{ marginBottom: "clamp(24px, 4vw, 36px)", color: "var(--rt-rose-light)" }}>
+            
             What you will experience
           </Rise>
-          {EXPERIENCE.map((line) => (
-            <Rise className="rt-expRow" key={line}>
+          {EXPERIENCE.map((line) =>
+          <Rise className="rt-expRow" key={line}>
               <span className="rt-expRow__mark" />
               <p>{line}</p>
             </Rise>
-          ))}
+          )}
           <Rise
             as="p"
             style={{
@@ -1490,8 +1490,8 @@ export default function Retreats() {
               fontSize: "clamp(24px, 3.4vw, 36px)",
               lineHeight: 1.4,
               color: "var(--rt-rose-light)"
-            }}
-          >
+            }}>
+            
             Let Mama Africa hold you.
           </Rise>
         </div>
@@ -1506,19 +1506,19 @@ export default function Retreats() {
               <span className="rt-details__glyph">+</span>
             </summary>
             <div className="rt-details__body">
-              {DIFFERENT.map((block) => (
-                <div key={block.heading}>
+              {DIFFERENT.map((block) =>
+              <div key={block.heading}>
                   <h4>{block.heading}</h4>
-                  {block.paragraphs.map((paragraph, index) => (
-                    <p
-                      key={paragraph.slice(0, 24)}
-                      style={{ marginBottom: index < block.paragraphs.length - 1 ? "18px" : 0 }}
-                    >
+                  {block.paragraphs.map((paragraph, index) =>
+                <p
+                  key={paragraph.slice(0, 24)}
+                  style={{ marginBottom: index < block.paragraphs.length - 1 ? "18px" : 0 }}>
+                  
                       {paragraph}
                     </p>
-                  ))}
+                )}
                 </div>
-              ))}
+              )}
             </div>
           </details>
         </Rise>
@@ -1537,8 +1537,8 @@ export default function Retreats() {
               fontSize: "clamp(36px, 6vw, 60px)",
               lineHeight: 1.2,
               color: "var(--rt-cream-edition)"
-            }}
-          >
+            }}>
+            
             Release and Restart
           </h2>
           <p
@@ -1548,20 +1548,20 @@ export default function Retreats() {
               fontWeight: 300,
               lineHeight: 1.75,
               color: "rgba(248,244,239,0.78)"
-            }}
-          >
+            }}>
+            
             A balanced edition. Somatic and psychological work throughout, with ceremony held on the
             third evening.
           </p>
 
           <div style={{ marginBottom: "clamp(48px, 8vw, 64px)" }}>
-            {DETAILS.map((detail) => (
-              <div className="rt-detailBlock" key={detail.label}>
+            {DETAILS.map((detail) =>
+            <div className="rt-detailBlock" key={detail.label}>
                 <p className="rt-detailBlock__label">{detail.label}</p>
                 <p className="rt-detailBlock__value">{detail.value}</p>
                 {detail.note ? <p className="rt-detailBlock__note">{detail.note}</p> : null}
               </div>
-            ))}
+            )}
           </div>
 
           <a href={APPLY_URL} className="rt-btn rt-btn--bone">
@@ -1577,8 +1577,8 @@ export default function Retreats() {
       {/* 13 FINAL CTA */}
       <section
         className="rt-bg-page"
-        style={{ padding: "clamp(96px, 16vw, 150px) clamp(24px, 6vw, 80px)" }}
-      >
+        style={{ padding: "clamp(96px, 16vw, 150px) clamp(24px, 6vw, 80px)" }}>
+        
         <Rise className="rt-w680">
           <h2
             className="rt-h2"
@@ -1586,8 +1586,8 @@ export default function Retreats() {
               marginBottom: "clamp(40px, 6vw, 56px)",
               fontSize: "clamp(30px, 5vw, 48px)",
               lineHeight: 1.3
-            }}
-          >
+            }}>
+            
             Retreat dates are announced to our register first.
           </h2>
           <a href={REGISTER_URL} className="rt-btn rt-btn--rose">
@@ -1607,18 +1607,18 @@ export default function Retreats() {
           </p>
           <p
             className="rt-p"
-            style={{ marginBottom: "clamp(48px, 7vw, 64px)", color: "var(--rt-white)" }}
-          >
+            style={{ marginBottom: "clamp(48px, 7vw, 64px)", color: "var(--rt-white)" }}>
+            
             I'll leave you with this. My favourite poem, and one I always come back to, and is the
             Aligned Woman Co's Manifesto: The Invitation by Oriah Mountain Dreamer.
           </p>
-          {MANIFESTO_LINES.length > 0 ? (
-            <div className="rt-poem">
-              {MANIFESTO_LINES.map((line) => (
-                <p key={line.slice(0, 24)}>{line}</p>
-              ))}
-            </div>
-          ) : null}
+          {MANIFESTO_LINES.length > 0 ?
+          <div className="rt-poem">
+              {MANIFESTO_LINES.map((line) =>
+            <p key={line.slice(0, 24)}>{line}</p>
+            )}
+            </div> :
+          null}
           <p
             style={{
               marginTop: "clamp(40px, 5vw, 56px)",
@@ -1627,12 +1627,12 @@ export default function Retreats() {
               letterSpacing: "0.24em",
               textTransform: "uppercase",
               color: "var(--rt-rose)"
-            }}
-          >
+            }}>
+            
             The Invitation · Oriah Mountain Dreamer
           </p>
         </div>
       </section>
-    </div>
-  );
+    </div>);
+
 }
