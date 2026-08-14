@@ -579,6 +579,10 @@ export default function Retreats() {
           .rt-breathe, .rt-pulse { animation: none; }
         }
         .rt-stack { margin: 48px auto 0; max-width: 480px; text-align: left; display: grid; gap: 40px; }
+        .rt-stack.rt-mobileOnly { display: none; }
+        @media (max-width: 700px) {
+          .rt-stack.rt-mobileOnly { display: grid; }
+        }
         .rt-stack__mark {
           width: 64px; height: 64px; border: 2px solid rgba(250,245,243,0.55);
           border-radius: 50%; display: flex; align-items: center; justify-content: center;
