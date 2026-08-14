@@ -845,14 +845,19 @@ export default function Retreats() {
             style={{
               position: "absolute",
               inset: 0,
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-              background: "rgba(232,223,202,0.8)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              background:
+                "linear-gradient(to right, rgba(232,223,202,0.92) 0%, rgba(232,223,202,0.6) 42%, rgba(232,223,202,0) 80%)",
+              WebkitMaskImage:
+                "linear-gradient(to right, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
+              maskImage:
+                "linear-gradient(to right, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
               pointerEvents: "none",
               zIndex: 0
             }}
           />
-          <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
+          <Rise className="rt-w680" style={{ position: "relative", zIndex: 1, marginLeft: 0, marginRight: "auto", textAlign: "left" }}>
             <h2 className="rt-h2" style={{ marginBottom: "24px", color: "#000000" }}>
               Most retreats sit at one end or the other. We built ours in the middle.
             </h2>
