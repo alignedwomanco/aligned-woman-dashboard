@@ -819,8 +819,30 @@ export default function Retreats() {
         </section>
 
         {/* 03 THE BALANCE */}
-        <section className="rt-sec rt-sec--tall" style={{ position: "relative", zIndex: 1, background: "transparent" }}>
-          <Rise className="rt-w680">
+        <section
+          className="rt-sec rt-sec--tall"
+          style={{
+            position: "relative",
+            zIndex: 1,
+            backgroundImage:
+              "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/cd11e2a78_Screenshot2026-08-11at160044.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              background: "rgba(250,245,243,0.35)",
+              pointerEvents: "none",
+              zIndex: 0
+            }}
+          />
+          <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
             <h2 className="rt-h2" style={{ marginBottom: "24px", color: "var(--rt-burg)" }}>
               Most retreats sit at one end or the other. We built ours in the middle.
             </h2>
