@@ -850,7 +850,7 @@ export default function Retreats() {
             <h2 className="rt-h2" style={{ marginBottom: "24px", color: "var(--rt-burg)" }}>
               Most retreats sit at one end or the other. We built ours in the middle.
             </h2>
-            <p className="rt-standfirst" style={{ marginBottom: "40px", color: "#FFFFFF" }}>
+            <p className="rt-standfirst" style={{ marginBottom: "40px", color: "var(--rt-burgundy)" }}>
               The balance is the method.
             </p>
             <p className="rt-p" style={{ marginBottom: "24px", color: "#FFFFFF" }}>
@@ -872,7 +872,7 @@ export default function Retreats() {
             </p>
             <p className="rt-pull" style={{ color: "var(--rt-burg)" }}>
               Body opens. Behaviour does the work.{" "}
-              <span style={{ color: "#FFFFFF" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
+              <span style={{ color: "var(--rt-burgundy)" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
             </p>
           </Rise>
         </section>
