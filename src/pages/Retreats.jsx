@@ -575,12 +575,12 @@ export default function Retreats() {
         .rt-dgCentre { font: italic 400 30px var(--rt-display); fill: #E8DFCA; }
         .rt-dgBody { font: 300 15px var(--rt-sans); fill: #E8DFCA; }
         .rt-dgNode { font: 400 20px var(--rt-display); fill: #E8DFCA; }
-        .rt-breathe { transform-box: fill-box; transform-origin: center; animation: rtBreathe 12s ease-in-out infinite; }
-        .rt-pulse { animation: rtPulse 16s ease-in-out infinite; }
-        .rt-pulse--b { animation-duration: 18s; animation-delay: -7s; }
-        .rt-pulse--c { animation-duration: 17s; animation-delay: -11s; }
-        @keyframes rtBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
-        @keyframes rtPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
+        .rt-breathe { transform-box: fill-box; transform-origin: center; animation: rtBreathe 5s ease-in-out infinite; }
+        .rt-pulse { transform-box: fill-box; transform-origin: center; animation: rtPulse 4.5s ease-in-out infinite; }
+        .rt-pulse--b { animation-duration: 5.6s; animation-delay: -1.8s; }
+        .rt-pulse--c { animation-duration: 6.2s; animation-delay: -3.4s; }
+        @keyframes rtBreathe { 0%, 100% { transform: scale(1); opacity: 0.45; } 50% { transform: scale(1.12); opacity: 1; } }
+        @keyframes rtPulse { 0%, 100% { transform: scale(0.9); opacity: 0.3; } 50% { transform: scale(1.12); opacity: 1; } }
         @media (prefers-reduced-motion: reduce) {
           .rt-breathe, .rt-pulse { animation: none; }
         }
