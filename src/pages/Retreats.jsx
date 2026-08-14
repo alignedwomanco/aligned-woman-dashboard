@@ -948,14 +948,19 @@ export default function Retreats() {
           style={{
             position: "absolute",
             inset: 0,
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            background: "rgba(245,221,217,0.5)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            background:
+              "linear-gradient(to left, rgba(245,221,217,0.85) 0%, rgba(245,221,217,0.5) 42%, rgba(245,221,217,0) 80%)",
+            WebkitMaskImage:
+              "linear-gradient(to left, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
+            maskImage:
+              "linear-gradient(to left, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
             pointerEvents: "none",
             zIndex: 0
           }}
         />
-        <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
+        <Rise className="rt-w680" style={{ position: "relative", zIndex: 1, marginLeft: "auto", marginRight: 0, textAlign: "right" }}>
           <h2 className="rt-h2" style={{ marginBottom: "clamp(48px, 7vw, 72px)", color: "#000000" }}>
             What to expect
           </h2>
