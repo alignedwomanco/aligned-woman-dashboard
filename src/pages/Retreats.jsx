@@ -24,7 +24,7 @@ const IMAGES = {
   how09: "",
   how10: "",
   how11: "",
-  awakening: "https://media.base44.com/images/public/69f46886a412ee042303f1af/54781555c_Screenshot2026-08-11at160109.png",
+  awakening: "https://media.base44.com/images/public/69f46886a412ee042303f1af/9eeae6713_Screenshot2026-08-14at221526.png",
   balanceBg: "https://media.base44.com/images/public/69f46886a412ee042303f1af/b612afc54_Screenshot2026-08-11at155522.png",
   balanceLeaf: "https://media.base44.com/images/public/69f46886a412ee042303f1af/db9e960d3_Screenshot2026-08-14at221311.png",
   balanceInset: "https://media.base44.com/images/public/69f46886a412ee042303f1af/db9e960d3_Screenshot2026-08-14at221311.png"
