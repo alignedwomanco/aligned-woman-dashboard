@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 /* ------------------------------------------------------------------
@@ -258,7 +258,9 @@ const DETAILS = [
 { label: "Location", value: "Western Cape, South Africa", note: "Venue announced to applicants" },
 { label: "Duration", value: "Three nights, four days" },
 { label: "Group size", value: "Twelve women" },
-{ label: "Included", value: "All sessions, accommodation and meals" }];
+{ label: "Included", value: "All sessions, accommodation and meals" },
+{ label: "Investment", value: "[CONFIRM: e.g. \"From R00 000 per woman\" or \"Shared with applicants\"]" },
+{ label: "Why we hold the venue back", value: "The land is private and the group is small. We share the venue with women once their application is accepted." }];
 
 
 /* ------------------------------------------------------------------
@@ -403,6 +405,8 @@ function Diagram() {
 
 export default function Retreats() {
   const carRef = useRef(null);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  const [stickyDismissed, setStickyDismissed] = useState(false);
 
   const scrollCar = (dir) => {
     const el = carRef.current;
@@ -411,6 +415,29 @@ export default function Retreats() {
     const w = card ? card.offsetWidth + 16 : 360;
     el.scrollBy({ left: dir * w, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (stickyDismissed) {
+        setShowStickyCta(false);
+        return;
+      }
+      const scrollTop = window.scrollY;
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      if (docH <= 0) return;
+      const frac = scrollTop / docH;
+      const nearBottom =
+        scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 180;
+      setShowStickyCta(frac >= 0.6 && !nearBottom);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [stickyDismissed]);
 
   return (
     <div className="rt-root">
@@ -547,6 +574,49 @@ export default function Retreats() {
         .rt-btn--rose:hover { background: var(--rt-rose-deep); }
         .rt-fineprint {
           margin-top: 20px; font-size: 13px; font-weight: 300; line-height: 1.6;
+        }
+        .rt-btn--burg { background: var(--rt-burg); color: var(--rt-cream-page); }
+        .rt-btn--burg:hover { background: var(--rt-burg-mid); }
+        .rt-btn--dominant { padding: 26px 44px; font-size: 13px; max-width: 520px; }
+        .rt-textLink {
+          display: inline-block; background: none; border: none; padding: 0;
+          color: var(--rt-rose-deep); text-decoration: underline; text-underline-offset: 4px;
+          font-family: var(--rt-sans); font-weight: 700; font-size: 12px;
+          letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer;
+          transition: color 200ms ease;
+        }
+        .rt-textLink:hover { color: var(--rt-burg); }
+
+        /* ---------- sticky CTA bar ---------- */
+        .rt-stickyCta {
+          position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+          display: flex; align-items: center; justify-content: space-between; gap: 16px;
+          padding: 14px clamp(16px, 4vw, 32px);
+          background: var(--rt-olive-deep);
+          color: var(--rt-cream-edition);
+          box-shadow: 0 -10px 30px rgba(8,1,5,0.18);
+        }
+        .rt-stickyCta__left {
+          font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
+          text-transform: uppercase; color: var(--rt-cream-edition);
+        }
+        .rt-stickyCta__right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+        .rt-stickyCta__btn {
+          display: inline-block; padding: 12px 22px; font-family: var(--rt-sans);
+          font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+          text-decoration: none; background: var(--rt-burg); color: var(--rt-cream-page);
+          border: none; border-radius: 0; transition: background 200ms ease;
+        }
+        .rt-stickyCta__btn:hover { background: var(--rt-burg-mid); }
+        .rt-stickyCta__close {
+          width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+          background: transparent; border: 1px solid rgba(248,244,239,0.4); color: var(--rt-cream-edition);
+          cursor: pointer; font-size: 16px; line-height: 1;
+        }
+        .rt-stickyCta__close:hover { background: rgba(248,244,239,0.1); }
+        @media (max-width: 640px) {
+          .rt-stickyCta__left { font-size: 10px; letter-spacing: 0.16em; }
+          .rt-stickyCta__btn { padding: 10px 16px; font-size: 10px; letter-spacing: 0.18em; }
         }
 
         /* ---------- media ---------- */
@@ -804,9 +874,20 @@ export default function Retreats() {
           <p className="rt-eyebrow" style={{ marginBottom: "20px", color: "var(--rt-cream)" }}>
             Retreats
           </p>
-          <h1 className="rt-h1" style={{ marginBottom: "24px" }}>
+          <h1 className="rt-h1" style={{ marginBottom: "20px" }}>
             Bespoke retreats for women who are ready for something to change.
           </h1>
+          <p
+            style={{
+              marginBottom: "28px",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.24em",
+              textTransform: "uppercase",
+              color: "rgba(250,245,243,0.85)"
+            }}>
+            Next retreat · 28 to 31 January 2027 · Western Cape · Twelve places
+          </p>
           <p
             className="rt-p"
             style={{
@@ -820,8 +901,8 @@ export default function Retreats() {
             Immersive, multi-day experiences in South Africa, created for the woman who senses
             there is more available to her and wants to understand what has been standing in the way.
           </p>
-          <a href="#next-retreat" className="rt-btn rt-btn--cream">
-            See the next retreat
+          <a href="#next-retreat" className="rt-btn rt-btn--burg">
+            Apply for a place
           </a>
         </div>
       </section>
@@ -1519,6 +1600,27 @@ export default function Retreats() {
         </Rise>
       </section>
 
+      {/* BAND 3 FOR YOU IF */}
+      <section className="rt-sec--bandTight rt-bg-edition">
+        <div className="rt-w820">
+          <Rise
+            as="p"
+            className="rt-eyebrow"
+            style={{ marginBottom: "clamp(20px, 3vw, 28px)", color: "var(--rt-burg)" }}>
+            
+            This retreat is for you if
+          </Rise>
+          {FOR_YOU_IF.map((line) =>
+          <Rise as="p" className="rt-editionRow" key={line}>
+              {line}
+            </Rise>
+          )}
+          <Rise as="p" className="rt-editionRow">
+            And you have decided that 2027 is your year.
+          </Rise>
+        </div>
+      </section>
+
       {/* BAND 2 THE FEELING */}
       <section className="rt-sec--band rt-bg-edition">
         <Rise className="rt-w680">
@@ -1566,27 +1668,6 @@ export default function Retreats() {
             You will leave feeling more yourself than you have in years. You will leave aligned.
           </p>
         </Rise>
-      </section>
-
-      {/* BAND 3 FOR YOU IF */}
-      <section className="rt-sec--bandTight rt-bg-edition">
-        <div className="rt-w820">
-          <Rise
-            as="p"
-            className="rt-eyebrow"
-            style={{ marginBottom: "clamp(20px, 3vw, 28px)", color: "var(--rt-burg)" }}>
-            
-            This retreat is for you if
-          </Rise>
-          {FOR_YOU_IF.map((line) =>
-          <Rise as="p" className="rt-editionRow" key={line}>
-              {line}
-            </Rise>
-          )}
-          <Rise as="p" className="rt-editionRow">
-            And you have decided that 2027 is your year.
-          </Rise>
-        </div>
       </section>
 
       {/* BAND 4 WHAT YOU WILL EXPERIENCE */}
@@ -1649,6 +1730,31 @@ export default function Retreats() {
         </Rise>
       </section>
 
+      {/* 13 REGISTER */}
+      <section
+        className="rt-bg-page"
+        style={{ padding: "clamp(96px, 16vw, 150px) clamp(24px, 6vw, 80px)" }}>
+        
+        <Rise className="rt-w680">
+          <h2
+            className="rt-h2"
+            style={{
+              marginBottom: "clamp(28px, 4vw, 40px)",
+              fontSize: "clamp(30px, 5vw, 48px)",
+              lineHeight: 1.3
+            }}>
+            
+            Retreat dates are announced to our register first.
+          </h2>
+          <a href={REGISTER_URL} className="rt-textLink">
+            Join the retreat register
+          </a>
+          <p className="rt-fineprint" style={{ color: "var(--rt-meta)" }}>
+            Account required. Takes under a minute to register. No credit card required.
+          </p>
+        </Rise>
+      </section>
+
       {/* BAND 7 THE DETAILS AND APPLY */}
       <section className="rt-sec--band rt-bg-oliveDeep">
         <Rise className="rt-w680">
@@ -1689,37 +1795,12 @@ export default function Retreats() {
             )}
           </div>
 
-          <a href={APPLY_URL} className="rt-btn rt-btn--bone">
+          <a href={APPLY_URL} className="rt-btn rt-btn--burg rt-btn--dominant">
             Apply for a place
           </a>
           <p className="rt-fineprint" style={{ color: "rgba(248,244,239,0.65)" }}>
             Places are applied for, not bought. Applications take a few minutes and we respond to
             every one.
-          </p>
-        </Rise>
-      </section>
-
-      {/* 13 FINAL CTA */}
-      <section
-        className="rt-bg-page"
-        style={{ padding: "clamp(96px, 16vw, 150px) clamp(24px, 6vw, 80px)" }}>
-        
-        <Rise className="rt-w680">
-          <h2
-            className="rt-h2"
-            style={{
-              marginBottom: "clamp(40px, 6vw, 56px)",
-              fontSize: "clamp(30px, 5vw, 48px)",
-              lineHeight: 1.3
-            }}>
-            
-            Retreat dates are announced to our register first.
-          </h2>
-          <a href={REGISTER_URL} className="rt-btn rt-btn--rose">
-            Join the retreat register
-          </a>
-          <p className="rt-fineprint" style={{ color: "var(--rt-meta)" }}>
-            Account required. Takes under a minute to register. No credit card required.
           </p>
         </Rise>
       </section>
@@ -1758,6 +1839,26 @@ export default function Retreats() {
           </p>
         </div>
       </section>
+
+      {showStickyCta && !stickyDismissed ? (
+        <div className="rt-stickyCta">
+          <div className="rt-stickyCta__left">
+            Release and Restart · 28 to 31 January 2027 · Twelve places
+          </div>
+          <div className="rt-stickyCta__right">
+            <a href={APPLY_URL} className="rt-stickyCta__btn">
+              Apply for a place
+            </a>
+            <button
+              type="button"
+              className="rt-stickyCta__close"
+              aria-label="Dismiss"
+              onClick={() => setStickyDismissed(true)}>
+              ×
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>);
 
 }
