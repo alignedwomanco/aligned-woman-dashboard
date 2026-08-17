@@ -462,11 +462,11 @@ export default function Retreats() {
           --rt-olive: #243019;
           --rt-hunter: #314323;
           --rt-olive-label: #5A5F2E;
-          --rt-green-wash: #F1F4ED;
+          --rt-green-wash: #FFFFFF;
           --rt-cream-page: #FAF5F3;
-          --rt-cream-edition: #F8F4EF;
+          --rt-cream-edition: #FAF5F3;
           --rt-bone: #EAE2D4;
-          --rt-cream: #E8E0CB;
+          --rt-cream: #FAF5F3;
           --rt-blush: #F5DDD9;
           --rt-rose: #C4847A;
           --rt-rose-light: #E8B4AE;
@@ -495,7 +495,7 @@ export default function Retreats() {
 
         /* ---------- responsive switch ---------- */
         .rt-mobileOnly { display: none; }
-        @media (max-width: 700px) {
+        @media (max-width: 768px) {
           .rt-desktopOnly { display: none !important; }
           .rt-mobileOnly { display: block; }
         }
@@ -532,7 +532,7 @@ export default function Retreats() {
 
         /* ---------- type ---------- */
         .rt-eyebrow {
-          font-size: 12px; font-weight: 700; letter-spacing: 0.28em;
+          font-size: 14px; font-weight: 700; letter-spacing: 0.28em;
           text-transform: uppercase;
         }
         .rt-subLabel {
@@ -542,7 +542,7 @@ export default function Retreats() {
         }
         .rt-h1 {
           font-family: var(--rt-display); font-weight: 400;
-          font-size: clamp(38px, 7vw, 72px); line-height: 1.22;
+          font-size: clamp(32px, 7vw, 72px); line-height: 1.22;
           letter-spacing: -0.01em; color: var(--rt-cream-page);
         }
         .rt-h2 {
@@ -555,11 +555,12 @@ export default function Retreats() {
           font-size: clamp(24px, 2.6vw, 30px); line-height: 1.3;
         }
         .rt-p {
-          font-size: clamp(16px, 1.5vw, 18px); font-weight: 300;
-          line-height: 1.75; color: var(--rt-body);
+          font-size: 17px; font-weight: 400;
+          line-height: 1.6; color: var(--rt-body); max-width: 68ch;
         }
-        .rt-p--onDark { color: rgba(232,224,203,0.92); }
+        .rt-p--onDark { color: #E8E0CB; }
         .rt-p--sm { font-size: 16px; }
+        @media (max-width: 700px) { .rt-p { font-size: 16px; } }
         .rt-pull {
           font-family: var(--rt-display); font-style: italic; font-weight: 400;
           font-size: clamp(26px, 4vw, 40px); line-height: 1.4; color: var(--rt-cream);
@@ -585,7 +586,7 @@ export default function Retreats() {
         .rt-btn--rose { background: var(--rt-rose); color: var(--rt-ink-soft); }
         .rt-btn--rose:hover { background: var(--rt-rose-deep); }
         .rt-fineprint {
-          margin-top: 20px; font-size: 13px; font-weight: 300; line-height: 1.6;
+          margin-top: 20px; font-size: 14px; font-weight: 400; line-height: 1.6;
         }
         .rt-btn--burg { background: var(--rt-burg); color: var(--rt-cream-page); }
         .rt-btn--burg:hover { background: var(--rt-burg-mid); }
@@ -609,7 +610,7 @@ export default function Retreats() {
           box-shadow: 0 -10px 30px rgba(8,1,5,0.18);
         }
         .rt-stickyCta__left {
-          font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
+          flex: 1 1 auto; min-width: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.22em;
           text-transform: uppercase; color: var(--rt-cream-edition);
         }
         .rt-stickyCta__right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
@@ -627,8 +628,8 @@ export default function Retreats() {
         }
         .rt-stickyCta__close:hover { background: rgba(248,244,239,0.1); }
         @media (max-width: 640px) {
-          .rt-stickyCta__left { font-size: 10px; letter-spacing: 0.16em; }
-          .rt-stickyCta__btn { padding: 10px 16px; font-size: 10px; letter-spacing: 0.18em; }
+          .rt-stickyCta__left { font-size: 14px; letter-spacing: 0.14em; }
+          .rt-stickyCta__btn { padding: 12px 16px; font-size: 11px; letter-spacing: 0.18em; }
         }
 
         /* ---------- media ---------- */
@@ -639,17 +640,22 @@ export default function Retreats() {
         .rt-slot {
           width: 100%; height: 100%; display: flex; align-items: center;
           justify-content: center; padding: 24px; box-sizing: border-box;
-          background: linear-gradient(160deg, var(--rt-hunter), var(--rt-olive-deep));
+          background: var(--rt-olive-deep);
         }
         .rt-slotText {
-          font-size: 12px; font-weight: 300; line-height: 1.5; text-align: center;
-          color: rgba(232,224,203,0.88); max-width: 34ch;
+          font-size: 14px; font-weight: 400; line-height: 1.5; text-align: center;
+          color: #E8E0CB; max-width: 34ch;
         }
+        .rt-card .rt-slotText { display: none; }
 
         /* ---------- 01 hero ---------- */
         .rt-hero { position: relative; min-height: 100svh; display: flex; align-items: flex-end; }
+        .rt-hero::before {
+          content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+          background: linear-gradient(to top, rgba(8,1,5,0.78) 0%, rgba(8,1,5,0.26) 44%, rgba(8,1,5,0) 72%);
+        }
         .rt-hero__copy {
-          position: relative; width: 100%; max-width: 820px;
+          position: relative; z-index: 2; width: 100%; max-width: 820px;
           padding: clamp(24px, 6vw, 80px);
           padding-bottom: clamp(56px, 9vh, 104px);
           pointer-events: none;
@@ -683,9 +689,14 @@ export default function Retreats() {
         @media (prefers-reduced-motion: reduce) {
           .rt-breathe, .rt-pulse { animation: none; }
         }
-        .rt-stack { margin: 48px auto 0; max-width: 480px; text-align: left; display: grid; gap: 40px; }
+        .rt-stack { margin: 48px auto 0; max-width: 480px; text-align: left; display: grid; gap: 20px; }
         .rt-stack.rt-mobileOnly { display: none; }
-        @media (max-width: 700px) {
+        .rt-stack > div {
+          background: rgba(232,224,203,0.05);
+          border: 1px solid rgba(232,224,203,0.18);
+          padding: 28px; border-radius: 10px;
+        }
+        @media (max-width: 768px) {
           .rt-stack.rt-mobileOnly { display: grid; }
         }
         .rt-stack__mark {
@@ -698,7 +709,7 @@ export default function Retreats() {
           margin-bottom: 14px; font-family: var(--rt-display); font-weight: 400;
           font-size: 30px; line-height: 1.2; color: #E8DFCA;
         }
-        .rt-stack p { font-size: 15px; font-weight: 300; line-height: 1.75; color: #E8DFCA; }
+        .rt-stack p { font-size: 16px; font-weight: 400; line-height: 1.6; color: #E8DFCA; }
         .rt-stack__node {
           margin-top: 14px; font-family: var(--rt-display); font-size: 17px;
           color: #E8DFCA;
@@ -707,9 +718,10 @@ export default function Retreats() {
         /* ---------- 05 expect ---------- */
         .rt-expect { display: grid; gap: clamp(28px, 4vw, 40px); }
         .rt-expect p {
-          font-size: clamp(17px, 1.8vw, 21px); font-weight: 300;
-          line-height: 1.7; color: var(--rt-body);
+          font-size: 17px; font-weight: 400;
+          line-height: 1.6; color: var(--rt-body); max-width: 68ch;
         }
+        @media (max-width: 700px) { .rt-expect p { font-size: 16px; } }
 
         /* ---------- 06b equine + 09 founder ---------- */
         .rt-split {
@@ -759,7 +771,7 @@ export default function Retreats() {
           font-size: clamp(22px, 2.2vw, 27px); line-height: 1.3;
           color: var(--rt-cream-page); margin-bottom: 12px;
         }
-        .rt-card__body { font-size: 13.5px; font-weight: 300; line-height: 1.6; color: rgba(250,245,243,0.92); }
+        .rt-card__body { font-size: 14px; font-weight: 400; line-height: 1.6; color: #FAF5F3; }
         .rt-arrows { display: flex; gap: 3px; justify-content: flex-end; margin-top: 24px; }
         @media (hover: none) { .rt-arrows { display: none; } }
         .rt-arrow {
@@ -779,8 +791,8 @@ export default function Retreats() {
         .rt-row:last-of-type { border-bottom: 1px solid rgba(232,224,203,0.18); }
         .rt-row__term { flex: 0 1 220px; color: var(--rt-cream); }
         .rt-row__detail {
-          flex: 1 1 280px; align-self: center; font-size: 16px;
-          font-weight: 300; line-height: 1.7; color: rgba(232,224,203,0.88);
+          flex: 1 1 280px; align-self: center; font-size: 17px;
+          font-weight: 400; line-height: 1.6; color: #E8E0CB;
         }
 
         /* ---------- 10 values ---------- */
@@ -789,7 +801,7 @@ export default function Retreats() {
           gap: 24px;
         }
         .rt-valueCard {
-          background: var(--rt-green-wash); border-radius: 10px;
+          background: var(--rt-white); border-radius: 10px;
           padding: clamp(40px, 4vw, 56px) clamp(28px, 3vw, 40px); text-align: center;
         }
         .rt-valueCard h3 {
@@ -797,7 +809,7 @@ export default function Retreats() {
           font-weight: 400; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.3;
           color: var(--rt-burg);
         }
-        .rt-valueCard p { font-size: 15px; font-weight: 300; line-height: 1.75; color: var(--rt-body); }
+        .rt-valueCard p { font-size: 17px; font-weight: 400; line-height: 1.6; color: var(--rt-body); max-width: 68ch; }
 
         /* ---------- edition bands ---------- */
         .rt-editionRow {
@@ -841,21 +853,21 @@ export default function Retreats() {
           margin-bottom: 16px; font-family: var(--rt-display); font-weight: 400;
           font-size: clamp(21px, 2.6vw, 26px); line-height: 1.35; color: var(--rt-ink-soft);
         }
-        .rt-details__body p { font-size: 16px; font-weight: 300; line-height: 1.8; color: var(--rt-ink-soft); }
+        .rt-details__body p { font-size: 17px; font-weight: 400; line-height: 1.6; color: var(--rt-ink-soft); max-width: 68ch; }
         .rt-detailBlock {
           border-top: 1px solid rgba(248,244,239,0.16);
           padding: clamp(24px, 4vw, 32px) 0;
         }
         .rt-detailBlock:last-of-type { border-bottom: 1px solid rgba(248,244,239,0.16); }
         .rt-detailBlock__label {
-          margin-bottom: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.28em;
+          margin-bottom: 10px; font-size: 14px; font-weight: 700; letter-spacing: 0.28em;
           text-transform: uppercase; color: var(--rt-rose);
         }
         .rt-detailBlock__value {
           font-family: var(--rt-display); font-weight: 400;
           font-size: clamp(23px, 3vw, 30px); line-height: 1.3; color: var(--rt-cream-edition);
         }
-        .rt-detailBlock__note { margin-top: 8px; font-size: 13px; font-weight: 300; color: rgba(248,244,239,0.6); }
+        .rt-detailBlock__note { margin-top: 8px; font-size: 14px; font-weight: 400; color: rgba(248,244,239,0.88); }
 
         /* ---------- 14 manifesto ---------- */
         .rt-poem {
@@ -892,11 +904,11 @@ export default function Retreats() {
           <p
             style={{
               marginBottom: "28px",
-              fontSize: "11px",
+              fontSize: "14px",
               fontWeight: 700,
               letterSpacing: "0.24em",
               textTransform: "uppercase",
-              color: "rgba(250,245,243,0.85)"
+              color: "var(--rt-cream-page)"
             }}>
             Next retreat · 28 to 31 January 2027 · Western Cape · Twelve places
           </p>
@@ -920,7 +932,7 @@ export default function Retreats() {
       </section>
 
       {/* "Not just rest" + "Most retreats" — two-column / overlapping layout */}
-      <section className="rt-sec" style={{ background: "#F6F3ED" }}>
+      <section className="rt-sec" style={{ background: "var(--rt-cream-page)" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
           <Rise>
             <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)" }}>
@@ -961,7 +973,7 @@ export default function Retreats() {
         </div>
       </section>
 
-      <section className="rt-sec" style={{ background: "#F6F3ED" }}>
+      <section className="rt-sec" style={{ background: "var(--rt-cream-page)" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
           <Rise>
             <h2 className="rt-h2" style={{ marginBottom: "clamp(36px, 5vw, 64px)", color: "var(--rt-burg)", maxWidth: "880px" }}>
@@ -990,7 +1002,7 @@ export default function Retreats() {
                   width: "clamp(110px, 12vw, 160px)",
                   height: "clamp(110px, 12vw, 160px)",
                   overflow: "hidden",
-                  border: "6px solid #F6F3ED"
+                  border: "6px solid var(--rt-cream-page)"
                 }}>
                 <Slot src={IMAGES.balanceInset} alt="Detail" brief="Detail" className="rt-fill" />
               </div>
@@ -1057,10 +1069,11 @@ export default function Retreats() {
           <p
             style={{
               marginTop: "16px",
-              fontSize: "15px",
-              fontWeight: 300,
-              lineHeight: 1.8,
-              color: "#E8DFCA"
+              fontSize: "clamp(16px, 2vw, 17px)",
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: "#E8DFCA",
+              maxWidth: "68ch"
             }}>
             
             Everything we create is built around three principles.
@@ -1082,10 +1095,10 @@ export default function Retreats() {
       </section>
 
       {/* 05 WHAT TO EXPECT */}
-      <section className="rt-sec" style={{ background: "#F6F3ED" }}>
+      <section className="rt-sec" style={{ background: "var(--rt-cream-page)" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
-          <Rise style={{ display: "flex", justifyContent: "flex-end" }}>
-            <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)", textAlign: "right" }}>
+          <Rise>
+            <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)" }}>
               What to expect
             </h2>
           </Rise>
@@ -1267,10 +1280,11 @@ export default function Retreats() {
             style={{
               margin: "clamp(32px, 5vw, 48px) 0 0",
               fontStyle: "italic",
-              fontSize: "clamp(15px, 1.4vw, 17px)",
-              fontWeight: 300,
-              lineHeight: 1.7,
-              color: "var(--rt-burg)"
+              fontSize: "clamp(16px, 2vw, 17px)",
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: "var(--rt-burg)",
+              maxWidth: "68ch"
             }}>
             
             Nothing is compulsory. You can be in every room and speak in none of them.
@@ -1466,7 +1480,7 @@ export default function Retreats() {
                     style={{
                       marginBottom: "clamp(48px, 7vw, 64px)",
                       fontSize: "13px",
-                      fontWeight: 300,
+                      fontWeight: 400,
                       color: "var(--rt-body-mid)"
                     }}>
 
@@ -1484,7 +1498,7 @@ export default function Retreats() {
                       style={{
                         marginBottom: "28px",
                         fontSize: "13px",
-                        fontWeight: 300,
+                        fontWeight: 400,
                         lineHeight: 1.6,
                         color: "var(--rt-body-soft)"
                       }}>
@@ -1506,7 +1520,7 @@ export default function Retreats() {
                           <p
                           style={{
                             fontSize: "13px",
-                            fontWeight: 300,
+                            fontWeight: 400,
                             lineHeight: 1.6,
                             color: "var(--rt-body-soft)"
                           }}>
@@ -1520,7 +1534,7 @@ export default function Retreats() {
                       style={{
                         marginTop: "40px",
                         fontSize: "12px",
-                        fontWeight: 300,
+                        fontWeight: 400,
                         color: "var(--rt-meta)"
                       }}>
 
@@ -1614,11 +1628,11 @@ export default function Retreats() {
           <p
             style={{
               marginBottom: "14px",
-              fontSize: "11px",
+              fontSize: "14px",
               fontWeight: 700,
               letterSpacing: "0.24em",
               textTransform: "uppercase",
-              color: "rgba(248,244,239,0.85)"
+              color: "var(--rt-cream-edition)"
             }}>
             
             28 to 31 January 2027 · Western Cape · Twelve places
@@ -1661,10 +1675,11 @@ export default function Retreats() {
             key={line.slice(0, 24)}
             style={{
               marginBottom: "24px",
-              fontSize: "clamp(17px, 1.8vw, 20px)",
-              fontWeight: 300,
-              lineHeight: 1.8,
-              color: "var(--rt-ink-soft)"
+              fontSize: "clamp(16px, 2vw, 17px)",
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: "var(--rt-ink-soft)",
+              maxWidth: "68ch"
             }}>
             
               {line}
@@ -1673,10 +1688,11 @@ export default function Retreats() {
           <p
             style={{
               marginBottom: "clamp(32px, 5vw, 44px)",
-              fontSize: "clamp(17px, 1.8vw, 20px)",
-              fontWeight: 300,
-              lineHeight: 1.8,
-              color: "var(--rt-ink-soft)"
+              fontSize: "clamp(16px, 2vw, 17px)",
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: "var(--rt-ink-soft)",
+              maxWidth: "68ch"
             }}>
             
             This is finally a space where every part of you is welcome and every part of you is seen.
@@ -1816,10 +1832,11 @@ export default function Retreats() {
           <p
             style={{
               marginBottom: "clamp(48px, 8vw, 64px)",
-              fontSize: "clamp(15px, 1.5vw, 17px)",
-              fontWeight: 300,
-              lineHeight: 1.75,
-              color: "rgba(248,244,239,0.78)"
+              fontSize: "clamp(16px, 2vw, 17px)",
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: "rgba(248,244,239,0.92)",
+              maxWidth: "68ch"
             }}>
             
             A balanced edition. Somatic and psychological work throughout, with ceremony held on the
@@ -1839,7 +1856,7 @@ export default function Retreats() {
           <a href={APPLY_URL} className="rt-btn rt-btn--burg rt-btn--dominant">
             Apply for a place
           </a>
-          <p className="rt-fineprint" style={{ color: "rgba(248,244,239,0.65)" }}>
+          <p className="rt-fineprint" style={{ color: "rgba(248,244,239,0.9)" }}>
             Places are applied for, not bought. Applications take a few minutes and we respond to
             every one.
           </p>
@@ -1869,7 +1886,7 @@ export default function Retreats() {
           <p
             style={{
               marginTop: "clamp(40px, 5vw, 56px)",
-              fontSize: "13px",
+              fontSize: "14px",
               fontWeight: 700,
               letterSpacing: "0.24em",
               textTransform: "uppercase",
