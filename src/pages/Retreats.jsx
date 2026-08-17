@@ -263,6 +263,18 @@ const DETAILS = [
 { label: "Why we hold the venue back", value: "The land is private and the group is small. We share the venue with women once their application is accepted." }];
 
 
+const FAQ = [
+{ q: "Do I need any experience with horses?", a: "No. The equine work is not riding and it does not require any horse experience at all. You will be guided through everything, and you set the pace. Some women stand at a distance for the first session. That is a valid way to do it." },
+{ q: "What if I have never done this kind of work before?", a: "Most women arrive having never done it. That is who this is built for. Nothing assumes prior practice and nothing is performed in front of the group." },
+{ q: "Will I have to share things in front of everyone?", a: "No. You are never required to speak, disclose or participate. You will be invited into everything and you can decline any of it without explaining yourself." },
+{ q: "Is this safe if I am carrying something difficult?", a: "The work is trauma informed and every practitioner is qualified in her field. We are not a clinical service and we are not a substitute for therapy. If you are in active crisis or under current psychiatric care, tell us in your application and we will speak with you honestly about whether this is the right time." },
+{ q: "What are the rooms like?", a: "[CONFIRM: single or shared, en suite or not]" },
+{ q: "Can you cater for dietary requirements?", a: "Yes. All meals are included and we cater for dietary requirements and allergies. You will tell us yours once your place is confirmed." },
+{ q: "How do I get there, and how physically demanding is it?", a: "The venue is in the Western Cape, [CONFIRM: travel time from Cape Town International]. [CONFIRM: transfer arrangement]. The days include walking on uneven ground outdoors. Nothing requires a particular level of fitness and everything can be adapted." },
+{ q: "What happens after I apply, and what if I need to cancel?", a: "We read every application and respond to every one, usually within [CONFIRM: response time]. If your place is confirmed we will send you the venue, the payment terms and everything you need. [CONFIRM: cancellation and refund terms]." }
+];
+
+
 /* ------------------------------------------------------------------
    MANIFESTO
    The Invitation by Oriah Mountain Dreamer is a copyrighted poem, so it
@@ -1269,9 +1281,13 @@ export default function Retreats() {
       {/* 08 HELD BY PEOPLE WE TRUST */}
       <section className="rt-sec rt-sec--tall rt-bg-hunter">
         <Rise className="rt-w820">
-          <h2 className="rt-h2" style={{ marginBottom: "28px", color: "var(--rt-cream)" }}>
+          <Rise
+            as="p"
+            className="rt-eyebrow"
+            style={{ marginBottom: "clamp(20px, 3vw, 28px)", color: "var(--rt-rose-light)" }}>
+            
             Held by people we trust completely
-          </h2>
+          </Rise>
           <p
             className="rt-p rt-p--onDark"
             style={{ marginBottom: "clamp(48px, 7vw, 64px)", maxWidth: "620px" }}>
@@ -1339,170 +1355,181 @@ export default function Retreats() {
               be happy. Don't complain. Anger doesn't look good on you. Work harder to be taken a
               little more seriously, but not too much.
             </blockquote>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
-              And don't even get me started on the medical system.
-            </p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "clamp(36px, 4vw, 48px)" }}>
-              All of this failed me. Like it's failed so many others.
-            </p>
 
-            <p className="rt-subLabel">Good on paper</p>
-            <div style={{ display: "grid", gap: "20px", marginBottom: "clamp(36px, 4vw, 48px)" }}>
-              <div style={{ display: "flex", gap: "20px" }}>
-                <p className="rt-age">32</p>
-                <p className="rt-p rt-p--sm">
-                  By 32 I was making more money than I knew what to do with. I had built and was
-                  running a multi-7-figure business, I was travelling business and first class so
-                  often I probably don't even know how to turn right anymore. I'd won awards at
-                  work, and in my sport. Travelled the world. Never said no to a good time. But deep
-                  down I had that gnawing feeling that something wasn't quite right.
-                </p>
-              </div>
-              <div style={{ display: "flex", gap: "20px" }}>
-                <p className="rt-age">35</p>
-                <p className="rt-p rt-p--sm">
-                  By 35 I was divorced, so burnt out I couldn't get out of bed, and given such bad
-                  advice about medication that at one point I was even suicidal. If you knew me, you
-                  wouldn't believe this. I couldn't even believe it!
-                </p>
-              </div>
-            </div>
-            <p
-              style={{
-                marginBottom: "clamp(36px, 4vw, 48px)",
-                fontFamily: "var(--rt-display)",
-                fontStyle: "italic",
-                fontWeight: 400,
-                fontSize: "clamp(20px, 2.2vw, 25px)",
-                lineHeight: 1.5
-              }}>
-              
-              How does this happen to someone who looks so good on paper?
-            </p>
+            <details className="rt-details">
+              <summary>
+                <h3>Read Laura's full story and credentials</h3>
+                <span className="rt-details__glyph">+</span>
+              </summary>
+              <div className="rt-details__body">
+                <div>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
+                    And don't even get me started on the medical system.
+                  </p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "clamp(36px, 4vw, 48px)" }}>
+                    All of this failed me. Like it's failed so many others.
+                  </p>
 
-            <p className="rt-subLabel">The real work</p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
-              The missing pieces of my life, of my soul, needed putting back together, and no talk
-              therapist alone was getting anywhere with me. And so the journey back to myself began.
-            </p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
-              Not the work I thought I was doing. Not the spiritual bypassing I'd become accustomed
-              to for so long. The real work.
-            </p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "clamp(36px, 4vw, 48px)" }}>
-              I spent years, and hundreds of thousands, figuring out what it really means to do "the
-              work" as a woman. There's no quick fix, and no linear, cut and paste way. But there is
-              a method, and I believe it will get you there a lot faster than anything I've ever
-              seen.
-            </p>
-
-            <p className="rt-subLabel">Why we check everything</p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
-              Along the way I also spent a lot of money and time on people who did far more harm
-              than good. At one point I nearly paid for that with my life.
-            </p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "clamp(36px, 4vw, 48px)" }}>
-              That is why doing the correct due diligence on every facilitator we work with is one
-              of my highest values, and one of this company's. I will not put a woman in a room with
-              someone I haven't checked myself. There is nothing about this I am willing to be
-              casual with.
-            </p>
-
-            <p className="rt-subLabel">Why the retreats exist</p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
-              I couldn't find everything I've found in any one place. It took years of travelling
-              and searching across the world. So I've brought those teachings together, and put them
-              in one place.
-            </p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
-              The Aligned Woman Co. retreats were born to create transformative experiences that
-              bring it all together. Wellness and transformational practices, community, and
-              practitioners who are genuinely qualified and genuinely experienced.
-            </p>
-            <p className="rt-p rt-p--sm" style={{ marginBottom: "40px" }}>
-              It is my soul's and my heart's desire to help women get to where they need to be,
-              without going through what I went through.
-            </p>
-
-            <p
-              style={{
-                marginBottom: "16px",
-                fontFamily: "var(--rt-display)",
-                fontStyle: "italic",
-                fontWeight: 400,
-                fontSize: "clamp(24px, 3vw, 32px)",
-                lineHeight: 1.4,
-                color: "var(--rt-burg)"
-              }}>
-              
-              Join me on the journey back to yourself.
-            </p>
-            <p style={{ marginBottom: "4px", fontSize: "15px", fontWeight: 600 }}>Laura</p>
-            <p
-              style={{
-                marginBottom: "clamp(48px, 7vw, 64px)",
-                fontSize: "13px",
-                fontWeight: 300,
-                color: "var(--rt-body-mid)"
-              }}>
-              
-              Founder, The Aligned Woman Co.
-            </p>
-
-            <div style={{ borderTop: "1px solid var(--rt-burg)", paddingTop: "32px" }}>
-              <p
-                className="rt-eyebrow"
-                style={{ marginBottom: "8px", letterSpacing: "0.24em", color: "var(--rt-burg)" }}>
-                
-                Laura Thomas
-              </p>
-              <p
-                style={{
-                  marginBottom: "28px",
-                  fontSize: "13px",
-                  fontWeight: 300,
-                  lineHeight: 1.6,
-                  color: "var(--rt-body-soft)"
-                }}>
-                
-                Award-winning business strategist, published author and speaker.
-              </p>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
-                  gap: "20px 40px"
-                }}>
-                
-                {CREDENTIALS.map((credential) =>
-                <div key={credential.title}>
-                    <p style={{ marginBottom: "4px", fontSize: "13px", fontWeight: 600, lineHeight: 1.5 }}>
-                      {credential.title}
-                    </p>
-                    <p
+                  <p className="rt-subLabel">Good on paper</p>
+                  <div style={{ display: "grid", gap: "20px", marginBottom: "clamp(36px, 4vw, 48px)" }}>
+                    <div style={{ display: "flex", gap: "20px" }}>
+                      <p className="rt-age">32</p>
+                      <p className="rt-p rt-p--sm">
+                        By 32 I was making more money than I knew what to do with. I had built and was
+                        running a multi-7-figure business, I was travelling business and first class so
+                        often I probably don't even know how to turn right anymore. I'd won awards at
+                        work, and in my sport. Travelled the world. Never said no to a good time. But deep
+                        down I had that gnawing feeling that something wasn't quite right.
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", gap: "20px" }}>
+                      <p className="rt-age">35</p>
+                      <p className="rt-p rt-p--sm">
+                        By 35 I was divorced, so burnt out I couldn't get out of bed, and given such bad
+                        advice about medication that at one point I was even suicidal. If you knew me, you
+                        wouldn't believe this. I couldn't even believe it!
+                      </p>
+                    </div>
+                  </div>
+                  <p
                     style={{
+                      marginBottom: "clamp(36px, 4vw, 48px)",
+                      fontFamily: "var(--rt-display)",
+                      fontStyle: "italic",
+                      fontWeight: 400,
+                      fontSize: "clamp(20px, 2.2vw, 25px)",
+                      lineHeight: 1.5
+                    }}>
+
+                    How does this happen to someone who looks so good on paper?
+                  </p>
+
+                  <p className="rt-subLabel">The real work</p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
+                    The missing pieces of my life, of my soul, needed putting back together, and no talk
+                    therapist alone was getting anywhere with me. And so the journey back to myself began.
+                  </p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
+                    Not the work I thought I was doing. Not the spiritual bypassing I'd become accustomed
+                    to for so long. The real work.
+                  </p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "clamp(36px, 4vw, 48px)" }}>
+                    I spent years, and hundreds of thousands, figuring out what it really means to do "the
+                    work" as a woman. There's no quick fix, and no linear, cut and paste way. But there is
+                    a method, and I believe it will get you there a lot faster than anything I've ever
+                    seen.
+                  </p>
+
+                  <p className="rt-subLabel">Why we check everything</p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
+                    Along the way I also spent a lot of money and time on people who did far more harm
+                    than good. At one point I nearly paid for that with my life.
+                  </p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "clamp(36px, 4vw, 48px)" }}>
+                    That is why doing the correct due diligence on every facilitator we work with is one
+                    of my highest values, and one of this company's. I will not put a woman in a room with
+                    someone I haven't checked myself. There is nothing about this I am willing to be
+                    casual with.
+                  </p>
+
+                  <p className="rt-subLabel">Why the retreats exist</p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
+                    I couldn't find everything I've found in any one place. It took years of travelling
+                    and searching across the world. So I've brought those teachings together, and put them
+                    in one place.
+                  </p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "22px" }}>
+                    The Aligned Woman Co. retreats were born to create transformative experiences that
+                    bring it all together. Wellness and transformational practices, community, and
+                    practitioners who are genuinely qualified and genuinely experienced.
+                  </p>
+                  <p className="rt-p rt-p--sm" style={{ marginBottom: "40px" }}>
+                    It is my soul's and my heart's desire to help women get to where they need to be,
+                    without going through what I went through.
+                  </p>
+
+                  <p
+                    style={{
+                      marginBottom: "16px",
+                      fontFamily: "var(--rt-display)",
+                      fontStyle: "italic",
+                      fontWeight: 400,
+                      fontSize: "clamp(24px, 3vw, 32px)",
+                      lineHeight: 1.4,
+                      color: "var(--rt-burg)"
+                    }}>
+
+                    Join me on the journey back to yourself.
+                  </p>
+                  <p style={{ marginBottom: "4px", fontSize: "15px", fontWeight: 600 }}>Laura</p>
+                  <p
+                    style={{
+                      marginBottom: "clamp(48px, 7vw, 64px)",
                       fontSize: "13px",
                       fontWeight: 300,
-                      lineHeight: 1.6,
-                      color: "var(--rt-body-soft)"
+                      color: "var(--rt-body-mid)"
                     }}>
-                    
-                      {credential.body}
+
+                    Founder, The Aligned Woman Co.
+                  </p>
+
+                  <div style={{ borderTop: "1px solid var(--rt-burg)", paddingTop: "32px" }}>
+                    <p
+                      className="rt-eyebrow"
+                      style={{ marginBottom: "8px", letterSpacing: "0.24em", color: "var(--rt-burg)" }}>
+
+                      Laura Thomas
+                    </p>
+                    <p
+                      style={{
+                        marginBottom: "28px",
+                        fontSize: "13px",
+                        fontWeight: 300,
+                        lineHeight: 1.6,
+                        color: "var(--rt-body-soft)"
+                      }}>
+
+                      Award-winning business strategist, published author and speaker.
+                    </p>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
+                        gap: "20px 40px"
+                      }}>
+
+                      {CREDENTIALS.map((credential) =>
+                      <div key={credential.title}>
+                          <p style={{ marginBottom: "4px", fontSize: "13px", fontWeight: 600, lineHeight: 1.5 }}>
+                            {credential.title}
+                          </p>
+                          <p
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: 300,
+                            lineHeight: 1.6,
+                            color: "var(--rt-body-soft)"
+                          }}>
+
+                            {credential.body}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <p
+                      style={{
+                        marginTop: "40px",
+                        fontSize: "12px",
+                        fontWeight: 300,
+                        color: "var(--rt-meta)"
+                      }}>
+
+                      If you are struggling, please reach out. SADAG, 0800 567 567.
                     </p>
                   </div>
-                )}
+                </div>
               </div>
-              <p
-                style={{
-                  marginTop: "40px",
-                  fontSize: "12px",
-                  fontWeight: 300,
-                  color: "var(--rt-meta)"
-                }}>
-                
-                If you are struggling, please reach out. SADAG, 0800 567 567.
-              </p>
-            </div>
+            </details>
           </div>
         </div>
       </section>
@@ -1703,7 +1730,7 @@ export default function Retreats() {
         </div>
       </section>
 
-      {/* BAND 6 WHAT MAKES THIS DIFFERENT */}
+      {/* BAND 6 WHAT MAKES THIS DIFFERENT / FAQ */}
       <section className="rt-sec--bandTight rt-bg-edition">
         <Rise className="rt-w680">
           <details className="rt-details">
@@ -1727,6 +1754,20 @@ export default function Retreats() {
               )}
             </div>
           </details>
+          {FAQ.map((item) =>
+          <details className="rt-details" key={item.q}>
+              <summary>
+                <h3>{item.q}</h3>
+                <span className="rt-details__glyph">+</span>
+              </summary>
+              <div className="rt-details__body">
+                <p>{item.a}</p>
+              </div>
+            </details>
+          )}
+          <p style={{ marginTop: "clamp(28px, 4vw, 40px)" }}>
+            <a href="/Contact" className="rt-textLink">Still have a question? Ask us.</a>
+          </p>
         </Rise>
       </section>
 
