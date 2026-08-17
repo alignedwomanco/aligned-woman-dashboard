@@ -1005,8 +1005,8 @@ export default function Retreats() {
               alignItems: "stretch"
             }}>
             <div className="rt-sticky-col">
-              <div className="rt-sticky-img" style={{ position: "relative", width: "100%" }}>
-                <img src={IMAGES.whatToExpect} alt="What to expect" style={{ width: "100%", height: "auto", display: "block", objectFit: "contain" }} />
+              <div className="rt-sticky-img" style={{ position: "relative", width: "100%", aspectRatio: "4 / 5", overflow: "hidden" }}>
+                <Slot src={IMAGES.whatToExpect} alt="What to expect" brief="What to expect on retreat" className="rt-fill" />
               </div>
             </div>
             <Rise>
