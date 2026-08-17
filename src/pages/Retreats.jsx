@@ -464,6 +464,11 @@ export default function Retreats() {
           .rt-grid-resp { grid-template-columns: 1fr !important; gap: 36px !important; }
           .rt-cols-resp { column-count: 1 !important; }
         }
+        .rt-sticky-col { display: flex; flex-direction: column; justify-content: flex-start; }
+        .rt-sticky-img { position: static; }
+        @media (min-width: 701px) {
+          .rt-sticky-img { position: sticky; top: 88px; }
+        }
 
         /* ---------- surfaces ---------- */
         .rt-sec { padding: clamp(80px, 14vw, 140px) clamp(24px, 6vw, 80px); }
@@ -828,7 +833,7 @@ export default function Retreats() {
               display: "grid",
               gridTemplateColumns: "minmax(0, 45fr) minmax(0, 55fr)",
               gap: "clamp(32px, 5vw, 80px)",
-              alignItems: "start"
+              alignItems: "stretch"
             }}>
             <Rise>
               <p className="rt-p" style={{ marginBottom: "28px", color: "#3C3630" }}>
@@ -847,11 +852,11 @@ export default function Retreats() {
                 </p>
               </div>
             </Rise>
-            <Rise>
-              <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 5", overflow: "hidden" }}>
+            <div className="rt-sticky-col">
+              <div className="rt-sticky-img" style={{ position: "relative", width: "100%", aspectRatio: "4 / 5", overflow: "hidden" }}>
                 <Slot src={IMAGES.awakening} alt="Retreat setting" brief="Retreat setting" className="rt-fill" />
               </div>
-            </Rise>
+            </div>
           </div>
         </div>
       </section>
