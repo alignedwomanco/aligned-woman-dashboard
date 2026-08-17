@@ -25,9 +25,9 @@ const IMAGES = {
   how10: "",
   how11: "",
   awakening: "https://media.base44.com/images/public/69f46886a412ee042303f1af/28bcb612c_2.png",
-  balanceBg: "https://media.base44.com/images/public/69f46886a412ee042303f1af/cbda177a3_Screenshot2026-08-11at155959.png",
-  balanceLeaf: "https://media.base44.com/images/public/69f46886a412ee042303f1af/db9e960d3_Screenshot2026-08-14at221311.png",
-  balanceInset: "https://media.base44.com/images/public/69f46886a412ee042303f1af/db9e960d3_Screenshot2026-08-14at221311.png",
+  balanceBg: "https://media.base44.com/images/public/69f46886a412ee042303f1af/a4241c6dc_4.png",
+  balanceLeaf: "https://media.base44.com/images/public/69f46886a412ee042303f1af/bfa885394_5.png",
+  balanceInset: "https://media.base44.com/images/public/69f46886a412ee042303f1af/6107e8f89_6.png",
   whatToExpect: "https://media.base44.com/images/public/69f46886a412ee042303f1af/fda595f0e_Screenshot2026-08-03at112544.png",
   theLand: "https://media.base44.com/images/public/69f46886a412ee042303f1af/937228dee_lions-head_1721080568_Lions-Head-Pixalot_Wall_Art.jpg"
 };
