@@ -28,7 +28,7 @@ const IMAGES = {
   balanceBg: "https://media.base44.com/images/public/69f46886a412ee042303f1af/a4241c6dc_4.png",
   balanceLeaf: "https://media.base44.com/images/public/69f46886a412ee042303f1af/bfa885394_5.png",
   balanceInset: "https://media.base44.com/images/public/69f46886a412ee042303f1af/6107e8f89_6.png",
-  whatToExpect: "https://media.base44.com/images/public/69f46886a412ee042303f1af/fda595f0e_Screenshot2026-08-03at112544.png",
+  whatToExpect: "https://media.base44.com/images/public/69f46886a412ee042303f1af/ce75d05bb_3.png",
   theLand: "https://media.base44.com/images/public/69f46886a412ee042303f1af/937228dee_lions-head_1721080568_Lions-Head-Pixalot_Wall_Art.jpg"
 };
 
@@ -991,8 +991,8 @@ export default function Retreats() {
       {/* 05 WHAT TO EXPECT */}
       <section className="rt-sec" style={{ background: "#F6F3ED" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
-          <Rise>
-            <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)" }}>
+          <Rise style={{ display: "flex", justifyContent: "flex-end" }}>
+            <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)", textAlign: "right" }}>
               What to expect
             </h2>
           </Rise>
