@@ -636,6 +636,11 @@ export default function Retreats() {
         .rt-split__media { flex: 1 1 300px; max-width: 460px; width: 100%; }
         .rt-split__media > * { width: 100%; aspect-ratio: 4 / 5; }
         .rt-split__copy { flex: 1 1 440px; max-width: 560px; }
+        .rt-split--sticky { align-items: stretch; }
+        .rt-split--sticky .rt-split__media { display: flex; flex-direction: column; justify-content: flex-start; }
+        @media (min-width: 701px) {
+          .rt-split--sticky .rt-split__media > * { position: sticky; top: 88px; }
+        }
         .rt-founder__media { flex: 1 1 300px; max-width: 420px; width: 100%; align-self: stretch; }
         .rt-founder__sticky > * { width: 100%; aspect-ratio: 4 / 5; }
         .rt-founder__copy { flex: 1 1 440px; max-width: 640px; }
@@ -1048,7 +1053,7 @@ export default function Retreats() {
 
       {/* 06b EQUINE-ASSISTED WORK */}
       <section className="rt-sec rt-bg-cream">
-        <div className="rt-w1100 rt-split rt-split--centre">
+        <div className="rt-w1100 rt-split rt-split--centre rt-split--sticky">
           <div className="rt-split__media">
             <video
               src="https://pub-f81092ac00b24c449008a93f41d7542d.r2.dev/SCOTY.mp4"
