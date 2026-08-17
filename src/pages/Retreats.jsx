@@ -23,7 +23,11 @@ const IMAGES = {
   how08: "",
   how09: "",
   how10: "",
-  how11: ""
+  how11: "",
+  awakening: "",
+  balanceBg: "",
+  balanceLeaf: "",
+  balanceInset: ""
 };
 
 /* ------------------------------------------------------------------
@@ -454,6 +458,12 @@ export default function Retreats() {
           .rt-desktopOnly { display: none !important; }
           .rt-mobileOnly { display: block; }
         }
+        .rt-grid-resp { }
+        .rt-cols-resp { }
+        @media (max-width: 700px) {
+          .rt-grid-resp { grid-template-columns: 1fr !important; gap: 36px !important; }
+          .rt-cols-resp { column-count: 1 !important; }
+        }
 
         /* ---------- surfaces ---------- */
         .rt-sec { padding: clamp(80px, 14vw, 140px) clamp(24px, 6vw, 80px); }
@@ -804,90 +814,124 @@ export default function Retreats() {
         </div>
       </section>
 
-      {/* "Not just rest" + "Most retreats" */}
-      <div className="rt-bg-page" style={{ position: "relative", width: "100%" }}>
-        {/* 02 NOT REST */}
-        <section className="rt-sec" style={{ position: "relative", zIndex: 1, background: "#E8DFCA" }}>
-          <Rise className="rt-w680" style={{ position: "relative", zIndex: 1 }}>
-            <h2 className="rt-h2" style={{ marginBottom: "32px", color: "var(--rt-burg)" }}>
+      {/* "Not just rest" + "Most retreats" — two-column / overlapping layout */}
+      <section className="rt-sec" style={{ background: "#F6F3ED" }}>
+        <div style={{ maxWidth: 1240, margin: "0 auto" }}>
+          <Rise>
+            <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)" }}>
               Not just rest. <i className="[font-family:'Libre_Baskerville',_serif]">Awakening.</i>
             </h2>
-            <p className="rt-p" style={{ marginBottom: "24px" }}>
-              A retreat with us is not designed to help you recover from your life. It is designed
-              to change your relationship with it.
-            </p>
-            <p className="rt-p" style={{ marginBottom: "24px" }}>
-              Together we bring the subconscious to the conscious. The patterns that have been running
-              quietly underneath your decisions become something you can see clearly, understand fully,
-              and finally work with rather than around. That is where clarity comes from. Not from
-              stepping away, but from finally seeing accurately.
-            </p>
-            <p className="rt-p">
-              You do not need to arrive with the answers. You only need to arrive open.
-            </p>
           </Rise>
-        </section>
-
-        {/* 03 THE BALANCE */}
-        <section
-          className="rt-sec rt-sec--tall"
-          style={{
-            position: "relative",
-            zIndex: 1,
-            backgroundImage:
-              "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/cd11e2a78_Screenshot2026-08-11at160044.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat"
-          }}
-        >
           <div
+            className="rt-grid-resp"
             style={{
-              position: "absolute",
-              inset: 0,
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-              background:
-                "linear-gradient(to right, rgba(232,223,202,0.92) 0%, rgba(232,223,202,0.6) 42%, rgba(232,223,202,0) 80%)",
-              WebkitMaskImage:
-                "linear-gradient(to right, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
-              maskImage:
-                "linear-gradient(to right, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
-              pointerEvents: "none",
-              zIndex: 0
-            }}
-          />
-          <Rise className="rt-w680" style={{ position: "relative", zIndex: 1, marginLeft: 0, marginRight: "auto", textAlign: "left" }}>
-            <h2 className="rt-h2" style={{ marginBottom: "24px", color: "#000000" }}>
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 45fr) minmax(0, 55fr)",
+              gap: "clamp(32px, 5vw, 80px)",
+              alignItems: "start"
+            }}>
+            <Rise>
+              <p className="rt-p" style={{ marginBottom: "28px", color: "#3C3630" }}>
+                A retreat with us is not designed to help you recover from your life. It is designed
+                to change your relationship with it.
+              </p>
+              <div className="rt-cols-resp" style={{ columnCount: 2, columnGap: 28 }}>
+                <p className="rt-p" style={{ marginBottom: 18, color: "#3C3630" }}>
+                  Together we bring the subconscious to the conscious. The patterns that have been
+                  running quietly underneath your decisions become something you can see clearly,
+                  understand fully, and finally work with rather than around. That is where clarity
+                  comes from. Not from stepping away, but from finally seeing accurately.
+                </p>
+                <p className="rt-p" style={{ color: "#3C3630" }}>
+                  You do not need to arrive with the answers. You only need to arrive open.
+                </p>
+              </div>
+            </Rise>
+            <Rise>
+              <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 5", overflow: "hidden" }}>
+                <Slot src={IMAGES.awakening} alt="Retreat setting" brief="Retreat setting" className="rt-fill" />
+              </div>
+            </Rise>
+          </div>
+        </div>
+      </section>
+
+      <section className="rt-sec" style={{ background: "#F6F3ED" }}>
+        <div style={{ maxWidth: 1240, margin: "0 auto" }}>
+          <Rise>
+            <h2 className="rt-h2" style={{ marginBottom: "clamp(36px, 5vw, 64px)", color: "var(--rt-burg)", maxWidth: "880px" }}>
               Most retreats sit at one end or the other. We built ours in the middle.
             </h2>
-            <p className="rt-standfirst" style={{ marginBottom: "40px", color: "#000000" }}>
-              The balance is the method.
-            </p>
-            <p className="rt-p" style={{ marginBottom: "24px", color: "#000000" }}>
-              After years of research and practice, we found that retreats rarely support women in the
-              way real change requires.
-            </p>
-            <p className="rt-p" style={{ marginBottom: "24px", color: "#000000" }}>
-              They are either too spiritual, without enough grounded practice to survive an ordinary
-              Tuesday. Or too clinical, with nothing in them that reaches the parts of you that
-              thinking alone cannot change.
-            </p>
-            <p className="rt-p" style={{ marginBottom: "24px", color: "#000000" }}>
-              The balance between the two is where alignment actually happens. Our retreats are built
-              to hold both.
-            </p>
-            <p className="rt-p" style={{ marginBottom: "56px", color: "#000000" }}>
-              No two are the same. But every one of them follows the same method, and the same three
-              elements are always present.
-            </p>
-            <p className="rt-pull" style={{ color: "#000000" }}>
-              Body opens. Behaviour does the work.{" "}
-              <span style={{ color: "#000000" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
-            </p>
           </Rise>
-        </section>
-      </div>
+          <Rise>
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "clamp(360px, 46vw, 560px)",
+                marginBottom: "clamp(56px, 7vw, 88px)"
+              }}>
+              <div style={{ position: "absolute", right: 0, top: 0, width: "62%", height: "100%", overflow: "hidden" }}>
+                <Slot src={IMAGES.balanceBg} alt="Forest waterfall" brief="Forest waterfall" className="rt-fill" />
+              </div>
+              <div style={{ position: "absolute", left: 0, bottom: 0, width: "46%", height: "80%", overflow: "hidden" }}>
+                <Slot src={IMAGES.balanceLeaf} alt="Forest leaves" brief="Forest leaves" className="rt-fill" />
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  left: "5%",
+                  bottom: "-28px",
+                  width: "clamp(110px, 12vw, 160px)",
+                  height: "clamp(110px, 12vw, 160px)",
+                  overflow: "hidden",
+                  border: "6px solid #F6F3ED"
+                }}>
+                <Slot src={IMAGES.balanceInset} alt="Detail" brief="Detail" className="rt-fill" />
+              </div>
+            </div>
+          </Rise>
+          <div
+            className="rt-grid-resp"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.15fr)",
+              gap: "clamp(32px, 5vw, 72px)",
+              alignItems: "start"
+            }}>
+            <Rise>
+              <p className="rt-pull" style={{ color: "var(--rt-burg)" }}>
+                Body opens. Behaviour does the work.{" "}
+                <span style={{ color: "var(--rt-burg-mid)" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
+              </p>
+            </Rise>
+            <Rise>
+              <p className="rt-eyebrow" style={{ color: "var(--rt-olive-label)", marginBottom: 18 }}>
+                The balance is the method
+              </p>
+              <div className="rt-cols-resp" style={{ columnCount: 2, columnGap: 28 }}>
+                <p className="rt-p" style={{ marginBottom: 18, color: "#3C3630" }}>
+                  After years of research and practice, we found that retreats rarely support women
+                  in the way real change requires.
+                </p>
+                <p className="rt-p" style={{ marginBottom: 18, color: "#3C3630" }}>
+                  They are either too spiritual, without enough grounded practice to survive an
+                  ordinary Tuesday. Or too clinical, with nothing in them that reaches the parts of
+                  you that thinking alone cannot change.
+                </p>
+                <p className="rt-p" style={{ marginBottom: 18, color: "#3C3630" }}>
+                  The balance between the two is where alignment actually happens. Our retreats are
+                  built to hold both.
+                </p>
+                <p className="rt-p" style={{ color: "#3C3630" }}>
+                  No two are the same. But every one of them follows the same method, and the same
+                  three elements are always present.
+                </p>
+              </div>
+            </Rise>
+          </div>
+        </div>
+      </section>
 
       {/* 04 BODY BEHAVIOUR BELONGING */}
       <section className="rt-parts">
