@@ -27,7 +27,9 @@ const IMAGES = {
   awakening: "https://media.base44.com/images/public/69f46886a412ee042303f1af/9eeae6713_Screenshot2026-08-14at221526.png",
   balanceBg: "https://media.base44.com/images/public/69f46886a412ee042303f1af/cbda177a3_Screenshot2026-08-11at155959.png",
   balanceLeaf: "https://media.base44.com/images/public/69f46886a412ee042303f1af/db9e960d3_Screenshot2026-08-14at221311.png",
-  balanceInset: "https://media.base44.com/images/public/69f46886a412ee042303f1af/db9e960d3_Screenshot2026-08-14at221311.png"
+  balanceInset: "https://media.base44.com/images/public/69f46886a412ee042303f1af/db9e960d3_Screenshot2026-08-14at221311.png",
+  whatToExpect: "https://media.base44.com/images/public/69f46886a412ee042303f1af/fda595f0e_Screenshot2026-08-03at112544.png",
+  theLand: "https://media.base44.com/images/public/69f46886a412ee042303f1af/937228dee_lions-head_1721080568_Lions-Head-Pixalot_Wall_Art.jpg"
 };
 
 /* ------------------------------------------------------------------
@@ -987,43 +989,35 @@ export default function Retreats() {
       </section>
 
       {/* 05 WHAT TO EXPECT */}
-      <section
-        className="rt-sec"
-        style={{
-          position: "relative",
-          backgroundImage:
-            "url('https://media.base44.com/images/public/69f46886a412ee042303f1af/fda595f0e_Screenshot2026-08-03at112544.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat"
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backdropFilter: "blur(14px)",
-            WebkitBackdropFilter: "blur(14px)",
-            background:
-              "linear-gradient(to left, rgba(245,221,217,0.85) 0%, rgba(245,221,217,0.5) 42%, rgba(245,221,217,0) 80%)",
-            WebkitMaskImage:
-              "linear-gradient(to left, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
-            maskImage:
-              "linear-gradient(to left, #000 0%, #000 30%, rgba(0,0,0,0.35) 60%, transparent 82%)",
-            pointerEvents: "none",
-            zIndex: 0
-          }}
-        />
-        <Rise className="rt-w680" style={{ position: "relative", zIndex: 1, marginLeft: "auto", marginRight: 0, textAlign: "right" }}>
-          <h2 className="rt-h2" style={{ marginBottom: "clamp(48px, 7vw, 72px)", color: "#000000" }}>
-            What to expect
-          </h2>
-          <div className="rt-expect">
-            {EXPECT.map((line) =>
-            <p key={line} style={{ color: "#000000" }}>{line}</p>
-            )}
+      <section className="rt-sec" style={{ background: "#F6F3ED" }}>
+        <div style={{ maxWidth: 1240, margin: "0 auto" }}>
+          <Rise>
+            <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)" }}>
+              What to expect
+            </h2>
+          </Rise>
+          <div
+            className="rt-grid-resp"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 45fr) minmax(0, 55fr)",
+              gap: "clamp(32px, 5vw, 80px)",
+              alignItems: "stretch"
+            }}>
+            <div className="rt-sticky-col">
+              <div className="rt-sticky-img" style={{ position: "relative", width: "100%", aspectRatio: "4 / 5", overflow: "hidden" }}>
+                <Slot src={IMAGES.whatToExpect} alt="What to expect" brief="What to expect on retreat" className="rt-fill" />
+              </div>
+            </div>
+            <Rise>
+              <div className="rt-expect">
+                {EXPECT.map((line) =>
+                <p key={line} style={{ color: "#3C3630" }}>{line}</p>
+                )}
+              </div>
+            </Rise>
           </div>
-        </Rise>
+        </div>
       </section>
 
       {/* 06 THE LAND */}
@@ -1031,23 +1025,38 @@ export default function Retreats() {
         <div
           className="rt-bg-hunter"
           style={{ padding: "clamp(72px, 12vw, 120px) clamp(24px, 6vw, 80px)" }}>
-          
-          <Rise className="rt-w680">
-            <h2 className="rt-h2" style={{ marginBottom: "32px", color: "var(--rt-cream)" }}>
-              The land does some of the work
-            </h2>
-            <p className="rt-p rt-p--onDark" style={{ marginBottom: "24px" }}>
-              Africa has always been a deeply healing place, and we do not take that lightly.
-            </p>
-            <p className="rt-p rt-p--onDark" style={{ marginBottom: "24px" }}>
-              Our spaces are chosen with care and we work with the land rather than on top of it.
-              Somewhere the noise drops away, the light changes how you feel, and the ground under
-              you asks you to slow down before anyone has said a word.
-            </p>
-            <p className="rt-p rt-p--onDark">
-              Place is not the backdrop to this work. It is part of the method.
-            </p>
-          </Rise>
+          <div style={{ maxWidth: 1240, margin: "0 auto" }}>
+            <div
+              className="rt-grid-resp"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 45fr) minmax(0, 55fr)",
+                gap: "clamp(32px, 5vw, 80px)",
+                alignItems: "stretch"
+              }}>
+              <Rise>
+                <h2 className="rt-h2" style={{ marginBottom: "32px", color: "var(--rt-cream)" }}>
+                  The land does some of the work
+                </h2>
+                <p className="rt-p rt-p--onDark" style={{ marginBottom: "24px" }}>
+                  Africa has always been a deeply healing place, and we do not take that lightly.
+                </p>
+                <p className="rt-p rt-p--onDark" style={{ marginBottom: "24px" }}>
+                  Our spaces are chosen with care and we work with the land rather than on top of it.
+                  Somewhere the noise drops away, the light changes how you feel, and the ground under
+                  you asks you to slow down before anyone has said a word.
+                </p>
+                <p className="rt-p rt-p--onDark">
+                  Place is not the backdrop to this work. It is part of the method.
+                </p>
+              </Rise>
+              <div className="rt-sticky-col">
+                <div className="rt-sticky-img" style={{ position: "relative", width: "100%", aspectRatio: "4 / 5", overflow: "hidden" }}>
+                  <Slot src={IMAGES.theLand} alt="Lion's Head at golden hour" brief="African landscape at golden hour" className="rt-fill" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
