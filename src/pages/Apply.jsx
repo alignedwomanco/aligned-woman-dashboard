@@ -13,18 +13,27 @@ import { createPageUrl } from "@/utils";
 //
 // Wiring is identical to the Directory apply modal, the existing
 // source of truth: writes an ExpertApplication record (status
-// pending), best-effort admin email, analytics event. Applying
-// grants nothing on its own; approval is an admin decision.
-// The route is inside the login-protected group, matching the
-// entity's sign-in-first flow.
+// pending), admin email, applicant confirmation, analytics event.
+// Applying grants nothing on its own; approval is an admin decision.
+// The route is public: applicants are not members yet, and the
+// entity's create rule is unrestricted (verified against a live
+// anonymous submission, August 2026).
+//
+// August 2026 fix: the thank-you view is reached by collapsing a
+// ~3000px form down to a ~400px card. The old smooth scrollTo ran
+// on the same tick as setSubmitted and raced that layout collapse,
+// leaving the viewport parked past the end of the page: a blank
+// screen under the fixed header. Scroll reset now runs in an effect
+// after commit, instantly. Everything after the create is isolated
+// so a failing email or analytics call can never blank the page or
+// lose an application.
 //
 // Held schema fields (accreditations and registrations, business
 // registration number, country, registered directors) are NOT here;
 // they are added only when Laura confirms the schema change.
-//
-// "Read the Standard in full" link is deliberately absent until the
-// Standard page exists: no dead ends.
 // ────────────────────────────────────────────────────────────────
+
+const ADMIN_EMAIL = "hello@alignedwomanco.com";
 
 // Kept in step with PINNED_CATEGORIES in ExpertsDirectory.jsx.
 const CATEGORY_OPTIONS = [
@@ -139,6 +148,17 @@ export default function Apply() {
       .catch(() => {});
   }, []);
 
+  // Runs after the thank-you view has committed and the document has
+  // already collapsed to its shorter height, so the browser has finished
+  // clamping. Instant, never smooth: a smooth scroll here races the
+  // layout change and leaves the viewport below the end of the page.
+  useEffect(() => {
+    if (!submitted) return;
+    window.scrollTo(0, 0);
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, [submitted]);
+
   const set = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((er) => ({ ...er, [key]: undefined, form: undefined }));
@@ -169,10 +189,16 @@ export default function Apply() {
       return;
     }
     setSaving(true);
+
+    const name = form.applicant_name.trim();
+    const email = form.email.trim().toLowerCase();
+
+    // Step 1: the record. This is the only step allowed to fail loudly,
+    // because it is the only step that loses the application.
     try {
       await base44.entities.ExpertApplication.create({
-        applicant_name: form.applicant_name.trim(),
-        email: form.email.trim().toLowerCase(),
+        applicant_name: name,
+        email,
         application_type: form.application_type,
         business_name: form.application_type === "business" ? form.business_name.trim() : "",
         headline: form.headline.trim(),
@@ -185,36 +211,67 @@ export default function Apply() {
         message: form.message.trim(),
         status: "pending",
       });
+    } catch (err) {
+      console.error("ExpertApplication create failed", err);
+      setErrors({ form: "Something went wrong sending your application. Please try again." });
+      setSaving(false);
+      return;
+    }
+
+    // Step 2: the application is safe. Show the confirmation before
+    // anything else runs, so no later failure can hold it back.
+    setSubmitted(true);
+    setSaving(false);
+
+    // Step 3: side effects, each isolated. None of these can throw
+    // into the view or undo the confirmation above.
+    try {
       base44.integrations.Core.SendEmail({
-        to: "hello@alignedwomanco.com",
-        subject: `New expert application - ${form.applicant_name.trim()}`,
-        body: `Name: ${form.applicant_name}\nEmail: ${form.email}\nType: ${form.application_type}\nInterested in: ${form.interested_in.join(", ")}\n\n${form.message}`,
+        to: ADMIN_EMAIL,
+        subject: `New expert application - ${name}`,
+        body: `Name: ${name}\nEmail: ${email}\nType: ${form.application_type}\nInterested in: ${form.interested_in.join(", ")}\n\n${form.message}`,
       }).catch(() => {});
+    } catch (err) {
+      console.error("Admin alert failed", err);
+    }
+
+    try {
+      base44.integrations.Core.SendEmail({
+        to: email,
+        from_name: "The Aligned Woman",
+        subject: "We have your application",
+        body: `Hello ${name},\n\nYour application to become AW Verified is with us, and it will be read by a person.\n\nHere is what happens next. We review every application against the Aligned Woman Standard: your qualifications and the proof behind them, your professional registration where your field requires one, and how you work with the women who trust you. If your work looks like a fit, we will write to arrange a real conversation. That conversation is part of verification, not a formality.\n\nEither way, you will hear back from us. We do not close applications with silence.\n\nWith warmth,\nThe Aligned Woman`,
+      }).catch(() => {});
+    } catch (err) {
+      console.error("Applicant confirmation failed", err);
+    }
+
+    try {
       base44.analytics.track({
         eventName: "expert_application_submit",
         properties: { application_type: form.application_type, source: "apply_page" },
       });
-      setSubmitted(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setErrors({ form: "Something went wrong sending your application. Please try again." });
-    } finally {
-      setSaving(false);
+      console.error("Analytics failed", err);
     }
   };
 
   if (submitted) {
     return (
-      <div className="max-w-2xl mx-auto px-5 md:px-6 py-16">
+      <div className="min-h-[70vh] max-w-2xl mx-auto px-5 md:px-6 py-16">
         <div className={`${GLASS_CARD} p-8 md:p-10`}>
           <h1 className="font-display text-[26px] md:text-[30px] text-awburg-core leading-tight mb-4">
             Received. Thank you for standing in front of the Standard.
           </h1>
-          <p className="font-body font-light text-[14px] leading-relaxed text-awburg-core/75 mb-8">
+          <p className="font-body font-light text-[14px] leading-relaxed text-awburg-core/75 mb-4">
             Your application is with our team, and it will be read by a person. If your work
             looks like a fit, we will write to you to arrange a real conversation; that
             conversation is part of verification, not a formality. Either way, you will hear
             back from us. We do not close applications with silence.
+          </p>
+          <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/60 mb-8">
+            A confirmation is on its way to your inbox. If it has not arrived in a few
+            minutes, check your spam folder.
           </p>
           <Link to={createPageUrl("ExpertsDirectory")} className={BTN_FILLED}>
             Back to the directory
