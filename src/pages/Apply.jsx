@@ -195,8 +195,9 @@ export default function Apply() {
 
     // Step 1: the record. This is the only step allowed to fail loudly,
     // because it is the only step that loses the application.
+    let created = null;
     try {
-      await base44.entities.ExpertApplication.create({
+      created = await base44.entities.ExpertApplication.create({
         applicant_name: name,
         email,
         application_type: form.application_type,
