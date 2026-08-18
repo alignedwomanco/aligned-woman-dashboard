@@ -1641,27 +1641,6 @@ export default function Retreats() {
         </Rise>
       </section>
 
-      {/* BAND 3 FOR YOU IF */}
-      <section className="rt-sec--bandTight rt-bg-edition">
-        <div className="rt-w820">
-          <Rise
-            as="p"
-            className="rt-eyebrow"
-            style={{ marginBottom: "clamp(20px, 3vw, 28px)", color: "var(--rt-burg)" }}>
-            
-            This retreat is for you if
-          </Rise>
-          {FOR_YOU_IF.map((line) =>
-          <Rise as="p" className="rt-editionRow" key={line}>
-              {line}
-            </Rise>
-          )}
-          <Rise as="p" className="rt-editionRow">
-            And you have decided that 2027 is your year.
-          </Rise>
-        </div>
-      </section>
-
       {/* BAND 2 THE FEELING */}
       <section className="rt-sec--band rt-bg-edition">
         <Rise className="rt-w680">
@@ -1711,6 +1690,27 @@ export default function Retreats() {
             You will leave feeling more yourself than you have in years. You will leave aligned.
           </p>
         </Rise>
+      </section>
+
+      {/* BAND 3 FOR YOU IF */}
+      <section className="rt-sec--bandTight rt-bg-edition">
+        <div className="rt-w820">
+          <Rise
+            as="p"
+            className="rt-eyebrow"
+            style={{ marginBottom: "clamp(20px, 3vw, 28px)", color: "var(--rt-burg)" }}>
+            
+            This retreat is for you if
+          </Rise>
+          {FOR_YOU_IF.map((line) =>
+          <Rise as="p" className="rt-editionRow" key={line}>
+              {line}
+            </Rise>
+          )}
+          <Rise as="p" className="rt-editionRow">
+            And you have decided that 2027 is your year.
+          </Rise>
+        </div>
       </section>
 
       {/* BAND 4 WHAT YOU WILL EXPERIENCE */}
