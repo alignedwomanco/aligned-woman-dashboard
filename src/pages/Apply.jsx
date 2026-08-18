@@ -236,13 +236,20 @@ export default function Apply() {
       console.error("Admin alert failed", err);
     }
 
+    // The applicant confirmation goes through a backend function rather
+    // than Core.SendEmail, because Core.SendEmail has no bcc parameter and
+    // the owner must receive a blind copy of the exact email the applicant
+    // gets. The function takes only the record id and reads the recipient
+    // from the record server side, so this endpoint cannot be used to mail
+    // an arbitrary address. Copy lives in the function, not here.
     try {
-      base44.integrations.Core.SendEmail({
-        to: email,
-        from_name: "The Aligned Woman",
-        subject: "We have your application",
-        body: `Hi ${name},\n\nThank you for applying to be part of the AW Verified directory. Your application is with us, and it will be read by a real human soon!\n\nHere is what happens next. We review every application against the Aligned Woman Standard. Should you be successful, we will request your qualifications and the proof behind them, your professional registration where your field requires one, and how you work with the women who trust you. If your work looks like a fit, the next step is a real conversation with us.\n\nYou will hear from us either way, within 14 working days.\n\nWith warmth,\nLaura\nFounder, The Aligned Woman`,
-      }).catch(() => {});
+      if (created?.id) {
+        base44.functions
+          .invoke("sendExpertApplicationEmail", { applicationId: created.id })
+          .catch((err) => console.error("Applicant confirmation failed", err));
+      } else {
+        console.error("Applicant confirmation skipped: no record id returned");
+      }
     } catch (err) {
       console.error("Applicant confirmation failed", err);
     }
