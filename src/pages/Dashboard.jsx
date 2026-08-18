@@ -653,32 +653,32 @@ function FreeResources({ userEmail, isPaid }) {
       <SectionLabel>Free resources</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div
-          className="relative rounded-[24px] overflow-hidden md:col-span-2 lg:col-span-2"
-          style={{ background: "#FAF5F3", boxShadow: "0 24px 60px rgba(8,1,5,0.16)" }}
+          className="relative rounded-2xl overflow-hidden border border-awburg-core/10 shadow-sm p-6 flex flex-col"
+          style={{ background: "#FBF5F2" }}
         >
-          <div className="relative z-10 flex flex-col gap-4 p-8 md:p-10 lg:p-12 max-w-full md:max-w-[58%]">
+          <div className="relative z-10 flex flex-col max-w-full md:max-w-[62%]">
             <span
-              className="font-body font-bold text-[11px] uppercase"
-              style={{ color: "#3B1B27", letterSpacing: "0.28em" }}
+              className="font-body font-bold text-[10px] tracking-eyebrow uppercase"
+              style={{ color: "#4A1F30" }}
             >
               WORKBOOK
             </span>
             <h3
-              className="font-display leading-[1.1] text-[28px] md:text-[34px] lg:text-[38px]"
-              style={{ color: "#3B1B27" }}
+              className="font-display leading-tight text-[20px] mt-4 mb-2"
+              style={{ color: "#4A1F30" }}
             >
               Your Money Story
             </h3>
             <p
-              className="font-body leading-relaxed text-[14px] md:text-[15px] max-w-[420px]"
-              style={{ color: "#2D2424" }}
+              className="font-body font-light text-[13px] leading-relaxed mb-3"
+              style={{ color: "#4A1F30" }}
             >
               The beliefs you inherited about money are running quietly underneath every
               decision. Meet them on paper.
             </p>
             <p
-              className="font-body text-[12px]"
-              style={{ color: "#3B1B27", opacity: 0.72 }}
+              className="font-body font-medium text-[12px] mb-4"
+              style={{ color: "#4A1F30", opacity: 0.7 }}
             >
               {moneyStoryStarted
                 ? "In progress · resume where you left off"
@@ -687,8 +687,8 @@ function FreeResources({ userEmail, isPaid }) {
             <div>
               <button
                 onClick={() => navigate("/YourMoneyStory")}
-                className="inline-flex items-center justify-center rounded-full px-7 py-3 font-body font-bold text-[12px] uppercase text-white transition-opacity hover:opacity-90"
-                style={{ background: "#3B1B27", letterSpacing: "0.22em" }}
+                className="inline-flex items-center justify-center rounded-full px-6 py-2.5 font-body font-bold text-[11px] tracking-eyebrow uppercase text-white transition-opacity hover:opacity-90"
+                style={{ background: "#4A1F30" }}
               >
                 {moneyStoryStarted ? "Continue" : "Begin"}
               </button>
@@ -700,10 +700,10 @@ function FreeResources({ userEmail, isPaid }) {
             aria-hidden="true"
             className="hidden md:block absolute pointer-events-none select-none"
             style={{
-              right: "-4%",
-              bottom: "-10%",
-              width: "42%",
-              maxWidth: 420,
+              right: "-6%",
+              bottom: "-8%",
+              width: "58%",
+              maxWidth: 260,
               transform: "rotate(-6deg)",
             }}
           />
