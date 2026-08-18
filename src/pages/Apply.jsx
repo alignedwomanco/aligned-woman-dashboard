@@ -240,7 +240,7 @@ export default function Apply() {
         to: email,
         from_name: "The Aligned Woman",
         subject: "We have your application",
-        body: `Hello ${name},\n\nYour application to become AW Verified is with us, and it will be read by a person.\n\nHere is what happens next. We review every application against the Aligned Woman Standard: your qualifications and the proof behind them, your professional registration where your field requires one, and how you work with the women who trust you. If your work looks like a fit, we will write to arrange a real conversation. That conversation is part of verification, not a formality.\n\nEither way, you will hear back from us. We do not close applications with silence.\n\nWith warmth,\nThe Aligned Woman`,
+        body: `Hi ${name},\n\nThank you for applying to be part of the AW Verified directory. Your application is with us, and it will be read by a real human soon!\n\nHere is what happens next. We review every application against the Aligned Woman Standard. Should you be successful, we will request your qualifications and the proof behind them, your professional registration where your field requires one, and how you work with the women who trust you. If your work looks like a fit, the next step is a real conversation with us.\n\nYou will hear from us either way, within 14 working days.\n\nWith warmth,\nLaura\nFounder, The Aligned Woman`,
       }).catch(() => {});
     } catch (err) {
       console.error("Applicant confirmation failed", err);
