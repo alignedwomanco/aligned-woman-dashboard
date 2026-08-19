@@ -942,7 +942,7 @@ export default function Retreats() {
           <div
             className="grid grid-cols-1 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] items-start"
             style={{ gap: "clamp(32px, 5vw, 80px)" }}>
-            <Rise className="lg:min-h-[130vh]">
+            <Rise>
               <p className="rt-p" style={{ marginBottom: "40px", color: "#3C3630" }}>
                 A retreat with us is not designed to help you recover from your life. It is designed
                 to change your relationship with it.
