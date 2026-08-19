@@ -935,25 +935,20 @@ export default function Retreats() {
       <section className="rt-sec" style={{ background: "var(--rt-cream-page)" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
           <Rise>
-            <h2 className="rt-h2" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)" }}>
+            <h2 className="rt-h2 relative z-20" style={{ marginBottom: "clamp(32px, 4vw, 56px)", color: "var(--rt-burg)" }}>
               Not just rest. <i className="[font-family:'Libre_Baskerville',_serif]">Awakening.</i>
             </h2>
           </Rise>
           <div
-            className="rt-grid-resp"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 45fr) minmax(0, 55fr)",
-              gap: "clamp(32px, 5vw, 80px)",
-              alignItems: "stretch"
-            }}>
-            <Rise>
-              <p className="rt-p" style={{ marginBottom: "28px", color: "#3C3630" }}>
+            className="grid grid-cols-1 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] items-start"
+            style={{ gap: "clamp(32px, 5vw, 80px)" }}>
+            <Rise className="lg:min-h-[130vh]">
+              <p className="rt-p" style={{ marginBottom: "40px", color: "#3C3630" }}>
                 A retreat with us is not designed to help you recover from your life. It is designed
                 to change your relationship with it.
               </p>
               <div className="rt-cols-resp" style={{ columnCount: 2, columnGap: 28 }}>
-                <p className="rt-p" style={{ marginBottom: 18, color: "#3C3630" }}>
+                <p className="rt-p" style={{ marginBottom: 28, color: "#3C3630" }}>
                   Together we bring the subconscious to the conscious. The patterns that have been
                   running quietly underneath your decisions become something you can see clearly,
                   understand fully, and finally work with rather than around. That is where clarity
@@ -964,9 +959,9 @@ export default function Retreats() {
                 </p>
               </div>
             </Rise>
-            <div className="rt-sticky-col">
-              <div className="rt-sticky-img" style={{ position: "relative", width: "100%", aspectRatio: "4 / 5", overflow: "hidden" }}>
-                <Slot src={IMAGES.awakening} alt="Retreat setting" brief="Retreat setting" className="rt-fill" />
+            <div className="lg:sticky lg:top-28 lg:self-start z-10">
+              <div style={{ position: "relative", width: "100%", aspectRatio: "3 / 4" }}>
+                <Slot src={IMAGES.awakening} alt="Retreat setting" brief="Retreat setting" className="rt-fill object-bottom" />
               </div>
             </div>
           </div>
