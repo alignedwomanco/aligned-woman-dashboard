@@ -1638,7 +1638,7 @@ export default function Retreats() {
 
       {/* BAND 2 THE FEELING */}
       <section className="rt-sec--band rt-bg-edition">
-        <Rise className="rt-w680">
+        <Rise className="rt-w820" style={{ maxWidth: "820px", margin: "0 auto", textAlign: "center" }}>
           {[
           "There is a particular relief in being somewhere that asks nothing of you except to be exactly who you are, at your core.",
           "For four days in the Western Cape, held by Mama Africa, you will be guided and released from everything you thought you needed to be. You will put down the invisible shackles. You will find a space safe enough to return to yourself, and to meet what you are actually capable of.",
@@ -1653,9 +1653,11 @@ export default function Retreats() {
               fontWeight: 400,
               lineHeight: 1.6,
               color: "var(--rt-ink-soft)",
-              maxWidth: "68ch"
+              maxWidth: "72ch",
+              marginLeft: "auto",
+              marginRight: "auto"
             }}>
-            
+
               {line}
             </p>
           )}
@@ -1666,9 +1668,11 @@ export default function Retreats() {
               fontWeight: 400,
               lineHeight: 1.6,
               color: "var(--rt-ink-soft)",
-              maxWidth: "68ch"
+              maxWidth: "72ch",
+              marginLeft: "auto",
+              marginRight: "auto"
             }}>
-            
+
             This is finally a space where every part of you is welcome and every part of you is seen.
             And what you have been looking for is not something we give you. It is already in you,
             and this is where you find it.
@@ -1681,7 +1685,7 @@ export default function Retreats() {
               lineHeight: 1.4,
               color: "var(--rt-burg)"
             }}>
-            
+
             You will leave feeling more yourself than you have in years. You will leave aligned.
           </p>
         </Rise>
