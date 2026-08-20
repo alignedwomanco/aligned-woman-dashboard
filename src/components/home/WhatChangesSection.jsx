@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import InterestModal from "./InterestModal";
 
 // ────────────────────────────────────────────────────────────────
 // New Year Reset · rebuilt to the August 2026 landing design.
@@ -25,6 +25,7 @@ const serif = "'Baskervville', 'DM Serif Display', Georgia, serif";
 const sans = "'Montserrat', system-ui, sans-serif";
 
 export default function WhatChangesSection() {
+  const [interestOpen, setInterestOpen] = useState(false);
   return (
     <section className="aw-reset" style={{ background: OLIVE }}>
       <style>{`
@@ -68,7 +69,7 @@ export default function WhatChangesSection() {
           border: 1.5px solid ${OLIVE_DEEP}; border-radius: 100px;
           font-family: ${sans}; font-weight: 700; font-size: 10px;
           letter-spacing: 0.2em; text-transform: uppercase;
-          padding: 17px 32px; white-space: nowrap; text-decoration: none;
+          padding: 17px 32px; white-space: nowrap; text-decoration: none; cursor: pointer;
           transition: background 320ms cubic-bezier(0.2,0.7,0.2,1),
                       border-color 320ms cubic-bezier(0.2,0.7,0.2,1),
                       color 320ms cubic-bezier(0.2,0.7,0.2,1),
@@ -125,10 +126,12 @@ export default function WhatChangesSection() {
         </p>
 
         {/* No public events page exists yet, so this captures interest. */}
-        <Link to="/Contact" className="cta">
+        <button type="button" className="cta" onClick={() => setInterestOpen(true)}>
           Register your interest
-        </Link>
+        </button>
       </div>
+
+      <InterestModal open={interestOpen} onClose={() => setInterestOpen(false)} />
     </section>
   );
 }
