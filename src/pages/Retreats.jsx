@@ -1014,7 +1014,7 @@ export default function Retreats() {
             <Rise>
               <p className="rt-pull" style={{ color: "var(--rt-burg)" }}>
                 Body opens. Behaviour does the work.{" "}
-                <span style={{ color: "var(--rt-burg-mid)" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
+                <span style={{ color: "#6A1742" }} className="[font-family:'Libre_Baskerville',_serif]">Belonging carries it home.</span>
               </p>
             </Rise>
             <Rise>
