@@ -1,6 +1,9 @@
 import React from "react";
 import LandingFooter from "@/components/home/LandingFooter";
 
+const BASK = "'Libre Baskerville', Georgia, serif";
+const MONT = "Montserrat, sans-serif";
+
 const PRINCIPLES = [
   {
     num: "01",
@@ -52,63 +55,52 @@ const COMMITMENTS = [
   },
 ];
 
-const S = {
-  eyebrow: {
-    fontFamily: "Montserrat, sans-serif",
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: "0.28em",
-    textTransform: "uppercase",
-    color: "#A86B6C",
-  },
-  body: {
-    fontFamily: "Montserrat, sans-serif",
-    fontSize: 15,
-    fontWeight: 400,
-    lineHeight: 1.8,
-    color: "#4A3040",
-  },
-};
+const Eyebrow = ({ children, style }) => (
+  <p style={{ fontFamily: MONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.26em", textTransform: "uppercase", color: "#A86460", margin: 0, ...style }}>
+    {children}
+  </p>
+);
+
+const Hairline = "#4A0E2E";
 
 export default function AboutUs() {
   return (
     <div style={{ background: "#FAF5F3", overflowX: "hidden" }}>
 
       {/* ── HERO ── */}
-      <section style={{ background: "#FAF5F3", padding: "clamp(100px,14vw,140px) clamp(24px,6vw,80px) clamp(64px,10vw,80px)" }}>
-        <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
-          <p style={{ ...S.eyebrow, marginBottom: 28 }}>The Aligned Woman</p>
-          <h1 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(3.5rem,8vw,6rem)", lineHeight: 1.05, color: "#2C1A2E", marginBottom: 24, fontWeight: 400 }}>
-            About{" "}
-            <span style={{ fontStyle: "italic", color: "#A86B6C" }}>us.</span>
+      <section style={{ background: "linear-gradient(160deg,#FAF5F3,#F5DDD9)", padding: "clamp(104px,12vw,112px) clamp(24px,6vw,80px)" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", textAlign: "center" }}>
+          <Eyebrow style={{ marginBottom: 28 }}>The Aligned Woman Co.</Eyebrow>
+          <h1 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(3.5rem,8vw,6rem)", lineHeight: 1.05, color: "#4A0E2E", marginBottom: 24, margin: 0 }}>
+            About <em style={{ color: "#A86460", fontStyle: "italic" }}>us.</em>
           </h1>
-          <div style={{ width: 40, height: 2, background: "#C4866C", margin: "0 auto 36px" }} />
-          <p style={{ ...S.body, maxWidth: 520, margin: "0 auto 24px", textAlign: "center" }}>
-            The Aligned Woman is an expert-led education platform built for women navigating the complexity of modern life. We exist to close the gap between what women have been taught and what they actually need to thrive. Personally, professionally, and physiologically.
+          <div style={{ width: 48, height: 1.5, background: Hairline, margin: "0 auto 40px", opacity: 0.4 }} />
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 17, lineHeight: 1.7, color: "#3A2A28", maxWidth: 640, margin: "0 auto 28px" }}>
+            The Aligned Woman Co. is an expert-led education platform built for women navigating the complexity of modern life. We exist to close the gap between what women have been taught and what they actually need to thrive — personally, professionally, and physiologically.
           </p>
-          <p style={{ ...S.body, maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-            <strong>We are not a wellness app. We are not a coaching platform.</strong> We are an education company. Rigorous, evidence-informed, and built around the lived reality of women's lives.
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 17, lineHeight: 1.7, color: "#3A2A28", maxWidth: 640, margin: "0 auto" }}>
+            We are not a wellness app. We are not a coaching platform. We are an education company — rigorous, evidence-informed, and built around the lived reality of women's lives.
           </p>
         </div>
       </section>
 
       {/* ── WHY WE EXIST ── */}
-      <section style={{ background: "#F5E8E2", padding: "clamp(72px,10vw,120px) clamp(24px,6vw,80px)" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(40px,8vw,100px)", alignItems: "start" }} className="au-grid">
+      <section style={{ background: "#FAF5F3", padding: "clamp(96px,11vw,112px) clamp(24px,6vw,80px)" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(40px,8vw,100px)", alignItems: "start" }} className="au-grid">
           <div>
-            <p style={{ ...S.eyebrow, marginBottom: 28 }}>Why We Exist</p>
-            <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2.8rem,6vw,4.5rem)", lineHeight: 1.1, color: "#2C1A2E", fontStyle: "italic", fontWeight: 400 }}>
-              To correct a long-standing gap.
+            <Eyebrow style={{ marginBottom: 28 }}>Why we exist</Eyebrow>
+            <h2 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(2.6rem,5.5vw,4rem)", lineHeight: 1.05, color: "#4A0E2E", margin: 0 }}>
+              To correct a long-standing <em style={{ color: "#A86460", fontStyle: "italic" }}>gap.</em>
             </h2>
           </div>
-          <div style={{ paddingTop: "clamp(0px,3vw,52px)" }}>
-            <p style={{ ...S.body, marginBottom: 24 }}>
-              Women have been taught many things. But almost never the things that matter most, the internal frameworks, body literacy, financial fluency, and emotional sovereignty that make everything else possible.
+          <div style={{ paddingTop: "clamp(0px,3vw,48px)" }}>
+            <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 16, lineHeight: 1.7, color: "#3A2A28", maxWidth: 560, marginBottom: 22 }}>
+              Women have been taught many things. But almost never the things that matter most — the internal frameworks, body literacy, financial fluency, and emotional sovereignty that make everything else possible.
             </p>
-            <p style={{ ...S.body, marginBottom: 24 }}>
+            <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 16, lineHeight: 1.7, color: "#3A2A28", maxWidth: 560, marginBottom: 22 }}>
               Formal education was not designed with women's biology, psychology, or lived reality in mind. Women were given rules to follow, not tools to self-navigate.
             </p>
-            <p style={{ ...S.body, fontWeight: 700, color: "#6B1B3D" }}>
+            <p style={{ fontFamily: MONT, fontWeight: 400, fontSize: 16, lineHeight: 1.7, color: "#4A0E2E", maxWidth: 560 }}>
               The Aligned Woman Blueprint™ was created to close this gap.
             </p>
           </div>
@@ -116,49 +108,44 @@ export default function AboutUs() {
       </section>
 
       {/* ── INCLUSION ── */}
-      <section style={{ background: "#FAF5F3", padding: "clamp(72px,10vw,120px) clamp(24px,6vw,80px)" }}>
+      <section style={{ background: "linear-gradient(160deg,#FAF5F3,#F5DDD9)", padding: "clamp(96px,11vw,112px) clamp(24px,6vw,80px)" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-          <p style={{ ...S.eyebrow, marginBottom: 28 }}>Diversity, Equity &amp; Inclusion</p>
-          <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2.4rem,5.5vw,4rem)", lineHeight: 1.15, color: "#2C1A2E", fontWeight: 400, marginBottom: 24 }}>
-            We believe{" "}
-            <span style={{ fontStyle: "italic", color: "#A86B6C" }}>inclusion</span>
-            {" "}is a practice.
+          <Eyebrow style={{ marginBottom: 28 }}>Diversity, equity &amp; inclusion</Eyebrow>
+          <h2 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(2.4rem,5vw,3.8rem)", lineHeight: 1.05, color: "#4A0E2E", margin: "0 0 24px" }}>
+            We believe <em style={{ color: "#A86460", fontStyle: "italic" }}>inclusion</em> is a practice.
           </h2>
-          <p style={{ ...S.body, maxWidth: 600, margin: "0 auto 72px", textAlign: "center", color: "#6A5060" }}>
-            Not a statement. Not a checkbox. A continuous, active, and sometimes uncomfortable commitment to building something that genuinely centres all women, in all their complexity, diversity, and fullness.
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 16, lineHeight: 1.7, color: "#3A2A28", maxWidth: 640, margin: "0 auto 72px" }}>
+            Not a statement. Not a checkbox. A continuous, active, and sometimes uncomfortable commitment to building something that genuinely centres all women — in all their complexity, diversity, and fullness.
           </p>
 
-          {/* Principles */}
+          {/* Principles — numbered editorial list */}
           <div style={{ textAlign: "left" }}>
             {PRINCIPLES.map((p) => (
-              <div key={p.num} style={{ display: "grid", gridTemplateColumns: "48px 1fr", gap: "24px 32px", padding: "36px 0", borderTop: "1px solid rgba(107,27,61,0.12)", alignItems: "flex-start" }}>
-                <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: "#C4866C", paddingTop: 2 }}>{p.num}</span>
+              <div key={p.num} style={{ display: "grid", gridTemplateColumns: "56px 1fr", gap: "24px 32px", padding: "34px 0", borderTop: `1px solid ${Hairline}14`, alignItems: "flex-start" }}>
+                <span style={{ fontFamily: BASK, fontWeight: 400, fontStyle: "italic", fontSize: 20, color: "#A86460" }}>{p.num}</span>
                 <div>
-                  <h3 style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#2C1A2E", marginBottom: 10, letterSpacing: "0.02em" }}>
+                  <h3 style={{ fontFamily: MONT, fontWeight: 700, fontSize: 13, letterSpacing: "0.04em", color: "#4A0E2E", marginBottom: 10 }}>
                     {p.title}
                   </h3>
-                  <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 400, lineHeight: 1.85, color: "#6A5060", margin: 0 }}>
+                  <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 15, lineHeight: 1.7, color: "#3A2A28", maxWidth: 560, margin: 0 }}>
                     {p.desc}
                   </p>
                 </div>
               </div>
             ))}
-            <div style={{ height: 1, background: "rgba(107,27,61,0.12)" }} />
+            <div style={{ height: 1, background: `${Hairline}14` }} />
           </div>
         </div>
       </section>
 
       {/* ── SIX COMMITMENTS ── */}
-      <section style={{ background: "#F5E8E2", padding: "clamp(72px,10vw,120px) clamp(24px,6vw,80px)" }}>
+      <section style={{ background: "#FAF5F3", padding: "clamp(96px,11vw,112px) clamp(24px,6vw,80px)" }}>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 72 }}>
-            <p style={{ ...S.eyebrow, marginBottom: 20 }}>Our Commitments</p>
-            <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2rem,4.5vw,3rem)", lineHeight: 1.2, color: "#2C1A2E", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>
-              Six Commitments
+            <Eyebrow style={{ marginBottom: 22 }}>Our commitments</Eyebrow>
+            <h2 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(2.2rem,4.5vw,3.2rem)", lineHeight: 1.05, color: "#4A0E2E", margin: 0 }}>
+              Six commitments we <em style={{ color: "#A86460", fontStyle: "italic" }}>operate by.</em>
             </h2>
-            <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2rem,4.5vw,3rem)", lineHeight: 1.2, color: "#A86B6C", fontStyle: "italic", fontWeight: 400 }}>
-              we operate by.
-            </p>
           </div>
 
           <div>
@@ -167,20 +154,20 @@ export default function AboutUs() {
                 key={c.num}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "48px 1fr",
+                  gridTemplateColumns: "56px 1fr",
                   gap: "24px 32px",
                   padding: "32px 0",
-                  borderTop: "1px solid rgba(107,27,61,0.12)",
-                  borderBottom: i === COMMITMENTS.length - 1 ? "1px solid rgba(107,27,61,0.12)" : "none",
+                  borderTop: `1px solid ${Hairline}14`,
+                  borderBottom: i === COMMITMENTS.length - 1 ? `1px solid ${Hairline}14` : "none",
                   alignItems: "flex-start",
                 }}
               >
-                <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 22, fontWeight: 400, color: "#C4866C", fontStyle: "italic", paddingTop: 2 }}>{c.num.replace("0", "0")}</span>
+                <span style={{ fontFamily: BASK, fontWeight: 400, fontStyle: "italic", fontSize: 20, color: "#A86460" }}>{c.num}</span>
                 <div>
-                  <h3 style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#2C1A2E", marginBottom: 10 }}>
+                  <h3 style={{ fontFamily: MONT, fontWeight: 700, fontSize: 13, letterSpacing: "0.04em", color: "#4A0E2E", marginBottom: 10 }}>
                     {c.title}
                   </h3>
-                  <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 400, lineHeight: 1.85, color: "#6A5060", margin: 0 }}>
+                  <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 15, lineHeight: 1.7, color: "#3A2A28", maxWidth: 560, margin: 0 }}>
                     {c.desc}
                   </p>
                 </div>
@@ -191,52 +178,54 @@ export default function AboutUs() {
       </section>
 
       {/* ── CLOSING CTA ── */}
-      <section style={{ background: "#FAF5F3", padding: "clamp(80px,12vw,130px) clamp(24px,6vw,80px)", textAlign: "center" }}>
+      <section style={{ background: "linear-gradient(160deg,#FAF5F3,#F5DDD9)", padding: "clamp(100px,13vw,112px) clamp(24px,6vw,80px)", textAlign: "center" }}>
         <div style={{ maxWidth: 700, margin: "0 auto" }}>
-          <p style={{ ...S.eyebrow, marginBottom: 32 }}>The Aligned Woman</p>
-          <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2.2rem,5vw,3.6rem)", lineHeight: 1.2, color: "#2C1A2E", fontWeight: 400, marginBottom: 48 }}>
-            This is education designed for dignity, agency &amp;{" "}
-            <em style={{ color: "#A86B6C" }}>long-term empowerment.</em>
+          <Eyebrow style={{ marginBottom: 32 }}>The Aligned Woman Co.</Eyebrow>
+          <h2 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(2.2rem,5vw,3.4rem)", lineHeight: 1.1, color: "#4A0E2E", margin: "0 0 48px" }}>
+            This is education designed for dignity, agency &amp; <em style={{ color: "#A86460", fontStyle: "italic" }}>long-term empowerment.</em>
           </h2>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <a
               href="/blueprint"
               style={{
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: 10,
+                fontFamily: MONT,
+                fontSize: 11,
                 fontWeight: 700,
-                letterSpacing: "0.22em",
+                letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: "#fff",
-                background: "#6B1B3D",
-                padding: "14px 28px",
+                background: "#C4847A",
+                padding: "15px 30px",
                 borderRadius: 100,
                 textDecoration: "none",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 8,
+                transition: "background 200ms ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#A86460")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#C4847A")}
             >
-              View the Blueprint +
+              View the Blueprint →
             </a>
             <a
               href="/Contact"
               style={{
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: 10,
+                fontFamily: MONT,
+                fontSize: 11,
                 fontWeight: 700,
-                letterSpacing: "0.22em",
+                letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "#2C1A2E",
+                color: "#4A0E2E",
                 background: "transparent",
-                padding: "14px 28px",
+                padding: "13.5px 28.5px",
                 borderRadius: 100,
                 textDecoration: "none",
                 display: "inline-block",
-                border: "1px solid rgba(44,26,46,0.25)",
+                border: "1.5px solid #4A0E2E",
               }}
             >
-              Get in Touch
+              Get in touch →
             </a>
           </div>
         </div>
