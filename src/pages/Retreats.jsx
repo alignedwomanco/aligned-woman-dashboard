@@ -1592,7 +1592,7 @@ export default function Retreats() {
             space too.
           </p>
           <p className="rt-pull">
-            The retreat is the middle of this. <span>Not the whole of it.</span>
+            The retreat is the middle of this. <span style={{ color: "#6A1742" }}>Not the whole of it.</span>
           </p>
         </Rise>
       </section>
