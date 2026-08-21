@@ -30,6 +30,29 @@ const publicPages = [
 { name: "ContactForm", label: "Contact Form" }];
 
 
+// Public hamburger menu nav — mirrors the LandingFooter structure (Explore / About / Social)
+const MENU_NAV = {
+  EXPLORE: [
+    { label: "Home", href: "/" },
+    { label: "Our Why", href: "/OurWhy" },
+    { label: "The Blueprint", href: "/blueprint" },
+  ],
+  ABOUT: [
+    { label: "About Us", href: "/about-us" },
+    { label: "Contact", href: "/Contact" },
+    { label: "The AW Standard", href: "/theawstandard" },
+    { label: "Retreats", href: "/retreats" },
+    { label: "Terms & Conditions", href: "/terms-and-conditions" },
+    { label: "Giveaway T&Cs", href: "/competition" },
+  ],
+  SOCIAL: [
+    { label: "Instagram", href: "https://www.instagram.com/alignedwoman_co/" },
+    { label: "YouTube", href: "https://www.youtube.com/@AlignedWomanCo" },
+    { label: "Email", href: "mailto:hello@alignedwoman.com" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/company/the-aligned-woman/" },
+  ],
+};
+
 const appNavigation = [
 { name: "Dashboard", label: "Dashboard" },
 
@@ -300,18 +323,19 @@ export default function Layout({ children, currentPageName }) {
             className="fixed inset-0 bg-black/50 z-50"
             onClick={() => setShowMobileMenu(false)} />
 
-            <div className="fixed top-0 right-0 bottom-0 w-80 bg-white z-50 shadow-2xl">
+            <div className="fixed top-0 right-0 bottom-0 w-80 z-50 shadow-2xl" style={{ background: "#f9f6f2" }}>
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-6 border-b">
+                <div className="flex items-center justify-between p-6" style={{ borderBottom: "1px solid #d1ccc5" }}>
                       <img
                       src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
-                      alt="AW"
+                      alt="The Aligned Woman Co."
                       className="object-contain w-auto"
-                      style={{ height: '40px' }} />
+                      style={{ height: '36px' }} />
 
                   <button
                   onClick={() => setShowMobileMenu(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  className="p-2 rounded-lg transition-colors"
+                  style={{ color: "#4a2c2e" }}>
 
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -319,54 +343,72 @@ export default function Layout({ children, currentPageName }) {
                   </button>
                 </div>
 
-                <nav className="flex-1 p-6">
+                <nav className="flex-1 p-6 overflow-y-auto">
                   {isAuthenticated &&
                 <>
-                      <Button
+                      <button
                     onClick={() => {
                       setShowMobileMenu(false);
                       window.location.href = createPageUrl("Dashboard");
                     }}
-                    className="w-full mb-4 bg-awburg-core hover:bg-awburg-mid text-paper">
-
+                    className="w-full mb-5 px-4 py-3 rounded-full font-body font-bold text-[11px] tracking-[0.22em] uppercase transition-all"
+                    style={{ background: "#C4847A", color: "#FFFFFF", border: "1px solid #C4847A" }}>
                         Go to Dashboard
-                      </Button>
-                      <div className="h-px bg-gray-200 mb-6" />
+                      </button>
+                      <div className="mb-6" style={{ borderBottom: "1px solid #d1ccc5" }} />
                     </>
                 }
-                  <ul className="space-y-2">
-                    {publicPages.filter(item => !["about-us", "blueprint", "CheckoutComplete", "ContactForm", "Experts"].includes(item.name)).map((item) =>
-                  <li key={item.name}>
-                        <Link
-                      to={item.href || createPageUrl(item.name)}
-                      onClick={() => setShowMobileMenu(false)}
-                      className="block px-4 py-3 text-awburg-core hover:bg-awrose-pale hover:text-awburg-dark rounded-lg transition-colors font-body font-medium">
-
-                          {item.label}
-                        </Link>
-                      </li>
-                  )}
-                    <li>
-                      <a href="/about-us" onClick={() => setShowMobileMenu(false)} className="block px-4 py-3 text-awburg-core hover:bg-awrose-pale hover:text-awburg-dark rounded-lg transition-colors font-body font-medium">About Us</a>
-                    </li>
-                  </ul>
+                  {Object.entries(MENU_NAV).map(([col, links]) => (
+                    <div key={col} className="mb-7">
+                      <p className="mb-4" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#4a2c2e" }}>
+                        {col}
+                      </p>
+                      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+                        {links.map((l) => (
+                          <li key={l.label}>
+                            {l.href.startsWith("mailto") || l.href.startsWith("http") ? (
+                              <a
+                                href={l.href}
+                                target={l.href.startsWith("http") ? "_blank" : undefined}
+                                rel="noreferrer"
+                                onClick={() => setShowMobileMenu(false)}
+                                style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#4a2c2e", opacity: 0.7, textDecoration: "none", display: "inline-block" }}
+                                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}>
+                                {l.label}
+                              </a>
+                            ) : (
+                              <Link
+                                to={l.href}
+                                onClick={() => setShowMobileMenu(false)}
+                                style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#4a2c2e", opacity: 0.7, textDecoration: "none", display: "inline-block" }}
+                                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}>
+                                {l.label}
+                              </Link>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </nav>
 
-                <div className="p-6 border-t">
+                <div className="p-6" style={{ borderTop: "1px solid #d1ccc5" }}>
                   {isAuthenticated ?
-                <Button
+                <button
                   onClick={handleLogout}
-                   className="w-full bg-awburg-core hover:bg-awburg-mid text-paper">
+                  className="w-full px-4 py-3 rounded-full font-body font-bold text-[11px] tracking-[0.22em] uppercase transition-all"
+                  style={{ background: "transparent", color: "#4a2c2e", border: "1px solid rgba(74,14,46,0.08)" }}>
+                    Sign Out
+                  </button> :
 
-                      Sign Out
-                    </Button> :
-
-                  <Button
+                  <button
                   onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                  className="w-full bg-awburg-core hover:bg-awburg-mid text-paper">
-
-                      Sign In
-                    </Button>
+                  className="w-full px-4 py-3 rounded-full font-body font-bold text-[11px] tracking-[0.22em] uppercase transition-all"
+                  style={{ background: "#4a2c2e", color: "#FFFFFF", border: "1px solid #4a2c2e" }}>
+                    Sign In
+                  </button>
                 }
                 </div>
               </div>
