@@ -33,9 +33,11 @@ export default function LandingFooter() {
 
           {/* Brand */}
           <div>
-            <p style={{ fontFamily: BASK, fontWeight: 400, fontSize: 38, color: "#4a2c2e", lineHeight: 1, marginBottom: 16 }}>
-              A<em style={{ color: "#A86460", fontStyle: "italic" }}>W</em>
-            </p>
+            <img
+              src="https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png"
+              alt="The Aligned Woman Co."
+              style={{ height: 40, width: "auto", objectFit: "contain", marginBottom: 18 }}
+            />
             <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 14, lineHeight: 1.6, color: "#4a2c2e", maxWidth: 240, opacity: 0.85 }}>
               Built for women. Grounded in evidence. Verified at every step.
             </p>
