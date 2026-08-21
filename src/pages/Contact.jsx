@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import LandingFooter from "@/components/home/LandingFooter";
 import { ArrowRight, Mail, Star, Building2, Handshake, Newspaper, HelpCircle } from "lucide-react";
 import ExpertApplicationModal from "@/components/contact/ExpertApplicationModal";
+
+const BASK = "'Libre Baskerville', Georgia, serif";
+const MONT = "Montserrat, sans-serif";
+const Hairline = "#4A0E2E";
 
 const CONTACT_PATHS = [
   {
@@ -30,7 +33,7 @@ const CONTACT_PATHS = [
   {
     type: "press",
     title: "Press & Media",
-    description: "Media inquiries and press resources for The Aligned Woman.",
+    description: "Media inquiries and press resources for The Aligned Woman Co.",
     icon: Newspaper,
     action: "modal",
   },
@@ -42,6 +45,12 @@ const CONTACT_PATHS = [
     action: "modal",
   },
 ];
+
+const Eyebrow = ({ children, style }) => (
+  <p style={{ fontFamily: MONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.26em", textTransform: "uppercase", color: "#A86460", margin: 0, ...style }}>
+    {children}
+  </p>
+);
 
 export default function Contact() {
   const [showExpertModal, setShowExpertModal] = useState(false);
@@ -61,114 +70,103 @@ export default function Contact() {
   };
 
   return (
-    <div className="overflow-x-hidden" style={{ background: "#FFF9F5", minHeight: "100vh" }}>
-      {/* Hero */}
-      <section style={{ background: "linear-gradient(135deg, #3D0F27 0%, #5A1633 100%)", padding: "clamp(80px,12vw,140px) clamp(24px,6vw,80px) clamp(80px,12vw,140px)" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 100, padding: "8px 18px", marginBottom: 32 }}>
-            <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)" }}>Let's Start a Conversation</span>
-          </div>
-          <h1 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2.5rem,6vw,4rem)", lineHeight: 1.15, color: "#fff", marginBottom: 12, fontStyle: "italic" }}>
-            Let's start a <span style={{ color: "#C4847A" }}>conversation.</span>
+    <div className="overflow-x-hidden" style={{ background: "#FAF5F3", minHeight: "100vh" }}>
+
+      {/* ── HERO ── */}
+      <section style={{ background: "linear-gradient(160deg,#FAF5F3,#F5DDD9)", padding: "clamp(104px,12vw,112px) clamp(24px,6vw,80px)" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
+          <Eyebrow style={{ marginBottom: 28 }}>The Aligned Woman Co.</Eyebrow>
+          <h1 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(3.2rem,7vw,5rem)", lineHeight: 1.05, color: "#4A0E2E", margin: "0 0 24px" }}>
+            Let's start a <em style={{ color: "#A86460", fontStyle: "italic" }}>conversation.</em>
           </h1>
-          <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.7, color: "rgba(255,255,255,0.7)", maxWidth: 550, margin: "0 auto" }}>
-            Choose the door that fits where you are. Messaged, could like to connect, we're here to support your journey.
+          <div style={{ width: 48, height: 1.5, background: Hairline, margin: "0 auto 36px", opacity: 0.4 }} />
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 17, lineHeight: 1.7, color: "#3A2A28", maxWidth: 560, margin: "0 auto" }}>
+            Choose the door that fits where you are. We read everything, and we respond within 48 hours.
           </p>
         </div>
       </section>
 
-      {/* Contact Paths Directory */}
-      <section style={{ background: "#FDF5F3", padding: "clamp(80px,12vw,120px) clamp(24px,6vw,80px)" }}>
-         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-           {/* Section header */}
-           <div style={{ marginBottom: 60, maxWidth: 800 }}>
-             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-               <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8A7A76" }}>How Can We Help</span>
-             </div>
-             <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2rem,5vw,3.5rem)", lineHeight: 1.15, color: "#3D0F27", marginBottom: 16, fontStyle: "italic" }}>
-               Find your way in.
-             </h2>
-             <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.7, color: "#8A7A76" }}>
-               Each category is built by our expert network. We're committed to respond within 48 hours.
-             </p>
-           </div>
+      {/* ── CONTACT PATHS ── */}
+      <section style={{ background: "#FAF5F3", padding: "clamp(96px,11vw,112px) clamp(24px,6vw,80px)" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64, maxWidth: 640, margin: "0 auto 64px" }}>
+            <Eyebrow style={{ marginBottom: 22 }}>How can we help</Eyebrow>
+            <h2 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(2.2rem,4.5vw,3.2rem)", lineHeight: 1.05, color: "#4A0E2E", margin: 0 }}>
+              Find your way <em style={{ color: "#A86460", fontStyle: "italic" }}>in.</em>
+            </h2>
+          </div>
 
-           {/* Cards grid */}
-           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
-             {CONTACT_PATHS.map((path) => {
-               const Icon = path.icon;
-               const isFeatured = path.featured;
-               return (
-                 <div
-                   key={path.type}
-                   onClick={() => handleCardClick(path)}
-                   style={{
-                     background: "#fff",
-                     borderRadius: 16,
-                     padding: isFeatured ? 40 : 32,
-                     border: "1px solid rgba(74,14,46,0.1)",
-                     cursor: path.action === "modal" ? "pointer" : "default",
-                     transition: "all 0.3s ease",
-                     gridColumn: isFeatured ? "span 2" : "span 1",
-                   }}
-                   onMouseEnter={(e) => {
-                     e.currentTarget.style.borderColor = "rgba(74,14,46,0.2)";
-                     e.currentTarget.style.background = "rgba(245,221,217,0.4)";
-                   }}
-                   onMouseLeave={(e) => {
-                     e.currentTarget.style.borderColor = "rgba(74,14,46,0.1)";
-                     e.currentTarget.style.background = "#fff";
-                   }}
-                 >
-                   <Icon style={{ width: 28, height: 28, color: "#C4847A", marginBottom: 20 }} />
-                   <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: isFeatured ? 26 : 20, color: "#3D0F27", marginBottom: 12, fontStyle: "italic" }}>
-                     {path.title}
-                   </h3>
-                   <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.7, color: "#666", marginBottom: 24 }}>
-                     {path.description}
-                   </p>
-                   <button
-                     onClick={(e) => {
-                       e.stopPropagation();
-                       handleCardClick(path);
-                     }}
-                     style={{
-                       display: "inline-flex",
-                       alignItems: "center",
-                       gap: 8,
-                       fontFamily: "Montserrat, sans-serif",
-                       fontSize: 10,
-                       fontWeight: 700,
-                       letterSpacing: "0.15em",
-                       textTransform: "uppercase",
-                       color: "#fff",
-                       background: "#4A0E2E",
-                       padding: "12px 28px",
-                       borderRadius: 100,
-                       border: "none",
-                       cursor: "pointer",
-                       transition: "all 0.2s",
-                     }}
-                     onMouseEnter={(e) => e.currentTarget.style.opacity = "0.88"}
-                     onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                   >
-                     {path.type === "apply_expert" ? "Apply Now" : "Start Here"} <ArrowRight style={{ width: 13, height: 13 }} />
-                   </button>
-                 </div>
-               );
-             })}
-           </div>
-         </div>
-       </section>
+          {/* Cards grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+            {CONTACT_PATHS.map((path) => {
+              const Icon = path.icon;
+              const isFeatured = path.featured;
+              return (
+                <div
+                  key={path.type}
+                  onClick={() => handleCardClick(path)}
+                  style={{
+                    background: "#fff",
+                    borderRadius: 10,
+                    padding: isFeatured ? 40 : 32,
+                    border: "1px solid rgba(74,14,46,0.08)",
+                    cursor: path.action === "modal" ? "pointer" : "default",
+                    transition: "border-color 0.2s ease",
+                    gridColumn: isFeatured ? "span 2" : "span 1",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(74,14,46,0.2)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(74,14,46,0.08)"; }}
+                >
+                  <Icon style={{ width: 26, height: 26, color: "#C4847A", marginBottom: 20 }} />
+                  <h3 style={{ fontFamily: BASK, fontWeight: 400, fontSize: isFeatured ? 24 : 19, color: "#4A0E2E", marginBottom: 12 }}>
+                    {path.title}
+                  </h3>
+                  <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 14, lineHeight: 1.7, color: "#3A2A28", marginBottom: 24, maxWidth: 480 }}>
+                    {path.description}
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCardClick(path);
+                    }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      fontFamily: MONT,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "#fff",
+                      background: "#C4847A",
+                      padding: "13px 28px",
+                      borderRadius: 100,
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "background 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#A86460")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "#C4847A")}
+                  >
+                    {path.type === "apply_expert" ? "Apply now →" : "Start here →"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-      {/* Newsletter Signup */}
-      <section style={{ background: "linear-gradient(135deg, #3D0F27 0%, #5A1633 100%)", padding: "clamp(80px,12vw,120px) clamp(24px,6vw,80px)" }}>
-        <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2rem,5vw,3rem)", color: "#fff", marginBottom: 12, fontStyle: "italic" }}>
-            Stay in the <span style={{ color: "#C4847A" }}>loop.</span>
+      {/* ── NEWSLETTER ── */}
+      <section style={{ background: "linear-gradient(160deg,#FAF5F3,#F5DDD9)", padding: "clamp(96px,11vw,112px) clamp(24px,6vw,80px)" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center" }}>
+          <Eyebrow style={{ marginBottom: 24 }}>The Aligned Woman Co.</Eyebrow>
+          <h2 style={{ fontFamily: BASK, fontWeight: 400, fontSize: "clamp(2.2rem,5vw,3.2rem)", lineHeight: 1.05, color: "#4A0E2E", margin: "0 0 20px" }}>
+            Stay in the <em style={{ color: "#A86460", fontStyle: "italic" }}>loop.</em>
           </h2>
-          <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 300, lineHeight: 1.7, color: "rgba(255,255,255,0.7)", marginBottom: 36 }}>
-            Join our newsletter for insights, resources and expert collaborations. The Aligned Woman.
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 16, lineHeight: 1.7, color: "#3A2A28", maxWidth: 520, margin: "0 auto 36px" }}>
+            Join our newsletter for insights, resources and expert collaborations. We respect your inbox. Unsubscribe any time.
           </p>
           <form
             onSubmit={(e) => {
@@ -186,52 +184,44 @@ export default function Contact() {
               required
               style={{
                 flex: "1 1 280px",
-                maxWidth: 380,
-                padding: "12px 20px",
+                maxWidth: 360,
+                padding: "13px 22px",
                 borderRadius: 100,
-                border: "1px solid rgba(255,255,255,0.2)",
-                background: "rgba(255,255,255,0.08)",
-                fontFamily: "Montserrat, sans-serif",
+                border: "1px solid rgba(74,14,46,0.12)",
+                background: "#fff",
+                fontFamily: MONT,
+                fontWeight: 300,
                 fontSize: 14,
-                color: "#fff",
+                color: "#3A2A28",
                 outline: "none",
-                transition: "all 0.2s",
+                transition: "border-color 0.2s ease",
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = "rgba(196,132,122,0.4)";
-                e.target.style.background = "rgba(255,255,255,0.12)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "rgba(255,255,255,0.2)";
-                e.target.style.background = "rgba(255,255,255,0.08)";
-              }}
+              onFocus={(e) => { e.target.style.borderColor = "#C4847A"; }}
+              onBlur={(e) => { e.target.style.borderColor = "rgba(74,14,46,0.12)"; }}
             />
             <button
               type="submit"
               style={{
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: 10,
+                fontFamily: MONT,
+                fontSize: 11,
                 fontWeight: 700,
-                letterSpacing: "0.15em",
+                letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: "#fff",
-                background: "rgba(196,132,122,0.7)",
-                padding: "12px 28px",
+                background: "#C4847A",
+                padding: "13px 28px",
                 borderRadius: 100,
                 border: "none",
                 cursor: "pointer",
-                transition: "all 0.2s",
+                transition: "background 0.2s ease",
                 whiteSpace: "nowrap",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "rgba(196,132,122,0.85)"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "rgba(196,132,122,0.7)"}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#A86460")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#C4847A")}
             >
-              Subscribe
+              Subscribe →
             </button>
           </form>
-          <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 300, lineHeight: 1.6, color: "rgba(255,255,255,0.5)", marginTop: 20 }}>
-            We respect your inbox. Unsubscribe any time.
-          </p>
         </div>
       </section>
 
@@ -246,24 +236,26 @@ export default function Contact() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(26,5,16,0.7)",
+            background: "rgba(74,14,46,0.45)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 1000,
+            padding: 24,
           }}
           onClick={closeModal}
         >
           <div
             style={{
-              background: "#fff",
-              borderRadius: 16,
+              background: "#FAF5F3",
+              borderRadius: 10,
               padding: 40,
               maxWidth: 520,
-              width: "90%",
+              width: "100%",
               maxHeight: "90vh",
               overflow: "auto",
               position: "relative",
+              border: "1px solid rgba(74,14,46,0.08)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -279,14 +271,15 @@ export default function Contact() {
                 padding: 8,
               }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A0E2E" strokeWidth="1.5">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
-            <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 24, color: "#3D0F27", marginBottom: 8, fontStyle: "italic" }}>
-              {CONTACT_PATHS.find(p => p.type === selectedType)?.title}
+            <Eyebrow style={{ marginBottom: 14 }}>{CONTACT_PATHS.find(p => p.type === selectedType)?.title}</Eyebrow>
+            <h3 style={{ fontFamily: BASK, fontWeight: 400, fontSize: 26, color: "#4A0E2E", marginBottom: 8 }}>
+              Tell us a little <em style={{ color: "#A86460", fontStyle: "italic" }}>more.</em>
             </h3>
-            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, color: "#666", marginBottom: 24 }}>
+            <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 14, lineHeight: 1.7, color: "#3A2A28", marginBottom: 28 }}>
               {CONTACT_PATHS.find(p => p.type === selectedType)?.description}
             </p>
             <form
@@ -300,8 +293,8 @@ export default function Contact() {
               style={{ display: "flex", flexDirection: "column", gap: 16 }}
             >
               <div>
-                <label style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#666", marginBottom: 6, display: "block" }}>
-                  First Name
+                <label style={{ fontFamily: MONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#A86460", marginBottom: 8, display: "block" }}>
+                  First name
                 </label>
                 <input
                   type="text"
@@ -311,15 +304,18 @@ export default function Contact() {
                     width: "100%",
                     padding: "12px 16px",
                     borderRadius: 8,
-                    border: "1px solid rgba(74,14,46,0.2)",
-                    fontFamily: "Montserrat, sans-serif",
+                    border: "1px solid rgba(74,14,46,0.12)",
+                    background: "#fff",
+                    fontFamily: MONT,
+                    fontWeight: 300,
                     fontSize: 14,
+                    color: "#3A2A28",
                     outline: "none",
                   }}
                 />
               </div>
               <div>
-                <label style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#666", marginBottom: 6, display: "block" }}>
+                <label style={{ fontFamily: MONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#A86460", marginBottom: 8, display: "block" }}>
                   Email
                 </label>
                 <input
@@ -330,15 +326,18 @@ export default function Contact() {
                     width: "100%",
                     padding: "12px 16px",
                     borderRadius: 8,
-                    border: "1px solid rgba(74,14,46,0.2)",
-                    fontFamily: "Montserrat, sans-serif",
+                    border: "1px solid rgba(74,14,46,0.12)",
+                    background: "#fff",
+                    fontFamily: MONT,
+                    fontWeight: 300,
                     fontSize: 14,
+                    color: "#3A2A28",
                     outline: "none",
                   }}
                 />
               </div>
               <div>
-                <label style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#666", marginBottom: 6, display: "block" }}>
+                <label style={{ fontFamily: MONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#A86460", marginBottom: 8, display: "block" }}>
                   Message
                 </label>
                 <textarea
@@ -349,9 +348,12 @@ export default function Contact() {
                     width: "100%",
                     padding: "12px 16px",
                     borderRadius: 8,
-                    border: "1px solid rgba(74,14,46,0.2)",
-                    fontFamily: "Montserrat, sans-serif",
+                    border: "1px solid rgba(74,14,46,0.12)",
+                    background: "#fff",
+                    fontFamily: MONT,
+                    fontWeight: 300,
                     fontSize: 14,
+                    color: "#3A2A28",
                     outline: "none",
                     resize: "vertical",
                   }}
@@ -360,22 +362,24 @@ export default function Contact() {
               <button
                 type="submit"
                 style={{
-                  fontFamily: "Montserrat, sans-serif",
-                  fontSize: 10,
+                  fontFamily: MONT,
+                  fontSize: 11,
                   fontWeight: 700,
-                  letterSpacing: "0.15em",
+                  letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "#fff",
-                  background: "#4A0E2E",
-                  padding: "14px 32px",
+                  background: "#C4847A",
+                  padding: "14px 30px",
                   borderRadius: 100,
                   border: "none",
                   cursor: "pointer",
-                  transition: "all 0.2s",
+                  transition: "background 0.2s ease",
                   marginTop: 8,
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#A86460")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#C4847A")}
               >
-                Submit
+                Submit →
               </button>
             </form>
           </div>
