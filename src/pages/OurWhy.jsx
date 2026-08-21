@@ -16,7 +16,7 @@ export default function OurWhy() {
     <div className="bg-[#FAF5F3] pt-20 font-body">
 
       {/* HERO */}
-      <section className="py-20 text-center max-w-2xl mx-auto px-6">
+      <section className="py-12 sm:py-20 text-center max-w-2xl mx-auto px-6">
         <EYEBROW>Why this education has</EYEBROW>
         <h1 className="font-display text-4xl sm:text-5xl text-[#4A0E2E] leading-tight mb-6">
           Why this has<br />
@@ -59,7 +59,7 @@ export default function OurWhy() {
       </section>
 
       {/* WHAT'S TAUGHT / WHAT ISN'T */}
-      <section className="py-20 max-w-4xl mx-auto px-6">
+      <section className="py-12 sm:py-20 max-w-4xl mx-auto px-6">
         <div className="text-center mb-12">
           <EYEBROW>The education gap</EYEBROW>
           <h2 className="font-display text-3xl sm:text-4xl text-[#4A0E2E]">
@@ -109,7 +109,7 @@ export default function OurWhy() {
       </section>
 
       {/* WHY AWB EXISTS */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-20 bg-white">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-12">
             <EYEBROW>Our reason for being</EYEBROW>
@@ -122,8 +122,24 @@ export default function OurWhy() {
             </p>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto rounded-xl border border-[#E8B4AE]/40">
+          {/* Comparison — stacked cards on mobile, table on sm+ */}
+          {[
+            ["Wellness Apps", "Symptom tracking, habit nudges", "Root cause education, integration"],
+            ["Business Coaching", "Strategy, sales, mindset", "Biology, identity, embodiment"],
+            ["Therapy / Psychology", "Mental health support", "Performance, leadership, ambition"],
+            ["Hormone Clinics", "Medical treatment", "Self-directed education, tools"],
+            ["Online Directories", "Endless listings", "Vetting, matching, accountability"],
+            ["Social Media", "Information overload", "Coherent, structured, safe to learn"],
+          ].map(([what, delivers, missing]) => (
+            <div key={what} className="sm:hidden rounded-xl bg-white border border-[#E8B4AE]/30 p-4 mb-3">
+              <p className="text-[#4A0E2E] font-bold text-xs tracking-widest uppercase mb-3">{what}</p>
+              <p className="text-xs text-[#C4847A] font-bold uppercase tracking-widest mb-1">Delivers</p>
+              <p className="text-sm text-[#6B4C55] mb-3">{delivers}</p>
+              <p className="text-xs text-[#C4847A] font-bold uppercase tracking-widest mb-1">Missing</p>
+              <p className="text-sm text-[#C4847A]">{missing}</p>
+            </div>
+          ))}
+          <div className="hidden sm:block overflow-x-auto rounded-xl border border-[#E8B4AE]/40">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-[#F5DDD9]">
@@ -159,7 +175,7 @@ export default function OurWhy() {
       </section>
 
       {/* BECAUSE WHEN WOMEN UNDERSTAND */}
-      <section className="py-20 max-w-4xl mx-auto px-6">
+      <section className="py-12 sm:py-20 max-w-4xl mx-auto px-6">
         <div className="text-center mb-12">
           <EYEBROW>The ripple effect</EYEBROW>
           <h2 className="font-display text-3xl sm:text-4xl text-[#4A0E2E]">
@@ -184,7 +200,7 @@ export default function OurWhy() {
       </section>
 
       {/* CLOSING CTA */}
-      <section className="bg-[#4A0E2E] py-24 text-center px-6">
+      <section className="bg-[#4A0E2E] py-16 sm:py-24 text-center px-6">
         <p className="font-display text-3xl sm:text-4xl text-white leading-tight max-w-2xl mx-auto mb-8">
           Women don't need more <ITALIC_SERIF>motivation.</ITALIC_SERIF><br />
           They need the system<br />
