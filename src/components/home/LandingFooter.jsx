@@ -1,6 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+const BASK = "'Libre Baskerville', Georgia, serif";
+const MONT = "Montserrat, sans-serif";
+
 const NAV = {
   EXPLORE: [
     { label: "Home", href: "/" },
@@ -22,42 +25,41 @@ const NAV = {
 };
 
 export default function LandingFooter() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="px-6 py-20" style={{ background: "linear-gradient(180deg, #0f0308 0%, #1a0510 100%)" }}>
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+    <footer style={{ background: "#f9f6f2", borderTop: "2px solid #4a2c2e", padding: "clamp(56px,7vw,80px) clamp(24px,6vw,80px) clamp(32px,4vw,48px)" }}>
+      <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "clamp(24px,4vw,56px)", alignItems: "start" }} className="footer-grid">
+
           {/* Brand */}
-          <div className="md:col-span-1">
-            <p
-              className="italic text-2xl mb-3"
-              style={{ fontFamily: "'DM Serif Display', Georgia, serif", color: "#C4866C" }}
-            >
-              The Aligned Woman
+          <div>
+            <p style={{ fontFamily: BASK, fontWeight: 400, fontSize: 38, color: "#4a2c2e", lineHeight: 1, marginBottom: 16 }}>
+              A<em style={{ color: "#A86460", fontStyle: "italic" }}>W</em>
             </p>
-            <p className="text-white/40 text-sm leading-relaxed max-w-xs">
-              An education for modern women. Built on honesty, evidence, and embodiment.
+            <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 14, lineHeight: 1.6, color: "#4a2c2e", maxWidth: 240, opacity: 0.85 }}>
+              Built for women. Grounded in evidence. Verified at every step.
             </p>
           </div>
 
           {/* Nav columns */}
           {Object.entries(NAV).map(([col, links]) => (
             <div key={col}>
-              <p className="text-xs font-bold tracking-[0.25em] uppercase mb-6" style={{ color: "#C4866C" }}>
+              <p style={{ fontFamily: MONT, fontWeight: 700, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#4a2c2e", marginBottom: 26 }}>
                 {col}
               </p>
-              <ul className="space-y-3">
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 14 }}>
                 {links.map((l) => (
                   <li key={l.label}>
                     {l.href.startsWith("mailto") ? (
-                      <a href={l.href} className="inline-block py-2.5 text-white/40 text-sm hover:text-white/80 transition-colors">
+                      <a href={l.href} style={{ fontFamily: MONT, fontWeight: 300, fontSize: 14, color: "#4a2c2e", opacity: 0.7, textDecoration: "none", transition: "opacity 0.2s ease" }} onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")} onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}>
                         {l.label}
                       </a>
                     ) : l.href.startsWith("#") ? (
-                      <a href={l.href} className="inline-block py-2.5 text-white/40 text-sm hover:text-white/80 transition-colors">
+                      <a href={l.href} style={{ fontFamily: MONT, fontWeight: 300, fontSize: 14, color: "#4a2c2e", opacity: 0.7, textDecoration: "none", transition: "opacity 0.2s ease" }} onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")} onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}>
                         {l.label}
                       </a>
                     ) : (
-                      <Link to={l.href} className="inline-block py-2.5 text-white/40 text-sm hover:text-white/80 transition-colors">
+                      <Link to={l.href} style={{ fontFamily: MONT, fontWeight: 300, fontSize: 14, color: "#4a2c2e", opacity: 0.7, textDecoration: "none", transition: "opacity 0.2s ease" }} onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")} onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}>
                         {l.label}
                       </Link>
                     )}
@@ -68,15 +70,33 @@ export default function LandingFooter() {
           ))}
         </div>
 
-        <div className="border-t pt-8 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-          <p className="text-white/25 text-xs tracking-wide">
-            © {new Date().getFullYear()} The Aligned Woman Co. All rights reserved.
+        <div style={{ borderTop: "1px solid #d1ccc5", marginTop: "clamp(40px,5vw,56px)", paddingTop: 24, display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 16 }} className="footer-bottom">
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 12, color: "#4a2c2e", opacity: 0.6, margin: 0 }}>
+            © {year} The Aligned Woman Co. All rights reserved.
           </p>
-          <p className="text-white/20 text-xs">
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 12, color: "#4a2c2e", opacity: 0.6, margin: 0 }}>
             Designed for women. Built with intention.
           </p>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 767px) {
+          .footer-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 40px !important;
+          }
+          .footer-bottom {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .footer-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }
