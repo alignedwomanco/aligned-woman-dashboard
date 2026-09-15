@@ -109,7 +109,7 @@ const AuthenticatedApp = () => {
       {/* The Aligned Woman Standard: public on purpose, the AW Verified seal
           on practitioners' own sites links here. */}
       <Route path="/theawstandard" element={<LayoutWrapper currentPageName="TheAWStandard"><TheAWStandard /></LayoutWrapper>} />
-      <Route path="/retreats" element={<LayoutWrapper currentPageName="Retreats"><Retreats /></LayoutWrapper>} />
+
       <Route path="/YourMoneyStory" element={<YourMoneyStory />} />
       <Route path="/money-story" element={<MoneyStoryLanding />} />
 
@@ -132,6 +132,7 @@ const AuthenticatedApp = () => {
             loop, which would wrap it in Layout as well. /theawstandard remains
             the only public directory-adjacent page. */}
         <Route path="/experts/:slug" element={<ExpertProfile />} />
+        <Route path="/retreats" element={<LayoutWrapper currentPageName="Retreats"><Retreats /></LayoutWrapper>} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route
             key={path}

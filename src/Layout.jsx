@@ -41,7 +41,6 @@ const MENU_NAV = {
     { label: "About Us", href: "/about-us" },
     { label: "Contact", href: "/Contact" },
     { label: "The AW Standard", href: "/theawstandard" },
-    { label: "Retreats", href: "/retreats" },
     { label: "Terms & Conditions", href: "/terms-and-conditions" },
     { label: "Giveaway T&Cs", href: "/competition" },
   ],
