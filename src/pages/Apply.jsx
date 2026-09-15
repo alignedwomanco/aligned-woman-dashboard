@@ -44,6 +44,7 @@ const CATEGORY_OPTIONS = [
   "Health & Medical",
   "Money & Finance",
   "Branding & Visibility",
+  "Coaching",
 ];
 
 const INTEREST_OPTIONS = [
