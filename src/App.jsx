@@ -45,7 +45,6 @@ import Community from './pages/Community';
 import Apply from './pages/Apply';
 import CommunityGroup from './pages/CommunityGroup';
 import TheAWStandard from './pages/TheAWStandard';
-import Retreats from './pages/Retreats';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -132,7 +131,6 @@ const AuthenticatedApp = () => {
             loop, which would wrap it in Layout as well. /theawstandard remains
             the only public directory-adjacent page. */}
         <Route path="/experts/:slug" element={<ExpertProfile />} />
-        <Route path="/retreats" element={<LayoutWrapper currentPageName="Retreats"><Retreats /></LayoutWrapper>} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route
             key={path}
