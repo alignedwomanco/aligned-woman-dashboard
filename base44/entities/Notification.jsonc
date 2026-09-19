@@ -1,7 +1,7 @@
 {
   "name": "Notification",
   "type": "object",
-  "description": "In app notification. recipient_email is the addressee. Community notifications are written by notifyCircle with the service role and never carry the identity of an anonymous poster.",
+  "description": "In app notification. recipient_email is the addressee and the only person who can read the row, besides admins. Community notifications are written by the Circle functions with the service role and never carry the identity of an anonymous poster. The trigger's email is stored in source_user_email for admins only; it grants no read access, so a replier can never read a row addressed to an anonymous asker.",
   "properties": {
     "type": {
       "type": "string",
@@ -41,7 +41,7 @@
     },
     "source_user_email": {
       "type": "string",
-      "description": "Who triggered this notification. Empty when the trigger was an anonymous post."
+      "description": "Who triggered this notification, for admins. Empty when the trigger was an anonymous post or the recipient asked anonymously."
     },
     "target_post_id": {
       "type": "string"
@@ -65,12 +65,6 @@
     "read": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.source_user_email": "{{user.email}}"
-        },
-        {
           "data.recipient_email": "{{user.email}}"
         },
         {
@@ -83,9 +77,6 @@
     "update": {
       "$or": [
         {
-          "data.source_user_email": "{{user.email}}"
-        },
-        {
           "data.recipient_email": "{{user.email}}"
         },
         {
@@ -97,9 +88,6 @@
     },
     "delete": {
       "$or": [
-        {
-          "data.source_user_email": "{{user.email}}"
-        },
         {
           "data.recipient_email": "{{user.email}}"
         },
