@@ -4,33 +4,22 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2, User } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import { getPostAuthDestination } from "@/lib/authReturnTo";
 
-// After registering, return the person to where they came from (for example the
-// checkout success page), falling back to the dashboard. Only ever returns to
-// our own app, never an external address.
-function getPostAuthDestination() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const fromUrl = params.get("from_url");
-    if (fromUrl) {
-      if (fromUrl.startsWith("/")) return fromUrl;
-      const url = new URL(fromUrl, window.location.origin);
-      if (url.origin === window.location.origin) {
-        return url.pathname + url.search + url.hash;
-      }
-    }
-  } catch (_err) {
-    // fall through to the default
-  }
-  return "/Dashboard";
-}
+// Full name is required at sign up. Without it every email sign up has a
+// blank name, which degrades the dashboard greeting, the apply prefill
+// and the host's new member alert to "Unknown". The Circle in particular
+// asks women to sign up with their real name and post anonymously if
+// they choose, so the name has to exist.
+const FULL_NAME_KEY = "aw_pending_full_name";
 
 export default function Register() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,13 +31,18 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (fullName.trim().length < 2) {
+      setError("Please tell us your name");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
     setLoading(true);
     try {
-      await base44.auth.register({ email, password });
+      await base44.auth.register({ email, password, full_name: fullName.trim() });
+      try { sessionStorage.setItem(FULL_NAME_KEY, fullName.trim()); } catch (_e) { /* private mode */ }
       setShowOtp(true);
     } catch (err) {
       setError(err.message || "Registration failed");
@@ -65,6 +59,16 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
+      // Belt and braces: if the register call did not store the name, set
+      // it on the fresh session before leaving the page.
+      try {
+        const pending = fullName.trim() || sessionStorage.getItem(FULL_NAME_KEY) || "";
+        if (pending) {
+          const me = await base44.auth.me().catch(() => null);
+          if (me && !me.full_name) await base44.auth.updateMe({ full_name: pending });
+        }
+        sessionStorage.removeItem(FULL_NAME_KEY);
+      } catch (_e) { /* the name can be added in profile settings */ }
       window.location.href = getPostAuthDestination();
     } catch (err) {
       setError(err.message || "Invalid verification code");
@@ -193,6 +197,23 @@ export default function Register() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
+          <Label htmlFor="full_name" className="font-body text-awburg-core">Your name</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" aria-hidden="true" />
+            <Input
+              id="full_name"
+              type="text"
+              autoComplete="name"
+              autoFocus
+              placeholder="First and last name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="pl-10 h-12 font-body"
+              required
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="email" className="font-body text-awburg-core">Email</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-awburg-core/40" aria-hidden="true" />
@@ -200,7 +221,6 @@ export default function Register() {
               id="email"
               type="email"
               autoComplete="email"
-              autoFocus
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
