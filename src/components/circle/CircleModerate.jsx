@@ -90,6 +90,18 @@ export default function CircleModerate({ group, onBack, onOpenPost }) {
         ))}
       </div>
 
+      {data?.room && (
+        <div className={`${CARD} px-5 py-3 flex flex-wrap items-center justify-between gap-3`}>
+          <p className="font-body text-[12.5px] text-awburg-dark">
+            <span className={`inline-block w-2 h-2 rounded-full mr-2 ${data.room.status === "published" ? "bg-awsage-core" : "bg-awrose-core"}`} aria-hidden="true" />
+            {data.room.status === "published" ? "Live. Women can find the room and ask to join." : "In draft. Only you and The Aligned Woman Co. can see it."}
+          </p>
+          <button type="button" className={`${BTN_SECONDARY} w-auto min-h-[40px] px-4 text-[10px]`} disabled={busyId === "publish"} onClick={() => run("publish", data.room.status === "published" ? "unpublish" : "publish")}>
+            {data.room.status === "published" ? "Take private" : "Publish"}
+          </button>
+        </div>
+      )}
+
       {error && <p className="font-body text-[12.5px] text-awrose-deep">{error}</p>}
       {isLoading || !data ? (
         <p className="font-body font-light text-[13px] text-awburg-mid">Loading...</p>
