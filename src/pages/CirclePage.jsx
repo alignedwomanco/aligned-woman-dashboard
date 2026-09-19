@@ -64,11 +64,34 @@ export default function CirclePage() {
     enabled: !!group?.id && !!user,
   });
 
+  // Before sign in there is no getCirclePosts call, so the host lockup on
+  // the pitch is read from the public Expert record. It carries only what
+  // the directory already shows: name, business name, logo.
+  const { data: publicHosts = [] } = useQuery({
+    queryKey: ["circle-public-host", group?.host_expert_id],
+    queryFn: () => base44.entities.Expert.filter({ id: group.host_expert_id }),
+    enabled: !!group?.host_expert_id && !user,
+  });
+  const publicHost = publicHosts[0]
+    ? { name: publicHosts[0].name, business_name: publicHosts[0].business_name || "", logo_url: publicHosts[0].logo_url || publicHosts[0].profile_picture || "", first_name: (publicHosts[0].name || "").split(/\s+/)[0] }
+    : null;
+
   const { data: thread, isLoading: threadLoading } = useQuery({
     queryKey: ["circle-thread", group?.id, postId],
     queryFn: () => fetchRoom(group.id, postId),
     enabled: !!group?.id && !!user && !!postId && room?.me?.status === "approved",
   });
+
+  const isModerator = room?.me?.role === "host" || room?.me?.role === "admin";
+  const { data: overview } = useQuery({
+    queryKey: ["circle-moderate", group?.id],
+    queryFn: async () => {
+      const res = await base44.functions.invoke("moderateCircle", { groupId: group.id, action: "overview" });
+      return res?.data || res;
+    },
+    enabled: !!group?.id && isModerator,
+  });
+  const pendingCount = overview?.requests?.length || 0;
 
   useEffect(() => {
     if (group) document.title = `${group.name} | The Aligned Woman Co`;
@@ -127,7 +150,7 @@ export default function CirclePage() {
   const status = !user ? "pitch" : roomLoading || !room ? "loading" : me?.status === "approved" ? "room" : me?.status === "pending" ? "pending" : (me?.status === "declined" || me?.status === "removed") ? "declined" : "gate";
 
   let body = null;
-  if (status === "pitch") body = <Pitch group={group} host={host || hostFromGroup(group)} slug={slug} />;
+  if (status === "pitch") body = <Pitch group={group} host={publicHost} slug={slug} />;
   else if (status === "loading") body = roomError ? <p className="px-6 py-10 font-body text-[13px] text-awrose-deep text-center">We could not open the Circle just now. Refresh to try again.</p> : <Loading />;
   else if (status === "gate") body = <JoinGate group={group} host={host} onRequest={requestJoin} busy={joinBusy} error={joinError} />;
   else if (status === "pending") body = <Pending host={host} />;
@@ -154,7 +177,7 @@ export default function CirclePage() {
         me={me}
         posts={room.posts || []}
         pinned={room.pinned}
-        pendingCount={0}
+        pendingCount={pendingCount}
         onOpenPost={(id) => go({ post: id })}
         onAsk={() => setComposer("question")}
         onShare={() => setComposer("share")}
@@ -166,7 +189,7 @@ export default function CirclePage() {
   }
 
   return (
-    <Shell user={user} slug={slug} group={group} host={host || hostFromGroup(group)} compact={!!postId || tab === "moderate"} draft={isDraft && isMod}>
+    <Shell user={user} slug={slug} group={group} host={host || publicHost} compact={!!postId || tab === "moderate"} draft={isDraft && isMod}>
       {body}
       <CircleComposer
         open={!!composer}
@@ -179,14 +202,6 @@ export default function CirclePage() {
       <ReportSheet open={!!report} target={report} group={group} host={host} onClose={() => setReport(null)} />
     </Shell>
   );
-}
-
-// Before she is signed in there is no getCirclePosts call, so the host
-// lockup on the pitch comes from the room record alone. The name is
-// filled in once the host's Expert record is linked; until then the
-// band shows the room name and a monogram.
-function hostFromGroup(group) {
-  return group?.host_expert_id ? { name: "", business_name: "", logo_url: "", first_name: "" } : null;
 }
 
 function Shell({ user, slug, group, host, compact, draft, children }) {
