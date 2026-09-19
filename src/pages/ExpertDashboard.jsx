@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import MyCommunityTab from "@/components/partner/MyCommunityTab";
 import {
   LayoutDashboard,
-  Users2,
+  UsersRound,
   Copy,
   Check,
   TrendingUp,
@@ -1238,7 +1238,7 @@ export default function ExpertDashboard() {
   const tabs = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "profile", label: "My Listing", icon: User },
-    hostsGroupId ? { id: "community", label: "My Community", icon: Users2 } : null,
+    hostsGroupId ? { id: "community", label: "My Community", icon: UsersRound } : null,
     { id: "contact-requests", label: "Contact Requests", icon: MessageSquare, badge: newRequests },
     affiliate ? { id: "earnings", label: "Earnings", icon: BarChart3 } : null,
   ].filter(Boolean);
