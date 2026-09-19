@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { DEFAULT_CIRCLE_TOPICS, DEFAULT_RULES_TEXT } from "@/lib/circle";
+import { DEFAULT_CIRCLE_TOPICS, DEFAULT_RULES_TEXT, randomId } from "@/lib/circle";
 
 // ────────────────────────────────────────────────────────────────
 // My Community · the host's setup checklist and room settings.
@@ -73,6 +73,7 @@ export default function MyCommunityTab({ groupId }) {
   useEffect(() => {
     if (room && !form) {
       setForm({
+        name: room.name || "",
         subtitle: room.subtitle || "",
         description: room.description || "",
         host_bio_override: room.host_bio_override || data?.host?.bio || "",
@@ -100,7 +101,7 @@ export default function MyCommunityTab({ groupId }) {
   const done = useMemo(() => {
     if (!room || !form) return {};
     return {
-      room: !!form.subtitle.trim() && !!form.description.trim(),
+      room: !!form.name.trim() && !!form.subtitle.trim() && !!form.description.trim(),
       about: !!form.host_bio_override.trim(),
       rules: !!form.rules_text.trim(),
       topics: form.topics.filter((t) => t.active !== false).length >= 3,
@@ -226,9 +227,13 @@ export default function MyCommunityTab({ groupId }) {
       {/* 1 Your room */}
       <section className={CARD}>
         <CardHead step={1} title="Your room" done={done.room}>
-          <p className={HELPER}>The line under the name and the intro women read at the top of the feed.</p>
+          <p className={HELPER}>The name, the line under it, and the intro women read at the top of the feed. Your logo comes from your listing. The address is fixed once shared; email us if it needs to change.</p>
         </CardHead>
         <div className="grid gap-4">
+          <div>
+            <label className={LABEL}>Room name</label>
+            <input className={INPUT} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} onBlur={() => { if (form.name.trim()) save({ name: form.name }); }} placeholder="The Grounded Women Circle" />
+          </div>
           <div>
             <label className={LABEL}>Subtitle</label>
             <input className={INPUT} value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} onBlur={() => save({ subtitle: form.subtitle })} placeholder="Grounded women. Still growing. Still living." />
@@ -296,7 +301,7 @@ export default function MyCommunityTab({ groupId }) {
           <button
             type="button"
             className="mt-3 font-body text-[12px] font-semibold text-awburg-core underline underline-offset-4"
-            onClick={() => setForm((f) => ({ ...f, topics: [...f.topics, { key: "", label: "", order: f.topics.length, active: true }] }))}
+            onClick={() => setForm((f) => ({ ...f, topics: [...f.topics, { key: `t${randomId().slice(0, 10)}`, label: "", order: f.topics.length, active: true }] }))}
           >
             Add a topic
           </button>
