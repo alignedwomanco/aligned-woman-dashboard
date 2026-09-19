@@ -1,7 +1,7 @@
 {
   "name": "ExpertApplication",
   "type": "object",
-  "description": "Public applications to join the expert marketplace. Created from the apply form on /ExpertsDirectory after the applicant signs in, then reviewed by an admin in Dashboard Settings. Approval creates a linked Expert record. Affiliate and course-host access are granted selectively by the admin, never automatically, and this flow never grants Blueprint course access.",
+  "description": "Public applications to join the directory as a practitioner or a business, and optionally to host a community room. Created from /Apply, reviewed by an admin on the Applications screen, and actioned by approvePartnerApplication, which creates the linked Expert record, applies grants, and creates a draft room when community hosting is granted. Affiliate, course host and community host access are granted selectively by the admin, never automatically, and this flow never grants Blueprint course access.",
   "properties": {
     "applicant_name": {
       "type": "string",
@@ -27,6 +27,10 @@
     "profile_picture": {
       "type": "string",
       "description": "Profile image URL"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Business logo URL, for business applications"
     },
     "website_url": {
       "type": "string",
@@ -61,7 +65,19 @@
       "items": {
         "type": "string"
       },
-      "description": "What they are applying for. Allowed values: marketplace_profile, affiliate, host_course"
+      "description": "What they are applying for. Allowed values: marketplace_profile, affiliate, host_course, host_community"
+    },
+    "community_name": {
+      "type": "string",
+      "description": "If hosting a community: what it would be called"
+    },
+    "community_for": {
+      "type": "string",
+      "description": "If hosting a community: who it is for"
+    },
+    "community_topics": {
+      "type": "string",
+      "description": "If hosting a community: what women would talk about"
     },
     "message": {
       "type": "string",
@@ -82,13 +98,21 @@
       "format": "date-time",
       "description": "When the application was reviewed"
     },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Admin email who actioned it"
+    },
     "review_notes": {
       "type": "string",
-      "description": "Admin notes from the review"
+      "description": "Admin notes from the review, or the decline reason"
     },
     "created_expert_id": {
       "type": "string",
       "description": "Id of the Expert record created on approval"
+    },
+    "created_group_id": {
+      "type": "string",
+      "description": "Id of the draft room created on approval when community hosting was granted"
     },
     "granted_affiliate": {
       "type": "boolean",
@@ -99,6 +123,11 @@
       "type": "boolean",
       "default": false,
       "description": "Whether course hosting was granted at approval"
+    },
+    "granted_community_host": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether community hosting was granted at approval"
     }
   },
   "required": [
