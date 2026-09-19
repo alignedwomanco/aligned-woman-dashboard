@@ -256,7 +256,7 @@ export default function MyCommunityTab({ groupId }) {
       {/* 3 The rules */}
       <section className={CARD}>
         <CardHead step={3} title="The rules" done={done.rules}>
-          <p className={HELPER}>Every member agrees to these before she can request to join. Edit them, or keep the default.</p>
+          <p className={HELPER}>Every member agrees to these before she can request to join. Edit them, or keep the default. Three things stay whatever you write, because they are our promise to every member: women only, approved members only, nothing shared outside the room.</p>
         </CardHead>
         <textarea className={TEXTAREA} rows={5} value={form.rules_text} onChange={(e) => setForm((f) => ({ ...f, rules_text: e.target.value }))} onBlur={() => save({ rules_text: form.rules_text })} />
       </section>
