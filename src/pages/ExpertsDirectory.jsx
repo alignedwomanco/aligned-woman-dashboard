@@ -773,10 +773,10 @@ export default function ExpertsDirectory() {
   // After a sign-in redirect from the apply button, reopen the form so the
   // practitioner is not dropped back on the page with no idea what to do next.
   useEffect(() => {
-    if (currentUser && searchParams.get("apply") === "1") {
-      setApplyOpen(true);
+    if (searchParams.get("apply") === "1") {
+      window.location.replace("/Apply");
     }
-  }, [currentUser, searchParams]);
+  }, [searchParams]);
 
   // Use live DB data, mapped to card shape, Laura always first
   const experts = [...dbExperts]
@@ -988,16 +988,13 @@ export default function ExpertsDirectory() {
     setModal({ expert, mode: "form" });
   };
 
-  // Practitioner apply. Sign-in first so we capture a verified email to link
-  // to later, then return to this page with the form open.
+  // Practitioner and business apply. /Apply is the single apply surface:
+  // it is public, sends the applicant a confirmation, and carries the
+  // business and community hosting fields this modal never had. The
+  // modal below stays in the file but is no longer reachable.
   const handleApplyClick = () => {
-    base44.analytics.track({ eventName: "expert_apply_click" });
-    if (!currentUser) {
-      const back = `${window.location.origin}/ExpertsDirectory?apply=1`;
-      base44.auth.redirectToLogin(back);
-      return;
-    }
-    setApplyOpen(true);
+    base44.analytics.track({ eventName: "expert_apply_click", properties: { source: "directory" } });
+    window.location.href = "/Apply";
   };
 
   return (
