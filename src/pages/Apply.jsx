@@ -268,7 +268,7 @@ export default function Apply() {
       base44.integrations.Core.SendEmail({
         to: ADMIN_EMAIL,
         subject: `New expert application - ${name}`,
-        body: `Name: ${name}\nEmail: ${email}\nType: ${form.application_type}${form.business_name ? `\nBusiness: ${form.business_name}` : ""}\nInterested in: ${form.interested_in.join(", ")}${wantsCommunity ? `\n\nCommunity: ${form.community_name}\nFor: ${form.community_for}\nTopics: ${form.community_topics}` : ""}\n\n${form.message}\n\nReview: https://app.alignedwomanco.com/admin (Applications)`,
+        body: `Name: ${name}\nEmail: ${email}\nType: ${form.application_type}${form.business_name ? `\nBusiness: ${form.business_name}` : ""}\nInterested in: ${form.interested_in.join(", ")}${wantsCommunity ? `\n\nCommunity: ${form.community_name}\nFor: ${form.community_for}\nTopics: ${form.community_topics}` : ""}\n\n${form.message}\n\nReview: https://app.alignedwomanco.com/admin?tab=applications`,
       }).catch(() => {});
     } catch (err) {
       console.error("Admin alert failed", err);
