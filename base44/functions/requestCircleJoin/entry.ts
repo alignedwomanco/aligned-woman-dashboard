@@ -77,8 +77,12 @@ async function loadContext(base44: any, groupId: string) {
     membership = Array.isArray(legacy) ? legacy[0] : null;
   }
 
-  const memberStatus = membership ? (membership.status || "approved") : "none";
-  const isApproved = memberStatus === "approved";
+  // In a partner room a membership counts only when a moderator set it to
+  // approved. An empty status is treated as approved for legacy open rooms
+  // alone, so a row written outside the functions can never open a room.
+  const isPartnerRoom = !!group.host_expert_id;
+  const memberStatus = membership ? (membership.status || (isPartnerRoom ? "pending" : "approved")) : "none";
+  const isApproved = memberStatus === "approved" && (!isPartnerRoom || !!membership?.reviewed_by || membership?.role === "owner");
 
   return { user, email, group, hostExpert, membership, memberStatus, isAdmin, isHost, isApproved };
 }
