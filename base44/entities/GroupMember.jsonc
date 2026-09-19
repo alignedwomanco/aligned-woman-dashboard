@@ -1,7 +1,7 @@
 {
   "name": "GroupMember",
   "type": "object",
-  "description": "Membership of a group, plus the per member read state that drives the unread marker. One row per member per group. For a request to join room the row is created by requestCircleJoin with status pending and role member, and only moderateCircle moves it to approved.",
+  "description": "Membership of a group, plus the per member read state that drives the unread marker. One row per member per group. For a request to join room the row is created by requestCircleJoin with status pending and role member, and only moderateCircle moves it to approved. Read is restricted to a member's own rows and admins: a room's member list is only reachable through moderateCircle, so nothing about who is in a sensitive room can be read from the browser.",
   "properties": {
     "group_id": {
       "type": "string",
@@ -84,7 +84,21 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
-    "read": null,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "$or": [
         {
