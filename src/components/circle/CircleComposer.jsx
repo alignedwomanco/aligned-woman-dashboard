@@ -27,6 +27,7 @@ export default function CircleComposer({ open, mode, group, host, onClose, onPos
   const recRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
+  const recSecondsRef = useRef(0);
 
   useEffect(() => {
     if (!open) {
@@ -90,7 +91,6 @@ export default function CircleComposer({ open, mode, group, host, onClose, onPos
       setError("We could not reach your microphone. Check the browser permission and try again.");
     }
   };
-  const recSecondsRef = useRef(0);
 
   const stopRecording = (discard) => {
     clearInterval(timerRef.current);
