@@ -1,6 +1,7 @@
 {
   "name": "Notification",
   "type": "object",
+  "description": "In app notification. recipient_email is the addressee. Community notifications are written by notifyCircle with the service role and never carry the identity of an anonymous poster.",
   "properties": {
     "type": {
       "type": "string",
@@ -14,7 +15,14 @@
         "follow",
         "new_badge",
         "level_up",
-        "post_reshare"
+        "post_reshare",
+        "circle_join_request",
+        "circle_approved",
+        "circle_declined",
+        "circle_reply",
+        "circle_answered",
+        "circle_new_question",
+        "circle_report"
       ]
     },
     "message": {
@@ -27,15 +35,23 @@
       "type": "boolean",
       "default": false
     },
+    "recipient_email": {
+      "type": "string",
+      "description": "Who this notification is for"
+    },
     "source_user_email": {
       "type": "string",
-      "description": "Who triggered this notification"
+      "description": "Who triggered this notification. Empty when the trigger was an anonymous post."
     },
     "target_post_id": {
       "type": "string"
     },
     "target_comment_id": {
       "type": "string"
+    },
+    "group_id": {
+      "type": "string",
+      "description": "Room the notification belongs to, for community types"
     }
   },
   "required": [
@@ -55,6 +71,9 @@
           "data.source_user_email": "{{user.email}}"
         },
         {
+          "data.recipient_email": "{{user.email}}"
+        },
+        {
           "user_condition": {
             "role": "admin"
           }
@@ -67,6 +86,9 @@
           "data.source_user_email": "{{user.email}}"
         },
         {
+          "data.recipient_email": "{{user.email}}"
+        },
+        {
           "user_condition": {
             "role": "admin"
           }
@@ -77,6 +99,9 @@
       "$or": [
         {
           "data.source_user_email": "{{user.email}}"
+        },
+        {
+          "data.recipient_email": "{{user.email}}"
         },
         {
           "user_condition": {
