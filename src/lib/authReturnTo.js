@@ -1,6 +1,6 @@
 // Shared by the auth pages (Login, Register, and any page that resumes a flow
 // after sign-in, e.g. the MCP OAuth consent page). Keep the redirect
-// validation in one place — it is security-sensitive and easy to drift.
+// validation in one place: it is security-sensitive and easy to drift.
 
 // After signing in or registering, return the person to where she came
 // from (?from_url=/groundedwomen, the checkout success page), falling
