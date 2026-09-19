@@ -7,26 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
-
-// After signing in, return the person to where they came from (for example the
-// checkout success page), falling back to the dashboard. Only ever returns to
-// our own app, never an external address.
-function getPostAuthDestination() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const fromUrl = params.get("from_url");
-    if (fromUrl) {
-      if (fromUrl.startsWith("/")) return fromUrl;
-      const url = new URL(fromUrl, window.location.origin);
-      if (url.origin === window.location.origin) {
-        return url.pathname + url.search + url.hash;
-      }
-    }
-  } catch (_err) {
-    // fall through to the default
-  }
-  return "/Dashboard";
-}
+import { getPostAuthDestination } from "@/lib/authReturnTo";
 
 export default function Login() {
   const [email, setEmail] = useState("");
