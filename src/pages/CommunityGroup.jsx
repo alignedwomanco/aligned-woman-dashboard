@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
@@ -48,16 +48,21 @@ export default function CommunityGroup() {
 
   const group = groups.find((g) => g.slug === slug) || null;
 
+  // A partner hosted room has one address, its own slug. This legacy
+  // page never renders it; the redirect below sends the old
+  // /Community/<slug> link there before any post query can run.
+  const isPartnerRoom = !!group?.host_expert_id;
+
   const { data: members = [] } = useQuery({
     queryKey: ["group-members", group?.id],
     queryFn: () => base44.entities.GroupMember.filter({ group_id: group.id }, "-created_date", 500),
-    enabled: !!group?.id,
+    enabled: !!group?.id && !isPartnerRoom,
   });
 
   const { data: posts = [], isLoading: postsLoading } = useQuery({
     queryKey: ["group-posts", group?.id],
     queryFn: () => base44.entities.GroupPost.filter({ group_id: group.id }, "-created_date", 300),
-    enabled: !!group?.id,
+    enabled: !!group?.id && !isPartnerRoom,
   });
 
   const { data: sessions = [] } = useQuery({
@@ -162,6 +167,10 @@ export default function CommunityGroup() {
         <div className="flex-1 lg:ml-72"><div className="page"><p style={{ color: "#92707D", fontSize: 13 }}>Loading...</p></div></div>
       </div>
     );
+  }
+
+  if (isPartnerRoom) {
+    return <Navigate to={`/${group.slug}`} replace />;
   }
 
   if (!group) {
