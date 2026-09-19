@@ -1,7 +1,7 @@
 {
   "name": "GroupMember",
   "type": "object",
-  "description": "Membership of a group, plus the per member read state that drives the unread marker. One row per member per group. For a request to join room the row is created by requestCircleJoin with status pending and role member, and only moderateCircle moves it to approved. Read is restricted to a member's own rows and admins: a room's member list is only reachable through moderateCircle, so nothing about who is in a sensitive room can be read from the browser.",
+  "description": "Membership of a group, plus the per member read state that drives the unread marker. One row per member per group. Rows are written only by the Circle functions with the service role (requestCircleJoin writes pending, moderateCircle approves, declines or removes, notifyCircle sets the preference) and by admins. A member can read her own rows and nothing else, so nobody can create, edit or delete a membership from the browser to let herself in.",
   "properties": {
     "group_id": {
       "type": "string",
@@ -28,7 +28,7 @@
         "declined",
         "removed"
       ],
-      "description": "Request state. Treat an empty value as approved for legacy open rooms. No default, per the enum plus default gotcha."
+      "description": "Request state. In a partner room an empty value is treated as pending. No default, per the enum plus default gotcha."
     },
     "joined_at": {
       "type": "string",
@@ -56,7 +56,7 @@
     },
     "reviewed_by": {
       "type": "string",
-      "description": "Email of the host or admin who approved, declined or removed this member. First to act wins."
+      "description": "Email of the host or admin who approved, declined or removed this member. First to act wins. Required for an approval to count in a partner room."
     },
     "reviewed_at": {
       "type": "string",
@@ -82,7 +82,9 @@
   ],
   "rls": {
     "create": {
-      "created_by_id": "{{user.id}}"
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "read": {
       "$or": [
@@ -100,34 +102,14 @@
       ]
     },
     "update": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.user_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.user_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }
