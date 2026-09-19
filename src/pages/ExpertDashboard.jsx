@@ -5,7 +5,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/AuthContext";
 import { resolveDomain } from "@/lib/expertDomain";
 import { motion } from "framer-motion";
+import MyCommunityTab from "@/components/partner/MyCommunityTab";
 import {
+  LayoutDashboard,
+  Users2,
   Copy,
   Check,
   TrendingUp,
@@ -1166,10 +1169,27 @@ function ProfileTab({ expert, onExpertUpdate, user }) {
   );
 }
 
+// ────────────────────────────────────────────────────────────────
+// Partner Dashboard · lives at /partner (the old /expert-dashboard
+// redirects here). A partner may be a practitioner or a business, and
+// may host a community, so tabs render only when they apply: Overview,
+// My Listing, My Community (hosts only), Contact Requests, Earnings
+// (affiliates only). No tab exists to say you cannot do something.
+// ────────────────────────────────────────────────────────────────
+
 export default function ExpertDashboard() {
   const { user, userEmail, expert, affiliate, sales, isLoading, isAdminMode } = useExpertData();
-  const [activeTab, setActiveTab] = useState("earnings");
+  const requestedTab = new URLSearchParams(window.location.search).get("tab") || "overview";
+  const [activeTab, setActiveTab] = useState(requestedTab);
   const queryClient = useQueryClient();
+  const hostsGroupId = expert?.hosts_group_id || "";
+
+  const { data: hostedGroups = [] } = useQuery({
+    queryKey: ["partner-hosted-group", hostsGroupId],
+    queryFn: () => base44.entities.Group.filter({ id: hostsGroupId }),
+    enabled: !!hostsGroupId,
+  });
+  const hostedGroup = hostedGroups[0] || null;
 
   const { data: contactSubmissions = [] } = useQuery({
     queryKey: ["expert-contact-requests", expert?.id],
@@ -1181,7 +1201,7 @@ export default function ExpertDashboard() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("connect") === "complete" || params.get("connect") === "refresh") {
       queryClient.invalidateQueries({ queryKey: ["expert-affiliate"] });
-      window.history.replaceState({}, "", "/expert-dashboard");
+      window.history.replaceState({}, "", "/partner");
     }
   }, [queryClient]);
 
@@ -1198,11 +1218,14 @@ export default function ExpertDashboard() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4" style={{ background: "#FAF5F3" }}>
         <User style={{ width: 48, height: 48, color: "#C4847A", marginBottom: 16 }} />
         <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 24, color: "#4A0E2E", marginBottom: 8 }}>
-          Expert profile not found
+          No partner listing on this account yet
         </h2>
-        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#8A7A76", maxWidth: 400 }}>
-          Your account is not linked to an expert profile yet. Please contact the admin team at hello@alignedwomanco.com to set up your expert account.
+        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#8A7A76", maxWidth: 420, marginBottom: 20 }}>
+          A listing is created when an application is approved. If you have applied, it is being read by a person. If you have not, you can apply now.
         </p>
+        <Link to="/Apply" className="inline-flex items-center justify-center rounded-full bg-awburg-core text-paper font-body font-bold text-[11px] tracking-eyebrow uppercase min-h-[48px] px-7">
+          Apply to be AW Verified
+        </Link>
       </div>
     );
   }
@@ -1211,11 +1234,15 @@ export default function ExpertDashboard() {
   const totalCommission = affiliate?.total_commission || 0;
   const commissionRate = affiliate?.commission_percentage || 0;
 
+  const newRequests = contactSubmissions?.filter((s) => s.status === "new").length || 0;
   const tabs = [
-    { id: "earnings", label: "Earnings", icon: BarChart3 },
-    { id: "profile", label: "My Profile", icon: User },
-    { id: "contact-requests", label: "Contact Requests", icon: MessageSquare, badge: contactSubmissions?.filter((s) => s.status === "new").length || 0 },
-  ];
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "profile", label: "My Listing", icon: User },
+    hostsGroupId ? { id: "community", label: "My Community", icon: Users2 } : null,
+    { id: "contact-requests", label: "Contact Requests", icon: MessageSquare, badge: newRequests },
+    affiliate ? { id: "earnings", label: "Earnings", icon: BarChart3 } : null,
+  ].filter(Boolean);
+  const currentTab = tabs.some((t) => t.id === activeTab) ? activeTab : "overview";
 
   return (
     <div style={{ background: "#FAF5F3", minHeight: "100vh" }}>
@@ -1241,13 +1268,13 @@ export default function ExpertDashboard() {
 
         <div className="mb-8">
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "#C4847A", marginBottom: 8 }}>
-            {isAdminMode ? "ADMIN - EXPERT PROFILE" : "EXPERT DASHBOARD"}
+            {isAdminMode ? "ADMIN - PARTNER LISTING" : "PARTNER DASHBOARD"}
           </p>
           <h1 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(24px, 4vw, 32px)", color: "#4A0E2E", marginBottom: 4 }}>
-            {isAdminMode ? expert.name : `Welcome back, ${expert.name?.split(" ")[0] || "Expert"}`}
+            {isAdminMode ? (expert.business_name || expert.name) : `Welcome back, ${expert.name?.split(" ")[0] || "there"}`}
           </h1>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: 14, color: "#8A7A76" }}>
-            {isAdminMode ? "Editing this expert's profile and earnings data." : "Manage your profile and track your affiliate earnings."}
+            {isAdminMode ? "Editing this partner's listing and earnings data." : hostsGroupId ? "Your listing, your community and your contact requests, in one place." : "Your listing and your contact requests, in one place."}
           </p>
         </div>
 
@@ -1258,8 +1285,8 @@ export default function ExpertDashboard() {
               onClick={() => setActiveTab(id)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all relative"
               style={{
-                background: activeTab === id ? "#4A0E2E" : "transparent",
-                color: activeTab === id ? "#FFFFFF" : "#8A7A76",
+                background: currentTab === id ? "#4A0E2E" : "transparent",
+                color: currentTab === id ? "#FFFFFF" : "#8A7A76",
                 fontFamily: "Montserrat, sans-serif",
                 fontWeight: 600,
                 fontSize: 13,
@@ -1277,12 +1304,26 @@ export default function ExpertDashboard() {
         </div>
 
         <motion.div
-          key={activeTab}
+          key={currentTab}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {activeTab === "earnings" && (
+          {currentTab === "overview" && (
+            <PartnerOverview
+              expert={expert}
+              affiliate={affiliate}
+              hostedGroup={hostedGroup}
+              newRequests={newRequests}
+              onGo={setActiveTab}
+            />
+          )}
+
+          {currentTab === "community" && hostsGroupId && (
+            <MyCommunityTab groupId={hostsGroupId} />
+          )}
+
+          {currentTab === "earnings" && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatCard icon={Users} label="Total Sales" value={totalSales} sub="purchases through your link" />
@@ -1315,7 +1356,7 @@ export default function ExpertDashboard() {
             </div>
           )}
 
-          {activeTab === "profile" && (
+          {currentTab === "profile" && (
             <ProfileTab
               expert={expert}
               user={user}
@@ -1323,11 +1364,76 @@ export default function ExpertDashboard() {
             />
           )}
 
-          {activeTab === "contact-requests" && (
+          {currentTab === "contact-requests" && (
             <ContactRequestsTab expert={expert} />
           )}
         </motion.div>
       </div>
+    </div>
+  );
+}
+
+// Overview · replaces an Earnings first screen that greeted every new
+// partner with three zeros. Cards for listing status, community activity
+// and, only when relevant, earnings. A quiet card invites partners who
+// do not host yet to ask about hosting.
+function PartnerOverview({ expert, affiliate, hostedGroup, newRequests, onGo }) {
+  const card = "rounded-3xl bg-paper border border-awburg-core/10 p-5 md:p-6 shadow-sm";
+  const eyebrow = "font-body font-bold text-[10px] tracking-eyebrow uppercase text-awrose-deep mb-2";
+  const title = "font-display text-[20px] text-awburg-core leading-tight mb-1";
+  const body = "font-body font-light text-[13px] text-awburg-mid leading-relaxed";
+  const link = "inline-flex items-center mt-4 font-body text-[12px] font-semibold text-awburg-core underline underline-offset-4 min-h-[44px]";
+  const isBusiness = expert.entity_type === "business";
+  const roomLive = hostedGroup?.status === "published";
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className={card}>
+        <p className={eyebrow}>Your listing</p>
+        <p className={title}>{expert.isPublished ? "Live in the directory" : "Not published yet"}</p>
+        <p className={body}>
+          {expert.isPublished
+            ? `${isBusiness ? (expert.business_name || expert.name) : expert.name} is visible to every woman on the platform, with the AW Verified mark.`
+            : "Finish your listing, then publish it. Nothing shows in the directory until you do."}
+        </p>
+        <button type="button" className={link} onClick={() => onGo("profile")}>Open my listing</button>
+      </div>
+
+      {hostedGroup ? (
+        <div className={card}>
+          <p className={eyebrow}>Your community</p>
+          <p className={title}>{hostedGroup.name}</p>
+          <p className={body}>
+            {roomLive ? "Open and taking requests to join." : "In draft. Finish the six steps and press Publish when you are ready."}
+          </p>
+          <button type="button" className={link} onClick={() => onGo("community")}>Open my community</button>
+        </div>
+      ) : (
+        <div className={`${card} bg-awsage-wash/60 border-awsage-core/30`}>
+          <p className={eyebrow}>Host your own community</p>
+          <p className={title}>A private room, run by you.</p>
+          <p className={body}>
+            Some partners host a request to join room inside The Aligned Woman Co., where women ask what they will not ask anywhere else. It is approved rarely, after a conversation.
+          </p>
+          <Link to="/Apply?intent=community" className={link}>Tell us about the room you have in mind</Link>
+        </div>
+      )}
+
+      <div className={card}>
+        <p className={eyebrow}>Contact requests</p>
+        <p className={title}>{newRequests ? `${newRequests} new` : "Nothing new"}</p>
+        <p className={body}>{newRequests ? "Women who asked to be introduced to you." : "Introductions from women in the directory land here."}</p>
+        <button type="button" className={link} onClick={() => onGo("contact-requests")}>Open contact requests</button>
+      </div>
+
+      {affiliate && (
+        <div className={card}>
+          <p className={eyebrow}>Earnings</p>
+          <p className={title}>R{(affiliate.total_commission || 0).toLocaleString()}</p>
+          <p className={body}>{affiliate.total_sales || 0} {affiliate.total_sales === 1 ? "purchase" : "purchases"} through your link.</p>
+          <button type="button" className={link} onClick={() => onGo("earnings")}>Open earnings</button>
+        </div>
+      )}
     </div>
   );
 }
