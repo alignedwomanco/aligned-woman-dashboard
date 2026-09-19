@@ -58,7 +58,9 @@ export default function Contact() {
 
   const handleCardClick = (path) => {
     if (path.type === "apply_expert") {
-      setShowExpertModal(true);
+      // /Apply is the single apply surface. It is public and it sends the
+      // applicant a confirmation, which this modal never did.
+      window.location.href = "/Apply";
     } else {
       setSelectedType(path.type);
     }
