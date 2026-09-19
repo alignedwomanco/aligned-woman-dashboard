@@ -14,6 +14,18 @@ const H1 = "font-display text-[29px] md:text-[34px] leading-[1.22] text-awburg-d
 const P = "font-body font-light text-[14.5px] md:text-[15px] leading-[1.65] text-awburg-dark m-0";
 const EM = "italic text-awburg-bright";
 
+function Check({ checked, onChange, id, children }) {
+  return (
+    <label htmlFor={id} className="flex items-start gap-[14px] min-h-[48px] cursor-pointer">
+      <input id={id} type="checkbox" className="sr-only peer" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span aria-hidden="true" className={`flex-none mt-[2px] w-[26px] h-[26px] rounded-full border-[1.5px] flex items-center justify-center font-body text-[13px] font-bold transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-awrose-deep ${checked ? "bg-awburg-core border-awburg-core text-paper" : "border-awburg-core/30 bg-paper text-transparent"}`}>
+        {"✓"}
+      </span>
+      <span className="font-body text-[14.5px] leading-[1.6] text-awburg-dark pt-[2px]">{children}</span>
+    </label>
+  );
+}
+
 export function Pitch({ group, host, slug }) {
   const business = host?.business_name || host?.name || "the host";
   const first = host?.first_name || "the host";
@@ -50,16 +62,6 @@ export function JoinGate({ group, host, onRequest, busy, error }) {
   const [rulesOpen, setRulesOpen] = useState(false);
   const first = host?.first_name || "the host";
   const canSend = woman && rules && !busy;
-
-  const Check = ({ checked, onChange, id, children }) => (
-    <label htmlFor={id} className="flex items-start gap-[14px] min-h-[48px] cursor-pointer">
-      <input id={id} type="checkbox" className="sr-only peer" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span aria-hidden="true" className={`flex-none mt-[2px] w-[26px] h-[26px] rounded-full border-[1.5px] flex items-center justify-center font-body text-[13px] font-bold transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-awrose-deep ${checked ? "bg-awburg-core border-awburg-core text-paper" : "border-awburg-core/30 bg-paper text-transparent"}`}>
-        {"✓"}
-      </span>
-      <span className="font-body text-[14.5px] leading-[1.6] text-awburg-dark pt-[2px]">{children}</span>
-    </label>
-  );
 
   return (
     <div className="px-[22px] pt-7 pb-[26px] md:px-10 md:pt-12 md:pb-14 md:max-w-[560px] md:mx-auto flex flex-col gap-[18px]">
