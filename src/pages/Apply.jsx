@@ -66,6 +66,12 @@ const INTEREST_OPTIONS = [
     note: "Bring your teaching to the platform, taught the Aligned Woman way.",
     locked: false,
   },
+  {
+    key: "host_community",
+    label: "Host your own community",
+    note: "A private, request to join room inside The Aligned Woman Co., run by you. This one is discussed first: we talk before anything is granted.",
+    locked: false,
+  },
 ];
 
 const FIVE_CHECKS = [
@@ -128,13 +134,34 @@ export default function Apply() {
     website_url: "",
     instagram_url: "",
     linkedin_url: "",
+    logo_url: "",
     category_interest: [],
     interested_in:
       searchParams.get("intent") === "course"
         ? ["marketplace_profile", "host_course"]
-        : ["marketplace_profile"],
+        : searchParams.get("intent") === "community"
+          ? ["marketplace_profile", "host_community"]
+          : ["marketplace_profile"],
+    community_name: "",
+    community_for: "",
+    community_topics: "",
     message: "",
   });
+  const [logoUploading, setLogoUploading] = useState(false);
+
+  const handleLogoFile = async (file) => {
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      set("logo_url", file_url || "");
+    } catch (err) {
+      console.error("Logo upload failed", err);
+      setErrors((er) => ({ ...er, logo_url: "The logo did not upload. Try a smaller image." }));
+    } finally {
+      setLogoUploading(false);
+    }
+  };
 
   useEffect(() => {
     base44.auth
@@ -180,6 +207,11 @@ export default function Apply() {
     if (form.application_type === "business" && !form.business_name.trim()) {
       e.business_name = "The business name is required when applying as a business.";
     }
+    if (form.interested_in.includes("host_community")) {
+      if (!form.community_name.trim()) e.community_name = "Tell us what the community would be called.";
+      if (!form.community_for.trim()) e.community_for = "Tell us who it is for.";
+      if (!form.community_topics.trim()) e.community_topics = "Tell us what women would talk about there.";
+    }
     return e;
   };
 
@@ -193,6 +225,7 @@ export default function Apply() {
 
     const name = form.applicant_name.trim();
     const email = form.email.trim().toLowerCase();
+    const wantsCommunity = form.interested_in.includes("host_community");
 
     // Step 1: the record. This is the only step allowed to fail loudly,
     // because it is the only step that loses the application.
@@ -208,8 +241,12 @@ export default function Apply() {
         website_url: form.website_url.trim(),
         instagram_url: form.instagram_url.trim(),
         linkedin_url: form.linkedin_url.trim(),
+        logo_url: form.application_type === "business" ? form.logo_url : "",
         category_interest: form.category_interest,
         interested_in: form.interested_in,
+        community_name: wantsCommunity ? form.community_name.trim() : "",
+        community_for: wantsCommunity ? form.community_for.trim() : "",
+        community_topics: wantsCommunity ? form.community_topics.trim() : "",
         message: form.message.trim(),
         status: "pending",
       });
@@ -231,7 +268,7 @@ export default function Apply() {
       base44.integrations.Core.SendEmail({
         to: ADMIN_EMAIL,
         subject: `New expert application - ${name}`,
-        body: `Name: ${name}\nEmail: ${email}\nType: ${form.application_type}\nInterested in: ${form.interested_in.join(", ")}\n\n${form.message}`,
+        body: `Name: ${name}\nEmail: ${email}\nType: ${form.application_type}${form.business_name ? `\nBusiness: ${form.business_name}` : ""}\nInterested in: ${form.interested_in.join(", ")}${wantsCommunity ? `\n\nCommunity: ${form.community_name}\nFor: ${form.community_for}\nTopics: ${form.community_topics}` : ""}\n\n${form.message}\n\nReview: https://app.alignedwomanco.com/admin (Applications)`,
       }).catch(() => {});
     } catch (err) {
       console.error("Admin alert failed", err);
@@ -408,14 +445,38 @@ export default function Apply() {
             />
           </Field>
           {isBusiness && (
-            <Field label="Business name" error={errors.business_name}>
-              <input
-                className={INPUT}
-                value={form.business_name}
-                onChange={(e) => set("business_name", e.target.value)}
-                placeholder="The registered name of the business"
-              />
-            </Field>
+            <>
+              <Field label="Business name" error={errors.business_name}>
+                <input
+                  className={INPUT}
+                  value={form.business_name}
+                  onChange={(e) => set("business_name", e.target.value)}
+                  placeholder="The registered name of the business"
+                />
+              </Field>
+              <Field
+                label="Logo"
+                error={errors.logo_url}
+                helper="Shown on your listing in place of a headshot. Square works best."
+              >
+                <div className="flex items-center gap-4">
+                  {form.logo_url ? (
+                    <img src={form.logo_url} alt="" className="w-14 h-14 rounded-full object-cover border border-awburg-core/10" />
+                  ) : (
+                    <span className="w-14 h-14 rounded-full bg-awrose-wash border border-awburg-core/10" aria-hidden="true" />
+                  )}
+                  <label className="font-body font-medium text-[12px] text-awburg-core rounded-full px-5 min-h-[44px] inline-flex items-center border border-awburg-core/20 hover:border-awburg-core/45 cursor-pointer">
+                    {logoUploading ? "Uploading..." : form.logo_url ? "Change logo" : "Upload logo"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(e) => handleLogoFile(e.target.files?.[0])}
+                    />
+                  </label>
+                </div>
+              </Field>
+            </>
           )}
         </div>
 
@@ -532,6 +593,45 @@ export default function Apply() {
             );
           })}
         </div>
+
+        {/* Host your own community: three questions, discussed first */}
+        {form.interested_in.includes("host_community") && (
+          <div className="space-y-5 rounded-2xl border border-awsage-core/30 bg-awsage-wash/60 p-5">
+            <div>
+              <p className="font-body font-semibold text-[14px] text-awburg-core">About the community you would host</p>
+              <p className={HELPER}>
+                Hosting a room is approved rarely, after a real conversation. These three answers are
+                where that conversation starts.
+              </p>
+            </div>
+            <Field label="What would it be called" error={errors.community_name}>
+              <input
+                className={INPUT}
+                value={form.community_name}
+                onChange={(e) => set("community_name", e.target.value)}
+                placeholder="For example, The Grounded Women Circle"
+              />
+            </Field>
+            <Field label="Who is it for" error={errors.community_for}>
+              <textarea
+                className={TEXTAREA}
+                rows={2}
+                value={form.community_for}
+                onChange={(e) => set("community_for", e.target.value)}
+                placeholder="The women you have in mind, in a sentence or two."
+              />
+            </Field>
+            <Field label="What would women talk about there" error={errors.community_topics}>
+              <textarea
+                className={TEXTAREA}
+                rows={3}
+                value={form.community_topics}
+                onChange={(e) => set("community_topics", e.target.value)}
+                placeholder="The questions you already get asked, the things nobody else will talk about."
+              />
+            </Field>
+          </div>
+        )}
 
         {/* Anything else */}
         <Field label="Anything else">
