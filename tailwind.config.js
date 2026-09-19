@@ -61,25 +61,27 @@ module.exports = {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			},
+  			// rgb(var(--x-rgb) / <alpha-value>) so opacity modifiers work.
+  			// The plain --aw-* hex vars stay for inline styles.
   			awburg: {
-  				dark: 'var(--aw-burg-dark)',
-  				core: 'var(--aw-burg-core)',
-  				mid: 'var(--aw-burg-mid)',
-  				bright: 'var(--aw-burg-bright)'
+  				dark: 'rgb(var(--aw-burg-dark-rgb) / <alpha-value>)',
+  				core: 'rgb(var(--aw-burg-core-rgb) / <alpha-value>)',
+  				mid: 'rgb(var(--aw-burg-mid-rgb) / <alpha-value>)',
+  				bright: 'rgb(var(--aw-burg-bright-rgb) / <alpha-value>)'
   			},
   			awrose: {
-  				deep: 'var(--aw-rose-deep)',
-  				core: 'var(--aw-rose-core)',
-  				light: 'var(--aw-rose-light)',
-  				pale: 'var(--aw-rose-pale)',
-  				wash: 'var(--aw-rose-wash)'
+  				deep: 'rgb(var(--aw-rose-deep-rgb) / <alpha-value>)',
+  				core: 'rgb(var(--aw-rose-core-rgb) / <alpha-value>)',
+  				light: 'rgb(var(--aw-rose-light-rgb) / <alpha-value>)',
+  				pale: 'rgb(var(--aw-rose-pale-rgb) / <alpha-value>)',
+  				wash: 'rgb(var(--aw-rose-wash-rgb) / <alpha-value>)'
   			},
   			awsage: {
-  				core: 'var(--aw-sage)',
-  				wash: 'var(--aw-sage-wash)'
+  				core: 'rgb(var(--aw-sage-rgb) / <alpha-value>)',
+  				wash: 'rgb(var(--aw-sage-wash-rgb) / <alpha-value>)'
   			},
-  			'off-white': 'var(--aw-off-white)',
-  			paper: 'var(--aw-white)'
+  			'off-white': 'rgb(var(--aw-off-white-rgb) / <alpha-value>)',
+  			paper: 'rgb(var(--aw-white-rgb) / <alpha-value>)'
   		},
   		fontFamily: {
   			display: ['DM Serif Display', 'Cormorant Garamond', 'Georgia', 'serif'],
