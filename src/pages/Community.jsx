@@ -25,9 +25,12 @@ export default function Community() {
     queryFn: () => base44.entities.Group.filter({ is_active: true }, "order", 200),
   });
 
+  // Membership rows are matched on user_email, not created_by: a partner
+  // room's rows are written by a service role function, so created_by is
+  // not the member. user_email is set on every row, old and new.
   const { data: myMemberships = [], isLoading: memLoading } = useQuery({
     queryKey: ["community-my-memberships", currentUser?.email],
-    queryFn: () => base44.entities.GroupMember.filter({ created_by: currentUser.email }, "-created_date", 200),
+    queryFn: () => base44.entities.GroupMember.filter({ user_email: currentUser.email }, "-created_date", 200),
     enabled: !!currentUser?.email,
   });
 
@@ -50,8 +53,12 @@ export default function Community() {
     .sort((a, b) => new Date(a.scheduled_for) - new Date(b.scheduled_for))
     .forEach((s) => { if (!nextByGroup[s.group_id]) nextByGroup[s.group_id] = s; });
 
-  const joined = groups.filter((g) => membershipByGroup[g.id]);
-  const discover = groups.filter((g) => !membershipByGroup[g.id] && g.visibility !== "secret");
+  // A partner room in draft is invisible everywhere until its host
+  // publishes it. A pending request is not a membership yet.
+  const visibleGroups = groups.filter((g) => g.status !== "draft");
+  const isIn = (g) => membershipByGroup[g.id] && (membershipByGroup[g.id].status || "approved") === "approved";
+  const joined = visibleGroups.filter((g) => isIn(g));
+  const discover = visibleGroups.filter((g) => !isIn(g) && g.visibility !== "secret");
 
   return (
     <div className="aw-c min-h-screen flex">
@@ -88,7 +95,7 @@ export default function Community() {
           <p className="section-title" style={{ marginBottom: 18 }}>Discover</p>
           <div className="main discover-row">
             {discover.map((g) => (
-              <DiscoverCard key={g.id} group={g} session={nextByGroup[g.id]} />
+              <DiscoverCard key={g.id} group={g} session={nextByGroup[g.id]} pending={membershipByGroup[g.id]?.status === "pending"} />
             ))}
             <OpeningSoonCard />
           </div>
@@ -146,17 +153,24 @@ export default function Community() {
   );
 }
 
+// A partner hosted room lives at its own address and nowhere else, so
+// there is only ever one URL in circulation for it.
+function roomHref(group) {
+  return group.host_expert_id ? `/${group.slug}` : `/Community/${group.slug}`;
+}
+
 function JoinedCard({ group, membership, session }) {
+  const isCircle = !!group.host_expert_id;
   return (
     <div className="card dark">
       <div style={{ display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "space-between", alignItems: "flex-start" }}>
         <div style={{ maxWidth: 560 }}>
-          <Chip onDark>{group.group_type === "event" ? "Event group" : "Live group"}</Chip>
+          <Chip onDark>{isCircle ? "Private circle" : group.group_type === "event" ? "Event group" : "Live group"}</Chip>
           <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 26, margin: "12px 0 8px", lineHeight: 1.2 }}>
             {group.name}
           </h3>
           <p className="meta" style={{ fontSize: 11.5, margin: 0 }}>
-            {group.member_count || 0} {group.member_count === 1 ? "member" : "members"}
+            {isCircle ? (group.subtitle || group.blurb || "") : `${group.member_count || 0} ${group.member_count === 1 ? "member" : "members"}`}
             {membership?.joined_at ? ` · ${joinedLabel(membership.joined_at)}` : ""}
           </p>
           {session && (
@@ -167,8 +181,8 @@ function JoinedCard({ group, membership, session }) {
           )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
-          <Link to={`/Community/${group.slug}`} className="btn rose">
-            Open group <Knob />
+          <Link to={roomHref(group)} className="btn rose">
+            {isCircle ? "Open the Circle" : "Open group"} <Knob />
           </Link>
         </div>
       </div>
@@ -176,19 +190,23 @@ function JoinedCard({ group, membership, session }) {
   );
 }
 
-function DiscoverCard({ group, session }) {
+function DiscoverCard({ group, session, pending }) {
+  const isCircle = !!group.host_expert_id;
   return (
     <div className="card">
-      <Chip>{group.group_type === "event" ? "Event group" : "Live group"}</Chip>
+      <Chip>{isCircle ? "Private circle" : group.group_type === "event" ? "Event group" : "Live group"}</Chip>
       <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, color: "var(--burg)", margin: "14px 0 10px", lineHeight: 1.2 }}>
         {group.name}
       </h3>
       <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 13, color: "var(--ink)", opacity: 0.82, lineHeight: 1.75, margin: "0 0 12px" }}>
         {group.blurb}
       </p>
-      <p style={{ fontSize: 12, color: "var(--note)", margin: 0 }}>
-        {group.member_count || 0} {group.member_count === 1 ? "member" : "members"}
-      </p>
+      {/* Nothing is visible before approval in a partner room, counts included. */}
+      {!isCircle && (
+        <p style={{ fontSize: 12, color: "var(--note)", margin: 0 }}>
+          {group.member_count || 0} {group.member_count === 1 ? "member" : "members"}
+        </p>
+      )}
       {session && (
         <div className="next-live">
           <span className="eyebrow">Next live</span>
@@ -196,12 +214,14 @@ function DiscoverCard({ group, session }) {
         </div>
       )}
       <div className="actions">
-        <Link to={`/Community/${group.slug}`} className="btn rose">
-          Join the group <Knob />
+        <Link to={roomHref(group)} className="btn rose">
+          {pending ? "Request pending" : isCircle ? "Request to join" : "Join the group"} <Knob />
         </Link>
-        <Link to={`/Community/${group.slug}`} className="textlink">
-          Have a look first
-        </Link>
+        {!isCircle && (
+          <Link to={roomHref(group)} className="textlink">
+            Have a look first
+          </Link>
+        )}
       </div>
     </div>
   );
