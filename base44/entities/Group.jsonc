@@ -1,59 +1,126 @@
 {
-  "description": "A community room. Interest groups are created by an admin and open to any registered member. Private groups are created by members and invite only. Event groups are populated from a ticket list.",
   "name": "Group",
+  "type": "object",
+  "description": "A community room. Interest groups are created by an admin and open to any registered member. Private groups are created by members and invite only. Event groups are populated from a ticket list. A partner hosted room (host_expert_id set) lives at its own slug as a top level address, is request to join, and is invisible until status is published.",
   "properties": {
-    "blurb": {
-      "description": "One line shown on cards and under the group name",
-      "type": "string"
+    "name": {
+      "type": "string",
+      "description": "Display name, for example The Grounded Women Circle"
     },
-    "cover_image": {
-      "description": "Optional cover image URL. Falls back to a brand gradient when empty.",
-      "type": "string"
+    "slug": {
+      "type": "string",
+      "description": "URL segment. For a partner room this is the room's public address, for example groundedwomen at app.alignedwomanco.com/groundedwomen. Unique. Validated against the reserved word list in src/lib/roomSlug.js."
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "One line under the room name in the header, for example Grounded women. Still growing. Still living."
+    },
+    "blurb": {
+      "type": "string",
+      "description": "One line shown on cards and under the group name"
     },
     "description": {
-      "description": "Longer About copy for the group page",
-      "type": "string"
+      "type": "string",
+      "description": "Longer About copy for the group page. For a partner room this is the room intro shown in the feed."
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Optional cover image URL. Falls back to a brand gradient when empty."
     },
     "group_type": {
-      "description": "interest is admin created and open, private is member created and invite only, event is populated from an attendee list",
+      "type": "string",
       "enum": [
         "interest",
         "private",
         "event"
       ],
-      "type": "string"
-    },
-    "is_active": {
-      "default": true,
-      "description": "Inactive groups are hidden from Discover but remain readable to members",
-      "type": "boolean"
-    },
-    "member_count": {
-      "default": 0,
-      "description": "Denormalised count, kept in step by the join and leave actions so cards do not have to aggregate GroupMember on every render",
-      "type": "number"
-    },
-    "name": {
-      "description": "Display name, for example Hormone Health",
-      "type": "string"
-    },
-    "order": {
-      "default": 0,
-      "description": "Sort order in Discover, ascending",
-      "type": "number"
-    },
-    "slug": {
-      "description": "URL segment, for example hormone-health. Unique.",
-      "type": "string"
+      "description": "interest is admin created and open, private is member created and invite only, event is populated from an attendee list"
     },
     "visibility": {
-      "description": "public is listed and joinable, private is listed and join by request, secret is invisible unless invited",
+      "type": "string",
       "enum": [
         "public",
         "private",
         "secret"
       ],
-      "type": "string"
+      "description": "public is listed and joinable, private is listed and join by request, secret is invisible unless invited"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Inactive groups are hidden from Discover but remain readable to members"
+    },
+    "member_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Denormalised count, kept in step by the join and leave actions so cards do not have to aggregate GroupMember on every render"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Sort order in Discover, ascending"
+    },
+    "host_expert_id": {
+      "type": "string",
+      "description": "Expert record of the partner hosting this room. Empty for Aligned Woman Co. rooms."
+    },
+    "host_bio_override": {
+      "type": "string",
+      "description": "Optional host line shown on the host card in place of the Expert bio"
+    },
+    "rules_text": {
+      "type": "string",
+      "description": "The room rules, shown in the rules modal and agreed to at the join gate"
+    },
+    "topics": {
+      "type": "array",
+      "description": "Topics members tag posts with. Data, not code, so the host can edit them without a developer.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "accent_token": {
+      "type": "string",
+      "description": "Tailwind colour token name for the room accent, for example sage. Never a hex."
+    },
+    "is_sensitive": {
+      "type": "boolean",
+      "description": "Room holds intimate or health conversation. Anonymous posting is offered and identities are stripped server side."
+    },
+    "access_mode": {
+      "type": "string",
+      "enum": [
+        "open",
+        "request",
+        "invite"
+      ],
+      "description": "open joins immediately, request writes a pending membership for the host to approve, invite is by link only"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "description": "Draft rooms are invisible to everyone but the host and admins. Treat an empty value as published for legacy rooms. No default, because a field carrying both enum and default is rejected by the schema API."
+    },
+    "welcome_post_id": {
+      "type": "string",
+      "description": "GroupPost id of the pinned welcome post written by the host at setup"
     }
   },
   "required": [
@@ -77,6 +144,5 @@
         "role": "admin"
       }
     }
-  },
-  "type": "object"
+  }
 }
