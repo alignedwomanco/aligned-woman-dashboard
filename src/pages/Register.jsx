@@ -41,7 +41,9 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await base44.auth.register({ email, password, full_name: fullName.trim() });
+      // The SDK's register payload has no name field, so the name is set
+      // on the account with updateMe straight after the code is verified.
+      await base44.auth.register({ email, password });
       try { sessionStorage.setItem(FULL_NAME_KEY, fullName.trim()); } catch (_e) { /* private mode */ }
       setShowOtp(true);
     } catch (err) {
@@ -59,14 +61,9 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
-      // Belt and braces: if the register call did not store the name, set
-      // it on the fresh session before leaving the page.
       try {
         const pending = fullName.trim() || sessionStorage.getItem(FULL_NAME_KEY) || "";
-        if (pending) {
-          const me = await base44.auth.me().catch(() => null);
-          if (me && !me.full_name) await base44.auth.updateMe({ full_name: pending });
-        }
+        if (pending) await base44.auth.updateMe({ full_name: pending });
         sessionStorage.removeItem(FULL_NAME_KEY);
       } catch (_e) { /* the name can be added in profile settings */ }
       window.location.href = getPostAuthDestination();
