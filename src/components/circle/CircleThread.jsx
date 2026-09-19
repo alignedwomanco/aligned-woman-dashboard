@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { shortTime, topicLabel } from "@/lib/circle";
-import { BTN_PRIMARY, BTN_SECONDARY, BTN_TEXT, CARD, Avatar, HostCard, HostLogo, FinePrint, RulesModal, Sheet } from "@/components/circle/CircleShell";
+import { activeTopics, shortTime, topicLabel } from "@/lib/circle";
+import { BTN_PRIMARY, BTN_SECONDARY, BTN_TEXT, CARD, CHIP, CHIP_ON, Avatar, HostCard, HostLogo, FinePrint, RulesModal, Sheet } from "@/components/circle/CircleShell";
 import { MediaBlock, ModeratorLine, TopicChip } from "@/components/circle/CircleFeed";
 
 // ────────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ export function ReportSheet({ open, target, group, host, onClose }) {
 function Reply({ post, host, isMod, onReport, onMenuAction }) {
   const [menu, setMenu] = useState(false);
   return (
-    <div className="flex gap-3 py-3 border-t border-awburg-core/8">
+    <div className="flex gap-3 py-3 border-t border-awburg-core/10">
       {post.author_is_host ? <HostLogo host={host} size={28} /> : <Avatar post={post} size={28} />}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -118,7 +118,10 @@ export default function CircleThread({ group, host, me, post, replies, onBack, o
   const [report, setReport] = useState(null);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [retagOpen, setRetagOpen] = useState(false);
   const isMod = me?.role === "host" || me?.role === "admin";
+  // The woman who asked anonymously stays anonymous on her own thread. The
+  // server enforces it; the switch is simply not offered to her here.
   const askedAnonymously = post?.is_mine && post?.is_anonymous;
 
   useEffect(() => { setAnon(!!askedAnonymously); }, [askedAnonymously, post?.id]);
@@ -166,6 +169,9 @@ export default function CircleThread({ group, host, me, post, replies, onBack, o
                       <button type="button" className="block w-full text-left px-4 py-3 font-body text-[12.5px] text-awburg-dark hover:bg-awrose-wash" onClick={() => { setMenu(false); onModerateAction(post.is_pinned ? "unpin" : "pin", post); }}>
                         {post.is_pinned ? "Unpin" : "Pin to the top"}
                       </button>
+                      <button type="button" className="block w-full text-left px-4 py-3 font-body text-[12.5px] text-awburg-dark hover:bg-awrose-wash" onClick={() => { setMenu(false); setRetagOpen(true); }}>
+                        Change topic
+                      </button>
                       <button type="button" className="block w-full text-left px-4 py-3 font-body text-[12.5px] text-awrose-deep hover:bg-awrose-wash" onClick={() => { setMenu(false); onModerateAction("delete_post", post); }}>Remove post</button>
                     </>
                   )}
@@ -183,6 +189,19 @@ export default function CircleThread({ group, host, me, post, replies, onBack, o
           </div>
           <p className="font-body font-light text-[15px] leading-[1.65] text-awburg-dark whitespace-pre-line">{post.body}</p>
           <MediaBlock media={post.media} full />
+          {retagOpen && isMod && (
+            <div className="mt-4 pt-4 border-t border-awburg-core/10">
+              <p className="font-body font-semibold text-[12px] text-awburg-dark mb-2">Move this to</p>
+              <div className="flex flex-wrap gap-2">
+                {activeTopics(group).map((t) => (
+                  <button key={t.key} type="button" className={t.key === post.topic_key ? CHIP_ON : CHIP} onClick={() => { setRetagOpen(false); if (t.key !== post.topic_key) onModerateAction("retag", post, t.key); }}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <button type="button" className={BTN_TEXT} onClick={() => setRetagOpen(false)}>Cancel</button>
+            </div>
+          )}
         </article>
 
         {answer && (
@@ -217,7 +236,7 @@ export default function CircleThread({ group, host, me, post, replies, onBack, o
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>
             </button>
           </div>
-          {!(me?.role === "host") && (
+          {!(me?.role === "host") && !askedAnonymously && (
             <label className="flex items-center justify-between gap-3 min-h-[36px] cursor-pointer">
               <span className="font-body text-[11.5px] text-awburg-dark">Reply as Anonymous member · {anon ? "On" : "Off"}</span>
               <input type="checkbox" role="switch" aria-checked={anon} className="sr-only peer" checked={anon} onChange={(e) => setAnon(e.target.checked)} />
@@ -226,7 +245,7 @@ export default function CircleThread({ group, host, me, post, replies, onBack, o
               </span>
             </label>
           )}
-          {askedAnonymously && anon && <p className="font-body text-[11px] text-awburg-mid">Kept anonymous so your question stays yours.</p>}
+          {askedAnonymously && <p className="font-body text-[11px] text-awburg-mid">Kept anonymous so your question stays yours.</p>}
           {error && <p className="font-body text-[11.5px] text-awrose-deep">{error}</p>}
         </div>
       </div>
