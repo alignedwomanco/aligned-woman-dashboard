@@ -12,7 +12,8 @@ import {
 // ────────────────────────────────────────────────────────────────
 
 export function StatusMark({ post }) {
-  const answered = post.status === "answered" || post.host_replied;
+  // Answered is the record's state, set when the host replies or marks it.
+  const answered = post.status === "answered";
   return answered ? (
     <span className="inline-flex items-center gap-1.5 font-body text-[10.5px] font-semibold text-awsage-core">
       <span className="w-[7px] h-[7px] rounded-full bg-awsage-core" aria-hidden="true" />
@@ -69,7 +70,12 @@ function QuestionCard({ post, group, host, onOpen, onReport }) {
   return (
     <article className={`${CARD} px-5 py-[18px]`}>
       <div className="flex items-center justify-between gap-3 mb-3">
-        <TopicChip label={label} />
+        <span className="inline-flex items-center gap-2">
+          {post.is_pinned && (
+            <svg className="text-awburg-core" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-label="Pinned"><path d="M16 3l5 5-4 1-3 3 1 6-2 2-4-4-5 5-1-1 5-5-4-4 2-2 6 1 3-3z" /></svg>
+          )}
+          <TopicChip label={label} />
+        </span>
         <StatusMark post={post} />
       </div>
       <div className="flex items-center gap-3 mb-3">
@@ -81,9 +87,10 @@ function QuestionCard({ post, group, host, onOpen, onReport }) {
       </div>
       <button type="button" onClick={() => onOpen(post.id)} className="block w-full text-left">
         <p className="font-body font-light text-[14.5px] leading-[1.6] text-awburg-dark line-clamp-3">{post.body}</p>
-        <MediaBlock media={post.media} />
       </button>
-      {post.host_replied && (
+      {/* Media sits outside the button so a voice note can be played here. */}
+      <MediaBlock media={post.media} />
+      {post.status === "answered" && (
         <div className="flex items-center gap-2 mt-3">
           <HostLogo host={host} size={20} />
           <span className="font-body text-[11.5px] font-semibold text-awburg-core">{host?.first_name || "The host"} answered</span>
@@ -127,29 +134,29 @@ export function WelcomePost({ pinned, host }) {
 export function NotifySheet({ open, onClose, group, current, onSaved }) {
   const [pref, setPref] = useState(current || "mine");
   const [busy, setBusy] = useState(false);
-  const options = [
-    { key: "mine", label: "My threads only", note: "Replies and answers to questions you asked or replied to." },
-    { key: "all", label: "All new questions", note: "Every new question posted in the Circle." },
-    { key: "none", label: "Nothing", note: "You will still be able to visit the Circle any time." },
-  ];
+  const [error, setError] = useState("");
   const save = async () => {
     setBusy(true);
+    setError("");
     try {
-      await base44.functions.invoke("notifyCircle", { groupId: group.id, action: "set_pref", notifyPref: pref });
+      const res = await base44.functions.invoke("notifyCircle", { groupId: group.id, action: "set_pref", notifyPref: pref });
+      if ((res?.data || res)?.error) throw new Error("failed");
       onSaved(pref);
       onClose();
+    } catch (_e) {
+      setError("That did not save. Try again in a moment.");
     } finally {
       setBusy(false);
     }
   };
   return (
     <Sheet open={open} onClose={onClose} label="Notification settings">
-      <NotifyBody pref={pref} setPref={setPref} options={options} busy={busy} onSave={save} onCancel={onClose} />
+      <NotifyBody pref={pref} setPref={setPref} busy={busy} error={error} onSave={save} onCancel={onClose} />
     </Sheet>
   );
 }
 
-export function NotifyBody({ pref, setPref, options, busy, onSave, onCancel, inline = false }) {
+export function NotifyBody({ pref, setPref, options, busy, error, onSave, onCancel, inline = false }) {
   const opts = options || [
     { key: "mine", label: "My threads only", note: "Replies and answers to questions you asked or replied to." },
     { key: "all", label: "All new questions", note: "Every new question posted in the Circle." },
@@ -173,6 +180,7 @@ export function NotifyBody({ pref, setPref, options, busy, onSave, onCancel, inl
         ))}
       </div>
       <p className="font-body font-light text-[11.5px] leading-[1.6] text-awburg-mid mt-3 mb-4">We email you and show it in the app. Nothing shows who you are.</p>
+      {error && <p className="font-body text-[12px] text-awrose-deep mb-3">{error}</p>}
       <button type="button" className={`${BTN_PRIMARY} ${inline ? "min-h-[48px]" : ""}`} disabled={busy} onClick={onSave}>{busy ? "Saving..." : "Save"}</button>
       {!inline && <button type="button" className={`${BTN_TEXT} w-full mt-2`} onClick={onCancel}>Cancel</button>}
     </div>
@@ -186,14 +194,15 @@ export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost,
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [inlinePref, setInlinePref] = useState(me?.notify_pref || "mine");
   const [inlineBusy, setInlineBusy] = useState(false);
+  const [inlineError, setInlineError] = useState("");
   const topics = activeTopics(group);
   const isMod = me?.role === "host" || me?.role === "admin";
 
   const shown = useMemo(() => {
     const q = search.trim().toLowerCase();
     return posts.filter((p) => {
-      if (filter === "unanswered" && (p.status === "answered" || p.host_replied)) return false;
-      if (filter === "answered" && !(p.status === "answered" || p.host_replied)) return false;
+      if (filter === "unanswered" && p.status === "answered") return false;
+      if (filter === "answered" && p.status !== "answered") return false;
       if (filter !== "all" && filter !== "unanswered" && filter !== "answered" && p.topic_key !== filter) return false;
       if (q && !String(p.body || "").toLowerCase().includes(q)) return false;
       return true;
@@ -202,9 +211,13 @@ export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost,
 
   const saveInline = async () => {
     setInlineBusy(true);
+    setInlineError("");
     try {
-      await base44.functions.invoke("notifyCircle", { groupId: group.id, action: "set_pref", notifyPref: inlinePref });
+      const res = await base44.functions.invoke("notifyCircle", { groupId: group.id, action: "set_pref", notifyPref: inlinePref });
+      if ((res?.data || res)?.error) throw new Error("failed");
       onPrefSaved?.(inlinePref);
+    } catch (_e) {
+      setInlineError("That did not save. Try again in a moment.");
     } finally {
       setInlineBusy(false);
     }
@@ -292,7 +305,7 @@ export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost,
         <TrustChips />
         <button type="button" className="text-left font-body text-[12.5px] font-semibold text-awburg-bright underline underline-offset-4 min-h-[44px] px-1" onClick={() => setRulesOpen(true)}>Circle rules</button>
         <div className={`${CARD} p-5`}>
-          <NotifyBody inline pref={inlinePref} setPref={setInlinePref} busy={inlineBusy} onSave={saveInline} />
+          <NotifyBody inline pref={inlinePref} setPref={setInlinePref} busy={inlineBusy} error={inlineError} onSave={saveInline} />
         </div>
         <FinePrint host={host} />
       </aside>
