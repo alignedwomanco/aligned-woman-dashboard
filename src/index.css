@@ -120,6 +120,22 @@
   --aw-sage: #5B6B4E;
   --aw-sage-wash: #F1F4ED;
   --aw-white: #FFFFFF;
+  /* Channel triples of the same colours, so Tailwind opacity modifiers
+     (bg-awburg-core/10, text-paper/80) resolve. A plain hex in a var
+     cannot take an alpha, so those classes used to emit nothing. */
+  --aw-burg-dark-rgb: 26 5 16;
+  --aw-burg-core-rgb: 74 14 46;
+  --aw-burg-mid-rgb: 107 22 66;
+  --aw-burg-bright-rgb: 140 32 87;
+  --aw-rose-deep-rgb: 168 100 96;
+  --aw-rose-core-rgb: 196 132 122;
+  --aw-rose-light-rgb: 232 180 174;
+  --aw-rose-pale-rgb: 245 221 217;
+  --aw-rose-wash-rgb: 253 245 243;
+  --aw-sage-rgb: 91 107 78;
+  --aw-sage-wash-rgb: 241 244 237;
+  --aw-white-rgb: 255 255 255;
+  --aw-off-white-rgb: 250 245 243;
   --aw-off-white: #FAF5F3;
   --aw-warm-grey: #C8B8B4;
   --aw-mid-grey: #8A7A76;
