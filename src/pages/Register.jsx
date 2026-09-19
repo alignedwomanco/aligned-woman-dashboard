@@ -152,7 +152,7 @@ export default function Register() {
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" className="text-awrose-core font-medium hover:underline">
+          <Link to={`/login${window.location.search}`} className="text-awrose-core font-medium hover:underline">
             Log in
           </Link>
         </>
