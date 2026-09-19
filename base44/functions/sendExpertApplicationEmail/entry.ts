@@ -72,7 +72,7 @@ function buildMimeMessage(to: string, bcc: string, subject: string, text: string
   return `${headers}\r\n\r\n${toBase64(text)}`;
 }
 
-function buildBody(name: string): string {
+function buildBody(name: string, wantsCommunity: boolean): string {
   return [
     `Hi ${name},`,
     ``,
@@ -80,6 +80,10 @@ function buildBody(name: string): string {
     ``,
     `Here is what happens next. We review every application against the Aligned Woman Standard. Should you be successful, we will request your qualifications and the proof behind them, your professional registration where your field requires one, and how you work with the women who trust you. If your work looks like a fit, the next step is a real conversation with us.`,
     ``,
+    // One line added when community hosting was ticked, per the host guide.
+    ...(wantsCommunity
+      ? [`You have also asked about hosting your own community. We approve those one at a time, after a conversation, so we will be in touch about that separately.`, ``]
+      : []),
     `You will hear from us either way, within 14 working days.`,
     ``,
     `With warmth,`,
@@ -129,7 +133,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Gmail connector is not available" }, { status: 503 });
     }
 
-    const raw = toBase64Url(buildMimeMessage(to, OWNER_EMAIL, SUBJECT, buildBody(name)));
+    const wantsCommunity = Array.isArray(application.interested_in) && application.interested_in.includes("host_community");
+    const raw = toBase64Url(buildMimeMessage(to, OWNER_EMAIL, SUBJECT, buildBody(name, wantsCommunity)));
 
     const response = await fetch(
       "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
