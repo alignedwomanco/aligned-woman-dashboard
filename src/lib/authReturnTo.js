@@ -6,6 +6,8 @@
 // from (?from_url=/groundedwomen, the checkout success page), falling
 // back to the dashboard. Only ever returns to our own app, never an
 // external address. Shared by Login and Register so the two cannot drift.
+const BOOTSTRAP_PARAMS = ["access_token", "clear_access_token", "app_id", "app_base_url", "functions_version", "from_url"];
+
 export function getPostAuthDestination(fallback = "/Dashboard") {
   try {
     const params = new URLSearchParams(window.location.search);
@@ -13,6 +15,9 @@ export function getPostAuthDestination(fallback = "/Dashboard") {
     if (fromUrl) {
       const url = new URL(fromUrl, window.location.origin);
       if (url.origin !== window.location.origin) return fallback;
+      // Same strip as safeReturnTo: app-params.js persists these from the
+      // URL into localStorage, so a crafted from_url could repoint the app.
+      for (const p of BOOTSTRAP_PARAMS) url.searchParams.delete(p);
       const path = url.pathname + url.search + url.hash;
       if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) return fallback;
       return path;
@@ -42,7 +47,7 @@ export function safeReturnTo() {
     // the token. Normal app-flow params (e.g. the OAuth consent ctx) are kept.
     // The full app-params.js bootstrap set (src/lib/app-params.js): any of
     // these in a crafted returnTo would be persisted at next load.
-    for (const p of ["access_token", "clear_access_token", "app_id", "app_base_url", "functions_version", "from_url"]) {
+    for (const p of BOOTSTRAP_PARAMS) {
       url.searchParams.delete(p);
     }
     const path = url.pathname + url.search;
