@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { topicLabel } from "@/lib/circle";
+import { randomId, topicLabel } from "@/lib/circle";
 import { BTN_PRIMARY, BTN_SECONDARY, BTN_TEXT, CARD, CHIP, CHIP_ON } from "@/components/circle/CircleShell";
 
 // ────────────────────────────────────────────────────────────────
@@ -237,7 +237,7 @@ function Topics({ room, run, busyId }) {
           </button>
         </div>
       ))}
-      <button type="button" className={BTN_TEXT + " self-start"} onClick={() => setTopics((arr) => [...arr, { key: "", label: "", order: arr.length, active: true }])}>Add a topic</button>
+      <button type="button" className={BTN_TEXT + " self-start"} onClick={() => setTopics((arr) => [...arr, { key: `t${randomId().slice(0, 10)}`, label: "", order: arr.length, active: true }])}>Add a topic</button>
     </div>
   );
 }
