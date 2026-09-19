@@ -22,7 +22,7 @@ export const CHIP =
   "inline-flex items-center rounded-full bg-paper border border-awburg-core/15 px-[15px] py-[11px] font-body text-[11px] font-semibold text-awburg-core whitespace-nowrap";
 export const CHIP_ON =
   "inline-flex items-center rounded-full bg-awrose-pale border border-awrose-pale px-[15px] py-[11px] font-body text-[11px] font-semibold text-awburg-core whitespace-nowrap";
-export const CARD = "rounded-[22px] bg-paper border border-awburg-core/10 shadow-[0_8px_24px_rgba(8,1,5,0.05)]";
+export const CARD = "rounded-[22px] bg-paper border border-awburg-core/10 shadow-sm";
 
 const AW_LOGO =
   "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png";
