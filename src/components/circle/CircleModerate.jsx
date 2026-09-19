@@ -52,6 +52,7 @@ export default function CircleModerate({ group, onBack, onOpenPost }) {
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["circle-moderate", group.id] });
     qc.invalidateQueries({ queryKey: ["circle-room", group.id] });
+    qc.invalidateQueries({ queryKey: ["circle-group"] });
   };
 
   const run = async (id, action, extra) => {
