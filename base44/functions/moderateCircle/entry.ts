@@ -407,6 +407,18 @@ Deno.serve(async (req) => {
       for (const k of ["subtitle", "description", "rules_text", "host_bio_override", "cover_image"]) {
         if (typeof f[k] === "string") patch[k] = f[k].trim().slice(0, 4000);
       }
+      // Three things cannot be switched off, per the host guide: women
+      // only, approved members only, nothing shared outside the room. If a
+      // host edits them out, the promise is appended back.
+      if (typeof patch.rules_text === "string") {
+        const t = patch.rules_text.toLowerCase();
+        const fixed = [
+          ["women only", "This is a closed, women only space."],
+          ["approved", "Every member is approved before she can see anything."],
+          ["stays in the circle", "What is shared in the Circle stays in the Circle: no screenshots, no sharing."],
+        ].filter(([needle]) => !t.includes(needle)).map(([, sentence]) => sentence);
+        if (fixed.length) patch.rules_text = `${patch.rules_text}${patch.rules_text ? " " : ""}${fixed.join(" ")}`;
+      }
       if (Array.isArray(f.topics)) {
         // Keys are stable identifiers posts point at. The client sends one
         // for every topic; a missing key gets a random one, never one
