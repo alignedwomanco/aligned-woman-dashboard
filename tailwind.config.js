@@ -74,6 +74,10 @@ module.exports = {
   				pale: 'var(--aw-rose-pale)',
   				wash: 'var(--aw-rose-wash)'
   			},
+  			awsage: {
+  				core: 'var(--aw-sage)',
+  				wash: 'var(--aw-sage-wash)'
+  			},
   			'off-white': 'var(--aw-off-white)',
   			paper: 'var(--aw-white)'
   		},
