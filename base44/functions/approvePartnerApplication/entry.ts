@@ -77,8 +77,12 @@ async function loadContext(base44: any, groupId: string) {
     membership = Array.isArray(legacy) ? legacy[0] : null;
   }
 
-  const memberStatus = membership ? (membership.status || "approved") : "none";
-  const isApproved = memberStatus === "approved";
+  // In a partner room a membership counts only when a moderator set it to
+  // approved. An empty status is treated as approved for legacy open rooms
+  // alone, so a row written outside the functions can never open a room.
+  const isPartnerRoom = !!group.host_expert_id;
+  const memberStatus = membership ? (membership.status || (isPartnerRoom ? "pending" : "approved")) : "none";
+  const isApproved = memberStatus === "approved" && (!isPartnerRoom || !!membership?.reviewed_by || membership?.role === "owner");
 
   return { user, email, group, hostExpert, membership, memberStatus, isAdmin, isHost, isApproved };
 }
@@ -289,7 +293,10 @@ Deno.serve(async (req) => {
       instagram_url: app.instagram_url || "",
       linkedin_url: app.linkedin_url || "",
       category: Array.isArray(app.category_interest) ? app.category_interest : [],
-      isPublished: false,
+      // The admin has just reviewed this person, and the host guide promises
+      // the listing goes live on approval. The partner can refine it from
+      // My Listing afterwards.
+      isPublished: true,
     };
 
     if (expert) {
@@ -298,7 +305,8 @@ Deno.serve(async (req) => {
         if (k === "isPublished") continue;
         if (!expert[k] && expertFields[k]) patch[k] = expertFields[k];
       }
-      if (Object.keys(patch).length) await svc.Expert.update(expert.id, patch);
+      patch.isPublished = true;
+      await svc.Expert.update(expert.id, patch);
       expert = { ...expert, ...patch };
     } else {
       expert = await svc.Expert.create(expertFields);
@@ -370,25 +378,32 @@ Deno.serve(async (req) => {
       review_notes: typeof p.reason === "string" ? p.reason.trim() : (app.review_notes || ""),
     });
 
+    // Wording follows the approved template in the community host guide.
     const partnerUrl = `${APP_ORIGIN}/partner`;
-    const lines = [
-      `Hi ${firstName},`, ``,
-      `We are glad to tell you that your application has been approved. You are now AW Verified.`, ``,
-      `Your partner dashboard is here: ${partnerUrl}`,
-      `Log in with this email address. From there you can finish your listing, and it goes live in the directory once you publish it.`,
-    ];
-    if (grantCommunityHost && group) {
-      lines.push(``, `You have also been approved to host your own community, ${group.name}.`);
-      lines.push(`It lives at ${roomUrl(group)} and stays private until you press Publish.`);
-      lines.push(`Set it up in six short steps under My Community in your dashboard: your room, about you, the rules, topics, your welcome post, and your invite link.`);
-      lines.push(`The host guide is there too. Read it before you open the doors; it covers what you can see as a host, how anonymous posts work, and what to do if a member shares something worrying.`);
-    }
-    if (grantAffiliate) lines.push(``, `Affiliate access is switched on. You will find your link and earnings under Earnings.`);
-    lines.push(``, `With warmth,`, `The Aligned Woman Co.`);
+    const lines = grantCommunityHost && group
+      ? [
+          `Hi ${firstName},`, ``,
+          `Your application to host a community on The Aligned Woman Co. has been approved, and your listing is live in the AW Verified directory.`, ``,
+          `Your room has been created in draft. Nobody can see it yet. You set it up yourself, and you decide when it opens.`, ``,
+          `Set up your room: ${partnerUrl}`, ``,
+          `It takes about ten minutes. Everything is pre-filled from your application, so you are editing rather than starting from nothing: your room name, your bio, the rules, the topics women choose from, a welcome post in your voice, and your invite link. Your room's address is ${roomUrl(group)}.`, ``,
+          `The host guide in your dashboard walks you through it, including what you can see as a host, what we ask of you, and how join requests and reports work. Read it before you open the doors.`, ``,
+          `When you press Publish, your link goes live and you can start inviting women in.`, ``,
+          `If anything is unclear, reply to this email and a person will answer.`, ``,
+          `With warmth,`, `The Aligned Woman Co.`,
+        ]
+      : [
+          `Hi ${firstName},`, ``,
+          `We are glad to tell you that your application has been approved. You are now AW Verified, and your listing is live in the directory.`, ``,
+          `Your partner dashboard is here: ${partnerUrl}`,
+          `Log in with this email address. From there you can refine your listing and see the women who ask to be introduced to you.`, ``,
+          `If anything is unclear, reply to this email and a person will answer.`, ``,
+          `With warmth,`, `The Aligned Woman Co.`,
+        ];
 
     await sendCircleEmail(base44, {
       to: applicantEmail, toName: app.applicant_name, bcc: OWNER_EMAIL,
-      subject: grantCommunityHost ? "You are approved, and your Circle is ready to set up" : "You are AW Verified",
+      subject: grantCommunityHost ? "Your community room is ready to set up" : "You are AW Verified",
       dedupeKey: `partner:approved:${app.id}`,
       text: lines.join("\n"),
     });
