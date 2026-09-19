@@ -1,38 +1,80 @@
 {
-  "description": "Membership of a group, plus the per member read state that drives the unread marker. One row per member per group.",
   "name": "GroupMember",
+  "type": "object",
+  "description": "Membership of a group, plus the per member read state that drives the unread marker. One row per member per group. For a request to join room the row is created by requestCircleJoin with status pending and role member, and only moderateCircle moves it to approved.",
   "properties": {
     "group_id": {
-      "description": "Group this membership belongs to",
-      "type": "string"
+      "type": "string",
+      "description": "Group this membership belongs to"
     },
-    "joined_at": {
-      "description": "When they joined, used for the you joined in June line",
-      "format": "date-time",
-      "type": "string"
-    },
-    "last_read_at": {
-      "description": "Last time this member opened the group. Posts newer than this drive the new posts since you were here marker. Kept here rather than on the post so a post is never rewritten when someone reads it.",
-      "format": "date-time",
-      "type": "string"
-    },
-    "muted": {
-      "default": false,
-      "description": "Member has muted notifications for this group",
-      "type": "boolean"
+    "user_email": {
+      "type": "string",
+      "description": "Member login email. Denormalised alongside created_by so membership can be read without a join."
     },
     "role": {
-      "description": "owner and moderator can manage the group, member cannot",
+      "type": "string",
       "enum": [
         "owner",
         "moderator",
         "member"
       ],
-      "type": "string"
+      "description": "owner and moderator can manage the group, member cannot"
     },
-    "user_email": {
-      "description": "Member login email. Denormalised alongside created_by so membership can be read without a join.",
-      "type": "string"
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "declined",
+        "removed"
+      ],
+      "description": "Request state. Treat an empty value as approved for legacy open rooms. No default, per the enum plus default gotcha."
+    },
+    "joined_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When they joined, used for the you joined in June line"
+    },
+    "last_read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time this member opened the group. Posts newer than this drive the new posts since you were here marker."
+    },
+    "muted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Member has muted notifications for this group"
+    },
+    "identifies_as_woman": {
+      "type": "boolean",
+      "description": "First consent at the join gate"
+    },
+    "agreed_to_rules_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the member agreed to the room rules, the second consent at the join gate"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Email of the host or admin who approved, declined or removed this member. First to act wins."
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the request was actioned"
+    },
+    "notify_pref": {
+      "type": "string",
+      "enum": [
+        "mine",
+        "all",
+        "none"
+      ],
+      "description": "mine is my threads only, all is every new question, none is nothing. Treat an empty value as mine."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Name shown on named posts, captured at approval from the user's full name"
     }
   },
   "required": [
@@ -73,6 +115,5 @@
         }
       ]
     }
-  },
-  "type": "object"
+  }
 }
