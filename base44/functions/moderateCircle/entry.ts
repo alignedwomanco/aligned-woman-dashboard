@@ -77,8 +77,12 @@ async function loadContext(base44: any, groupId: string) {
     membership = Array.isArray(legacy) ? legacy[0] : null;
   }
 
-  const memberStatus = membership ? (membership.status || "approved") : "none";
-  const isApproved = memberStatus === "approved";
+  // In a partner room a membership counts only when a moderator set it to
+  // approved. An empty status is treated as approved for legacy open rooms
+  // alone, so a row written outside the functions can never open a room.
+  const isPartnerRoom = !!group.host_expert_id;
+  const memberStatus = membership ? (membership.status || (isPartnerRoom ? "pending" : "approved")) : "none";
+  const isApproved = memberStatus === "approved" && (!isPartnerRoom || !!membership?.reviewed_by || membership?.role === "owner");
 
   return { user, email, group, hostExpert, membership, memberStatus, isAdmin, isHost, isApproved };
 }
@@ -404,17 +408,22 @@ Deno.serve(async (req) => {
         if (typeof f[k] === "string") patch[k] = f[k].trim().slice(0, 4000);
       }
       if (Array.isArray(f.topics)) {
+        // Keys are stable identifiers posts point at. The client sends one
+        // for every topic; a missing key gets a random one, never one
+        // derived from the label, so a rename can never orphan posts.
         patch.topics = f.topics
           .filter((t: any) => t && typeof t.label === "string" && t.label.trim())
           .slice(0, 30)
           .map((t: any, i: number) => ({
-            key: (typeof t.key === "string" && t.key.trim()) ? t.key.trim() : t.label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+            key: (typeof t.key === "string" && t.key.trim()) ? t.key.trim() : `t${crypto.randomUUID().replace(/-/g, "").slice(0, 10)}`,
             label: t.label.trim().slice(0, 60),
             order: typeof t.order === "number" ? t.order : i,
             active: t.active !== false,
           }));
       }
-      if (isAdmin && typeof f.name === "string" && f.name.trim()) patch.name = f.name.trim().slice(0, 120);
+      // The host may rename her room. The address stays with admins, since
+      // changing it after the link has been shared breaks every copy of it.
+      if (typeof f.name === "string" && f.name.trim()) patch.name = f.name.trim().slice(0, 120);
       if (isAdmin && typeof f.slug === "string") {
         const slug = f.slug.trim().toLowerCase();
         if (!/^[a-z0-9-]{3,40}$/.test(slug) || RESERVED.includes(slug)) return json({ error: "slug_not_allowed" }, 422);
