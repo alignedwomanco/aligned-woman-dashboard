@@ -50,9 +50,9 @@ export default function useMemberNav() {
     { name: "Directory", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
     {
       name: "My Profile",
-      to: isApprovedExpert ? "/expert-dashboard" : createPageUrl("ProfileSettings"),
+      to: isApprovedExpert ? "/partner" : createPageUrl("ProfileSettings"),
       active: isApprovedExpert
-        ? location.pathname === "/expert-dashboard"
+        ? location.pathname === "/partner" || location.pathname === "/expert-dashboard"
         : isActive("ProfileSettings"),
     },
   ];
