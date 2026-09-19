@@ -1,36 +1,116 @@
 {
-  "description": "The ambient conversation inside a group, between live sessions. Replies nest one level only, via parent_id. No likes, no reactions, no points: this is a waiting room, not a social network.",
   "name": "GroupPost",
+  "type": "object",
+  "description": "The ambient conversation inside a group, between live sessions. Replies nest one level only, via parent_id. No likes, no reactions, no points. In a sensitive room posts are written by createCirclePost and read through getCirclePosts, which strips identity from anonymous posts for everyone except the host and admins.",
   "properties": {
-    "author_avatar": {
-      "description": "Author avatar URL at time of posting",
-      "type": "string"
-    },
-    "author_is_practitioner": {
-      "default": false,
-      "description": "Author is an AW Verified practitioner, so the card can mark them",
-      "type": "boolean"
-    },
-    "author_name": {
-      "description": "Display name captured at post time, so the feed does not need a user lookup per row",
-      "type": "string"
+    "group_id": {
+      "type": "string",
+      "description": "Group this post belongs to"
     },
     "body": {
-      "description": "Post text",
-      "type": "string"
-    },
-    "group_id": {
-      "description": "Group this post belongs to",
-      "type": "string"
-    },
-    "is_deleted": {
-      "default": false,
-      "description": "Soft delete. Removed posts leave the thread structure intact rather than orphaning their replies.",
-      "type": "boolean"
+      "type": "string",
+      "description": "Post text"
     },
     "parent_id": {
-      "description": "Empty for a top level post, or the id of the post being replied to. Replies nest one level only.",
-      "type": "string"
+      "type": "string",
+      "description": "Empty for a top level post, or the id of the post being replied to. Replies nest one level only."
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name captured at post time. For an anonymous post this holds Anonymous member, never the real name."
+    },
+    "author_avatar": {
+      "type": "string",
+      "description": "Author avatar URL at time of posting. Empty for anonymous posts."
+    },
+    "author_is_practitioner": {
+      "type": "boolean",
+      "default": false,
+      "description": "Author is an AW Verified practitioner, so the card can mark them"
+    },
+    "author_is_host": {
+      "type": "boolean",
+      "description": "Author is the host of this room"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Soft delete. Removed posts leave the thread structure intact rather than orphaning their replies."
+    },
+    "post_type": {
+      "type": "string",
+      "enum": [
+        "question",
+        "share",
+        "welcome"
+      ],
+      "description": "question is Ask a question, share is Share, welcome is the host's pinned welcome post. Treat empty as share."
+    },
+    "is_anonymous": {
+      "type": "boolean",
+      "description": "Other members see Anonymous member. The host and admins see the real identity via author_email_private."
+    },
+    "author_email_private": {
+      "type": "string",
+      "description": "Real author email. Only ever returned by getCirclePosts to the host and admins. Never rendered to members."
+    },
+    "anon_tint": {
+      "type": "number",
+      "description": "0 to 5, chosen at random per post so anonymous avatars cannot be linked by colour"
+    },
+    "topic_key": {
+      "type": "string",
+      "description": "Key of the topic from Group.topics"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "answered"
+      ],
+      "description": "Question state. Treat empty as open."
+    },
+    "is_pinned": {
+      "type": "boolean",
+      "description": "Pinned to the top of the feed"
+    },
+    "answered_by": {
+      "type": "string",
+      "description": "Email of the host who marked this answered"
+    },
+    "answered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "answer_post_id": {
+      "type": "string",
+      "description": "The host reply pinned as the answer"
+    },
+    "media": {
+      "type": "array",
+      "description": "Attached files, uploaded through createCirclePost with EXIF stripped and names replaced",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "photo",
+              "audio"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "duration_seconds": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "reply_count": {
+      "type": "number",
+      "description": "Denormalised count of live replies, kept by createCirclePost"
     }
   },
   "required": [
@@ -66,6 +146,5 @@
         }
       ]
     }
-  },
-  "type": "object"
+  }
 }
