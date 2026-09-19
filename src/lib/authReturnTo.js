@@ -2,6 +2,27 @@
 // after sign-in, e.g. the MCP OAuth consent page). Keep the redirect
 // validation in one place — it is security-sensitive and easy to drift.
 
+// After signing in or registering, return the person to where she came
+// from (?from_url=/groundedwomen, the checkout success page), falling
+// back to the dashboard. Only ever returns to our own app, never an
+// external address. Shared by Login and Register so the two cannot drift.
+export function getPostAuthDestination(fallback = "/Dashboard") {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("from_url");
+    if (fromUrl) {
+      const url = new URL(fromUrl, window.location.origin);
+      if (url.origin !== window.location.origin) return fallback;
+      const path = url.pathname + url.search + url.hash;
+      if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) return fallback;
+      return path;
+    }
+  } catch (_err) {
+    // fall through to the default
+  }
+  return fallback;
+}
+
 // Resolve ?returnTo= to a safe same-origin path, else "/".
 //
 // The same-origin check alone is not enough: a value like /.//evil.com or
