@@ -45,6 +45,7 @@ import Community from './pages/Community';
 import Apply from './pages/Apply';
 import CommunityGroup from './pages/CommunityGroup';
 import TheAWStandard from './pages/TheAWStandard';
+import CirclePage from './pages/CirclePage';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -148,11 +149,24 @@ const AuthenticatedApp = () => {
         <Route path="/WorkbookViewer" element={<LayoutWrapper currentPageName="Workbook"><WorkbookViewer /></LayoutWrapper>} />
         <Route path="/dashboardsettings" element={<LayoutWrapper currentPageName="AdminSettings"><AdminSettings /></LayoutWrapper>} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/expert-dashboard" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
+        {/* Partner Dashboard. /expert-dashboard is the old address and
+            redirects, keeping any ?expert_id= the admin Experts tab sends. */}
+        <Route path="/partner" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
+        <Route path="/expert-dashboard" element={<Navigate to={`/partner${window.location.search}`} replace />} />
 
         <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
         <Route path="/analytics" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
       </Route>
+
+      {/* One address per room. A partner hosted community lives at its own
+          slug and nowhere else: /groundedwomen renders the pitch, the join
+          gate, the pending screen or the room, depending on who is looking.
+          Declared after every named route so it can never shadow one, and
+          backed by the reserved word list in src/lib/circle.js, which the
+          page checks before it ever queries a Group. It brings its own
+          platform bar, so it does not go through LayoutWrapper. */}
+      <Route path="/groundedwoman" element={<Navigate to="/groundedwomen" replace />} />
+      <Route path="/:roomSlug" element={<CirclePage />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
