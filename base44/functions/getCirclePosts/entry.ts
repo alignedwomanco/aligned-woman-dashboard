@@ -77,8 +77,12 @@ async function loadContext(base44: any, groupId: string) {
     membership = Array.isArray(legacy) ? legacy[0] : null;
   }
 
-  const memberStatus = membership ? (membership.status || "approved") : "none";
-  const isApproved = memberStatus === "approved";
+  // In a partner room a membership counts only when a moderator set it to
+  // approved. An empty status is treated as approved for legacy open rooms
+  // alone, so a row written outside the functions can never open a room.
+  const isPartnerRoom = !!group.host_expert_id;
+  const memberStatus = membership ? (membership.status || (isPartnerRoom ? "pending" : "approved")) : "none";
+  const isApproved = memberStatus === "approved" && (!isPartnerRoom || !!membership?.reviewed_by || membership?.role === "owner");
 
   return { user, email, group, hostExpert, membership, memberStatus, isAdmin, isHost, isApproved };
 }
@@ -210,7 +214,7 @@ function hostFirstName(hostExpert: any) {
 // Payload: { groupId, postId? }  postId returns one thread in full.
 // ────────────────────────────────────────────────────────────────
 
-function publicView(post: any, viewer: { email: string; canSeeIdentity: boolean }, askerEmail: string) {
+function publicView(post: any, viewer: { email: string; canSeeIdentity: boolean }, askerEmail: string, askerAnon = false) {
   const anon = !!post.is_anonymous;
   const real = lower(post.author_email_private || post.created_by || "");
   const out: any = {
@@ -234,7 +238,10 @@ function publicView(post: any, viewer: { email: string; canSeeIdentity: boolean 
     answered_at: post.answered_at || "",
     created_date: post.created_date,
     is_mine: !!real && real === viewer.email,
-    is_asker: !!askerEmail && !!real && real === askerEmail,
+    // Asked this is only shown when the reply carries the same anonymity as
+    // the question, so the tag can never sit next to a real name on an
+    // anonymous thread, or next to an anonymous reply on a named one.
+    is_asker: !!askerEmail && !!real && real === askerEmail && anon === askerAnon,
   };
   if (viewer.canSeeIdentity && anon) {
     out.moderator_only = { real_name: post.author_name_private || real, email: real };
@@ -264,7 +271,6 @@ Deno.serve(async (req) => {
       role: isAdmin ? "admin" : isHost ? "host" : (membership?.role || "member"),
       notify_pref: membership?.notify_pref || "mine",
       display_name: membership?.display_name || "",
-      membershipId: membership?.id || "",
     };
 
     const host = hostExpert ? {
@@ -291,22 +297,23 @@ Deno.serve(async (req) => {
       const question = Array.isArray(found) ? found[0] : null;
       if (!question || question.is_deleted) return json({ error: "post_not_found" }, 404);
       const askerEmail = lower(question.author_email_private || question.created_by || "");
+      const askerAnon = !!question.is_anonymous;
       const rawReplies = await svc.GroupPost.filter({ group_id: group.id, parent_id: question.id }, "created_date", 500);
       const replies = (Array.isArray(rawReplies) ? rawReplies : [])
         .filter((r: any) => !r.is_deleted)
-        .map((r: any) => publicView(r, viewer, askerEmail));
-      return json({ me, host, post: publicView(question, viewer, askerEmail), replies });
+        .map((r: any) => publicView(r, viewer, askerEmail, askerAnon));
+      return json({ me, host, post: publicView(question, viewer, askerEmail, askerAnon), replies });
     }
 
     const raw = await svc.GroupPost.filter({ group_id: group.id }, "-created_date", 500);
     const all = (Array.isArray(raw) ? raw : []).filter((p: any) => !p.is_deleted);
     const topLevel = all.filter((p: any) => !p.parent_id);
-    const answeredBy: Record<string, boolean> = {};
-    all.forEach((p: any) => { if (p.parent_id && p.author_is_host) answeredBy[p.parent_id] = true; });
-
+    // Answered is a state the record carries (set when the host replies or
+    // marks it), so the feed, the insights and the export agree.
     const posts = topLevel
       .filter((p: any) => p.post_type !== "welcome")
-      .map((p: any) => ({ ...publicView(p, viewer, ""), host_replied: !!answeredBy[p.id] }));
+      .sort((a: any, b: any) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0))
+      .map((p: any) => publicView(p, viewer, ""));
     const welcome = topLevel.find((p: any) => p.post_type === "welcome") || null;
     const pinned = welcome ? publicView(welcome, viewer, "") : null;
 
