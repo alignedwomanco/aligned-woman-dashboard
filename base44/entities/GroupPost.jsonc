@@ -1,7 +1,7 @@
 {
   "name": "GroupPost",
   "type": "object",
-  "description": "The ambient conversation inside a group, between live sessions. Replies nest one level only, via parent_id. No likes, no reactions, no points. In a sensitive room posts are written by createCirclePost and read through getCirclePosts, which strips identity from anonymous posts for everyone except the host and admins.",
+  "description": "The ambient conversation inside a group, between live sessions. Replies nest one level only, via parent_id. No likes, no reactions, no points. Posts in a sensitive room are written by createCirclePost and read through getCirclePosts, which strips identity from anonymous posts for everyone except the host and admins. Read is restricted to the author's own rows and admins, so the full feed is never in the browser: a later page regression cannot expose posts.",
   "properties": {
     "group_id": {
       "type": "string",
@@ -125,7 +125,18 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
-    "read": null,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "$or": [
         {
