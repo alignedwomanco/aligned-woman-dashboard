@@ -81,7 +81,7 @@ export function PlatformBar({ user, slug }) {
       {open && (
         <div className="md:hidden absolute left-0 right-0 top-[54px] z-40 bg-off-white border-b border-awburg-core/10 shadow-lg">
           {links.map((l) => (
-            <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="block px-6 py-4 font-body font-bold text-[10px] tracking-[0.2em] uppercase text-awburg-core border-t border-awburg-core/8">
+            <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="block px-6 py-4 font-body font-bold text-[10px] tracking-[0.2em] uppercase text-awburg-core border-t border-awburg-core/10">
               {l.label}
             </Link>
           ))}
