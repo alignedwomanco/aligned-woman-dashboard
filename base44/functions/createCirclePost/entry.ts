@@ -77,8 +77,12 @@ async function loadContext(base44: any, groupId: string) {
     membership = Array.isArray(legacy) ? legacy[0] : null;
   }
 
-  const memberStatus = membership ? (membership.status || "approved") : "none";
-  const isApproved = memberStatus === "approved";
+  // In a partner room a membership counts only when a moderator set it to
+  // approved. An empty status is treated as approved for legacy open rooms
+  // alone, so a row written outside the functions can never open a room.
+  const isPartnerRoom = !!group.host_expert_id;
+  const memberStatus = membership ? (membership.status || (isPartnerRoom ? "pending" : "approved")) : "none";
+  const isApproved = memberStatus === "approved" && (!isPartnerRoom || !!membership?.reviewed_by || membership?.role === "owner");
 
   return { user, email, group, hostExpert, membership, memberStatus, isAdmin, isHost, isApproved };
 }
@@ -210,18 +214,23 @@ function hostFirstName(hostExpert: any) {
 // Media: photos are re-encoded through a canvas in the browser before
 // upload, which drops every byte of EXIF including location, and are
 // renamed to a random id. Voice notes are recorded in the browser and
-// carry no metadata. This function accepts only https URLs and stores
-// kind, url and duration, never an original file name.
+// carry no metadata. This function accepts only URLs on our own file
+// host, so a member cannot attach an outside image that would log who
+// opened the feed, and stores kind, url and duration, never a file name.
 //
 // Payload: { groupId, body, parentId?, postType?, isAnonymous?, topicKey?, media? }
 // ────────────────────────────────────────────────────────────────
 
 const MAX_BODY = 4000;
+// Where base44.integrations.Core.UploadFile puts files for this app.
+const FILE_HOST_PREFIXES = [
+  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/",
+];
 
 function cleanMedia(input: unknown) {
   if (!Array.isArray(input)) return [];
   return input
-    .filter((m: any) => m && typeof m.url === "string" && /^https:\/\//.test(m.url))
+    .filter((m: any) => m && typeof m.url === "string" && FILE_HOST_PREFIXES.some((p) => m.url.startsWith(p)))
     .slice(0, 4)
     .map((m: any) => ({
       kind: m.kind === "audio" ? "audio" : "photo",
@@ -248,7 +257,7 @@ Deno.serve(async (req) => {
     if (!text && media.length === 0) return json({ error: "empty_post" }, 422);
 
     const parentId = typeof payload.parentId === "string" ? payload.parentId : "";
-    const isAnonymous = payload.isAnonymous === true && !isHost;
+    let isAnonymous = payload.isAnonymous === true && !isHost;
     const svc = base44.asServiceRole.entities;
 
     let parent: any = null;
@@ -257,22 +266,26 @@ Deno.serve(async (req) => {
       parent = Array.isArray(found) ? found[0] : null;
       if (!parent || parent.is_deleted) return json({ error: "parent_not_found" }, 404);
       if (parent.parent_id) return json({ error: "replies_nest_one_level" }, 422);
+      // The woman who asked anonymously stays anonymous on her own thread,
+      // whatever the switch says, so a named reply can never out her.
+      const parentAuthor = lower(parent.author_email_private || parent.created_by || "");
+      if (parent.is_anonymous && parentAuthor === email) isAnonymous = true;
     }
 
+    // The welcome post is the host's pinned note and carries no topic.
+    // Everything else at the top level must be tagged.
     const topics = Array.isArray(group.topics) ? group.topics : [];
     let topicKey = typeof payload.topicKey === "string" ? payload.topicKey : "";
     let postType = "share";
-    if (!parent) {
-      postType = payload.postType === "question" ? "question" : "share";
-      if (payload.postType === "welcome" && (isHost || isAdmin)) postType = "welcome";
-      if (postType !== "welcome") {
-        const valid = topics.some((t: any) => t.key === topicKey && t.active !== false);
-        if (!valid) return json({ error: "topic_required" }, 422);
-      } else {
-        topicKey = "";
-      }
-    } else {
+    if (parent) {
       topicKey = "";
+    } else if (payload.postType === "welcome" && (isHost || isAdmin)) {
+      postType = "welcome";
+      topicKey = "";
+    } else {
+      postType = payload.postType === "question" ? "question" : "share";
+      const valid = topics.some((t: any) => t.key === topicKey && t.active !== false);
+      if (!valid) return json({ error: "topic_required" }, 422);
     }
 
     const realName = (user.full_name || "").trim() || membership?.display_name || email;
@@ -311,8 +324,21 @@ Deno.serve(async (req) => {
     const hosts = await hostEmails(base44, group);
 
     if (parent) {
-      await svc.GroupPost.update(parent.id, { reply_count: (parent.reply_count || 0) + 1 }).catch(() => {});
+      // A host reply answers the question. The record carries the state so
+      // the feed, the insights, the counters and the export all agree.
+      const parentPatch: any = { reply_count: (parent.reply_count || 0) + 1 };
+      if (isHost && parent.post_type === "question" && parent.status !== "answered") {
+        parentPatch.status = "answered";
+        parentPatch.answered_by = email;
+        parentPatch.answered_at = new Date().toISOString();
+        parentPatch.answer_post_id = record.id;
+      }
+      await svc.GroupPost.update(parent.id, parentPatch).catch(() => {});
       const askerEmail = lower(parent.author_email_private || parent.created_by || "");
+      // A notification to an anonymous asker never names her and never
+      // carries the replier's email either, so the row cannot be read back
+      // by anyone but her.
+      const askerSource = parent.is_anonymous ? "" : source;
       const who = isHost ? hostFirstName(hostExpert) : (isAnonymous ? "Someone" : displayName);
       // The asker, unless she is replying to herself or has opted out.
       if (askerEmail && askerEmail !== email) {
@@ -324,7 +350,7 @@ Deno.serve(async (req) => {
             recipient: askerEmail,
             type: isHost ? "circle_answered" : "circle_reply",
             message: isHost ? `${who} answered your question in ${group.name}.` : `${who} replied to your question in ${group.name}.`,
-            linkTo: link, groupId: group.id, postId: parent.id, source,
+            linkTo: link, groupId: group.id, postId: parent.id, source: askerSource,
           });
           await sendCircleEmail(base44, {
             to: askerEmail,
