@@ -125,10 +125,11 @@ export default function CirclePage() {
     }
   };
 
-  const moderateAction = async (action, post, answerPostId) => {
+  const moderateAction = async (action, post, arg) => {
     try {
       const extra = { postId: post.id };
-      if (action === "mark_answered" && answerPostId) extra.answerPostId = answerPostId;
+      if (action === "mark_answered" && arg) extra.answerPostId = arg;
+      if (action === "retag" && arg) extra.topicKey = arg;
       await base44.functions.invoke("moderateCircle", { groupId: group.id, action, ...extra });
       if (action === "delete_post" && !post.parent_id) go({});
       refreshRoom();
