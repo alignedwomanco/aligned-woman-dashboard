@@ -14,6 +14,7 @@ import EmailsTab from "@/components/adminpanel/EmailsTab";
 import ExpertsTab from "@/components/adminpanel/ExpertsTab";
 import PagesTab from "@/components/adminpanel/PagesTab";
 import AppSettingsTab from "@/components/adminpanel/AppSettingsTab";
+import ApplicationsTab from "@/components/adminpanel/ApplicationsTab";
 
 const NAV_ITEMS = [
   { id: "overview", label: "Overview", icon: "📊" },
@@ -25,12 +26,16 @@ const NAV_ITEMS = [
   { id: "leads", label: "Leads", icon: "📬" },
   { id: "emails", label: "Emails", icon: "✉️" },
   { id: "experts", label: "Experts", icon: "⭐" },
+  { id: "applications", label: "Applications", icon: "📨" },
   { id: "pages", label: "Pages", icon: "📝" },
   { id: "app-settings", label: "App Settings", icon: "⚙️" },
 ];
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState("overview");
+  // ?tab=applications deep links straight to a tab, so the alert email
+  // for a new application can land the admin on the right screen.
+  const initialTab = new URLSearchParams(window.location.search).get("tab");
+  const [activeTab, setActiveTab] = useState(NAV_ITEMS.some((n) => n.id === initialTab) ? initialTab : "overview");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -64,6 +69,7 @@ export default function Admin() {
     "leads": <LeadsTab />,
     "emails": <EmailsTab />,
     "experts": <ExpertsTab />,
+    "applications": <ApplicationsTab />,
     "pages": <PagesTab />,
     "app-settings": <AppSettingsTab />,
   };
