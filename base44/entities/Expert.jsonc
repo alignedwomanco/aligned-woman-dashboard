@@ -1,10 +1,11 @@
 {
   "name": "Expert",
   "type": "object",
+  "description": "A directory listing. An individual practitioner or a business, both carrying the one AW Verified badge. A business may host a community room, linked by hosts_group_id.",
   "properties": {
     "name": {
       "type": "string",
-      "description": "Expert full name"
+      "description": "Expert full name, or the contact name for a business"
     },
     "title": {
       "type": "string",
@@ -17,6 +18,30 @@
     "profile_picture": {
       "type": "string",
       "description": "Expert profile picture URL"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "business"
+      ],
+      "description": "Listing type. Treat empty as individual."
+    },
+    "business_name": {
+      "type": "string",
+      "description": "Trading name shown on the listing when entity_type is business"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Business logo, shown in place of the headshot"
+    },
+    "hosts_group_id": {
+      "type": "string",
+      "description": "Group id of the community room this partner hosts, if any"
+    },
+    "verified_note": {
+      "type": "string",
+      "description": "One line on the listing saying what was verified"
     },
     "category": {
       "type": "array",
