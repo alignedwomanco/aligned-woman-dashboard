@@ -1,7 +1,7 @@
 {
   "name": "GroupPost",
   "type": "object",
-  "description": "The ambient conversation inside a group, between live sessions. Replies nest one level only, via parent_id. No likes, no reactions, no points. Posts in a sensitive room are written by createCirclePost and read through getCirclePosts, which strips identity from anonymous posts for everyone except the host and admins. Read is restricted to the author's own rows and admins, so the full feed is never in the browser: a later page regression cannot expose posts.",
+  "description": "The ambient conversation inside a group. Replies nest one level only, via parent_id. No likes, no reactions, no points. Posts are written only by createCirclePost with the service role and read only through getCirclePosts, which strips identity from anonymous posts for everyone except the host and admins. No browser write path exists, so nobody can insert a post with a forged author or host flag, and no browser read path exists, so a later page regression cannot expose posts.",
   "properties": {
     "group_id": {
       "type": "string",
@@ -72,7 +72,7 @@
         "open",
         "answered"
       ],
-      "description": "Question state. Treat empty as open."
+      "description": "Question state. Set to answered when the host replies or marks it. Treat empty as open."
     },
     "is_pinned": {
       "type": "boolean",
@@ -80,7 +80,7 @@
     },
     "answered_by": {
       "type": "string",
-      "description": "Email of the host who marked this answered"
+      "description": "Email of the host who answered or marked this answered"
     },
     "answered_at": {
       "type": "string",
@@ -92,7 +92,7 @@
     },
     "media": {
       "type": "array",
-      "description": "Attached files, re-encoded and renamed in the browser before upload so no EXIF or original file name survives",
+      "description": "Attached files on our own file host, re-encoded and renamed in the browser before upload so no EXIF or original file name survives",
       "items": {
         "type": "object",
         "properties": {
@@ -123,7 +123,9 @@
   ],
   "rls": {
     "create": {
-      "created_by_id": "{{user.id}}"
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "read": {
       "$or": [
@@ -138,28 +140,14 @@
       ]
     },
     "update": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }
