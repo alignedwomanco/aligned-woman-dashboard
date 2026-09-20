@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import LandingFooter from "@/components/home/LandingFooter";
 import { ArrowRight, Mail, Star, Building2, Handshake, Newspaper, HelpCircle } from "lucide-react";
-import ExpertApplicationModal from "@/components/contact/ExpertApplicationModal";
 
 const BASK = "'Libre Baskerville', Georgia, serif";
 const MONT = "Montserrat, sans-serif";
@@ -230,7 +229,6 @@ export default function Contact() {
       <LandingFooter />
 
       {/* Expert Application Modal */}
-      {showExpertModal && <ExpertApplicationModal onClose={closeModal} />}
 
       {/* Generic Contact Form Modal */}
       {selectedType && (
