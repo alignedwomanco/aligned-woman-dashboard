@@ -53,7 +53,7 @@ export const DEFAULT_RULES_TEXT =
 export const CIRCLE_COPY = {
   anonymousHelper: (hostFirstName) =>
     `Other members will see Anonymous member. ${hostFirstName || "The host"} and The Aligned Woman Co. can see who you are, to keep the Circle safe. Take care with names or places that could identify you.`,
-  mediaHelper: "Photos and voice notes can show who you are. Share what feels right for you.",
+  mediaHelper: "A photo can show who you are. Share what feels right for you.",
   finePrint: (hostBusiness) => `${hostBusiness || "The host"} shares lived experience and education, not medical advice.`,
   questionPlaceholder: "No question is embarrassing. No question is off limits.",
   sharePlaceholder: "Something that helped, something you learned, something you want other women to know.",
