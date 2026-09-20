@@ -344,7 +344,7 @@ Deno.serve(async (req) => {
       if (askerEmail && askerEmail !== email) {
         const rows = await svc.GroupMember.filter({ group_id: group.id, user_email: askerEmail });
         const askerRow = Array.isArray(rows) ? rows[0] : null;
-        const pref = askerRow?.notify_pref || "mine";
+        const pref = askerRow?.notify_pref || "all";
         if (pref !== "none") {
           await notifyInApp(base44, {
             recipient: askerEmail,
@@ -407,9 +407,11 @@ Deno.serve(async (req) => {
           ].join("\n"),
         });
       }
-      // Members who chose All new questions, in app only, never naming an anonymous poster.
-      const wantAll = await svc.GroupMember.filter({ group_id: group.id, notify_pref: "all", status: "approved" }, "-created_date", 500);
-      for (const m of (Array.isArray(wantAll) ? wantAll : [])) {
+      // Members on All new questions (the default; an empty pref counts as
+      // all), in app only, never naming an anonymous poster.
+      const approved = await svc.GroupMember.filter({ group_id: group.id, status: "approved" }, "-created_date", 500);
+      const wantAll = (Array.isArray(approved) ? approved : []).filter((m: any) => (m.notify_pref || "all") === "all");
+      for (const m of wantAll) {
         const to = lower(m.user_email || m.created_by);
         if (!to || to === email || hosts.includes(to)) continue;
         await notifyInApp(base44, {
