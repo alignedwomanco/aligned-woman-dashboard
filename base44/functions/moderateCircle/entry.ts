@@ -443,16 +443,19 @@ Deno.serve(async (req) => {
       }
       await svc.GroupMember.update(m.id, { status, reviewed_by: actor, reviewed_at: now, display_name: displayName || m.display_name || "" });
       const link = `/${group.slug}`;
+      const greetName = (displayName || m.display_name || "").trim().split(/\s+/)[0] || "";
+      const greeting = greetName ? `Hi ${greetName},` : `Hi there,`;
+      const hostLabel = hostExpert ? hostFirstName(hostExpert) : "The host";
       if (action === "approve") {
         await notifyInApp(base44, { recipient: memberEmail, type: "circle_approved", message: `You are in. ${group.name} is open to you now.`, linkTo: link, groupId: group.id });
         await sendCircleEmail(base44, {
           to: memberEmail, subject: `You are in: ${group.name}`, dedupeKey: `circle:approved:${m.id}`,
           text: [
-            `Hi,`, ``,
+            greeting, ``,
             `Your request to join ${group.name} has been approved. The Circle is open to you now.`, ``,
             `Step in here: ${roomUrl(group)}`, ``,
-            `A reminder of how it works: post under your name or as Anonymous member, your choice each time. ${hostFirstName(hostExpert)} and The Aligned Woman Co. can see who posted, to keep the Circle safe. What is shared in the Circle stays in the Circle.`, ``,
-            `The Aligned Woman Co.`,
+            `A reminder of how it works: post under your name or as Anonymous member, your choice each time. ${hostLabel} and The Aligned Woman Co. can see who posted, to keep the Circle safe. What is shared in the Circle stays in the Circle.`, ``,
+            `With warmth,`, `The Aligned Woman Co.`,
           ].join("\n"),
         });
       } else if (action === "decline") {
@@ -460,7 +463,7 @@ Deno.serve(async (req) => {
         await sendCircleEmail(base44, {
           to: memberEmail, subject: `About your request to join ${group.name}`, dedupeKey: `circle:declined:${m.id}`,
           text: [
-            `Hi,`, ``,
+            greeting, ``,
             `Every request to join ${group.name} is reviewed one at a time, and this one has not been approved.`, ``,
             `If you think something went wrong, reply to this email and we will look.`, ``,
             `The Aligned Woman Co.`,
