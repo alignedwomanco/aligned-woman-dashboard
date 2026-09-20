@@ -231,12 +231,12 @@ Deno.serve(async (req) => {
     const svc = base44.asServiceRole.entities;
 
     if (action === "get_pref") {
-      return json({ notify_pref: membership?.notify_pref || "mine" });
+      return json({ notify_pref: membership?.notify_pref || "all" });
     }
 
     if (action === "set_pref") {
       if (!(isApproved || isHost || isAdmin)) return json({ error: "not_a_member" }, 403);
-      const pref = ["mine", "all", "none"].includes(p.notifyPref) ? p.notifyPref : "mine";
+      const pref = ["mine", "all", "none"].includes(p.notifyPref) ? p.notifyPref : "all";
       // An admin has no membership row; there is nothing to store, and
       // nothing to fail.
       if (membership) await svc.GroupMember.update(membership.id, { notify_pref: pref, muted: pref === "none" });
