@@ -273,6 +273,11 @@ Deno.serve(async (req) => {
     const grantCourseHost = grants.courseHost === true;
     const grantCommunityHost = grants.communityHost === true;
     const isBusiness = app.application_type === "business";
+    // A woman who only asked to start her own group (Community page form)
+    // never applied to the directory. She still gets an Expert record, since
+    // that is what links her to her room, but it is never published.
+    const interests: string[] = Array.isArray(app.interested_in) ? app.interested_in : [];
+    const wantsListing = interests.includes("marketplace_profile") || interests.includes("host_course") || !!app.headline || !!app.bio;
 
     // One Expert record per person. Link by login email first.
     let expert: any = null;
@@ -295,8 +300,8 @@ Deno.serve(async (req) => {
       category: Array.isArray(app.category_interest) ? app.category_interest : [],
       // The admin has just reviewed this person, and the host guide promises
       // the listing goes live on approval. The partner can refine it from
-      // My Listing afterwards.
-      isPublished: true,
+      // My Listing afterwards. A group only host stays out of the directory.
+      isPublished: wantsListing,
     };
 
     if (expert) {
@@ -305,7 +310,7 @@ Deno.serve(async (req) => {
         if (k === "isPublished") continue;
         if (!expert[k] && expertFields[k]) patch[k] = expertFields[k];
       }
-      patch.isPublished = true;
+      if (wantsListing) patch.isPublished = true;
       await svc.Expert.update(expert.id, patch);
       expert = { ...expert, ...patch };
     } else {
@@ -383,7 +388,9 @@ Deno.serve(async (req) => {
     const lines = grantCommunityHost && group
       ? [
           `Hi ${firstName},`, ``,
-          `Your application to host a community on The Aligned Woman Co. has been approved, and your listing is live in the AW Verified directory.`, ``,
+          wantsListing
+            ? `Your application to host a community on The Aligned Woman Co. has been approved, and your listing is live in the AW Verified directory.`
+            : `Your request to start ${group.name} on The Aligned Woman Co. has been approved.`, ``,
           `Your room has been created in draft. Nobody can see it yet. You set it up yourself, and you decide when it opens.`, ``,
           `Set up your room: ${partnerUrl}`, ``,
           `It takes about ten minutes. Everything is pre-filled from your application, so you are editing rather than starting from nothing: your room name, your bio, the rules, the topics women choose from, a welcome post in your voice, and your invite link. Your room's address is ${roomUrl(group)}.`, ``,
