@@ -21,6 +21,10 @@
     "tokens_used": {
       "type": "number",
       "description": "Number of tokens used"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

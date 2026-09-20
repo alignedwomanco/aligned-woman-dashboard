@@ -38,6 +38,10 @@
     "userEmail": {
       "type": "string",
       "description": "Email of the enrolled user (for pre-registration matching)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

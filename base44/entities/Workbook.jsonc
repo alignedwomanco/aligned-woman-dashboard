@@ -69,6 +69,10 @@
       "type": "number",
       "default": 0,
       "description": "Display order when listed alongside expert's modules"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

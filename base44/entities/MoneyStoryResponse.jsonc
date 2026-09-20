@@ -20,6 +20,10 @@
       "type": "string",
       "format": "date-time",
       "description": "Timestamp when the user marked the workbook complete."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [],

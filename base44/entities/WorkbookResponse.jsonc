@@ -29,6 +29,10 @@
       "type": "object",
       "description": "Scoring output computed when workbook is marked complete. Null until completion. Contains dominant_state, window_classification, resource_classification, somatic_classification, and portrait_keys.",
       "default": null
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

@@ -72,6 +72,10 @@
     "last_module_id": {
       "type": "string",
       "description": "Reference to the most recent Module the user accessed. Null if no module accessed yet."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

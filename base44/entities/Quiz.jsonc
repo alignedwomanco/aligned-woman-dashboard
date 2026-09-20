@@ -41,6 +41,10 @@
       "type": "number",
       "default": 10,
       "description": "Points awarded for passing"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

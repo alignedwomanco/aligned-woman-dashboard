@@ -47,6 +47,10 @@
     "claimed_user_email": {
       "type": "string",
       "description": "The email of the user record that claimed this pre-approval."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

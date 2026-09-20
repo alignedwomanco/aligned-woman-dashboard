@@ -31,6 +31,10 @@
     "deviceType": {
       "type": "string",
       "description": "desktop, mobile, tablet"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

@@ -25,6 +25,10 @@
       "type": "object",
       "default": {},
       "description": "JSON object with 5 boolean keys: protein_every_meal, carbs_paired, five_cups_veg, consistent_rhythm, ate_with_awareness"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

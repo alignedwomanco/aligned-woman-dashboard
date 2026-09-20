@@ -25,6 +25,10 @@
       "type": "boolean",
       "default": false,
       "description": "Whether this is a saved reusable template"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

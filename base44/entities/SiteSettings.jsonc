@@ -17,6 +17,10 @@
     "dark_favicon": {
       "type": "string",
       "description": "Favicon URL for dark theme (white icon)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [],

@@ -13,6 +13,10 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this specialty is available for selection"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

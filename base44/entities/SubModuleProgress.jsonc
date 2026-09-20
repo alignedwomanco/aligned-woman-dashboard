@@ -21,6 +21,10 @@
       "type": "number",
       "default": 0,
       "description": "Last position in seconds"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

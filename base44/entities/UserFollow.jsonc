@@ -5,6 +5,10 @@
     "followingEmail": {
       "type": "string",
       "description": "Email of user being followed"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

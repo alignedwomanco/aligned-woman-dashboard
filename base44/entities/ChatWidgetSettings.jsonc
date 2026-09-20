@@ -46,6 +46,10 @@
       "type": "string",
       "default": "#6B1B3D",
       "description": "Primary color for chatbot UI"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

@@ -18,6 +18,10 @@
       "type": "string",
       "format": "date-time",
       "description": "Date badge was earned"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

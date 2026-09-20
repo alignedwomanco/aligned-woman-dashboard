@@ -38,6 +38,10 @@
     "expert_id": {
       "type": "string",
       "description": "Linked expert ID (optional)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

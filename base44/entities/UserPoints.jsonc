@@ -26,6 +26,10 @@
       "type": "string",
       "format": "date",
       "description": "Last date of activity"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

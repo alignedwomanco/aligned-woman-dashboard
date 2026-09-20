@@ -25,6 +25,10 @@
     "source_page": {
       "type": "string",
       "description": "Page where signup occurred"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

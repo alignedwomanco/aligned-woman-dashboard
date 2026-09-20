@@ -26,6 +26,10 @@
       "type": "object",
       "default": {},
       "description": "JSON object for any extra pillar-specific form fields"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

@@ -75,6 +75,10 @@
     "display_name": {
       "type": "string",
       "description": "Name shown on named posts, captured at approval from the user's full name"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [
