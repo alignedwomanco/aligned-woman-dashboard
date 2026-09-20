@@ -229,6 +229,9 @@ function ApplicationDetail({ app, onClose, onDone }) {
           {wantsCommunity && (
             <div className="rounded-2xl border border-awsage-core/30 bg-awsage-wash/60 p-4 grid gap-4">
               <Row label="Community name" value={app.community_name} />
+              {app.requested_by_email ? (
+                <Row label="Requested by" value={`${app.requested_by_name || ""} (${app.requested_by_email})\nThe host above is someone else. Approval writes to the host.`} />
+              ) : null}
               <Row label="Who it is for" value={app.community_for} />
               <Row label="What women would talk about" value={app.community_topics} />
             </div>
