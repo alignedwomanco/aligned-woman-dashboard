@@ -126,7 +126,7 @@ export function WelcomePost({ pinned, host }) {
 }
 
 export function NotifySheet({ open, onClose, group, current, onSaved }) {
-  const [pref, setPref] = useState(current || "mine");
+  const [pref, setPref] = useState(current || "all");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const save = async () => {
@@ -152,8 +152,8 @@ export function NotifySheet({ open, onClose, group, current, onSaved }) {
 
 export function NotifyBody({ pref, setPref, options, busy, error, onSave, onCancel, inline = false }) {
   const opts = options || [
+    { key: "all", label: "All new questions", note: "Every new question posted in the Circle, plus replies to your own." },
     { key: "mine", label: "My threads only", note: "Replies and answers to questions you asked or replied to." },
-    { key: "all", label: "All new questions", note: "Every new question posted in the Circle." },
     { key: "none", label: "Nothing", note: "You will still be able to visit the Circle any time." },
   ];
   return (
@@ -186,7 +186,7 @@ export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost,
   const [search, setSearch] = useState("");
   const [rulesOpen, setRulesOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
-  const [inlinePref, setInlinePref] = useState(me?.notify_pref || "mine");
+  const [inlinePref, setInlinePref] = useState(me?.notify_pref || "all");
   const [inlineBusy, setInlineBusy] = useState(false);
   const [inlineError, setInlineError] = useState("");
   const topics = activeTopics(group);
