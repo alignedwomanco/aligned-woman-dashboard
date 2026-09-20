@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { activeTopics, formatDuration, shortTime, topicLabel } from "@/lib/circle";
+import { activeTopics, shortTime, topicLabel } from "@/lib/circle";
 import {
   BTN_PRIMARY, BTN_SECONDARY, BTN_TEXT, CARD, CHIP, CHIP_ON, Avatar, HostCard, HostLogo, TrustChips, FinePrint, RulesModal, Sheet,
 } from "@/components/circle/CircleShell";
@@ -32,7 +32,7 @@ export function TopicChip({ label }) {
 export function MediaBlock({ media, full = false }) {
   if (!Array.isArray(media) || media.length === 0) return null;
   const photos = media.filter((m) => m.kind === "photo");
-  const audio = media.filter((m) => m.kind === "audio");
+  if (photos.length === 0) return null;
   return (
     <div className="flex flex-col gap-2 mt-3">
       {photos.length > 0 && (
@@ -44,12 +44,6 @@ export function MediaBlock({ media, full = false }) {
         </div>
       )}
       {full && photos.slice(1).map((p) => <img key={p.url} src={p.url} alt="" className="w-full max-h-[420px] rounded-[20px] object-cover border border-awburg-core/10" />)}
-      {audio.map((a) => (
-        <div key={a.url} className="flex items-center gap-3 rounded-full bg-off-white border border-awburg-core/10 px-3 py-2">
-          <audio controls preload="none" src={a.url} className="h-8 flex-1 min-w-0" />
-          <span className="font-body text-[11px] text-awburg-mid whitespace-nowrap">{formatDuration(a.duration_seconds)}</span>
-        </div>
-      ))}
     </div>
   );
 }
@@ -88,7 +82,7 @@ function QuestionCard({ post, group, host, onOpen, onReport }) {
       <button type="button" onClick={() => onOpen(post.id)} className="block w-full text-left">
         <p className="font-body font-light text-[14.5px] leading-[1.6] text-awburg-dark line-clamp-3">{post.body}</p>
       </button>
-      {/* Media sits outside the button so a voice note can be played here. */}
+      {/* Media sits outside the button so the photo is not part of the tap target. */}
       <MediaBlock media={post.media} />
       {post.status === "answered" && (
         <div className="flex items-center gap-2 mt-3">
