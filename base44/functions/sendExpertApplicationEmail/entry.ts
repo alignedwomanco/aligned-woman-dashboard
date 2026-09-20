@@ -55,10 +55,11 @@ function toBase64Url(input: string): string {
     .replace(/=+$/, "");
 }
 
-function buildMimeMessage(to: string, bcc: string, subject: string, text: string): string {
+function buildMimeMessage(to: string, bcc: string, subject: string, text: string, cc = ""): string {
   const headers = [
     `From: ${FROM_HEADER}`,
     `To: ${to}`,
+    cc ? `Cc: ${cc}` : null,
     `Bcc: ${bcc}`,
     `Reply-To: ${OWNER_EMAIL}`,
     `Subject: ${subject}`,
@@ -66,7 +67,7 @@ function buildMimeMessage(to: string, bcc: string, subject: string, text: string
     `MIME-Version: 1.0`,
     `Content-Type: text/plain; charset="UTF-8"`,
     `Content-Transfer-Encoding: base64`,
-  ].join("\r\n");
+  ].filter(Boolean).join("\r\n");
 
   // Blank line between headers and body. Without it the first body
   // line is read as a header and the email arrives mangled.
@@ -87,6 +88,7 @@ function buildGroupBody(name: string, groupName: string, requestedBy: string): s
     ``,
     `You will hear from us either way, within 14 working days.`,
     ``,
+    ...(requestedBy ? [`${requestedBy} is copied on this email so you both know where things stand.`, ``] : []),
     `With warmth,`,
     `Laura`,
     `Founder, The Aligned Woman`,
@@ -159,8 +161,13 @@ Deno.serve(async (req) => {
     const groupOnly = wantsCommunity && !interests.includes("marketplace_profile") && !interests.includes("host_course");
     const subject = groupOnly ? GROUP_SUBJECT : SUBJECT;
     const requestedBy = (application.requested_by_name || "").trim();
-    const text = groupOnly ? buildGroupBody(name, (application.community_name || "").trim(), requestedBy) : buildBody(name, wantsCommunity);
-    const raw = toBase64Url(buildMimeMessage(to, OWNER_EMAIL, subject, text));
+    // The woman who sent the request on someone else's behalf is copied in,
+    // so a mistyped host address never fails silently. Read from the record,
+    // never from the caller, for the same open relay reason as the recipient.
+    const requesterEmail = (application.requested_by_email || "").trim().toLowerCase();
+    const cc = groupOnly && requesterEmail && requesterEmail !== to.toLowerCase() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requesterEmail) ? requesterEmail : "";
+    const text = groupOnly ? buildGroupBody(name, (application.community_name || "").trim(), cc ? requestedBy : "") : buildBody(name, wantsCommunity);
+    const raw = toBase64Url(buildMimeMessage(to, OWNER_EMAIL, subject, text, cc));
 
     const response = await fetch(
       "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
