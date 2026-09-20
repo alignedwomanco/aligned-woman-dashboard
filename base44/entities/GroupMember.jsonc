@@ -70,7 +70,7 @@
         "all",
         "none"
       ],
-      "description": "mine is my threads only, all is every new question, none is nothing. Treat an empty value as mine."
+      "description": "mine is my threads only, all is every new question, none is nothing. Treat an empty value as all, the default."
     },
     "display_name": {
       "type": "string",
