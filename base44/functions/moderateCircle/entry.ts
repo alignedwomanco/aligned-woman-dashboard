@@ -98,8 +98,102 @@ function toBase64Url(input: string): string {
   return toBase64(input).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+const BRAND_LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png";
+const BRAND_FONT_BODY = "Montserrat, 'Helvetica Neue', Arial, sans-serif";
+const BRAND_FONT_DISPLAY = "'DM Serif Display', Georgia, 'Times New Roman', serif";
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function linkify(s: string): string {
+  return escapeHtml(s).replace(/(https?:\/\/[^\s<]+)/g, (u) => `<a href="${u}" style="color:#C4847A;text-decoration:underline;word-break:break-all;">${u}</a>`);
+}
+
+// Turns the plain text email into the branded HTML version. Blocks are
+// split on blank lines. A line shaped "Label: https://..." becomes the
+// call to action (the first one a filled button, later ones a link).
+// The sign off is set quieter. The plain text part is still sent, so
+// a client that cannot render HTML gets exactly the same words.
+function renderCircleHtml(subject: string, text: string): string {
+  const blocks = text.replace(/\r/g, "").split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+  const ctaRe = /^(.{2,80}?):\s*(https?:\/\/\S+)$/;
+  let usedButton = false;
+  const parts: string[] = [];
+  const P = `margin:0 0 18px;font-family:${BRAND_FONT_BODY};font-size:15px;line-height:1.7;color:#3D2B2D;font-weight:300;`;
+  const QUIET = `margin:0 0 6px;font-family:${BRAND_FONT_BODY};font-size:14px;line-height:1.6;color:#8A7068;font-weight:300;`;
+
+  blocks.forEach((block, i) => {
+    const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+    const isSignOff = /^with warmth,?$/i.test(lines[0] || "") || (i === blocks.length - 1 && lines.length <= 3 && /aligned woman/i.test(block));
+    if (isSignOff) {
+      parts.push(`<p style="${QUIET}margin-top:10px;">${lines.map(escapeHtml).join("<br/>")}</p>`);
+      return;
+    }
+    const single = lines.length === 1 ? lines[0] : "";
+    const cta = single ? single.match(ctaRe) : null;
+    if (cta) {
+      const label = escapeHtml(cta[1]);
+      const href = cta[2];
+      if (!usedButton) {
+        usedButton = true;
+        parts.push(
+          `<table cellpadding="0" cellspacing="0" role="presentation" style="margin:6px 0 26px;"><tr><td style="background:#4A0E2E;border-radius:100px;padding:15px 34px;">` +
+          `<a href="${href}" style="color:#FFFFFF;font-family:${BRAND_FONT_BODY};font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;display:inline-block;">${label}</a>` +
+          `</td></tr></table>`,
+        );
+      } else {
+        parts.push(`<p style="${P}"><strong style="font-weight:600;">${label}:</strong> <a href="${href}" style="color:#C4847A;text-decoration:underline;word-break:break-all;">${href}</a></p>`);
+      }
+      return;
+    }
+    parts.push(`<p style="${P}">${lines.map(linkify).join("<br/>")}</p>`);
+  });
+
+  const heading = escapeHtml(subject).replace(/\bWoman\b/, `<em style="font-style:italic;">Woman</em>`).replace(/\bWomen\b/, `<em style="font-style:italic;">Women</em>`);
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#F7EFEC;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#F7EFEC;padding:36px 14px;">
+    <tr>
+      <td align="center">
+        <table width="580" cellpadding="0" cellspacing="0" role="presentation" style="max-width:580px;width:100%;background:#FFFFFF;border-radius:24px;overflow:hidden;box-shadow:0 14px 40px rgba(61,43,45,0.07);">
+          <tr>
+            <td style="background:#4A0E2E;padding:28px 40px;text-align:center;">
+              <img src="${BRAND_LOGO}" alt="The Aligned Woman" height="36" style="filter:brightness(0) invert(1);height:36px;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:38px 40px 26px;">
+              <h1 style="margin:0 0 22px;font-family:${BRAND_FONT_DISPLAY};font-size:27px;line-height:1.2;color:#4A0E2E;font-weight:400;">${heading}</h1>
+              ${parts.join("\n              ")}
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#F5DDD9;padding:22px 40px;text-align:center;">
+              <p style="margin:0;font-family:${BRAND_FONT_BODY};font-size:12px;line-height:1.7;color:#8A7068;">
+                The education women should have been given.<br/>
+                Reply to this email and a person will answer.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 function buildMime(to: string, bcc: string | null, subject: string, text: string): string {
   const encodedSubject = `=?utf-8?B?${toBase64(subject)}?=`;
+  const boundary = `----=_AW_${crypto.randomUUID().replace(/-/g, "")}`;
   const headers = [
     `From: ${FROM_HEADER}`,
     `To: ${to}`,
@@ -108,10 +202,22 @@ function buildMime(to: string, bcc: string | null, subject: string, text: string
     `Subject: ${encodedSubject}`,
     `Date: ${new Date().toUTCString()}`,
     `MIME-Version: 1.0`,
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+  ].filter(Boolean).join("\r\n");
+  const body = [
+    `--${boundary}`,
     `Content-Type: text/plain; charset="UTF-8"`,
     `Content-Transfer-Encoding: base64`,
-  ].filter(Boolean).join("\r\n");
-  return `${headers}\r\n\r\n${toBase64(text)}`;
+    ``,
+    toBase64(text),
+    `--${boundary}`,
+    `Content-Type: text/html; charset="UTF-8"`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    toBase64(renderCircleHtml(subject, text)),
+    `--${boundary}--`,
+  ].join("\r\n");
+  return `${headers}\r\n\r\n${body}`;
 }
 
 // Plain text, brand light, one per (dedupeKey, recipient). Never throws:
