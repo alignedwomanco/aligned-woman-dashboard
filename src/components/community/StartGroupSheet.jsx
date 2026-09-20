@@ -192,7 +192,7 @@ export default function StartGroupSheet({ open, onClose }) {
           {done ? (
             <>
               <p className="font-body font-light text-[14px] leading-[1.7] text-awburg-dark m-0">
-                Thank you. Every group is read and approved by a person, so it stays a room women can trust. We will write to {selfHost ? "you" : (firstName || "the host")} once we have looked at it{selfHost ? ", and a confirmation is on its way to your inbox now" : ", and she has a confirmation in her inbox now"}.
+                Thank you. Every group is read and approved by a person, so it stays a room women can trust. We will write to {selfHost ? "you" : (firstName || "the host")} once we have looked at it{selfHost ? ", and a confirmation is on its way to your inbox now" : ", and a confirmation is on its way to her now with you copied in"}.
               </p>
               <p className="font-body font-light text-[12.5px] leading-[1.7] text-awburg-mid m-0">
                 Once approved, the group gets its own address on the platform, a private space only the women {selfHost ? "you invite" : "she invites"} can see, and a short guide to hosting it well.
@@ -277,7 +277,7 @@ export default function StartGroupSheet({ open, onClose }) {
                       <Field label="Your name" error={errors.applicant_name}>
                         <input className={FIELD} value={form.applicant_name} onChange={(e) => set("applicant_name", e.target.value)} autoComplete="name" />
                       </Field>
-                      <Field label="Your email" help={knownSender ? "So we can copy you in." : "So we can write back to you."} error={errors.email}>
+                      <Field label="Your email" help="You are copied on her confirmation, so you know it arrived." error={errors.email}>
                         <input className={`${FIELD} ${knownSender ? "opacity-70" : ""}`} type="email" value={form.email} readOnly={knownSender} onChange={(e) => set("email", e.target.value)} autoComplete="email" />
                       </Field>
                     </div>
