@@ -1,11 +1,11 @@
 {
   "name": "ExpertApplication",
   "type": "object",
-  "description": "Public applications to join the directory as a practitioner or a business, and optionally to host a community room. Created from /Apply, reviewed by an admin on the Applications screen, and actioned by approvePartnerApplication, which creates the linked Expert record, applies grants, and creates a draft room when community hosting is granted. Affiliate, course host and community host access are granted selectively by the admin, never automatically, and this flow never grants Blueprint course access.",
+  "description": "Public applications to join the directory as a practitioner or a business, and optionally to host a community room. Created from /Apply or the Start your own group form on Community, reviewed by an admin on the Applications screen, and actioned by approvePartnerApplication, which creates the linked Expert record, applies grants, and creates a draft room when community hosting is granted. applicant_name and email are always the person who will own the listing or host the room; requested_by_* records who sent the request when that was someone else. Affiliate, course host and community host access are granted selectively by the admin, never automatically, and this flow never grants Blueprint course access.",
   "properties": {
     "applicant_name": {
       "type": "string",
-      "description": "Applicant full name"
+      "description": "Applicant full name (the person who will host or be listed)"
     },
     "business_name": {
       "type": "string",
@@ -14,7 +14,15 @@
     "email": {
       "type": "string",
       "format": "email",
-      "description": "Applicant contact and login email"
+      "description": "Applicant contact and login email (the host's login email for a room)"
+    },
+    "requested_by_name": {
+      "type": "string",
+      "description": "Name of the logged in member who sent the request, when the host is someone else"
+    },
+    "requested_by_email": {
+      "type": "string",
+      "description": "Email of the logged in member who sent the request, when the host is someone else"
     },
     "headline": {
       "type": "string",
