@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import DashboardSidebar from "@/components/dashboard-v2/DashboardSidebar";
+import StartGroupSheet from "@/components/community/StartGroupSheet";
 import {
   CommunityStyles, Eyebrow, Chip, Knob,
   serif, sans, joinedLabel, sessionDateLabel,
@@ -15,6 +16,7 @@ import {
 // ────────────────────────────────────────────────────────────────
 
 export default function Community() {
+  const [startOpen, setStartOpen] = useState(false);
   const { data: currentUser } = useQuery({
     queryKey: ["sidebar-current-user"],
     queryFn: () => base44.auth.me(),
@@ -114,11 +116,11 @@ export default function Community() {
                   </p>
                 </div>
                 <div className="banner-action">
-                  {/* Private groups are Phase 3. Until then this captures interest
-                      rather than opening a door that leads nowhere. */}
-                  <Link to={createPageUrl("Support")} className="btn ghost">
+                  {/* The request form. Nothing is created until an admin approves
+                      it from the Applications tab. */}
+                  <button type="button" onClick={() => setStartOpen(true)} className="btn ghost">
                     Create a group
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
@@ -149,6 +151,7 @@ export default function Community() {
           </div>
         </div>
       </div>
+      <StartGroupSheet open={startOpen} onClose={() => setStartOpen(false)} />
     </div>
   );
 }
