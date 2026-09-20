@@ -13,7 +13,7 @@ export const RESERVED_ROOM_SLUGS = [
   "terms-and-conditions", "competition", "contact", "contactform", "welcome",
   "checkout-success", "pdf-test", "startingpointprofile", "theawstandard",
   "yourmoneystory", "money-story", "dashboard", "community", "experts", "admin",
-  "expert-dashboard", "partner", "feminineworkbook", "analytics", "coursedetail",
+  "expert-dashboard", "partner", "host-guide", "feminineworkbook", "analytics", "coursedetail",
   "sectiondetail", "workbook", "workbookviewer", "dashboardsettings", "classroom",
   "dailycheckin", "definemypurpose", "expertsdirectory", "expertprofile", "members",
   "moduleframeworkbuilder", "moduleplayer", "myalivejourney", "mycycle", "mymetrics",
