@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
       last_read_at: now,
       identifies_as_woman: true,
       agreed_to_rules_at: now,
-      notify_pref: "mine",
+      notify_pref: "all",
       display_name: displayName,
     });
 
