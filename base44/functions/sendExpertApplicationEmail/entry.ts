@@ -75,11 +75,13 @@ function buildMimeMessage(to: string, bcc: string, subject: string, text: string
 
 // A woman who only asked to start her own group (the Community page form)
 // never applied to the directory, so she gets the group wording.
-function buildGroupBody(name: string, groupName: string): string {
+function buildGroupBody(name: string, groupName: string, requestedBy: string): string {
   return [
     `Hi ${name},`,
     ``,
-    `Thank you for asking to start ${groupName || "your own group"} on The Aligned Woman. Your request is with us, and it will be read by a real person.`,
+    requestedBy
+      ? `${requestedBy} has asked us to set up ${groupName || "a group"} on The Aligned Woman with you as its host. The request is with us, and it will be read by a real person.`
+      : `Thank you for asking to start ${groupName || "your own group"} on The Aligned Woman. Your request is with us, and it will be read by a real person.`,
     ``,
     `Every group is approved one at a time, so the platform stays a place women can trust. Once yours is approved, it gets its own address, a private room only the women you invite can see, and a short guide to hosting it well.`,
     ``,
@@ -156,7 +158,8 @@ Deno.serve(async (req) => {
     const wantsCommunity = interests.includes("host_community");
     const groupOnly = wantsCommunity && !interests.includes("marketplace_profile") && !interests.includes("host_course");
     const subject = groupOnly ? GROUP_SUBJECT : SUBJECT;
-    const text = groupOnly ? buildGroupBody(name, (application.community_name || "").trim()) : buildBody(name, wantsCommunity);
+    const requestedBy = (application.requested_by_name || "").trim();
+    const text = groupOnly ? buildGroupBody(name, (application.community_name || "").trim(), requestedBy) : buildBody(name, wantsCommunity);
     const raw = toBase64Url(buildMimeMessage(to, OWNER_EMAIL, subject, text));
 
     const response = await fetch(
