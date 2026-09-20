@@ -269,7 +269,7 @@ Deno.serve(async (req) => {
       email,
       status: isHost || isAdmin ? "approved" : memberStatus,
       role: isAdmin ? "admin" : isHost ? "host" : (membership?.role || "member"),
-      notify_pref: membership?.notify_pref || "mine",
+      notify_pref: membership?.notify_pref || "all",
       display_name: membership?.display_name || "",
     };
 
