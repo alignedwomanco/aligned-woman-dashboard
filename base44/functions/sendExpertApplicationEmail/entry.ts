@@ -36,6 +36,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 const OWNER_EMAIL = "hello@alignedwomanco.com";
 const FROM_HEADER = `The Aligned Woman <${OWNER_EMAIL}>`;
 const SUBJECT = "We have your application";
+const GROUP_SUBJECT = "We have your group request";
 const MAX_AGE_MS = 15 * 60 * 1000;
 
 function toBase64(input: string): string {
@@ -70,6 +71,24 @@ function buildMimeMessage(to: string, bcc: string, subject: string, text: string
   // Blank line between headers and body. Without it the first body
   // line is read as a header and the email arrives mangled.
   return `${headers}\r\n\r\n${toBase64(text)}`;
+}
+
+// A woman who only asked to start her own group (the Community page form)
+// never applied to the directory, so she gets the group wording.
+function buildGroupBody(name: string, groupName: string): string {
+  return [
+    `Hi ${name},`,
+    ``,
+    `Thank you for asking to start ${groupName || "your own group"} on The Aligned Woman. Your request is with us, and it will be read by a real person.`,
+    ``,
+    `Every group is approved one at a time, so the platform stays a place women can trust. Once yours is approved, it gets its own address, a private room only the women you invite can see, and a short guide to hosting it well.`,
+    ``,
+    `You will hear from us either way, within 14 working days.`,
+    ``,
+    `With warmth,`,
+    `Laura`,
+    `Founder, The Aligned Woman`,
+  ].join("\n");
 }
 
 function buildBody(name: string, wantsCommunity: boolean): string {
@@ -133,8 +152,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Gmail connector is not available" }, { status: 503 });
     }
 
-    const wantsCommunity = Array.isArray(application.interested_in) && application.interested_in.includes("host_community");
-    const raw = toBase64Url(buildMimeMessage(to, OWNER_EMAIL, SUBJECT, buildBody(name, wantsCommunity)));
+    const interests = Array.isArray(application.interested_in) ? application.interested_in : [];
+    const wantsCommunity = interests.includes("host_community");
+    const groupOnly = wantsCommunity && !interests.includes("marketplace_profile") && !interests.includes("host_course");
+    const subject = groupOnly ? GROUP_SUBJECT : SUBJECT;
+    const text = groupOnly ? buildGroupBody(name, (application.community_name || "").trim()) : buildBody(name, wantsCommunity);
+    const raw = toBase64Url(buildMimeMessage(to, OWNER_EMAIL, subject, text));
 
     const response = await fetch(
       "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
