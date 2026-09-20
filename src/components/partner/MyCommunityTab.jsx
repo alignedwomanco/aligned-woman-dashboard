@@ -219,6 +219,14 @@ export default function MyCommunityTab({ groupId }) {
         </div>
       </div>
 
+      <div className={`${CARD} flex flex-wrap items-center justify-between gap-3`}>
+        <div>
+          <p className="font-body font-semibold text-[14px] text-awburg-dark">Read the host guide before you open the doors.</p>
+          <p className="font-body font-light text-[12.5px] text-awburg-mid">What you can see as a host, what we ask of you, and how join requests and reports work.</p>
+        </div>
+        <Link to="/host-guide" className={BTN_SECONDARY}>Open the host guide</Link>
+      </div>
+
       <div className="flex items-center justify-between">
         <p className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-awrose-deep">Set up your Circle</p>
         <SaveMark state={saveState} />
