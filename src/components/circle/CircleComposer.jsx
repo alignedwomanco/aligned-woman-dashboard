@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { CIRCLE_COPY, activeTopics, formatDuration, randomId, scrubPhoto } from "@/lib/circle";
+import { CIRCLE_COPY, activeTopics, scrubPhoto } from "@/lib/circle";
 import { BTN_PRIMARY, BTN_SECONDARY, BTN_TEXT, CHIP, CHIP_ON, Sheet } from "@/components/circle/CircleShell";
 
 // ────────────────────────────────────────────────────────────────
@@ -8,8 +8,9 @@ import { BTN_PRIMARY, BTN_SECONDARY, BTN_TEXT, CHIP, CHIP_ON, Sheet } from "@/co
 //
 // Photos are scrubbed in the browser before upload (canvas re-encode,
 // random file name) so no EXIF and no original name ever leave the
-// phone. Voice notes are recorded with MediaRecorder and carry no
-// metadata. The post itself goes through createCirclePost.
+// phone. Photos are the only media type: voice notes were removed on
+// purpose and createCirclePost rejects them. The post itself goes
+// through createCirclePost.
 // ────────────────────────────────────────────────────────────────
 
 export default function CircleComposer({ open, mode, group, host, onClose, onPosted }) {
@@ -20,21 +21,13 @@ export default function CircleComposer({ open, mode, group, host, onClose, onPos
   const [anon, setAnon] = useState(false);
   const [media, setMedia] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [recording, setRecording] = useState(false);
-  const [recSeconds, setRecSeconds] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const recRef = useRef(null);
-  const chunksRef = useRef([]);
-  const timerRef = useRef(null);
-  const recSecondsRef = useRef(0);
 
   useEffect(() => {
     if (!open) {
       setBody(""); setTopic(""); setAnon(false); setMedia([]); setError(""); setBusy(false);
-      stopRecording(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const addPhoto = async (file) => {
@@ -52,59 +45,10 @@ export default function CircleComposer({ open, mode, group, host, onClose, onPos
     }
   };
 
-  const startRecording = async () => {
-    setError("");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
-      const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-      chunksRef.current = [];
-      rec.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
-      rec.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const seconds = recSecondsRef.current;
-        if (!chunksRef.current.length || seconds < 1) return;
-        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
-        const ext = (rec.mimeType || "").includes("mp4") ? "m4a" : "webm";
-        const file = new File([blob], `${randomId()}.${ext}`, { type: blob.type });
-        setUploading(true);
-        try {
-          const { file_url } = await base44.integrations.Core.UploadFile({ file });
-          setMedia((m) => [...m, { kind: "audio", url: file_url, duration_seconds: seconds }]);
-        } catch (_e) {
-          setError("The voice note did not upload. Try again.");
-        } finally {
-          setUploading(false);
-        }
-      };
-      recRef.current = rec;
-      rec.start();
-      setRecording(true);
-      setRecSeconds(0);
-      recSecondsRef.current = 0;
-      timerRef.current = setInterval(() => {
-        recSecondsRef.current += 1;
-        setRecSeconds(recSecondsRef.current);
-        if (recSecondsRef.current >= 180) stopRecording(false);
-      }, 1000);
-    } catch (_e) {
-      setError("We could not reach your microphone. Check the browser permission and try again.");
-    }
-  };
-
-  const stopRecording = (discard) => {
-    clearInterval(timerRef.current);
-    if (discard) recSecondsRef.current = 0;
-    const rec = recRef.current;
-    if (rec && rec.state !== "inactive") rec.stop();
-    recRef.current = null;
-    setRecording(false);
-  };
-
   const submit = async () => {
     setError("");
     if (!topic) { setError("Choose a topic so the right women find it."); return; }
-    if (!body.trim() && media.length === 0) { setError("Write something, or add a photo or voice note."); return; }
+    if (!body.trim() && media.length === 0) { setError("Write something, or add a photo."); return; }
     setBusy(true);
     try {
       const res = await base44.functions.invoke("createCirclePost", {
@@ -172,37 +116,15 @@ export default function CircleComposer({ open, mode, group, host, onClose, onPos
         </div>
 
         <div>
-          <div className="flex flex-wrap gap-2">
-            <label className={`${BTN_SECONDARY} w-auto min-h-[44px] px-5 cursor-pointer ${uploading || recording ? "opacity-50 pointer-events-none" : ""}`}>
-              {uploading ? "Uploading..." : "Add a photo"}
-              <input type="file" accept="image/*" className="sr-only" onChange={(e) => { addPhoto(e.target.files?.[0]); e.target.value = ""; }} />
-            </label>
-            {recording ? (
-              <>
-                <span className="inline-flex items-center gap-2 font-body text-[12px] font-semibold text-awburg-dark min-h-[44px]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-awburg-bright animate-pulse" aria-hidden="true" />
-                  Recording {formatDuration(recSeconds)}
-                </span>
-                <button type="button" className={`${BTN_PRIMARY} w-auto min-h-[44px] px-5`} onClick={() => stopRecording(false)}>Stop</button>
-                <button type="button" className={BTN_TEXT} onClick={() => stopRecording(true)}>Discard</button>
-              </>
-            ) : (
-              <button type="button" className={`${BTN_SECONDARY} w-auto min-h-[44px] px-5`} disabled={uploading} onClick={startRecording}>
-                Record a voice note
-              </button>
-            )}
-          </div>
+          <label className={`${BTN_SECONDARY} w-auto min-h-[44px] px-5 cursor-pointer ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+            {uploading ? "Uploading..." : "Add a photo"}
+            <input type="file" accept="image/*" className="sr-only" onChange={(e) => { addPhoto(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
           {media.length > 0 && (
             <div className="flex flex-wrap gap-3 mt-3">
               {media.map((m, i) => (
                 <div key={m.url} className="relative">
-                  {m.kind === "photo" ? (
-                    <img src={m.url} alt="" className="w-[84px] h-[84px] rounded-[16px] object-cover border border-awburg-core/10" />
-                  ) : (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-paper border border-awburg-core/15 px-4 h-[44px] font-body text-[12px] text-awburg-dark">
-                      Voice note · {formatDuration(m.duration_seconds)}
-                    </span>
-                  )}
+                  <img src={m.url} alt="" className="w-[84px] h-[84px] rounded-[16px] object-cover border border-awburg-core/10" />
                   <button type="button" aria-label="Remove" onClick={() => setMedia((arr) => arr.filter((_, idx) => idx !== i))} className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-awburg-core text-paper text-[12px] flex items-center justify-center">{"✕"}</button>
                 </div>
               ))}
@@ -213,7 +135,7 @@ export default function CircleComposer({ open, mode, group, host, onClose, onPos
 
         {error && <p className="font-body text-[12.5px] text-awrose-deep">{error}</p>}
 
-        <button type="button" className={BTN_PRIMARY} disabled={busy || uploading || recording} onClick={submit}>
+        <button type="button" className={BTN_PRIMARY} disabled={busy || uploading} onClick={submit}>
           {busy ? "Posting..." : isQuestion ? "Post to the Circle" : "Share with the Circle"}
         </button>
         <button type="button" className={`${BTN_TEXT} w-full`} onClick={onClose} disabled={busy}>Cancel</button>
