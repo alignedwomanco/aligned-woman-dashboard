@@ -46,6 +46,7 @@ import Apply from './pages/Apply';
 import CommunityGroup from './pages/CommunityGroup';
 import TheAWStandard from './pages/TheAWStandard';
 import CirclePage from './pages/CirclePage';
+import HostGuide from './pages/HostGuide';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -153,6 +154,9 @@ const AuthenticatedApp = () => {
             redirects, keeping any ?expert_id= the admin Experts tab sends. */}
         <Route path="/partner" element={<LayoutWrapper currentPageName="ExpertDashboard"><ExpertDashboard /></LayoutWrapper>} />
         <Route path="/expert-dashboard" element={<Navigate to={`/partner${window.location.search}`} replace />} />
+        {/* The community host guide. Signed in partners and admins only;
+            the page itself checks for a linked listing. */}
+        <Route path="/host-guide" element={<LayoutWrapper currentPageName="ExpertDashboard"><HostGuide /></LayoutWrapper>} />
 
         <Route path="/FeminineWorkbook" element={<FeminineWorkbook />} />
         <Route path="/analytics" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
