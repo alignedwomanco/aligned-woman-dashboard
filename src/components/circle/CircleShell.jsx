@@ -24,8 +24,15 @@ export const CHIP_ON =
   "inline-flex items-center rounded-full bg-awrose-pale border border-awrose-pale px-[15px] py-[11px] font-body text-[11px] font-semibold text-awburg-core whitespace-nowrap";
 export const CARD = "rounded-[22px] bg-paper border border-awburg-core/10 shadow-sm";
 
-const AW_LOGO =
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695154cb868ee011bb627195/23f49bf5a_AlignedWomanLogoPurple.png";
+// The platform bar carries the wordmark as type, not the image logo, so
+// it always sits in brand burgundy: THE ALIGNED WOMAN, Woman in italic.
+export function Wordmark({ className = "" }) {
+  return (
+    <span className={`font-display uppercase tracking-[0.08em] text-awburg-core whitespace-nowrap ${className}`}>
+      The Aligned <em className="italic">Woman</em>
+    </span>
+  );
+}
 
 // "The Grounded Women Circle" with Women in true italic, per the brand.
 export function RoomTitle({ name, className = "" }) {
@@ -54,9 +61,8 @@ export function PlatformBar({ user, slug }) {
       ];
   return (
     <header className="relative h-[54px] bg-off-white border-b border-awburg-core/10 flex items-center justify-between px-[18px]">
-      <Link to={home} className="flex items-center gap-[9px] min-h-[44px]">
-        <img src={AW_LOGO} alt="" className="h-[22px] w-auto" />
-        <span className="font-body font-bold text-[8.5px] tracking-[0.24em] text-awburg-core">THE ALIGNED WOMAN CO.</span>
+      <Link to={home} aria-label="The Aligned Woman" className="flex items-center min-h-[44px]">
+        <Wordmark className="text-[15px] md:text-[16px]" />
       </Link>
       <nav className="hidden md:flex items-center gap-6">
         {links.map((l) => (
