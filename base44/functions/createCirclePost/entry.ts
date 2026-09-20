@@ -213,8 +213,8 @@ function hostFirstName(hostExpert: any) {
 //
 // Media: photos are re-encoded through a canvas in the browser before
 // upload, which drops every byte of EXIF including location, and are
-// renamed to a random id. Voice notes are recorded in the browser and
-// carry no metadata. This function accepts only URLs on our own file
+// renamed to a random id. Photos are the only media type; voice notes
+// were removed on purpose. This function accepts only URLs on our own file
 // host, so a member cannot attach an outside image that would log who
 // opened the feed, and stores kind, url and duration, never a file name.
 //
@@ -230,12 +230,12 @@ const FILE_HOST_PREFIXES = [
 function cleanMedia(input: unknown) {
   if (!Array.isArray(input)) return [];
   return input
-    .filter((m: any) => m && typeof m.url === "string" && FILE_HOST_PREFIXES.some((p) => m.url.startsWith(p)))
+    .filter((m: any) => m && m.kind === "photo" && typeof m.url === "string" && FILE_HOST_PREFIXES.some((p) => m.url.startsWith(p)))
     .slice(0, 4)
     .map((m: any) => ({
-      kind: m.kind === "audio" ? "audio" : "photo",
+      kind: "photo",
       url: m.url,
-      duration_seconds: typeof m.duration_seconds === "number" ? Math.round(m.duration_seconds) : 0,
+      duration_seconds: 0,
     }));
 }
 
