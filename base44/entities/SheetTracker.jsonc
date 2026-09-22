@@ -1,0 +1,58 @@
+{
+  "name": "SheetTracker",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the tracker sheet"
+    },
+    "spreadsheet_id": {
+      "type": "string",
+      "description": "Google Sheets spreadsheet ID the sync writes into"
+    },
+    "spreadsheet_url": {
+      "type": "string",
+      "description": "Link to open the spreadsheet"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the sheet was last refreshed"
+    },
+    "row_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of rows written on the last sync"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    }
+  },
+  "required": [
+    "name",
+    "spreadsheet_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
