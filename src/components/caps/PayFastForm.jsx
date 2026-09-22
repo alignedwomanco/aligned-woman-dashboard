@@ -97,9 +97,10 @@ export default function PayFastForm({ item, price, onClose }) {
           <input type="hidden" name="return_url" value={RETURN_URL} />
           <input type="hidden" name="cancel_url" value={CANCEL_URL} />
           <input type="hidden" name="notify_url" value={NOTIFY_URL} />
-          {/* Matches the generated PayFast Pay Now code: amount is the price of one
-              cap, and PayFast multiplies it by custom_quantity. */}
-          <input type="hidden" name="amount" value={Number(price).toFixed(2)} />
+          {/* PayFast charges exactly this amount and does not multiply by
+              custom_quantity (tested September 22, 2026: 2 caps showed R350).
+              So the full total for the chosen quantity is sent here. */}
+          <input type="hidden" name="amount" value={amount.toFixed(2)} />
           <input type="hidden" name="item_name" value="Caps4Cause" />
           {/* PayFast only sends its own fields back, so everything the order
               sheet needs travels here:
