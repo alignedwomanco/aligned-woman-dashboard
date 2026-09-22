@@ -195,8 +195,8 @@ function ProductCard({ item, onBuy }) {
           <img
             src={images[photo]}
             alt={`${item.line}, embroidered on the ${item.cap.toLowerCase()} cap`}
-            className="w-full rounded-xl object-cover"
-            style={{ height: 220 }}
+            className="w-full rounded-xl"
+            style={{ height: "auto", display: "block" }}
           />
           <div className="flex gap-2">
             {images.map((src, i) => (
