@@ -36,6 +36,27 @@ function summariseItems(items) {
     .join("; ");
 }
 
+// Base44 stores created_date in UTC, often without a zone marker. The sheet
+// shows South African time, so a sale just after midnight lands on the right day.
+function saDateTime(value) {
+  if (!value) return "";
+  const text = String(value);
+  const hasZone = /(Z|[+-]\d{2}:?\d{2})$/.test(text);
+  const date = new Date(hasZone ? text : `${text}Z`);
+  if (Number.isNaN(date.getTime())) return text.slice(0, 10);
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Johannesburg",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (type) => (parts.find((p) => p.type === type) || {}).value || "";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
+}
+
 function deliveryLabel(method) {
   if (method === "courier") return "Courier";
   if (method === "collect") return "Collection";
@@ -135,7 +156,7 @@ export default async function (req) {
 
     const rows = orders.map((order) => [
       order.id || "",
-      order.created_date ? String(order.created_date).slice(0, 10) : "",
+      saDateTime(order.created_date),
       order.customer_name || "",
       order.email || "",
       order.phone || "",
