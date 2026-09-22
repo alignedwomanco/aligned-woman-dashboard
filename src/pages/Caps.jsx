@@ -102,7 +102,15 @@ export default function Caps() {
   }, []);
 
   return (
-    <div style={{ background: C.bg, color: C.ink, fontFamily: SANS, fontWeight: 300, minHeight: "100vh" }}>
+    <div className="aw-caps" style={{ background: C.bg, color: C.ink, fontFamily: SANS, fontWeight: 300, minHeight: "100vh" }}>
+      {/* Mobile only: centre the page's text. Desktop keeps the editorial left alignment. */}
+      <style>{`
+        @media (max-width: 767px) {
+          .aw-caps { text-align: center; }
+          .aw-caps .text-right { text-align: center; }
+          .aw-caps .aw-m-center { justify-content: center; gap: 10px; }
+        }
+      `}</style>
       <Nav />
       <Hero />
       <StatBand />
@@ -148,13 +156,13 @@ function Hero() {
         <p className="m-0 text-lg md:text-xl max-w-[560px]" style={{ lineHeight: 1.55 }}>
           After nine women were found dead in Ekurhuleni, the police told women in Kempton Park not to walk or run alone. This is the country's answer, embroidered on a cap.
         </p>
-        <div className="flex flex-wrap items-center gap-5 mt-2">
+        <div className="flex flex-wrap items-center gap-5 mt-2 aw-m-center">
           <a href="#caps" className="rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
           <div className="text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
         </div>
-        <div className="flex items-baseline gap-3 mt-4 pt-6" style={{ borderTop: `1px solid ${C.roseLight}` }}>
+        <div className="flex items-baseline gap-3 mt-4 pt-6 aw-m-center" style={{ borderTop: `1px solid ${C.roseLight}` }}>
           <div className="text-5xl" style={{ fontFamily: SERIF, color: C.burg }}>{SOLD}</div>
           <div className="text-[15px] uppercase" style={{ letterSpacing: "0.06em" }}>of {RUN_SIZE} caps sold</div>
         </div>
@@ -222,7 +230,7 @@ function ProductCard({ item, onBuy }) {
             className="w-full rounded-xl"
             style={{ height: "auto", display: "block" }}
           />
-          <div className="flex gap-2">
+          <div className="flex gap-2 aw-m-center">
             {images.map((src, i) => (
               <button
                 key={src}
@@ -242,17 +250,17 @@ function ProductCard({ item, onBuy }) {
           <div className="text-[26px] text-center px-4" style={{ fontFamily: SERIF, color: item.ink }}>{item.line}</div>
         </div>
       )}
-      <div className="flex justify-between items-baseline">
+      <div className="flex justify-between items-baseline aw-m-center">
         <div className="text-xl" style={{ fontFamily: SERIF, color: C.burg }}>{item.line}</div>
         <div className="text-sm font-medium">{money(PRICE)}</div>
       </div>
       <div className="text-[13px] uppercase" style={{ color: C.burgMid, letterSpacing: "0.06em" }}>Embroidered on the {item.placement}</div>
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 aw-m-center">
           <span style={{ ...swatchDot, background: item.swatch }} />
           <span className="text-[13px]" style={{ color: C.burgMid }}>{item.cap} cap</span>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 aw-m-center">
           <span style={{ ...swatchDot, background: item.ink }} />
           <span className="text-[13px]" style={{ color: C.burgMid }}>{item.thread} embroidery</span>
         </div>
