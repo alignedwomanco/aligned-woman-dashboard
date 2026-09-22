@@ -85,7 +85,7 @@ export default function PayFastForm({ item, price, onClose }) {
           <input type="hidden" name="cancel_url" value={CANCEL_URL} />
           <input type="hidden" name="notify_url" value={NOTIFY_URL} />
           <input type="hidden" name="amount" value={amount.toFixed(2)} />
-          <input type="hidden" name="item_name" value={`${item.line} cap`} />
+          <input type="hidden" name="item_name" value="Caps4Cause" />
           {/* PayFast only sends its own fields back, so everything the order
               sheet needs travels here. m_payment_id and custom_str5 (the
               shipping address) are filled in on submit, once the form is
@@ -102,7 +102,7 @@ export default function PayFastForm({ item, price, onClose }) {
             <label htmlFor="pf-qty" style={labelStyle}>Quantity</label>
             <input
               id="pf-qty"
-              name="quantity"
+              name="custom_quantity"
               type="number"
               min="1"
               value={qty}
