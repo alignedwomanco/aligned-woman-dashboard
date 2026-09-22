@@ -14,7 +14,7 @@ const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order save
 const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/11ecf7590_WhatsAppImage2026-09-22at135317.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
-const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/7a30592a5_WhatsAppImage2026-09-22at1115541.jpeg"; // portrait hero shot, phones only.
+const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/7ba341790_WhatsAppImage2026-09-22at1148031.jpeg"; // portrait hero shot, phones only.
 const BARRON_LOGO = "https://media.base44.com/images/public/69f46886a412ee042303f1af/842e10106_barron-logo.svg";
 
 /* Every cap carries its own colourway: one cap colour, one embroidery colour.
@@ -233,7 +233,7 @@ function Hero() {
       {HERO_IMAGE_MOBILE && (
         <img
           src={HERO_IMAGE_MOBILE}
-          alt="The forest green cap embroidered with how about no, worn at golden hour"
+          alt="The forest green cap embroidered with you stay home, worn at golden hour"
           className="aw-hero-img-mobile w-full block"
           style={{ height: "auto" }}
         />
