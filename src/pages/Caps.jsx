@@ -205,7 +205,7 @@ function Hero() {
       </div>
       <div className="flex flex-col gap-3">
         {HERO_IMAGE ? (
-          <img src={HERO_IMAGE} alt="The forest green cap embroidered with you stay home, worn at golden hour" className="w-full rounded-2xl object-cover" style={{ height: 480 }} />
+          <img src={HERO_IMAGE} alt="The forest green cap embroidered with you stay home, worn at golden hour" className="w-full block" style={{ height: "auto" }} />
         ) : (
           <div className="w-full rounded-2xl flex items-center justify-center text-center p-6 text-sm uppercase" style={{ height: 480, background: C.roseLight, color: C.burg, letterSpacing: "0.1em" }}>
             Six-cap flat lay. Drop the image URL into HERO_IMAGE.
