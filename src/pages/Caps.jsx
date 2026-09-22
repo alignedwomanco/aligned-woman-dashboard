@@ -23,7 +23,7 @@ const LINES = [
   {
     id: "stay", line: "you stay home", placement: "front", swatch: "#20483D", ink: "#F2AFC7", cap: "Forest green", thread: "Light pink",
     images: [
-      "https://media.base44.com/images/public/69f46886a412ee042303f1af/4704a2c6a_WhatsAppImage2026-09-22at1148031.jpeg",
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/f32288785_YOUSTAYHOMEUPDATEDPORTRAIT.jpeg",
       "https://media.base44.com/images/public/69f46886a412ee042303f1af/1e8098d4c_WhatsAppImage2026-09-22at114803.jpeg",
     ],
   },
@@ -113,6 +113,9 @@ export default function Caps() {
         @media (max-width: 767px) {
           .aw-caps { text-align: center; }
           .aw-caps .text-right { text-align: center; }
+          /* The footer is the site's shared footer, so on a phone it keeps the
+             same left alignment every other page shows. */
+          .aw-caps footer { text-align: left; }
           .aw-caps .aw-m-center { justify-content: center; gap: 10px; }
           .aw-caps .aw-nav-cta { padding: 8px 16px; font-size: 11px; min-height: 36px !important; }
           /* The Barron mark sits alone in its tile, so on a phone it centres. */
