@@ -118,8 +118,8 @@ export default function Caps() {
       <Money />
       <Why />
       <Faq />
-      <Footer />
       <PoweredBy />
+      <Footer />
 
       {buy && <PayFastForm item={buy} price={PRICE} onClose={() => setBuy(null)} />}
     </div>
