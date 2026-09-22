@@ -75,7 +75,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete" || currentPageName === "StartingPointProfile" || currentPageName === "ContactForm" || currentPageName === "TheAWStandard" || currentPageName === "Apply" || currentPageName === "Retreats";
+  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete" || currentPageName === "StartingPointProfile" || currentPageName === "ContactForm" || currentPageName === "TheAWStandard" || currentPageName === "Apply" || currentPageName === "Retreats" || currentPageName === "caps";
 
   // Dashboard has its own layout - render children directly
   const isDashboardPage = currentPageName === "Dashboard";
@@ -355,9 +355,23 @@ export default function Layout({ children, currentPageName }) {
                     style={{ background: "#C4847A", color: "#FFFFFF", border: "1px solid #C4847A" }}>
                         Go to Dashboard
                       </button>
-                      <div className="mb-6" style={{ borderBottom: "1px solid #d1ccc5" }} />
                     </>
                 }
+                  {currentPageName === "caps" &&
+                    <button
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        const el = document.getElementById("caps");
+                        if (el) el.scrollIntoView({ behavior: "smooth" }); else window.location.href = "/caps#caps";
+                      }}
+                      className="w-full mb-5 px-4 py-3 rounded-full font-body font-bold text-[11px] tracking-[0.22em] uppercase transition-all"
+                      style={{ background: "transparent", color: "#4A0E2E", border: "1px solid #4A0E2E" }}>
+                        Buy a cap
+                    </button>
+                  }
+                  {(isAuthenticated || currentPageName === "caps") &&
+                    <div className="mb-6" style={{ borderBottom: "1px solid #d1ccc5" }} />
+                  }
                   {Object.entries(MENU_NAV).map(([col, links]) => (
                     <div key={col} className="mb-7">
                       <p className="mb-4" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#4a2c2e" }}>
