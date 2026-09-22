@@ -193,9 +193,9 @@ function Hero() {
 
 function StatBand() {
   const stats = [
-    [String(RUN_SIZE), "caps in the run. When they're gone, they're gone."],
-    ["100%", <>of proceeds to <WFC />. Barron covers the caps and embroidery, so there is no cost of goods to deduct.</>],
-    [money(RUN_SIZE * PRICE), <>to <WFC /> if every cap sells. You decide how close we get.</>],
+    ["Three", "women a day are killed by an intimate partner."],
+    ["569", "women were murdered in three months this year."],
+    ["5 to 6x", "our femicide rate, against the global average."],
   ];
   return (
     <div className="grid md:grid-cols-3 gap-8 md:gap-12 px-6 md:px-24 py-12" style={{ background: C.burg, color: C.bg }}>
