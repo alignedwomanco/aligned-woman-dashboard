@@ -9,7 +9,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 //   custom_str1   the line
 //   custom_str2   cap colour | thread colour | placement
 //   custom_str3   phone
-//   custom_str4   item id
+//   custom_str4   name | surname
 //   custom_str5   shipping address
 //   custom_int1   quantity
 // Payments started before September 22, 2026 used an older layout
@@ -115,9 +115,15 @@ export default async function (req) {
     phone = phone || clean(params.get("cell_number"));
 
     const address = clean(params.get("custom_str5"));
-    const buyerName = [clean(params.get("name_first")), clean(params.get("name_last"))]
+    const payerName = [clean(params.get("name_first")), clean(params.get("name_last"))]
       .filter(Boolean)
       .join(" ");
+    // The name typed on the cap form is who the cap goes to. The PayFast payer
+    // can differ (a partner's card, a company account), so it is kept in Notes.
+    const formName = str4.includes("|")
+      ? str4.split("|").map((p) => p.trim()).filter(Boolean).join(" ")
+      : "";
+    const buyerName = formName || payerName;
     const email = clean(params.get("email_address"));
 
     // The price travels in a form field a buyer could edit, so the amount
@@ -128,13 +134,17 @@ export default async function (req) {
       flags.push(`CHECK AMOUNT: paid R${total.toFixed(2)}, expected R${expected.toFixed(2)} for ${quantity} cap${quantity === 1 ? "" : "s"}`);
     }
     if (!address) flags.push("CHECK: no shipping address received");
+    if (!phone) flags.push("CHECK: no phone received");
+    if (!formName) flags.push("CHECK: no name received from the cap form");
     if (!ourReference) flags.push("CHECK: payment did not come through the cap form");
 
     const noteParts = [
       ...flags,
       `Paid by PayFast${ourReference ? `, payment ${ourReference}` : ""}${pfPaymentId ? ` (PayFast ${pfPaymentId})` : ""}`,
     ];
-    if (str4 && newLayout) noteParts.push(`Item ${str4}`);
+    if (formName && payerName && formName.toLowerCase() !== payerName.toLowerCase()) {
+      noteParts.push(`Paid by ${payerName}`);
+    }
 
     const order = await base44.asServiceRole.entities.CapOrder.create({
       customer_name: buyerName || email || "Cap buyer",
