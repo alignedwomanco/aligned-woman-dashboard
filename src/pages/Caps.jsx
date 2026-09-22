@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import PayFastForm from "@/components/caps/PayFastForm";
 
 /* ------------------------------------------------------------------
    CAMPAIGN SETTINGS
@@ -52,10 +52,7 @@ function WFC() {
 /* ------------------------------------------------------------------ */
 
 export default function Caps() {
-  const [cart, setCart] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [checkout, setCheckout] = useState(false);
-  const [done, setDone] = useState(null);
+  const [buy, setBuy] = useState(null);
 
   useEffect(() => {
     const id = "aw-caps-fonts";
@@ -69,62 +66,25 @@ export default function Caps() {
     document.title = "You stay home. Caps for Women For Change | The Aligned Woman Co.";
   }, []);
 
-  const addToCart = (item) => {
-    setCart((c) => {
-      const key = `${item.id}|${item.cap}|${item.thread}`;
-      const i = c.findIndex((x) => x.key === key);
-      if (i >= 0) {
-        const n = [...c];
-        n[i] = { ...n[i], quantity: n[i].quantity + 1 };
-        return n;
-      }
-      return [...c, { ...item, key, quantity: 1 }];
-    });
-    setCartOpen(true);
-  };
-  const setQty = (key, q) =>
-    setCart((c) => c.map((x) => (x.key === key ? { ...x, quantity: Math.max(0, q) } : x)).filter((x) => x.quantity > 0));
-
-  const capCount = cart.reduce((s, x) => s + x.quantity, 0);
-  const subtotal = capCount * PRICE;
-
   return (
     <div style={{ background: C.bg, color: C.ink, fontFamily: SANS, fontWeight: 300, minHeight: "100vh" }}>
-      <Nav capCount={capCount} onCart={() => setCartOpen(true)} />
+      <Nav />
       <Hero />
       <StatBand />
-      <Shop onAdd={addToCart} />
+      <Shop onBuy={setBuy} />
       <Money />
       <Why />
       <Faq />
       <Footer />
 
-      {cartOpen && !checkout && (
-        <CartDrawer
-          cart={cart}
-          setQty={setQty}
-          subtotal={subtotal}
-          onClose={() => setCartOpen(false)}
-          onCheckout={() => setCheckout(true)}
-        />
-      )}
-      {checkout && !done && (
-        <CheckoutModal
-          cart={cart}
-          capCount={capCount}
-          subtotal={subtotal}
-          onClose={() => setCheckout(false)}
-          onDone={(order) => { setDone(order); setCart([]); }}
-        />
-      )}
-      {done && <DoneModal order={done} onClose={() => { setDone(null); setCheckout(false); setCartOpen(false); }} />}
+      {buy && <PayFastForm item={buy} price={PRICE} onClose={() => setBuy(null)} />}
     </div>
   );
 }
 
 /* ---------------- Sections ---------------- */
 
-function Nav({ capCount, onCart }) {
+function Nav() {
   return (
     <div className="flex items-center justify-between px-6 md:px-24 py-6" style={{ borderBottom: `1px solid ${C.roseLight}` }}>
       <a href="/" style={{ fontFamily: SERIF, fontSize: 20, color: C.ink, textDecoration: "none" }}>The Aligned Woman Co.</a>
@@ -132,9 +92,9 @@ function Nav({ capCount, onCart }) {
         <a href="#caps" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>The caps</a>
         <a href="#money" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Where the money goes</a>
         <a href="#why" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Why</a>
-        <button type="button" onClick={onCart} className="rounded-full px-6 py-3 font-medium" style={{ background: C.rose, color: C.ink, minHeight: 44 }}>
-          Cart{capCount > 0 ? ` (${capCount})` : ""}
-        </button>
+        <a href="#caps" className="rounded-full px-6 py-3 font-medium" style={{ background: C.rose, color: C.ink, minHeight: 44, textDecoration: "none" }}>
+          Buy a cap
+        </a>
       </div>
     </div>
   );
@@ -196,7 +156,7 @@ function StatBand() {
   );
 }
 
-function Shop({ onAdd }) {
+function Shop({ onBuy }) {
   return (
     <div id="caps" className="px-6 md:px-24 pt-16 md:pt-24 pb-16 flex flex-col gap-10">
       <div className="flex flex-col gap-3 max-w-[720px]">
@@ -206,14 +166,14 @@ function Shop({ onAdd }) {
         </p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {LINES.map((l) => <ProductCard key={l.id} item={l} onAdd={onAdd} />)}
+        {LINES.map((l) => <ProductCard key={l.id} item={l} onBuy={onBuy} />)}
       </div>
       <div className="text-sm" style={{ color: C.burgMid }}>Shipping is charged at cost and never comes out of the donation.</div>
     </div>
   );
 }
 
-function ProductCard({ item, onAdd }) {
+function ProductCard({ item, onBuy }) {
   const [cap, setCap] = useState(item.cap);
   const [thread, setThread] = useState(item.thread);
   const selectStyle = { flexGrow: 1, padding: "12px 14px", border: `1px solid ${C.rose}`, borderRadius: 10, background: C.white, color: C.ink, fontFamily: "inherit", fontSize: 14, minHeight: 44, width: "100%" };
@@ -244,11 +204,11 @@ function ProductCard({ item, onAdd }) {
       </div>
       <button
         type="button"
-        onClick={() => onAdd({ id: item.id, line: item.line, placement: item.placement, cap, thread })}
+        onClick={() => onBuy({ id: item.id, line: item.line, placement: item.placement, cap, thread })}
         className="rounded-full py-4 text-sm font-medium"
         style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, cursor: "pointer" }}
       >
-        Add to cart
+        Buy now with PayFast
       </button>
     </div>
   );
@@ -325,146 +285,5 @@ function Footer() {
       <div>The Aligned Woman Co.</div>
       <div>#TheAlignedWomanBlueprint · #SouthAfricanWomen</div>
     </div>
-  );
-}
-
-/* ---------------- Cart and checkout ---------------- */
-
-function Overlay({ children, onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end" style={{ background: "rgba(8,1,5,0.55)" }} onClick={onClose}>
-      <div className="h-full w-full max-w-[480px] overflow-y-auto p-6 md:p-8 flex flex-col gap-6" style={{ background: C.bg }} onClick={(e) => e.stopPropagation()}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function CartDrawer({ cart, setQty, subtotal, onClose, onCheckout }) {
-  return (
-    <Overlay onClose={onClose}>
-      <div className="flex justify-between items-center">
-        <div className="text-3xl" style={{ fontFamily: SERIF, color: C.burg }}>Your cart</div>
-        <button type="button" onClick={onClose} aria-label="Close cart" className="rounded-full px-4 py-2" style={{ background: C.roseLight, color: C.ink, border: 0, minHeight: 44 }}>Close</button>
-      </div>
-      {cart.length === 0 ? (
-        <div className="text-[15px]">Nothing in here yet. Pick a line.</div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {cart.map((x) => (
-            <div key={x.key} className="rounded-2xl p-5 flex flex-col gap-2" style={{ background: C.white }}>
-              <div className="text-lg" style={{ fontFamily: SERIF, color: C.burg }}>{x.line}</div>
-              <div className="text-[13px] uppercase" style={{ color: C.burgMid, letterSpacing: "0.06em" }}>{x.cap} cap · {x.thread} embroidery · {x.placement}</div>
-              <div className="flex items-center justify-between mt-1">
-                <div className="flex items-center gap-2">
-                  <button type="button" aria-label="Fewer" onClick={() => setQty(x.key, x.quantity - 1)} className="rounded-full w-11 h-11" style={{ background: C.roseLight, border: 0 }}>−</button>
-                  <div className="w-8 text-center">{x.quantity}</div>
-                  <button type="button" aria-label="More" onClick={() => setQty(x.key, x.quantity + 1)} className="rounded-full w-11 h-11" style={{ background: C.roseLight, border: 0 }}>+</button>
-                </div>
-                <div className="font-medium">{money(x.quantity * PRICE)}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="mt-auto flex flex-col gap-3 pt-4" style={{ borderTop: `1px solid ${C.roseLight}` }}>
-        <div className="flex justify-between text-[15px]"><span>Caps</span><span>{money(subtotal)}</span></div>
-        <div className="flex justify-between text-[15px]"><span>Shipping</span><span>{SHIPPING ? money(SHIPPING) : "At cost, confirmed at checkout"}</span></div>
-        <div className="text-sm" style={{ color: C.burgMid }}>100% of the cap price goes to Women For Change.</div>
-        <button type="button" disabled={cart.length === 0} onClick={onCheckout} className="rounded-full py-4 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, opacity: cart.length ? 1 : 0.5 }}>
-          Checkout
-        </button>
-      </div>
-    </Overlay>
-  );
-}
-
-function CheckoutModal({ cart, capCount, subtotal, onClose, onDone }) {
-  const [f, setF] = useState({ customer_name: "", email: "", phone: "", delivery_method: "courier", address: "", notes: "" });
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const shipping = f.delivery_method === "courier" ? SHIPPING : 0;
-  const total = subtotal + shipping;
-  const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
-  const inputStyle = { padding: "12px 14px", border: `1px solid ${C.rose}`, borderRadius: 10, background: C.white, color: C.ink, fontFamily: "inherit", fontSize: 15, minHeight: 44, width: "100%" };
-  const labelStyle = { fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: C.burgMid };
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setErr("");
-    if (!f.customer_name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) { setErr("Please add your name and a valid email."); return; }
-    if (f.delivery_method === "courier" && !f.address.trim()) { setErr("Please add a delivery address, or choose collection."); return; }
-    setBusy(true);
-    try {
-      const order = await base44.entities.CapOrder.create({
-        ...f,
-        items: cart.map((x) => ({ line: x.line, cap_colour: x.cap, thread_colour: x.thread, placement: x.placement, quantity: x.quantity, unit_price: PRICE })),
-        cap_count: capCount,
-        subtotal,
-        shipping,
-        total,
-        status: "pending_payment",
-      });
-      if (PAYMENT_LINK) {
-        const url = new URL(PAYMENT_LINK);
-        url.searchParams.set("prefilled_email", f.email);
-        url.searchParams.set("client_reference_id", order.id);
-        window.location.href = url.toString();
-        return;
-      }
-      onDone(order);
-    } catch (ex) {
-      setErr("Something went wrong saving your order. Please try again or email hello@alignedwomanco.com.");
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Overlay onClose={onClose}>
-      <div className="flex justify-between items-center">
-        <div className="text-3xl" style={{ fontFamily: SERIF, color: C.burg }}>Checkout</div>
-        <button type="button" onClick={onClose} aria-label="Back to cart" className="rounded-full px-4 py-2" style={{ background: C.roseLight, color: C.ink, border: 0, minHeight: 44 }}>Back</button>
-      </div>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5"><label htmlFor="co-name" style={labelStyle}>Full name</label><input id="co-name" value={f.customer_name} onChange={set("customer_name")} style={inputStyle} autoComplete="name" /></div>
-        <div className="flex flex-col gap-1.5"><label htmlFor="co-email" style={labelStyle}>Email</label><input id="co-email" type="email" value={f.email} onChange={set("email")} style={inputStyle} autoComplete="email" /></div>
-        <div className="flex flex-col gap-1.5"><label htmlFor="co-phone" style={labelStyle}>Phone</label><input id="co-phone" type="tel" value={f.phone} onChange={set("phone")} style={inputStyle} autoComplete="tel" /></div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="co-delivery" style={labelStyle}>Delivery</label>
-          <select id="co-delivery" value={f.delivery_method} onChange={set("delivery_method")} style={inputStyle}>
-            <option value="courier">Courier (charged at cost)</option>
-            <option value="collect">Collect</option>
-          </select>
-        </div>
-        {f.delivery_method === "courier" && (
-          <div className="flex flex-col gap-1.5"><label htmlFor="co-address" style={labelStyle}>Delivery address</label><textarea id="co-address" rows={3} value={f.address} onChange={set("address")} style={inputStyle} autoComplete="street-address" /></div>
-        )}
-        <div className="flex flex-col gap-1.5"><label htmlFor="co-notes" style={labelStyle}>Notes (optional)</label><input id="co-notes" value={f.notes} onChange={set("notes")} style={inputStyle} /></div>
-
-        <div className="flex flex-col gap-2 pt-4" style={{ borderTop: `1px solid ${C.roseLight}` }}>
-          <div className="flex justify-between text-[15px]"><span>{capCount} cap{capCount === 1 ? "" : "s"}</span><span>{money(subtotal)}</span></div>
-          <div className="flex justify-between text-[15px]"><span>Shipping</span><span>{f.delivery_method === "collect" ? "Free" : shipping ? money(shipping) : "Confirmed by email"}</span></div>
-          <div className="flex justify-between text-lg font-medium"><span>Total</span><span>{money(total)}</span></div>
-        </div>
-        {err && <div className="text-sm" style={{ color: C.burgMid }}>{err}</div>}
-        <button type="submit" disabled={busy} className="rounded-full py-4 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, opacity: busy ? 0.6 : 1 }}>
-          {busy ? "Saving your order" : PAYMENT_LINK ? "Continue to payment" : "Place order"}
-        </button>
-        <div className="text-xs" style={{ color: C.burgMid, lineHeight: 1.5 }}>100% of the cap price goes to <WFC />. Shipping is charged at cost and never comes out of the donation.</div>
-      </form>
-    </Overlay>
-  );
-}
-
-function DoneModal({ order, onClose }) {
-  return (
-    <Overlay onClose={onClose}>
-      <div className="text-4xl" style={{ fontFamily: SERIF, color: C.burg }}>Thank you.</div>
-      <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>
-        Your order for {order.cap_count} cap{order.cap_count === 1 ? "" : "s"} is saved. We will email {order.email} with payment details and, once paid, your cap goes into Barron's embroidery run.
-      </p>
-      <p className="m-0 text-[15px]" style={{ lineHeight: 1.6, color: C.burgMid }}>Order reference: {order.id}</p>
-      <button type="button" onClick={onClose} className="rounded-full py-4 text-[15px] font-medium mt-auto" style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44 }}>Back to the caps</button>
-    </Overlay>
   );
 }
