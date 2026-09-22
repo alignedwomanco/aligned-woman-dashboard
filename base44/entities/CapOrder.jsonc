@@ -79,6 +79,10 @@
       ],
       "default": "pending_payment"
     },
+    "payment_reference": {
+      "type": "string",
+      "description": "PayFast payment reference, used to keep one sale to one order"
+    },
     "notes": {
       "type": "string"
     }

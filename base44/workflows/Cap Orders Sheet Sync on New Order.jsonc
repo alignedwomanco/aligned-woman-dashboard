@@ -1,0 +1,39 @@
+{
+  "description": "Refreshes the cap orders Google Sheet as soon as a cap order is added or updated, so a sale shows up without waiting for the daily refresh.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "cap_orders_sheet_sync_on_order",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_cap_orders": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncCapOrdersToSheet",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Refresh the cap orders sheet",
+            "description": "After an order changes"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Cap Orders Sheet Sync on New Order",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "CapOrder"
+    }
+  }
+}

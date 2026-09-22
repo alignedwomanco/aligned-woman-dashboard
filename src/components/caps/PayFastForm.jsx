@@ -19,6 +19,7 @@ const SERIF = "'Libre Baskerville', Baskerville, 'DM Serif Display', Georgia, se
 
 const RECEIVER = "32598411";
 const SITE_URL = "https://www.app.alignedwomanco.com";
+const NOTIFY_URL = "https://new-aligned-woman-dashboard-copy-2303f1af.base44.app/functions/payfastNotify";
 const COUNTRIES = ["South Africa", "Botswana", "Lesotho", "Mauritius", "Mozambique", "Swaziland", "Zimbabwe"];
 
 const inputStyle = { padding: "12px 14px", border: `1px solid ${C.rose}`, borderRadius: 10, background: C.white, color: C.ink, fontFamily: "inherit", fontSize: 15, minHeight: 44, width: "100%" };
@@ -43,6 +44,20 @@ export default function PayFastForm({ item, price, onClose }) {
       setErr("Select a country.");
       return;
     }
+    // PayFast hands back only the fields it knows, so the payment reference
+    // and the full shipping address are attached here, on the way out.
+    f.elements["m_payment_id"].value = `CAP-${Date.now()}`;
+    f.elements["custom_str5"].value = [
+      val("line1"),
+      val("line2"),
+      val("city"),
+      val("region"),
+      val("country"),
+      val("code"),
+    ]
+      .filter(Boolean)
+      .join(", ")
+      .slice(0, 255);
     setErr("");
   };
 
@@ -66,18 +81,26 @@ export default function PayFastForm({ item, price, onClose }) {
           <input type="hidden" name="receiver" value={RECEIVER} />
           <input type="hidden" name="return_url" value={SITE_URL} />
           <input type="hidden" name="cancel_url" value={SITE_URL} />
-          <input type="hidden" name="notify_url" value={SITE_URL} />
-          <input type="hidden" name="amount" value={amount} />
-          <input type="hidden" name="item_name" value="Cap" />
+          <input type="hidden" name="notify_url" value={NOTIFY_URL} />
+          <input type="hidden" name="amount" value={amount.toFixed(2)} />
+          <input type="hidden" name="item_name" value={`${item.line} cap`} />
+          {/* PayFast only sends its own fields back, so everything the order
+              sheet needs travels here. m_payment_id and custom_str5 (the
+              shipping address) are filled in on submit, once the form is
+              known to be valid. */}
+          <input type="hidden" name="m_payment_id" value="" />
           <input type="hidden" name="custom_str1" value={item.line} />
-          <input type="hidden" name="custom_str2" value={`${item.cap} cap`} />
-          <input type="hidden" name="custom_str3" value={`${item.thread} embroidery, ${item.placement}`} />
+          <input type="hidden" name="custom_str2" value={item.cap} />
+          <input type="hidden" name="custom_str3" value={item.thread} />
+          <input type="hidden" name="custom_str4" value={item.placement} />
+          <input type="hidden" name="custom_int1" value={qty} />
+          <input type="hidden" name="custom_str5" value="" />
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="pf-qty" style={labelStyle}>Quantity</label>
             <input
               id="pf-qty"
-              name="custom_quantity"
+              name="quantity"
               type="number"
               min="1"
               value={qty}
