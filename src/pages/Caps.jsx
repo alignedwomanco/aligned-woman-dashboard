@@ -141,6 +141,7 @@ export default function Caps() {
           .aw-caps .aw-hero-content h1,
           .aw-caps .aw-hero-content p,
           .aw-caps .aw-hero-content > div { color: #FAF5F3 !important; }
+          .aw-caps .aw-hero-content .aw-hero-note { color: #FFFFFF !important; }
           .aw-caps .aw-hero-content h1 { font-size: 36px; }
           .aw-caps .aw-hero-content p { font-size: 15px; line-height: 1.45; }
           .aw-caps .aw-hero-scrim {
@@ -247,7 +248,7 @@ function Hero() {
           <a href="#caps" className="aw-buy rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
-          <div className="text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
+          <div className="aw-hero-note text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
         </div>
         <div className="text-xs uppercase" style={{ letterSpacing: "0.1em", color: C.burgMid }}>Caps and embroidery sponsored by Barron</div>
       </div>
