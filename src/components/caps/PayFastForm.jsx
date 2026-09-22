@@ -18,8 +18,10 @@ const C = {
 const SERIF = "'Libre Baskerville', Baskerville, 'DM Serif Display', Georgia, serif";
 
 const RECEIVER = "32598411";
-const SITE_URL = "https://www.app.alignedwomanco.com";
-const NOTIFY_URL = "https://new-aligned-woman-dashboard-copy-2303f1af.base44.app/functions/payfastNotify";
+const RETURN_URL = "https://app.alignedwomanco.com/caps";
+const CANCEL_URL = "https://app.alignedwomanco.com/caps#caps";
+// Same platform API route the working Stripe webhook uses.
+const NOTIFY_URL = "https://api.base44.com/api/apps/69f46886a412ee042303f1af/functions/payfastNotify";
 const COUNTRIES = ["South Africa", "Botswana", "Lesotho", "Mauritius", "Mozambique", "Swaziland", "Zimbabwe"];
 
 const inputStyle = { padding: "12px 14px", border: `1px solid ${C.rose}`, borderRadius: 10, background: C.white, color: C.ink, fontFamily: "inherit", fontSize: 15, minHeight: 44, width: "100%" };
@@ -79,8 +81,8 @@ export default function PayFastForm({ item, price, onClose }) {
         <form ref={formRef} action="https://payment.payfast.io/eng/process" method="post" onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input type="hidden" name="cmd" value="_paynow" />
           <input type="hidden" name="receiver" value={RECEIVER} />
-          <input type="hidden" name="return_url" value={SITE_URL} />
-          <input type="hidden" name="cancel_url" value={SITE_URL} />
+          <input type="hidden" name="return_url" value={RETURN_URL} />
+          <input type="hidden" name="cancel_url" value={CANCEL_URL} />
           <input type="hidden" name="notify_url" value={NOTIFY_URL} />
           <input type="hidden" name="amount" value={amount.toFixed(2)} />
           <input type="hidden" name="item_name" value={`${item.line} cap`} />
