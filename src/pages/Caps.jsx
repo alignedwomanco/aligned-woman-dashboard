@@ -137,7 +137,7 @@ function Nav() {
           src="https://media.base44.com/images/public/69f46886a412ee042303f1af/6af7e7352_AWCologo.png"
           alt="The Aligned Woman Co."
           className="block w-auto"
-          style={{ height: 48 }}
+          style={{ height: 144 }}
         />
       </a>
       <div className="flex items-center gap-4 md:gap-8 text-[13px] uppercase" style={{ letterSpacing: "0.12em" }}>
