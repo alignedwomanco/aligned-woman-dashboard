@@ -17,12 +17,21 @@ export default async function (req) {
       return Response.json({ error: "Empty notification" }, { status: 400 });
     }
 
-    // PayFast asks that the notification be posted straight back to them to
-    // confirm it really came from them. Anything else is discarded.
+    const params = new URLSearchParams(rawBody);
+
+    // PayFast asks that the notification be posted straight back to them, in
+    // the same order, with the signature left out, to confirm it really came
+    // from them. Anything else is discarded.
+    const validationBody = new URLSearchParams();
+    for (const [key, value] of params) {
+      if (key === "signature") continue;
+      validationBody.append(key, value);
+    }
+
     const check = await fetch(VALIDATE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: rawBody,
+      body: validationBody.toString(),
     });
     const verdict = (await check.text()).trim().toUpperCase();
 
@@ -30,7 +39,6 @@ export default async function (req) {
       return Response.json({ error: "Notification could not be verified" }, { status: 400 });
     }
 
-    const params = new URLSearchParams(rawBody);
     const paymentStatus = (params.get("payment_status") || "").toUpperCase();
 
     // Only a completed payment becomes an order. Anything else is acknowledged
