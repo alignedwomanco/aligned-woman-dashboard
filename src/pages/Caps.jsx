@@ -13,7 +13,7 @@ const SHIPPING = 0;                // courier fee at cost in ZAR; 0 until the co
 const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order saved, payment link sent by email.
 const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
-const HERO_IMAGE = "";             // six-cap flat lay. Empty renders a toned placeholder.
+const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/51791f46b_WhatsAppImage2026-09-22at1148031.jpeg"; // hero portrait. Empty renders a toned placeholder.
 
 /* Every cap carries its own colourway: one cap colour, one embroidery colour.
    swatch is the cap, ink is the embroidery thread. */
@@ -175,7 +175,7 @@ function Hero() {
       </div>
       <div className="flex flex-col gap-3">
         {HERO_IMAGE ? (
-          <img src={HERO_IMAGE} alt="The six caps, laid flat" className="w-full rounded-2xl object-cover" style={{ height: 480 }} />
+          <img src={HERO_IMAGE} alt="The forest green cap embroidered with you stay home, worn at golden hour" className="w-full rounded-2xl object-cover" style={{ height: 480 }} />
         ) : (
           <div className="w-full rounded-2xl flex items-center justify-center text-center p-6 text-sm uppercase" style={{ height: 480, background: C.roseLight, color: C.burg, letterSpacing: "0.1em" }}>
             Six-cap flat lay. Drop the image URL into HERO_IMAGE.
