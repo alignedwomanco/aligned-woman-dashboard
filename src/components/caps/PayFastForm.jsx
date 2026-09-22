@@ -20,16 +20,22 @@ const SERIF = "'Libre Baskerville', Baskerville, 'DM Serif Display', Georgia, se
 const RECEIVER = "32598411";
 const RETURN_URL = "https://app.alignedwomanco.com/caps";
 const CANCEL_URL = "https://app.alignedwomanco.com/caps#caps";
-// Same platform API route the working Stripe webhook uses.
-const NOTIFY_URL = "https://api.base44.com/api/apps/69f46886a412ee042303f1af/functions/payfastNotify";
+// Checked September 22, 2026: this app-domain route reaches the function
+// (answers GET with 405). The api.base44.com form returned 404, so it is not used.
+const NOTIFY_URL = "https://new-aligned-woman-dashboard-copy-2303f1af.base44.app/functions/payfastNotify";
 const COUNTRIES = ["South Africa", "Botswana", "Lesotho", "Mauritius", "Mozambique", "Swaziland", "Zimbabwe"];
+const MAX_QTY = 20;
 
 const inputStyle = { padding: "12px 14px", border: `1px solid ${C.rose}`, borderRadius: 10, background: C.white, color: C.ink, fontFamily: "inherit", fontSize: 15, minHeight: 44, width: "100%" };
 const labelStyle = { fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: C.burgMid };
 
 export default function PayFastForm({ item, price, onClose }) {
   const formRef = useRef(null);
-  const [qty, setQty] = useState(1);
+  // The box holds exactly what is typed, so clearing it to type a new number
+  // never snaps back to 1 and turns "2" into "12". The order uses a whole
+  // number from 1 to MAX_QTY.
+  const [qtyText, setQtyText] = useState("1");
+  const qty = Math.min(MAX_QTY, Math.max(1, parseInt(qtyText, 10) || 1));
   const [err, setErr] = useState("");
   const amount = price * qty;
 
@@ -127,8 +133,12 @@ export default function PayFastForm({ item, price, onClose }) {
               name="custom_quantity"
               type="number"
               min="1"
-              value={qty}
-              onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
+              max={MAX_QTY}
+              step="1"
+              inputMode="numeric"
+              value={qtyText}
+              onChange={(e) => setQtyText(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))}
+              onBlur={() => setQtyText(String(qty))}
               required
               style={inputStyle}
             />
