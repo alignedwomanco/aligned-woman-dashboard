@@ -13,7 +13,7 @@ const SHIPPING = 0;                // courier fee at cost in ZAR; 0 until the co
 const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order saved, payment link sent by email.
 const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
-const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/11ecf7590_WhatsAppImage2026-09-22at135317.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
+const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f037b9dd7_YOUSTAYHOME-UPDATED.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
 const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/7ba341790_WhatsAppImage2026-09-22at1148031.jpeg"; // portrait hero shot, phones only.
 const BARRON_LOGO = "https://media.base44.com/images/public/69f46886a412ee042303f1af/842e10106_barron-logo.svg";
 
