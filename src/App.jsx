@@ -47,6 +47,7 @@ import CommunityGroup from './pages/CommunityGroup';
 import TheAWStandard from './pages/TheAWStandard';
 import CirclePage from './pages/CirclePage';
 import HostGuide from './pages/HostGuide';
+import Caps from './pages/Caps';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -92,6 +93,9 @@ const AuthenticatedApp = () => {
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
+      {/* GBV cap drop, September 2026. Public, brings its own header and footer. */}
+      <Route path="/caps" element={<Caps />} />
+      <Route path="/Caps" element={<Caps />} />
       {/* Applying to be listed is for practitioners who are not members
           yet, so it cannot sit behind login. ExpertApplication has an
           unrestricted create rule, so an anonymous submission works. */}
