@@ -12,6 +12,7 @@ const NAV = {
   ],
   ABOUT: [
     { label: "About Us", href: "/about-us" },
+    { label: "Our Founder", href: "/founder" },
     { label: "Contact", href: "/Contact" },
     { label: "Terms & Conditions", href: "/terms-and-conditions" },
     { label: "Giveaway T&Cs", href: "/competition" },
