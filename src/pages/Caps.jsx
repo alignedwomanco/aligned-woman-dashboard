@@ -152,6 +152,14 @@ export default function Caps() {
           .aw-caps .aw-hero-scrim {
             background: linear-gradient(180deg, rgba(8,1,5,0) 38%, rgba(8,1,5,0.55) 70%, rgba(8,1,5,0.8) 100%);
           }
+          /* Why: the statement opens at the top of the section and stays there
+             while the paragraphs beside it scroll past. */
+          .aw-caps .aw-why-quote {
+            align-self: start;
+            justify-content: flex-start;
+            position: sticky;
+            top: 32px;
+          }
         }
         /* Hero: a full-bleed photograph with the copy laid over it. A soft wash
            keeps the text legible without hiding the image. */
@@ -489,7 +497,7 @@ function Why() {
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.65 }}>A cap is worn on the head. It is in every selfie, every memorial run, every school pickup. It says the line so you don't have to, to the person who needs to hear it.</p>
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.65 }}>Seven women are killed every day in South Africa, according to the South African Medical Research Council's 20-year femicide study. Nine were found in Ekurhuleni in two months. We are not going to fix that with a cap. We are going to send all proceeds to the people who are working on it.</p>
       </div>
-      <div className="flex flex-col justify-end gap-3">
+      <div className="aw-why-quote flex flex-col justify-end gap-3">
         <div className="text-5xl md:text-[64px]" style={{ fontFamily: SERIF, lineHeight: 1.05, color: C.bg }}>Stop telling women how to avoid femicide.</div>
         <div className="text-[13px] uppercase" style={{ letterSpacing: "0.12em", color: C.rose }}>The country's answer, September 2026</div>
       </div>
