@@ -151,7 +151,7 @@ function Hero() {
           {RUN_SIZE} caps. 100% to <WFC />.
         </div>
         <h1 className="m-0 text-6xl md:text-[88px] leading-none" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>
-          You stay home.
+          <span style={{ fontStyle: "italic" }}>You</span> stay home.
         </h1>
         <p className="m-0 text-lg md:text-xl max-w-[560px]" style={{ lineHeight: 1.55 }}>
           After nine women were found dead in Ekurhuleni, the police told women in Kempton Park not to walk or run alone. This is the country's answer, embroidered on a cap.
