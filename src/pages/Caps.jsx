@@ -118,6 +118,7 @@ export default function Caps() {
       <Money />
       <Why />
       <Faq />
+      <MobileSupport />
       <PoweredBy />
       <Footer />
 
@@ -349,6 +350,25 @@ function Footer() {
       <div>The Aligned Woman Co.</div>
       <div>#TheAlignedWomanBlueprint · #SouthAfricanWomen</div>
     </div>
+  );
+}
+
+/* Mobile only. */
+function MobileSupport() {
+  return (
+    <a
+      href="https://womenforchange.co.za/"
+      target="_blank"
+      rel="noreferrer"
+      className="md:hidden block"
+    >
+      <img
+        src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4bbc43bad_Screenshot2026-09-22at123254.png"
+        alt="Survivor Support Line. Support and guidance for anyone affected by GBV."
+        className="w-full block"
+        style={{ height: "auto" }}
+      />
+    </a>
   );
 }
 
