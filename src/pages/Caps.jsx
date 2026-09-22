@@ -191,7 +191,7 @@ function StatBand() {
   const stats = [
     ["Three", "women a day are killed by an intimate partner."],
     ["569", "women were murdered in three months this year."],
-    ["5 to 6x", "our femicide rate, against the global average."],
+    ["6x", "our femicide rate is nearly 6x more against the global average."],
   ];
   return (
     <div className="grid md:grid-cols-3 gap-8 md:gap-12 px-6 md:px-24 py-12" style={{ background: C.burg, color: C.bg }}>
