@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PayFastForm from "@/components/caps/PayFastForm";
 import LandingFooter from "@/components/home/LandingFooter";
 
@@ -260,20 +260,67 @@ function Hero() {
 
 function StatBand() {
   const stats = [
-    ["7", "women are killed every day in South Africa."],
-    ["569", "women were murdered in three months this year."],
-    ["6x", "our femicide rate is nearly 6x more against the global average."],
+    [7, "", "women are killed every day in South Africa."],
+    [569, "", "women were murdered in three months this year."],
+    [6, "x", "our femicide rate is nearly 6x more against the global average."],
   ];
   return (
     <div className="grid md:grid-cols-3 gap-8 md:gap-12 px-6 md:px-24 py-12" style={{ background: C.burg, color: C.bg }}>
-      {stats.map(([n, t]) => (
-        <div key={n} className="flex flex-col gap-2">
-          <div className="text-4xl" style={{ fontFamily: SERIF }}>{n}</div>
+      {stats.map(([value, suffix, t]) => (
+        <div key={t} className="flex flex-col gap-2">
+          <div className="text-4xl" style={{ fontFamily: SERIF }}><CountUp value={value} suffix={suffix} /></div>
           <div className="text-sm" style={{ lineHeight: 1.5, color: C.roseLight }}>{t}</div>
         </div>
       ))}
     </div>
   );
+}
+
+/* Counts up from zero each time the number scrolls into view, so it replays
+   on every pass. The number resets once it leaves the screen. */
+function CountUp({ value, suffix = "" }) {
+  const ref = useRef(null);
+  const [n, setN] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const DURATION = 1400;
+    let frame = null;
+
+    const run = () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setN(value);
+        return;
+      }
+      const start = performance.now();
+      const tick = (now) => {
+        const p = Math.min(1, (now - start) / DURATION);
+        setN(Math.round(value * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          run();
+        } else {
+          if (frame) cancelAnimationFrame(frame);
+          setN(0);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [value]);
+
+  return <span ref={ref}>{n}{suffix}</span>;
 }
 
 function Shop({ onBuy }) {
