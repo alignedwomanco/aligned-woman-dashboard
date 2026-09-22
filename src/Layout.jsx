@@ -39,6 +39,7 @@ const MENU_NAV = {
   ],
   ABOUT: [
     { label: "About Us", href: "/about-us" },
+    { label: "Meet our founder", href: "/founder" },
     { label: "Contact", href: "/Contact" },
     { label: "The AW Standard", href: "/theawstandard" },
     { label: "Terms & Conditions", href: "/terms-and-conditions" },

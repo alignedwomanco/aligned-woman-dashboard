@@ -110,9 +110,26 @@ export default function AboutUs() {
           <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 17, lineHeight: 1.7, color: "#3A2A28", maxWidth: 640, margin: "0 auto 28px" }}>
             Through diagnostics, community, verified practitioners, education, events and personalised guidance, we help women understand what is happening within them and what to do next.
           </p>
-          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 17, lineHeight: 1.7, color: "#3A2A28", maxWidth: 640, margin: "0 auto" }}>
+          <p style={{ fontFamily: MONT, fontWeight: 300, fontSize: 17, lineHeight: 1.7, color: "#3A2A28", maxWidth: 640, margin: "0 auto 40px" }}>
             We are not a wellness app. We are not a coaching platform. We are infrastructure. Rigorous, evidence informed, and built around the lived reality of women's lives.
           </p>
+          <a
+            href="/founder"
+            style={{
+              fontFamily: MONT,
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "#A86460",
+              textDecoration: "none",
+              borderBottom: "1px solid #A86460",
+              paddingBottom: 4,
+              display: "inline-block",
+            }}
+          >
+            Meet our founder →
+          </a>
         </div>
       </section>
 
