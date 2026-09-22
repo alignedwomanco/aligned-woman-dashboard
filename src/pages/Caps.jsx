@@ -14,16 +14,15 @@ const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
 const HERO_IMAGE = "";             // six-cap flat lay. Empty renders a toned placeholder.
 
-const CAP_COLOURS = ["Olive", "Stone", "Pink", "Purple"];
-const THREAD_COLOURS = ["White", "Cream", "Burgundy", "Rose pink"];
-
+/* Every cap carries its own colourway: one cap colour, one embroidery colour.
+   swatch is the cap, ink is the embroidery thread. */
 const LINES = [
-  { id: "stay", line: "you stay home", placement: "front", swatch: "#CDC3AC", ink: "#4A0E2E", cap: "Stone", thread: "Burgundy" },
-  { id: "close", line: "you're too close", placement: "back", swatch: "#4B2478", ink: "#E8B4AE", cap: "Purple", thread: "Rose pink" },
-  { id: "kempton", line: "coming for kempton", placement: "front", swatch: "#5C6134", ink: "#F6EFE8", cap: "Olive", thread: "Cream" },
-  { id: "tryme", line: "try me", placement: "front", swatch: "#F2C4CE", ink: "#4A0E2E", cap: "Pink", thread: "Burgundy" },
-  { id: "no", line: "how about no", placement: "front", swatch: "#5C6134", ink: "#F6EFE8", cap: "Olive", thread: "Cream" },
-  { id: "bitch", line: "100% that bitch", placement: "front", swatch: "#4B2478", ink: "#E8B4AE", cap: "Purple", thread: "Rose pink" },
+  { id: "stay", line: "you stay home", placement: "front", swatch: "#20483D", ink: "#F2AFC7", cap: "Forest green", thread: "Light pink" },
+  { id: "close", line: "you're too close", placement: "back", swatch: "#454B28", ink: "#F2AFC7", cap: "Olive", thread: "Light pink" },
+  { id: "kempton", line: "coming for kempton", placement: "front", swatch: "#B3122F", ink: "#F2AFC7", cap: "Red", thread: "Light pink" },
+  { id: "tryme", line: "try me", placement: "front", swatch: "#E7B7CA", ink: "#5A102D", cap: "Baby pink", thread: "Burgundy" },
+  { id: "no", line: "how about no", placement: "front", swatch: "#CBBCAF", ink: "#5A102D", cap: "Stone beige", thread: "Burgundy" },
+  { id: "bitch", line: "100% that bitch", placement: "front", swatch: "#5D2675", ink: "#F2AFC7", cap: "Purple", thread: "Light pink" },
 ];
 
 const C = {
@@ -162,7 +161,7 @@ function Shop({ onBuy }) {
       <div className="flex flex-col gap-3 max-w-[720px]">
         <h2 className="m-0 text-4xl md:text-5xl" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>Six lines women shouldn't have to say.</h2>
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>
-          Barron 6-panel heavy brushed cotton cap, pre-curved peak, low profile, adjustable closure. One size. Four colours: olive, stone, pink and purple. {money(PRICE)} each.
+          Barron 6-panel heavy brushed cotton cap, pre-curved peak, low profile, adjustable closure. One size. Each line comes in its own colourway, with its own embroidery colour. {money(PRICE)} each.
         </p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -174,10 +173,7 @@ function Shop({ onBuy }) {
 }
 
 function ProductCard({ item, onBuy }) {
-  const [cap, setCap] = useState(item.cap);
-  const [thread, setThread] = useState(item.thread);
-  const selectStyle = { flexGrow: 1, padding: "12px 14px", border: `1px solid ${C.rose}`, borderRadius: 10, background: C.white, color: C.ink, fontFamily: "inherit", fontSize: 14, minHeight: 44, width: "100%" };
-  const labelStyle = { fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: C.burgMid };
+  const swatchDot = { width: 22, height: 22, borderRadius: "100%", border: "1px solid rgba(8,1,5,0.18)", flexShrink: 0 };
   return (
     <div className="flex flex-col gap-4 rounded-2xl p-6" style={{ background: C.white }}>
       <div className="rounded-xl flex items-center justify-center" style={{ height: 220, background: item.swatch }}>
@@ -188,23 +184,19 @@ function ProductCard({ item, onBuy }) {
         <div className="text-sm font-medium">{money(PRICE)}</div>
       </div>
       <div className="text-[13px] uppercase" style={{ color: C.burgMid, letterSpacing: "0.06em" }}>Embroidered on the {item.placement}</div>
-      <div className="flex gap-3">
-        <div className="flex flex-col gap-1.5 flex-1">
-          <label htmlFor={`cap-${item.id}`} style={labelStyle}>Cap colour</label>
-          <select id={`cap-${item.id}`} value={cap} onChange={(e) => setCap(e.target.value)} style={selectStyle}>
-            {CAP_COLOURS.map((c) => <option key={c}>{c}</option>)}
-          </select>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2.5">
+          <span style={{ ...swatchDot, background: item.swatch }} />
+          <span className="text-[13px]" style={{ color: C.burgMid }}>{item.cap} cap</span>
         </div>
-        <div className="flex flex-col gap-1.5 flex-1">
-          <label htmlFor={`thread-${item.id}`} style={labelStyle}>Embroidery colour</label>
-          <select id={`thread-${item.id}`} value={thread} onChange={(e) => setThread(e.target.value)} style={selectStyle}>
-            {THREAD_COLOURS.map((c) => <option key={c}>{c}</option>)}
-          </select>
+        <div className="flex items-center gap-2.5">
+          <span style={{ ...swatchDot, background: item.ink }} />
+          <span className="text-[13px]" style={{ color: C.burgMid }}>{item.thread} embroidery</span>
         </div>
       </div>
       <button
         type="button"
-        onClick={() => onBuy({ id: item.id, line: item.line, placement: item.placement, cap, thread })}
+        onClick={() => onBuy({ id: item.id, line: item.line, placement: item.placement, cap: item.cap, thread: item.thread })}
         className="rounded-full py-4 text-sm font-medium"
         style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, cursor: "pointer" }}
       >
