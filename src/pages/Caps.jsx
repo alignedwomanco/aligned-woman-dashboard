@@ -154,11 +154,18 @@ export default function Caps() {
             background: linear-gradient(180deg, rgba(8,1,5,0) 38%, rgba(8,1,5,0.55) 70%, rgba(8,1,5,0.8) 100%);
           }
         }
-        /* Buy buttons. A lift on hover, a sheen that sweeps across, and a press. */
+        /* Buy buttons. A slow, continuous pulse, a lift on hover, a sheen that
+           sweeps across, and a press. The pulse rides on the box shadow so the
+           hover lift keeps the transform to itself. */
+        @keyframes aw-buy-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(122,27,52,0.4); }
+          50% { box-shadow: 0 0 0 12px rgba(122,27,52,0); }
+        }
         .aw-buy {
           position: relative;
           overflow: hidden;
           transition: transform 220ms ease, box-shadow 220ms ease;
+          animation: aw-buy-pulse 2.8s ease-in-out infinite;
         }
         .aw-buy::after {
           content: "";
@@ -173,11 +180,13 @@ export default function Caps() {
         .aw-buy:hover {
           transform: translateY(-3px) scale(1.03);
           box-shadow: 0 12px 28px rgba(74,14,46,0.28);
+          animation: none;
         }
         .aw-buy:hover::after { left: 120%; }
         .aw-buy:active { transform: translateY(0) scale(0.98); }
         @media (prefers-reduced-motion: reduce) {
           .aw-buy, .aw-buy::after { transition: none; }
+          .aw-buy { animation: none; }
           .aw-buy:hover { transform: none; }
         }
       `}</style>
