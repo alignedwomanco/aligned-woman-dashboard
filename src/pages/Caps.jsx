@@ -118,8 +118,9 @@ export default function Caps() {
           /* The Barron mark sits alone in its tile, so on a phone it centres. */
           .aw-caps .aw-barron-logo { margin-left: auto; margin-right: auto; }
         }
-        /* Tablet: the portrait frame replaces the wide shot and fills the hero,
-           with the buy row centred. */
+        /* Tablet: the portrait frame replaces the wide shot, and the copy gets
+           the same treatment as the phone, sitting over the bottom of the frame
+           in cream. */
         @media (min-width: 768px) and (max-width: 1023px) {
           .aw-hero-cta { justify-content: center; text-align: center; }
           .aw-caps .aw-hero-img-desktop { display: none; }
@@ -130,6 +131,25 @@ export default function Caps() {
             width: 100%;
             height: 100% !important;
             object-fit: cover;
+          }
+          .aw-caps .aw-hero-content {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 0 32px 36px;
+            gap: 14px;
+            align-items: center;
+            text-align: center;
+          }
+          .aw-caps .aw-hero-content h1,
+          .aw-caps .aw-hero-content p,
+          .aw-caps .aw-hero-content > div { color: #FAF5F3 !important; }
+          .aw-caps .aw-hero-content .aw-hero-note { color: #FFFFFF !important; }
+          .aw-caps .aw-hero-content h1 { font-size: 36px; }
+          .aw-caps .aw-hero-content p { font-size: 15px; line-height: 1.45; }
+          .aw-caps .aw-hero-scrim {
+            background: linear-gradient(180deg, rgba(8,1,5,0) 38%, rgba(8,1,5,0.55) 70%, rgba(8,1,5,0.8) 100%);
           }
         }
         /* Hero: a full-bleed photograph with the copy laid over it. A soft wash
