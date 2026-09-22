@@ -29,6 +29,15 @@ export default function NavigationTracker() {
         }, '*');
     }, [location]);
 
+    // Every page opens at the top. The browser keeps the previous scroll
+    // position across a route change, so a link clicked from the footer landed
+    // people halfway down the next page. Skipped when the destination carries a
+    // hash, so in-page anchors such as /caps#caps still jump where they should.
+    useEffect(() => {
+        if (location.hash) return;
+        window.scrollTo(0, 0);
+    }, [location.pathname]);
+
     // Log user activity when navigating to a page
     useEffect(() => {
         // Extract page name from pathname
