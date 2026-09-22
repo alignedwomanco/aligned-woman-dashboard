@@ -72,6 +72,8 @@ const C = {
   rose: "#C4847A",
   roseLight: "#E8B4AE",
   white: "#FFFFFF",
+  btn: "#7A1B34",
+  btnText: "#C4837B",
 };
 const SERIF = "'Libre Baskerville', Baskerville, 'DM Serif Display', Georgia, serif";
 const SANS = "'Montserrat', system-ui, sans-serif";
@@ -210,7 +212,7 @@ function Nav() {
         <a href="#caps" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>The caps</a>
         <a href="#money" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Where the money goes</a>
         <a href="#why" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Why</a>
-        <a href="#caps" className="aw-buy aw-nav-cta rounded-full px-6 py-3 font-medium" style={{ background: C.rose, color: C.ink, minHeight: 44, textDecoration: "none" }}>
+        <a href="#caps" className="aw-buy aw-nav-cta rounded-full px-6 py-3 font-medium" style={{ background: C.btn, color: C.btnText, minHeight: 44, textDecoration: "none" }}>
           Buy a cap
         </a>
       </div>
@@ -247,7 +249,7 @@ function Hero() {
           After nine women were found dead in Ekurhuleni, the police told women in Kempton Park not to walk or run alone. This is the country's answer, embroidered on a cap.
         </p>
         <div className="flex flex-wrap items-center gap-5 mt-2 aw-m-center aw-hero-cta">
-          <a href="#caps" className="aw-buy rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, textDecoration: "none", letterSpacing: "0.04em" }}>
+          <a href="#caps" className="aw-buy rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.btn, color: C.btnText, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
           <div className="aw-hero-note text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
@@ -393,7 +395,7 @@ function ProductCard({ item, onBuy }) {
         type="button"
         onClick={() => onBuy({ id: item.id, line: item.line, placement: item.placement, cap: item.cap, thread: item.thread })}
         className="aw-buy rounded-full py-4 text-sm font-medium"
-        style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, cursor: "pointer" }}
+        style={{ background: C.btn, color: C.btnText, border: 0, minHeight: 44, cursor: "pointer" }}
       >
         Buy now
       </button>

@@ -12,6 +12,8 @@ const C = {
   roseLight: "#E8B4AE",
   white: "#FFFFFF",
   bg: "#F6EFE8",
+  btn: "#7A1B34",
+  btnText: "#C4837B",
 };
 const SERIF = "'Libre Baskerville', Baskerville, 'DM Serif Display', Georgia, serif";
 
@@ -104,7 +106,7 @@ export default function PayFastForm({ item, price, onClose }) {
             <span>R{amount.toLocaleString("en-ZA")}</span>
           </div>
           {err && <div className="text-sm" style={{ color: C.burgMid }}>{err}</div>}
-          <button type="submit" className="aw-buy rounded-full py-4 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, cursor: "pointer" }}>
+          <button type="submit" className="aw-buy rounded-full py-4 text-[15px] font-medium" style={{ background: C.btn, color: C.btnText, border: 0, minHeight: 44, cursor: "pointer" }}>
             Buy now
           </button>
           <div className="text-xs" style={{ color: C.burgMid, lineHeight: 1.5 }}>
