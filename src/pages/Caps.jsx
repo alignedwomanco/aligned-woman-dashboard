@@ -49,7 +49,7 @@ const LINES = [
   {
     id: "no", line: "how about no", placement: "front", swatch: "#CBBCAF", ink: "#5A102D", cap: "Stone beige", thread: "Burgundy",
     images: [
-      "https://media.base44.com/images/public/69f46886a412ee042303f1af/5c7656a0d_WhatsAppImage2026-09-22at1129511.jpeg",
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/0ebba6e8d_how-about-no-stone-beige-front.png",
       "https://media.base44.com/images/public/69f46886a412ee042303f1af/c7ac5911f_WhatsAppImage2026-09-22at112951.jpeg",
     ],
   },
