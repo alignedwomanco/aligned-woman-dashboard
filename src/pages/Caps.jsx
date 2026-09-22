@@ -67,7 +67,7 @@ const LINES = [
 const C = {
   bg: "#F6EFE8",
   ink: "#080105",
-  burg: "#4A0E2E",
+  burg: "#7A1B34",
   burgMid: "#6B1642",
   rose: "#C4847A",
   roseLight: "#E8B4AE",
