@@ -46,7 +46,13 @@ const LINES = [
       "https://media.base44.com/images/public/69f46886a412ee042303f1af/c7ac5911f_WhatsAppImage2026-09-22at112951.jpeg",
     ],
   },
-  { id: "bitch", line: "100% that bitch", placement: "front", swatch: "#5D2675", ink: "#F2AFC7", cap: "Purple", thread: "Light pink" },
+  {
+    id: "bitch", line: "100% that bitch", placement: "front", swatch: "#5D2675", ink: "#F2AFC7", cap: "Purple", thread: "Light pink",
+    images: [
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/6bae76c6a_WhatsAppImage2026-09-22at112539.jpeg",
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/2f494f5f2_WhatsAppImage2026-09-22at1125391.jpeg",
+    ],
+  },
 ];
 
 const C = {
