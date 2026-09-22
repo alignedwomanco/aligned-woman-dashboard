@@ -11,7 +11,7 @@ const SOLD = 0;                    // update as orders are paid, or wire to CapO
 const SHIPPING = 0;                // courier fee at cost in ZAR; 0 until the courier quote is in
 const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order saved, payment link sent by email.
 const DONATION_LINK = "";          // Women For Change direct donation link
-const LEAD_TIME = "[X] working days";
+const LEAD_TIME = "7 working days";
 const HERO_IMAGE = "";             // six-cap flat lay. Empty renders a toned placeholder.
 
 const CAP_COLOURS = ["Olive", "Stone", "Pink", "Purple"];
