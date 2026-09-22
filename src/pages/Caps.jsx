@@ -111,6 +111,10 @@ export default function Caps() {
           .aw-caps .text-right { text-align: center; }
           .aw-caps .aw-m-center { justify-content: center; gap: 10px; }
         }
+        /* Tablet: centre the hero buy row and its line about the money. */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .aw-hero-cta { justify-content: center; text-align: center; }
+        }
         /* Buy buttons. A lift on hover, a sheen that sweeps across, and a press. */
         .aw-buy {
           position: relative;
@@ -192,7 +196,7 @@ function Hero() {
         <p className="m-0 text-lg md:text-xl max-w-[560px]" style={{ lineHeight: 1.55 }}>
           After nine women were found dead in Ekurhuleni, the police told women in Kempton Park not to walk or run alone. This is the country's answer, embroidered on a cap.
         </p>
-        <div className="flex flex-wrap items-center gap-5 mt-2 aw-m-center">
+        <div className="flex flex-wrap items-center gap-5 mt-2 aw-m-center aw-hero-cta">
           <a href="#caps" className="aw-buy rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
