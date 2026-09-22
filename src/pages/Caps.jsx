@@ -316,7 +316,7 @@ function ProductCard({ item, onBuy }) {
 function Money() {
   const partners = [
     ["Beneficiary", <WFC />, "Registered NPO. 100% of proceeds."],
-    ["Production partner", "Barron", "Caps and embroidery, sponsored in full."],
+    ["Production partner", "Barron", "Caps and embroidery, sponsored in full.", "https://barron.com/"],
     ["Run by", "The Aligned Woman Co.", "Design, sales, fulfilment and PR. No margin."],
     ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated."],
   ];
@@ -329,10 +329,14 @@ function Money() {
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>When the run sells out we will publish the total, the transfer confirmation and <WFC />'s receipt, here and on our channels.</p>
       </div>
       <div className="flex flex-col gap-4">
-        {partners.map(([k, n, d]) => (
+        {partners.map(([k, n, d, href]) => (
           <div key={k} className="rounded-2xl p-7 flex flex-col gap-1.5" style={{ background: C.white }}>
             <div className="text-xs uppercase" style={{ letterSpacing: "0.12em", color: C.burgMid }}>{k}</div>
-            <div className="text-2xl" style={{ fontFamily: SERIF, color: C.burg }}>{n}</div>
+            <div className="text-2xl" style={{ fontFamily: SERIF, color: C.burg }}>
+              {href ? (
+                <a href={href} target="_blank" rel="noreferrer" style={{ color: C.burg, textDecoration: "none" }} className="transition-opacity hover:opacity-70">{n}</a>
+              ) : n}
+            </div>
             <div className="text-sm" style={{ lineHeight: 1.5 }}>{d}</div>
           </div>
         ))}
