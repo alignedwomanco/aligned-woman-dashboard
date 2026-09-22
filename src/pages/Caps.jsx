@@ -32,7 +32,13 @@ const LINES = [
       "https://media.base44.com/images/public/69f46886a412ee042303f1af/7f32a47ec_WhatsAppImage2026-09-22at114221.jpeg",
     ],
   },
-  { id: "tryme", line: "try me", placement: "front", swatch: "#E7B7CA", ink: "#5A102D", cap: "Baby pink", thread: "Burgundy" },
+  {
+    id: "tryme", line: "try me", placement: "front", swatch: "#E7B7CA", ink: "#5A102D", cap: "Baby pink", thread: "Burgundy",
+    images: [
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/8f0e0a841_WhatsAppImage2026-09-22at1122462.jpeg",
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/5d7ca5b2f_WhatsAppImage2026-09-22at1122461.jpeg",
+    ],
+  },
   {
     id: "no", line: "how about no", placement: "front", swatch: "#CBBCAF", ink: "#5A102D", cap: "Stone beige", thread: "Burgundy",
     images: [
