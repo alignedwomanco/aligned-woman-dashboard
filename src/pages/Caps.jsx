@@ -317,7 +317,6 @@ function Money() {
   const partners = [
     ["Beneficiary", <WFC />, "Registered NPO. 100% of proceeds."],
     ["Production partner", "Barron", "Caps and embroidery, sponsored in full.", "https://barron.com/"],
-    ["Run by", "The Aligned Woman Co.", "Design, sales, fulfilment and PR. No margin."],
     ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated."],
   ];
   return (
