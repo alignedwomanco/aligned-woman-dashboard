@@ -65,11 +65,18 @@ export default function Founder() {
   return (
     <div style={{ background: C.bg, color: C.ink, fontFamily: SANS, fontWeight: 300 }}>
       <style>{`
+        /* Transform and opacity only: both are composited, so the pulse
+           never triggers a repaint while the page is scrolling. The old
+           box-shadow ring repainted on every frame and made scrolling stutter. */
         @keyframes aw-btn-pulse {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74,14,46,0.30); }
-          50% { transform: scale(1.04); box-shadow: 0 0 0 10px rgba(74,14,46,0); }
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.04); opacity: 0.82; }
         }
-        .aw-pulse { animation: aw-btn-pulse 2.4s ease-in-out infinite; }
+        .aw-pulse {
+          animation: aw-btn-pulse 2.4s ease-in-out infinite;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+        }
         @media (prefers-reduced-motion: reduce) { .aw-pulse { animation: none; } }
       `}</style>
       <Hero />
@@ -86,7 +93,7 @@ export default function Founder() {
 function Hero() {
   return (
     <section className="relative w-full overflow-hidden h-[640px] md:h-[900px] lg:h-[920px]" style={{ background: C.burg, color: C.bg }}>
-      <img src={HERO_IMAGE} alt="Laura Jane Thomas, founder of The Aligned Woman Co." className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 18%" }} />
+      <img src={HERO_IMAGE} alt="Laura Jane Thomas, founder of The Aligned Woman Co." className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 18%", transform: "translateZ(0)" }} />
       {/* mobile and tablet: vertical fade */}
       <div className="absolute inset-0 lg:hidden" style={{ background: "linear-gradient(180deg, rgba(74,14,46,0.05) 0%, rgba(74,14,46,0.35) 45%, rgba(74,14,46,0.92) 100%)" }} />
       {/* desktop: left-to-right fade plus a bottom fade */}
@@ -145,7 +152,7 @@ function Why() {
     <section id="why" className="px-5 md:px-12 lg:px-24 py-14 lg:py-24 grid md:grid-cols-[300px_minmax(0,1fr)] lg:grid-cols-[480px_minmax(0,1fr)] gap-8 md:gap-10 lg:gap-24 items-start" style={{ background: C.roseLight }}>
       <div className="md:sticky md:top-6 lg:top-8">
         {SECOND_IMAGE ? (
-          <img src={SECOND_IMAGE} alt="Laura Jane Thomas" className="w-full rounded-2xl object-cover object-top h-[430px] md:h-[375px] lg:h-[600px]" />
+          <img src={SECOND_IMAGE} alt="Laura Jane Thomas" className="w-full rounded-2xl object-cover object-top h-[430px] md:h-[375px] lg:h-[600px]" style={{ transform: "translateZ(0)" }} />
         ) : (
           <div className="w-full rounded-2xl flex items-center justify-center text-center p-6 text-xs uppercase h-[430px] md:h-[375px] lg:h-[600px]" style={{ background: C.rose, color: C.burg, letterSpacing: "0.12em" }}>Second image of Laura</div>
         )}
