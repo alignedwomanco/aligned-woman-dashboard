@@ -313,7 +313,7 @@ function Faq() {
 function Footer() {
   return (
     <div className="flex flex-col md:flex-row gap-2 justify-between px-6 md:px-24 py-8 text-xs uppercase" style={{ borderTop: `1px solid ${C.roseLight}`, letterSpacing: "0.08em", color: C.burgMid }}>
-      <div>The Aligned Woman Co. · Cape Town · London</div>
+      <div>The Aligned Woman Co.</div>
       <div>#TheAlignedWomanBlueprint · #SouthAfricanWomen</div>
     </div>
   );
