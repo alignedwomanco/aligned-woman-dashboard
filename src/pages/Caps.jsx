@@ -138,8 +138,8 @@ export default function Caps() {
             left: 0; right: 0; bottom: 0;
             max-width: 760px;
             margin: 0 auto;
-            padding: 0 32px 36px;
-            gap: 14px;
+            padding: 0 40px 96px;
+            gap: 18px;
             align-items: center;
             text-align: center;
           }
@@ -147,8 +147,10 @@ export default function Caps() {
           .aw-caps .aw-hero-content p,
           .aw-caps .aw-hero-content > div { color: #FAF5F3 !important; }
           .aw-caps .aw-hero-content .aw-hero-note { color: #FFFFFF !important; }
-          .aw-caps .aw-hero-content h1 { font-size: 36px; }
-          .aw-caps .aw-hero-content p { font-size: 15px; line-height: 1.45; }
+          .aw-caps .aw-hero-content h1 { font-size: 52px; }
+          .aw-caps .aw-hero-content p { font-size: 19px; line-height: 1.55; max-width: 620px; }
+          .aw-caps .aw-hero-content .aw-hero-note { font-size: 15px; }
+          .aw-caps .aw-hero-content .aw-hero-sponsor { font-size: 12px; }
           .aw-caps .aw-hero-scrim {
             background: linear-gradient(180deg, rgba(8,1,5,0) 38%, rgba(8,1,5,0.55) 70%, rgba(8,1,5,0.8) 100%);
           }
