@@ -97,8 +97,8 @@ const AuthenticatedApp = () => {
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
       {/* GBV cap drop, September 2026. Public, brings its own header and footer. */}
-      <Route path="/caps" element={<Caps />} />
-      <Route path="/Caps" element={<Caps />} />
+      <Route path="/caps" element={<LayoutWrapper currentPageName="caps"><Caps /></LayoutWrapper>} />
+      <Route path="/Caps" element={<LayoutWrapper currentPageName="caps"><Caps /></LayoutWrapper>} />
       {/* Applying to be listed is for practitioners who are not members
           yet, so it cannot sit behind login. ExpertApplication has an
           unrestricted create rule, so an anonymous submission works. */}
