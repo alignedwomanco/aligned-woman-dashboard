@@ -117,12 +117,27 @@ export default function Caps() {
         }
         /* Hero: a full-bleed photograph with the copy laid over it. A soft wash
            keeps the text legible without hiding the image. */
+        .aw-caps .aw-hero { min-height: 560px; }
         .aw-hero-scrim {
           background: linear-gradient(90deg, rgba(246,239,232,0.95) 0%, rgba(246,239,232,0.82) 34%, rgba(246,239,232,0.14) 66%, rgba(246,239,232,0) 88%);
         }
+        /* On a phone the whole photograph stays in frame, so the model is never
+           cropped away. The copy sits over the top of the frame, above her
+           face, and is set smaller so it clears her. */
         @media (max-width: 767px) {
-          .aw-hero-scrim {
-            background: linear-gradient(180deg, rgba(246,239,232,0.94) 0%, rgba(246,239,232,0.8) 58%, rgba(246,239,232,0.4) 100%);
+          .aw-caps .aw-hero { min-height: 0; }
+          .aw-caps .aw-hero-img { position: relative; height: auto; min-height: 500px; }
+          .aw-caps .aw-hero-content {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding-top: 24px;
+            padding-bottom: 0;
+            gap: 16px;
+          }
+          .aw-caps .aw-hero-content h1 { font-size: 36px; }
+          .aw-caps .aw-hero-content p { font-size: 15px; line-height: 1.45; }
+          .aw-caps .aw-hero-scrim {
+            background: linear-gradient(180deg, rgba(246,239,232,0.96) 0%, rgba(246,239,232,0.86) 45%, rgba(246,239,232,0) 72%);
           }
         }
         /* Buy buttons. A lift on hover, a sheen that sweeps across, and a press. */
@@ -195,18 +210,18 @@ function Nav() {
 
 function Hero() {
   return (
-    <div className="relative w-full" style={{ minHeight: 560 }}>
+    <div className="aw-hero relative w-full">
       {HERO_IMAGE ? (
         <img
           src={HERO_IMAGE}
           alt="The forest green cap embroidered with you stay home, worn at golden hour"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="aw-hero-img absolute inset-0 w-full h-full object-cover"
         />
       ) : (
-        <div className="absolute inset-0" style={{ background: C.roseLight }} />
+        <div className="aw-hero-img absolute inset-0" style={{ background: C.roseLight }} />
       )}
       <div className="aw-hero-scrim absolute inset-0" aria-hidden="true" />
-      <div className="relative flex flex-col gap-7 px-6 md:px-24 py-20 md:py-32 max-w-[760px]">
+      <div className="aw-hero-content relative flex flex-col gap-7 px-6 md:px-24 py-20 md:py-32 max-w-[760px]">
         <div className="text-[13px] uppercase font-medium" style={{ letterSpacing: "0.16em", color: C.burgMid }}>
           {RUN_SIZE} caps. 100% to <WFC />.
         </div>
