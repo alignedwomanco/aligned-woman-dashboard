@@ -123,14 +123,15 @@ export default function Caps() {
            in cream. */
         @media (min-width: 768px) and (max-width: 1023px) {
           .aw-hero-cta { justify-content: center; text-align: center; }
+          .aw-caps .aw-hero { min-height: 0; }
           .aw-caps .aw-hero-img-desktop { display: none; }
+          /* The portrait frame is tall, so on a tablet it runs full width and
+             keeps its whole length. Nothing is cropped. */
           .aw-caps .aw-hero-img-mobile {
             display: block;
-            position: absolute;
-            inset: 0;
+            position: relative;
             width: 100%;
-            height: 100% !important;
-            object-fit: cover;
+            height: auto !important;
           }
           .aw-caps .aw-hero-content {
             position: absolute;
