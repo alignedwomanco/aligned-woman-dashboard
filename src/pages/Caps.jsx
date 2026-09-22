@@ -111,6 +111,32 @@ export default function Caps() {
           .aw-caps .text-right { text-align: center; }
           .aw-caps .aw-m-center { justify-content: center; gap: 10px; }
         }
+        /* Buy buttons. A lift on hover, a sheen that sweeps across, and a press. */
+        .aw-buy {
+          position: relative;
+          overflow: hidden;
+          transition: transform 220ms ease, box-shadow 220ms ease;
+        }
+        .aw-buy::after {
+          content: "";
+          position: absolute;
+          top: 0; bottom: 0; left: -60%;
+          width: 40%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+          transform: skewX(-18deg);
+          transition: left 600ms ease;
+          pointer-events: none;
+        }
+        .aw-buy:hover {
+          transform: translateY(-3px) scale(1.03);
+          box-shadow: 0 12px 28px rgba(74,14,46,0.28);
+        }
+        .aw-buy:hover::after { left: 120%; }
+        .aw-buy:active { transform: translateY(0) scale(0.98); }
+        @media (prefers-reduced-motion: reduce) {
+          .aw-buy, .aw-buy::after { transition: none; }
+          .aw-buy:hover { transform: none; }
+        }
       `}</style>
       <Nav />
       <Hero />
@@ -145,7 +171,7 @@ function Nav() {
         <a href="#caps" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>The caps</a>
         <a href="#money" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Where the money goes</a>
         <a href="#why" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Why</a>
-        <a href="#caps" className="rounded-full px-6 py-3 font-medium" style={{ background: C.rose, color: C.ink, minHeight: 44, textDecoration: "none" }}>
+        <a href="#caps" className="aw-buy rounded-full px-6 py-3 font-medium" style={{ background: C.rose, color: C.ink, minHeight: 44, textDecoration: "none" }}>
           Buy a cap
         </a>
       </div>
@@ -167,7 +193,7 @@ function Hero() {
           After nine women were found dead in Ekurhuleni, the police told women in Kempton Park not to walk or run alone. This is the country's answer, embroidered on a cap.
         </p>
         <div className="flex flex-wrap items-center gap-5 mt-2 aw-m-center">
-          <a href="#caps" className="rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, textDecoration: "none", letterSpacing: "0.04em" }}>
+          <a href="#caps" className="aw-buy rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
           <div className="text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
@@ -274,10 +300,10 @@ function ProductCard({ item, onBuy }) {
       <button
         type="button"
         onClick={() => onBuy({ id: item.id, line: item.line, placement: item.placement, cap: item.cap, thread: item.thread })}
-        className="rounded-full py-4 text-sm font-medium"
+        className="aw-buy rounded-full py-4 text-sm font-medium"
         style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, cursor: "pointer" }}
       >
-        Buy now with PayFast
+        Buy now
       </button>
     </div>
   );

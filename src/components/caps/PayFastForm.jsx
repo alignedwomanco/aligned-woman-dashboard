@@ -104,8 +104,8 @@ export default function PayFastForm({ item, price, onClose }) {
             <span>R{amount.toLocaleString("en-ZA")}</span>
           </div>
           {err && <div className="text-sm" style={{ color: C.burgMid }}>{err}</div>}
-          <button type="submit" className="rounded-full py-4 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, cursor: "pointer" }}>
-            Buy now with PayFast
+          <button type="submit" className="aw-buy rounded-full py-4 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, cursor: "pointer" }}>
+            Buy now
           </button>
           <div className="text-xs" style={{ color: C.burgMid, lineHeight: 1.5 }}>
             You will be taken to PayFast to pay securely. 100% of the cap price goes to Women For Change. Shipping is charged at cost and never comes out of the donation.
