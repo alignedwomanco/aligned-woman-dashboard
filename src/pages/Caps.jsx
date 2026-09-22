@@ -115,6 +115,8 @@ export default function Caps() {
           .aw-caps .text-right { text-align: center; }
           .aw-caps .aw-m-center { justify-content: center; gap: 10px; }
           .aw-caps .aw-nav-cta { padding: 8px 16px; font-size: 11px; min-height: 36px !important; }
+          /* The Barron mark sits alone in its tile, so on a phone it centres. */
+          .aw-caps .aw-barron-logo { margin-left: auto; margin-right: auto; }
         }
         /* Tablet: centre the hero buy row and its line about the money. */
         @media (min-width: 768px) and (max-width: 1023px) {
@@ -406,7 +408,7 @@ function ProductCard({ item, onBuy }) {
 function Money() {
   const partners = [
     ["Beneficiary", <WFC />, "Registered NPO. 100% of proceeds."],
-    ["Production partner", <img src={BARRON_LOGO} alt="Barron" className="block" style={{ height: 30, width: "auto" }} />, "Caps and embroidery, sponsored in full.", "https://barron.com/"],
+    ["Production partner", <img src={BARRON_LOGO} alt="Barron" className="aw-barron-logo block" style={{ height: 30, width: "auto" }} />, "Caps and embroidery, sponsored in full.", "https://barron.com/"],
     ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated.", "https://sadhana-ai-creative.sadhanasahaye.chatgpt.site/"],
   ];
   return (
