@@ -24,7 +24,13 @@ const LINES = [
       "https://media.base44.com/images/public/69f46886a412ee042303f1af/1e8098d4c_WhatsAppImage2026-09-22at114803.jpeg",
     ],
   },
-  { id: "close", line: "you're too close", placement: "back", swatch: "#454B28", ink: "#F2AFC7", cap: "Olive", thread: "Light pink" },
+  {
+    id: "close", line: "you're too close", placement: "back", swatch: "#454B28", ink: "#F2AFC7", cap: "Olive", thread: "Light pink",
+    images: [
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/0828ee261_WhatsAppImage2026-09-22at1142212.jpeg",
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/c5bedda2c_WhatsAppImage2026-09-22at1142211.jpeg",
+    ],
+  },
   {
     id: "kempton", line: "coming for kempton", placement: "front", swatch: "#B3122F", ink: "#F2AFC7", cap: "Red", thread: "Light pink",
     images: [
