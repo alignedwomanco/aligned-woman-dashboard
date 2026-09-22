@@ -97,7 +97,9 @@ export default function PayFastForm({ item, price, onClose }) {
           <input type="hidden" name="return_url" value={RETURN_URL} />
           <input type="hidden" name="cancel_url" value={CANCEL_URL} />
           <input type="hidden" name="notify_url" value={NOTIFY_URL} />
-          <input type="hidden" name="amount" value={amount.toFixed(2)} />
+          {/* Matches the generated PayFast Pay Now code: amount is the price of one
+              cap, and PayFast multiplies it by custom_quantity. */}
+          <input type="hidden" name="amount" value={Number(price).toFixed(2)} />
           <input type="hidden" name="item_name" value="Caps4Cause" />
           {/* PayFast only sends its own fields back, so everything the order
               sheet needs travels here:
@@ -121,7 +123,7 @@ export default function PayFastForm({ item, price, onClose }) {
             <label htmlFor="pf-qty" style={labelStyle}>Quantity</label>
             <input
               id="pf-qty"
-              name="cap_qty"
+              name="custom_quantity"
               type="number"
               min="1"
               value={qty}
