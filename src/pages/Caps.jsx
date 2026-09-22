@@ -171,7 +171,7 @@ export default function Caps() {
             position: absolute;
             left: 0; right: 0; bottom: 0;
             max-width: none;
-            padding: 0 24px 12px;
+            padding: 0 24px 4px;
             gap: 14px;
           }
           .aw-caps .aw-hero-content h1,
@@ -179,7 +179,7 @@ export default function Caps() {
           .aw-caps .aw-hero-content > div { color: #FAF5F3 !important; }
           .aw-caps .aw-hero-content .aw-hero-note { color: #FFFFFF !important; }
           .aw-caps .aw-hero-content h1 { font-size: 36px; }
-          .aw-caps .aw-hero-content p { font-size: 15px; line-height: 1.45; }
+          .aw-caps .aw-hero-content p { font-size: 13px; line-height: 1.5; }
           /* The two supporting lines sit quieter on a phone. */
           .aw-caps .aw-hero-content .aw-hero-note { font-size: 12px; }
           .aw-caps .aw-hero-content .aw-hero-sponsor { font-size: 10px; }
