@@ -64,6 +64,14 @@ export default function Founder() {
 
   return (
     <div style={{ background: C.bg, color: C.ink, fontFamily: SANS, fontWeight: 300 }}>
+      <style>{`
+        @keyframes aw-btn-pulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74,14,46,0.30); }
+          50% { transform: scale(1.04); box-shadow: 0 0 0 10px rgba(74,14,46,0); }
+        }
+        .aw-pulse { animation: aw-btn-pulse 2.4s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .aw-pulse { animation: none; } }
+      `}</style>
       <Hero />
       <Story />
       <Why />
@@ -172,7 +180,7 @@ function Credentials() {
             <div className="flex flex-col gap-3 text-[15px]" style={{ lineHeight: 1.6 }}>
               {c.items.map((t) => <div key={t}>{t}</div>)}
             </div>
-            <a href={c.href} target="_blank" rel="noreferrer" className="mt-auto self-center md:self-start inline-flex items-center rounded-full px-5 text-[13px] font-medium uppercase" style={{ minHeight: 44, border: `1px solid ${C.burg}`, color: C.burg, letterSpacing: "0.08em", textDecoration: "none" }}>Learn more</a>
+            <a href={c.href} target="_blank" rel="noreferrer" className="aw-pulse mt-auto self-center md:self-start inline-flex items-center rounded-full px-5 text-[13px] font-medium uppercase" style={{ minHeight: 44, border: `1px solid ${C.burg}`, color: C.burg, letterSpacing: "0.08em", textDecoration: "none" }}>Learn more</a>
           </div>
         ))}
       </div>
