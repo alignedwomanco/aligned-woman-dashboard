@@ -132,7 +132,14 @@ export default function Caps() {
 function Nav() {
   return (
     <div className="flex items-center justify-between px-6 md:px-24 py-6" style={{ borderBottom: `1px solid ${C.roseLight}` }}>
-      <a href="/" style={{ fontFamily: SERIF, fontSize: 20, color: C.ink, textDecoration: "none" }}>The Aligned Woman Co.</a>
+      <a href="/" className="block transition-opacity hover:opacity-80" aria-label="The Aligned Woman Co.">
+        <img
+          src="https://media.base44.com/images/public/69f46886a412ee042303f1af/6af7e7352_AWCologo.png"
+          alt="The Aligned Woman Co."
+          className="block w-auto"
+          style={{ height: 48 }}
+        />
+      </a>
       <div className="flex items-center gap-4 md:gap-8 text-[13px] uppercase" style={{ letterSpacing: "0.12em" }}>
         <a href="#caps" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>The caps</a>
         <a href="#money" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Where the money goes</a>
