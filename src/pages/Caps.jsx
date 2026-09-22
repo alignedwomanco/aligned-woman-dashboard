@@ -40,6 +40,15 @@ const SANS = "'Montserrat', system-ui, sans-serif";
 
 const money = (n) => `R${Number(n).toLocaleString("en-ZA")}`;
 
+/* Every mention of Women For Change links to their site. */
+function WFC() {
+  return (
+    <a href="https://womenforchange.co.za/" target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "2px" }}>
+      Women For Change
+    </a>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 
 export default function Caps() {
@@ -136,7 +145,7 @@ function Hero() {
     <div className="grid md:grid-cols-2 gap-10 md:gap-16 px-6 md:px-24 pt-16 pb-12 md:pt-24 md:pb-20 items-center">
       <div className="flex flex-col gap-7">
         <div className="text-[13px] uppercase font-medium" style={{ letterSpacing: "0.16em", color: C.burgMid }}>
-          {RUN_SIZE} caps. 100% to Women For Change.
+          {RUN_SIZE} caps. 100% to <WFC />.
         </div>
         <h1 className="m-0 text-6xl md:text-[88px] leading-none" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>
           You stay home.
@@ -148,7 +157,7 @@ function Hero() {
           <a href="#caps" className="rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
-          <div className="text-sm" style={{ color: C.burgMid }}>Every cent goes to Women For Change.</div>
+          <div className="text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
         </div>
         <div className="flex items-baseline gap-3 mt-4 pt-6" style={{ borderTop: `1px solid ${C.roseLight}` }}>
           <div className="text-5xl" style={{ fontFamily: SERIF, color: C.burg }}>{SOLD}</div>
@@ -172,8 +181,8 @@ function Hero() {
 function StatBand() {
   const stats = [
     [String(RUN_SIZE), "caps in the run. When they're gone, they're gone."],
-    ["100%", "of proceeds to Women For Change. Barron covers the caps and embroidery, so there is no cost of goods to deduct."],
-    [money(RUN_SIZE * PRICE), "to Women For Change if every cap sells. You decide how close we get."],
+    ["100%", <>of proceeds to <WFC />. Barron covers the caps and embroidery, so there is no cost of goods to deduct.</>],
+    [money(RUN_SIZE * PRICE), <>to <WFC /> if every cap sells. You decide how close we get.</>],
   ];
   return (
     <div className="grid md:grid-cols-3 gap-8 md:gap-12 px-6 md:px-24 py-12" style={{ background: C.burg, color: C.bg }}>
@@ -247,7 +256,7 @@ function ProductCard({ item, onAdd }) {
 
 function Money() {
   const partners = [
-    ["Beneficiary", "Women For Change", "Registered NPO. 100% of proceeds."],
+    ["Beneficiary", <WFC />, "Registered NPO. 100% of proceeds."],
     ["Production partner", "Barron", "Caps and embroidery, sponsored in full."],
     ["Run by", "The Aligned Woman Co.", "Design, sales, fulfilment and PR. No margin."],
     ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated."],
@@ -256,13 +265,13 @@ function Money() {
     <div id="money" className="grid md:grid-cols-2 gap-10 md:gap-16 px-6 md:px-24 py-16" style={{ borderTop: `1px solid ${C.roseLight}` }}>
       <div className="flex flex-col gap-4">
         <h2 className="m-0 text-4xl" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>Where the money goes.</h2>
-        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>Every rand you pay for a cap goes to Women For Change, the registered NPO whose petition led to gender-based violence and femicide being declared a national disaster in November 2025.</p>
+        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>Every rand you pay for a cap goes to <WFC />, the registered NPO whose petition led to gender-based violence and femicide being declared a national disaster in November 2025.</p>
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>Barron is sponsoring the caps and the embroidery. sadhana.ai / creative-studio is donating the design and illustration. We are covering the platform and the fulfilment ourselves. That is how 100% stays 100%.</p>
-        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>When the run sells out we will publish the total, the transfer confirmation and Women For Change's receipt, here and on our channels.</p>
+        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>When the run sells out we will publish the total, the transfer confirmation and <WFC />'s receipt, here and on our channels.</p>
       </div>
       <div className="flex flex-col gap-4">
         {partners.map(([k, n, d]) => (
-          <div key={n} className="rounded-2xl p-7 flex flex-col gap-1.5" style={{ background: C.white }}>
+          <div key={k} className="rounded-2xl p-7 flex flex-col gap-1.5" style={{ background: C.white }}>
             <div className="text-xs uppercase" style={{ letterSpacing: "0.12em", color: C.burgMid }}>{k}</div>
             <div className="text-2xl" style={{ fontFamily: SERIF, color: C.burg }}>{n}</div>
             <div className="text-sm" style={{ lineHeight: 1.5 }}>{d}</div>
@@ -302,7 +311,7 @@ function Faq() {
         <div key={q} className="flex flex-col gap-2">
           <div className="text-xl" style={{ fontFamily: SERIF, color: C.burg }}>{q}</div>
           <div className="text-[15px]" style={{ lineHeight: 1.6 }}>
-            {a ?? (<>Yes. Give directly to Women For Change <a href={DONATION_LINK} target="_blank" rel="noreferrer" style={{ color: C.burg }}>here</a>. The cap is for wearing the line in public.</>)}
+            {a ?? (<>Yes. Give directly to <WFC /> <a href={DONATION_LINK} target="_blank" rel="noreferrer" style={{ color: C.burg }}>here</a>. The cap is for wearing the line in public.</>)}
           </div>
         </div>
       ))}
@@ -441,7 +450,7 @@ function CheckoutModal({ cart, capCount, subtotal, onClose, onDone }) {
         <button type="submit" disabled={busy} className="rounded-full py-4 text-[15px] font-medium" style={{ background: C.rose, color: C.ink, border: 0, minHeight: 44, opacity: busy ? 0.6 : 1 }}>
           {busy ? "Saving your order" : PAYMENT_LINK ? "Continue to payment" : "Place order"}
         </button>
-        <div className="text-xs" style={{ color: C.burgMid, lineHeight: 1.5 }}>100% of the cap price goes to Women For Change. Shipping is charged at cost and never comes out of the donation.</div>
+        <div className="text-xs" style={{ color: C.burgMid, lineHeight: 1.5 }}>100% of the cap price goes to <WFC />. Shipping is charged at cost and never comes out of the donation.</div>
       </form>
     </Overlay>
   );
