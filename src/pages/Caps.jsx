@@ -324,8 +324,9 @@ function Money() {
     <div id="money" className="grid md:grid-cols-2 gap-10 md:gap-16 px-6 md:px-24 py-16" style={{ borderTop: `1px solid ${C.roseLight}` }}>
       <div className="flex flex-col gap-4">
         <h2 className="m-0 text-4xl" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>Where the money goes.</h2>
+        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>The Aligned Woman Co. would like to thank its partners for making this real. Barron, for supplying every cap and all the embroidery. sadhana.ai / creative-studio, for the artwork and campaign visuals.</p>
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>Every rand you pay for a cap goes to <WFC />, the registered NPO whose petition led to gender-based violence and femicide being declared a national disaster in November 2025.</p>
-        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>Barron is sponsoring the caps and the embroidery. sadhana.ai / creative-studio is donating the design and illustration. We are covering the platform and the fulfilment ourselves. That is how 100% stays 100%.</p>
+        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>As the caps, embroidery and the design are all donated, and we cover the platform and fulfilment ourselves, there is nothing to deduct. That is how 100% stays 100%.</p>
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>When the run sells out we will publish the total, the transfer confirmation and <WFC />'s receipt, here and on our channels.</p>
       </div>
       <div className="flex flex-col gap-4">
