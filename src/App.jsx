@@ -48,6 +48,7 @@ import TheAWStandard from './pages/TheAWStandard';
 import CirclePage from './pages/CirclePage';
 import HostGuide from './pages/HostGuide';
 import Caps from './pages/Caps';
+import Founder from './pages/Founder';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -91,6 +92,8 @@ const AuthenticatedApp = () => {
       <Route path="/home" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       <Route path="/blueprint" element={<LayoutWrapper currentPageName="blueprint"><BlueprintPage /></LayoutWrapper>} />
       <Route path="/about-us" element={<LayoutWrapper currentPageName="about-us"><AboutUs /></LayoutWrapper>} />
+      <Route path="/founder" element={<LayoutWrapper currentPageName="about-us"><Founder /></LayoutWrapper>} />
+      <Route path="/meet-our-founder" element={<LayoutWrapper currentPageName="about-us"><Founder /></LayoutWrapper>} />
       <Route path="/CheckoutComplete" element={<LayoutWrapper currentPageName="CheckoutComplete"><CheckoutComplete /></LayoutWrapper>} />
       <Route path="/claritysprint" element={<ClaritySprintPage />} />
       {/* GBV cap drop, September 2026. Public, brings its own header and footer. */}
