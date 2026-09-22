@@ -14,7 +14,7 @@ const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order save
 const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f037b9dd7_YOUSTAYHOME-UPDATED.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
-const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/6a43a9858_YOUSTAYHOMEUPDATEDPORTRAIT.jpeg"; // portrait hero shot, phones and tablets.
+const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/9d204ad59_YOUSTAYHOMEUPDATEDPORTRAIT.jpeg"; // portrait hero shot, phones and tablets.
 const BARRON_LOGO = "https://media.base44.com/images/public/69f46886a412ee042303f1af/842e10106_barron-logo.svg";
 
 /* Every cap carries its own colourway: one cap colour, one embroidery colour.
