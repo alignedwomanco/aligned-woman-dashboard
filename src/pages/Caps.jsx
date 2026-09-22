@@ -171,7 +171,7 @@ export default function Caps() {
             position: absolute;
             left: 0; right: 0; bottom: 0;
             max-width: none;
-            padding: 0 24px 28px;
+            padding: 0 24px 12px;
             gap: 14px;
           }
           .aw-caps .aw-hero-content h1,
@@ -180,6 +180,9 @@ export default function Caps() {
           .aw-caps .aw-hero-content .aw-hero-note { color: #FFFFFF !important; }
           .aw-caps .aw-hero-content h1 { font-size: 36px; }
           .aw-caps .aw-hero-content p { font-size: 15px; line-height: 1.45; }
+          /* The two supporting lines sit quieter on a phone. */
+          .aw-caps .aw-hero-content .aw-hero-note { font-size: 12px; }
+          .aw-caps .aw-hero-content .aw-hero-sponsor { font-size: 10px; }
           .aw-caps .aw-hero-scrim {
             background: linear-gradient(180deg, rgba(8,1,5,0) 38%, rgba(8,1,5,0.55) 70%, rgba(8,1,5,0.8) 100%);
           }
@@ -295,7 +298,7 @@ function Hero() {
           </a>
           <div className="aw-hero-note text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
         </div>
-        <div className="text-xs uppercase" style={{ letterSpacing: "0.1em", color: C.burgMid }}>Caps and embroidery sponsored by Barron</div>
+        <div className="aw-hero-sponsor text-xs uppercase" style={{ letterSpacing: "0.1em", color: C.burgMid }}>Caps and embroidery sponsored by Barron</div>
       </div>
     </div>
   );
