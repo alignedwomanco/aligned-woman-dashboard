@@ -112,6 +112,7 @@ export default function Caps() {
           .aw-caps { text-align: center; }
           .aw-caps .text-right { text-align: center; }
           .aw-caps .aw-m-center { justify-content: center; gap: 10px; }
+          .aw-caps .aw-nav-cta { padding: 8px 16px; font-size: 11px; min-height: 36px !important; }
         }
         /* Tablet: centre the hero buy row and its line about the money. */
         @media (min-width: 768px) and (max-width: 1023px) {
@@ -209,7 +210,7 @@ function Nav() {
         <a href="#caps" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>The caps</a>
         <a href="#money" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Where the money goes</a>
         <a href="#why" className="hidden md:inline" style={{ color: C.ink, textDecoration: "none" }}>Why</a>
-        <a href="#caps" className="aw-buy rounded-full px-6 py-3 font-medium" style={{ background: C.rose, color: C.ink, minHeight: 44, textDecoration: "none" }}>
+        <a href="#caps" className="aw-buy aw-nav-cta rounded-full px-6 py-3 font-medium" style={{ background: C.rose, color: C.ink, minHeight: 44, textDecoration: "none" }}>
           Buy a cap
         </a>
       </div>
