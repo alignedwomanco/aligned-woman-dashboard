@@ -1,0 +1,117 @@
+{
+  "name": "CapOrder",
+  "type": "object",
+  "properties": {
+    "customer_name": {
+      "type": "string",
+      "description": "Buyer's full name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Buyer's email"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Buyer's phone"
+    },
+    "delivery_method": {
+      "type": "string",
+      "enum": [
+        "courier",
+        "collect"
+      ],
+      "description": "Courier or collection"
+    },
+    "address": {
+      "type": "string",
+      "description": "Delivery address (courier only)"
+    },
+    "items": {
+      "type": "array",
+      "description": "Cart lines",
+      "items": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "type": "string"
+          },
+          "cap_colour": {
+            "type": "string"
+          },
+          "thread_colour": {
+            "type": "string"
+          },
+          "placement": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "unit_price": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "cap_count": {
+      "type": "integer",
+      "description": "Total caps in the order"
+    },
+    "subtotal": {
+      "type": "number",
+      "description": "Cap subtotal in ZAR"
+    },
+    "shipping": {
+      "type": "number",
+      "description": "Shipping charged at cost in ZAR"
+    },
+    "total": {
+      "type": "number",
+      "description": "Order total in ZAR"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_payment",
+        "paid",
+        "fulfilled",
+        "cancelled"
+      ],
+      "default": "pending_payment"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_name",
+    "email",
+    "items",
+    "total"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "data.email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
