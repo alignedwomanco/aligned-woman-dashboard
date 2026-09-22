@@ -317,7 +317,7 @@ function Money() {
   const partners = [
     ["Beneficiary", <WFC />, "Registered NPO. 100% of proceeds."],
     ["Production partner", "Barron", "Caps and embroidery, sponsored in full.", "https://barron.com/"],
-    ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated."],
+    ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated.", "https://sadhana-ai-creative.sadhanasahaye.chatgpt.site/"],
   ];
   return (
     <div id="money" className="grid md:grid-cols-2 gap-10 md:gap-16 px-6 md:px-24 py-16" style={{ borderTop: `1px solid ${C.roseLight}` }}>
