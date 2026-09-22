@@ -17,7 +17,13 @@ const HERO_IMAGE = "";             // six-cap flat lay. Empty renders a toned pl
 /* Every cap carries its own colourway: one cap colour, one embroidery colour.
    swatch is the cap, ink is the embroidery thread. */
 const LINES = [
-  { id: "stay", line: "you stay home", placement: "front", swatch: "#20483D", ink: "#F2AFC7", cap: "Forest green", thread: "Light pink" },
+  {
+    id: "stay", line: "you stay home", placement: "front", swatch: "#20483D", ink: "#F2AFC7", cap: "Forest green", thread: "Light pink",
+    images: [
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/4704a2c6a_WhatsAppImage2026-09-22at1148031.jpeg",
+      "https://media.base44.com/images/public/69f46886a412ee042303f1af/1e8098d4c_WhatsAppImage2026-09-22at114803.jpeg",
+    ],
+  },
   { id: "close", line: "you're too close", placement: "back", swatch: "#454B28", ink: "#F2AFC7", cap: "Olive", thread: "Light pink" },
   { id: "kempton", line: "coming for kempton", placement: "front", swatch: "#B3122F", ink: "#F2AFC7", cap: "Red", thread: "Light pink" },
   { id: "tryme", line: "try me", placement: "front", swatch: "#E7B7CA", ink: "#5A102D", cap: "Baby pink", thread: "Burgundy" },
@@ -173,12 +179,39 @@ function Shop({ onBuy }) {
 }
 
 function ProductCard({ item, onBuy }) {
+  const [photo, setPhoto] = useState(0);
+  const images = item.images || [];
   const swatchDot = { width: 22, height: 22, borderRadius: "100%", border: "1px solid rgba(8,1,5,0.18)", flexShrink: 0 };
   return (
     <div className="flex flex-col gap-4 rounded-2xl p-6" style={{ background: C.white }}>
-      <div className="rounded-xl flex items-center justify-center" style={{ height: 220, background: item.swatch }}>
-        <div className="text-[26px] text-center px-4" style={{ fontFamily: SERIF, color: item.ink }}>{item.line}</div>
-      </div>
+      {images.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <img
+            src={images[photo]}
+            alt={`${item.line}, embroidered on the ${item.cap.toLowerCase()} cap`}
+            className="w-full rounded-xl object-cover"
+            style={{ height: 220 }}
+          />
+          <div className="flex gap-2">
+            {images.map((src, i) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => setPhoto(i)}
+                aria-label={`View photo ${i + 1}`}
+                className="rounded-lg overflow-hidden"
+                style={{ width: 56, height: 56, padding: 0, background: "none", cursor: "pointer", border: `1px solid ${i === photo ? C.burg : C.roseLight}` }}
+              >
+                <img src={src} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl flex items-center justify-center" style={{ height: 220, background: item.swatch }}>
+          <div className="text-[26px] text-center px-4" style={{ fontFamily: SERIF, color: item.ink }}>{item.line}</div>
+        </div>
+      )}
       <div className="flex justify-between items-baseline">
         <div className="text-xl" style={{ fontFamily: SERIF, color: C.burg }}>{item.line}</div>
         <div className="text-sm font-medium">{money(PRICE)}</div>
