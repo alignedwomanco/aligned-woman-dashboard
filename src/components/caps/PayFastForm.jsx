@@ -41,21 +41,28 @@ export default function PayFastForm({ item, price, onClose }) {
       setErr("Complete all the mandatory address fields.");
       return;
     }
+    if (val("phone").replace(/[^0-9]/g, "").length < 9) {
+      e.preventDefault();
+      setErr("Add a phone number the courier can reach you on.");
+      return;
+    }
     if (!val("country")) {
       e.preventDefault();
       setErr("Select a country.");
       return;
     }
-    // PayFast hands back only the fields it knows, so the payment reference
-    // and the full shipping address are attached here, on the way out.
+    // PayFast hands back only the fields it knows, so the payment reference,
+    // phone and full shipping address are attached here, on the way out.
+    // The address reads the way a courier writes it, postal code before country.
     f.elements["m_payment_id"].value = `CAP-${Date.now()}`;
+    f.elements["custom_str3"].value = val("phone").slice(0, 255);
     f.elements["custom_str5"].value = [
       val("line1"),
       val("line2"),
       val("city"),
       val("region"),
-      val("country"),
       val("code"),
+      val("country"),
     ]
       .filter(Boolean)
       .join(", ")
@@ -87,14 +94,18 @@ export default function PayFastForm({ item, price, onClose }) {
           <input type="hidden" name="amount" value={amount.toFixed(2)} />
           <input type="hidden" name="item_name" value="Caps4Cause" />
           {/* PayFast only sends its own fields back, so everything the order
-              sheet needs travels here. m_payment_id and custom_str5 (the
-              shipping address) are filled in on submit, once the form is
-              known to be valid. */}
+              sheet needs travels here:
+              custom_str1  the line
+              custom_str2  cap colour | thread colour | placement
+              custom_str3  phone (filled in on submit)
+              custom_str4  item id
+              custom_str5  shipping address (filled in on submit)
+              custom_int1  quantity */}
           <input type="hidden" name="m_payment_id" value="" />
           <input type="hidden" name="custom_str1" value={item.line} />
-          <input type="hidden" name="custom_str2" value={item.cap} />
-          <input type="hidden" name="custom_str3" value={item.thread} />
-          <input type="hidden" name="custom_str4" value={item.placement} />
+          <input type="hidden" name="custom_str2" value={[item.cap, item.thread, item.placement].join(" | ")} />
+          <input type="hidden" name="custom_str3" value="" />
+          <input type="hidden" name="custom_str4" value={item.id || ""} />
           <input type="hidden" name="custom_int1" value={qty} />
           <input type="hidden" name="custom_str5" value="" />
 
@@ -111,6 +122,8 @@ export default function PayFastForm({ item, price, onClose }) {
               style={inputStyle}
             />
           </div>
+
+          <div className="flex flex-col gap-1.5"><label htmlFor="pf-phone" style={labelStyle}>Phone for the courier</label><input id="pf-phone" name="phone" type="tel" autoComplete="tel" required style={inputStyle} /></div>
 
           <div className="text-[11px] uppercase" style={{ letterSpacing: "0.12em", color: C.burgMid }}>Shipping address</div>
           <div className="flex flex-col gap-1.5"><label htmlFor="pf-line1" style={labelStyle}>Line 1</label><input id="pf-line1" name="line1" className="shipping" required style={inputStyle} /></div>
