@@ -249,7 +249,7 @@ function Hero() {
           After nine women were found dead in Ekurhuleni, the police told women in Kempton Park not to walk or run alone. This is the country's answer, embroidered on a cap.
         </p>
         <div className="flex flex-wrap items-center gap-5 mt-2 aw-m-center aw-hero-cta">
-          <a href="#caps" className="aw-buy rounded-full px-9 py-5 text-[15px] font-medium" style={{ background: C.btn, color: C.btnText, textDecoration: "none", letterSpacing: "0.04em" }}>
+          <a href="#caps" className="aw-buy rounded-full px-5 py-2.5 text-[13px] font-medium" style={{ background: C.btn, color: C.btnText, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
           <div className="aw-hero-note text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
