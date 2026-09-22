@@ -172,10 +172,6 @@ function Hero() {
           </a>
           <div className="text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
         </div>
-        <div className="flex items-baseline gap-3 mt-4 pt-6 aw-m-center" style={{ borderTop: `1px solid ${C.roseLight}` }}>
-          <div className="text-5xl" style={{ fontFamily: SERIF, color: C.burg }}>{SOLD}</div>
-          <div className="text-[15px] uppercase" style={{ letterSpacing: "0.06em" }}>of {RUN_SIZE} caps sold</div>
-        </div>
       </div>
       <div className="flex flex-col gap-3">
         {HERO_IMAGE ? (
