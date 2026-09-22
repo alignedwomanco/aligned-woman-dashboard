@@ -15,6 +15,7 @@ const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/11ecf7590_WhatsAppImage2026-09-22at135317.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
 const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/7a30592a5_WhatsAppImage2026-09-22at1115541.jpeg"; // portrait hero shot, phones only.
+const BARRON_LOGO = "https://media.base44.com/images/public/69f46886a412ee042303f1af/842e10106_barron-logo.svg";
 
 /* Every cap carries its own colourway: one cap colour, one embroidery colour.
    swatch is the cap, ink is the embroidery thread. */
@@ -355,7 +356,7 @@ function ProductCard({ item, onBuy }) {
 function Money() {
   const partners = [
     ["Beneficiary", <WFC />, "Registered NPO. 100% of proceeds."],
-    ["Production partner", "Barron", "Caps and embroidery, sponsored in full.", "https://barron.com/"],
+    ["Production partner", <img src={BARRON_LOGO} alt="Barron" className="block" style={{ height: 30, width: "auto" }} />, "Caps and embroidery, sponsored in full.", "https://barron.com/"],
     ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated.", "https://sadhana-ai-creative.sadhanasahaye.chatgpt.site/"],
   ];
   return (
