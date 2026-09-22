@@ -119,6 +119,7 @@ export default function Caps() {
       <Why />
       <Faq />
       <Footer />
+      <PoweredBy />
 
       {buy && <PayFastForm item={buy} price={PRICE} onClose={() => setBuy(null)} />}
     </div>
@@ -347,6 +348,23 @@ function Footer() {
     <div className="flex flex-col md:flex-row gap-2 justify-between px-6 md:px-24 py-8 text-xs uppercase" style={{ borderTop: `1px solid ${C.roseLight}`, letterSpacing: "0.08em", color: C.burgMid }}>
       <div>The Aligned Woman Co.</div>
       <div>#TheAlignedWomanBlueprint · #SouthAfricanWomen</div>
+    </div>
+  );
+}
+
+/* Desktop and tablet only. */
+function PoweredBy() {
+  return (
+    <div className="hidden md:block py-8 text-center" style={{ background: "#451786" }}>
+      <a
+        href="https://womenforchange.co.za/"
+        target="_blank"
+        rel="noreferrer"
+        className="transition-opacity hover:opacity-80"
+        style={{ color: C.white, textDecoration: "none", fontSize: 14, letterSpacing: "0.04em" }}
+      >
+        Powered by Women For Change
+      </a>
     </div>
   );
 }
