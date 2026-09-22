@@ -13,7 +13,7 @@ const SHIPPING = 0;                // courier fee at cost in ZAR; 0 until the co
 const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order saved, payment link sent by email.
 const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
-const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/51791f46b_WhatsAppImage2026-09-22at1148031.jpeg"; // hero portrait. Empty renders a toned placeholder.
+const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/11ecf7590_WhatsAppImage2026-09-22at135317.jpeg"; // hero portrait. Empty renders a toned placeholder.
 
 /* Every cap carries its own colourway: one cap colour, one embroidery colour.
    swatch is the cap, ink is the embroidery thread. */
@@ -115,6 +115,16 @@ export default function Caps() {
         @media (min-width: 768px) and (max-width: 1023px) {
           .aw-hero-cta { justify-content: center; text-align: center; }
         }
+        /* Hero: a full-bleed photograph with the copy laid over it. A soft wash
+           keeps the text legible without hiding the image. */
+        .aw-hero-scrim {
+          background: linear-gradient(90deg, rgba(246,239,232,0.95) 0%, rgba(246,239,232,0.82) 34%, rgba(246,239,232,0.14) 66%, rgba(246,239,232,0) 88%);
+        }
+        @media (max-width: 767px) {
+          .aw-hero-scrim {
+            background: linear-gradient(180deg, rgba(246,239,232,0.94) 0%, rgba(246,239,232,0.8) 58%, rgba(246,239,232,0.4) 100%);
+          }
+        }
         /* Buy buttons. A lift on hover, a sheen that sweeps across, and a press. */
         .aw-buy {
           position: relative;
@@ -185,12 +195,22 @@ function Nav() {
 
 function Hero() {
   return (
-    <div className="grid md:grid-cols-2 gap-10 md:gap-16 px-6 md:px-24 pt-16 pb-12 md:pt-24 md:pb-20 items-center">
-      <div className="flex flex-col gap-7">
+    <div className="relative w-full" style={{ minHeight: 560 }}>
+      {HERO_IMAGE ? (
+        <img
+          src={HERO_IMAGE}
+          alt="The forest green cap embroidered with you stay home, worn at golden hour"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0" style={{ background: C.roseLight }} />
+      )}
+      <div className="aw-hero-scrim absolute inset-0" aria-hidden="true" />
+      <div className="relative flex flex-col gap-7 px-6 md:px-24 py-20 md:py-32 max-w-[760px]">
         <div className="text-[13px] uppercase font-medium" style={{ letterSpacing: "0.16em", color: C.burgMid }}>
           {RUN_SIZE} caps. 100% to <WFC />.
         </div>
-        <h1 className="m-0 text-6xl md:text-[88px] leading-none" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>
+        <h1 className="m-0 text-5xl md:text-[80px] leading-none" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>
           <span style={{ fontStyle: "italic", fontWeight: 700 }}>You</span> stay home.
         </h1>
         <p className="m-0 text-lg md:text-xl max-w-[560px]" style={{ lineHeight: 1.55 }}>
@@ -202,16 +222,7 @@ function Hero() {
           </a>
           <div className="text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
         </div>
-      </div>
-      <div className="flex flex-col gap-3">
-        {HERO_IMAGE ? (
-          <img src={HERO_IMAGE} alt="The forest green cap embroidered with you stay home, worn at golden hour" className="w-full block" style={{ height: "auto" }} />
-        ) : (
-          <div className="w-full rounded-2xl flex items-center justify-center text-center p-6 text-sm uppercase" style={{ height: 480, background: C.roseLight, color: C.burg, letterSpacing: "0.1em" }}>
-            Six-cap flat lay. Drop the image URL into HERO_IMAGE.
-          </div>
-        )}
-        <div className="text-xs uppercase text-right" style={{ letterSpacing: "0.1em", color: C.burgMid }}>Caps and embroidery sponsored by Barron</div>
+        <div className="text-xs uppercase" style={{ letterSpacing: "0.1em", color: C.burgMid }}>Caps and embroidery sponsored by Barron</div>
       </div>
     </div>
   );
