@@ -234,7 +234,6 @@ export default function Caps() {
           .aw-buy:hover { transform: none; }
         }
       `}</style>
-      <Nav />
       <Hero />
       <StatBand />
       <Shop onBuy={setBuy} />
@@ -252,7 +251,9 @@ export default function Caps() {
 
 /* ---------------- Sections ---------------- */
 
-function Nav() {
+// Page-level nav removed: /caps now renders inside the site Layout header.
+// eslint-disable-next-line no-unused-vars
+function NavUnused() {
   return (
     <div className="flex items-center justify-between px-6 lg:px-24 py-6" style={{ borderBottom: `1px solid ${C.roseLight}` }}>
       <a href="/" className="block flex-shrink-0 transition-opacity hover:opacity-80" aria-label="The Aligned Woman Co.">
