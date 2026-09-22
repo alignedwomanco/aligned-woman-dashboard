@@ -36,6 +36,11 @@ export default function PayFastForm({ item, price, onClose }) {
   const handleSubmit = (e) => {
     const f = formRef.current;
     const val = (n) => (f.elements[n]?.value || "").trim();
+    if (!val("first_name") || !val("last_name")) {
+      e.preventDefault();
+      setErr("Add your name and surname.");
+      return;
+    }
     if (!val("line1") || !val("city") || !val("region") || !val("code")) {
       e.preventDefault();
       setErr("Complete all the mandatory address fields.");
@@ -56,6 +61,7 @@ export default function PayFastForm({ item, price, onClose }) {
     // The address reads the way a courier writes it, postal code before country.
     f.elements["m_payment_id"].value = `CAP-${Date.now()}`;
     f.elements["custom_str3"].value = val("phone").slice(0, 255);
+    f.elements["custom_str4"].value = `${val("first_name").replace(/\|/g, "")} | ${val("last_name").replace(/\|/g, "")}`.slice(0, 255);
     f.elements["custom_str5"].value = [
       val("line1"),
       val("line2"),
@@ -98,7 +104,7 @@ export default function PayFastForm({ item, price, onClose }) {
               custom_str1  the line
               custom_str2  cap colour | thread colour | placement
               custom_str3  phone (filled in on submit)
-              custom_str4  item id
+              custom_str4  name | surname (filled in on submit)
               custom_str5  shipping address (filled in on submit)
               custom_int1  quantity */}
           {/* Filled in on submit, so these stay uncontrolled: a re-render must
@@ -107,7 +113,7 @@ export default function PayFastForm({ item, price, onClose }) {
           <input type="hidden" name="custom_str1" value={item.line} />
           <input type="hidden" name="custom_str2" value={[item.cap, item.thread, item.placement].join(" | ")} />
           <input type="hidden" name="custom_str3" defaultValue="" />
-          <input type="hidden" name="custom_str4" value={item.id || ""} />
+          <input type="hidden" name="custom_str4" defaultValue="" />
           <input type="hidden" name="custom_int1" value={qty} />
           <input type="hidden" name="custom_str5" defaultValue="" />
 
@@ -115,7 +121,7 @@ export default function PayFastForm({ item, price, onClose }) {
             <label htmlFor="pf-qty" style={labelStyle}>Quantity</label>
             <input
               id="pf-qty"
-              name="custom_quantity"
+              name="cap_qty"
               type="number"
               min="1"
               value={qty}
@@ -125,6 +131,9 @@ export default function PayFastForm({ item, price, onClose }) {
             />
           </div>
 
+          <div className="text-[11px] uppercase" style={{ letterSpacing: "0.12em", color: C.burgMid }}>Your details</div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pf-first" style={labelStyle}>Name</label><input id="pf-first" name="first_name" autoComplete="given-name" required style={inputStyle} /></div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pf-last" style={labelStyle}>Surname</label><input id="pf-last" name="last_name" autoComplete="family-name" required style={inputStyle} /></div>
           <div className="flex flex-col gap-1.5"><label htmlFor="pf-phone" style={labelStyle}>Phone for the courier</label><input id="pf-phone" name="phone" type="tel" autoComplete="tel" required style={inputStyle} /></div>
 
           <div className="text-[11px] uppercase" style={{ letterSpacing: "0.12em", color: C.burgMid }}>Shipping address</div>
