@@ -237,9 +237,6 @@ function Hero() {
       )}
       <div className="aw-hero-scrim absolute inset-0" aria-hidden="true" />
       <div className="aw-hero-content relative flex flex-col gap-7 px-6 md:px-24 py-20 md:py-32 max-w-[760px]">
-        <div className="text-[13px] uppercase font-medium" style={{ letterSpacing: "0.16em", color: C.burgMid }}>
-          {RUN_SIZE} caps. 100% to <WFC />.
-        </div>
         <h1 className="m-0 text-5xl md:text-[80px] leading-none" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>
           <span style={{ fontStyle: "italic", fontWeight: 700 }}>You</span> stay home.
         </h1>
