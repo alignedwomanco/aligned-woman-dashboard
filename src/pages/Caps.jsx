@@ -13,7 +13,8 @@ const SHIPPING = 0;                // courier fee at cost in ZAR; 0 until the co
 const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order saved, payment link sent by email.
 const DONATION_LINK = "";          // Women For Change direct donation link
 const LEAD_TIME = "7 working days";
-const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/11ecf7590_WhatsAppImage2026-09-22at135317.jpeg"; // hero portrait. Empty renders a toned placeholder.
+const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/11ecf7590_WhatsAppImage2026-09-22at135317.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
+const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/7a30592a5_WhatsAppImage2026-09-22at1115541.jpeg"; // portrait hero shot, phones only.
 
 /* Every cap carries its own colourway: one cap colour, one embroidery colour.
    swatch is the cap, ink is the embroidery thread. */
@@ -121,23 +122,29 @@ export default function Caps() {
         .aw-hero-scrim {
           background: linear-gradient(90deg, rgba(246,239,232,0.95) 0%, rgba(246,239,232,0.82) 34%, rgba(246,239,232,0.14) 66%, rgba(246,239,232,0) 88%);
         }
-        /* On a phone the whole photograph stays in frame, so the model is never
-           cropped away. The copy sits over the top of the frame, above her
-           face, and is set smaller so it clears her. */
+        /* The phone gets its own portrait frame. Hidden from the wide layout. */
+        .aw-hero-img-mobile { display: none; }
+        /* On a phone that portrait frame runs full width and the copy sits over
+           the bottom half of it. It lands on the dark blazer, so it turns cream
+           and takes a soft wash underneath. */
         @media (max-width: 767px) {
           .aw-caps .aw-hero { min-height: 0; }
-          .aw-caps .aw-hero-img { position: relative; height: auto; min-height: 500px; }
+          .aw-caps .aw-hero-img-desktop { display: none; }
+          .aw-caps .aw-hero-img-mobile { display: block; }
           .aw-caps .aw-hero-content {
             position: absolute;
-            top: 0; left: 0; right: 0;
-            padding-top: 24px;
-            padding-bottom: 0;
-            gap: 16px;
+            left: 0; right: 0; bottom: 0;
+            max-width: none;
+            padding: 0 24px 28px;
+            gap: 14px;
           }
+          .aw-caps .aw-hero-content h1,
+          .aw-caps .aw-hero-content p,
+          .aw-caps .aw-hero-content > div { color: #FAF5F3 !important; }
           .aw-caps .aw-hero-content h1 { font-size: 36px; }
           .aw-caps .aw-hero-content p { font-size: 15px; line-height: 1.45; }
           .aw-caps .aw-hero-scrim {
-            background: linear-gradient(180deg, rgba(246,239,232,0.96) 0%, rgba(246,239,232,0.86) 45%, rgba(246,239,232,0) 72%);
+            background: linear-gradient(180deg, rgba(8,1,5,0) 38%, rgba(8,1,5,0.55) 70%, rgba(8,1,5,0.8) 100%);
           }
         }
         /* Buy buttons. A lift on hover, a sheen that sweeps across, and a press. */
@@ -215,10 +222,18 @@ function Hero() {
         <img
           src={HERO_IMAGE}
           alt="The forest green cap embroidered with you stay home, worn at golden hour"
-          className="aw-hero-img absolute inset-0 w-full h-full object-cover"
+          className="aw-hero-img-desktop absolute inset-0 w-full h-full object-cover"
         />
       ) : (
-        <div className="aw-hero-img absolute inset-0" style={{ background: C.roseLight }} />
+        <div className="aw-hero-img-desktop absolute inset-0" style={{ background: C.roseLight }} />
+      )}
+      {HERO_IMAGE_MOBILE && (
+        <img
+          src={HERO_IMAGE_MOBILE}
+          alt="The forest green cap embroidered with how about no, worn at golden hour"
+          className="aw-hero-img-mobile w-full block"
+          style={{ height: "auto" }}
+        />
       )}
       <div className="aw-hero-scrim absolute inset-0" aria-hidden="true" />
       <div className="aw-hero-content relative flex flex-col gap-7 px-6 md:px-24 py-20 md:py-32 max-w-[760px]">
