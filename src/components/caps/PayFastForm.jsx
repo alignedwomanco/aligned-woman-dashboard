@@ -101,13 +101,15 @@ export default function PayFastForm({ item, price, onClose }) {
               custom_str4  item id
               custom_str5  shipping address (filled in on submit)
               custom_int1  quantity */}
-          <input type="hidden" name="m_payment_id" value="" />
+          {/* Filled in on submit, so these stay uncontrolled: a re-render must
+              never reset them to empty before the form posts to PayFast. */}
+          <input type="hidden" name="m_payment_id" defaultValue="" />
           <input type="hidden" name="custom_str1" value={item.line} />
           <input type="hidden" name="custom_str2" value={[item.cap, item.thread, item.placement].join(" | ")} />
-          <input type="hidden" name="custom_str3" value="" />
+          <input type="hidden" name="custom_str3" defaultValue="" />
           <input type="hidden" name="custom_str4" value={item.id || ""} />
           <input type="hidden" name="custom_int1" value={qty} />
-          <input type="hidden" name="custom_str5" value="" />
+          <input type="hidden" name="custom_str5" defaultValue="" />
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="pf-qty" style={labelStyle}>Quantity</label>
