@@ -431,9 +431,9 @@ function ProductCard({ item, onBuy }) {
           <div className="text-[26px] text-center px-4" style={{ fontFamily: SERIF, color: item.ink }}>{item.line}</div>
         </div>
       )}
-      <div className="flex justify-between items-baseline aw-m-center">
+      <div className="flex flex-col gap-1">
         <div className="text-xl" style={{ fontFamily: SERIF, color: C.burg }}>{item.line}</div>
-        <div className="text-sm font-medium">{money(PRICE)}</div>
+        <div className="text-sm font-medium" style={{ color: C.burg }}>{money(PRICE)}</div>
       </div>
       <div className="text-[13px] uppercase" style={{ color: C.burgMid, letterSpacing: "0.06em" }}>Embroidered on the {item.placement}</div>
       <div className="flex flex-col gap-2">
