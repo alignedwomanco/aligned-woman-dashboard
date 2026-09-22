@@ -355,16 +355,18 @@ function Footer() {
 /* Desktop and tablet only. */
 function PoweredBy() {
   return (
-    <div className="hidden md:block py-8 text-center" style={{ background: "#451786" }}>
-      <a
-        href="https://womenforchange.co.za/"
-        target="_blank"
-        rel="noreferrer"
-        className="transition-opacity hover:opacity-80"
-        style={{ color: C.white, textDecoration: "none", fontSize: 14, letterSpacing: "0.04em" }}
-      >
-        Powered by Women For Change
-      </a>
-    </div>
+    <a
+      href="https://womenforchange.co.za/"
+      target="_blank"
+      rel="noreferrer"
+      className="hidden md:block transition-opacity hover:opacity-80"
+    >
+      <img
+        src="https://media.base44.com/images/public/69f46886a412ee042303f1af/c69324b82_Screenshot2026-09-22at123236.png"
+        alt="Powered by Women For Change"
+        className="w-full block"
+        style={{ height: "auto" }}
+      />
+    </a>
   );
 }
