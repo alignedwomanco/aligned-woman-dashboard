@@ -106,29 +106,19 @@ export default function AdminDashboard() {
   };
 
   const sendCampaign = async (campaign) => {
-    let recipients = [];
-    if (campaign.target_audience === "all_waitlist") recipients = waitlist.map(w => ({ email: w.email, name: w.full_name }));
-    else if (campaign.target_audience === "abandoned_carts") recipients = abandonedCarts.filter(a => a.email).map(a => ({ email: a.email, name: a.full_name }));
-    else if (campaign.target_audience === "applications") recipients = applications.map(a => ({ email: a.email, name: a.full_name }));
-
-    for (const r of recipients) {
-      await base44.integrations.Core.SendEmail({
-        to: r.email,
-        subject: campaign.subject,
-        body: campaign.body_html,
-        from_name: "The Aligned Woman",
-      });
-      await base44.entities.EmailLog.create({
-        campaign_id: campaign.id,
-        recipient_email: r.email,
-        recipient_name: r.name,
-        status: "sent",
-        sent_at: new Date().toISOString(),
-      });
+    // Sending happens on the server: the audience is resolved there from the
+    // campaign's own records, so the browser never holds the send capability.
+    setSendingCampaign(true);
+    try {
+      const res = await base44.functions.invoke("sendAdminCampaign", { campaign_id: campaign.id });
+      const sent = res?.data?.sent ?? 0;
+      await loadAll();
+      alert(`Campaign sent to ${sent} recipients!`);
+    } catch (_err) {
+      alert("The campaign could not be sent. Please try again.");
+    } finally {
+      setSendingCampaign(false);
     }
-    await base44.entities.EmailCampaign.update(campaign.id, { status: "sent", sent_at: new Date().toISOString(), sent_count: recipients.length });
-    await loadAll();
-    alert(`Campaign sent to ${recipients.length} recipients!`);
   };
 
   if (loading) {

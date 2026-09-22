@@ -11,7 +11,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!['owner', 'admin', 'master_admin', 'moderator', 'expert', 'educator', 'facilitator', 'support'].includes(user.role)) {
+    // This returns every member record, so it is limited to the roles that
+    // actually administer accounts. Staff roles such as expert, educator or
+    // support have no business holding the full directory.
+    if (!['owner', 'admin', 'master_admin'].includes(user.role)) {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 

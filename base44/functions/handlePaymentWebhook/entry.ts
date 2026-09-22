@@ -117,6 +117,28 @@ Deno.serve(async (req) => {
     email = email.toLowerCase().trim();
 
     // ----------------------------------------------------------------
+    // 0. IDEMPOTENCY
+    // Stripe delivers events at least once and redelivers whenever an earlier
+    // response is missed, so a repeat checkout.session.completed for the same
+    // session must not create a second Sale or credit the affiliate twice.
+    // ----------------------------------------------------------------
+
+    if (stripeSessionId) {
+      const existingSales = await base44.asServiceRole.entities.Sale.filter({
+        stripe_session_id: stripeSessionId,
+      });
+      if (existingSales.length > 0) {
+        return Response.json({
+          success: true,
+          duplicate: true,
+          message: "This session has already been processed",
+        }, {
+          headers: { "Access-Control-Allow-Origin": "*" },
+        });
+      }
+    }
+
+    // ----------------------------------------------------------------
     // 1. GRANT COURSE ACCESS
     // ----------------------------------------------------------------
 

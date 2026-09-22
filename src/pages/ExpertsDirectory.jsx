@@ -133,10 +133,12 @@ function ExpertModal({ expert, mode, onClose }) {
     ev.preventDefault();
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    base44.integrations.Core.SendEmail({
-      to: "hello@alignedwomanco.com",
-      subject: `Expert Connection Request - ${expert.name}`,
-      body: `Name: ${form.name}\nEmail: ${form.email}\nExpert: ${expert.name}\n\nMessage:\n${form.reason}`,
+    // Sent server side to the platform inbox. The caller never picks a recipient.
+    base44.functions.invoke("sendExpertDirectoryRequest", {
+      expert_id: expert.id,
+      sender_name: form.name,
+      sender_email: form.email,
+      reason: form.reason,
     }).catch(() => {});
     base44.analytics.track({ eventName: "expert_request_submit", properties: { expert: expert.name } });
     setSubmitted(true);

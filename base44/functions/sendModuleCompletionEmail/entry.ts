@@ -27,6 +27,16 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
+    // Identify the caller when there is one. The entity automation invokes this
+    // function without a user token, so a missing caller is expected; a signed
+    // in member calling it directly may only trigger their own completion.
+    let caller = null;
+    try {
+      caller = await base44.auth.me();
+    } catch (_err) {
+      caller = null;
+    }
+
     // This function is invoked by the entity automation on CourseProgress changes.
     // The payload includes: event, data (current record), old_data (previous), changed_fields.
     const body = await req.json();
@@ -57,6 +67,13 @@ Deno.serve(async (req) => {
 
     if (!moduleId || !userId) {
       return Response.json({ skipped: true, reason: 'missing moduleId or userId' });
+    }
+
+    // A signed in caller who is neither the record owner nor an admin must not
+    // be able to trigger someone else's completion email.
+    const callerIsAdmin = !!caller && ['owner', 'admin', 'master_admin'].includes(caller.role);
+    if (caller && caller.id !== userId && !callerIsAdmin) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Look up all pages that belong to this module
@@ -117,6 +134,15 @@ Deno.serve(async (req) => {
 
     if (!userEmail) {
       return Response.json({ skipped: true, reason: 'no user email found' });
+    }
+
+    // One completion email per member per module. The automation retries, and
+    // this function is reachable directly, so a repeat call finds the log entry
+    // written below and stops rather than sending again.
+    const idempotencyKey = `module_complete:${userId}:${moduleId}`;
+    const alreadySent = await base44.asServiceRole.entities.EmailLog.filter({ campaign_id: idempotencyKey });
+    if (alreadySent && alreadySent.length > 0) {
+      return Response.json({ skipped: true, reason: 'already sent' });
     }
 
     // ── Send the email via the connected Gmail connector ──
@@ -225,6 +251,21 @@ Deno.serve(async (req) => {
     if (!sendRes.ok) {
       const err = await sendRes.json();
       throw new Error(err.error?.message || 'Gmail send failed');
+    }
+
+    try {
+      await base44.asServiceRole.entities.EmailLog.create({
+        campaign_id: idempotencyKey,
+        campaign_name: 'Module completion',
+        to_email: userEmail,
+        to_name: userName || '',
+        subject: `You just completed "${moduleTitle}"`,
+        type: 'one_time',
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+      });
+    } catch (_err) {
+      // Logging is best effort, never block the response on it.
     }
 
     return Response.json({

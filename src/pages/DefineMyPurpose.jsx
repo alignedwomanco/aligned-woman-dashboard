@@ -333,7 +333,7 @@ export default function DefineMyPurpose() {
           <Card className="bg-white/5 border-white/10 p-6 mb-6">
             <div
               className="prose prose-invert max-w-none mb-6"
-              dangerouslySetInnerHTML={{ __html: mirrorHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(mirrorHtml) }}
             />
 
             <div className="space-y-4 mt-6 pt-6 border-t border-white/10">

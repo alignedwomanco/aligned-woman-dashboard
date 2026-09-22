@@ -22,7 +22,6 @@ import { serif, sans } from "@/components/community/communityUI";
 // sends the host her set up email.
 // ────────────────────────────────────────────────────────────────
 
-const ADMIN_EMAIL = "hello@alignedwomanco.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const FIELD = "w-full bg-paper border border-awburg-core/15 focus:border-awrose-core rounded-[16px] px-4 py-3 font-body font-light text-[14px] leading-[1.6] text-awburg-dark outline-none";
@@ -147,25 +146,8 @@ export default function StartGroupSheet({ open, onClose }) {
     setDone(true);
     setSaving(false);
 
-    try {
-      base44.integrations.Core.SendEmail({
-        to: ADMIN_EMAIL,
-        subject: `New group request - ${groupName}`,
-        body: [
-          `Group: ${groupName}`,
-          `Host: ${hostName} (${hostEmail})`,
-          selfHost ? "" : `Requested by: ${senderName} (${senderEmail})`,
-          ``,
-          `For: ${form.community_for.trim()}`,
-          `Talk about: ${form.community_topics.trim()}`,
-          ``,
-          form.message.trim(),
-          ``,
-          `Review: https://app.alignedwomanco.com/admin?tab=applications`,
-        ].filter((l) => l !== null).join("\n"),
-      }).catch(() => {});
-    } catch (_err) { /* best effort */ }
-
+    // The owner alert rides along with the host's confirmation inside
+    // sendExpertApplicationEmail, so the browser holds no send capability.
     try {
       if (created?.id) base44.functions.invoke("sendExpertApplicationEmail", { applicationId: created.id }).catch(() => {});
     } catch (_err) { /* best effort */ }

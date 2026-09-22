@@ -33,7 +33,6 @@ import { createPageUrl } from "@/utils";
 // they are added only when Laura confirms the schema change.
 // ────────────────────────────────────────────────────────────────
 
-const ADMIN_EMAIL = "hello@alignedwomanco.com";
 
 // Kept in step with PINNED_CATEGORIES in ExpertsDirectory.jsx.
 const CATEGORY_OPTIONS = [
@@ -264,15 +263,9 @@ export default function Apply() {
 
     // Step 3: side effects, each isolated. None of these can throw
     // into the view or undo the confirmation above.
-    try {
-      base44.integrations.Core.SendEmail({
-        to: ADMIN_EMAIL,
-        subject: `New expert application - ${name}`,
-        body: `Name: ${name}\nEmail: ${email}\nType: ${form.application_type}${form.business_name ? `\nBusiness: ${form.business_name}` : ""}\nInterested in: ${form.interested_in.join(", ")}${wantsCommunity ? `\n\nCommunity: ${form.community_name}\nFor: ${form.community_for}\nTopics: ${form.community_topics}` : ""}\n\n${form.message}\n\nReview: https://app.alignedwomanco.com/admin?tab=applications`,
-      }).catch(() => {});
-    } catch (err) {
-      console.error("Admin alert failed", err);
-    }
+    // The internal alert to the owner inbox is sent by sendExpertApplicationEmail
+    // below, alongside the applicant confirmation, so nothing is emailed from
+    // the browser.
 
     // The applicant confirmation goes through a backend function rather
     // than Core.SendEmail, because Core.SendEmail has no bcc parameter and

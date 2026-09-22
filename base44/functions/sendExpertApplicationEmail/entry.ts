@@ -292,6 +292,38 @@ Deno.serve(async (req) => {
       throw new Error(detail?.error?.message || "Gmail rejected the message");
     }
 
+    // The internal alert to the owner inbox goes from here rather than the
+    // browser, so the recipient is fixed server side and the applicant page
+    // holds no send capability. Best effort: the applicant already has their
+    // confirmation, and the record is the source of truth.
+    try {
+      const alertSubject = groupOnly
+        ? `New group request - ${(application.community_name || "").trim()}`
+        : `New expert application - ${name}`;
+      const alertLines = [
+        `Name: ${name}`,
+        `Email: ${to}`,
+        groupOnly
+          ? `Requested by: ${requestedBy || "the host"}`
+          : `Type: ${application.application_type || "individual"}`,
+        application.business_name ? `Business: ${application.business_name}` : null,
+        `Interested in: ${interests.length ? interests.join(", ") : "not specified"}`,
+        groupOnly ? `For: ${(application.community_for || "").trim()}` : null,
+        groupOnly ? `Talk about: ${(application.community_topics || "").trim()}` : null,
+        ``,
+        (application.message || "").trim(),
+        ``,
+        `Review: https://app.alignedwomanco.com/admin?tab=applications`,
+      ].filter((line) => line !== null);
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: OWNER_EMAIL,
+        subject: alertSubject,
+        body: alertLines.join("\n"),
+      });
+    } catch (_err) {
+      // Best effort. The application record is the source of truth.
+    }
+
     return Response.json({ success: true, sentTo: to, bcc: OWNER_EMAIL });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

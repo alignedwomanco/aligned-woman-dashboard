@@ -105,7 +105,7 @@ function VerifiedMark({ onDark = false }) {
 }
 
 // ─── CONNECTION FORM ───
-function ConnectionForm({ expertName, expertEmail, expertLinkedEmail, formRef }) {
+function ConnectionForm({ expertName, expertEmail, expertLinkedEmail, expertId, formRef }) {
   const [form, setForm] = useState({ name: "", email: "", regarding: "", message: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -143,20 +143,15 @@ function ConnectionForm({ expertName, expertEmail, expertLinkedEmail, formRef })
     setSending(true);
     setSendError("");
     try {
-      await base44.integrations.Core.SendEmail({
-        to: recipient,
-        // Replies go to the member, not to the platform, so the
-        // practitioner can answer from her own inbox.
-        reply_to: form.email,
-        from_name: "The Aligned Woman Co",
-        subject: `New message from ${form.name} via your Aligned Woman profile`,
-        body:
-          `Hi ${firstName},\n\n` +
-          `You have received a message from ${form.name} via your Aligned Woman profile.\n\n` +
-          `From: ${form.name} (${form.email})\n` +
-          `Regarding: ${form.regarding}\n\n` +
-          `Message:\n${form.message}\n\n` +
-          `Reply directly to ${form.email} to respond.`,
+      // Sent server side: the recipient is read from the practitioner's record
+      // and the member's own details come from her signed-in account, so the
+      // browser never picks an address.
+      await base44.functions.invoke("sendExpertProfileMessage", {
+        expert_id: expertId,
+        sender_name: form.name,
+        sender_email: form.email,
+        regarding: form.regarding,
+        message: form.message,
       });
       base44.analytics.track({
         eventName: "expert_profile_connection_request",
@@ -862,6 +857,7 @@ export default function ExpertProfile() {
               expertName={expert.name}
               expertEmail={expert.email}
               expertLinkedEmail={expert.linked_user_email}
+              expertId={expert.id}
               formRef={formRef}
             />
 

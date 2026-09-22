@@ -119,10 +119,11 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
 
   const sendInviteMutation = useMutation({
     mutationFn: async ({ email, role }) => {
-      await base44.integrations.Core.SendEmail({
-        to: email,
-        subject: "Invitation to Join as Expert - The Aligned Woman Blueprint",
-        body: `You've been invited to join The Aligned Woman Blueprint as ${role.replace("_", " ")}. Please sign up at ${window.location.origin}`,
+      // Sent server side from a fixed template, admin only.
+      await base44.functions.invoke("sendExpertInviteEmail", {
+        email,
+        role,
+        template: "invite",
       });
     },
     onSuccess: () => {
@@ -270,10 +271,10 @@ export default function ExpertsManagementContent({ expertOnlyEmail = null }) {
       queryClient.invalidateQueries({ queryKey: ["preApprovedMembers"] });
       let note = "";
       try {
-        await base44.integrations.Core.SendEmail({
-          to: email,
-          subject: "You're pre-approved - The Aligned Woman",
-          body: `Hi,\n\nYou have been pre-approved to access your expert dashboard on The Aligned Woman.\n\nSign in using this email address (${email}) here:\n${signupLink}\n\nOnce you sign in, your profile will be ready to edit.\n\nWarmly,\nThe Aligned Woman team`,
+        // Sent server side from a fixed template, admin only.
+        await base44.functions.invoke("sendExpertInviteEmail", {
+          email,
+          template: "preapproved",
         });
         note = "Invite email sent to " + email + ". ";
       } catch (mailErr) {

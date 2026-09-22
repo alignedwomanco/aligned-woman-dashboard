@@ -92,12 +92,9 @@ export default function SupportRoomContent({ currentUser }) {
       },
     });
 
-    // Send email notification
-    await base44.integrations.Core.SendEmail({
-      to: selectedTicket.created_by,
-      subject: `Re: ${selectedTicket.subject}`,
-      body: `Your support ticket has been updated.\n\nAdmin Response:\n${response}\n\nTicket ID: ${selectedTicket.id}`,
-    });
+    // The reply email is sent server side from the saved ticket, so the
+    // recipient is read from the record rather than chosen here.
+    await base44.functions.invoke("sendSupportTicketReply", { ticket_id: selectedTicket.id });
 
     setResponse("");
   };

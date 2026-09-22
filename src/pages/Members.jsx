@@ -118,10 +118,11 @@ export default function Members() {
         linkTo: `/members`,
       });
 
-      await base44.integrations.Core.SendEmail({
-        to: userEmail,
-        subject: "New Connection Request",
-        body: `${currentUser.full_name} (${currentUser.email}) wants to connect with you.\n\nMessage: ${note}\n\nView your connection requests at ${window.location.origin}${createPageUrl("Members")}`,
+      // The email is sent server side, where the recipient is verified to be a
+      // real member and the sender is taken from the signed-in account.
+      await base44.functions.invoke("sendConnectionRequestEmail", {
+        recipient_email: userEmail,
+        note,
       });
 
       return { newRequest, userEmail };

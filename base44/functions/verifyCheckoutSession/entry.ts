@@ -112,11 +112,21 @@ Deno.serve(async (req: Request) => {
   let affiliateAttributed = false;
   let attributedCommission = 0;
 
-  // Guard 2: consume the session once. If a completed Sale already exists for
-  // this session it has been processed. Only the original Stripe payer email
-  // may re-link it on a later visit; anyone else is routed to support.
+  // Guard 2: the signed-in account must be the payer. The entitlement is only
+  // ever attached to an account whose email matches the address Stripe captured
+  // for this session (case-insensitive, ignoring a +tag in the local part).
+  // Knowing a completed session id is never enough on its own, so a shared or
+  // forwarded success link cannot claim someone else's purchase.
+  const normalizeEmail = (value: unknown) => String(value ?? "").trim().toLowerCase();
+  const withoutPlusTag = (value: string) => {
+    const [local, domain] = value.split("@");
+    return domain ? local.split("+")[0] + "@" + domain : value;
+  };
+  const sameEmail = (a: string, b: string) =>
+    !!a && !!b && (a === b || withoutPlusTag(a) === withoutPlusTag(b));
+
   let alreadyProcessed = false;
-  let conflict = false;
+  let recordedBuyerEmail = "";
   try {
     const existing = await base44.asServiceRole.entities.Sale.filter({
       stripe_session_id: sessionId,
@@ -124,31 +134,32 @@ Deno.serve(async (req: Request) => {
     const completed = (existing || []).find((s: any) => s.status === "completed");
     if (completed) {
       alreadyProcessed = true;
-      const payer = (completed.buyer_email || "").toLowerCase();
-      const userHasTag =
-        Array.isArray(user.access_tags) && user.access_tags.includes(BLUEPRINT_ACCESS_TAG);
-      if (!userHasTag && payer && payer !== userEmail) {
-        conflict = true;
-      }
+      recordedBuyerEmail = normalizeEmail(completed.buyer_email);
     }
   } catch (_err) {
-    // If the lookup fails we fall through. The grant below is idempotent on
-    // the access tag, so a buyer is never blocked by a transient read error.
+    // If the lookup fails we fall through to the payer check below, which still
+    // requires the Stripe email to match the signed-in account.
   }
 
-  if (conflict) {
+  // Prefer the address Stripe captured; fall back to the one on the recorded
+  // Sale for older sessions that predate it being stored.
+  const payerEmail = stripeEmail || recordedBuyerEmail;
+  const userHasTag =
+    Array.isArray(user.access_tags) && user.access_tags.includes(BLUEPRINT_ACCESS_TAG);
+  const isPayer = sameEmail(userEmail, payerEmail);
+
+  if (!userHasTag && !isPayer) {
     return json({
       success: true,
       granted: false,
       hasAccess: false,
-      alreadyProcessed: true,
+      alreadyProcessed,
       conflict: true,
     });
   }
 
-  // Grant access to the logged in user. Provider agnostic by design: access is
-  // attached to whoever is signed in, not by matching the payment email. This
-  // is what makes Google, Apple relay addresses, and the rest all work.
+  // Grant access to the verified payer. A member who already holds the tag
+  // keeps it; the check above is what makes the grant safe.
   let granted = false;
   try {
     const currentTags = Array.isArray(user.access_tags) ? user.access_tags : [];
@@ -172,7 +183,7 @@ Deno.serve(async (req: Request) => {
 
   // Record the Sale once, with affiliate attribution. A Sale write failure must
   // not block access, since the grant above is the thing that matters.
-  if (!alreadyProcessed) {
+  if (!alreadyProcessed && isPayer) {
     // Resolve the affiliate from the code and compute commission. Commission is
     // only credited on a real paid amount, so a 100 percent off comp (amount 0)
     // never inflates an affiliate's totals.

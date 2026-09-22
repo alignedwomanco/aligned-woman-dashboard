@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Award } from "lucide-react";
 
-export default function LeaderboardCard({ leaderboard, currentUserEmail }) {
+export default function LeaderboardCard({ leaderboard }) {
   const getRankIcon = (rank) => {
     if (rank === 1) return <Trophy className="w-5 h-5 text-yellow-500" />;
     if (rank === 2) return <Medal className="w-5 h-5 text-gray-400" />;
@@ -24,11 +24,11 @@ export default function LeaderboardCard({ leaderboard, currentUserEmail }) {
         <div className="space-y-3">
           {leaderboard.map((entry, index) => {
             const rank = index + 1;
-            const isCurrentUser = entry.email === currentUserEmail;
-            
+            const isCurrentUser = !!entry.is_current_user;
+
             return (
               <div
-                key={entry.email}
+                key={entry.id || rank}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                   isCurrentUser ? "bg-[#6B1B3D]/10 border-2 border-[#6B1B3D]" : "bg-gray-50"
                 }`}
@@ -40,7 +40,7 @@ export default function LeaderboardCard({ leaderboard, currentUserEmail }) {
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={entry.profile_picture} />
                   <AvatarFallback className="bg-[#6B1B3D] text-white">
-                    {entry.full_name?.[0] || entry.email?.[0]}
+                    {entry.full_name?.[0] || "?"}
                   </AvatarFallback>
                 </Avatar>
                 
