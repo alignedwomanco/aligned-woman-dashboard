@@ -189,7 +189,7 @@ function Hero() {
 
 function StatBand() {
   const stats = [
-    ["Three", "women a day are killed by an intimate partner."],
+    ["7", "women are killed every day in South Africa."],
     ["569", "women were murdered in three months this year."],
     ["6x", "our femicide rate is nearly 6x more against the global average."],
   ];
