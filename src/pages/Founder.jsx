@@ -10,7 +10,7 @@ import LandingFooter from "@/components/home/LandingFooter";
    The page sits inside the site Layout (header) and ends with LandingFooter.
 ------------------------------------------------------------------ */
 const HERO_IMAGE = "https://media.base44.com/images/public/69e1e7f05d39205bc001ea00/44ad00c70_LJT_17-04-2026-21-30-39.jpg";
-const SECOND_IMAGE = "";
+const SECOND_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/4a8d06944_Facetune_17-04-2026-20-36-52.jpg";
 
 const LINKS = {
   spp: "/StartingPointProfile",
