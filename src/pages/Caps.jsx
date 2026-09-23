@@ -271,7 +271,7 @@ export default function Caps() {
       `}</style>
       <Hero />
       <StatBand />
-      <Shop basket={basket} capCount={capCount} onAdd={addToOrder} />
+      <Shop basket={basket} capCount={capCount} onAdd={addToOrder} onSet={setQty} onCheckout={() => setCheckout(true)} />
       <Money />
       <Why />
       <Faq />
@@ -419,7 +419,7 @@ function CountUp({ value, suffix = "" }) {
   return <span ref={ref}>{n}{suffix}</span>;
 }
 
-function Shop({ basket, capCount, onAdd }) {
+function Shop({ basket, capCount, onAdd, onSet, onCheckout }) {
   return (
     <div id="caps" className="px-6 md:px-24 pt-16 md:pt-24 pb-16 flex flex-col gap-10">
       <div className="flex flex-col gap-3 max-w-[720px]">
@@ -429,27 +429,19 @@ function Shop({ basket, capCount, onAdd }) {
         </p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {LINES.map((l) => <ProductCard key={l.id} item={l} inOrder={basket[l.id] || 0} room={MAX_CAPS - capCount} onAdd={onAdd} />)}
+        {LINES.map((l) => <ProductCard key={l.id} item={l} inOrder={basket[l.id] || 0} room={MAX_CAPS - capCount} onAdd={onAdd} onSet={onSet} onCheckout={onCheckout} />)}
       </div>
       <div className="text-sm" style={{ color: C.burgMid }}>Shipping is charged at cost and never comes out of the donation.</div>
     </div>
   );
 }
 
-function ProductCard({ item, inOrder, room, onAdd }) {
+function ProductCard({ item, inOrder, room, onAdd, onSet, onCheckout }) {
   const [photo, setPhoto] = useState(0);
-  const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
   const images = item.images || [];
   const swatchDot = { width: 22, height: 22, borderRadius: "100%", border: "1px solid rgba(8,1,5,0.18)", flexShrink: 0 };
-  const full = room <= 0;
-
-  // The button confirms the add for a moment, then goes back to normal.
-  useEffect(() => {
-    if (!added) return undefined;
-    const t = setTimeout(() => setAdded(false), 1800);
-    return () => clearTimeout(t);
-  }, [added]);
+  // The order is full and none of this cap is in it, so nothing can be added.
+  const full = room <= 0 && inOrder === 0;
   return (
     <div className="flex flex-col gap-4 rounded-2xl p-6" style={{ background: C.white }}>
       {images.length > 0 ? (
@@ -495,26 +487,21 @@ function ProductCard({ item, inOrder, room, onAdd }) {
           <span className="text-[13px]" style={{ color: C.burgMid }}>{item.thread} embroidery</span>
         </div>
       </div>
+      {/* The number is what is in the order for this cap, so it starts at 0
+          and + and - change the order directly. */}
       <div className="flex items-center justify-between gap-3 aw-m-center">
-        <span className="text-[13px] uppercase" style={{ color: C.burgMid, letterSpacing: "0.06em" }}>Quantity</span>
-        <QtyStepper value={Math.min(qty, Math.max(1, room))} onChange={setQty} max={Math.max(1, room)} label={item.line} />
+        <span className="text-[13px] uppercase" style={{ color: C.burgMid, letterSpacing: "0.06em" }}>In your order</span>
+        <QtyStepper value={inOrder} onChange={(q) => onSet(item.id, q)} min={0} max={inOrder + Math.max(0, room)} label={item.line} />
       </div>
       <button
         type="button"
         disabled={full}
-        onClick={() => {
-          onAdd(item.id, Math.min(qty, room));
-          setQty(1);
-          setAdded(true);
-        }}
+        onClick={() => (inOrder > 0 ? onCheckout() : onAdd(item.id, 1))}
         className="aw-buy rounded-full py-4 text-sm font-medium"
         style={{ background: C.btn, color: C.btnText, border: 0, minHeight: 44, cursor: full ? "not-allowed" : "pointer", opacity: full ? 0.5 : 1 }}
       >
-        {full ? `Order is full (${MAX_CAPS} caps)` : added ? "Added to your order" : "Add to order"}
+        {full ? `Order is full (${MAX_CAPS} caps)` : inOrder > 0 ? "Checkout" : "Add to order"}
       </button>
-      {inOrder > 0 && (
-        <div className="text-[13px] text-center" style={{ color: C.burgMid }}>{inOrder} in your order</div>
-      )}
     </div>
   );
 }
