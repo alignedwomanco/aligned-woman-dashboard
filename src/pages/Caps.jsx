@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import PayFastForm from "@/components/caps/PayFastForm";
+import PayFastForm, { QtyStepper, MAX_CAPS } from "@/components/caps/PayFastForm";
 import LandingFooter from "@/components/home/LandingFooter";
 
 /* ------------------------------------------------------------------
@@ -92,7 +92,39 @@ function WFC() {
 /* ------------------------------------------------------------------ */
 
 export default function Caps() {
-  const [buy, setBuy] = useState(null);
+  // The order: cap line id -> how many. Lives only for this visit, so a buyer
+  // who pays and comes back from PayFast starts with an empty order.
+  const [basket, setBasket] = useState({});
+  const [checkout, setCheckout] = useState(false);
+
+  const capCount = Object.values(basket).reduce((n, q) => n + q, 0);
+  const orderItems = LINES.filter((l) => basket[l.id] > 0).map((l) => ({
+    id: l.id,
+    line: l.line,
+    cap: l.cap,
+    thread: l.thread,
+    placement: l.placement,
+    qty: basket[l.id],
+  }));
+
+  // Adds to what is already in the order, never past MAX_CAPS in total.
+  const addToOrder = (id, qty) => {
+    setBasket((b) => {
+      const total = Object.values(b).reduce((n, q) => n + q, 0);
+      const room = MAX_CAPS - total;
+      if (room <= 0) return b;
+      return { ...b, [id]: (b[id] || 0) + Math.min(qty, room) };
+    });
+  };
+
+  const setQty = (id, qty) => {
+    setBasket((b) => {
+      const next = { ...b };
+      if (qty <= 0) delete next[id];
+      else next[id] = qty;
+      return next;
+    });
+  };
 
   useEffect(() => {
     const id = "aw-caps-fonts";
@@ -239,15 +271,18 @@ export default function Caps() {
       `}</style>
       <Hero />
       <StatBand />
-      <Shop onBuy={setBuy} />
+      <Shop basket={basket} capCount={capCount} onAdd={addToOrder} />
       <Money />
       <Why />
       <Faq />
       <MobileSupport />
       <PoweredBy />
       <LandingFooter />
+      {/* Room at the very bottom, so the order bar never covers the footer. */}
+      {capCount > 0 && <div style={{ height: 96 }} aria-hidden="true" />}
 
-      {buy && <PayFastForm item={buy} price={PRICE} onClose={() => setBuy(null)} />}
+      <OrderBar count={capCount} onCheckout={() => setCheckout(true)} />
+      {checkout && <PayFastForm items={orderItems} price={PRICE} onChangeQty={setQty} onClose={() => setCheckout(false)} />}
     </div>
   );
 }
@@ -384,7 +419,7 @@ function CountUp({ value, suffix = "" }) {
   return <span ref={ref}>{n}{suffix}</span>;
 }
 
-function Shop({ onBuy }) {
+function Shop({ basket, capCount, onAdd }) {
   return (
     <div id="caps" className="px-6 md:px-24 pt-16 md:pt-24 pb-16 flex flex-col gap-10">
       <div className="flex flex-col gap-3 max-w-[720px]">
@@ -394,17 +429,27 @@ function Shop({ onBuy }) {
         </p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {LINES.map((l) => <ProductCard key={l.id} item={l} onBuy={onBuy} />)}
+        {LINES.map((l) => <ProductCard key={l.id} item={l} inOrder={basket[l.id] || 0} room={MAX_CAPS - capCount} onAdd={onAdd} />)}
       </div>
       <div className="text-sm" style={{ color: C.burgMid }}>Shipping is charged at cost and never comes out of the donation.</div>
     </div>
   );
 }
 
-function ProductCard({ item, onBuy }) {
+function ProductCard({ item, inOrder, room, onAdd }) {
   const [photo, setPhoto] = useState(0);
+  const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
   const images = item.images || [];
   const swatchDot = { width: 22, height: 22, borderRadius: "100%", border: "1px solid rgba(8,1,5,0.18)", flexShrink: 0 };
+  const full = room <= 0;
+
+  // The button confirms the add for a moment, then goes back to normal.
+  useEffect(() => {
+    if (!added) return undefined;
+    const t = setTimeout(() => setAdded(false), 1800);
+    return () => clearTimeout(t);
+  }, [added]);
   return (
     <div className="flex flex-col gap-4 rounded-2xl p-6" style={{ background: C.white }}>
       {images.length > 0 ? (
@@ -450,14 +495,52 @@ function ProductCard({ item, onBuy }) {
           <span className="text-[13px]" style={{ color: C.burgMid }}>{item.thread} embroidery</span>
         </div>
       </div>
+      <div className="flex items-center justify-between gap-3 aw-m-center">
+        <span className="text-[13px] uppercase" style={{ color: C.burgMid, letterSpacing: "0.06em" }}>Quantity</span>
+        <QtyStepper value={Math.min(qty, Math.max(1, room))} onChange={setQty} max={Math.max(1, room)} label={item.line} />
+      </div>
       <button
         type="button"
-        onClick={() => onBuy({ id: item.id, line: item.line, placement: item.placement, cap: item.cap, thread: item.thread })}
+        disabled={full}
+        onClick={() => {
+          onAdd(item.id, Math.min(qty, room));
+          setQty(1);
+          setAdded(true);
+        }}
         className="aw-buy rounded-full py-4 text-sm font-medium"
-        style={{ background: C.btn, color: C.btnText, border: 0, minHeight: 44, cursor: "pointer" }}
+        style={{ background: C.btn, color: C.btnText, border: 0, minHeight: 44, cursor: full ? "not-allowed" : "pointer", opacity: full ? 0.5 : 1 }}
       >
-        Buy now
+        {full ? `Order is full (${MAX_CAPS} caps)` : added ? "Added to your order" : "Add to order"}
       </button>
+      {inOrder > 0 && (
+        <div className="text-[13px] text-center" style={{ color: C.burgMid }}>{inOrder} in your order</div>
+      )}
+    </div>
+  );
+}
+
+/* Pinned to the bottom of the screen once anything is in the order, so the
+   buyer can keep browsing and check out from anywhere on the page. */
+function OrderBar({ count, onCheckout }) {
+  if (!count) return null;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-4" style={{ pointerEvents: "none" }}>
+      <div
+        className="mx-auto max-w-[560px] rounded-full flex items-center justify-between gap-4 pl-6 pr-2 py-2"
+        style={{ pointerEvents: "auto", background: C.ink, color: C.bg, boxShadow: "0 12px 32px rgba(8,1,5,0.28)", textAlign: "left" }}
+      >
+        <span className="text-sm">
+          Your order: {count} cap{count === 1 ? "" : "s"} · {money(PRICE * count)}
+        </span>
+        <button
+          type="button"
+          onClick={onCheckout}
+          className="aw-buy rounded-full px-6 py-3 text-sm font-medium flex-shrink-0"
+          style={{ background: C.btn, color: C.btnText, border: 0, minHeight: 44, cursor: "pointer" }}
+        >
+          Checkout
+        </button>
+      </div>
     </div>
   );
 }
