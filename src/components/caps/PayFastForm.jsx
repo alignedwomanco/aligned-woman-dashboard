@@ -189,7 +189,9 @@ export default function PayFastForm({ items, price, onChangeQty, onClose }) {
           <input type="hidden" name="amount" value={amount.toFixed(2)} />
           <input type="hidden" name="item_name" value="Caps4Cause" />
           <input type="hidden" name="item_description" value={description} />
-          <input type="hidden" name="custom_quantity" value={capCount} />
+          {/* No custom_quantity here on purpose. The amount above is already the
+              whole order, so if PayFast ever started multiplying by a quantity
+              field the buyer would be charged twice over. */}
           {/* What payfastNotify reads back:
               custom_int2  2, marks this multi-cap order layout
               custom_int1  total caps in the order
@@ -201,7 +203,8 @@ export default function PayFastForm({ items, price, onChangeQty, onClose }) {
           <input type="hidden" name="custom_int2" value="2" />
           <input type="hidden" name="custom_int1" value={capCount} />
           <input type="hidden" name="custom_str1" value={itemsA} />
-          <input type="hidden" name="custom_str2" value={itemsB} />
+          {/* Only sent when the order has more lines than custom_str1 holds. */}
+          {itemsB && <input type="hidden" name="custom_str2" value={itemsB} />}
           {/* Filled in on submit, so these stay uncontrolled: a re-render must
               never reset them to empty before the form posts to PayFast. */}
           <input type="hidden" name="m_payment_id" defaultValue="" />
