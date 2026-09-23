@@ -4,16 +4,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 // completes, and this is where a cap sale first becomes a record in the app,
 // which is what the cap orders sheet is built from.
 //
-// Field layout sent by src/components/caps/PayFastForm.jsx:
+// Current layout, a multi-cap order (custom_int2 = 2), sent by
+// src/components/caps/PayFastForm.jsx:
 //   m_payment_id  CAP-<timestamp>, our reference
-//   custom_str1   the line
-//   custom_str2   cap colour | thread colour | placement
+//   custom_int1   total caps in the order
+//   custom_str1   cap lines, line|cap|thread|placement|qty joined with ;
+//   custom_str2   cap lines that did not fit in custom_str1
 //   custom_str3   phone
 //   custom_str4   name | surname
 //   custom_str5   shipping address
-//   custom_int1   quantity
-// Payments started before September 22, 2026 used an older layout
-// (str2 cap, str3 thread, str4 placement, no phone). Both are read.
+//
+// Older single-cap layouts are still read, so a payment started before a
+// release still records correctly:
+//   September 22, 2026 evening: str1 line, str2 cap | thread | placement,
+//     str3 phone, str4 name | surname
+//   Before that: str1 line, str2 cap, str3 thread, str4 placement, no phone
 
 const VALIDATE_URL = "https://www.payfast.co.za/eng/query/validate";
 const MERCHANT_ID = "32598411";
@@ -21,6 +26,30 @@ const CAP_PRICE = 350; // ZAR per cap, keep in step with PRICE in src/pages/Caps
 
 function clean(value) {
   return (value || "").trim();
+}
+
+function wholeNumber(value, fallback) {
+  const n = parseInt(String(value || ""), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+// line|cap|thread|placement|qty;line|cap|thread|placement|qty
+function parseCapLines(text) {
+  return text
+    .split(";")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const [line, cap, thread, placement, qty] = entry.split("|").map((p) => p.trim());
+      return {
+        line: line || "Cap",
+        cap_colour: cap || "",
+        thread_colour: thread || "",
+        placement: placement || "",
+        quantity: wholeNumber(qty, 1),
+        unit_price: CAP_PRICE,
+      };
+    });
 }
 
 export default async function (req) {
@@ -89,50 +118,77 @@ export default async function (req) {
     }
 
     const total = Number(params.get("amount_gross") || 0);
-    const quantity = Math.max(1, Math.round(Number(params.get("custom_int1") || 1) || 1));
-
+    const str1 = clean(params.get("custom_str1"));
     const str2 = clean(params.get("custom_str2"));
     const str3 = clean(params.get("custom_str3"));
     const str4 = clean(params.get("custom_str4"));
-    const newLayout = str2.includes("|");
+    const declaredCaps = wholeNumber(params.get("custom_int1"), 0);
+    const multiCap = clean(params.get("custom_int2")) === "2";
 
-    let capColour = "";
-    let threadColour = "";
-    let placement = "";
+    let items = [];
     let phone = "";
+    let hasNameField = false;
 
-    if (newLayout) {
-      const parts = str2.split("|").map((p) => p.trim());
-      capColour = parts[0] || "";
-      threadColour = parts[1] || "";
-      placement = parts[2] || "";
+    if (multiCap) {
+      items = parseCapLines([str1, str2].filter(Boolean).join(";"));
       phone = str3;
+      hasNameField = true;
+    } else if (str2.includes("|")) {
+      // September 22 evening single-cap layout.
+      const parts = str2.split("|").map((p) => p.trim());
+      items = [{
+        line: str1 || clean(params.get("item_name")) || "Cap",
+        cap_colour: parts[0] || "",
+        thread_colour: parts[1] || "",
+        placement: parts[2] || "",
+        quantity: declaredCaps || 1,
+        unit_price: CAP_PRICE,
+      }];
+      phone = str3;
+      hasNameField = true;
     } else {
-      capColour = str2;
-      threadColour = str3;
-      placement = str4;
+      // Original single-cap layout.
+      items = [{
+        line: str1 || clean(params.get("item_name")) || "Cap",
+        cap_colour: str2,
+        thread_colour: str3,
+        placement: str4,
+        quantity: declaredCaps || 1,
+        unit_price: CAP_PRICE,
+      }];
     }
     phone = phone || clean(params.get("cell_number"));
+
+    const flags = [];
+    if (items.length === 0) {
+      flags.push("CHECK: no cap lines received, confirm the order with the buyer");
+      items = [{ line: "Cap", cap_colour: "", thread_colour: "", placement: "", quantity: declaredCaps || 1, unit_price: CAP_PRICE }];
+    }
+
+    const capCount = items.reduce((n, i) => n + i.quantity, 0);
+    if (declaredCaps && declaredCaps !== capCount) {
+      flags.push(`CHECK: order said ${declaredCaps} caps, lines add up to ${capCount}`);
+    }
+
+    // The price travels in a form field a buyer could edit, so the amount
+    // PayFast actually took is checked against what the caps cost.
+    const expected = CAP_PRICE * capCount;
+    if (Math.abs(total - expected) > 0.009) {
+      flags.push(`CHECK AMOUNT: paid R${total.toFixed(2)}, expected R${expected.toFixed(2)} for ${capCount} cap${capCount === 1 ? "" : "s"}`);
+    }
 
     const address = clean(params.get("custom_str5"));
     const payerName = [clean(params.get("name_first")), clean(params.get("name_last"))]
       .filter(Boolean)
       .join(" ");
-    // The name typed on the cap form is who the cap goes to. The PayFast payer
+    // The name typed on the cap form is who the caps go to. The PayFast payer
     // can differ (a partner's card, a company account), so it is kept in Notes.
-    const formName = str4.includes("|")
+    const formName = hasNameField && str4.includes("|")
       ? str4.split("|").map((p) => p.trim()).filter(Boolean).join(" ")
       : "";
     const buyerName = formName || payerName;
     const email = clean(params.get("email_address"));
 
-    // The price travels in a form field a buyer could edit, so the amount
-    // PayFast actually took is checked against what the caps cost.
-    const expected = CAP_PRICE * quantity;
-    const flags = [];
-    if (Math.abs(total - expected) > 0.009) {
-      flags.push(`CHECK AMOUNT: paid R${total.toFixed(2)}, expected R${expected.toFixed(2)} for ${quantity} cap${quantity === 1 ? "" : "s"}`);
-    }
     if (!address) flags.push("CHECK: no shipping address received");
     if (!phone) flags.push("CHECK: no phone received");
     if (!formName) flags.push("CHECK: no name received from the cap form");
@@ -152,17 +208,8 @@ export default async function (req) {
       phone,
       delivery_method: address ? "courier" : "collect",
       address,
-      items: [
-        {
-          line: clean(params.get("custom_str1")) || clean(params.get("item_name")) || "Cap",
-          cap_colour: capColour,
-          thread_colour: threadColour,
-          placement,
-          quantity,
-          unit_price: Number((total / quantity).toFixed(2)),
-        },
-      ],
-      cap_count: quantity,
+      items,
+      cap_count: capCount,
       subtotal: total,
       shipping: 0,
       total,
