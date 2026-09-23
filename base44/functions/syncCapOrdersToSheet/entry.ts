@@ -9,6 +9,19 @@ const SHEET_NAME = "The Aligned Woman Co - Cap Orders";
 const TAB_NAME = "Cap orders";
 const ADMIN_ROLES = ["owner", "admin", "master_admin"];
 
+// One column per cap design, so an order with several designs shows how many
+// of each on one row and every column can be totalled for production. Keep in
+// step with LINES in src/pages/Caps.jsx. A cap whose line is not listed here
+// lands in "Other caps" rather than disappearing.
+const DESIGNS = [
+  "you stay home",
+  "you're too close",
+  "coming for kempton",
+  "try me",
+  "how about no",
+  "100% that bitch",
+];
+
 const HEADERS = [
   "Order ID",
   "Date ordered",
@@ -17,7 +30,9 @@ const HEADERS = [
   "Phone",
   "Delivery",
   "Address",
-  "Caps",
+  "Total caps",
+  ...DESIGNS,
+  "Other caps",
   "Items",
   "Subtotal",
   "Shipping",
@@ -25,6 +40,38 @@ const HEADERS = [
   "Status",
   "Notes",
 ];
+
+// Column letter for a 1-based column number (1 = A, 27 = AA).
+function columnLetter(n) {
+  let s = "";
+  while (n > 0) {
+    const r = (n - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+const LAST_COL = columnLetter(HEADERS.length);
+
+// Matches a design however the line was typed: case and curly apostrophes aside.
+function designKey(line) {
+  return String(line || "").toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, " ").trim();
+}
+const DESIGN_KEYS = DESIGNS.map(designKey);
+
+// How many of each design, plus anything unrecognised, for one order.
+function designCounts(items) {
+  const counts = DESIGNS.map(() => 0);
+  let other = 0;
+  (items || []).forEach((item) => {
+    const q = Number(item.quantity) || 1;
+    const i = DESIGN_KEYS.indexOf(designKey(item.line));
+    if (i >= 0) counts[i] += q;
+    else other += q;
+  });
+  // Blank rather than 0, so each row reads at a glance. SUM treats blanks as 0.
+  return [...counts, other].map((n) => (n > 0 ? n : ""));
+}
 
 function summariseItems(items) {
   return (items || [])
@@ -165,6 +212,7 @@ export default async function (req) {
       order.cap_count != null
         ? order.cap_count
         : (order.items || []).reduce((total, item) => total + (item.quantity || 0), 0),
+      ...designCounts(order.items),
       summariseItems(order.items),
       order.subtotal != null ? order.subtotal : "",
       order.shipping != null ? order.shipping : "",
@@ -176,11 +224,12 @@ export default async function (req) {
     // Clear the old body first, so an order removed in the app does not linger.
     await sheetsRequest(
       accessToken,
-      `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`${TAB_NAME}!A2:N100000`)}:clear`,
+      // Wider than the table, so columns from an older layout are cleared too.
+      `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`${TAB_NAME}!A2:AZ100000`)}:clear`,
       { method: "POST", body: {} }
     );
 
-    const range = `${TAB_NAME}!A1:N${rows.length + 1}`;
+    const range = `${TAB_NAME}!A1:${LAST_COL}${rows.length + 1}`;
     await sheetsRequest(
       accessToken,
       `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,
@@ -189,6 +238,34 @@ export default async function (req) {
         body: { range, majorDimension: "ROWS", values: [HEADERS, ...rows] },
       }
     );
+
+    // Keep the whole header row bold, including columns added after the sheet
+    // was first made. Cosmetic, so a failure here never stops the sync.
+    try {
+      const meta = await sheetsRequest(
+        accessToken,
+        `spreadsheets/${spreadsheetId}?fields=sheets.properties(sheetId,title)`
+      );
+      const tab = (meta.sheets || []).find((s) => s.properties && s.properties.title === TAB_NAME);
+      if (tab) {
+        await sheetsRequest(accessToken, `spreadsheets/${spreadsheetId}:batchUpdate`, {
+          method: "POST",
+          body: {
+            requests: [
+              {
+                repeatCell: {
+                  range: { sheetId: tab.properties.sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: HEADERS.length },
+                  cell: { userEnteredFormat: { textFormat: { bold: true } } },
+                  fields: "userEnteredFormat.textFormat.bold",
+                },
+              },
+            ],
+          },
+        });
+      }
+    } catch (_err) {
+      // Formatting only.
+    }
 
     await base44.asServiceRole.entities.SheetTracker.update(tracker.id, {
       last_synced_at: new Date().toISOString(),
