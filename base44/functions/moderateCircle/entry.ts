@@ -505,7 +505,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === "clear_announcement") {
-      const post = await findPost(String(p.postId || ""));
+      const id = typeof p.postId === "string" ? p.postId : "";
+      if (!id) return json({ error: "post_not_found" }, 404);
+      const post = await findPost(id);
       if (!post || post.post_type !== "announcement") return json({ error: "post_not_found" }, 404);
       // Clearing is expiring. The record stays, so she can post it again.
       await svc.GroupPost.update(post.id, { expires_at: now });
