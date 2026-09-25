@@ -42,9 +42,25 @@
       "enum": [
         "question",
         "share",
-        "welcome"
+        "welcome",
+        "announcement"
       ],
-      "description": "question is Ask a question, share is Share, welcome is the host's pinned welcome post. Treat empty as share."
+      "description": "question is Ask a question, share is Share, welcome is the host's pinned welcome post, announcement is a one-off notice the host posts for an exception. Treat empty as share."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Only set on an announcement. The notice is active while this is in the future. Never cleaned up by a job: reads filter on it."
+    },
+    "announcement_kind": {
+      "type": "string",
+      "enum": [
+        "live",
+        "answers",
+        "away",
+        "note"
+      ],
+      "description": "Only set on an announcement. live and away are the ones a woman waiting to be approved must not see when they would mislead her."
     },
     "is_anonymous": {
       "type": "boolean",

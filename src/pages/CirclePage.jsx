@@ -10,6 +10,7 @@ import CircleFeed from "@/components/circle/CircleFeed";
 import CircleThread, { ReportSheet } from "@/components/circle/CircleThread";
 import CircleComposer from "@/components/circle/CircleComposer";
 import CircleModerate from "@/components/circle/CircleModerate";
+import CircleAnnounce from "@/components/circle/CircleAnnounce";
 
 // ────────────────────────────────────────────────────────────────
 // CirclePage · one address per room: app.alignedwomanco.com/<slug>.
@@ -44,6 +45,9 @@ export default function CirclePage() {
   const [report, setReport] = useState(null);
   const [joinBusy, setJoinBusy] = useState(false);
   const [joinError, setJoinError] = useState("");
+  const [announceOpen, setAnnounceOpen] = useState(false);
+  const [announceSeed, setAnnounceSeed] = useState(null);
+  const [announceBusy, setAnnounceBusy] = useState(false);
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["circle-user"],
@@ -125,6 +129,21 @@ export default function CirclePage() {
     }
   };
 
+  const openAnnounce = (seed) => {
+    setAnnounceSeed(seed || null);
+    setAnnounceOpen(true);
+  };
+
+  const clearAnnouncement = async (id) => {
+    setAnnounceBusy(true);
+    try {
+      await base44.functions.invoke("moderateCircle", { groupId: group.id, action: "clear_announcement", postId: id });
+      refreshRoom();
+    } catch (_e) { /* the next refresh shows the truth */ } finally {
+      setAnnounceBusy(false);
+    }
+  };
+
   const moderateAction = async (action, post, arg) => {
     try {
       const extra = { postId: post.id };
@@ -154,9 +173,9 @@ export default function CirclePage() {
   if (status === "pitch") body = <Pitch group={group} host={publicHost} slug={slug} />;
   else if (status === "loading") body = roomError ? <p className="px-6 py-10 font-body text-[13px] text-awrose-deep text-center">We could not open the Circle just now. Refresh to try again.</p> : <Loading />;
   else if (status === "gate") body = <JoinGate group={group} host={host} onRequest={requestJoin} busy={joinBusy} error={joinError} />;
-  else if (status === "pending") body = <Pending host={host} />;
+  else if (status === "pending") body = <Pending host={host} schedule={group.live_session} announcement={room?.announcement} />;
   else if (status === "declined") body = <Declined group={group} />;
-  else if (tab === "moderate" && isMod) body = <CircleModerate group={group} onBack={() => go({})} onOpenPost={(id) => go({ post: id })} />;
+  else if (tab === "moderate" && isMod) body = <CircleModerate group={group} onBack={() => go({})} onOpenPost={(id) => go({ post: id })} onPostAgain={(a) => { go({}); openAnnounce(a); }} />;
   else if (postId) {
     body = threadLoading || !thread ? <Loading /> : thread.post ? (
       <CircleThread
@@ -185,12 +204,23 @@ export default function CirclePage() {
         onReport={(p) => setReport(p)}
         onModerate={() => go({ tab: "moderate" })}
         onPrefSaved={refreshRoom}
+        announcement={room.announcement}
+        onClearAnnounce={clearAnnouncement}
+        announceBusy={announceBusy}
       />
     );
   }
 
   return (
-    <Shell user={user} slug={slug} group={group} host={host || publicHost} compact={!!postId || tab === "moderate"} draft={isDraft && isMod}>
+    <Shell
+      user={user}
+      slug={slug}
+      group={group}
+      host={host || publicHost}
+      compact={!!postId || tab === "moderate"}
+      draft={isDraft && isMod}
+      onAnnounce={status === "room" && isMod && !postId && tab !== "moderate" ? () => openAnnounce(null) : undefined}
+    >
       {body}
       <CircleComposer
         open={!!composer}
@@ -200,16 +230,23 @@ export default function CirclePage() {
         onClose={() => setComposer(null)}
         onPosted={(id) => { setComposer(null); refreshRoom(); if (id) go({ post: id }); }}
       />
+      <CircleAnnounce
+        open={announceOpen}
+        onClose={() => { setAnnounceOpen(false); setAnnounceSeed(null); }}
+        group={group}
+        seed={announceSeed}
+        onPosted={refreshRoom}
+      />
       <ReportSheet open={!!report} target={report} group={group} host={host} onClose={() => setReport(null)} />
     </Shell>
   );
 }
 
-function Shell({ user, slug, group, host, compact, draft, children }) {
+function Shell({ user, slug, group, host, compact, draft, onAnnounce, children }) {
   return (
     <div className="min-h-screen bg-off-white font-body text-awburg-dark">
       <PlatformBar user={user} slug={slug} />
-      {group && <HostBand group={group} host={host} compact={compact} />}
+      {group && <HostBand group={group} host={host} compact={compact} onAnnounce={onAnnounce} />}
       {draft && (
         <p className="bg-awsage-wash text-awsage-core font-body text-[11.5px] font-semibold text-center px-4 py-2">
           Not visible yet. Only you and The Aligned Woman Co. can see this room until you publish it from your Partner Dashboard.

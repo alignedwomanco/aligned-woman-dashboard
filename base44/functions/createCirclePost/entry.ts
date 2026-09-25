@@ -388,10 +388,25 @@ Deno.serve(async (req) => {
     } else if (payload.postType === "welcome" && (isHost || isAdmin)) {
       postType = "welcome";
       topicKey = "";
+    } else if (payload.postType === "announcement" && (isHost || isAdmin)) {
+      // A one off notice for an exception. Host and admins only, never
+      // tagged, never a thread. It carries its own expiry and leaves the
+      // feed by falling out of the active window on read.
+      postType = "announcement";
+      topicKey = "";
     } else {
       postType = payload.postType === "question" ? "question" : "share";
       const valid = topics.some((t: any) => t.key === topicKey && t.active !== false);
       if (!valid) return json({ error: "topic_required" }, 422);
+    }
+
+    let expiresAt = "";
+    let announcementKind = "";
+    if (postType === "announcement") {
+      const expiry = Date.parse(String(payload.expiresAt || ""));
+      if (!Number.isFinite(expiry) || expiry <= Date.now()) return json({ error: "announcement_needs_future_expiry" }, 422);
+      expiresAt = new Date(expiry).toISOString();
+      announcementKind = ["live", "answers", "away", "note"].includes(payload.announcementKind) ? payload.announcementKind : "note";
     }
 
     const realName = (user.full_name || "").trim() || membership?.display_name || email;
@@ -405,6 +420,8 @@ Deno.serve(async (req) => {
       parent_id: parentId,
       post_type: postType,
       topic_key: topicKey,
+      expires_at: expiresAt,
+      announcement_kind: announcementKind,
       status: postType === "question" ? "open" : "",
       is_anonymous: isAnonymous,
       anon_tint: isAnonymous ? Math.floor(Math.random() * 6) : 0,
@@ -422,6 +439,26 @@ Deno.serve(async (req) => {
 
     if (postType === "welcome") {
       await svc.Group.update(group.id, { welcome_post_id: record.id }).catch(() => {});
+    }
+
+    // An announcement is not a conversation. It notifies the approved
+    // members once, if the host asked for it, and stops there: no topic,
+    // no replies, no thread. Posting a new one supersedes the last,
+    // because only the newest unexpired notice is ever active.
+    if (postType === "announcement") {
+      if (payload.notify === true) {
+        const approved = await svc.GroupMember.filter({ group_id: group.id, status: "approved" }, "-created_date", 500);
+        for (const m of (Array.isArray(approved) ? approved : [])) {
+          const to = lower(m.user_email || m.created_by);
+          if (!to || to === email) continue;
+          await notifyInApp(base44, {
+            recipient: to, type: "circle_announcement",
+            message: `${hostFirstName(hostExpert)} posted a notice in ${group.name}.`,
+            linkTo: `/${group.slug}`, groupId: group.id, postId: record.id, source: email,
+          });
+        }
+      }
+      return json({ success: true, postId: record.id });
     }
 
     // Notifications. An anonymous trigger leaves source empty everywhere.

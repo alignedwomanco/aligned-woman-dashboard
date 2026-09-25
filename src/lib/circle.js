@@ -137,3 +137,116 @@ export function randomId() {
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+// ────────────────────────────────────────────────────────────────
+// The host's weekly live hour. Times are South African time, which
+// has no daylight saving, so a fixed +02:00 offset is exact all year.
+// The next occurrence is computed in the reader's browser: nothing is
+// stored, so nothing drifts, and there is no scheduled job.
+// ────────────────────────────────────────────────────────────────
+
+const SAST_OFFSET_MS = 2 * 60 * 60 * 1000;
+
+export const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+export function parseTimeOfDay(value) {
+  const m = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  const h = Number(m[1]);
+  const mi = Number(m[2]);
+  if (h > 23 || mi > 59) return null;
+  return { h, m: mi };
+}
+
+// "20:00" becomes "8pm", "20:30" becomes "8:30pm".
+export function formatTimeOfDay(value) {
+  const t = parseTimeOfDay(value);
+  if (!t) return "";
+  const ampm = t.h < 12 ? "am" : "pm";
+  const hr = t.h % 12 === 0 ? 12 : t.h % 12;
+  return t.m === 0 ? `${hr}${ampm}` : `${hr}:${String(t.m).padStart(2, "0")}${ampm}`;
+}
+
+// "Tuesday 8pm"
+export function sessionLabel(schedule) {
+  const day = Number(schedule?.day);
+  if (!parseTimeOfDay(schedule?.start_time) || !(day >= 0 && day <= 6)) return "";
+  return `${WEEKDAYS[day]} ${formatTimeOfDay(schedule.start_time)}`;
+}
+
+// The next occurrence in absolute time, including one already running,
+// so the room can tell whether the window is open right now.
+export function nextCircleSession(schedule, nowMs = Date.now()) {
+  if (!schedule?.on) return null;
+  const day = Number(schedule.day);
+  const t = parseTimeOfDay(schedule.start_time);
+  if (!(day >= 0 && day <= 6) || !t) return null;
+  const dur = Math.min(240, Math.max(15, Number(schedule.duration_minutes) || 60));
+  const base = new Date(nowMs + SAST_OFFSET_MS);
+  for (let i = 0; i < 8; i++) {
+    if ((base.getUTCDay() + i) % 7 !== day) continue;
+    const start = Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate() + i, t.h, t.m, 0, 0) - SAST_OFFSET_MS;
+    const end = start + dur * 60000;
+    if (end > nowMs) return { start, end };
+  }
+  return null;
+}
+
+// A short hint, only once the session is close: "in 2 hours", "tomorrow at 8pm".
+export function sessionHint(occ, schedule, nowMs = Date.now()) {
+  if (!occ) return "";
+  const diff = occ.start - nowMs;
+  if (diff <= 0) return "";
+  const mins = Math.round(diff / 60000);
+  if (mins < 60) return mins <= 1 ? "in a minute" : `in ${mins} minutes`;
+  const hours = Math.round(diff / 3600000);
+  if (hours < 24) return `in ${hours} ${hours === 1 ? "hour" : "hours"}`;
+  const a = new Date(nowMs + SAST_OFFSET_MS);
+  const b = new Date(occ.start + SAST_OFFSET_MS);
+  const dayDiff = Math.round((Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate()) - Date.UTC(a.getUTCFullYear(), a.getUTCMonth(), a.getUTCDate())) / 86400000);
+  return dayDiff === 1 ? `tomorrow at ${formatTimeOfDay(schedule.start_time)}` : "";
+}
+
+// ────────────────────────────────────────────────────────────────
+// Announcements. One off notices, stored as a GroupPost so the write
+// path stays the one server side function every other post uses.
+// ────────────────────────────────────────────────────────────────
+
+export const ANNOUNCE_TEMPLATES = [
+  { key: "live", label: "I'm live now", kind: "live", preset: "1h", notify: true, text: "I'm live in the Circle now, come and chat" },
+  { key: "answers", label: "This week's answers", kind: "answers", preset: "3d", notify: false, text: "This week's answers are up, scroll down to the new post" },
+  { key: "away", label: "I'm away", kind: "away", needsDate: true, notify: true, text: "" },
+  { key: "note", label: "Write your own", kind: "note", preset: "3d", notify: false, text: "" },
+];
+
+export const EXPIRY_PRESETS = [
+  { key: "1h", label: "1 hour" },
+  { key: "today", label: "Today" },
+  { key: "3d", label: "3 days" },
+  { key: "1w", label: "1 week" },
+];
+
+export function expiryFromPreset(key, nowMs = Date.now()) {
+  if (key === "1h") return new Date(nowMs + 3600000);
+  if (key === "today") {
+    const sast = new Date(nowMs + SAST_OFFSET_MS);
+    return new Date(Date.UTC(sast.getUTCFullYear(), sast.getUTCMonth(), sast.getUTCDate(), 23, 59, 59) - SAST_OFFSET_MS);
+  }
+  if (key === "1w") return new Date(nowMs + 7 * 86400000);
+  return new Date(nowMs + 3 * 86400000);
+}
+
+// The away notice expires at the end of the day she names, in SAST.
+export function awayExpiry(dateStr) {
+  const m = String(dateStr || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59) - SAST_OFFSET_MS);
+}
+
+// "Friday 2 October"
+export function formatAwayDate(dateStr) {
+  const m = String(dateStr || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return "";
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
+  return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+}

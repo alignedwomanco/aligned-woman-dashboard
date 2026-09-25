@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { DEFAULT_CIRCLE_TOPICS, DEFAULT_RULES_TEXT, randomId } from "@/lib/circle";
+import { DEFAULT_CIRCLE_TOPICS, DEFAULT_RULES_TEXT, WEEKDAYS, randomId } from "@/lib/circle";
 
 // ────────────────────────────────────────────────────────────────
 // My Community · the host's setup checklist and room settings.
@@ -68,6 +68,7 @@ export default function MyCommunityTab({ groupId }) {
   const [posting, setPosting] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [live, setLive] = useState(null);
   const saveTimer = useRef(null);
 
   useEffect(() => {
@@ -83,7 +84,21 @@ export default function MyCommunityTab({ groupId }) {
     }
   }, [room, form, data]);
 
+  // The weekly live hour. South African time, so it is set once and the
+  // room works out the next one itself.
+  useEffect(() => {
+    if (room && !live) {
+      setLive(room.live_session || { on: false, day: 2, start_time: "20:00", duration_minutes: 60, label: "Circle Hour" });
+    }
+  }, [room, live]);
+
   const refresh = () => qc.invalidateQueries({ queryKey: ["partner-community", groupId] });
+
+  const saveLive = (patch) => {
+    const next = { ...live, ...patch };
+    setLive(next);
+    save({ live_session: next });
+  };
 
   const save = async (fields) => {
     setSaveState("saving");
@@ -105,10 +120,11 @@ export default function MyCommunityTab({ groupId }) {
       about: !!form.host_bio_override.trim(),
       rules: !!form.rules_text.trim(),
       topics: form.topics.filter((t) => t.active !== false).length >= 3,
+      live: !!live?.on,
       welcome: !!room.welcome_post_id,
       link: room.status === "published",
     };
-  }, [room, form]);
+  }, [room, form, live]);
   const doneCount = Object.values(done).filter(Boolean).length;
 
   if (!groupId) return null;
@@ -185,7 +201,7 @@ export default function MyCommunityTab({ groupId }) {
             {isPublished ? `${room.name} is open at ${roomUrl.replace("https://", "")}` : `${room.name} is private until you publish it.`}
           </p>
           <p className={`font-body font-light text-[12.5px] mt-1 ${isPublished ? "text-awburg-mid" : "text-paper/80"}`}>
-            {doneCount} of 6 steps done{isPublished ? "" : ". You can publish at any point; the steps are a guide, not a gate."}
+            {doneCount} of 7 steps done{isPublished ? "" : ". You can publish at any point; the steps are a guide, not a gate."}
           </p>
         </div>
         <button type="button" onClick={publish} disabled={publishing} className={isPublished ? BTN_SECONDARY : "inline-flex items-center justify-center rounded-full bg-paper text-awburg-core font-body font-bold text-[11px] tracking-eyebrow uppercase min-h-[48px] px-7 transition-colors hover:bg-awrose-wash disabled:opacity-50"}>
@@ -316,9 +332,65 @@ export default function MyCommunityTab({ groupId }) {
         )}
       </section>
 
-      {/* 5 Welcome post */}
+      {/* 5 Your live hour */}
       <section className={CARD}>
-        <CardHead step={5} title="Your welcome post" done={done.welcome}>
+        <CardHead step={5} title="Your live hour" done={!!live?.on}>
+          <p className={HELPER}>Your live hour. Pick one time a week when you are in the room. Members see the next one automatically, so you never have to post a reminder.</p>
+        </CardHead>
+        {live && (
+          <div className="grid gap-4">
+            <label className="flex items-center justify-between gap-4 cursor-pointer min-h-[44px]">
+              <span className="font-body font-semibold text-[14px] text-awburg-dark">Show your live hour in the room</span>
+              <span className="flex items-center gap-2">
+                <span className="font-body text-[11px] text-awburg-mid">{live.on ? "On" : "Off"}</span>
+                <input type="checkbox" role="switch" aria-checked={live.on} className="sr-only peer" checked={live.on} onChange={(e) => saveLive({ on: e.target.checked })} />
+                <span aria-hidden="true" className={`relative inline-block w-[46px] h-[26px] rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-awrose-deep ${live.on ? "bg-awburg-core" : "bg-awburg-core/20"}`}>
+                  <span className={`absolute top-[3px] w-5 h-5 rounded-full bg-paper transition-all ${live.on ? "left-[23px]" : "left-[3px]"}`} />
+                </span>
+              </span>
+            </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={LABEL}>Day</label>
+                <select className={INPUT} value={live.day} onChange={(e) => saveLive({ day: Number(e.target.value) })}>
+                  {WEEKDAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={LABEL}>Start time (South African time)</label>
+                <input
+                  type="time"
+                  className={INPUT}
+                  value={live.start_time}
+                  onChange={(e) => setLive((l) => ({ ...l, start_time: e.target.value }))}
+                  onBlur={(e) => saveLive({ start_time: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className={LABEL}>How long</label>
+                <select className={INPUT} value={live.duration_minutes} onChange={(e) => saveLive({ duration_minutes: Number(e.target.value) })}>
+                  {[30, 45, 60, 90, 120].map((m) => <option key={m} value={m}>{m} minutes</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={LABEL}>What you call it</label>
+                <input
+                  className={INPUT}
+                  value={live.label}
+                  onChange={(e) => setLive((l) => ({ ...l, label: e.target.value }))}
+                  onBlur={(e) => saveLive({ label: e.target.value })}
+                  placeholder="Circle Hour"
+                />
+              </div>
+            </div>
+            <p className={HELPER}>While the hour is running the line in the room changes by itself to say you are there, and back again when it ends.</p>
+          </div>
+        )}
+      </section>
+
+      {/* 6 Welcome post */}
+      <section className={CARD}>
+        <CardHead step={6} title="Your welcome post" done={done.welcome}>
           <p className={HELPER}>Pinned to the top of the feed. It is the first thing a new member reads, and on day one it is the only thing.</p>
         </CardHead>
         {room.welcome_post_id ? (
@@ -337,9 +409,9 @@ export default function MyCommunityTab({ groupId }) {
         )}
       </section>
 
-      {/* 6 Invite link */}
+      {/* 7 Invite link */}
       <section className={CARD}>
-        <CardHead step={6} title="Your invite link" done={done.link}>
+        <CardHead step={7} title="Your invite link" done={done.link}>
           <p className={HELPER}>The only address your room has. Put it in your Instagram bio, your WhatsApp broadcast, your emails. Every woman lands on the same page and asks to join there.</p>
         </CardHead>
         <div className="flex flex-wrap items-center gap-3">

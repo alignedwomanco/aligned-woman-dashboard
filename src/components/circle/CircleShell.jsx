@@ -114,7 +114,7 @@ export function HostLogo({ host, size = 50, className = "" }) {
   );
 }
 
-export function HostBand({ group, host, compact = false }) {
+export function HostBand({ group, host, compact = false, onAnnounce }) {
   const business = host?.business_name || host?.name || "";
   return (
     <>
@@ -127,6 +127,16 @@ export function HostBand({ group, host, compact = false }) {
           </h1>
           {!compact && group.subtitle && <p className="font-body font-light text-[11.5px] text-paper/80 mt-[3px]">{group.subtitle}</p>}
         </div>
+        {/* Host and admins only. The function enforces it again server side. */}
+        {onAnnounce && (
+          <button
+            type="button"
+            onClick={onAnnounce}
+            className="ml-auto flex-none min-h-[40px] px-4 rounded-full border border-paper/40 hover:bg-paper/10 text-paper font-body font-bold text-[10px] tracking-[0.16em] uppercase transition-colors"
+          >
+            Announce
+          </button>
+        )}
       </div>
       <div className="h-[3px] bg-awsage-core" aria-hidden="true" />
     </>

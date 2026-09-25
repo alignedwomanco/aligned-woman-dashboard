@@ -118,6 +118,34 @@
       ],
       "description": "Draft rooms are invisible to everyone but the host and admins. Treat an empty value as published for legacy rooms. No default, because a field carrying both enum and default is rejected by the schema API."
     },
+    "live_session": {
+      "type": "object",
+      "description": "The host's recurring live hour: one time a week she is in the room. Times are South African time (SAST, UTC+2, no daylight saving). The next occurrence is computed in the reader's browser, so there is no stored date to drift and no scheduled job.",
+      "properties": {
+        "on": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the weekly live hour is shown in the room"
+        },
+        "day": {
+          "type": "number",
+          "description": "Day of the week in SAST, 0 is Sunday through 6 is Saturday"
+        },
+        "start_time": {
+          "type": "string",
+          "description": "Start time in SAST, 24 hour HH:MM"
+        },
+        "duration_minutes": {
+          "type": "number",
+          "default": 60,
+          "description": "How long the session runs, in minutes"
+        },
+        "label": {
+          "type": "string",
+          "description": "What the host calls her hour. Default Circle Hour."
+        }
+      }
+    },
     "welcome_post_id": {
       "type": "string",
       "description": "GroupPost id of the pinned welcome post written by the host at setup"

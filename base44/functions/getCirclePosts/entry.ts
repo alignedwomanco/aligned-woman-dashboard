@@ -355,6 +355,19 @@ function publicView(post: any, viewer: { email: string; canSeeIdentity: boolean 
   return out;
 }
 
+// An announcement is the host's own notice, never anonymous, and it is
+// shown as a strip, not a thread. Only what the strip needs leaves here.
+function announcementView(post: any) {
+  return {
+    id: post.id,
+    body: post.body,
+    announcement_kind: post.announcement_kind || "note",
+    author_name: post.author_name || "The host",
+    created_date: post.created_date,
+    expires_at: post.expires_at || "",
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders() });
   try {
@@ -387,12 +400,23 @@ Deno.serve(async (req) => {
       first_name: hostFirstName(hostExpert),
     } : null;
 
+    const svc = base44.asServiceRole.entities;
+
     if (!canRead) {
-      // Nothing visible before approval: no posts, no members, no counts.
-      return json({ me, host, posts: [], replies: [], pinned: null });
+      // Nothing visible before approval except one thing: an active notice,
+      // and only when it is not an away notice. A woman waiting to be
+      // approved should see when the room next meets, not that the host is
+      // away. The schedule itself comes from the public Group record.
+      let notice: any = null;
+      try {
+        const raw = await svc.GroupPost.filter({ group_id: group.id, post_type: "announcement" }, "-created_date", 20);
+        const open = (Array.isArray(raw) ? raw : []).filter((a: any) =>
+          !a.is_deleted && a.announcement_kind !== "away" && a.expires_at && new Date(a.expires_at).getTime() > Date.now());
+        notice = open[0] ? announcementView(open[0]) : null;
+      } catch (_e) { notice = null; }
+      return json({ me, host, posts: [], replies: [], pinned: null, announcement: notice });
     }
 
-    const svc = base44.asServiceRole.entities;
     // Keep the member's read marker in step for the unread dot on the index.
     if (membership?.id) {
       svc.GroupMember.update(membership.id, { last_read_at: new Date().toISOString() }).catch(() => {});
@@ -417,13 +441,20 @@ Deno.serve(async (req) => {
     // Answered is a state the record carries (set when the host replies or
     // marks it), so the feed, the insights and the export agree.
     const posts = topLevel
-      .filter((p: any) => p.post_type !== "welcome")
+      .filter((p: any) => p.post_type !== "welcome" && p.post_type !== "announcement")
       .sort((a: any, b: any) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0))
       .map((p: any) => publicView(p, viewer, ""));
     const welcome = topLevel.find((p: any) => p.post_type === "welcome") || null;
     const pinned = welcome ? publicView(welcome, viewer, "") : null;
 
-    return json({ me, host, posts, pinned });
+    // Only the newest unexpired notice is ever active. Expired ones are
+    // filtered here, never deleted, so the host still has her history.
+    const nowMs = Date.now();
+    const active = topLevel
+      .filter((p: any) => p.post_type === "announcement" && p.expires_at && new Date(p.expires_at).getTime() > nowMs)
+      .sort((a: any, b: any) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime())[0] || null;
+
+    return json({ me, host, posts, pinned, announcement: active ? announcementView(active) : null });
   } catch (error) {
     return json({ error: (error as Error).message }, 500);
   }

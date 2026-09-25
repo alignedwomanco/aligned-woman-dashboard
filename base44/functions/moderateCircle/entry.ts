@@ -409,11 +409,25 @@ Deno.serve(async (req) => {
           host_bio_override: group.host_bio_override || "", topics: group.topics || [],
           status: group.status || "published", cover_image: group.cover_image || "",
           welcome_post_id: group.welcome_post_id || "",
+          live_session: group.live_session || null,
         },
         host: hostExpert ? { name: hostExpert.name, business_name: hostExpert.business_name || "", logo_url: hostExpert.logo_url || hostExpert.profile_picture || "", bio: hostExpert.bio || "" } : null,
         requests: rows.filter((r: any) => r.status === "pending"),
         members: rows.filter((r: any) => r.status !== "pending"),
         reports: reportRows,
+        // Every notice she has ever posted, newest first, so she can post
+        // one again. Expired ones are only marked here; reads filter them.
+        announcements: live
+          .filter((x: any) => !x.parent_id && x.post_type === "announcement")
+          .sort((a: any, b: any) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime())
+          .map((x: any) => ({
+            id: x.id,
+            body: x.body,
+            announcement_kind: x.announcement_kind || "note",
+            created_date: x.created_date,
+            expires_at: x.expires_at || "",
+            expired: !x.expires_at || new Date(x.expires_at).getTime() <= Date.now(),
+          })),
         insights: {
           questions_total: questions.length,
           questions_open: questions.filter((q: any) => (q.status || "open") === "open").length,
@@ -490,6 +504,14 @@ Deno.serve(async (req) => {
       return json({ success: true });
     }
 
+    if (action === "clear_announcement") {
+      const post = await findPost(String(p.postId || ""));
+      if (!post || post.post_type !== "announcement") return json({ error: "post_not_found" }, 404);
+      // Clearing is expiring. The record stays, so she can post it again.
+      await svc.GroupPost.update(post.id, { expires_at: now });
+      return json({ success: true });
+    }
+
     if (action === "retag") {
       const post = await findPost(String(p.postId || ""));
       if (!post) return json({ error: "post_not_found" }, 404);
@@ -541,6 +563,21 @@ Deno.serve(async (req) => {
             order: typeof t.order === "number" ? t.order : i,
             active: t.active !== false,
           }));
+      }
+      // The weekly live hour. Times are South African time, so a fixed
+      // offset is exact. The next occurrence is worked out in the browser.
+      if (f.live_session && typeof f.live_session === "object") {
+        const ls = f.live_session;
+        const day = Number(ls.day);
+        const time = String(ls.start_time || "");
+        if (!(Number.isInteger(day) && day >= 0 && day <= 6) || !/^\d{1,2}:\d{2}$/.test(time)) return json({ error: "invalid_live_session" }, 422);
+        patch.live_session = {
+          on: ls.on !== false,
+          day,
+          start_time: time,
+          duration_minutes: Math.min(240, Math.max(15, Number(ls.duration_minutes) || 60)),
+          label: (typeof ls.label === "string" && ls.label.trim() ? ls.label.trim() : "Circle Hour").slice(0, 40),
+        };
       }
       // The host may rename her room. The address stays with admins, since
       // changing it after the link has been shared breaks every copy of it.

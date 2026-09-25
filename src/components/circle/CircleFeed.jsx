@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { activeTopics, shortTime, topicLabel } from "@/lib/circle";
 import {
   BTN_PRIMARY, BTN_SECONDARY, BTN_TEXT, CARD, CHIP, CHIP_ON, Avatar, HostCard, HostLogo, TrustChips, FinePrint, RulesModal, Sheet,
 } from "@/components/circle/CircleShell";
+import CircleScheduleLine from "@/components/circle/CircleScheduleLine";
+import CircleAnnounceBanner from "@/components/circle/CircleAnnounceBanner";
 
 // ────────────────────────────────────────────────────────────────
 // Feed · Section B, screens 5, 8 and 9. The member view, the host view
@@ -181,7 +183,7 @@ export function NotifyBody({ pref, setPref, options, busy, error, onSave, onCanc
   );
 }
 
-export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost, onAsk, onShare, onReport, onModerate, pendingCount, onPrefSaved }) {
+export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost, onAsk, onShare, onReport, onModerate, pendingCount, onPrefSaved, announcement, onClearAnnounce, announceBusy }) {
   const [filter, setFilter] = useState(() => new URLSearchParams(window.location.search).get("filter") || "all");
   const [search, setSearch] = useState("");
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -189,8 +191,24 @@ export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost,
   const [inlinePref, setInlinePref] = useState(me?.notify_pref || "all");
   const [inlineBusy, setInlineBusy] = useState(false);
   const [inlineError, setInlineError] = useState("");
+  const [dismissed, setDismissed] = useState("");
   const topics = activeTopics(group);
   const isMod = me?.role === "host" || me?.role === "admin";
+
+  // A member hides the notice for herself. It is keyed by the notice id, so
+  // posting a new one brings it straight back.
+  useEffect(() => {
+    if (!group?.id) return;
+    try { setDismissed(localStorage.getItem(`circle-announce-dismissed:${group.id}`) || ""); } catch (_e) { setDismissed(""); }
+  }, [group?.id]);
+
+  const dismissAnnounce = () => {
+    if (!announcement?.id) return;
+    setDismissed(announcement.id);
+    try { localStorage.setItem(`circle-announce-dismissed:${group.id}`, announcement.id); } catch (_e) { /* private mode */ }
+  };
+
+  const showAnnounce = !!announcement && (isMod || announcement.id !== dismissed);
 
   const shown = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -228,6 +246,19 @@ export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost,
   return (
     <div className="md:max-w-[1100px] md:mx-auto md:grid md:grid-cols-[minmax(0,680px)_320px] md:gap-10 md:px-10 md:pt-8 md:pb-16">
       <div className="px-[22px] pt-6 pb-8 md:px-0 md:pt-0 flex flex-col gap-4">
+        {/* Two lines at most above the feed: the notice, then the hour. */}
+        {showAnnounce && (
+          <CircleAnnounceBanner
+            announcement={announcement}
+            host={host}
+            isMod={isMod}
+            busy={announceBusy}
+            onClear={() => onClearAnnounce?.(announcement.id)}
+            onDismiss={dismissAnnounce}
+          />
+        )}
+        <CircleScheduleLine schedule={group.live_session} host={host} />
+
         {!empty && group.description && (
           <p className="font-body font-light text-[13.5px] leading-[1.65] text-awburg-dark">
             {group.description}{" "}

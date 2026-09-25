@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import {
   BTN_PRIMARY, BTN_SECONDARY, HostCard, TrustChips, FinePrint, RulesModal, RoomTitle,
 } from "@/components/circle/CircleShell";
+import CircleScheduleLine from "@/components/circle/CircleScheduleLine";
+import CircleAnnounceBanner from "@/components/circle/CircleAnnounceBanner";
 
 // ────────────────────────────────────────────────────────────────
 // Arriving · Section A. One address, four states, the same header
@@ -89,13 +91,19 @@ export function JoinGate({ group, host, onRequest, busy, error }) {
   );
 }
 
-export function Pending({ host }) {
+export function Pending({ host, schedule, announcement }) {
   const first = host?.first_name || "the host";
   return (
     <div className="px-[22px] pt-9 pb-10 md:px-10 md:pt-16 md:pb-20 md:max-w-[480px] md:mx-auto flex flex-col gap-4 md:text-center">
       <h2 className={H1}>Your request is <em className={EM}>with {first}</em>.</h2>
       <p className={P}>She approves every member herself, so this can take a little time. We will email you the moment you are in.</p>
       <p className="font-body font-light text-[13px] leading-[1.65] text-awburg-mid">Nothing in the Circle is visible until then. You can safely close this page.</p>
+      {/* She can see when the room next meets. She does not see the live line
+          (she cannot step in yet) and never an away notice. */}
+      <div className="w-full md:max-w-[400px] md:mx-auto flex flex-col gap-3 pt-1 text-left">
+        <CircleScheduleLine schedule={schedule} host={host} showLive={false} />
+        {announcement && <CircleAnnounceBanner announcement={announcement} host={host} readOnly />}
+      </div>
     </div>
   );
 }

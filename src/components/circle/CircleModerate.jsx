@@ -40,7 +40,7 @@ function Consent({ ok, children }) {
   );
 }
 
-export default function CircleModerate({ group, onBack, onOpenPost }) {
+export default function CircleModerate({ group, onBack, onOpenPost, onPostAgain }) {
   const qc = useQueryClient();
   const [view, setView] = useState(() => new URLSearchParams(window.location.search).get("view") || "requests");
   const [busyId, setBusyId] = useState("");
@@ -71,6 +71,7 @@ export default function CircleModerate({ group, onBack, onOpenPost }) {
   const tabs = [
     { key: "requests", label: "Requests", count: data?.requests?.length || 0 },
     { key: "reports", label: "Reports", count: (data?.reports || []).filter((r) => r.status === "open").length },
+    { key: "announcements", label: "Announcements" },
     { key: "members", label: "Members" },
     { key: "topics", label: "Topics" },
     { key: "insights", label: "Insights" },
@@ -110,6 +111,8 @@ export default function CircleModerate({ group, onBack, onOpenPost }) {
         <Requests rows={data.requests} busyId={busyId} run={run} />
       ) : view === "reports" ? (
         <Reports rows={data.reports} group={group} busyId={busyId} run={run} onOpenPost={onOpenPost} />
+      ) : view === "announcements" ? (
+        <Announcements rows={data.announcements || []} busyId={busyId} run={run} onPostAgain={onPostAgain} />
       ) : view === "members" ? (
         <Members rows={data.members} busyId={busyId} run={run} />
       ) : view === "topics" ? (
@@ -177,6 +180,31 @@ function Reports({ rows, group, busyId, run, onOpenPost }) {
       {handled.map((r) => <Item key={r.id} r={r} />)}
     </>
   );
+}
+
+function Announcements({ rows, busyId, run, onPostAgain }) {
+  if (!rows.length) {
+    return <p className="font-body font-light text-[13px] text-awburg-mid">No notices yet. Post one from the room header when you need it.</p>;
+  }
+  return rows.map((a) => (
+    <div key={a.id} className={`${CARD} px-5 py-4 flex flex-col gap-3 ${a.expired ? "opacity-70" : ""}`}>
+      <div className="flex items-center justify-between gap-3">
+        <span className={`font-body font-bold text-[10px] tracking-eyebrow uppercase ${a.expired ? "text-awburg-mid" : "text-awrose-deep"}`}>
+          {a.expired ? "Ended" : "Showing now"}
+        </span>
+        <span className="font-body text-[11px] text-awburg-mid">{when(a.created_date)}</span>
+      </div>
+      <p className="font-body font-light text-[13px] leading-[1.6] text-awburg-dark whitespace-pre-line">{a.body}</p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className={`${BTN_SECONDARY} w-auto min-h-[44px] px-5`} onClick={() => onPostAgain?.(a)}>Post again</button>
+        {!a.expired && (
+          <button type="button" className={`${BTN_SECONDARY} w-auto min-h-[44px] px-5`} disabled={busyId === a.id} onClick={() => run(a.id, "clear_announcement", { postId: a.id })}>
+            Clear it
+          </button>
+        )}
+      </div>
+    </div>
+  ));
 }
 
 function Members({ rows, busyId, run }) {
