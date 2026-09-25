@@ -97,16 +97,18 @@ export function PlatformBar({ user, slug }) {
   );
 }
 
-export function HostLogo({ host, size = 50, className = "" }) {
+export function HostLogo({ host, src, size = 50, className = "" }) {
   const initials = (host?.business_name || host?.name || "GW").split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+  // The room's own mark wins, then the host's logo, then initials.
+  const image = src || host?.logo_url || "";
   return (
     <span
       className={`flex-none rounded-full overflow-hidden border-[1.5px] border-awsage-core bg-paper flex items-center justify-center ${className}`}
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      {host?.logo_url ? (
-        <img src={host.logo_url} alt="" className="w-full h-full object-cover" />
+      {image ? (
+        <img src={image} alt="" className="w-full h-full object-cover" />
       ) : (
         <span className="font-display text-awburg-core" style={{ fontSize: size * 0.34 }}>{initials}</span>
       )}
@@ -119,7 +121,7 @@ export function HostBand({ group, host, compact = false, onAnnounce }) {
   return (
     <>
       <div className={`bg-awburg-core flex items-center gap-[14px] px-[18px] ${compact ? "py-[14px]" : "pt-5 pb-[18px]"}`}>
-        <HostLogo host={host} size={compact ? 40 : 50} />
+        <HostLogo host={host} src={group.logo_url} size={compact ? 40 : 50} />
         <div className="min-w-0">
           {business && <p className="font-body font-bold text-[9px] tracking-eyebrow uppercase text-awrose-light mb-1">Hosted by {business}</p>}
           <h1 className="font-display text-[19px] leading-tight text-paper m-0">

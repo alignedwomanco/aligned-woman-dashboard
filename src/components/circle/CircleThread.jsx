@@ -81,11 +81,11 @@ export function ReportSheet({ open, target, group, host, onClose }) {
   );
 }
 
-function Reply({ post, host, isMod, onReport, onMenuAction }) {
+function Reply({ post, host, group, isMod, onReport, onMenuAction }) {
   const [menu, setMenu] = useState(false);
   return (
     <div className="flex gap-3 py-3 border-t border-awburg-core/10">
-      {post.author_is_host ? <HostLogo host={host} size={28} /> : <Avatar post={post} size={28} />}
+      {post.author_is_host ? <HostLogo host={host} src={group?.logo_url} size={28} /> : <Avatar post={post} size={28} />}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="font-body font-semibold text-[12.5px] text-awburg-dark">{post.author_name}</span>
@@ -207,7 +207,7 @@ export default function CircleThread({ group, host, me, post, replies, onBack, o
         {answer && (
           <div className="rounded-[22px] bg-awrose-wash border-l-[3px] border-awsage-core px-5 py-4">
             <div className="flex items-center gap-2 mb-2">
-              <HostLogo host={host} size={20} />
+              <HostLogo host={host} src={group.logo_url} size={20} />
               <p className="font-body font-bold text-[9.5px] tracking-eyebrow uppercase text-awburg-core">{host?.first_name || "The host"} answered</p>
               <span className="ml-auto font-body text-[11px] text-awburg-mid">{shortTime(answer.created_date)}</span>
             </div>
@@ -218,7 +218,7 @@ export default function CircleThread({ group, host, me, post, replies, onBack, o
 
         {others.length > 0 && (
           <div className={`${CARD} px-5 py-2`}>
-            {others.map((r) => <Reply key={r.id} post={r} host={host} isMod={isMod} onReport={setReport} onMenuAction={onModerateAction} />)}
+            {others.map((r) => <Reply key={r.id} post={r} host={host} group={group} isMod={isMod} onReport={setReport} onMenuAction={onModerateAction} />)}
           </div>
         )}
 

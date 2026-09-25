@@ -88,7 +88,7 @@ function QuestionCard({ post, group, host, onOpen, onReport }) {
       <MediaBlock media={post.media} />
       {post.status === "answered" && (
         <div className="flex items-center gap-2 mt-3">
-          <HostLogo host={host} size={20} />
+          <HostLogo host={host} src={group.logo_url} size={20} />
           <span className="font-body text-[11.5px] font-semibold text-awburg-core">{host?.first_name || "The host"} answered</span>
         </div>
       )}
@@ -113,12 +113,12 @@ function QuestionCard({ post, group, host, onOpen, onReport }) {
   );
 }
 
-export function WelcomePost({ pinned, host }) {
+export function WelcomePost({ pinned, host, group }) {
   if (!pinned) return null;
   return (
     <div className="rounded-[22px] bg-awrose-pale px-5 py-[18px]">
       <div className="flex items-center gap-2 mb-2">
-        <HostLogo host={host} size={22} />
+        <HostLogo host={host} src={group.logo_url} size={22} />
         <p className="font-body font-bold text-[9.5px] tracking-eyebrow uppercase text-awburg-core">From {host?.first_name || "the host"}</p>
         <svg className="ml-auto text-awburg-core" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-label="Pinned"><path d="M16 3l5 5-4 1-3 3 1 6-2 2-4-4-5 5-1-1 5-5-4-4 2-2 6 1 3-3z" /></svg>
       </div>
@@ -302,7 +302,7 @@ export default function CircleFeed({ group, host, me, posts, pinned, onOpenPost,
           </>
         )}
 
-        <WelcomePost pinned={pinned} host={host} />
+        <WelcomePost pinned={pinned} host={host} group={group} />
 
         {empty ? (
           <div className={`${CARD} px-6 py-8 text-center flex flex-col items-center gap-3`}>

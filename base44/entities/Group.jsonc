@@ -27,6 +27,10 @@
       "type": "string",
       "description": "Optional cover image URL. Falls back to a brand gradient when empty."
     },
+    "logo_url": {
+      "type": "string",
+      "description": "Optional room mark, shown as a circle in the room header and beside host posts. Falls back to the host's own logo, then to initials."
+    },
     "group_type": {
       "type": "string",
       "enum": [
