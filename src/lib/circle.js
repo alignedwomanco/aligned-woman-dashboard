@@ -224,6 +224,7 @@ export const EXPIRY_PRESETS = [
   { key: "today", label: "Today" },
   { key: "3d", label: "3 days" },
   { key: "1w", label: "1 week" },
+  { key: "2w", label: "2 weeks" },
 ];
 
 export function expiryFromPreset(key, nowMs = Date.now()) {
@@ -233,6 +234,7 @@ export function expiryFromPreset(key, nowMs = Date.now()) {
     return new Date(Date.UTC(sast.getUTCFullYear(), sast.getUTCMonth(), sast.getUTCDate(), 23, 59, 59) - SAST_OFFSET_MS);
   }
   if (key === "1w") return new Date(nowMs + 7 * 86400000);
+  if (key === "2w") return new Date(nowMs + 14 * 86400000);
   return new Date(nowMs + 3 * 86400000);
 }
 
