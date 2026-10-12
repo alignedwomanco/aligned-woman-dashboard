@@ -21,7 +21,6 @@ const RUN_SIZE = 200;              // caps in the run
 const SOLD = 0;                    // update as orders are paid, or wire to CapOrder later
 const SHIPPING = 0;                // courier fee at cost in ZAR; 0 until the courier quote is in
 const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order saved, payment link sent by email.
-const DONATION_LINK = "";          // Beneficiary direct donation link
 const LEAD_TIME = "7 working days";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f037b9dd7_YOUSTAYHOME-UPDATED.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
 const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/9d204ad59_YOUSTAYHOMEUPDATEDPORTRAIT.jpeg"; // portrait hero shot, phones and tablets.
@@ -597,7 +596,6 @@ function Faq() {
   const qs = [
     ["When will my cap arrive?", `Caps are embroidered to order by Barron. Allow ${LEAD_TIME} from close of the run, plus courier time.`],
     ["What size?", "One size, adjustable closure at the back. Fits most adults."],
-    ["Can I just donate?", DONATION_LINK ? null : "Yes. Buy a cap. 100% of proceeds go to the NPO, and the cap is for wearing the line in public."],
   ];
   return (
     <div className="grid md:grid-cols-3 gap-10 px-6 md:px-24 py-16 md:py-20">
@@ -605,7 +603,7 @@ function Faq() {
         <div key={q} className="flex flex-col gap-2">
           <div className="text-xl" style={{ fontFamily: SERIF, color: C.burg }}>{q}</div>
           <div className="text-[15px]" style={{ lineHeight: 1.6 }}>
-            {a ?? (<>Yes. Buy a cap. 100% of proceeds go to the NPO, and the cap is for wearing the line in public.</>)}
+            {a}
           </div>
         </div>
       ))}
