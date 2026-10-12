@@ -2,6 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import PayFastForm, { QtyStepper, MAX_CAPS } from "@/components/caps/PayFastForm";
 import LandingFooter from "@/components/home/LandingFooter";
 
+/* The beneficiary of the run. One source of truth: every mention on the page
+   reads from here. While url is empty the name renders as plain text, not a
+   link. Add a url and it links out again. */
+const BENEFICIARY = {
+  name: "a registered NPO supporting GBV survivors",
+  label: "NPO supporting GBV survivors",
+  url: "",
+  registration: "Registered NPO",
+};
+
 /* ------------------------------------------------------------------
    CAMPAIGN SETTINGS
    Everything the campaign needs to change lives here.
@@ -11,7 +21,7 @@ const RUN_SIZE = 200;              // caps in the run
 const SOLD = 0;                    // update as orders are paid, or wire to CapOrder later
 const SHIPPING = 0;                // courier fee at cost in ZAR; 0 until the courier quote is in
 const PAYMENT_LINK = "";           // Stripe or PayFast link. Empty = order saved, payment link sent by email.
-const DONATION_LINK = "";          // Women For Change direct donation link
+const DONATION_LINK = "";          // Beneficiary direct donation link
 const LEAD_TIME = "7 working days";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f037b9dd7_YOUSTAYHOME-UPDATED.jpeg"; // wide hero shot, desktop and tablet. Empty renders a toned placeholder.
 const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/9d204ad59_YOUSTAYHOMEUPDATEDPORTRAIT.jpeg"; // portrait hero shot, phones and tablets.
@@ -80,11 +90,14 @@ const SANS = "'Montserrat', system-ui, sans-serif";
 
 const money = (n) => `R${Number(n).toLocaleString("en-ZA")}`;
 
-/* Every mention of Women For Change links to their site. */
-function WFC() {
+/* The beneficiary, rendered from BENEFICIARY. With no url set it is plain
+   text. Add a url and it links out. */
+function BeneficiaryLink() {
+  const { name, url } = BENEFICIARY;
+  if (!url) return <span>{name}</span>;
   return (
-    <a href="https://womenforchange.co.za/" target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "2px" }}>
-      Women For Change
+    <a href={url} target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "2px" }}>
+      {name}
     </a>
   );
 }
@@ -135,7 +148,7 @@ export default function Caps() {
       l.href = "https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500&display=swap";
       document.head.appendChild(l);
     }
-    document.title = "You stay home. Caps for Women For Change | The Aligned Woman Co.";
+    document.title = `You stay home. Caps for ${BENEFICIARY.name} | The Aligned Woman Co.`;
   }, []);
 
   return (
@@ -275,8 +288,7 @@ export default function Caps() {
       <Money />
       <Why />
       <Faq />
-      <MobileSupport />
-      <PoweredBy />
+      <SupportBand />
       <LandingFooter />
       {/* Room at the very bottom, so the order bar never covers the footer. */}
       {capCount > 0 && <div style={{ height: 96 }} aria-hidden="true" />}
@@ -346,7 +358,7 @@ function Hero() {
           <a href="#caps" className="aw-buy rounded-full px-5 py-2.5 text-[13px] font-medium" style={{ background: C.btn, color: C.btnText, textDecoration: "none", letterSpacing: "0.04em" }}>
             Buy a cap for {money(PRICE)}
           </a>
-          <div className="aw-hero-note text-sm" style={{ color: C.burgMid }}>Every cent goes to <WFC />.</div>
+          <div className="aw-hero-note text-sm" style={{ color: C.burgMid }}>Every cent goes to <BeneficiaryLink />.</div>
         </div>
         <div className="aw-hero-sponsor text-xs uppercase" style={{ letterSpacing: "0.1em", color: C.burgMid }}>Caps and embroidery sponsored by Barron</div>
       </div>
@@ -534,7 +546,7 @@ function OrderBar({ count, onCheckout }) {
 
 function Money() {
   const partners = [
-    ["Beneficiary", <WFC />, "Registered NPO. 100% of proceeds."],
+    ["Beneficiary", BENEFICIARY.label, `${BENEFICIARY.registration}. 100% of proceeds.`],
     ["Production partner", <img src={BARRON_LOGO} alt="Barron" className="aw-barron-logo block" style={{ height: 30, width: "auto" }} />, "Caps and embroidery, sponsored in full.", "https://barron.com/"],
     ["Design and illustration", "sadhana.ai / creative-studio", "Artwork and campaign visuals, donated.", "https://sadhana-ai-creative.sadhanasahaye.chatgpt.site/"],
   ];
@@ -543,9 +555,9 @@ function Money() {
       <div className="flex flex-col gap-4">
         <h2 className="m-0 text-4xl" style={{ fontFamily: SERIF, fontWeight: 400, color: C.burg }}>Where the money goes.</h2>
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>The Aligned Woman Co. would like to thank its partners for making this real. Barron, for supplying every cap and all the embroidery. sadhana.ai / creative-studio, for the artwork and campaign visuals.</p>
-        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>Every rand you pay for a cap goes to <WFC />, the registered NPO whose petition led to gender-based violence and femicide being declared a national disaster in November 2025.</p>
+        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>Every rand you pay for a cap goes to a registered NPO that supports survivors of gender-based violence.</p>
         <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>As the caps, embroidery and the design are all donated, and we cover the platform and fulfilment ourselves, there is nothing to deduct. That is how 100% stays 100%.</p>
-        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>When the run sells out we will publish the total, the transfer confirmation and <WFC />'s receipt, here and on our channels.</p>
+        <p className="m-0 text-[17px]" style={{ lineHeight: 1.6 }}>When the run sells out we will publish the total, the transfer confirmation and the NPO's receipt, here and on our channels.</p>
       </div>
       <div className="flex flex-col gap-4">
         {partners.map(([k, n, d, href]) => (
@@ -585,7 +597,7 @@ function Faq() {
   const qs = [
     ["When will my cap arrive?", `Caps are embroidered to order by Barron. Allow ${LEAD_TIME} from close of the run, plus courier time.`],
     ["What size?", "One size, adjustable closure at the back. Fits most adults."],
-    ["Can I just donate?", DONATION_LINK ? null : "Yes. Give directly to Women For Change. The cap is for wearing the line in public."],
+    ["Can I just donate?", DONATION_LINK ? null : "Yes. Buy a cap. 100% of proceeds go to the NPO, and the cap is for wearing the line in public."],
   ];
   return (
     <div className="grid md:grid-cols-3 gap-10 px-6 md:px-24 py-16 md:py-20">
@@ -593,7 +605,7 @@ function Faq() {
         <div key={q} className="flex flex-col gap-2">
           <div className="text-xl" style={{ fontFamily: SERIF, color: C.burg }}>{q}</div>
           <div className="text-[15px]" style={{ lineHeight: 1.6 }}>
-            {a ?? (<>Yes. Give directly to <WFC /> <a href={DONATION_LINK} target="_blank" rel="noreferrer" style={{ color: C.burg }}>here</a>. The cap is for wearing the line in public.</>)}
+            {a ?? (<>Yes. Buy a cap. 100% of proceeds go to the NPO, and the cap is for wearing the line in public.</>)}
           </div>
         </div>
       ))}
@@ -601,40 +613,22 @@ function Faq() {
   );
 }
 
-/* Mobile only. */
-function MobileSupport() {
+/* The national line anyone can call. Replaces the beneficiary's own support
+   line, so the help offered here belongs to the country, not to the NPO. */
+function SupportBand() {
   return (
-    <a
-      href="https://womenforchange.co.za/"
-      target="_blank"
-      rel="noreferrer"
-      className="md:hidden block"
-    >
-      <img
-        src="https://media.base44.com/images/public/69f46886a412ee042303f1af/4bbc43bad_Screenshot2026-09-22at123254.png"
-        alt="Survivor Support Line. Support and guidance for anyone affected by GBV."
-        className="w-full block"
-        style={{ height: "auto" }}
-      />
-    </a>
-  );
-}
-
-/* Desktop and tablet only. */
-function PoweredBy() {
-  return (
-    <a
-      href="https://womenforchange.co.za/"
-      target="_blank"
-      rel="noreferrer"
-      className="hidden md:block transition-opacity hover:opacity-80"
-    >
-      <img
-        src="https://media.base44.com/images/public/69f46886a412ee042303f1af/c69324b82_Screenshot2026-09-22at123236.png"
-        alt="Powered by Women For Change"
-        className="w-full block"
-        style={{ height: "auto" }}
-      />
-    </a>
+    <div className="px-6 md:px-24 py-16 md:py-20" style={{ background: C.ink, color: C.bg }}>
+      <div className="flex flex-col gap-5 max-w-[720px] mx-auto md:mx-0 items-center md:items-start">
+        <h2 className="m-0 text-4xl" style={{ fontFamily: SERIF, fontWeight: 400, color: C.roseLight }}>If you need help now.</h2>
+        <p className="m-0 text-[17px]" style={{ lineHeight: 1.65 }}>The national GBV Command Centre is free, confidential and open 24 hours. Call 0800 428 428, or SMS "help" to 31531.</p>
+        <a
+          href="tel:0800428428"
+          className="aw-buy rounded-full px-6 py-3 text-sm font-medium"
+          style={{ background: C.rose, color: C.ink, textDecoration: "none", minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+        >
+          Call 0800 428 428
+        </a>
+      </div>
+    </div>
   );
 }

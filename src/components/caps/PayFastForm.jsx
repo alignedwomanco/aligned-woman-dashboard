@@ -245,7 +245,7 @@ export default function PayFastForm({ items, price, onChangeQty, onClose }) {
             Pay R{amount.toLocaleString("en-ZA")} with PayFast
           </button>
           <div className="text-xs" style={{ color: C.burgMid, lineHeight: 1.5 }}>
-            You will be taken to PayFast to pay securely. 100% of the cap price goes to Women For Change. Shipping is charged at cost and never comes out of the donation.
+            You will be taken to PayFast to pay securely. 100% of the cap price goes to a registered NPO supporting GBV survivors. Shipping is charged at cost and never comes out of the donation.
           </div>
         </form>
       </div>
