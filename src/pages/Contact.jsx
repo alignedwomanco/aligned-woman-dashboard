@@ -283,12 +283,15 @@ export default function Contact() {
               {CONTACT_PATHS.find(p => p.type === selectedType)?.description}
             </p>
             <form
-              onSubmit={async (e) => {
+              onSubmit={(e) => {
                 e.preventDefault();
-                const formData = new FormData(e.target);
-                const data = Object.fromEntries(formData);
-                // Submit to ContactSubmission entity
-                window.location.href = `/ContactForm?type=${selectedType}`;
+                // Carry what she has already typed into the full form, so she
+                // is never asked for the same three fields twice.
+                const params = new URLSearchParams({
+                  type: selectedType,
+                  ...Object.fromEntries(new FormData(e.target)),
+                });
+                window.location.href = `/ContactForm?${params.toString()}`;
               }}
               style={{ display: "flex", flexDirection: "column", gap: 16 }}
             >

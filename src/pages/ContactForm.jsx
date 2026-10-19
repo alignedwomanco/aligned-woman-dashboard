@@ -62,12 +62,14 @@ export default function ContactForm() {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  // The Contact page collects her name, email and message before sending her
+  // here, so those arrive prefilled rather than being asked for twice.
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    country: "",
-    message: "",
+    first_name: searchParams.get("first_name") || "",
+    last_name: searchParams.get("last_name") || "",
+    email: searchParams.get("email") || "",
+    country: searchParams.get("country") || "",
+    message: searchParams.get("message") || "",
     extra_field_value: "",
   });
 
@@ -91,11 +93,11 @@ export default function ContactForm() {
 
       // Send automated email reply
       try {
+        // Only the record id is sent. The recipient and wording are read from
+        // the saved submission, so this endpoint cannot be used to mail an
+        // address the form never collected.
         await base44.functions.invoke("sendContactFormEmail", {
           submissionId: submission.id,
-          recipientEmail: formData.email,
-          submissionType: type,
-          firstName: formData.first_name,
         });
       } catch (emailError) {
         console.error("Failed to send email:", emailError);
