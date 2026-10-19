@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // Helper: normalise checkbox values (object {key: true} or array ["key"])
 function toArray(val: unknown): string[] {
@@ -7,6 +7,9 @@ function toArray(val: unknown): string[] {
   return [];
 }
 
+// Scores a member's workbook response when she marks it complete. The
+// completion automation calls this with the response id; it is also safe to
+// call directly, where a member may only recompute her own response.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -18,10 +21,9 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: "no entity_id" });
     }
 
-    // Require an authenticated caller. Unauthenticated requests are rejected
-    // so the ownership check below cannot be bypassed by omitting a token.
-    // The completion automation calls this as an admin, which the ownership
-    // check below lets through; a member may recompute only their own response.
+    // Require an authenticated caller. Unauthenticated requests are rejected so
+    // the ownership check below cannot be bypassed by omitting a token. The
+    // automation presents an admin, which the check lets through.
     let caller = null;
     try { caller = await base44.auth.me(); } catch { caller = null; }
     if (!caller) {
