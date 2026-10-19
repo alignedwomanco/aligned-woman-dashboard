@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import PayFastForm, { QtyStepper, MAX_CAPS } from "@/components/caps/PayFastForm";
+import RecentOrders from "@/components/caps/RecentOrders";
 import LandingFooter from "@/components/home/LandingFooter";
 
 /* The beneficiary of the run. One source of truth: every mention on the page
@@ -284,6 +285,7 @@ export default function Caps() {
       <Hero />
       <StatBand />
       <Shop basket={basket} capCount={capCount} onAdd={addToOrder} onSet={setQty} onCheckout={() => setCheckout(true)} />
+      <RecentOrders />
       <Money />
       <Why />
       <Faq />
