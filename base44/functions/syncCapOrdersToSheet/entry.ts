@@ -4,6 +4,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 // details. The first run creates the spreadsheet in the connected Google
 // account and remembers it on a SheetTracker record; every later run rewrites
 // the same sheet, so an order edited or deleted in the app is reflected here.
+//
+// The supplier works in this sheet and adds tracking as each cap goes out, so
+// the columns after Notes belong to her. Every sync reads them back first and
+// carries them into the rewritten row, matched on Order ID, so nothing she has
+// typed is ever lost.
 
 const SHEET_NAME = "The Aligned Woman Co - Cap Orders";
 const TAB_NAME = "Cap orders";
@@ -41,6 +46,11 @@ const HEADERS = [
   "Notes",
 ];
 
+// The supplier's columns. Nothing in the app writes these: she fills them in as
+// she dispatches, and the sync preserves whatever is there.
+const SUPPLIER_HEADERS = ["Tracking number", "Courier", "Dispatched", "Supplier notes"];
+const ALL_HEADERS = [...HEADERS, ...SUPPLIER_HEADERS];
+
 // Column letter for a 1-based column number (1 = A, 27 = AA).
 function columnLetter(n) {
   let s = "";
@@ -51,7 +61,7 @@ function columnLetter(n) {
   }
   return s;
 }
-const LAST_COL = columnLetter(HEADERS.length);
+const LAST_COL = columnLetter(ALL_HEADERS.length);
 
 // Matches a design however the line was typed: case and curly apostrophes aside.
 function designKey(line) {
