@@ -79,6 +79,18 @@
       ],
       "default": "pending_payment"
     },
+    "tracking_number": {
+      "type": "string",
+      "description": "Courier tracking number. Written by the supplier in the shared Google Sheet and pulled back onto the order by syncCapOrdersToSheet. Never typed in the app."
+    },
+    "courier": {
+      "type": "string",
+      "description": "Courier the order went out with. Written by the supplier in the shared Google Sheet and pulled back onto the order by syncCapOrdersToSheet."
+    },
+    "dispatched": {
+      "type": "string",
+      "description": "When the supplier sent it, exactly as she typed it in the shared Google Sheet. Free text, so it holds a date or a note such as Collected. Pulled back onto the order by syncCapOrdersToSheet."
+    },
     "payment_reference": {
       "type": "string",
       "description": "PayFast payment reference, used to keep one sale to one order"

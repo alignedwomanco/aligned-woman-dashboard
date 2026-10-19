@@ -8,7 +8,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 // The supplier works in this sheet and adds tracking as each cap goes out, so
 // the columns after Notes belong to her. Every sync reads them back first and
 // carries them into the rewritten row, matched on Order ID, so nothing she has
-// typed is ever lost. The sync only ever writes and clears the table's own
+// typed is ever lost. Her tracking is then pulled back onto the order in the
+// app as well, so the two agree in both directions and nobody copies a
+// tracking number across by hand. The sync only ever writes and clears the table's own
 // columns and its own rows: any column she adds, and any row she adds herself,
 // are left exactly as she left them.
 
@@ -291,6 +293,44 @@ export default async function (req) {
       );
     }
 
+    // ── Pull: her tracking comes back into the app ──
+    // The sheet is where the supplier actually works, so for tracking it is the
+    // source of truth. Whatever she has typed against an order is written onto
+    // the order itself, so the app knows how each one went out.
+    //
+    // Only a value that has genuinely changed is written. That matters: an
+    // update to a CapOrder re-runs this sync, so re-writing values that already
+    // match would keep the on-new-order trigger firing at itself forever.
+    const TRACKING_FIELDS = ["tracking_number", "courier", "dispatched"];
+    const trackingPatches = [];
+
+    orders.forEach((order) => {
+      // A row she has left entirely blank has no entry in the map, and that is
+      // meaningful rather than missing: there is no tracking yet. It is read as
+      // empty instead of skipped, so a tracking number she clears in the sheet
+      // is cleared in the app too rather than lingering there as a stale one.
+      const values = supplierValues.get(String(order.id)) || SUPPLIER_HEADERS.map(() => "");
+
+      const incoming = values
+        .slice(0, TRACKING_FIELDS.length)
+        .map((value) => String(value == null ? "" : value).trim());
+      const current = TRACKING_FIELDS.map((field) =>
+        String(order[field] == null ? "" : order[field]).trim()
+      );
+      if (incoming.every((value, i) => value === current[i])) return;
+
+      const patch = { id: order.id };
+      TRACKING_FIELDS.forEach((field, i) => {
+        if (incoming[i] !== current[i]) patch[field] = incoming[i];
+      });
+      trackingPatches.push(patch);
+    });
+
+    // 500 records per call, which is the most the API takes at once.
+    for (let i = 0; i < trackingPatches.length; i += 500) {
+      await base44.asServiceRole.entities.CapOrder.bulkUpdate(trackingPatches.slice(i, i + 500));
+    }
+
     // Keep the whole header row bold, including columns added after the sheet
     // was first made. Cosmetic, so a failure here never stops the sync.
     try {
@@ -327,6 +367,7 @@ export default async function (req) {
     return Response.json({
       success: true,
       orders: rows.length,
+      tracking_updated: trackingPatches.length,
       spreadsheet_url: tracker.spreadsheet_url,
     });
   } catch (error) {
