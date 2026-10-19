@@ -114,6 +114,27 @@ function saDateTime(value) {
   return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
 }
 
+// Reads the supplier's columns out of the sheet as it stands, keyed by Order ID,
+// so her tracking survives the rewrite. Columns are found by their heading, so
+// the layout can grow without this breaking.
+function supplierColumnsFrom(existingRows) {
+  const carried = new Map();
+  const rows = existingRows || [];
+  if (!rows.length) return carried;
+
+  const header = (rows[0] || []).map((cell) => String(cell || "").trim().toLowerCase());
+  const indexes = SUPPLIER_HEADERS.map((name) => header.indexOf(name.toLowerCase()));
+
+  rows.slice(1).forEach((row) => {
+    const id = row[0];
+    if (!id) return;
+    const values = indexes.map((i) => (i >= 0 ? row[i] || "" : ""));
+    if (values.some((value) => String(value).trim() !== "")) carried.set(String(id), values);
+  });
+
+  return carried;
+}
+
 function deliveryLabel(method) {
   if (method === "courier") return "Courier";
   if (method === "collect") return "Collection";
@@ -209,6 +230,14 @@ export default async function (req) {
       });
     }
 
+    // Read the sheet as it stands before touching it, so the supplier's tracking
+    // is carried into the rewrite below.
+    const existingValues = await sheetsRequest(
+      accessToken,
+      `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`${TAB_NAME}!A1:${LAST_COL}100000`)}`
+    );
+    const supplierValues = supplierColumnsFrom(existingValues.values);
+
     const orders = await base44.asServiceRole.entities.CapOrder.list("-created_date", 5000);
 
     const rows = orders.map((order) => [
@@ -229,6 +258,8 @@ export default async function (req) {
       order.total != null ? order.total : "",
       order.status || "",
       order.notes || "",
+      // Whatever the supplier has already typed against this order.
+      ...(supplierValues.get(String(order.id)) || SUPPLIER_HEADERS.map(() => "")),
     ]);
 
     // Clear the old body first, so an order removed in the app does not linger.
@@ -245,7 +276,7 @@ export default async function (req) {
       `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,
       {
         method: "PUT",
-        body: { range, majorDimension: "ROWS", values: [HEADERS, ...rows] },
+        body: { range, majorDimension: "ROWS", values: [ALL_HEADERS, ...rows] },
       }
     );
 
@@ -264,7 +295,7 @@ export default async function (req) {
             requests: [
               {
                 repeatCell: {
-                  range: { sheetId: tab.properties.sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: HEADERS.length },
+                  range: { sheetId: tab.properties.sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: ALL_HEADERS.length },
                   cell: { userEnteredFormat: { textFormat: { bold: true } } },
                   fields: "userEnteredFormat.textFormat.bold",
                 },
