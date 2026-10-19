@@ -8,7 +8,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 // The supplier works in this sheet and adds tracking as each cap goes out, so
 // the columns after Notes belong to her. Every sync reads them back first and
 // carries them into the rewritten row, matched on Order ID, so nothing she has
-// typed is ever lost.
+// typed is ever lost. The sync only ever writes and clears the table's own
+// columns and its own rows: any column she adds, and any row she adds herself,
+// are left exactly as she left them.
 
 const SHEET_NAME = "The Aligned Woman Co - Cap Orders";
 const TAB_NAME = "Cap orders";
@@ -236,7 +238,8 @@ export default async function (req) {
       accessToken,
       `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`${TAB_NAME}!A1:${LAST_COL}100000`)}`
     );
-    const supplierValues = supplierColumnsFrom(existingValues.values);
+    const existingRows = (existingValues && existingValues.values) || [];
+    const supplierValues = supplierColumnsFrom(existingRows);
 
     const orders = await base44.asServiceRole.entities.CapOrder.list("-created_date", 5000);
 
@@ -262,14 +265,6 @@ export default async function (req) {
       ...(supplierValues.get(String(order.id)) || SUPPLIER_HEADERS.map(() => "")),
     ]);
 
-    // Clear the old body first, so an order removed in the app does not linger.
-    await sheetsRequest(
-      accessToken,
-      // Wider than the table, so columns from an older layout are cleared too.
-      `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`${TAB_NAME}!A2:AZ100000`)}:clear`,
-      { method: "POST", body: {} }
-    );
-
     const range = `${TAB_NAME}!A1:${LAST_COL}${rows.length + 1}`;
     await sheetsRequest(
       accessToken,
@@ -279,6 +274,22 @@ export default async function (req) {
         body: { range, majorDimension: "ROWS", values: [ALL_HEADERS, ...rows] },
       }
     );
+
+    // A run that needs fewer rows than the last one leaves the tail behind, so
+    // an order removed in the app would linger. Only rows the previous run
+    // wrote are cleared: a row the supplier has added sits below them and stays,
+    // and no column past the table is ever touched.
+    const previousLastRow = (tracker.row_count || 0) + 1;
+    if (previousLastRow > rows.length + 1) {
+      const from = rows.length + 2;
+      await sheetsRequest(
+        accessToken,
+        `spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
+          `${TAB_NAME}!A${from}:${LAST_COL}${previousLastRow}`
+        )}:clear`,
+        { method: "POST", body: {} }
+      );
+    }
 
     // Keep the whole header row bold, including columns added after the sheet
     // was first made. Cosmetic, so a failure here never stops the sync.
