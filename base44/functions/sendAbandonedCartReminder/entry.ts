@@ -24,6 +24,10 @@ function buildMimeMessage({ to, subject, htmlBody, fromName, fromEmail }) {
 
 const CHECKOUT_URL = 'https://app.alignedwomanco.com/Checkout';
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+// A cart is only worth a nudge while the decision is still live. Without an
+// upper bound the poll would also chase carts left months ago, which reads as
+// spam, so anything older than this is left alone.
+const REMINDER_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 
 Deno.serve(async (req) => {
   try {
@@ -32,13 +36,13 @@ Deno.serve(async (req) => {
     // Fetch all abandoned carts (RLS is admin-only, so asServiceRole works)
     const carts = await base44.asServiceRole.entities.AbandonedCart.list('-created_date', 200);
 
-    const cutoff = new Date(Date.now() - TWO_HOURS_MS);
-    const eligible = carts.filter((c) =>
-      !c.recovered &&
-      c.email &&
-      c.created_date &&
-      new Date(c.created_date) < cutoff
-    );
+    const cutoff = Date.now() - TWO_HOURS_MS;
+    const oldest = Date.now() - REMINDER_WINDOW_MS;
+    const eligible = carts.filter((c) => {
+      if (c.recovered || !c.email || !c.created_date) return false;
+      const age = new Date(c.created_date).getTime();
+      return age < cutoff && age > oldest;
+    });
 
     if (eligible.length === 0) {
       return Response.json({ checked: true, eligible: 0 });

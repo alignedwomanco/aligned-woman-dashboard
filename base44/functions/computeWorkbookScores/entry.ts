@@ -20,13 +20,14 @@ Deno.serve(async (req) => {
 
     // Require an authenticated caller. Unauthenticated requests are rejected
     // so the ownership check below cannot be bypassed by omitting a token.
-    // (The entity automation for this function is currently inactive; if it is
-    // re-enabled it must be reworked to authenticate system invocations.)
+    // The completion automation calls this as an admin, which the ownership
+    // check below lets through; a member may recompute only their own response.
     let caller = null;
     try { caller = await base44.auth.me(); } catch { caller = null; }
     if (!caller) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const callerIsAdmin = ["owner", "admin", "master_admin"].includes(caller.role);
 
     // Fetch the real record from the database rather than trusting the
     // request payload — a direct call could otherwise supply arbitrary
@@ -38,8 +39,9 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: "response not found" });
     }
 
-    // Ownership check: the caller must own the record being recomputed.
-    if (data.created_by_id && data.created_by_id !== caller.id) {
+    // Ownership check: the caller must own the record being recomputed, unless
+    // they are an admin, which is how the completion automation calls it.
+    if (data.created_by_id && data.created_by_id !== caller.id && !callerIsAdmin) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
