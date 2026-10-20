@@ -748,7 +748,15 @@ export default function Dashboard() {
     let cancelled = false;
     (async () => {
       try {
-        const ensured = await ensureMemberProfile(resolvedUser);
+        // Look up by user_id first, the same key getDashboardState reads,
+        // so this can never create a second profile the state lookup would
+        // then pick instead of hers. Only create one when none exists.
+        const existing = await base44.entities.MemberProfile.filter(
+          { user_id: resolvedUser.id },
+          "-created_date",
+          1
+        );
+        const ensured = existing?.[0] || (await ensureMemberProfile(resolvedUser));
         let raw = null;
         try { raw = localStorage.getItem("aw_quiz_result"); } catch (_e) { raw = null; }
         if (raw && ensured?.id) {
