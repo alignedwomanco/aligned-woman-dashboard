@@ -83,7 +83,7 @@ Return a JSON object with:
 - content: full article in HTML paragraphs (no markdown, just <p>, <h2>, <h3>, <ul>, <li> tags)
 - meta_description: SEO meta description under 160 chars
 
-The article should be written in first person where appropriate, grounded in the A.L.I.V.E. Method (Awareness, Liberation, Intentional Action, Vision, Embodiment), and end with a gentle CTA toward The Clarity Sprint or The Aligned Woman Blueprint platform.`,
+The article should be written in first person where appropriate, grounded in the A.L.I.V.E. Method (Awareness, Liberation, Intention, Vision, Embodiment), and end with a gentle CTA toward The Clarity Sprint or The Aligned Woman Blueprint platform.`,
       response_json_schema: {
         type: "object",
         properties: {
