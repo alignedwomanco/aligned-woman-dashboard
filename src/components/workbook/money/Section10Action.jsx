@@ -583,7 +583,7 @@ function Step4Final({ reflections, newScript, actions30, actions6m, actions12m, 
           </p>
           <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.3)", margin: "20px auto" }} />
           <p style={{ margin: 0, fontSize: 14, fontWeight: 600, opacity: 0.85 }}>Dr. Nasrat Sirkissoon</p>
-          <p style={{ margin: "4px 0 0", fontSize: 12, opacity: 0.5 }}>The Aligned Woman Blueprint / Phase I: Intentional Action</p>
+          <p style={{ margin: "4px 0 0", fontSize: 12, opacity: 0.5 }}>The Aligned Woman Blueprint / Phase I: Intention</p>
         </div>
       </FadeIn>
 
