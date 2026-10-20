@@ -212,7 +212,7 @@ const ALIVE_PHASES = [
   { letter: "A", name: "Awareness", quote: "You stop fighting symptoms and start seeing causes.", body: "Deep recognition of what is actually running your decisions, your patterns, and your behaviour. Not surface mindset work. The kind of seeing that changes what is possible, permanently." },
   { letter: "L", name: "Liberation", quote: "The body does what thinking alone never could.", body: "Releasing what your nervous system has been holding. Survival patterns. Stored stress. The weight that no amount of analysis has been able to lift. You cannot think your way out of what the body has locked in." },
   { letter: "I", name: "Intention", quote: "Rebuild from clarity, not from pressure.", body: "From a regulated, clear internal state you rebuild. Not from fear. Not from who you have been told to be. From actual clarity about who you are, what you are building, and why it matters to you specifically." },
-  { letter: "V", name: "Vitality", quote: "Sustainable performance without the crash.", body: "Operating from capacity rather than depletion. This is where the external changes become visible. Better decisions, faster recovery, cleaner thinking under pressure, and the energy to sustain all of it." },
+  { letter: "V", name: "Vision", quote: "What do I actually want?", body: "From a regulated system and clear values, you choose your direction. Identity and purpose decided on purpose, not inherited. This is where the life you are building starts to match the woman building it." },
   { letter: "E", name: "Embodiment", quote: "The shift becomes who you are.", body: "Not practised. Not performed. Embodied. This is not a destination you reach. It is a fundamentally different internal state you operate from. One that does not require maintenance because it has become you." },
 ];
 
@@ -227,7 +227,7 @@ const TESTIMONIALS = [
 ];
 
 const FAQS = [
-  { q: "What exactly is The Aligned Woman Blueprint?", a: "It is an online programme built across seven domains that ambitious women are expected to navigate but rarely taught: psychology, nervous system regulation, health, money, identity, leadership, and the integration of all of them.\n\nEach domain is taught by a credentialed specialist in that field, not by a single coach or content creator covering everything. The faculty includes practitioners whose combined private consultation value exceeds R116,000. You are getting direct access to what they teach, structured into a guided curriculum you can work through at your own pace.\n\nThe programme is built on the ALIVE Method, a five-phase sequence (Awareness, Liberation, Intention, Vision, Execution) that determines the order in which the teaching is delivered. This is deliberate. Most wellness education lets you pick and choose topics at random. The Blueprint is sequenced because each phase builds on the one before it, and skipping phases is why most personal development efforts do not hold.\n\nInside the programme you get guided expert modules, deep-work workbooks designed for real application. It is not a library of content to browse. It is an architecture you move through.\n\nThe simplest way to describe it: it is the education women should have been given alongside every degree, promotion, and life transition they have ever navigated. It did not exist, so we built it." },
+  { q: "What exactly is The Aligned Woman Blueprint?", a: "It is an online programme built across seven domains that ambitious women are expected to navigate but rarely taught: psychology, nervous system regulation, health, money, identity, leadership, and the integration of all of them.\n\nEach domain is taught by a credentialed specialist in that field, not by a single coach or content creator covering everything. The faculty includes practitioners whose combined private consultation value exceeds R116,000. You are getting direct access to what they teach, structured into a guided curriculum you can work through at your own pace.\n\nThe programme is built on the ALIVE Method, a five-phase sequence (Awareness, Liberation, Intention, Vision, Embodiment) that determines the order in which the teaching is delivered. This is deliberate. Most wellness education lets you pick and choose topics at random. The Blueprint is sequenced because each phase builds on the one before it, and skipping phases is why most personal development efforts do not hold.\n\nInside the programme you get guided expert modules, deep-work workbooks designed for real application. It is not a library of content to browse. It is an architecture you move through.\n\nThe simplest way to describe it: it is the education women should have been given alongside every degree, promotion, and life transition they have ever navigated. It did not exist, so we built it." },
   { q: "Who is this for?", a: "Ambitious women, typically 26 to 38, who are succeeding by every external measure and privately exhausted, reactive, or overwhelmed." },
   { q: "How is this different from other programmes I have tried?", a: "The order. Most programmes give the right information in the wrong sequence. The ALIVE Method puts regulation before identity, foundation before structure. Always." },
   { q: "I have tried courses before and nothing changed. Why would this be different?", a: "Tools without sequence do not build anything. This programme is sequenced. Each domain is built on the last." },
@@ -242,7 +242,7 @@ const FAQS = [
 
 const COMPARISON_ROWS = [
   { generic: "Generic content not designed for how women actually operate", blueprint: "Built specifically around female psychology, biology, and the internal systems that drive everything else", coaching: "Dependent on one person's methodology and availability" },
-  { generic: "Random experts with no connection between their teachings", blueprint: "14 credentialed specialists whose knowledge is intentionally sequenced to build on each other", coaching: "One practitioner covering multiple domains they may not specialise in" },
+  { generic: "Random experts with no connection between their teachings", blueprint: "13 credentialed specialists whose knowledge is intentionally sequenced to build on each other", coaching: "One practitioner covering multiple domains they may not specialise in" },
   { generic: "Right information in the wrong order. Tools without a system", blueprint: "The ALIVE Method delivers every tool in the physiological and psychological sequence your nervous system requires", coaching: "Sessions without structure. Insight without integration" },
   { generic: "Asks you to change before you have the capacity to hold the change", blueprint: "Builds capacity first. Regulation before identity work. Foundation before structure. Always", coaching: "Explores the problem without always providing the structural solution" },
   { generic: "Designed for ideal conditions. Requires motivation and consistency you may not have", blueprint: "Built for your real life. The Low Energy Entry Points Guide means you can progress even on your worst days", coaching: "Requires weekly appointments that depend on your schedule and budget" },
@@ -966,7 +966,7 @@ function Faculty() {
             style={{ background: C.rosePale }}
           >
             <p className="text-[14px]" style={{ fontFamily: sans, color: C.burgCore }}>
-              Accessing all 14 specialists privately would cost{" "}
+              Accessing all 13 specialists privately would cost{" "}
               <strong>R116,200</strong> &middot; Your access inside the Blueprint:{" "}
               <strong>included</strong>
             </p>
@@ -1559,7 +1559,7 @@ function FinalClose() {
                 </p>
                 <div className="space-y-3 mb-8">
                   {[
-                    "Full access to 14 specialists, 7 domains, and the ALIVE Method.",
+                    "Full access to 13 specialists, 7 domains, and the ALIVE Method.",
                   ].map((item, i) => (
                     <div key={i} className="flex gap-3">
                       <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: C.roseCore }} />
