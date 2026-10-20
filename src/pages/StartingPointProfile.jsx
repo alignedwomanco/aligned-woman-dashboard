@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getAllArchetypes, getArchetype } from "@/data/archetypes";
+import { base44 } from "@/api/base44Client";
 
 const PATTERNS = {
   performer: {
@@ -328,7 +329,15 @@ export default function StartingPointProfile() {
       completed_at: new Date().toISOString(),
     };
     localStorage.setItem("aw_quiz_result", JSON.stringify(quizResult));
-    window.location.href = "/register?from_url=/Dashboard";
+    // A woman who is already signed in (a retake from her dashboard) goes
+    // straight to the dashboard, which saves the result to her profile.
+    // Everyone else registers first and lands on the dashboard after.
+    base44.auth
+      .isAuthenticated()
+      .catch(() => false)
+      .then((authed) => {
+        window.location.href = authed ? "/Dashboard" : "/register?from_url=/Dashboard";
+      });
   };
 
   const restart = () => {
@@ -359,7 +368,7 @@ export default function StartingPointProfile() {
             Twelve questions. One pattern you have probably been running for years. Naming it is the first thing the work asks of you.
           </p>
           <p style={{ margin: centered ? (mobile ? "20px 0 0" : "24px auto 0") : (mobile ? "20px 0 0" : "24px 0 0"), fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 560, fontWeight: 300 }}>
-            This is not a personality quiz. It is a diagnostic built from the work of fourteen specialists across psychology, neuroscience, health, money, and leadership. It reads the pattern running beneath your ambition, your exhaustion, and the gap between what you are capable of and what you are actually doing.
+            This is not a personality quiz. It is a diagnostic built from the work of thirteen specialists across psychology, neuroscience, health, money, and leadership. It reads the pattern running beneath your ambition, your exhaustion, and the gap between what you are capable of and what you are actually doing.
           </p>
           <div style={{ marginTop: mobile ? 28 : 36, textAlign: "center" }}>
             <button
