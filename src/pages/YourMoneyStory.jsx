@@ -13,7 +13,7 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
  *  - The 0 to 7 window: delta and theta brainwaves, the critical faculty
  *  - 95% subconscious, whose one job is safety: familiar = safe, new = danger
  *  - The financial setpoint / thermostat, and why wealth reverts (70% stats)
- *  - The five protection patterns (Performer, Over-Functioner, Outsourcer,
+ *  - The five protection patterns (Performer, Over-Functioner, Delegator,
  *    Overrider, Reactor)
  *  - The 90-second emotional wave (feelings are tunnels, built to move through)
  *  - Worth is not price: untying value-as-human from value-of-service
