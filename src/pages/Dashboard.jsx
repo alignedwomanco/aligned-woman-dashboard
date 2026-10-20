@@ -5,6 +5,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { getDashboardState } from "@/lib/dashboardState";
+import { ensureMemberProfile } from "@/lib/ensureMemberProfile";
 import useContinueModule from "@/hooks/useContinueModule";
 import { getArchetype } from "@/data/archetypes";
 import { createPageUrl } from "@/utils";
@@ -734,11 +735,45 @@ export default function Dashboard() {
 
   const resolvedUser = currentUser === undefined ? user : currentUser;
 
+  // October 2026 fix. Since the July cutover this page never created a
+  // MemberProfile for a new sign-up (getDashboardState then threw and she
+  // saw the error card), and never read the quiz result StartingPointProfile
+  // leaves in localStorage, so every result taken before sign-up was lost.
+  // Both jobs were in DashboardLegacy.jsx and did not come across. Order:
+  // make sure the profile exists, save any pending quiz result to it, then
+  // resolve the state. The pending result is cleared only once it is saved
+  // (or is unreadable), so a failed save is retried on her next visit.
   useEffect(() => {
     if (!resolvedUser) return;
-    getDashboardState()
-      .then(setDash)
-      .catch((e) => setDashError(e?.message || "Could not load your dashboard state."));
+    let cancelled = false;
+    (async () => {
+      try {
+        const ensured = await ensureMemberProfile(resolvedUser);
+        let raw = null;
+        try { raw = localStorage.getItem("aw_quiz_result"); } catch (_e) { raw = null; }
+        if (raw && ensured?.id) {
+          let quiz = null;
+          try { quiz = JSON.parse(raw); } catch (_e) { quiz = null; }
+          if (quiz?.archetype_key) {
+            await base44.entities.MemberProfile.update(ensured.id, {
+              computed_archetype_key: quiz.archetype_key,
+              quiz_completed_at: quiz.completed_at || new Date().toISOString(),
+            });
+          }
+          try { localStorage.removeItem("aw_quiz_result"); } catch (_e) { /* private mode */ }
+        }
+      } catch (_e) {
+        // Leave any pending result in place for the next visit; the state
+        // lookup below still runs and reports its own error if it fails.
+      }
+      try {
+        const result = await getDashboardState();
+        if (!cancelled) setDash(result);
+      } catch (e) {
+        if (!cancelled) setDashError(e?.message || "Could not load your dashboard state.");
+      }
+    })();
+    return () => { cancelled = true; };
   }, [resolvedUser?.id]);
 
   // state_b is the one-time first welcome for a paid member. Flip
