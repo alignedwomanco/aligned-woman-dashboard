@@ -387,7 +387,7 @@ function Timeline() {
       sub: "What is in your way, and how do we move it?",
       desc: "Now we work on what is holding you back. The beliefs you inherited. The patterns you keep repeating. The fears dressed up as practicality. We use NLP and strategic questioning to surface and dismantle the specific blocks keeping you stuck.",
       leave: "A written list of the specific blocks we worked on, plus the reframes and tools to manage them when they show up again." },
-    { num: "03", letter: "I", name: "Intentional Action", dur: "60 min",
+    { num: "03", letter: "I", name: "Intention", dur: "60 min",
       sub: "What do you actually want, and what is the plan to get there?",
       desc: "This is the strategy week. By now you are clearer on where you are and what has been in the way. So we build the plan. We get specific about what you want next. Not the vague 'more freedom' version. The concrete version. Then we reverse-engineer it.",
       leave: "A written 30-day action plan with prioritised next steps, calibrated to your actual capacity." },
