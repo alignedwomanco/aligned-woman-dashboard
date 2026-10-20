@@ -3,7 +3,7 @@ import { Lock } from "lucide-react";
 
 const PHASES = [
   { letter: "L", name: "LIBERATION", caption: "I don't have to live in survival mode anymore." },
-  { letter: "I", name: "INTENTIONAL ACTION", caption: "I think differently, so I choose differently." },
+  { letter: "I", name: "INTENTION", caption: "I think differently, so I choose differently." },
   { letter: "V", name: "VISION", caption: "What do I actually want?" },
   { letter: "E", name: "EMBODIMENT", caption: "This is who I am now." },
 ];
