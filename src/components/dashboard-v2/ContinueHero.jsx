@@ -22,10 +22,10 @@ const PHASE_CONFIG = {
   },
   intentional_action: {
     letter: "I",
-    name: "INTENTIONAL ACTION",
+    name: "INTENTION",
     quote: "I think differently, so I choose differently.",
     number: 3,
-    ctaLabel: "CONTINUE INTENTIONAL ACTION",
+    ctaLabel: "CONTINUE INTENTION",
   },
   vision: {
     letter: "V",
