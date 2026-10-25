@@ -139,11 +139,11 @@ export const DESIGN_KEY = { performer: "P", over_functioner: "O", delegator: "D"
 // Pattern photographs (uploaded to the app's media library). A pattern with
 // two images picks one at random per attempt and keeps it for her.
 export const PATTERN_IMAGES = {
-  P: [],
-  O: [],
-  D: [],
-  V: [],
-  R: [],
+  P: ["https://media.base44.com/images/public/69f46886a412ee042303f1af/01b508ac2_ThePerformer.png"],
+  O: ["https://media.base44.com/images/public/69f46886a412ee042303f1af/21f747bf4_TheOver-Functioner.png"],
+  D: ["https://media.base44.com/images/public/69f46886a412ee042303f1af/f2f2a46cf_TheDelegator.png"],
+  V: ["https://media.base44.com/images/public/69f46886a412ee042303f1af/91df3a10c_TheOverrider.png"],
+  R: ["https://media.base44.com/images/public/69f46886a412ee042303f1af/078368613_Thereactor.png"],
 };
 // Intro editorial image: a woman drawing a mandala in the sand, used as the
 // hero backdrop behind the intro copy.
