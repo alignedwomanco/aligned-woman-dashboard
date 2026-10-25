@@ -292,36 +292,6 @@ function PatternHero({ profile, isPaid }) {
           </Link>
         </div>
 
-        {/* Inline full-pattern narrative. Becomes a route to the Full
-            Pattern page once that page is built; inline keeps the law of
-            no dead ends until then. */}
-        {expanded && (
-          <div
-            className="mt-6 pt-6 border-t border-white/15 space-y-4 max-w-2xl"
-            style={TEXT_SHADOW}
-          >
-            {arch?.fullDescription && (
-              <p className="font-body font-light text-sm leading-relaxed text-white/90">
-                {arch.fullDescription}
-              </p>
-            )}
-            {arch?.primaryPillar && (
-              <p className="font-body font-light text-sm leading-relaxed text-white/90">
-                The Aligned Woman Blueprint Course addresses this through two pillars. Your
-                primary work begins in{" "}
-                <span className="font-medium text-white">{arch.primaryPillar}</span>,{" "}
-                {arch.primaryPillarNote} Your secondary work sits in{" "}
-                <span className="font-medium text-white">{arch.secondaryPillar}</span>,{" "}
-                {arch.secondaryPillarNote}
-              </p>
-            )}
-            {arch?.foundation && (
-              <p className="font-display italic text-sm leading-relaxed text-awrose-pale">
-                {arch.foundation}
-              </p>
-            )}
-          </div>
-        )}
       </div>
     </section>
   );
