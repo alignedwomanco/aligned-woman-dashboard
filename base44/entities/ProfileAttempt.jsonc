@@ -1,0 +1,144 @@
+{
+  "name": "ProfileAttempt",
+  "properties": {
+    "answers": {
+      "description": "Platform pattern key per question, in question order",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "completed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "consent": {
+      "default": false,
+      "type": "boolean"
+    },
+    "consent_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "consent_text": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "fit": {
+      "enum": [
+        "yes",
+        "partly",
+        "not_really"
+      ],
+      "type": "string"
+    },
+    "guess": {
+      "enum": [
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor",
+        "unsure"
+      ],
+      "type": "string"
+    },
+    "mix": {
+      "description": "Percentages per platform key, adding to 100. Stored only",
+      "type": "object"
+    },
+    "primary_key": {
+      "enum": [
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor"
+      ],
+      "type": "string"
+    },
+    "quiz_version": {
+      "default": "v3",
+      "type": "string"
+    },
+    "secondary_key": {
+      "enum": [
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor"
+      ],
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "stage": {
+      "default": "started",
+      "enum": [
+        "started",
+        "completed",
+        "lead",
+        "account"
+      ],
+      "type": "string"
+    },
+    "started_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "token": {
+      "description": "Random token held in her browser so the backend function can update this attempt before she has an account",
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "utm_campaign": {
+      "type": "string"
+    },
+    "utm_medium": {
+      "type": "string"
+    },
+    "utm_source": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "type": "object"
+}
