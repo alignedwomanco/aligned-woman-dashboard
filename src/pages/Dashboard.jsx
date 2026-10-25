@@ -5,7 +5,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { getDashboardState } from "@/lib/dashboardState";
-import { ensureMemberProfile } from "@/lib/ensureMemberProfile";
+import { saveQuizResultToProfile } from "@/lib/sppStore";
 import useContinueModule from "@/hooks/useContinueModule";
 import { getArchetype } from "@/data/archetypes";
 import { createPageUrl } from "@/utils";
@@ -249,7 +249,6 @@ function Tag({ children }) {
 
 // ── 02 · Pattern hero, design state A (pattern known) ──
 function PatternHero({ profile, isPaid }) {
-  const [expanded, setExpanded] = useState(false);
   const archKey = KEY_MAP[profile?.computed_archetype_key] || "performer";
   const arch = getArchetype(archKey);
 
@@ -282,16 +281,12 @@ function PatternHero({ profile, isPaid }) {
         <div className="flex flex-wrap items-center gap-4">
           {/* Free member with a pattern has no Continue, so this is her
               single filled action. Paid members get the outline tier. */}
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className={BTN_FILLED}
-          >
+          {/* October 2026: opens the Your Pattern page (her full Starting
+              Point Profile and the two doors) instead of expanding here. */}
+          <Link to="/YourPattern" className={BTN_FILLED}>
             Read your full pattern
-            <ChevronDown
-              className="w-3.5 h-3.5 transition-transform duration-200"
-              style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
-            />
-          </button>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
           <Link to="/StartingPointProfile" className={LINK_ON_DARK}>
             Retake the profile
           </Link>
@@ -751,25 +746,10 @@ export default function Dashboard() {
         // Look up by user_id first, the same key getDashboardState reads,
         // so this can never create a second profile the state lookup would
         // then pick instead of hers. Only create one when none exists.
-        const existing = await base44.entities.MemberProfile.filter(
-          { user_id: resolvedUser.id },
-          "-created_date",
-          1
-        );
-        const ensured = existing?.[0] || (await ensureMemberProfile(resolvedUser));
-        let raw = null;
-        try { raw = localStorage.getItem("aw_quiz_result"); } catch (_e) { raw = null; }
-        if (raw && ensured?.id) {
-          let quiz = null;
-          try { quiz = JSON.parse(raw); } catch (_e) { quiz = null; }
-          if (quiz?.archetype_key) {
-            await base44.entities.MemberProfile.update(ensured.id, {
-              computed_archetype_key: quiz.archetype_key,
-              quiz_completed_at: quiz.completed_at || new Date().toISOString(),
-            });
-          }
-          try { localStorage.removeItem("aw_quiz_result"); } catch (_e) { /* private mode */ }
-        }
+        // October 2026: the shared helper (src/lib/sppStore.js) also saves
+        // the Starting Point Profile v3 fields and links her attempt. The
+        // Your Pattern page calls the same helper.
+        await saveQuizResultToProfile(resolvedUser);
       } catch (_e) {
         // Leave any pending result in place for the next visit; the state
         // lookup below still runs and reports its own error if it fails.
