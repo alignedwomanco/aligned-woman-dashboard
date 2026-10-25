@@ -6,7 +6,7 @@ import CheckoutModal from "@/components/dashboard/CheckoutModal";
 import { usePaymentContext } from "@/context/PaymentContext";
 import { hasBlueprintAccess } from "@/lib/entitlement";
 import "@/components/spp/spp.css";
-import { DESIGN_KEY, PLATFORM_KEY } from "@/data/startingPointProfile";
+import { DESIGN_KEY } from "@/data/startingPointProfile";
 import { PatternFull, Doors, ApplySheet, FootNote, Primary } from "@/components/spp/SppUI";
 import { saveQuizResultToProfile, mixFromObject, guessFromPlatform, track, clearProgress } from "@/lib/sppStore";
 
@@ -101,6 +101,7 @@ export default function YourPattern() {
       status: "pending",
     });
     track("spp_application_sent", { primary: profile?.computed_archetype_key || "" });
+    setApplied(true);
   };
 
   return (
@@ -118,11 +119,7 @@ export default function YourPattern() {
                     {first ? <>Welcome, {firstName}. <em>Here's your full profile.</em></> : <>Good to see you, {firstName}.</>}
                   </h1>
                 </div>
-                {res.mix ? (
-                  <PatternFull res={res} guess={guess} imgIdx={imgIdx} onRetake={retake} />
-                ) : (
-                  <PatternFull res={{ ...res, mix: [{ k: primary, pct: 100 }] }} guess={null} imgIdx={imgIdx} onRetake={retake} />
-                )}
+                <PatternFull res={res} guess={guess} imgIdx={imgIdx} onRetake={retake} />
                 <Doors route={route} setRoute={setRoute} doorState={{ applied: applied ? "laura" : null, bought }} onDoor={onDoor} res={res} bpPrice={bpPrice} />
                 <FootNote />
               </div>
@@ -159,5 +156,3 @@ export default function YourPattern() {
   );
 }
 
-// Keep PLATFORM_KEY referenced for readers looking for the key map.
-export { PLATFORM_KEY };
