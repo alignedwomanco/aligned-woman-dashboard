@@ -14,16 +14,16 @@ const ARCHETYPES = {
     key: "performer",
     name: "The Performer",
     mirrorLine:
-      "Identity is performance-dependent. Without the performing, you have no reliable sense of self.",
+      "You have become very good at looking like you have it handled, and very tired of being the only one who knows you don't.",
 
     atBest:
-      "You are magnetic. Composed, prepared, and deeply competent. You walk into a room and people trust you before you have said a word. You deliver. You rise. You make complex things look effortless. Your ability to read a room and position yourself is a genuine skill, not a performance. When this pattern is working for you, it builds empires.",
+      "You read a room in seconds. You hold standards others rely on, and you deliver under pressure without letting it show.",
 
     atWorst:
-      "The version of you people admire is a construction, and she is expensive to maintain. You cannot remember the last time you let someone see you without the armour. The exhaustion you feel is not from the work. It is from the distance between who you perform as and who you actually are. You have built a life that looks right and feels hollow.",
+      "The gap between how it looks and how it feels keeps widening. Praise doesn't land, rest feels like a risk, and nobody gets to see the real picture, sometimes not even you.",
 
     fullDescription:
-      "You have built your life around a version of yourself that works. She is competent, composed, and almost impossible to fault. She shows up prepared. She delivers. She makes it look effortless. And the gap between who she is in public and who you are in private has become so wide that you are no longer sure which one is real.",
+      "Your nervous system learned that being seen struggling was unsafe. So you built a polished version that does the visible work while the real you runs underneath it, unsupported.",
 
     primaryPillar: "Identity, Visibility & Personal Brand",
     primaryPillarNote:
@@ -44,16 +44,16 @@ const ARCHETYPES = {
     key: "overFunctioner",
     name: "The Over-Functioner",
     mirrorLine:
-      "You carry more than your share and your body knows it even when your mind refuses to admit it.",
+      "You hold everything together so well that nobody has noticed you're the one who needs holding.",
 
     atBest:
-      "You are the person everyone counts on, and for good reason. You show up. You hold space. You absorb complexity so others do not have to. Your instinct to care for the people around you is real and it has built trust, loyalty, and deep relationships. When this pattern is working for you, you are a quiet force.",
+      "You see what needs doing before anyone asks. People feel safe around you, and things work because you are in them.",
 
     atWorst:
-      "You carry what is not yours to hold and your body knows it even when your mind refuses to admit it. You have confused leadership with labour. You say weak yeses when you should be saying strong nos. The people around you have adapted to your capacity, which means they will never tell you to slow down. Your nervous system has forgotten what rest actually feels like.",
+      "Your needs keep moving to the bottom of the list. You resent the load and keep picking it up anyway, and when you finally stop, there is nothing left for you.",
 
     fullDescription:
-      "You carry more than your share and you have done it for so long that it feels like your nature rather than a pattern. You are the one who holds it together. The one who shows up early, stays late, absorbs the tension in the room, and makes sure nothing falls through. Other people's systems run because you run them. And the cost of that is a nervous system that has forgotten what rest actually feels like.",
+      "Somewhere along the way, being useful became the condition for being loved. Your system treats other people's discomfort as an emergency you have to fix.",
 
     primaryPillar: "Nervous System & Emotional Regulation",
     primaryPillarNote:
@@ -74,16 +74,16 @@ const ARCHETYPES = {
     key: "delegator",
     name: "The Delegator",
     mirrorLine:
-      "You have not been delegating. You have been giving your power away.",
+      "You've earned the seat at the table. You're still waiting for someone to tell you it's yours.",
 
     atBest:
-      "You know how to build systems, create space, and let other people do what they do well. You are strategic. You are not threatened by delegation. You can hold complexity without needing to control every detail. When this pattern is working for you, it looks like wisdom.",
+      "You are collaborative, generous with credit and easy to work with. You make space for others and keep the peace.",
 
     atWorst:
-      "The distance that protects you also keeps you from the thing you want most. You have handed your decisions, your emotional choices, or your power to someone else and called it a preference. 'I trust them with that.' 'I am just not the one who deals with it.' These are not preferences. They are patterns. You are competent everywhere except the areas that actually determine your freedom.",
+      "Decisions about your money, health and career end up in other people's hands. You undersell yourself, then wonder why the outcome doesn't fit you.",
 
     fullDescription:
-      "You are capable, often exceptionally so. But somewhere along the way you handed your decisions, your authority, or your hardest choices to someone else, or to avoidance itself, and called it a personality trait. 'I am just not the one who handles that.' 'I trust them with it.' 'Someone else takes care of it.' These are not preferences. They are patterns. And they are quietly costing you the one thing they were never meant to: your own freedom.",
+      "You learned that taking up space caused friction, so you hand the wheel over before anyone can say you took too much. It looks like modesty. It costs you authorship of your own life.",
 
     primaryPillar: "Leadership, Authority & Career",
     primaryPillarNote:
@@ -104,16 +104,16 @@ const ARCHETYPES = {
     key: "overrider",
     name: "The Overrider",
     mirrorLine:
-      "Your body sends signals and you override every single one.",
+      "You've pushed through so much for so long that your body has stopped asking, and started telling.",
 
     atBest:
-      "You are relentless in the best sense. When you commit, you deliver. Your drive has taken you further than most people thought possible. You do not quit. You do not make excuses. When this pattern is working for you, it looks like discipline, focus, and extraordinary resilience.",
+      "You are relentless, reliable and hard to rattle. When things get difficult, you are the one who keeps going.",
 
     atWorst:
-      "Your body sends signals and you override every single one. Pain, fatigue, hormonal shifts, illness. The bill comes due in your thirties or forties in ways that look like sudden decline but are actually years of accumulated debt. You push through to dinner without eating. You push through the exhaustion without sleeping. You have dissociated from your body so thoroughly that you do not notice until something breaks.",
+      "Sleep, energy, pain and mood send signals you've learned to ignore. You rest only when your body forces you to, and the bill keeps arriving later and larger.",
 
     fullDescription:
-      "You push through. Pain, fatigue, hormonal shifts, illness, grief. Your body sends signals and you override every single one because there is always something more important than how you feel. You have been rewarded for this your entire life. School rewarded it. Work rewarded it. Relationships rewarded it. Nobody told you that the override has a physiological cost that compounds.",
+      "Your capacity became your identity. Every time you push past a signal and it works, your system learns that signals don't matter, until they matter all at once.",
 
     primaryPillar: "Health, Hormones & Body Literacy",
     primaryPillarNote:
@@ -134,16 +134,16 @@ const ARCHETYPES = {
     key: "reactor",
     name: "The Reactor",
     mirrorLine:
-      "Your nervous system speaks before you do.",
+      "You feel everything at full volume, and most days the feeling chooses before you do.",
 
     atBest:
-      "You feel everything, fast and deep. That is not weakness. It is a form of intelligence that most people do not have access to. You read emotional shifts in a room before anyone else notices. You are perceptive, empathetic, and when this pattern is working for you, it makes you the person others trust with the truth.",
+      "You are honest, alive to what is happening and quick to sense when something is wrong. People always know where they stand with you.",
 
     atWorst:
-      "Your nervous system speaks before you do. You react, then regret, then correct, then repeat. You can see the pattern clearly and you still fall into it. Your amygdala moves faster than your discernment. Anxiety is future fear, and you are investing your resources in worst-case scenarios that have not happened. The emotion shapes the words before your logic can intervene.",
+      "Your response arrives before your choice does. You say things you walk back, freeze when it matters, and spend days replaying moments that lasted seconds.",
 
     fullDescription:
-      "You respond. To other people's urgency, to emotional shifts in a room, to crises that may not be yours. Your life has a pattern of high reactivity followed by regret, correction, and then the same cycle again. You can see it happening. That is the painful part. You are not unaware. You are aware and still caught.",
+      "Your nervous system is set to react fast, usually because it once had to. This isn't a character flaw. It's a missing gap between feeling and response, and that gap can be built.",
 
     primaryPillar: "Mindset & Behaviour",
     primaryPillarNote:
