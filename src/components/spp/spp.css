@@ -10,6 +10,7 @@
   position:relative;min-height:100svh;background:var(--off);font-family:var(--sans);color:var(--grey);-webkit-font-smoothing:antialiased;text-align:left}
 .spp.in-shell{--top:8px;min-height:0}
 .spp *{box-sizing:border-box}
+.spp em,.spp i{font-family:inherit}
 .spp a{color:var(--burg-mid);text-decoration:none}
 .spp a:hover{color:var(--burg);text-decoration:underline}
 .spp button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
