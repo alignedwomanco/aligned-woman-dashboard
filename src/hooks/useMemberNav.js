@@ -48,6 +48,7 @@ export default function useMemberNav() {
     // go blank once you are inside /Community/hormone-health.
     { name: "Community", to: createPageUrl("Community"), active: location.pathname.toLowerCase().startsWith("/community") },
     { name: "Directory", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
+    { name: "Your Pattern", to: "/YourPattern", active: location.pathname === "/YourPattern" },
     {
       name: "My Profile",
       to: isApprovedExpert ? "/partner" : createPageUrl("ProfileSettings"),
