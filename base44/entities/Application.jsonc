@@ -1,22 +1,10 @@
 {
   "name": "Application",
-  "type": "object",
   "properties": {
-    "full_name": {
-      "type": "string"
-    },
-    "email": {
-      "type": "string",
-      "format": "email"
-    },
-    "country_city": {
-      "type": "string"
-    },
-    "instagram_handle": {
-      "type": "string"
+    "acknowledges_price": {
+      "type": "boolean"
     },
     "age_range": {
-      "type": "string",
       "enum": [
         "Under 20",
         "20\u201325",
@@ -25,7 +13,43 @@
         "36\u201340",
         "41\u201345",
         "46+"
-      ]
+      ],
+      "type": "string"
+    },
+    "answer_1": {
+      "description": "What's happening for you right now that made you choose this?",
+      "type": "string"
+    },
+    "answer_2": {
+      "description": "What would be different in six months if this worked?",
+      "type": "string"
+    },
+    "confirms_reservation": {
+      "type": "boolean"
+    },
+    "country_city": {
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 1000,
+      "type": "string"
+    },
+    "email": {
+      "format": "email",
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "instagram_handle": {
+      "type": "string"
+    },
+    "payment_preference": {
+      "enum": [
+        "Pay in full",
+        "Payment plan"
+      ],
+      "type": "string"
     },
     "primary_focus": {
       "type": "string"
@@ -33,40 +57,59 @@
     "primary_focus_other": {
       "type": "string"
     },
-    "understands_paid_programme": {
-      "type": "boolean"
-    },
-    "acknowledges_price": {
-      "type": "boolean"
-    },
-    "payment_preference": {
-      "type": "string",
+    "primary_key": {
       "enum": [
-        "Pay in full",
-        "Payment plan"
-      ]
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor"
+      ],
+      "type": "string"
     },
-    "confirms_reservation": {
-      "type": "boolean"
+    "programme": {
+      "description": "one_on_one for Starting Point Profile applications. Blank means a Blueprint application",
+      "enum": [
+        "one_on_one"
+      ],
+      "type": "string"
+    },
+    "secondary_key": {
+      "enum": [
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor"
+      ],
+      "type": "string"
+    },
+    "source": {
+      "description": "Where she took the profile from",
+      "type": "string"
     },
     "status": {
-      "type": "string",
+      "default": "pending",
       "enum": [
         "pending",
         "accepted",
         "declined"
       ],
-      "default": "pending"
+      "type": "string"
     },
-    "description": {
-      "type": "string",
-      "maxLength": 1000
+    "understands_paid_programme": {
+      "type": "boolean"
+    },
+    "user_id": {
+      "description": "Her account",
+      "type": "string"
     }
   },
   "required": [
     "full_name",
     "email"
   ],
+  "type": "object",
   "rls": {
     "create": {},
     "read": {
