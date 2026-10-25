@@ -1,592 +1,687 @@
-import { useState, useEffect, useRef } from "react";
-import { getAllArchetypes, getArchetype } from "@/data/archetypes";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import "@/components/spp/spp.css";
+import { PATTERNS, ORDER, Q, MINUTES, CONSENT_TEXT, INTRO_IMAGE, LOGO_URL, PLATFORM_KEY, DESIGN_KEY, score, shuffle } from "@/data/startingPointProfile";
+import { Icon, Check, Arrow, Primary, Logo, PatternImg, MixBar, GuessLine, FitCheck, FootNote } from "@/components/spp/SppUI";
+import {
+  readProgress, writeProgress, clearProgress, readResult, writeResult,
+  attemptCreate, attemptUpdate, track, buildResult, saveQuizResultToProfile,
+  pickImageIndex, FIT_KEY, FIT_LABEL, guessToPlatform, guessFromPlatform, mixFromObject,
+} from "@/lib/sppStore";
 
-const PATTERNS = {
-  performer: {
-    name: "The Performer",
-    mirror: "You have not been achieving. You have been performing.",
-    pillar: "Identity, Visibility & Personal Brand",
-    secondaryPillar: "Mindset & Behaviour",
-    description: [
-      "You have built your life around a version of yourself that works. She is competent, composed, and almost impossible to fault. She shows up prepared. She delivers. She makes it look effortless. And the gap between who she is in public and who you are in private has become so wide that you are no longer sure which one is real.",
-      "This is what it looks like to operate from a constructed identity rather than an authentic one. Your 'I am' statements, the version of you that walks into every room, were not chosen by you. They were assembled from what earned approval, what avoided rejection, what kept you safe in environments that rewarded performance over presence. Beneath the surface, this is identity protection: a behavioural driver so deep it runs beneath your conscious awareness.",
-      "If you do not define yourself with intention, you will be defined by assumption. You have been defined by assumption for a long time. Not by the market. By yourself. The version of you that people admire is a construction. She is expensive to maintain. And the exhaustion you feel is not from the work. It is from the distance between who you perform as and who you actually are.",
-      "The foundation you are missing is not competence. You already have that. The foundation you are missing is knowing who you are without the performance."
-    ],
-    startingModule: "Identity Architecture",
-  },
-  overFunctioner: {
-    name: "The Over-Functioner",
-    mirror: "You have not been strong. You have been over-functioning.",
-    pillar: "Nervous System & Emotional Regulation",
-    secondaryPillar: "Leadership, Authority & Career",
-    description: [
-      "You carry more than your share and you have done it for so long that it feels like your nature rather than a pattern. You are the one who holds it together. The one who shows up early, stays late, absorbs the tension in the room, and makes sure nothing falls through. Other people's systems run because you run them. And the cost of that is a nervous system that has forgotten what rest actually feels like.",
-      "Your cortisol pattern tells the story: you are wired. Your stress response has been in a sustained alarm state for so long that your body no longer distinguishes between a real threat and a Tuesday morning. Your fight response has been repurposed as productivity. You are not productive because you are thriving. You are productive because your body does not know how to stop.",
-      "This maps to the rescuer pattern: you seek relief through fixing and overhelping. At work, you step in instead of empowering others. At home, you overextend, avoid conflict, manage everyone's emotions. The temporary sense of control comes at the cost of lingering exhaustion. This is overperforming from a place of lack. Saying weak yeses when you should be saying strong nos.",
-      "Leadership is not about doing more. It is about buy-in, composure, and clarity. You have confused leadership with labour. The people around you have adapted to your capacity, which means they will never tell you to slow down. The foundation you are missing is not more strength. It is the ability to put yourself down."
-    ],
-    startingModule: "Nervous System Literacy",
-  },
-  delegator: {
-    name: "The Delegator",
-    mirror: "You have not been delegating. You have been giving your power away.",
-    pillar: "Money & Financial Agency",
-    secondaryPillar: "Mindset & Behaviour",
-    description: [
-      "You earn well. You may even earn exceptionally. But somewhere along the way, you handed your financial agency to someone else, or to avoidance itself, and called it a personality trait. 'I am just not a numbers person.' 'I trust my partner with that.' 'I have someone who handles it.' These are not preferences. They are patterns. And they are costing you the one thing money is actually supposed to buy: freedom.",
-      "Your relationship with money did not start when you opened your first bank account. It started in the household you grew up in, in the conversations you heard or did not hear, in the scripts you inherited without choosing them. 'Money does not grow on trees.' 'We cannot afford that.' 'Just put it on the card.' These scripts became your financial blueprint, and you have been operating on someone else's blueprint your entire adult life.",
-      "Beneath the pattern sits a limiting decision, formed early. It might be 'I am not the kind of person who commands money.' Whatever it is, it has calcified into an identity constraint that no amount of financial literacy will fix on its own. The gap is not knowledge. It is sovereignty. You delegate decisions because the discomfort of getting it wrong feels more dangerous than the cost of never deciding.",
-      "The irony is that you are competent everywhere else. You lead teams, you make complex decisions, you navigate ambiguity professionally. But the domain that actually determines your freedom is the one where you defer. The foundation you are missing is not a spreadsheet. It is the belief that you are someone who commands money."
-    ],
-    startingModule: "Financial Architecture",
-  },
-  overrider: {
-    name: "The Overrider",
-    mirror: "You have not been disciplined. You have been overriding.",
-    pillar: "Health, Hormones & Body Literacy",
-    secondaryPillar: "Nervous System & Emotional Regulation",
-    description: [
-      "You push through. Pain, fatigue, hormonal shifts, illness, grief. Your body sends signals and you override every single one because there is always something more important than how you feel. You have been rewarded for this your entire life. School rewarded it. Work rewarded it. Relationships rewarded it. Nobody told you that the override has a physiological cost that compounds.",
-      "The mechanism is precise: when you chronically override your body's signals, your cortisol system moves through three phases. First you are wired, running on adrenaline and determination. Then you are wired and tired, waking up exhausted but unable to sleep at night. Then you are just tired, and your body's stress response has effectively shut down. The bill comes due in your thirties or forties in ways that look like sudden decline but are actually years of accumulated debt. Weight gain around the abdomen. Irregular cycles. Brain fog. Inflammation that no one can quite explain.",
-      "It shows up in your plate too. You are the woman who has not eaten properly since morning because there was always something more urgent. Protein skipped, blood sugar crashing, gut lining inflamed from years of eating in fight-or-flight. Your body is not failing you. You are failing to listen to it. The framework is simple: protein is your anchor, rhythm not restriction, awareness not control. But the Overrider cannot follow this framework because following it requires slowing down, and slowing down feels more dangerous than the symptoms.",
-      "You have dissociated from your body so thoroughly that you do not notice the tension in your shoulders until someone touches them, the shallow breathing until a therapist points it out, the clenched jaw until it becomes a dental problem. Your body has been talking for years. The foundation you are missing is not willpower or a better supplement stack. It is the radical act of treating your body as a source of intelligence rather than something to override."
-    ],
-    startingModule: "Body & Hormonal Literacy",
-  },
-  reactor: {
-    name: "The Reactor",
-    mirror: "You have not been responsive. You have been reactive.",
-    pillar: "Mindset & Behaviour",
-    secondaryPillar: "Relationships & Connection",
-    description: [
-      "You respond. To other people's urgency, to emotional shifts in a room, to crises that may not be yours. Your life has a pattern of high reactivity followed by regret, correction, and then the same cycle again. You can see it happening. That is the painful part. You are not unaware. You are aware and still caught.",
-      "Three behavioural drivers sit beneath reactivity: fear of failure, need for approval, and desire for control. When these needs feel threatened, you do not respond. You react. The difference is structural. A response comes from your values. A reaction comes from your nervous system. The discernment pause exists: observe the behaviour, identify the emotional signal, consider the driver, then choose your response. You know this intellectually. The problem is that your amygdala moves faster than your discernment.",
-      "This is your left-brain emotional circuit running the show. The protector, the critic. It holds fear, anxiety, insecurity. It identifies threats everywhere. It creates emotional reactivity that hijacks your logic before your frontal lobe can intervene. The cycle is clear: thoughts create feelings, feelings create actions, actions create results, results become evidence for the original belief. You are living inside a loop. Anxiety is future fear. You are investing your resources in a worst-case scenario that has not happened, and the investment itself is exhausting you.",
-      "All influence, all connection, begins with listening first. But your pattern makes listening almost impossible because your emotional response arrives before the other person has finished speaking. The relational cost is quiet but severe: the people closest to you have learned to manage your reactions rather than connect with you honestly. The foundation you are missing is not mindfulness or willpower. It is the structural gap between how you receive emotional data and how you process it. That gap is addressable. But not with the tools you have been using."
-    ],
-    startingModule: "Behavioural Patterns & Emotional Regulation",
-  },
-};
+// ────────────────────────────────────────────────────────────────
+// Starting Point Profile v3 (October 2026). Built from the design file
+// "Starting Point Profile - All Screens" and the Base44 build brief.
+// Intro → Before → 12 questions (Halfway after 6) → Guess → Reading →
+// Result with the sign-up card. After sign-up she goes to /YourPattern.
+// The previous quiz is kept on checkpoint "Before new Starting Point
+// Profile and Your Pattern page".
+// ────────────────────────────────────────────────────────────────
 
-const QUESTIONS = [
-  { id: 1, label: "01", dimension: "Recognition", setup: "Think about the last time someone told you, out loud, that you had done something well. A meaningful recognition. Specific, not generic. Recent enough that you remember the moment.", question: "What was your internal response?", answers: [{ text: "You received it cleanly. Said thank you. Felt it land. Then moved on without immediately deflecting or diminishing it.", pattern: "delegator" }, { text: "You smiled and said the right thing. But inside, you were already questioning whether they really meant it, or whether you had somehow created a false impression.", pattern: "performer" }, { text: "You felt a brief warmth, then immediately thought of three things you still had not done well enough.", pattern: "overFunctioner" }, { text: "You redirected it. Gave credit to the team, the timing, the circumstances. Something in you resists being seen as the one who made it happen.", pattern: "overrider" }, { text: "You were not sure how to sit with it. You either dismissed it quickly or replayed it repeatedly before you landed anywhere.", pattern: "reactor" }] },
-  { id: 2, label: "02", dimension: "Pressure", setup: "You are leading a meeting. Someone challenges your recommendation publicly. The room is watching.", question: "What is your first internal response?", answers: [{ text: "A sharp awareness of how you are being perceived. You adjust your position carefully, not because you have changed your mind, but because you need the room back.", pattern: "performer" }, { text: "You feel a pull to fix the tension immediately. You soften your stance or over-explain to reduce the discomfort in the room.", pattern: "overFunctioner" }, { text: "Your body responds before your logic does. There is heat, or a freeze, or a sudden urge to either defend hard or withdraw entirely.", pattern: "reactor" }, { text: "You feel the challenge but hold it at a distance. You defer, or give ground, because the conflict feels more costly than the concession.", pattern: "delegator" }, { text: "You push through. You keep the meeting moving. You process it alone later, if at all.", pattern: "overrider" }] },
-  { id: 3, label: "03", dimension: "Opportunity", setup: "An opportunity lands that would stretch you significantly. It is visible, ambitious, and you are maybe 70% ready.", question: "What do you actually do?", answers: [{ text: "You say yes, then quietly work twice as hard to close the gap between where you are and where you need to appear to be.", pattern: "performer" }, { text: "You take it on, then immediately start managing everyone else's expectations and timelines as well as your own.", pattern: "overFunctioner" }, { text: "You hesitate. You think about who else might be better placed. You wonder if it is the right time. You probably do not take it.", pattern: "delegator" }, { text: "You assess whether your body and energy can sustain it. If you have nothing left, you decline, and feel the cost of that declining for weeks.", pattern: "overrider" }, { text: "You either jump impulsively because the energy of the moment pulls you in, or you overthink it until the window closes and the decision is made for you before you can deliver it.", pattern: "reactor" }] },
-  { id: 4, label: "04", dimension: "Exhaustion", setup: "You have had three consecutive weeks where every day demanded more than you had.", question: "What does week four actually look like?", answers: [{ text: "You still show up as if nothing has shifted. The output stays consistent. You manage the perception. Inside, you are running on fumes.", pattern: "performer" }, { text: "You carry everyone else through it. You check in on the team. You hold the energy in the room. You do not let anyone see the cost.", pattern: "overFunctioner" }, { text: "You get quieter. You withdraw. You start delegating more, sometimes to the point of disengagement, because you genuinely do not have the reserves to engage.", pattern: "delegator" }, { text: "You ignore the signals and push into week four the same way you pushed into weeks one, two, and three. You will rest when it is over.", pattern: "overrider" }, { text: "Your reactions become unpredictable. Small things land harder. You say things you have to walk back. You are not your worst self, but you are close, and you know it.", pattern: "reactor" }] },
-  { id: 5, label: "05", dimension: "Body Signals", setup: "Your sleep has been off for weeks. Your energy crashes every afternoon. Something in your body has shifted and it is not resolving on its own.", question: "What is your honest first response?", answers: [{ text: "You keep the presentation of energy intact externally. You use whatever you need to maintain output. You do not let the fatigue show.", pattern: "performer" }, { text: "You try to fix it by adding structure: earlier sleep, better nutrition, more exercise. You manage your body the way you manage a project.", pattern: "overFunctioner" }, { text: "You google it briefly, feel overwhelmed by the options, and hand the problem to someone else. A doctor, a partner, a programme you pay for and do not follow.", pattern: "delegator" }, { text: "You note it and continue. You have performed through worse. You will address it properly once the current pressure eases.", pattern: "overrider" }, { text: "You spiral slightly. You catastrophise, or swing to the other end and dismiss it entirely. Either way, it has already hijacked your week.", pattern: "reactor" }] },
-  { id: 6, label: "06", dimension: "Nourishment", setup: "It is 3pm on a demanding day. You have not eaten properly since morning.", question: "What actually happens next?", answers: [{ text: "You eat something if people are around. If you are alone, you probably skip it or grab whatever requires no thought, then feel the energy crash an hour later and push through it.", pattern: "performer" }, { text: "You have snacks prepared. You have thought about this. But you have probably already eaten them while solving someone else's problem and did not register the meal.", pattern: "overFunctioner" }, { text: "You decide you will sort it later and continue working. Later becomes evening. You eat more than you needed because you waited too long and your body stopped being able to regulate the signal.", pattern: "delegator" }, { text: "You override the signal completely. You are aware you are hungry. You file it for later. Your body has learned to stop asking.", pattern: "overrider" }, { text: "You make an impulsive decision. You eat something that is not aligned with how you want to feel, feel guilty about it, and the guilt takes more energy than whatever you are feeling.", pattern: "reactor" }] },
-  { id: 7, label: "07", dimension: "Disappointment", setup: "Someone close to you lets you down in a way that actually matters. Not a small thing. A real one.", question: "What do you do with it?", answers: [{ text: "You process it privately. You do not let it show. You adjust your expectations quietly and continue.", pattern: "performer" }, { text: "You absorb the impact and immediately start managing the situation. You try to fix it, smooth it over, or hold the relationship together while processing your own disappointment separately.", pattern: "overFunctioner" }, { text: "You minimise it. You tell yourself it does not matter, or that you should have expected less. You move the responsibility for your own needs somewhere else.", pattern: "delegator" }, { text: "You push through the feeling. You acknowledge it briefly and get back to what needs doing. You will deal with it eventually.", pattern: "overrider" }, { text: "Your response is immediate and felt by the room. You either say more than you intended, go quiet in a way that communicates clearly, or replay the moment until you have exhausted your interpretation of it and said more than you intended.", pattern: "reactor" }] },
-  { id: 8, label: "08", dimension: "Support", setup: "You need something from someone. Not a task delegated. Real support. The kind that requires you to be seen as not having it all together.", question: "What do you actually do?", answers: [{ text: "You reframe the need so it sounds like a strategic conversation rather than a personal one. You get the support without revealing that you needed it.", pattern: "performer" }, { text: "You offer support to others while waiting for someone to notice you need it too. You do not ask directly.", pattern: "overFunctioner" }, { text: "You find a way to hand the weight to someone else, but in a way that feels like you are just being practical rather than vulnerable.", pattern: "delegator" }, { text: "You do not ask. You manage. You file the need and continue until the moment where it is no longer possible to continue.", pattern: "overrider" }, { text: "You either ask for it in a way that is harder to receive than you intended, or you avoid asking entirely because the risk of the ask feels higher than the cost of going without it, and the dynamic shifts.", pattern: "reactor" }] },
-  { id: 9, label: "09", dimension: "Conflict", setup: "There is a conversation you have been avoiding. Something needs to be said, and you know it.", question: "What has kept you from saying it?", answers: [{ text: "The fear that the honest version will damage how you are perceived. You are waiting for a version of the conversation where you can be direct without the relational cost.", pattern: "performer" }, { text: "You are protecting someone. You have decided, on their behalf, that they cannot handle it, or that the timing is wrong, or that your role is to hold the peace.", pattern: "overFunctioner" }, { text: "You are not entirely sure what you want to say. The clarity you need to have the conversation keeps evading you, and without it, the conversation does not happen.", pattern: "delegator" }, { text: "You have not had the capacity. You will have it when things settle. Things have not settled.", pattern: "overrider" }, { text: "You are afraid of your own response in the moment. You do not fully trust that the version of you in that conversation will say it the way you intend, and the cost of getting it wrong feels higher than the cost of not saying it. You have been holding the unsaid thing so tightly it is already hijacking the message.", pattern: "reactor" }] },
-  { id: 10, label: "10", dimension: "Money", setup: "Think about your actual relationship with your own financial position. Not the story you tell people. The real one.", question: "Which of these is closest to the truth?", answers: [{ text: "You earn well and spend in ways that support the version of yourself you present. The number is less important than what it signals.", pattern: "performer" }, { text: "You manage it carefully because losing control of it would mean losing control of everything. It is less about wealth and more about not being caught out.", pattern: "overFunctioner" }, { text: "You have handed the real decision-making to someone or something else. A partner, an advisor, avoidance. You are not sure of the actual number.", pattern: "delegator" }, { text: "You know roughly where you are and you will deal with the gaps later. There is always something more urgent than sorting this properly.", pattern: "overrider" }, { text: "Your relationship with money is emotionally charged. It is either a source of anxiety, a comfort mechanism, or both. The number does not match the feeling, and you have not fully worked out why. Something about it makes you feel fundamentally wrong with you.", pattern: "reactor" }] },
-  { id: 11, label: "11", dimension: "Worth", setup: "Think about the last time your contribution was being assessed. A performance review, a salary conversation, a moment where what you bring was being weighed against what you receive.", question: "What was your internal experience?", answers: [{ text: "You prepared extensively. You presented a version of yourself that made the strongest possible case. Internally, you were managing the gap between what you know you deliver and the fear that they would see through it.", pattern: "performer" }, { text: "You advocated for the team before yourself. You mentioned everything you had held together. You left wondering if you had undersold your own part.", pattern: "overFunctioner" }, { text: "You accepted what was offered. You told yourself it was fair, or close enough, or that negotiating would create more tension than the difference was worth.", pattern: "delegator" }, { text: "You went in underprepared. You had the skills but not the data to support the conversation. You walked out knowing you should have fought harder but not having the energy to go back.", pattern: "overrider" }, { text: "You either over-advocated and felt the room shift, or you froze entirely and said less than you meant to. The emotional charge of the moment overrode the strategy. You are still in a reactive state, and you know it.", pattern: "reactor" }] },
-  { id: 12, label: "12", dimension: "The Pattern", setup: "Read these five sentences slowly. Pick the one you have lived the longest.", question: "Which of these is the pattern you are most tired of?", answers: [{ text: "I am tired of building a life that looks exactly right and feels like it belongs to someone else.", pattern: "performer" }, { text: "I am tired of holding everything together for everyone and having nothing left for myself.", pattern: "overFunctioner" }, { text: "I am tired of waiting for someone else to give me permission to take up the space I have already earned.", pattern: "delegator" }, { text: "I am tired of my body paying the price for everything I refuse to put down.", pattern: "overrider" }, { text: "I am tired of reacting before I have had the chance to choose, and watching the cost of that pattern compound in the relationships and opportunities I seem to stop doing it.", pattern: "reactor" }] },
+const BAR_H = 94;
+const RESUME_PATH = "/StartingPointProfile?resume=1";
+
+function heroCopy(summit) {
+  return summit ? <>You've made your guess. <em>Now check it.</em></> : <>Which pattern has been <em>running<br />your life?</em></>;
+}
+function TimeLine({ center }) {
+  return <p className="small" style={{ marginTop: 14, textAlign: center ? "center" : "left", color: "#3A2A28" }}>12 questions · about {MINUTES} minutes · free</p>;
+}
+const WHAT = [
+  ["identity", "Your pattern, named"],
+  ["awareness", "Your full pattern mix"],
+  ["health", "What it costs you at your best and your worst"],
+  ["alive", "Where your work starts"],
 ];
 
-const KEY_TO_ENUM = {
-  performer: "performer",
-  overFunctioner: "over_functioner",
-  delegator: "delegator",
-  overrider: "overrider",
-  reactor: "reactor",
-};
-
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function Intro({ summit, onStart }) {
+  return (
+    <div>
+      <section className="hero hero-intro" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", overflow: "hidden" }}>
+        {INTRO_IMAGE && <img src={INTRO_IMAGE} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "40% 50%", display: "block" }} />}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(250,245,243,0.45) 0%,rgba(250,245,243,0.6) 40%,rgba(250,245,243,0.9) 100%)" }} />
+        <div style={{ position: "relative" }}><Logo /></div>
+        <div className="hero-text" style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+          <p className="eye">The Starting Point Profile</p>
+          <div style={{ width: 40, height: 1, background: "var(--rose-deep)", margin: "20px 0" }} />
+          <h1 className="h-xl">{heroCopy(summit)}</h1>
+          <p className="body" style={{ marginTop: 18, maxWidth: 330 }}>
+            <strong>This isn’t a personality test.</strong><br />It’s a diagnostic. Twelve questions to show you what’s been driving the way you live.
+          </p>
+        </div>
+        <Primary onClick={onStart} style={{ position: "relative" }}>Show me my pattern</Primary>
+        <div style={{ position: "relative" }}><TimeLine center /></div>
+      </section>
+      <section className="sect"><div className="sect-inner">
+        <p className="eye">What you'll see</p>
+        <h2 className="h-l" style={{ marginTop: 14 }}>Most tests tell you who you are. <em>This one shows you what has been running you.</em></h2>
+        <div className="cards4">{WHAT.map(([ic, t]) => <div className="c4" key={t}><Icon name={ic} size={30} /><h4>{t}</h4></div>)}</div>
+        <p className="body" style={{ marginTop: 28, fontFamily: "var(--serif)", fontStyle: "italic", fontSize: 21, lineHeight: 1.4, color: "var(--burg)" }}>This is not reading your best day. It is reading your operating system.</p>
+      </div></section>
+      <section className="sect"><div className="sect-inner">
+        <p className="eye">The five patterns</p>
+        <div className="strip strip-p">{ORDER.map((k) => <div key={k}><b>{PATTERNS[k].name}</b><span>{PATTERNS[k].desc}</span></div>)}</div>
+        <p className="body" style={{ marginTop: 20 }}>You'll see yourself in more than one. The quiz finds the one that runs first.</p>
+      </div></section>
+      <section className="sect"><div className="sect-inner narrow">
+        <p className="body">Built with the 13 specialists behind The Aligned Woman Blueprint: doctors, psychologists and practitioners.</p>
+      </div></section>
+      <section className="sect" style={{ background: "linear-gradient(160deg,#FAF5F3 0%,#F5DDD9 100%)", textAlign: "center", paddingBottom: 64 }}><div className="sect-inner narrow">
+        <h2 className="h-l">{heroCopy(summit)}</h2>
+        <div style={{ marginTop: 28 }}><Primary onClick={onStart}>Show me my pattern</Primary></div>
+        <TimeLine center />
+      </div></section>
+    </div>
+  );
 }
 
-const INK = "#4A0E2E";
-const INK_BODY = "rgba(58,42,40,0.78)";
-const INK_MUTED = "rgba(58,42,40,0.5)";
-const ROSE = "#C4847A";
-const ROSE_DEEP = "#A86460";
-const HAIRLINE = "rgba(74,14,46,0.1)";
-const HAIRLINE_STRONG = "rgba(196,132,122,0.35)";
-const SERIF = "'DM Serif Display', Georgia, serif";
-const SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
-const EASE = "cubic-bezier(0.2, 0.7, 0.2, 1)";
+function BackBtn({ onBack }) {
+  return <button type="button" className="back" onClick={onBack} aria-label="Back"><Icon name="arrow" size={20} style={{ transform: "scaleX(-1)" }} /></button>;
+}
 
-function ArchetypeCarousel({ mobile }) {
-  const archetypes = getAllArchetypes();
-  const len = archetypes.length;
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setActive((a) => (a + 1) % len), 3200);
-    return () => clearInterval(id);
-  }, [len]);
-
-  const cW = mobile ? 140 : 280;
-  const sW = mobile ? 80 : 160;
-  const gap = mobile ? 12 : 28;
-  const totalW = cW + (sW + gap) * 2;
-
-  const getOffset = (i) => {
-    let diff = i - active;
-    if (diff > len / 2) diff -= len;
-    if (diff < -len / 2) diff += len;
-    return diff;
-  };
-
+function Before({ onBegin, onBack }) {
   return (
-    <div style={{ marginTop: 8 }}>
-      <div style={{
-        position: "relative",
-        width: totalW,
-        height: mobile ? 340 : 620,
-        margin: "0 auto",
-        padding: mobile ? "20px 0 16px" : "32px 0 24px",
-      }}>
-        {archetypes.map((arch, i) => {
-          const diff = getOffset(i);
-          const isCenter = diff === 0;
-          const isVisible = Math.abs(diff) <= 1;
-
-          const w = isCenter ? cW : sW;
-          const centerX = totalW / 2;
-          const x = isCenter
-            ? centerX - cW / 2
-            : diff === -1
-            ? centerX - cW / 2 - gap - sW
-            : diff === 1
-            ? centerX + cW / 2 + gap
-            : diff < 0
-            ? -sW - 20
-            : totalW + 20;
-
-          return (
-            <div
-              key={arch.key}
-              style={{
-                position: "absolute",
-                top: mobile ? 20 : 32,
-                left: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: mobile ? 10 : 14,
-                width: w,
-                transform: `translateX(${x}px)`,
-                opacity: isVisible ? (isCenter ? 1 : 0.55) : 0,
-                transition: `all 800ms ${EASE}`,
-                pointerEvents: isVisible ? "auto" : "none",
-              }}
-            >
-              <div style={{
-                fontFamily: SANS,
-                fontSize: isCenter ? (mobile ? 10 : 12) : (mobile ? 8 : 10),
-                fontWeight: 700,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: isCenter ? ROSE_DEEP : "rgba(74,14,46,0.45)",
-                textAlign: "center",
-                lineHeight: 1.3,
-                minHeight: mobile ? 26 : 32,
-                transition: `all 800ms ${EASE}`,
-                whiteSpace: "nowrap",
-              }}>
-                {arch.name.replace("The ", "")}
-              </div>
-              <div style={{
-                width: "100%",
-                aspectRatio: "9 / 16",
-                background: arch.videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)",
-                border: `1px solid ${isCenter ? "rgba(196,132,122,0.55)" : "rgba(196,132,122,0.25)"}`,
-                borderRadius: mobile ? 8 : 10,
-                boxShadow: isCenter
-                  ? mobile
-                    ? "0 10px 28px rgba(74,14,46,0.18)"
-                    : "0 18px 48px rgba(74,14,46,0.22)"
-                  : "none",
-                position: "relative",
-                overflow: "hidden",
-                transition: `all 800ms ${EASE}`,
-              }}>
-                {arch.videoUrl && (
-                  <video
-                    src={arch.videoUrl}
-                    muted
-                    playsInline
-                    autoPlay
-                    loop
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
-                <div style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: arch.videoUrl
-                    ? "radial-gradient(circle at 50% 60%, transparent 40%, rgba(74,14,46,0.3) 100%)"
-                    : "radial-gradient(circle at 50% 60%, transparent 50%, rgba(74,14,46,0.1) 100%)",
-                  pointerEvents: "none",
-                }} />
-              </div>
-            </div>
-          );
-        })}
+    <div className="hero before" style={{ display: "flex", flexDirection: "column" }}>
+      <div className="qtop-row"><BackBtn onBack={onBack} /><span /></div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <p className="eye">Before you start</p>
+        <p className="h-l" style={{ marginTop: 18 }}>Pick the response that happens first, <em>not the one you'd like to have.</em></p>
+        <p className="body" style={{ marginTop: 18 }}>You'll see yourself in more than one.</p>
       </div>
-      <div style={{ display: "flex", justifyContent: "center", gap: mobile ? 8 : 10, marginTop: mobile ? 8 : 16 }}>
-        {archetypes.map((_, i) => (
-          <span
-            key={i}
-            onClick={() => setActive(i)}
-            style={{
-              width: i === active ? (mobile ? 18 : 24) : (mobile ? 6 : 8),
-              height: mobile ? 4 : 5,
-              borderRadius: 2,
-              background: i === active ? ROSE : "rgba(196,132,122,0.35)",
-              transition: `all 600ms ${EASE}`,
-              cursor: "pointer",
-            }}
-          />
-        ))}
+      <Primary onClick={onBegin}>Begin</Primary>
+    </div>
+  );
+}
+
+function QTop({ onBack, label, pct }) {
+  return (
+    <div className="qtop"><div className="qtop-inner">
+      <div className="qtop-row"><BackBtn onBack={onBack} /><span className="qcount">{label}</span></div>
+      {pct != null && (
+        <div className="pbar">
+          <div className="ptrack" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Progress"><div className="pfill" style={{ width: pct + "%" }} /></div>
+          <span className="ppct">{pct}%</span>
+        </div>
+      )}
+    </div></div>
+  );
+}
+
+function Question({ qi, order, answer, onAnswer, onBack, animClass }) {
+  const q = Q[qi];
+  const [sel, setSel] = useState(null);
+  const lock = useRef(false);
+  const pick = useCallback((i) => {
+    if (lock.current) return;
+    lock.current = true;
+    setSel(i);
+    setTimeout(() => onAnswer(q.a[order[i]][1]), 500);
+  }, [q, order, onAnswer]);
+  useEffect(() => {
+    const h = (e) => {
+      const tag = e.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= 5) pick(n - 1);
+      if (e.key === "Backspace") { e.preventDefault(); onBack(); }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [pick, onBack]);
+  const prev = answer ? order.findIndex((o) => q.a[o][1] === answer) : -1;
+  const shown = sel != null ? sel : prev;
+  const pct = Math.round((qi / 12) * 100);
+  return (
+    <div>
+      <QTop onBack={onBack} label={`Question ${qi + 1} of 12`} pct={pct} />
+      <div className={"qbody " + animClass}>
+        <p className="eye">{String(qi + 1).padStart(2, "0")} · {q.dim}</p>
+        <p className="qsetup">{q.setup}</p>
+        <h2 className="qq" id={"qlabel" + qi}>{q.q}</h2>
+        <div className="answers" role="radiogroup" aria-labelledby={"qlabel" + qi}>
+          {order.map((o, i) => (
+            <button key={i} type="button" role="radio" aria-checked={shown === i} aria-disabled={sel != null ? "true" : "false"} className={"ans" + (shown === i ? " sel" : "")} onClick={() => pick(i)}>
+              <span>{q.a[o][0]}</span><span className="tick">{shown === i && <Check />}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-export default function StartingPointProfile() {
-  const [screen, setScreen] = useState("intro");
-  const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState(null);
-  const [resultKey, setResultKey] = useState(null);
-  const [underPattern, setUnderPattern] = useState(null);
-  const [secondaryKey, setSecondaryKey] = useState(null);
-  const [shuffledQs, setShuffledQs] = useState([]);
-  const [fadeIn, setFadeIn] = useState(true);
-  const [selected, setSelected] = useState(null);
-  const [mobile, setMobile] = useState(false);
-  const ref = useRef(null);
+function Halfway({ onDone }) {
+  useEffect(() => { const t = setTimeout(onDone, 1500); return () => clearTimeout(t); }, [onDone]);
+  return (
+    <button type="button" className="inter" onClick={onDone} aria-label="Continue">
+      <p className="eye">Halfway</p>
+      <p className="h-l" style={{ marginTop: 18 }}>Keep going with your first response, <em>not your best one.</em></p>
+      <p className="caption" style={{ marginTop: 28 }}>Tap to continue</p>
+    </button>
+  );
+}
 
-  useEffect(() => {
-    setShuffledQs(QUESTIONS.map((q) => ({ ...q, answers: shuffleArray(q.answers) })));
-  }, []);
+function Guess({ onPick, onBack, value }) {
+  const [sel, setSel] = useState(value || null);
+  const opts = [...ORDER.map((k) => ({ k, name: PATTERNS[k].name, desc: PATTERNS[k].desc })), { k: "X", name: "I honestly don't know", desc: "" }];
+  const pick = (k) => { setSel(k); setTimeout(() => onPick(k), 500); };
+  return (
+    <div>
+      <QTop onBack={onBack} label="Your guess" />
+      <div className="qbody qanim">
+        <p className="eye">Before the answer</p>
+        <h2 className="qq" id="glabel" style={{ fontStyle: "normal" }}>Before we show you: <em style={{ color: "var(--rose-deep)" }}>which of these do you think runs you?</em></h2>
+        <div className="answers" role="radiogroup" aria-labelledby="glabel" style={{ gap: 8 }}>
+          {opts.map((o) => (
+            <button key={o.k} type="button" role="radio" aria-checked={sel === o.k} className={"opt" + (sel === o.k ? " sel" : "")} onClick={() => pick(o.k)}>
+              <span><b>{o.name}</b>{o.desc && <span>{o.desc}</span>}</span><span className="tick">{sel === o.k && <Check s={12} />}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const check = () => setMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+function Reading({ onDone }) {
+  useEffect(() => { const t = setTimeout(onDone, 2100); return () => clearTimeout(t); }, [onDone]);
+  return (
+    <div className="reading hero" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", background: "linear-gradient(160deg,#0E0208 0%,#1A0510 35%,#4A0E2E 65%,#1A0510 100%)" }} role="status">
+      <p className="h-l" style={{ color: "#FAF5F3" }}><em style={{ color: "var(--rose-light)" }}>Reading your answers</em></p>
+      <div className="drawline" style={{ background: "rgba(255,255,255,0.12)" }}><i style={{ background: "var(--rose)" }} /></div>
+    </div>
+  );
+}
 
-  const transition = (cb) => {
-    setFadeIn(false);
-    setTimeout(() => {
-      cb();
-      setFadeIn(true);
-      if (ref.current) ref.current.scrollTo({ top: 0, behavior: "instant" });
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 400);
+function RevealHead({ res, imgIdx }) {
+  const P = PATTERNS[res.primary];
+  return (
+    <div className="rv-head">
+      <div className="rv-img"><PatternImg p={res.primary} imgIdx={imgIdx} /></div>
+      <div className="rv-fade" />
+      <div className="rv-text">
+        <p className="eye">Your starting point</p>
+        <h1 className="h-xl rv-name" style={{ marginTop: 12 }}>{P.name}</h1>
+        <p className="body rv-mirror" style={{ marginTop: 12, fontFamily: "var(--serif)", fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: "var(--burg)" }}>{P.mirror}</p>
+      </div>
+      <img className="rv-logo" src={LOGO_URL} alt="The Aligned Woman Co." />
+    </div>
+  );
+}
+
+const GoogleG = () => (
+  <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" /><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" /><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" /><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" /></svg>
+);
+
+// The sign-up card: name, email, consent → how you'll sign in → email code.
+function Gate({ onLead, onBeforeLeave, onSaved, primaryName }) {
+  const [step, setStep] = useState(1);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [err, setErr] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [more, setMore] = useState(false);
+  const [pw, setPw] = useState("");
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [resent, setResent] = useState(false);
+  const refs = useRef([]);
+  const loginHref = "/login?from_url=" + encodeURIComponent(RESUME_PATH);
+
+  const save = async () => {
+    const e = {};
+    if (!name.trim()) e.name = "Add your first name.";
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) e.email = "Check your email address.";
+    if (!consent) e.consent = "Tick this so we can send your results.";
+    setErr(e);
+    if (Object.keys(e).length) return;
+    setLoading(true);
+    await onLead({ name: name.trim(), email: email.trim().toLowerCase() });
+    setLoading(false);
+    setStep(2);
   };
 
-  const handleAnswer = (pattern) => {
-    setSelected(pattern);
-    const newA = { ...answers, [currentQ]: pattern };
-    setAnswers(newA);
-    setTimeout(() => {
-      if (currentQ < shuffledQs.length - 1) {
-        transition(() => {
-          setCurrentQ(currentQ + 1);
-          setSelected(null);
-        });
+  const toCode = async () => {
+    setErr({});
+    setLoading(true);
+    try {
+      await base44.auth.register({ email: email.trim().toLowerCase(), password: pw });
+      setStep(3);
+      setTimeout(() => refs.current[0] && refs.current[0].focus(), 50);
+    } catch (ex) {
+      const msg = String(ex?.message || ex?.response?.data?.message || "");
+      if (/exist|already|registered|in use|taken/i.test(msg)) {
+        onBeforeLeave();
+        setErr({ taken: true });
       } else {
-        const scores = { performer: 0, overFunctioner: 0, delegator: 0, overrider: 0, reactor: 0 };
-        Object.values(newA).forEach((p) => { scores[p]++; });
-        const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-        const primaryKey = sorted[0][0];
-        const secondKey = sorted[1][1] > 0 ? sorted[1][0] : null;
-        setResult(PATTERNS[primaryKey]);
-        setResultKey(primaryKey);
-        setUnderPattern(secondKey ? PATTERNS[secondKey] : null);
-        setSecondaryKey(secondKey);
-        transition(() => {
-          setScreen("gate");
-          setSelected(null);
-        });
+        setErr({ pw: msg || "We couldn't create your account. Try again." });
       }
-    }, 600);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSeeResult = () => {
-    const quizResult = {
-      archetype_key: KEY_TO_ENUM[resultKey],
-      secondary_key: secondaryKey ? KEY_TO_ENUM[secondaryKey] : null,
-      completed_at: new Date().toISOString(),
-    };
-    localStorage.setItem("aw_quiz_result", JSON.stringify(quizResult));
-    // A woman who is already signed in (a retake from her dashboard) goes
-    // straight to the dashboard, which saves the result to her profile.
-    // Everyone else registers first and lands on the dashboard after.
-    base44.auth
-      .isAuthenticated()
-      .catch(() => false)
-      .then((authed) => {
-        window.location.href = authed ? "/Dashboard" : "/register?from_url=/Dashboard";
-      });
+  const verify = async (digits) => {
+    setLoading(true);
+    try {
+      const result = await base44.auth.verifyOtp({ email: email.trim().toLowerCase(), otpCode: digits });
+      if (result?.access_token) base44.auth.setToken(result.access_token);
+      try { await base44.auth.updateMe({ full_name: name.trim() }); } catch (_e) { /* name can be added later */ }
+      await onSaved({ name: name.trim(), method: "password" });
+    } catch (_e) {
+      setErr({ code: "That code didn't match. Check the latest email from us and try again." });
+      setCode(["", "", "", "", "", ""]);
+      refs.current[0] && refs.current[0].focus();
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const restart = () => {
-    setAnswers({});
-    setCurrentQ(0);
-    setResult(null);
-    setResultKey(null);
-    setUnderPattern(null);
-    setSecondaryKey(null);
-    setSelected(null);
-    setShuffledQs(QUESTIONS.map((q) => ({ ...q, answers: shuffleArray(q.answers) })));
-    transition(() => setScreen("intro"));
+  const setDigits = (next) => {
+    setCode(next);
+    if (next.every(Boolean)) verify(next.join(""));
   };
-
-  if (screen === "intro") {
-    const centered = !mobile;
-    return (
-      <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, padding: mobile ? "60px 24px 80px" : "88px 64px 120px", boxSizing: "border-box", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: mobile ? "100%" : 760, margin: "0 auto", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease", ...(centered ? { textAlign: "center" } : {}) }}>
-          <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: ROSE }}>
-            The Starting Point Profile
-          </div>
-          <h1 style={{ margin: mobile ? "28px 0 28px" : "36px auto 36px", fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 44 : 72, lineHeight: 1.05, letterSpacing: "-0.02em", color: INK, maxWidth: mobile ? "100%" : 640 }}>
-            Are you ready for<br />a mirror moment?
-          </h1>
-          <p style={{ margin: centered ? "0 auto" : 0, fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 560, fontWeight: 300 }}>
-            Twelve questions. One pattern you have probably been running for years. Naming it is the first thing the work asks of you.
-          </p>
-          <p style={{ margin: centered ? (mobile ? "20px 0 0" : "24px auto 0") : (mobile ? "20px 0 0" : "24px 0 0"), fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 560, fontWeight: 300 }}>
-            This is not a personality quiz. It is a diagnostic built from the work of thirteen specialists across psychology, neuroscience, health, money, and leadership. It reads the pattern running beneath your ambition, your exhaustion, and the gap between what you are capable of and what you are actually doing.
-          </p>
-          <div style={{ marginTop: mobile ? 28 : 36, textAlign: "center" }}>
-            <button
-              onClick={() => transition(() => setScreen("quiz"))}
-              style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "16px 28px" : "18px 36px", borderRadius: 100, background: ROSE, color: "#FFFFFF", border: "none", fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `background 180ms ${EASE}` }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = ROSE_DEEP)}
-              onMouseLeave={(e) => (e.currentTarget.style.background = ROSE)}
-            >
-              Show me <span>&#8594;</span>
-            </button>
-          </div>
-          <h2 style={{ margin: centered ? (mobile ? "40px 0 24px" : "64px auto 32px") : (mobile ? "40px 0 24px" : "64px 0 32px"), fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 26 : 36, lineHeight: 1.15, letterSpacing: "-0.015em", color: INK }}>
-            Which one are <em style={{ fontStyle: "italic", color: ROSE_DEEP }}>you</em>?
-          </h2>
-          <ArchetypeCarousel mobile={mobile} />
-          <div style={{ marginTop: mobile ? 32 : 44, paddingLeft: centered ? 0 : (mobile ? 16 : 20), paddingTop: centered ? 28 : 0, borderLeft: centered ? "none" : `1px solid ${HAIRLINE}`, maxWidth: mobile ? "100%" : 560, marginLeft: centered ? "auto" : 0, marginRight: centered ? "auto" : 0 }}>
-            <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300 }}>
-              You will recognise yourself in more than one answer. That is how patterns work. They overlap. Pick the one that runs first, the response you default to before you have time to choose a better one. This is not reading your best day. It is reading your operating system.
-            </p>
-          </div>
-          <div style={{ marginTop: mobile ? 36 : 48, textAlign: "center" }}>
-            <button
-              onClick={() => transition(() => setScreen("quiz"))}
-              style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "16px 28px" : "18px 36px", borderRadius: 100, background: ROSE, color: "#FFFFFF", border: "none", fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `background 180ms ${EASE}` }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = ROSE_DEEP)}
-              onMouseLeave={(e) => (e.currentTarget.style.background = ROSE)}
-            >
-              Show me <span>&#8594;</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (screen === "quiz" && shuffledQs.length > 0) {
-    const q = shuffledQs[currentQ];
-    const handleBack = () => {
-      if (currentQ > 0) {
-        transition(() => {
-          setCurrentQ(currentQ - 1);
-          setSelected(null);
-        });
-      } else {
-        transition(() => setScreen("intro"));
-      }
-    };
-
-    return (
-      <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: mobile ? "100%" : 700, margin: "0 auto", padding: mobile ? "48px 24px 80px" : "72px 28px 100px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
-          <div style={{ display: "flex", gap: mobile ? 4 : 8, marginBottom: mobile ? 32 : 48 }}>
-            {shuffledQs.map((_, i) => (
-              <div key={i} style={{ flex: 1, height: 2, borderRadius: 2, background: i <= currentQ ? ROSE : HAIRLINE, transition: `background 0.4s ${EASE}` }} />
-            ))}
-          </div>
-          <div style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: ROSE }}>
-            Question {q.label} of 12
-          </div>
-          <div style={{ marginTop: mobile ? 10 : 14, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: INK_MUTED }}>
-            {q.dimension}
-          </div>
-          {q.setup && (
-            <p style={{ margin: mobile ? "22px 0 0" : "28px 0 0", fontFamily: SANS, fontSize: mobile ? 14 : 15, fontWeight: 300, lineHeight: 1.75, color: INK_BODY, maxWidth: mobile ? "100%" : 560 }}>
-              {q.setup}
-            </p>
-          )}
-          <h2 style={{ margin: mobile ? "32px 0 28px" : "44px 0 36px", fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 28 : 38, lineHeight: 1.15, letterSpacing: "-0.015em", color: INK, maxWidth: mobile ? "100%" : 640 }}>
-            {q.question}
-          </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: mobile ? 10 : 12 }}>
-            {q.answers.map((a, i) => {
-              const isSel = selected === a.pattern;
-              return (
-                <button
-                  key={i}
-                  onClick={() => !selected && handleAnswer(a.pattern)}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    textAlign: "left",
-                    padding: mobile ? "18px 20px" : "22px 26px",
-                    borderRadius: 8,
-                    background: isSel ? "rgba(196,132,122,0.06)" : "#FFFFFF",
-                    border: `1px solid ${isSel ? ROSE : HAIRLINE}`,
-                    boxShadow: isSel ? "0 2px 0 rgba(196,132,122,0.25)" : "none",
-                    color: INK_BODY,
-                    fontFamily: SANS,
-                    fontSize: mobile ? 13 : 14,
-                    lineHeight: 1.65,
-                    fontWeight: 400,
-                    cursor: selected ? "default" : "pointer",
-                    transition: `all 200ms ${EASE}`,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!selected) {
-                      e.currentTarget.style.borderColor = HAIRLINE_STRONG;
-                      e.currentTarget.style.background = "rgba(196,132,122,0.03)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!selected || !isSel) {
-                      e.currentTarget.style.borderColor = isSel ? ROSE : HAIRLINE;
-                      e.currentTarget.style.background = isSel ? "rgba(196,132,122,0.06)" : "#FFFFFF";
-                    }
-                  }}
-                >
-                  {a.text}
-                </button>
-              );
-            })}
-          </div>
-          <div style={{ marginTop: mobile ? 32 : 44, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-            <button
-              onClick={handleBack}
-              style={{ background: "transparent", border: "none", color: INK_MUTED, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", padding: 0, transition: `color 180ms ${EASE}` }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = INK)}
-              onMouseLeave={(e) => (e.currentTarget.style.color = INK_MUTED)}
-            >
-              &#8592; Back
-            </button>
-            <span style={{ fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: INK_MUTED }}>
-              {currentQ + 1} / {shuffledQs.length}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (screen === "gate" && result) {
-    const arch = getArchetype(resultKey) || {};
-    const videoUrl = arch.videoUrl || "";
-    const atBest = arch.atBest || "";
-    const atWorst = arch.atWorst || "";
-
-    // Single unified layout — responsive via mobile state
-    const cardWidth = mobile ? 220 : 300;
-
-    return (
-      <div ref={ref} style={{ minHeight: "100vh", background: "#FAF5F3", fontFamily: SANS, color: INK, position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% -10%, rgba(196,132,122,0.16), transparent 55%), radial-gradient(circle at -10% 110%, rgba(232,180,174,0.12), transparent 60%)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: mobile ? "100%" : 900, margin: "0 auto", padding: mobile ? "48px 24px 80px" : "88px 64px 120px", opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(10px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
-
-          {/* Top section: video card + content */}
-          <div style={{ display: mobile ? "block" : "grid", gridTemplateColumns: "300px 1fr", gap: 56, alignItems: "start" }}>
-
-            {/* Video card */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: mobile ? 32 : 0 }}>
-              <div style={{ width: cardWidth, aspectRatio: "9 / 16", background: videoUrl ? "#3D0B27" : "linear-gradient(160deg, #FBEFEC 0%, #F5DDD9 100%)", border: "1px solid rgba(196,132,122,0.3)", borderRadius: 8, position: "relative", overflow: "hidden" }}>
-                {videoUrl && (
-                  <video src={videoUrl} muted playsInline autoPlay loop style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                )}
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(20,4,12,0.92) 0%, rgba(20,4,12,0.7) 30%, rgba(20,4,12,0.15) 55%, transparent 70%)", pointerEvents: "none" }} />
-                <div style={{ position: "absolute", top: 18, right: 18, width: 44, height: 44, borderRadius: "50%", background: "rgba(20,4,12,0.55)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(0,0,0,0.35)" }}>
-                  <svg width={12} height={14} viewBox="0 0 14 16" fill="#FFFFFF" style={{ marginLeft: 2 }}><path d="M0 0 L14 8 L0 16 Z" /></svg>
-                </div>
-                <div style={{ position: "absolute", left: 24, right: 24, bottom: 28 }}>
-                  <div style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 20 : 28, lineHeight: 1.05, color: "#FFFFFF", marginBottom: 12, textShadow: "0 2px 16px rgba(0,0,0,0.65)" }}>{result.name}</div>
-                  <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 11 : 13, lineHeight: 1.6, color: "rgba(255,255,255,0.96)", fontWeight: 400, textShadow: "0 1px 8px rgba(0,0,0,0.65)" }}>{atBest.split(". ").slice(0, 3).join(". ") + "."}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Text content */}
-            <div>
-              <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: ROSE }}>Your Starting Point</div>
-              <h1 style={{ margin: mobile ? "20px 0" : "24px 0 28px", fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 48 : 84, lineHeight: 1, letterSpacing: "-0.02em", color: INK }}>{result.name}</h1>
-              <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: mobile ? 17 : 22, lineHeight: 1.45, color: ROSE_DEEP, maxWidth: 460 }}>{result.mirror}</p>
-
-              <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 22, maxWidth: 460 }}>
-                <div>
-                  <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: 10 }}>At your best</div>
-                  <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300 }}>{atBest}</p>
-                </div>
-                <div>
-                  <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: ROSE, marginBottom: 10 }}>At your worst</div>
-                  <p style={{ margin: 0, fontFamily: SANS, fontSize: mobile ? 13 : 14, lineHeight: 1.7, color: INK_BODY, fontWeight: 300, filter: "blur(6px)", userSelect: "none" }}>{atWorst}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom: centered CTA — same on all archetypes */}
-          <div style={{ marginTop: mobile ? 48 : 56, textAlign: "center" }}>
-            <p style={{ margin: "0 auto 28px", fontFamily: SANS, fontSize: mobile ? 14 : 15, lineHeight: 1.75, color: INK_BODY, maxWidth: 460, fontWeight: 300 }}>
-              Your full diagnostic is ready, written by our specialists about the pattern that has been running your life. Sign up to read the full detail.
-            </p>
-            <button
-              onClick={handleSeeResult}
-              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: mobile ? "12px 22px" : "13px 26px", borderRadius: 100, background: "#FFFFFF", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
-            >
-              <span style={{ fontSize: 12 }}>&#x1F512;</span> Read the full detail
-            </button>
-            <div style={{ marginTop: 12 }}>
-              <button
-                onClick={restart}
-                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: mobile ? "11px 22px" : "12px 28px", borderRadius: 100, background: "transparent", color: ROSE_DEEP, border: `1px solid ${HAIRLINE_STRONG}`, fontFamily: SANS, fontSize: mobile ? 10 : 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer", transition: `all 180ms ${EASE}` }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,132,122,0.06)"; e.currentTarget.style.borderColor = ROSE; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = HAIRLINE_STRONG; }}
-              >
-                Retake
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    );
-  }
+  const typeCode = (i, v) => {
+    const digits = v.replace(/\D/g, "");
+    setErr({});
+    if (digits.length > 1) {
+      const next = code.slice();
+      digits.slice(0, 6 - i).split("").forEach((d, j) => { next[i + j] = d; });
+      const focusAt = Math.min(5, i + digits.length);
+      refs.current[focusAt] && refs.current[focusAt].focus();
+      setDigits(next);
+      return;
+    }
+    const next = code.slice();
+    next[i] = digits.slice(-1);
+    if (next[i] && i < 5) refs.current[i + 1].focus();
+    setDigits(next);
+  };
+  const resend = async () => {
+    setErr({});
+    try { await base44.auth.resendOtp(email.trim().toLowerCase()); setResent(true); } catch (_e) { /* ignore */ }
+  };
+  const provider = (p) => {
+    try { sessionStorage.setItem("aw_pending_full_name", name.trim()); } catch (_e) { /* private mode */ }
+    onBeforeLeave();
+    track("spp_signup_provider", { method: p });
+    base44.auth.loginWithProvider(p, RESUME_PATH);
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FAF5F3", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ width: 32, height: 32, border: `3px solid ${ROSE}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div className="gate" id="gate">
+      {step === 1 && (
+        <>
+          <p className="eye">Free account</p>
+          <h3 className="h-m" style={{ marginTop: 10 }}>Your full profile is ready.</h3>
+          <p className="body" style={{ marginTop: 10, fontSize: 16 }}>Create your free account to read the rest: what it costs you at your worst, your full pattern, and where your work starts.</p>
+          <div className={"field" + (err.name ? " err" : "")}><label htmlFor="fn">First name</label><input id="fn" value={name} onChange={(e) => setName(e.target.value)} autoComplete="given-name" aria-invalid={!!err.name} />{err.name && <span className="msg">{err.name}</span>}</div>
+          <div className={"field" + (err.email ? " err" : "")}><label htmlFor="em">Email</label><input id="em" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" aria-invalid={!!err.email} />{err.email && <span className="msg">{err.email}</span>}</div>
+          <button type="button" className={"consent" + (consent ? " on" : "")} role="checkbox" aria-checked={consent} onClick={() => setConsent(!consent)} style={err.consent ? { color: "#9B2C2C" } : null}>
+            <span className="box" style={err.consent ? { borderColor: "#9B2C2C", borderWidth: 2 } : null}>{consent && <Check s={14} />}</span>
+            <span>{CONSENT_TEXT}</span>
+          </button>
+          {err.consent && <p className="small" style={{ color: "#9B2C2C", marginTop: 4 }}>{err.consent}</p>}
+          <div style={{ marginTop: 20 }}><Primary onClick={save} loading={loading}>Continue</Primary></div>
+        </>
+      )}
+      {step === 2 && (
+        <>
+          <p className="eye">Saved</p>
+          <h3 className="h-m" style={{ marginTop: 10 }}>Thanks, {name.trim()}. <em>One last step.</em></h3>
+          <p className="body" style={{ marginTop: 10, fontSize: 16 }}>Your result is saved to {email.trim()}. Choose how you'll sign in.</p>
+          <div style={{ marginTop: 20 }}><button type="button" className="gbtn" onClick={() => provider("google")}><GoogleG />Continue with Google</button></div>
+          <p className="or">or</p>
+          <div className={"field" + (err.pw ? " err" : "")}><label htmlFor="pw">Set a password</label><input id="pw" type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" />{err.pw && <span className="msg">{err.pw}</span>}</div>
+          {err.taken && <p className="guess" role="alert" style={{ marginTop: 16, borderColor: "rgba(155,44,44,0.35)" }}>You already have an account. <a href={loginHref}>Log in to save this result.</a></p>}
+          <div style={{ marginTop: 16 }}><Primary onClick={toCode} loading={loading} disabled={pw.length < 6}>Create my free account</Primary></div>
+          <div style={{ textAlign: "center", marginTop: 6 }}><button type="button" className="btn-t" onClick={() => setMore(!more)} aria-expanded={more}>More ways to sign in</button></div>
+          {more && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[["microsoft", "Microsoft"], ["apple", "Apple"], ["facebook", "Facebook"]].map(([p, label]) => (
+                <button key={p} type="button" className="gbtn" onClick={() => provider(p)}>Continue with {label}</button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+      {step === 3 && (
+        <>
+          <p className="eye">Check your email</p>
+          <h3 className="h-m" style={{ marginTop: 10 }}>Enter the 6-digit code</h3>
+          <p className="body" style={{ marginTop: 10, fontSize: 16 }}>We sent it to {email.trim()}.</p>
+          <div className="code">
+            {code.map((c, i) => (
+              <input key={i} ref={(el) => (refs.current[i] = el)} value={c} inputMode="numeric" autoComplete={i === 0 ? "one-time-code" : "off"} aria-label={"Digit " + (i + 1)}
+                onChange={(e) => typeCode(i, e.target.value)}
+                onPaste={(e) => { const t = (e.clipboardData?.getData("text") || "").replace(/\D/g, ""); if (t) { e.preventDefault(); typeCode(i, t); } }}
+                onKeyDown={(e) => { if (e.key === "Backspace" && !code[i] && i > 0) refs.current[i - 1].focus(); }}
+                style={err.code ? { borderColor: "#9B2C2C" } : null} />
+            ))}
+          </div>
+          {err.code && <p className="small" role="alert" style={{ color: "#9B2C2C", marginTop: 10 }}>{err.code}</p>}
+          {loading && <p className="caption" style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}><span className="spinner" />Checking</p>}
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+            <button type="button" className="btn-t" onClick={resend}>Resend code</button>
+            {resent && <span className="caption" style={{ alignSelf: "center" }} role="status">Sent</span>}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Result({ res, guess, imgIdx, fit, onFit, unlocked, userName, onLead, onBeforeLeave, onSaved, onYourPattern }) {
+  const P = PATTERNS[res.primary];
+  const [showSticky, setShowSticky] = useState(false);
+  useEffect(() => {
+    const g = document.getElementById("gate");
+    if (!g || unlocked) { setShowSticky(false); return; }
+    const io = new IntersectionObserver(([e]) => setShowSticky(!e.isIntersecting), { root: null, threshold: 0, rootMargin: `0px 0px -${BAR_H}px 0px` });
+    io.observe(g);
+    return () => io.disconnect();
+  }, [unlocked]);
+  const toGate = () => {
+    const g = document.getElementById("gate");
+    if (g) window.scrollTo({ top: g.getBoundingClientRect().top + window.scrollY - 80, behavior: "smooth" });
+  };
+  return (
+    <div className="result" style={{ paddingBottom: unlocked ? 0 : BAR_H }}>
+      <RevealHead res={res} imgIdx={imgIdx} />
+      <div className="pad result-col" style={{ paddingTop: 22 }}>
+        <GuessLine guess={guess} primary={res.primary} />
+        <div className="block" style={{ marginTop: 22 }}>
+          <p className="eye">Your pattern mix</p>
+          <MixBar mix={res.mix} anim />
+        </div>
+        <FitCheck secondary={res.secondary} value={fit} onChange={onFit} />
+        <div className="block">
+          <p className="eye">At your best</p>
+          <p className="body">{P.best}</p>
+        </div>
+        <div className="block lockwrap" style={{ paddingBottom: unlocked ? 28 : 0 }}>
+          <div className={unlocked ? "unlocking" : "locked"} aria-hidden={!unlocked}>
+            <p className="eye">At your worst</p>
+            <p className="body">{P.worst}</p>
+            <p className="eye" style={{ marginTop: 24 }}>What this means</p>
+            <p className="body">{P.means}</p>
+          </div>
+          {!unlocked && <Gate onLead={onLead} onBeforeLeave={onBeforeLeave} onSaved={onSaved} primaryName={P.name} />}
+          {unlocked && (
+            <div style={{ marginTop: 28, padding: "24px 20px", borderRadius: 10, background: "#fff", border: "1px solid var(--hair)", textAlign: "center" }}>
+              <p className="eye">Saved to your profile</p>
+              <p className="h-m" style={{ marginTop: 10 }}>Welcome, {userName || "there"}.</p>
+              <div style={{ marginTop: 18 }}><Primary onClick={onYourPattern}>Go to my full profile <Arrow /></Primary></div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="span" style={{ height: 28 }} />
+      <FootNote />
+      <div className={"sticky" + (showSticky && !unlocked ? " on" : "")} aria-hidden={!(showSticky && !unlocked)} style={{ height: BAR_H }}>
+        <Primary onClick={toGate}>Read the rest <span aria-hidden="true">↓</span></Primary>
+      </div>
+    </div>
+  );
+}
+
+function newOrders() {
+  return Q.map(() => shuffle([0, 1, 2, 3, 4]));
+}
+
+function readParams() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    summit: p.get("src") === "summit",
+    resume: p.get("resume") === "1",
+    utm: {
+      utm_source: p.get("utm_source") || undefined,
+      utm_medium: p.get("utm_medium") || undefined,
+      utm_campaign: p.get("utm_campaign") || undefined,
+    },
+  };
+}
+
+export default function StartingPointProfile() {
+  const navigate = useNavigate();
+  const params = useRef(readParams()).current;
+  const saved = useRef(readProgress()).current;
+  const resumeOk = saved && saved.step && saved.step !== "intro" && Array.isArray(saved.answers) && saved.answers.length === 12;
+
+  const [user, setUser] = useState(undefined); // undefined while checking
+  const [step, setStep] = useState(resumeOk ? (saved.step === "reading" || saved.step === "half" ? (saved.step === "reading" ? "result" : "q") : saved.step) : "intro");
+  const [qi, setQi] = useState(resumeOk ? saved.qi || 0 : 0);
+  const [answers, setAnswers] = useState(resumeOk ? saved.answers : Array(12).fill(null));
+  const [orders, setOrders] = useState(resumeOk && Array.isArray(saved.orders) ? saved.orders : newOrders());
+  const [guess, setGuess] = useState(resumeOk ? saved.guess || null : null);
+  const [fit, setFit] = useState(resumeOk ? saved.fit || null : null);
+  const [halfShown, setHalfShown] = useState(resumeOk ? !!saved.halfShown : false);
+  const [attempt, setAttempt] = useState(resumeOk ? saved.attempt || null : null);
+  const [source] = useState((resumeOk && saved.source) || (params.summit ? "summit" : ""));
+  const [utm] = useState((resumeOk && saved.utm) || params.utm);
+  const [imgIdx, setImgIdx] = useState(resumeOk ? saved.imgIdx || 0 : 0);
+  const [startedAt, setStartedAt] = useState(resumeOk ? saved.startedAt : null);
+  const [completedAt, setCompletedAt] = useState(resumeOk ? saved.completedAt || null : null);
+  const [anim, setAnim] = useState("qanim");
+  const [unlocked, setUnlocked] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [resumed, setResumed] = useState(null); // result rebuilt from aw_quiz_result
+  const resultTracked = useRef(false);
+
+  const summit = source === "summit";
+  const res = resumed ? resumed.res : (step === "result" && answers.every(Boolean) ? score(answers) : null);
+  const shownGuess = resumed ? resumed.guess : guess;
+  const shownImg = resumed ? resumed.imgIdx : imgIdx;
+
+  // Who is she?
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const ok = await base44.auth.isAuthenticated();
+        const me = ok ? await base44.auth.me() : null;
+        if (!cancelled) setUser(me || null);
+      } catch (_e) {
+        if (!cancelled) setUser(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Save progress so a refresh resumes at the same place.
+  useEffect(() => {
+    if (resumed) return;
+    if (step === "intro") return;
+    writeProgress({ step, qi, answers, orders, guess, fit, halfShown, attempt, source, utm, imgIdx, startedAt, completedAt });
+  }, [step, qi, answers, orders, guess, fit, halfShown, attempt, source, utm, imgIdx, startedAt, completedAt, resumed]);
+
+  // Signed in, with a finished result: save it straight away.
+  const saveForSignedIn = useCallback(async (me, r, extra = {}) => {
+    try {
+      await saveQuizResultToProfile(me, extra);
+    } catch (_e) { /* the hand-off stays for the next page load */ }
+    setUnlocked(true);
+    setUserName(extra.firstName || (me?.full_name || "").split(" ")[0] || "");
+  }, []);
+
+  // ?resume=1 after an OAuth or login round trip.
+  useEffect(() => {
+    if (!params.resume || user === undefined) return;
+    const stored = readResult();
+    if (!stored?.archetype_key) {
+      if (user) navigate("/YourPattern", { replace: true });
+      return;
+    }
+    const primary = DESIGN_KEY[stored.archetype_key];
+    const secondary = DESIGN_KEY[stored.secondary_key];
+    const mix = mixFromObject(stored.mix, primary, secondary);
+    const r = mix ? { primary, secondary, mix } : null;
+    if (!r) { navigate(user ? "/YourPattern" : "/StartingPointProfile", { replace: true }); return; }
+    setResumed({ res: r, guess: guessFromPlatform(stored.guess), imgIdx: Number(stored.image_variant) || 0 });
+    setFit(stored.fit ? FIT_LABEL[stored.fit] : null);
+    setStep("result");
+    if (user) {
+      let pending = "";
+      try { pending = sessionStorage.getItem("aw_pending_full_name") || ""; sessionStorage.removeItem("aw_pending_full_name"); } catch (_e) { /* ignore */ }
+      (async () => {
+        if (pending && !user.full_name) { try { await base44.auth.updateMe({ full_name: pending }); } catch (_e) { /* ignore */ } }
+        await saveForSignedIn(user, r, { firstName: pending || (user.full_name || "").split(" ")[0] });
+        track("spp_signup_complete", { primary: stored.archetype_key, method: "other" });
+      })();
+    }
+  }, [params.resume, user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const start = async () => {
+    track("spp_start", { source: source || "" });
+    const now = new Date().toISOString();
+    setStartedAt(now);
+    setAnswers(Array(12).fill(null));
+    setOrders(newOrders());
+    setGuess(null); setFit(null); setHalfShown(false); setQi(0); setCompletedAt(null);
+    setStep("before");
+    const att = await attemptCreate({ source: source || "", ...utm, started_at: now });
+    setAttempt(att);
+  };
+
+  const onAnswer = useCallback((k) => {
+    track("spp_question", { question: qi + 1 });
+    setAnswers((a) => { const n = a.slice(); n[qi] = k; return n; });
+    setAnim("qanim");
+    if (qi === 5 && !halfShown) { setHalfShown(true); setStep("half"); setQi(6); return; }
+    if (qi < 11) { setQi(qi + 1); window.scrollTo(0, 0); return; }
+    setStep("guess");
+    window.scrollTo(0, 0);
+  }, [qi, halfShown]);
+
+  const onBackQ = useCallback(() => {
+    setAnim("qback");
+    if (qi === 0) { setStep("before"); return; }
+    setQi(qi - 1);
+    window.scrollTo(0, 0);
+  }, [qi]);
+
+  const onGuess = (g) => {
+    setGuess(g);
+    track("spp_guess", { guess: guessToPlatform(g) });
+    setStep("reading");
+    window.scrollTo(0, 0);
+  };
+
+  // Reading: calculate, save the attempt, then reveal.
+  const finishReading = useCallback(() => {
+    const r = score(answers);
+    const now = new Date().toISOString();
+    const idx = pickImageIndex(r.primary);
+    setImgIdx(idx);
+    setCompletedAt(now);
+    setStep("result");
+    window.scrollTo(0, 0);
+    const handoff = buildResult({ res: r, answers, guess, fit: null, source, attempt, imgIdx: idx, completedAt: now });
+    writeResult(handoff);
+    attemptUpdate(attempt, {
+      answers: handoff.answers, primary_key: handoff.archetype_key, secondary_key: handoff.secondary_key,
+      mix: handoff.mix, guess: handoff.guess, stage: "completed", completed_at: now,
+    });
+    if (user) saveForSignedIn(user, r);
+  }, [answers, guess, source, attempt, user, saveForSignedIn]);
+
+  // Track the reveal once.
+  useEffect(() => {
+    if (step !== "result" || !res || resultTracked.current) return;
+    resultTracked.current = true;
+    track("spp_result", { primary: PLATFORM_KEY[res.primary], guess_matched: shownGuess === res.primary });
+  }, [step, res, shownGuess]);
+
+  // If she was already signed in when a saved result was resumed, show it unlocked.
+  useEffect(() => {
+    if (step === "result" && user && !unlocked && !resumed && res) saveForSignedIn(user, res);
+  }, [user, step]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentHandoff = () => {
+    const stored = readResult();
+    if (stored?.archetype_key) return stored;
+    if (!res) return null;
+    return buildResult({ res, answers, guess, fit: FIT_KEY[fit], source, attempt, imgIdx, completedAt });
+  };
+
+  const onFit = (label) => {
+    setFit(label);
+    const key = FIT_KEY[label];
+    track("spp_fit", { fit: key });
+    const h = currentHandoff();
+    if (h) {
+      writeResult({ ...h, fit: key });
+      attemptUpdate(h.attempt_id ? { id: h.attempt_id, token: h.attempt_token } : attempt, { fit: key });
+    }
+    if (user) {
+      (async () => {
+        try {
+          const rows = await base44.entities.MemberProfile.filter({ user_id: user.id }, "-created_date", 1);
+          if (rows?.[0]) await base44.entities.MemberProfile.update(rows[0].id, { quiz_fit: key });
+        } catch (_e) { /* ignore */ }
+      })();
+    }
+  };
+
+  const onLead = async ({ name, email }) => {
+    setUserName(name);
+    try { sessionStorage.setItem("aw_pending_full_name", name); } catch (_e) { /* ignore */ }
+    const h = currentHandoff();
+    const att = h?.attempt_id ? { id: h.attempt_id, token: h.attempt_token } : attempt;
+    await attemptUpdate(att, { first_name: name, email, consent: true, consent_text: CONSENT_TEXT, consent_at: new Date().toISOString(), stage: "lead" });
+    track("spp_signup_step1", { primary: h?.archetype_key || "" });
+  };
+
+  const onBeforeLeave = () => {
+    const h = currentHandoff();
+    if (h) writeResult({ ...h, fit: FIT_KEY[fit] || h.fit });
+  };
+
+  const onSaved = async ({ name, method }) => {
+    onBeforeLeave();
+    let me = null;
+    try { me = await base44.auth.me(); } catch (_e) { me = null; }
+    if (me) {
+      try { await saveQuizResultToProfile(me, { firstName: name }); } catch (_e) { /* retried on next page */ }
+    }
+    try { sessionStorage.removeItem("aw_pending_full_name"); } catch (_e) { /* ignore */ }
+    setUser(me);
+    setUserName(name);
+    setUnlocked(true);
+    track("spp_signup_complete", { primary: res ? PLATFORM_KEY[res.primary] : "", method });
+  };
+
+  const goYourPattern = () => navigate("/YourPattern");
+
+  return (
+    <div className="spp-c">
+      <div className="spp">
+        {step === "intro" && <Intro summit={summit} onStart={start} />}
+        {step === "before" && <Before onBack={() => setStep("intro")} onBegin={() => { setAnim("qanim"); setQi(0); setStep("q"); }} />}
+        {step === "q" && (
+          <Question key={qi} qi={qi} order={orders[qi]} answer={answers[qi]} onAnswer={onAnswer} onBack={onBackQ} animClass={anim} />
+        )}
+        {step === "half" && <Halfway onDone={() => { setStep("q"); window.scrollTo(0, 0); }} />}
+        {step === "guess" && <Guess value={guess} onPick={onGuess} onBack={() => { setAnim("qback"); setQi(11); setStep("q"); }} />}
+        {step === "reading" && <Reading onDone={finishReading} />}
+        {step === "result" && res && (
+          <Result
+            res={res}
+            guess={shownGuess}
+            imgIdx={shownImg}
+            fit={fit}
+            onFit={onFit}
+            unlocked={unlocked}
+            userName={userName}
+            onLead={onLead}
+            onBeforeLeave={onBeforeLeave}
+            onSaved={onSaved}
+            onYourPattern={goYourPattern}
+          />
+        )}
+        {step === "result" && !res && <div className="hero" />}
+      </div>
     </div>
   );
 }
