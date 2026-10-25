@@ -5,7 +5,7 @@ import "@/components/spp/spp.css";
 import { PATTERNS, ORDER, Q, MINUTES, CONSENT_TEXT, INTRO_IMAGE, LOGO_URL, PLATFORM_KEY, DESIGN_KEY, score, shuffle } from "@/data/startingPointProfile";
 import { Icon, Check, Arrow, Primary, Logo, PatternImg, MixBar, GuessLine, FitCheck, FootNote } from "@/components/spp/SppUI";
 import {
-  readProgress, writeProgress, clearProgress, readResult, writeResult,
+  readProgress, writeProgress, readResult, writeResult,
   attemptCreate, attemptUpdate, track, buildResult, saveQuizResultToProfile,
   pickImageIndex, FIT_KEY, FIT_LABEL, guessToPlatform, guessFromPlatform, mixFromObject,
 } from "@/lib/sppStore";
