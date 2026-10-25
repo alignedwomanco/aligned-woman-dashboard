@@ -1,60 +1,17 @@
 {
   "name": "MemberProfile",
-  "type": "object",
   "properties": {
-    "user_id": {
-      "type": "string",
-      "description": "Foreign key to User. One MemberProfile per User."
-    },
-    "first_name": {
-      "type": "string",
-      "description": "User's first name, used for dashboard greeting"
-    },
-    "full_name": {
-      "type": "string",
-      "description": "User's full name"
-    },
-    "profile_image_url": {
-      "type": "string",
-      "description": "URL to profile image"
-    },
-    "referral_source": {
-      "type": "string",
-      "description": "How the user found the platform"
-    },
     "affiliate_id": {
-      "type": "string",
-      "description": "GoAffPro affiliate ID captured at signup"
-    },
-    "signup_timestamp": {
-      "type": "string",
-      "format": "date-time",
-      "description": "When the profile was created"
-    },
-    "current_phase": {
-      "type": "string",
-      "enum": [
-        "awareness",
-        "liberation",
-        "intentional_action",
-        "vision",
-        "embodiment"
-      ],
-      "default": "awareness",
-      "description": "Current ALIVE phase the user is in"
+      "description": "GoAffPro affiliate ID captured at signup",
+      "type": "string"
     },
     "completed_modules_count": {
-      "type": "number",
       "default": 0,
-      "description": "Total modules user has marked complete across all courses"
-    },
-    "has_seen_welcome": {
-      "type": "boolean",
-      "default": false,
-      "description": "Flips to true after the user's first dashboard load"
+      "description": "Total modules user has marked complete across all courses",
+      "type": "number"
     },
     "computed_archetype_key": {
-      "type": "string",
+      "description": "User's archetype key from onboarding quiz. Null until quiz is completed.",
       "enum": [
         "performer",
         "over_functioner",
@@ -62,25 +19,129 @@
         "overrider",
         "reactor"
       ],
-      "description": "User's archetype key from onboarding quiz. Null until quiz is completed."
+      "type": "string"
     },
-    "quiz_completed_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Timestamp when the user completed the onboarding quiz. Null until completed."
-    },
-    "last_module_id": {
-      "type": "string",
-      "description": "Reference to the most recent Module the user accessed. Null if no module accessed yet."
+    "current_phase": {
+      "default": "awareness",
+      "description": "Current ALIVE phase the user is in",
+      "enum": [
+        "awareness",
+        "liberation",
+        "intentional_action",
+        "vision",
+        "embodiment"
+      ],
+      "type": "string"
     },
     "description": {
-      "type": "string",
-      "maxLength": 1000
+      "maxLength": 1000,
+      "type": "string"
+    },
+    "first_name": {
+      "description": "User's first name, used for dashboard greeting",
+      "type": "string"
+    },
+    "full_name": {
+      "description": "User's full name",
+      "type": "string"
+    },
+    "has_seen_welcome": {
+      "default": false,
+      "description": "Flips to true after the user's first dashboard load",
+      "type": "boolean"
+    },
+    "last_module_id": {
+      "description": "Reference to the most recent Module the user accessed. Null if no module accessed yet.",
+      "type": "string"
+    },
+    "latest_attempt_id": {
+      "description": "ProfileAttempt id of her latest attempt",
+      "type": "string"
+    },
+    "next_step_route": {
+      "description": "Route picked on Your Pattern: Blueprint or one-on-one",
+      "enum": [
+        "bp",
+        "laura"
+      ],
+      "type": "string"
+    },
+    "pattern_section_seen_at": {
+      "description": "First time the Your Pattern page was shown after her latest attempt",
+      "format": "date-time",
+      "type": "string"
+    },
+    "profile_image_url": {
+      "description": "URL to profile image",
+      "type": "string"
+    },
+    "quiz_completed_at": {
+      "description": "Timestamp when the user completed the onboarding quiz. Null until completed.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "quiz_fit": {
+      "description": "Her answer to Does this sound like you?",
+      "enum": [
+        "yes",
+        "partly",
+        "not_really"
+      ],
+      "type": "string"
+    },
+    "quiz_guess": {
+      "description": "The pattern she guessed before seeing her result",
+      "enum": [
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor",
+        "unsure"
+      ],
+      "type": "string"
+    },
+    "quiz_image_variant": {
+      "description": "Which pattern photograph she was shown, so it stays the same",
+      "type": "string"
+    },
+    "quiz_mix": {
+      "description": "Pattern mix percentages per platform key, adding to 100. Stored only, never shown",
+      "type": "object"
+    },
+    "quiz_source": {
+      "description": "Where she took the profile from, e.g. summit",
+      "type": "string"
+    },
+    "referral_source": {
+      "description": "How the user found the platform",
+      "type": "string"
+    },
+    "secondary_archetype_key": {
+      "description": "Second strongest pattern from her latest Starting Point Profile",
+      "enum": [
+        "performer",
+        "over_functioner",
+        "delegator",
+        "overrider",
+        "reactor"
+      ],
+      "type": "string"
+    },
+    "signup_timestamp": {
+      "description": "When the profile was created",
+      "format": "date-time",
+      "type": "string"
+    },
+    "user_id": {
+      "description": "Foreign key to User. One MemberProfile per User.",
+      "type": "string"
     }
   },
   "required": [
     "user_id"
   ],
+  "type": "object",
   "rls": {
     "create": {
       "created_by_id": "{{user.id}}"
