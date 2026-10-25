@@ -25,6 +25,7 @@ import { PaymentProvider } from './context/PaymentContext';
 import Checkout from './pages/Checkout';
 import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
+import YourPattern from './pages/YourPattern';
 import YourMoneyStory from './pages/YourMoneyStory';
 import MoneyStoryLanding from './pages/MoneyStoryLanding';
 import FeminineWorkbook from './pages/FeminineWorkbook';
@@ -128,6 +129,10 @@ const AuthenticatedApp = () => {
             shell via AppShellV2. The previous dashboard is kept unrouted in
             src/pages/DashboardLegacy.jsx as a rollback. */}
         <Route path="/Dashboard" element={<Dashboard />} />
+        {/* Your Pattern: her full Starting Point Profile and the two doors.
+            Same treatment as /Dashboard: its own AppShellV2 chrome, outside
+            Layout, so free members are never stopped by PendingApproval. */}
+        <Route path="/YourPattern" element={<YourPattern />} />
         {/* Community pages bring their own DashboardSidebar, so they are
             declared here rather than in the generic loop. Going through the
             loop wraps them in Layout, which renders a second sidebar and a
