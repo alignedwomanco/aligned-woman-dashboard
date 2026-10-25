@@ -48,6 +48,14 @@ function ContactsTable() {
   );
 }
 
+// Starting Point Profile applications (programme one_on_one) carry her
+// pattern and two answers. Blank programme = a Blueprint application.
+const PROGRAMME_LABEL = { one_on_one: "One-on-one" };
+const PATTERN_LABEL = {
+  performer: "Performer", over_functioner: "Over-Functioner", delegator: "Delegator",
+  overrider: "Overrider", reactor: "Reactor",
+};
+
 function ApplicationsTable() {
   const qc = useQueryClient();
   const { data: apps = [] } = useQuery({ queryKey: ["admin-apps"], queryFn: () => base44.entities.Application.list("-created_date") });
@@ -58,13 +66,16 @@ function ApplicationsTable() {
   return (
     <div className="rounded-xl overflow-hidden" style={{ background: "#fff", border: "1px solid rgba(107,27,61,0.1)" }}>
       <table className="w-full">
-        <thead><tr style={{background:"#FAF5F3"}}>{["Date","Name","Email","Age","Payment Pref","Status","Action"].map(h=><th key={h} className="px-4 py-3 text-left" style={{fontSize:11,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:"#C4866C"}}>{h}</th>)}</tr></thead>
+        <thead><tr style={{background:"#FAF5F3"}}>{["Date","Name","Email","Programme","Pattern","Age","Payment Pref","Status","Action"].map(h=><th key={h} className="px-4 py-3 text-left" style={{fontSize:11,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:"#C4866C"}}>{h}</th>)}</tr></thead>
         <tbody>
           {apps.map(a=>(
-            <tr key={a.id} className="border-t" style={{borderColor:"rgba(107,27,61,0.06)"}}>
+            <React.Fragment key={a.id}>
+            <tr className="border-t" style={{borderColor:"rgba(107,27,61,0.06)"}}>
               <td className="px-4 py-3 text-sm text-gray-500">{a.created_date?format(new Date(a.created_date),"dd MMM yy"):"—"}</td>
               <td className="px-4 py-3 text-sm font-medium">{a.full_name}</td>
               <td className="px-4 py-3 text-sm">{a.email}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{PROGRAMME_LABEL[a.programme]||"Blueprint"}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{PATTERN_LABEL[a.primary_key]||"—"}{a.secondary_key?` / ${PATTERN_LABEL[a.secondary_key]}`:""}</td>
               <td className="px-4 py-3 text-sm text-gray-600">{a.age_range||"—"}</td>
               <td className="px-4 py-3 text-sm text-gray-600">{a.payment_preference||"—"}</td>
               <td className="px-4 py-3"><span className="px-2 py-1 rounded-full text-xs font-semibold" style={{background:`${STATUS_COLORS[a.status]}20`,color:STATUS_COLORS[a.status]}}>{a.status}</span></td>
@@ -74,8 +85,18 @@ function ApplicationsTable() {
                 </select>
               </td>
             </tr>
+            {a.programme==="one_on_one"&&(a.answer_1||a.answer_2)&&(
+              <tr style={{background:"#FCF9F8"}}>
+                <td colSpan={9} className="px-4 pb-4 pt-1 text-sm text-gray-700">
+                  {a.answer_1&&<p><span className="font-semibold">What's happening for you right now that made you choose this? </span>{a.answer_1}</p>}
+                  {a.answer_2&&<p className="mt-1"><span className="font-semibold">What would be different in six months if this worked? </span>{a.answer_2}</p>}
+                  {a.source&&<p className="mt-1 text-gray-500">Source: {a.source}</p>}
+                </td>
+              </tr>
+            )}
+            </React.Fragment>
           ))}
-          {apps.length===0&&<tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No applications yet</td></tr>}
+          {apps.length===0&&<tr><td colSpan={9} className="px-4 py-8 text-center text-gray-400">No applications yet</td></tr>}
         </tbody>
       </table>
     </div>
