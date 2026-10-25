@@ -39,8 +39,8 @@ function Intro({ summit, onStart }) {
   return (
     <div>
       <section className="hero hero-intro" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", overflow: "hidden" }}>
-        {INTRO_IMAGE && <img src={INTRO_IMAGE} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "40% 50%", display: "block" }} />}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(250,245,243,0.45) 0%,rgba(250,245,243,0.6) 40%,rgba(250,245,243,0.9) 100%)" }} />
+        {INTRO_IMAGE && <img src={INTRO_IMAGE} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 52%", display: "block" }} />}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(250,245,243,0.52) 0%,rgba(250,245,243,0.44) 34%,rgba(250,245,243,0.62) 66%,rgba(250,245,243,0.9) 100%)" }} />
         <div style={{ position: "relative" }}><Logo /></div>
         <div className="hero-text" style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
           <p className="eye">The Starting Point Profile</p>

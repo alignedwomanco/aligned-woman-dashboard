@@ -145,9 +145,9 @@ export const PATTERN_IMAGES = {
   V: [],
   R: [],
 };
-// Intro editorial image: not supplied yet. The intro shows the light
-// gradient on its own until it is.
-export const INTRO_IMAGE = "";
+// Intro editorial image: a woman drawing a mandala in the sand, used as the
+// hero backdrop behind the intro copy.
+export const INTRO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/4153d4e3f_thepattern.jpg";
 export const LOGO_URL = "https://media.base44.com/images/public/69f46886a412ee042303f1af/1c0c68566_awblogo.png";
 
 export const MINUTES = "6";
