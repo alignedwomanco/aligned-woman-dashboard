@@ -215,7 +215,7 @@ const GoogleG = () => (
 );
 
 // The sign-up card: name, email, consent → how you'll sign in → email code.
-function Gate({ onLead, onBeforeLeave, onSaved, primaryName }) {
+function Gate({ onLead, onBeforeLeave, onSaved }) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -407,7 +407,7 @@ function Result({ res, guess, imgIdx, fit, onFit, unlocked, userName, onLead, on
             <p className="eye" style={{ marginTop: 24 }}>What this means</p>
             <p className="body">{P.means}</p>
           </div>
-          {!unlocked && <Gate onLead={onLead} onBeforeLeave={onBeforeLeave} onSaved={onSaved} primaryName={P.name} />}
+          {!unlocked && <Gate onLead={onLead} onBeforeLeave={onBeforeLeave} onSaved={onSaved} />}
           {unlocked && (
             <div style={{ marginTop: 28, padding: "24px 20px", borderRadius: 10, background: "#fff", border: "1px solid var(--hair)", textAlign: "center" }}>
               <p className="eye">Saved to your profile</p>
@@ -450,7 +450,7 @@ export default function StartingPointProfile() {
   const resumeOk = saved && saved.step && saved.step !== "intro" && Array.isArray(saved.answers) && saved.answers.length === 12;
 
   const [user, setUser] = useState(undefined); // undefined while checking
-  const [step, setStep] = useState(resumeOk ? (saved.step === "reading" || saved.step === "half" ? (saved.step === "reading" ? "result" : "q") : saved.step) : "intro");
+  const [step, setStep] = useState(resumeOk ? (saved.step === "half" ? "q" : saved.step) : "intro");
   const [qi, setQi] = useState(resumeOk ? saved.qi || 0 : 0);
   const [answers, setAnswers] = useState(resumeOk ? saved.answers : Array(12).fill(null));
   const [orders, setOrders] = useState(resumeOk && Array.isArray(saved.orders) ? saved.orders : newOrders());
