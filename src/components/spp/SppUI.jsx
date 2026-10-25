@@ -146,7 +146,9 @@ export function PatternFull({ res, guess, imgIdx, onRetake }) {
           <h2 className="h-l" style={{ marginTop: 10 }}>{P.name}</h2>
           <p className="body" style={{ marginTop: 10, fontFamily: "var(--serif)", fontStyle: "italic", fontSize: 19, lineHeight: 1.4, color: "var(--burg)" }}>{P.mirror}</p>
           {guess && <div style={{ marginTop: 16 }}><GuessLine guess={guess} primary={res.primary} /></div>}
-          <div className="block" style={{ marginTop: 20 }}><p className="eye">Your pattern mix</p><MixBar mix={res.mix} /></div>
+          {Array.isArray(res.mix) && res.mix.length === 5 && (
+            <div className="block" style={{ marginTop: 20 }}><p className="eye">Your pattern mix</p><MixBar mix={res.mix} /></div>
+          )}
         </div>
       </div>
       <div className="pad dash-full">
