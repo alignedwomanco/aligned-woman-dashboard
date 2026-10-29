@@ -78,7 +78,7 @@ export default function CheckoutComplete() {
       // Signed in. Confirm the payment with Stripe and unlock the course for
       // this account. Idempotent: a repeat call just re confirms access.
       try {
-        const raw = await base44.functions.verifyCheckoutSession({ session_id: sessionId });
+        const raw = await base44.functions.invoke("verifyCheckoutSession", { session_id: sessionId });
         const result = raw && raw.data ? raw.data : raw;
         if (cancelled) return;
 
