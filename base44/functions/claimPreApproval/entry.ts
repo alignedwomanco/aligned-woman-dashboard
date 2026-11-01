@@ -1,5 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+const AUDIT_ACCESS_TAG = 'alignment_audit_paid';
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -28,8 +30,15 @@ Deno.serve(async (req) => {
     const existingTags = Array.isArray(user.access_tags) ? user.access_tags : [];
     const mergedTags = Array.from(new Set([...existingTags, ...grantTags]));
 
+    // membership_type only ever moves up. A "free" grant (for example an
+    // Alignment Audit) never downgrades a member who is already "paid".
+    const nextMembershipType =
+      user.membership_type === 'paid' || grantType === 'paid'
+        ? 'paid'
+        : (user.membership_type || grantType);
+
     await base44.asServiceRole.entities.User.update(user.id, {
-      membership_type: grantType,
+      membership_type: nextMembershipType,
       access_tags: mergedTags,
     });
 
@@ -38,6 +47,20 @@ Deno.serve(async (req) => {
       claimed_user_email: email,
       claimed_at: new Date().toISOString(),
     });
+
+    // Link any audit bought before she had an account to her new user id.
+    if (grantTags.includes(AUDIT_ACCESS_TAG)) {
+      try {
+        const audits = await base44.asServiceRole.entities.AuditResponse.filter({ email });
+        for (const audit of audits || []) {
+          if (!audit.user_id) {
+            await base44.asServiceRole.entities.AuditResponse.update(audit.id, { user_id: user.id });
+          }
+        }
+      } catch (_err) {
+        // Best effort. The audit is still readable by her email.
+      }
+    }
 
     // Enroll user in any courses whose tags match the granted access tags
     const allCourses = await base44.asServiceRole.entities.Course.list();
