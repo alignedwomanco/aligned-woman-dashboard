@@ -706,7 +706,9 @@ export function migrateAnswers(answers) {
     } else if (q.type === "lists2") {
       next = { [q.lists[0].key]: [{ text: v }] };
     } else if (q.type === "prefix") {
-      next = v.replace(/^\s*"?good women don'?t\.{0,3}"?\s*/i, "") || v;
+      // Only her own words are kept; the fixed lead-in is dropped once.
+      const words = v.replace(/^\s*"?good women don'?t\.{0,3}"?\s*/i, "") || v;
+      next = words !== v ? words : null;
     }
     if (next !== null) { out[q.id] = next; changed[q.id] = next; }
   }
