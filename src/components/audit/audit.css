@@ -55,7 +55,39 @@
 .spp .aw-bullets li{position:relative;padding-left:18px;font-weight:300;font-size:16px;line-height:1.6;color:var(--grey);list-style:none}
 .spp .aw-bullets li::before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--rose)}
 .spp .aw-diag{white-space:pre-wrap;font-weight:300;font-size:16px;line-height:1.7;color:var(--grey);margin-top:16px}
+/* Answer Format Update: rows, fields, chips, prefix */
+.spp .aw-field input[type=time]{width:100%;max-width:200px;min-height:48px;padding:0 14px;border-radius:8px;border:1px solid rgba(74,14,46,0.2);background:#fff;font:400 16px var(--sans);color:var(--grey)}
+.spp .aw-field input[type=time]:focus{outline:none;border:2px solid var(--burg);padding:0 13px}
+.spp .aw-chips .chip,.spp .aw-toggle .chip{min-height:44px}
+.spp .aw-toggle{display:flex;gap:8px;flex-wrap:wrap}
+.spp .aw-toggle .chip{flex:1 1 auto;justify-content:center}
+.spp .aw-numbox{display:flex;align-items:center;gap:10px}
+.spp .aw-numbox input{max-width:140px}
+.spp .aw-suffix{font:500 14px var(--sans);color:var(--grey-mid);white-space:nowrap}
+.spp .aw-leadin{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--burg);margin-bottom:8px}
+.spp .aw-total{font:600 14px var(--sans);color:var(--burg);margin-top:14px}
+.spp .aw-total-note{font:400 14px/1.5 var(--sans);color:var(--grey);margin-top:4px}
+.spp .aw-rows{display:flex;flex-direction:column;gap:12px}
+.spp .aw-row-card{background:#fff;border:1px solid rgba(74,14,46,0.1);border-radius:10px;padding:16px}
+.spp .aw-cols{display:flex;flex-direction:column;gap:14px}
+.spp .aw-cols .aw-sub{margin-top:0}
+.spp .aw-remove{font:600 12px var(--sans);letter-spacing:0.08em;text-transform:uppercase;color:var(--burg-mid);margin-top:12px;min-height:36px;text-decoration:underline;text-underline-offset:3px}
+.spp .aw-add{margin-top:12px}
+.spp .aw-line-card{background:#fff;border:1px solid rgba(74,14,46,0.1);border-radius:10px;padding:10px 10px 14px;margin-top:8px}
+.spp .aw-line-card .aw-list-row{margin-top:0}
+.spp .aw-line-extra{margin-top:10px}
+.spp .aw-prefix{display:flex;flex-direction:column;gap:8px}
+.spp .aw-prefix-lead{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--burg)}
+.spp .aw-pair{display:grid;grid-template-columns:1fr;gap:0}
+.spp .aw-pause{min-height:50vh;display:flex;flex-direction:column;justify-content:center}
 @container (min-width:768px){
 .spp .aw-audit-body{padding:36px var(--side) 128px}
 .spp .aw-row.inline{grid-template-columns:1fr 260px;align-items:center}
+.spp .aw-col.wide{max-width:1040px}
+.spp .aw-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;align-items:start}
+.spp .aw-row-card .aw-cols{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.spp .aw-pair{grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.spp .aw-pair .aw-q{border-top:none}
+.spp .aw-pair .aw-cols{display:flex;flex-direction:column}
+.spp .aw-add{max-width:320px}
 }
