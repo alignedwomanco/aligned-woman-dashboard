@@ -76,7 +76,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete" || currentPageName === "StartingPointProfile" || currentPageName === "ContactForm" || currentPageName === "TheAWStandard" || currentPageName === "Apply" || currentPageName === "Retreats" || currentPageName === "caps";
+  const isPublicPage = publicPages.some((p) => p.name === currentPageName) || currentPageName === "Login" || currentPageName === "LandingPage" || currentPageName === "Home" || currentPageName === "blueprint" || currentPageName === "about-us" || currentPageName === "CheckoutComplete" || currentPageName === "StartingPointProfile" || currentPageName === "ContactForm" || currentPageName === "TheAWStandard" || currentPageName === "Apply" || currentPageName === "Retreats" || currentPageName === "caps" || currentPageName === "alignment-audit";
 
   // Dashboard has its own layout - render children directly
   const isDashboardPage = currentPageName === "Dashboard";
