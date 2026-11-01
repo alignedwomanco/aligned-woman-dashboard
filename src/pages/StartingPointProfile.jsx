@@ -652,7 +652,12 @@ export default function StartingPointProfile() {
     track("spp_signup_complete", { primary: res ? PLATFORM_KEY[res.primary] : "", method });
   };
 
-  const goYourPattern = () => navigate("/YourPattern");
+  // A woman sent here from the Alignment Audit goes straight back to it.
+  const goYourPattern = () => {
+    let ret = "";
+    try { ret = sessionStorage.getItem("aw_spp_return") || ""; } catch (_e) { ret = ""; }
+    navigate(ret === "/Audit" ? "/Audit" : "/YourPattern");
+  };
 
   return (
     <div className="spp-c">
