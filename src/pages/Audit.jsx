@@ -5,12 +5,12 @@ import AppShellV2 from "@/components/dashboard-v2/AppShellV2";
 import "@/components/spp/spp.css";
 import "@/components/audit/audit.css";
 import { Primary, Check } from "@/components/spp/SppUI";
-import { AnswerField, CarryQuote, QuestionText } from "@/components/audit/AuditFields";
+import { AnswerField, CarryQuote, LiveQuote, QuestionText } from "@/components/audit/AuditFields";
 import { Q as SPP_Q, DESIGN_KEY, MINUTES } from "@/data/startingPointProfile";
 import { saveQuizResultToProfile, track } from "@/lib/sppStore";
 import {
-  BEFORE_YOU_BEGIN, AGREEMENT_TEXT, TERMS_LABEL, TERMS_URL, TRACK_SCREEN, WHEN_YOU_FINISH,
-  SPP_CARRY, partsForTrack, questionsFor, isAnswered,
+  BEFORE_YOU_BEGIN, AGREEMENT_TEXT, TERMS_LABEL, TERMS_URL, TRACK_SCREEN, WHEN_YOU_FINISH, PAUSE_SCREEN,
+  SPP_CARRY, partsForTrack, questionsFor, isAnswered, migrateAnswers,
 } from "@/data/auditQuestions";
 
 // ────────────────────────────────────────────────────────────────
@@ -19,7 +19,8 @@ import {
 //   before   Before you begin, with the agreement tick
 //   track    I run a business / I have a career
 //   spp      the Starting Point Profile, only if she has never taken it
-//   p1..p7   Parts 1 to 7, one per screen
+//   p1..p7   Parts 1 to 7, one per screen, with a pause screen before
+//            Part 4 (not a part, not counted in progress)
 //   tb | tc  her track module
 //   p8, p9   Parts 8 and 9
 //   finish   When you finish
@@ -37,6 +38,24 @@ const FACT_TO_PROFILE = {
   q2: { what: "role_or_business", stage: "stage" },
   q3: { role: "role_or_business", how_long: "stage", industry: "industry" },
 };
+
+// What is sent to the server for one answer. Rows with nothing filled in
+// are not saved.
+function rowFilled(row) {
+  if (!row || typeof row !== "object") return false;
+  return Object.values(row).some((x) => {
+    if (x === undefined || x === null) return false;
+    if (typeof x === "number") return true;
+    if (typeof x === "string") return x.trim().length > 0;
+    if (Array.isArray(x?.selected)) return x.selected.length > 0 || String(x.other || "").trim().length > 0;
+    return false;
+  });
+}
+
+function cleanAnswer(q, value) {
+  if (q.type === "rows" && Array.isArray(value)) return value.filter(rowFilled);
+  return value;
+}
 
 async function callAudit(payload) {
   const res = await base44.functions.invoke("auditFlow", payload);
@@ -106,7 +125,10 @@ export default function Audit() {
   const screens = useMemo(() => {
     const list = ["before", "track"];
     if (!hasProfile) list.push("spp");
-    parts.forEach((p) => list.push(p.id));
+    parts.forEach((p) => {
+      if (p.pauseBefore) list.push("pause");
+      list.push(p.id);
+    });
     list.push("finish", "review");
     return list;
   }, [parts, hasProfile]);
@@ -143,7 +165,16 @@ export default function Audit() {
         const a = r?.audit || null;
         setAudit(a);
         if (a) {
-          setAnswers(a.answers || {});
+          // Answers saved before the Answer Format Update move into the new
+          // layout, and the moved versions are saved back once.
+          const migrated = migrateAnswers(a.answers || {});
+          setAnswers(migrated.answers);
+          if (Object.keys(migrated.changed).length && (a.status === "purchased" || a.status === "in_progress")) {
+            Object.assign(pending.current.answers, migrated.changed);
+            setSaveState("saving");
+            if (timer.current) clearTimeout(timer.current);
+            timer.current = setTimeout(() => flush(), 300);
+          }
           setTrackChoice(a.track || (p?.track === "business" || p?.track === "career" ? p.track : null));
           if (a.status === "purchased") setScreen("before");
           else if (a.status === "in_progress") setScreen(a.last_part || "track");
@@ -217,7 +248,7 @@ export default function Audit() {
 
   const setAnswer = (q, value) => {
     setAnswers((prev) => ({ ...prev, [q.id]: value }));
-    pending.current.answers[q.id] = value === undefined ? null : value;
+    pending.current.answers[q.id] = value === undefined ? null : cleanAnswer(q, value);
     const map = FACT_TO_PROFILE[q.id];
     if (map && value && typeof value === "object") {
       for (const [field, profileKey] of Object.entries(map)) {
@@ -317,7 +348,10 @@ export default function Audit() {
   const quotes = audit?.spp_snapshot?.quotes || {};
   const partIndex = parts.findIndex((p) => p.id === screen);
   const partLabel = partIndex >= 0 ? `Part ${partIndex + 1} of ${parts.length}` : "";
-  const navPct = screens.length > 1 && idx >= 0 ? Math.round((idx / (screens.length - 1)) * 100) : 0;
+  // The pause screen is not counted in the progress bar.
+  const counted = screens.filter((s) => s !== "pause");
+  const countedIdx = counted.indexOf(screen === "pause" ? screens[idx - 1] : screen);
+  const navPct = counted.length > 1 && countedIdx >= 0 ? Math.round((countedIdx / (counted.length - 1)) * 100) : 0;
   const editable = audit?.status === "purchased" || audit?.status === "in_progress";
 
   // ── Screens ──
@@ -380,27 +414,46 @@ export default function Audit() {
     </div>
   );
 
+  const renderQuestion = (q) => (
+    <section key={q.id} className="aw-q" aria-labelledby={`${q.id}-n`}>
+      <p className="aw-qnum" id={`${q.id}-n`}>{q.n}</p>
+      {q.quote && <LiveQuote kind={q.quote} answers={answers} />}
+      <QuestionText q={q} />
+      {q.carry && <CarryQuote quotes={quotes[q.carry]} />}
+      <AnswerField q={q} value={answers[q.id]} answers={answers} profileFacts={profileFacts} onChange={(v) => setAnswer(q, v)} />
+    </section>
+  );
+
   const renderPart = (part) => {
     const qs = questionsFor(part, trackValue);
+    const hasPair = qs.some((q) => q.pairWith);
+    const paired = new Set(qs.filter((q) => q.pairWith).map((q) => q.pairWith));
     let lastGroup = null;
     return (
-      <div className="aw-col">
+      <div className={"aw-col" + (hasPair ? " wide" : "")}>
         <p className="eye">{partLabel}</p>
         <h1 className="h-l" style={{ marginTop: 10 }}>{part.title}</h1>
         {part.intro && <p className="body" style={{ marginTop: 12 }}>{part.intro}</p>}
         <div style={{ marginTop: 12 }}>
           {qs.map((q) => {
+            if (paired.has(q.id)) return null;
             const groupHead = part.groups && q.group !== lastGroup ? q.group : null;
             lastGroup = q.group;
+            // Q34 and Q35: two columns on a wide screen, Q34 on the left, so
+            // she sees the gap. Stacked on a phone.
+            if (q.pairWith) {
+              const partner = qs.find((x) => x.id === q.pairWith);
+              return (
+                <div key={q.id} className="aw-pair">
+                  {renderQuestion(q)}
+                  {partner && renderQuestion(partner)}
+                </div>
+              );
+            }
             return (
               <React.Fragment key={q.id}>
                 {groupHead && <h2 className="aw-group">{groupHead}</h2>}
-                <section className="aw-q" aria-labelledby={`${q.id}-n`}>
-                  <p className="aw-qnum" id={`${q.id}-n`}>{q.n}</p>
-                  <QuestionText q={q} />
-                  {q.carry && <CarryQuote quotes={quotes[q.carry]} />}
-                  <AnswerField q={q} value={answers[q.id]} profileFacts={profileFacts} onChange={(v) => setAnswer(q, v)} />
-                </section>
+                {renderQuestion(q)}
               </React.Fragment>
             );
           })}
@@ -408,6 +461,14 @@ export default function Audit() {
       </div>
     );
   };
+
+  const renderPause = () => (
+    <div className="aw-col aw-pause">
+      <h1 className="h-l">{PAUSE_SCREEN.title}</h1>
+      <p className="body" style={{ marginTop: 16 }}>{PAUSE_SCREEN.body}</p>
+      <div style={{ marginTop: 28 }}><Primary onClick={goNext}>{PAUSE_SCREEN.button}</Primary></div>
+    </div>
+  );
 
   const renderFinish = () => (
     <div className="aw-col">
@@ -521,6 +582,7 @@ export default function Audit() {
   else if (screen === "before") body = renderBefore();
   else if (screen === "track") body = renderTrack();
   else if (screen === "spp") body = renderSpp();
+  else if (screen === "pause") body = renderPause();
   else if (screen === "finish") body = renderFinish();
   else if (screen === "review") body = renderReview();
   else {
@@ -553,7 +615,7 @@ export default function Audit() {
               </div>
             )}
             <div className="aw-audit-body">{body}</div>
-            {inForm && screen !== "review" && screen !== "spp" && (
+            {inForm && screen !== "review" && screen !== "spp" && screen !== "pause" && (
               <div className="aw-nav">
                 <div className="aw-nav-inner">
                   {canBack && <button type="button" className="btn btn-s" onClick={goBack}>Back</button>}
