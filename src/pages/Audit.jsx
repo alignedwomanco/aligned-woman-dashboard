@@ -260,7 +260,9 @@ export default function Audit() {
   };
   const idx = screens.indexOf(screen);
   const goNext = () => { if (idx >= 0 && idx < screens.length - 1) go(screens[idx + 1]); };
-  const goBack = () => { if (idx > 0) go(screens[idx - 1]); };
+  // Once started, Back never returns to Before you begin.
+  const canBack = idx > 1;
+  const goBack = () => { if (canBack) go(screens[idx - 1]); };
 
   const start = async () => {
     if (!agreed) return;
@@ -535,7 +537,7 @@ export default function Audit() {
               <div className="qtop">
                 <div className="aw-col">
                   <div className="qtop-row">
-                    <button type="button" className="back" aria-label="Back" onClick={goBack} disabled={idx <= 0}>
+                    <button type="button" className="back" aria-label="Back" onClick={goBack} disabled={!canBack} style={canBack ? undefined : { visibility: "hidden" }}>
                       <span aria-hidden="true">←</span>
                     </button>
                     <span className="qcount">{partLabel || (firstName ? `${firstName}'s audit` : "Your audit")}</span>
@@ -554,7 +556,7 @@ export default function Audit() {
             {inForm && screen !== "review" && screen !== "spp" && (
               <div className="aw-nav">
                 <div className="aw-nav-inner">
-                  {idx > 0 && <button type="button" className="btn btn-s" onClick={goBack}>Back</button>}
+                  {canBack && <button type="button" className="btn btn-s" onClick={goBack}>Back</button>}
                   <Primary onClick={goNext} disabled={!canNext} full={false}>{nextLabel}</Primary>
                 </div>
               </div>
