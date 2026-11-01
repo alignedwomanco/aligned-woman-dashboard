@@ -1,17 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import { Check } from "@/components/spp/SppUI";
-import { OPTION_SETS, CARRY_LEAD } from "@/data/auditQuestions";
+import { OPTION_SETS, CARRY_LEAD, optionsFor, liveQuote } from "@/data/auditQuestions";
 
 // Answer fields for the Alignment Audit. One component per answer type in
 // src/data/auditQuestions.js. Every field is optional: an untouched field
-// stays empty and counts as skipped.
+// stays empty and counts as skipped. Chips are real radio buttons or
+// checkboxes (role and aria-checked on a focusable button), so they work
+// with a keyboard and show the shared focus ring from spp.css.
 
 function optionsOf(name) {
   return OPTION_SETS[name] || [];
 }
 
+const hasText = (x) => String(x ?? "").trim().length > 0;
+
 // A text field that grows as she types.
-export function AutoText({ value, onChange, id, ariaLabel, minRows = 3, disabled }) {
+export function AutoText({ value, onChange, id, ariaLabel, minRows = 3, disabled, placeholder }) {
   const ref = useRef(null);
   useEffect(() => {
     const el = ref.current;
@@ -27,6 +31,7 @@ export function AutoText({ value, onChange, id, ariaLabel, minRows = 3, disabled
       rows={minRows}
       value={value || ""}
       disabled={disabled}
+      placeholder={placeholder || undefined}
       onChange={(e) => onChange(e.target.value)}
     />
   );
@@ -42,6 +47,29 @@ export function CarryQuote({ quotes }) {
       {list.map((q, i) => (
         <blockquote key={i}>{q}</blockquote>
       ))}
+    </div>
+  );
+}
+
+// One of her answers from earlier in this audit, quoted back.
+export function LiveQuote({ kind, answers }) {
+  const line = kind ? liveQuote(kind, answers) : null;
+  if (!line) return null;
+  return (
+    <div className="aw-carry">
+      <blockquote style={{ marginTop: 0 }}>{line}</blockquote>
+    </div>
+  );
+}
+
+// Words she wrote before the answer format changed, where the new layout
+// has no text box to hold them. Nothing she wrote is lost.
+function LegacyNote({ text }) {
+  if (!hasText(text)) return null;
+  return (
+    <div className="aw-carry">
+      <p>What you wrote before:</p>
+      <blockquote>{text}</blockquote>
     </div>
   );
 }
@@ -92,6 +120,135 @@ function FromProfile() {
   return <span className="tag">From your profile</span>;
 }
 
+// ── Chips ──
+// Value: { selected: [...values], other: "" }. When "other" is chosen a
+// short text box appears for it.
+function ChipSet({ options, mode = "single", value, onChange, label, id }) {
+  const v = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const selected = Array.isArray(v.selected) ? v.selected : [];
+  const multi = mode === "multi";
+  const toggle = (val) => {
+    let next;
+    if (multi) next = selected.includes(val) ? selected.filter((x) => x !== val) : [...selected, val];
+    else next = selected[0] === val ? [] : [val];
+    const out = { ...v, selected: next };
+    if (!next.includes("other")) out.other = "";
+    onChange(out);
+  };
+  const otherOn = selected.includes("other");
+  return (
+    <div>
+      <div className="chips aw-chips" role={multi ? "group" : "radiogroup"} aria-label={label}>
+        {options.map((o) => {
+          const on = selected.includes(o.value);
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role={multi ? "checkbox" : "radio"}
+              aria-checked={on}
+              className={"chip" + (on ? " sel" : "")}
+              onClick={() => toggle(o.value)}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {otherOn && (
+        <div style={{ marginTop: 8 }}>
+          <label className="aw-label" htmlFor={`${id}-other`}><span>Other</span></label>
+          <input id={`${id}-other`} type="text" value={v.other || ""} onChange={(e) => onChange({ ...v, other: e.target.value })} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Two options side by side, one choice. Value: the chosen option's value.
+function Toggle({ options, value, onChange, label }) {
+  return (
+    <div className="aw-toggle" role="radiogroup" aria-label={label}>
+      {options.map((o) => {
+        const on = value === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            className={"chip" + (on ? " sel" : "")}
+            onClick={() => onChange(on ? "" : o.value)}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// One box inside rows, fields or a list line.
+function Box({ def, value, onChange, id, answers }) {
+  const label = def.label;
+  const ph = def.placeholder || undefined;
+  if (def.kind === "chips") {
+    const options = optionsFor(def.options, answers);
+    if (!options.length && def.fallback === "text") {
+      return <AutoText id={id} ariaLabel={label} minRows={2} placeholder={ph} value={typeof value === "string" ? value : ""} onChange={onChange} />;
+    }
+    return <ChipSet id={id} options={options} mode={def.mode} value={value} onChange={onChange} label={label} />;
+  }
+  if (def.kind === "toggle") {
+    return <Toggle options={optionsFor(def.options, answers)} value={value} onChange={onChange} label={label} />;
+  }
+  if (def.kind === "number") {
+    return (
+      <div className="aw-numbox">
+        <input
+          id={id}
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step="any"
+          placeholder={ph}
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
+        />
+        {def.suffix && <span className="aw-suffix">{def.suffix}</span>}
+      </div>
+    );
+  }
+  if (def.kind === "time") {
+    return <input id={id} type="time" value={value || ""} onChange={(e) => onChange(e.target.value)} />;
+  }
+  if (def.kind === "short") {
+    return <input id={id} type="text" placeholder={ph} value={typeof value === "string" ? value : ""} onChange={(e) => onChange(e.target.value)} />;
+  }
+  // text
+  return (
+    <>
+      {def.leadIn && <p className="aw-leadin">{def.leadIn}</p>}
+      <AutoText id={id} ariaLabel={label} minRows={2} placeholder={ph} value={typeof value === "string" ? value : ""} onChange={onChange} />
+    </>
+  );
+}
+
+function BoxWithLabel({ def, value, onChange, id, answers }) {
+  // Chips and toggles label a group; inputs label the input itself.
+  const isGroup = def.kind === "chips" || def.kind === "toggle";
+  return (
+    <div className="aw-sub">
+      {isGroup ? (
+        <p className="aw-label" id={`${id}-label`}><span>{def.label}</span></p>
+      ) : (
+        <label className="aw-label" htmlFor={id}><span>{def.label}</span></label>
+      )}
+      <Box def={def} value={value} onChange={onChange} id={id} answers={answers} />
+    </div>
+  );
+}
+
 // Q2 or Q3. Fields marked "profile" start from her saved profile.
 function FactsField({ q, value, onChange, profileFacts }) {
   const v = value || {};
@@ -123,7 +280,7 @@ function FactsField({ q, value, onChange, profileFacts }) {
                 ))}
               </div>
             ) : (
-              <input id={id} type="text" value={v[f.key] || ""} onChange={(e) => set(f.key, e.target.value)} />
+              <input id={id} type="text" placeholder={f.placeholder || undefined} value={v[f.key] || ""} onChange={(e) => set(f.key, e.target.value)} />
             )}
           </div>
         );
@@ -181,7 +338,7 @@ function MultiField({ q, value, onChange }) {
       </div>
       {q.withText && (
         <div className="aw-sub" style={{ marginTop: 14 }}>
-          <AutoText value={v.text} ariaLabel={`${q.n}, in your own words`} minRows={2} onChange={(t) => onChange({ ...v, text: t })} />
+          <AutoText value={v.text} ariaLabel={`${q.n}, in your own words`} minRows={2} placeholder={q.placeholder} onChange={(t) => onChange({ ...v, text: t })} />
         </div>
       )}
     </div>
@@ -235,34 +392,45 @@ function LeakMapField({ value, onChange }) {
 
 function HoursField({ value, onChange }) {
   const v = value || {};
+  const total = Object.values(v).reduce((s, x) => s + (typeof x === "number" && x > 0 ? x : 0), 0);
+  const shown = Math.round(total * 10) / 10;
   return (
-    <div className="aw-field aw-hours">
-      {optionsOf("TIME_RECEIPT").map((r) => {
-        const id = `q21-${r.id}`;
-        return (
-          <div key={r.id}>
-            <label htmlFor={id}>{r.label}</label>
-            <input
-              id={id}
-              type="number"
-              inputMode="decimal"
-              min="0"
-              max="168"
-              step="0.5"
-              placeholder="Hours"
-              value={v[r.id] ?? ""}
-              onChange={(e) => onChange({ ...v, [r.id]: e.target.value === "" ? "" : Number(e.target.value) })}
-            />
-          </div>
-        );
-      })}
+    <div className="aw-field">
+      <div className="aw-hours">
+        {optionsOf("TIME_RECEIPT").map((r) => {
+          const id = `q21-${r.id}`;
+          return (
+            <div key={r.id}>
+              <label htmlFor={id}>{r.label}</label>
+              <input
+                id={id}
+                type="number"
+                inputMode="decimal"
+                min="0"
+                max="168"
+                step="0.5"
+                placeholder="Hours"
+                value={v[r.id] ?? ""}
+                onChange={(e) => onChange({ ...v, [r.id]: e.target.value === "" ? "" : Number(e.target.value) })}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <p className="aw-total" aria-live="polite">{shown} of the 168 hours in a week</p>
+      {total > 168 && <p className="aw-total-note">That's more hours than a week has. Worth a second look.</p>}
     </div>
   );
 }
 
-function Lists2Field({ q, value, onChange }) {
+// Two lists she adds lines to. A list can give each line an extra box,
+// saved as { text, <extra key> }.
+function Lists2Field({ q, value, onChange, answers }) {
   const v = value || {};
-  const listOf = (key) => (Array.isArray(v[key]) && v[key].length ? v[key] : [""]);
+  const listOf = (key) => {
+    const raw = Array.isArray(v[key]) && v[key].length ? v[key] : [{ text: "" }];
+    return raw.map((x) => (typeof x === "string" ? { text: x } : x || { text: "" }));
+  };
   const setList = (key, list) => onChange({ ...v, [key]: list });
   return (
     <div className="aw-field">
@@ -270,26 +438,59 @@ function Lists2Field({ q, value, onChange }) {
         const list = listOf(l.key);
         return (
           <div key={l.key} className="aw-sub" style={{ marginTop: 18 }}>
-            <div className="aw-label"><span>{l.label}</span></div>
-            {list.map((item, i) => (
-              <div key={i} className="aw-list-row">
-                <input
-                  type="text"
-                  aria-label={`${l.label}, line ${i + 1}`}
-                  value={item}
-                  onChange={(e) => setList(l.key, list.map((x, j) => (j === i ? e.target.value : x)))}
-                />
-                <button
-                  type="button"
-                  className="aw-x"
-                  aria-label={`Remove line ${i + 1}`}
-                  onClick={() => setList(l.key, list.length > 1 ? list.filter((_, j) => j !== i) : [""])}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-            <button type="button" className="btn-t" onClick={() => setList(l.key, [...list, ""])}>
+            <p className="aw-label"><span>{l.label}</span></p>
+            {list.map((item, i) => {
+              const idBase = `${q.id}-${l.key}-${i}`;
+              const setItem = (patch) => setList(l.key, list.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+              return (
+                <div key={i} className={l.extra ? "aw-line-card" : ""}>
+                  <div className="aw-list-row">
+                    <input
+                      type="text"
+                      aria-label={`${l.label}, line ${i + 1}`}
+                      placeholder={l.placeholder || undefined}
+                      value={item.text || ""}
+                      onChange={(e) => setItem({ text: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      className="aw-x"
+                      aria-label={`Remove line ${i + 1}`}
+                      onClick={() => setList(l.key, list.length > 1 ? list.filter((_, j) => j !== i) : [{ text: "" }])}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  {l.extra && (
+                    <div className="aw-line-extra">
+                      {l.extra.kind === "chips" ? (
+                        <>
+                          <p className="aw-label"><span>{l.extra.label}</span></p>
+                          <Toggle
+                            options={optionsFor(l.extra.options, answers)}
+                            value={item[l.extra.key] || ""}
+                            label={`${l.extra.label}, line ${i + 1}`}
+                            onChange={(val) => setItem({ [l.extra.key]: val })}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <label className="aw-label" htmlFor={`${idBase}-x`}><span>{l.extra.label}</span></label>
+                          <Box
+                            def={l.extra}
+                            id={`${idBase}-x`}
+                            value={item[l.extra.key]}
+                            answers={answers}
+                            onChange={(val) => setItem({ [l.extra.key]: val })}
+                          />
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <button type="button" className="btn-t" onClick={() => setList(l.key, [...list, { text: "" }])}>
               + Add a line
             </button>
           </div>
@@ -354,12 +555,116 @@ function ReadinessField({ q, value, onChange }) {
   return (
     <div className="aw-field">
       <Nums from={1} to={10} value={v.score} label={q.scaleText} onChange={(n) => onChange({ ...v, score: n })} />
-      {q.textFields.map((f) => (
-        <div key={f.key} className="aw-sub" style={{ marginTop: 18 }}>
-          <label className="aw-label" htmlFor={`q54-${f.key}`}><span>{f.label}</span></label>
-          <AutoText id={`q54-${f.key}`} value={text[f.key]} minRows={2} onChange={(t) => onChange({ ...v, text: { ...text, [f.key]: t } })} />
-        </div>
-      ))}
+      {q.textFields.map((f) => {
+        const label = f.scoreLabel && typeof v.score === "number" ? f.scoreLabel.replace("{score}", String(v.score)) : f.label;
+        return (
+          <div key={f.key} className="aw-sub" style={{ marginTop: 18 }}>
+            <label className="aw-label" htmlFor={`q54-${f.key}`}><span>{label}</span></label>
+            <AutoText id={`q54-${f.key}`} value={text[f.key]} minRows={2} placeholder={f.placeholder} onChange={(t) => onChange({ ...v, text: { ...text, [f.key]: t } })} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── rows ──
+// Rows she adds with "Add another", up to maxRows. One empty row shows to
+// start. Each row is its own card on a phone, so its boxes read as one
+// answer. Empty rows are dropped when saving (see cleanAnswer in Audit.jsx).
+function RowsField({ q, value, onChange, answers }) {
+  const rows = Array.isArray(value) && value.length ? value : [{}];
+  const max = q.maxRows || 3;
+  const legacy = rows.map((r) => r?.legacy).filter(hasText);
+  const setRow = (i, patch) => onChange(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  const total = q.total
+    ? rows.reduce((s, r) => s + (typeof r?.[q.total] === "number" && r[q.total] > 0 ? r[q.total] : 0), 0)
+    : null;
+  return (
+    <div className="aw-field">
+      {legacy.map((t, i) => <LegacyNote key={i} text={t} />)}
+      <div className="aw-rows">
+        {rows.map((row, i) => (
+          <div key={i} className="aw-row-card" role="group" aria-label={`${q.n}, answer ${i + 1}`}>
+            <div className="aw-cols">
+              {q.columns.map((c) => (
+                <BoxWithLabel
+                  key={c.key}
+                  def={c}
+                  id={`${q.id}-${i}-${c.key}`}
+                  value={row?.[c.key]}
+                  answers={answers}
+                  onChange={(val) => setRow(i, { [c.key]: val })}
+                />
+              ))}
+            </div>
+            {i > 0 && (
+              <button type="button" className="aw-remove" onClick={() => onChange(rows.filter((_, j) => j !== i))}>
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      {q.total && (
+        <p className="aw-total" aria-live="polite">{Math.round(total * 10) / 10}% of your income</p>
+      )}
+      {rows.length < max && (
+        <button type="button" className="btn btn-s full aw-add" onClick={() => onChange([...rows, {}])}>
+          Add another
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── fields ──
+// Two or more labelled boxes for one question, side by side on a wide
+// screen, stacked on a phone in the order listed.
+function FieldsField({ q, value, onChange, answers }) {
+  const v = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const visible = q.fields.filter((f) => {
+    if (!f.hideWhen) return true;
+    const ctl = v[f.hideWhen.field];
+    const sel = Array.isArray(ctl?.selected) ? ctl.selected : [];
+    return !sel.includes(f.hideWhen.value);
+  });
+  return (
+    <div className="aw-field">
+      <LegacyNote text={v.legacy} />
+      <div className={"aw-cols" + (q.fields.some((f) => f.kind === "chips") ? " has-chips" : "")}>
+        {visible.map((f) => (
+          <BoxWithLabel
+            key={f.key}
+            def={f}
+            id={`${q.id}-${f.key}`}
+            value={v[f.key]}
+            answers={answers}
+            onChange={(val) => onChange({ ...v, [f.key]: val })}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChipsField({ q, value, onChange }) {
+  const v = value && typeof value === "object" ? value : {};
+  return (
+    <div className="aw-field">
+      <LegacyNote text={v.legacy} />
+      <ChipSet id={q.id} options={optionsOf(q.options)} mode={q.mode} value={v} onChange={onChange} label={`Question ${q.n}`} />
+    </div>
+  );
+}
+
+// One line that starts with fixed words she finishes. Saves her words only.
+function PrefixField({ q, value, onChange }) {
+  const id = `${q.id}-prefix`;
+  return (
+    <div className="aw-field aw-prefix">
+      <label htmlFor={id} className="aw-prefix-lead">{q.leadIn}</label>
+      <input id={id} type="text" placeholder={q.placeholder || undefined} value={typeof value === "string" ? value : ""} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }
@@ -374,19 +679,22 @@ export function QuestionText({ q }) {
     content = <>{before}<em>{q.em}</em>{after}</>;
   }
   return (
-    <p className="aw-qtext">
-      {q.lead && <><b>{q.lead}</b> </>}
-      {content}
-    </p>
+    <>
+      <p className="aw-qtext">
+        {q.lead && <><b>{q.lead}</b> </>}
+        {content}
+      </p>
+      {q.text2 && <p className="aw-qtext" style={{ marginTop: 12 }}>{q.text2}</p>}
+    </>
   );
 }
 
-export function AnswerField({ q, value, onChange, profileFacts }) {
+export function AnswerField({ q, value, onChange, profileFacts, answers }) {
   switch (q.type) {
     case "text":
       return (
         <div className="aw-field">
-          <AutoText value={value} ariaLabel={`Question ${q.n}`} onChange={onChange} />
+          <AutoText value={value} ariaLabel={`Question ${q.n}`} placeholder={q.placeholder} onChange={onChange} />
         </div>
       );
     case "facts":
@@ -400,13 +708,21 @@ export function AnswerField({ q, value, onChange, profileFacts }) {
     case "hours":
       return <HoursField value={value} onChange={onChange} />;
     case "lists2":
-      return <Lists2Field q={q} value={value} onChange={onChange} />;
+      return <Lists2Field q={q} value={value} onChange={onChange} answers={answers} />;
     case "rows5":
       return <Rows5Field q={q} value={value} onChange={onChange} />;
     case "single":
       return <SingleField q={q} value={value} onChange={onChange} />;
     case "readiness":
       return <ReadinessField q={q} value={value} onChange={onChange} />;
+    case "rows":
+      return <RowsField q={q} value={value} onChange={onChange} answers={answers} />;
+    case "fields":
+      return <FieldsField q={q} value={value} onChange={onChange} answers={answers} />;
+    case "chips":
+      return <ChipsField q={q} value={value} onChange={onChange} />;
+    case "prefix":
+      return <PrefixField q={q} value={value} onChange={onChange} />;
     default:
       return null;
   }
