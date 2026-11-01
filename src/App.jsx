@@ -138,7 +138,6 @@ const AuthenticatedApp = () => {
             its own AppShellV2 chrome, outside Layout, so free members who
             bought the audit are never stopped by PendingApproval. */}
         <Route path="/Audit" element={<Audit />} />
-        <Route path="/audit" element={<Navigate to="/Audit" replace />} />
         {/* Community pages bring their own DashboardSidebar, so they are
             declared here rather than in the generic loop. Going through the
             loop wraps them in Layout, which renders a second sidebar and a
