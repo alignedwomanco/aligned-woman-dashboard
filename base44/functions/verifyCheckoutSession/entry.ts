@@ -89,6 +89,23 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  // Guard 0: this function only ever grants the Blueprint. An Alignment Audit
+  // session (payment link metadata product=alignment_audit) is owned by
+  // handlePaymentWebhook, which grants alignment_audit_paid. Granting
+  // blueprint_paid here would hand an audit buyer the Blueprint.
+  const sessionMetadata = (session.metadata as Record<string, unknown>) || {};
+  const sessionProduct = String(sessionMetadata.product || "").trim().toLowerCase();
+  if (sessionProduct === "alignment_audit") {
+    return json({
+      success: true,
+      granted: false,
+      hasAccess: false,
+      alreadyProcessed: false,
+      conflict: false,
+      product: "alignment_audit",
+    });
+  }
+
   // Guard 1: the payment must actually be complete and paid.
   const paymentStatus = (session.payment_status as string) || "";
   const sessionStatus = (session.status as string) || "";
