@@ -1,0 +1,147 @@
+{
+  "description": "One paid Alignment Audit per purchase. Kept separate from Blueprint workbooks. Created by handlePaymentWebhook on an alignment_audit purchase. Readable by the owner (matched on email or user_id) and master_admin only. All writes go through service-role backend functions, never the browser.",
+  "name": "AuditResponse",
+  "properties": {
+    "agreement_accepted_at": {
+      "description": "When she ticked the Before you begin agreement.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "agreement_text": {
+      "description": "The exact agreement wording she accepted.",
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "answers": {
+      "description": "One entry per audit question id.",
+      "type": "object"
+    },
+    "call_booked_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "completed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "computed_scores": {
+      "description": "Auto-scored summary written by a backend function on submit.",
+      "type": "object"
+    },
+    "currency": {
+      "description": "ZAR or USD.",
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 1000,
+      "type": "string"
+    },
+    "diagnostic": {
+      "description": "Laura's written diagnostic, or a link to an uploaded PDF.",
+      "type": "string"
+    },
+    "due_at": {
+      "description": "Five business days after submission, skipping weekends and South African public holidays.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "email": {
+      "description": "Lowercased email the buyer paid with.",
+      "type": "string"
+    },
+    "last_part": {
+      "description": "The part she is on, for resume on any device.",
+      "type": "string"
+    },
+    "progress_percent": {
+      "description": "Percentage complete, 0 to 100.",
+      "type": "number"
+    },
+    "purchased_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "released_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "sale_id": {
+      "description": "Relationship to Sale.",
+      "type": "string"
+    },
+    "spp_snapshot": {
+      "description": "Snapshot from her latest ProfileAttempt taken when she presses Start: attempt id, completed date, primary and secondary pattern, quoted option text.",
+      "type": "object"
+    },
+    "status": {
+      "description": "Lifecycle status. Intended default: purchased. Written by backend functions only.",
+      "enum": [
+        "purchased",
+        "in_progress",
+        "submitted",
+        "diagnostic_ready",
+        "complete"
+      ],
+      "type": "string"
+    },
+    "stripe_session_id": {
+      "description": "Stripe checkout session that paid for this audit.",
+      "type": "string"
+    },
+    "submitted_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "track": {
+      "description": "Opening fork chosen at the start of the audit.",
+      "enum": [
+        "business",
+        "career"
+      ],
+      "type": "string"
+    },
+    "user_id": {
+      "description": "User id of the owner. Empty until the buyer has an account; filled by claimPreApproval on first sign-in.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "master_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "master_admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.email": "{{user.email}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "master_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "master_admin"
+      }
+    }
+  },
+  "type": "object"
+}

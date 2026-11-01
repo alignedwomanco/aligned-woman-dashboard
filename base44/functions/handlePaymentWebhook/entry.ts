@@ -12,9 +12,84 @@ const BLUEPRINT_COURSE_ID = "69f4885c4fadbeea6d28a9be";
 // entity and the manual pre-approval grants.
 const BLUEPRINT_ACCESS_TAG = "blueprint_paid";
 
+// Alignment Audit. Its Stripe payment links carry metadata
+// product=alignment_audit, which Stripe copies onto the checkout session.
+// A session with no product metadata is a Blueprint purchase, exactly as
+// before. The audit never sets membership_type to "paid", because
+// hasBlueprintAccess treats "paid" as Blueprint access.
+const AUDIT_PRODUCT = "alignment_audit";
+const AUDIT_ACCESS_TAG = "alignment_audit_paid";
+
 // Where a new buyer signs in. The welcome email points here, and it is the
 // authed entry that runs the pre-approval claim on first load.
 const LOGIN_URL = "https://app.alignedwomanco.com/Dashboard";
+
+// Who hears about every audit purchase.
+const OWNER_EMAIL = "hello@laurajanethomas.biz";
+
+const CORS = { "Access-Control-Allow-Origin": "*" };
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+async function logEmail(base44, entry) {
+  try {
+    await base44.asServiceRole.entities.EmailLog.create({
+      sent_at: new Date().toISOString(),
+      ...entry,
+    });
+  } catch (_err) {
+    // Logging is best effort. Never block the webhook on it.
+  }
+}
+
+async function sendLoggedEmail(base44, { to, toName, subject, body, type }) {
+  let status = "sent";
+  let errorMessage = "";
+  try {
+    await base44.asServiceRole.integrations.Core.SendEmail({ to, subject, body });
+  } catch (err) {
+    status = "failed";
+    errorMessage = err?.message || "send_failed";
+    console.error("Email send failed:", errorMessage);
+  }
+  await logEmail(base44, {
+    to_email: to,
+    to_name: toName || "",
+    subject,
+    type,
+    status,
+    error_message: errorMessage,
+  });
+}
+
+// Merge tags into a pending pre-approval without dropping earlier grants, so a
+// woman who buys two products before her first sign-in keeps both. membership
+// only ever moves up: a "free" audit grant never downgrades a "paid" one.
+async function upsertPendingPreApproval(base44, { email, tag, membershipType, note }) {
+  const pending = await base44.asServiceRole.entities.PreApprovedMember.filter({
+    email,
+    status: "pending",
+  });
+  if (!pending || pending.length === 0) {
+    await base44.asServiceRole.entities.PreApprovedMember.create({
+      email,
+      grant_membership_type: membershipType,
+      grant_access_tags: [tag],
+      status: "pending",
+      note,
+    });
+    return { created: true };
+  }
+  const record = pending[0];
+  const currentTags = Array.isArray(record.grant_access_tags) ? record.grant_access_tags : [];
+  const mergedTags = Array.from(new Set([...currentTags, tag]));
+  const nextType = record.grant_membership_type === "paid" || membershipType === "paid" ? "paid" : "free";
+  await base44.asServiceRole.entities.PreApprovedMember.update(record.id, {
+    grant_membership_type: nextType,
+    grant_access_tags: mergedTags,
+  });
+  return { created: false };
+}
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -39,16 +114,16 @@ Deno.serve(async (req) => {
 
     // ----------------------------------------------------------------
     // STRIPE SIGNATURE VERIFICATION (mandatory)
-    // This endpoint grants paid course access, so every request must be
-    // verified as a genuine Stripe webhook using the signing secret.
-    // Unsigned / manually-constructed payloads are rejected.
+    // This endpoint grants paid access, so every request must be verified as
+    // a genuine Stripe webhook using the signing secret. Unsigned or
+    // manually constructed payloads are rejected.
     // ----------------------------------------------------------------
     const stripeKey = Deno.env.get("stripe");
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     if (!stripeKey || !webhookSecret) {
       return Response.json({ error: "Webhook is not configured" }, {
         status: 500,
-        headers: { "Access-Control-Allow-Origin": "*" },
+        headers: CORS,
       });
     }
 
@@ -66,7 +141,7 @@ Deno.serve(async (req) => {
       console.error("Stripe signature verification failed:", err.message);
       return Response.json({ error: "Invalid signature" }, {
         status: 400,
-        headers: { "Access-Control-Allow-Origin": "*" },
+        headers: CORS,
       });
     }
 
@@ -76,41 +151,34 @@ Deno.serve(async (req) => {
         success: true,
         message: `Event type ${event.type} acknowledged but not processed`,
       }, {
-        headers: { "Access-Control-Allow-Origin": "*" },
+        headers: CORS,
       });
     }
 
     const session = event.data.object;
 
-    let email = "";
-    let fullName = "";
-    const courseId = BLUEPRINT_COURSE_ID;
-    let transactionId = "";
+    let email = session.customer_details?.email || session.customer_email || "";
+    const fullName = session.customer_details?.name || "";
+    const stripeSessionId = session.id || "";
+    const transactionId = session.payment_intent || session.id || "";
+    const affiliateCode = session.client_reference_id || "";
+    const currency = (session.currency || "zar").toUpperCase();
     const paymentSource = "stripe";
-    let amount = 0;
-    let currency = "ZAR";
-    let affiliateCode = "";
-    let stripeSessionId = "";
     const purchaseType = "self";
-
-    email = session.customer_details?.email || session.customer_email || "";
-    fullName = session.customer_details?.name || "";
-    stripeSessionId = session.id || "";
-    transactionId = session.payment_intent || session.id || "";
-    affiliateCode = session.client_reference_id || "";
-    currency = (session.currency || "zar").toUpperCase();
+    const courseId = BLUEPRINT_COURSE_ID;
 
     // amount_total is in cents (e.g. 399700 = R3,997.00)
-    amount = session.amount_total ? session.amount_total / 100 : 0;
+    const amount = session.amount_total ? session.amount_total / 100 : 0;
 
-    // For multi-product support in future: read course_id from metadata
-    // courseId = session.metadata?.course_id || BLUEPRINT_COURSE_ID;
+    // Which product was bought. No value means the Blueprint, as before.
+    const product = String(session.metadata?.product || "").trim().toLowerCase();
+    const isAudit = product === AUDIT_PRODUCT;
 
     // Basic validation
     if (!email) {
       return Response.json({ error: "Email is required" }, {
         status: 400,
-        headers: { "Access-Control-Allow-Origin": "*" },
+        headers: CORS,
       });
     }
 
@@ -133,19 +201,137 @@ Deno.serve(async (req) => {
           duplicate: true,
           message: "This session has already been processed",
         }, {
-          headers: { "Access-Control-Allow-Origin": "*" },
+          headers: CORS,
         });
       }
     }
+
+    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
+    const userExists = existingUsers.length > 0;
+
+    // ================================================================
+    // ALIGNMENT AUDIT BRANCH
+    // Grants alignment_audit_paid only. Never touches membership_type,
+    // Blueprint enrolment or the Blueprint welcome email.
+    // ================================================================
+
+    if (isAudit) {
+      let userId = "";
+      let preApprovalCreated = false;
+
+      // 1. Grant the audit tag
+      if (userExists) {
+        userId = existingUsers[0].id;
+        const currentTags = Array.isArray(existingUsers[0].access_tags) ? existingUsers[0].access_tags : [];
+        if (!currentTags.includes(AUDIT_ACCESS_TAG)) {
+          await base44.asServiceRole.entities.User.update(userId, {
+            access_tags: [...currentTags, AUDIT_ACCESS_TAG],
+          });
+        }
+      } else {
+        const result = await upsertPendingPreApproval(base44, {
+          email,
+          tag: AUDIT_ACCESS_TAG,
+          membershipType: "free",
+          note: "Stripe purchase: Alignment Audit",
+        });
+        preApprovalCreated = result.created;
+      }
+
+      // 2. Record the Sale. The affiliate code is kept for reference, but no
+      // commission is credited on the audit until that is decided.
+      const sale = await base44.asServiceRole.entities.Sale.create({
+        buyer_email: email,
+        buyer_name: fullName,
+        amount,
+        currency,
+        purchase_type: purchaseType,
+        status: "completed",
+        stripe_session_id: stripeSessionId,
+        affiliate_code: affiliateCode || "",
+        affiliate_id: "",
+        commission_percentage: 0,
+        commission_amount: 0,
+        description: "Alignment Audit",
+      });
+
+      // 3. Create the audit record
+      const now = new Date().toISOString();
+      await base44.asServiceRole.entities.AuditResponse.create({
+        user_id: userId,
+        email,
+        status: "purchased",
+        answers: {},
+        progress_percent: 0,
+        purchased_at: now,
+        sale_id: sale?.id || "",
+        stripe_session_id: stripeSessionId,
+        currency,
+        amount,
+      });
+
+      // 4. Emails (best effort). Placeholder copy until Laura supplies final.
+      const safeName = esc(fullName || "there");
+      const safeEmail = esc(email);
+
+      await sendLoggedEmail(base44, {
+        to: email,
+        toName: fullName,
+        subject: "Your Alignment Audit is ready",
+        type: "welcome",
+        body: `
+          <h2>Your Alignment Audit is ready.</h2>
+          <p>Hi ${safeName},</p>
+          <p>Your payment is confirmed.</p>
+          <p>Sign in at <a href="${LOGIN_URL}">app.alignedwomanco.com</a> with ${safeEmail}, the same email you paid with. Your audit is waiting on your dashboard.</p>
+          <p>Set aside about 90 minutes. Your answers save as you go, so you can stop and come back.</p>
+          <p>With love,<br/>Laura</p>
+        `,
+      });
+
+      const accountLine = userExists
+        ? "Yes. The audit is unlocked on her account."
+        : (preApprovalCreated
+          ? "No. A pending pre-approval was created. If she signs up with a different email, move the grant by hand."
+          : "No. Added to her existing pending pre-approval.");
+
+      await sendLoggedEmail(base44, {
+        to: OWNER_EMAIL,
+        toName: "Laura",
+        subject: `New Alignment Audit bought: ${fullName || email}`,
+        type: "one_time",
+        body: `
+          <h2>New Alignment Audit bought</h2>
+          <p><strong>Name:</strong> ${esc(fullName || "Not given")}</p>
+          <p><strong>Email:</strong> ${safeEmail}</p>
+          <p><strong>Paid:</strong> ${esc(currency)} ${esc(amount)}</p>
+          <p><strong>Account exists:</strong> ${esc(accountLine)}</p>
+        `,
+      });
+
+      return Response.json({
+        success: true,
+        product: AUDIT_PRODUCT,
+        message: "Payment processed and audit access granted",
+        userExists,
+        preApprovalCreated,
+      }, {
+        headers: CORS,
+      });
+    }
+
+    // ================================================================
+    // BLUEPRINT BRANCH (unchanged behaviour, except pending pre-approvals
+    // now merge tags instead of replacing them)
+    // ================================================================
 
     // ----------------------------------------------------------------
     // 1. GRANT COURSE ACCESS
     // ----------------------------------------------------------------
 
-    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
     let userId = null;
 
-    if (existingUsers.length > 0) {
+    if (userExists) {
       // Existing account: grant access directly so it is live immediately.
       userId = existingUsers[0].id;
       const currentTags = existingUsers[0].access_tags || [];
@@ -157,29 +343,15 @@ Deno.serve(async (req) => {
         access_tags: nextTags,
       });
     } else {
-      // Brand-new buyer with no account yet. Create a pending pre-approval keyed
-      // to the email Stripe captured, so their first sign-in is claimed
-      // automatically and they land straight in the course. This is the same
-      // claim path used for manual pre-approvals. Reuse an existing pending
-      // grant for this email rather than stacking a duplicate.
-      const pending = await base44.asServiceRole.entities.PreApprovedMember.filter({
+      // Brand-new buyer with no account yet. Create or merge a pending
+      // pre-approval keyed to the email Stripe captured, so their first
+      // sign-in is claimed automatically and they land straight in the course.
+      await upsertPendingPreApproval(base44, {
         email,
-        status: "pending",
+        tag: BLUEPRINT_ACCESS_TAG,
+        membershipType: "paid",
+        note: "Stripe purchase",
       });
-      if (!pending || pending.length === 0) {
-        await base44.asServiceRole.entities.PreApprovedMember.create({
-          email,
-          grant_membership_type: "paid",
-          grant_access_tags: [BLUEPRINT_ACCESS_TAG],
-          status: "pending",
-          note: "Stripe purchase",
-        });
-      } else {
-        await base44.asServiceRole.entities.PreApprovedMember.update(pending[0].id, {
-          grant_membership_type: "paid",
-          grant_access_tags: [BLUEPRINT_ACCESS_TAG],
-        });
-      }
     }
 
     // ----------------------------------------------------------------
@@ -275,15 +447,6 @@ Deno.serve(async (req) => {
         console.error("Affiliate totals update failed:", affUpdateErr.message);
         // Sale is still recorded with affiliate fields, so commission is not lost
       }
-
-      // TODO: When Stripe Connect is active, create a Transfer here:
-      // const stripe = new Stripe(STRIPE_SECRET_KEY);
-      // await stripe.transfers.create({
-      //   amount: Math.round(commissionAmount * 100), // in cents
-      //   currency: currency.toLowerCase(),
-      //   destination: affiliateRecord.stripe_account_id,
-      //   description: `Commission for sale ${stripeSessionId}`,
-      // });
     }
 
     // ----------------------------------------------------------------
@@ -291,7 +454,6 @@ Deno.serve(async (req) => {
     // ----------------------------------------------------------------
 
     try {
-      const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       const safeName = esc(fullName || "there");
       const safeEmail = esc(email);
       await base44.asServiceRole.integrations.Core.SendEmail({
@@ -324,18 +486,18 @@ Deno.serve(async (req) => {
       success: true,
       message: "Payment processed and course access granted",
       enrollmentId: enrollment.id,
-      userExists: existingUsers.length > 0,
+      userExists,
       affiliateAttributed: !!affiliateRecord,
       commissionAmount,
     }, {
-      headers: { "Access-Control-Allow-Origin": "*" },
+      headers: CORS,
     });
 
   } catch (error) {
     console.error("Webhook error:", error.message);
     return Response.json({ error: error.message }, {
       status: 500,
-      headers: { "Access-Control-Allow-Origin": "*" },
+      headers: CORS,
     });
   }
 });
