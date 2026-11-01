@@ -50,6 +50,10 @@
       "description": "Flips to true after the user's first dashboard load",
       "type": "boolean"
     },
+    "industry": {
+      "description": "Once-only fact: her industry, short text. Reused by the audit.",
+      "type": "string"
+    },
     "last_module_id": {
       "description": "Reference to the most recent Module the user accessed. Null if no module accessed yet.",
       "type": "string"
@@ -117,6 +121,10 @@
       "description": "How the user found the platform",
       "type": "string"
     },
+    "role_or_business": {
+      "description": "Once-only fact: her role (career) or what her business does (business). Short text, reused by the audit.",
+      "type": "string"
+    },
     "secondary_archetype_key": {
       "description": "Second strongest pattern from her latest Starting Point Profile",
       "enum": [
@@ -131,6 +139,18 @@
     "signup_timestamp": {
       "description": "When the profile was created",
       "format": "date-time",
+      "type": "string"
+    },
+    "stage": {
+      "description": "Once-only fact. Business track: idea, just_started, growing, stuck or rebuilding. Career track: years in role as short text. Reused by the audit.",
+      "type": "string"
+    },
+    "track": {
+      "description": "Once-only fact: I run a business or I have a career. Opening fork of the Alignment Audit, editable on Profile Settings.",
+      "enum": [
+        "business",
+        "career"
+      ],
       "type": "string"
     },
     "user_id": {
