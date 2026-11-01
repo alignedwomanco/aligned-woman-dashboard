@@ -173,7 +173,7 @@ export default function Audit() {
             Object.assign(pending.current.answers, migrated.changed);
             setSaveState("saving");
             if (timer.current) clearTimeout(timer.current);
-            timer.current = setTimeout(() => flush(), 300);
+            timer.current = setTimeout(() => flushRef.current(), 300);
           }
           setTrackChoice(a.track || (p?.track === "business" || p?.track === "career" ? p.track : null));
           if (a.status === "purchased") setScreen("before");
@@ -246,6 +246,10 @@ export default function Audit() {
     return chain.current;
   }, [progress]);
 
+  // Timers call the latest flush, so they never send a stale progress figure.
+  const flushRef = useRef(flush);
+  flushRef.current = flush;
+
   const setAnswer = (q, value) => {
     setAnswers((prev) => ({ ...prev, [q.id]: value }));
     pending.current.answers[q.id] = value === undefined ? null : cleanAnswer(q, value);
@@ -257,7 +261,7 @@ export default function Audit() {
     }
     setSaveState("saving");
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => flush(), 900);
+    timer.current = setTimeout(() => flushRef.current(), 900);
   };
 
   // Save whatever is waiting if she closes the tab.
