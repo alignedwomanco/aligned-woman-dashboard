@@ -158,7 +158,13 @@ Deno.serve(async (req) => {
     const session = event.data.object;
 
     let email = session.customer_details?.email || session.customer_email || "";
-    const fullName = session.customer_details?.name || "";
+    // When a payment link collects a business name, Stripe puts the business
+    // name in customer_details.name and the person's own name in
+    // individual_name. Prefer the person, and trim the stray spaces buyers type.
+    const fullName = String(
+      session.customer_details?.individual_name || session.customer_details?.name || ""
+    ).trim();
+    const firstName = fullName.split(/\s+/)[0] || "there";
     const stripeSessionId = session.id || "";
     const transactionId = session.payment_intent || session.id || "";
     const affiliateCode = session.client_reference_id || "";
@@ -271,7 +277,8 @@ Deno.serve(async (req) => {
       });
 
       // 4. Emails (best effort). Placeholder copy until Laura supplies final.
-      const safeName = esc(fullName || "there");
+      // Layout and colours match the Blueprint welcome in verifyCheckoutSession.
+      const safeFirst = esc(firstName);
       const safeEmail = esc(email);
 
       await sendLoggedEmail(base44, {
@@ -279,14 +286,25 @@ Deno.serve(async (req) => {
         toName: fullName,
         subject: "Your Alignment Audit is ready",
         type: "welcome",
-        body: `
-          <h2>Your Alignment Audit is ready.</h2>
-          <p>Hi ${safeName},</p>
-          <p>Your payment is confirmed.</p>
-          <p>Sign in at <a href="${LOGIN_URL}">app.alignedwomanco.com</a> with ${safeEmail}, the same email you paid with. Your audit is waiting on your dashboard.</p>
-          <p>Set aside about 90 minutes. Your answers save as you go, so you can stop and come back.</p>
-          <p>With love,<br/>Laura</p>
-        `,
+        body:
+          '<div style="margin:0;padding:0;background-color:#F7F2EE;">' +
+            '<div style="max-width:560px;margin:0 auto;padding:40px 24px;font-family:\'Montserrat\',Helvetica,Arial,sans-serif;color:#3A2B30;">' +
+              '<div style="background-color:#FFFFFF;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(74,14,46,0.08);">' +
+                '<div style="height:6px;background:linear-gradient(90deg,#4A0E2E,#C4847A);"></div>' +
+                '<div style="padding:40px 36px;">' +
+                  '<p style="margin:0 0 24px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#C4847A;font-weight:600;">One-to-one with Laura</p>' +
+                  '<h1 style="margin:0 0 20px;font-family:\'DM Serif Display\',Georgia,serif;font-size:30px;line-height:1.2;color:#4A0E2E;font-weight:400;">Your Alignment Audit is ready</h1>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Hi ' + safeFirst + ',</p>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Your payment is confirmed.</p>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Sign in at app.alignedwomanco.com with ' + safeEmail + ', the same email you paid with. Your audit is waiting on your dashboard.</p>' +
+                  '<p style="margin:0 0 28px;font-size:16px;line-height:1.7;">Set aside about 90 minutes. Your answers save as you go, so you can stop and come back.</p>' +
+                  '<a href="' + LOGIN_URL + '" style="display:inline-block;background-color:#4A0E2E;color:#FFFFFF;text-decoration:none;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;padding:16px 30px;border-radius:999px;">Start your audit</a>' +
+                  '<p style="margin:32px 0 0;font-size:14px;line-height:1.7;color:#6B5B61;">With love,<br/>Laura</p>' +
+                '</div>' +
+              '</div>' +
+              '<p style="margin:20px 0 0;text-align:center;font-size:12px;line-height:1.6;color:#9A8B90;">You are receiving this because you purchased the Alignment Audit.</p>' +
+            '</div>' +
+          '</div>',
       });
 
       const accountLine = userExists
@@ -454,7 +472,7 @@ Deno.serve(async (req) => {
     // ----------------------------------------------------------------
 
     try {
-      const safeName = esc(fullName || "there");
+      const safeName = esc(firstName);
       const safeEmail = esc(email);
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
