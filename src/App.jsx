@@ -26,6 +26,7 @@ import Checkout from './pages/Checkout';
 import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
 import YourPattern from './pages/YourPattern';
+import Audit from '@/pages/Audit';
 import YourMoneyStory from './pages/YourMoneyStory';
 import MoneyStoryLanding from './pages/MoneyStoryLanding';
 import FeminineWorkbook from './pages/FeminineWorkbook';
@@ -133,6 +134,11 @@ const AuthenticatedApp = () => {
             Same treatment as /Dashboard: its own AppShellV2 chrome, outside
             Layout, so free members are never stopped by PendingApproval. */}
         <Route path="/YourPattern" element={<YourPattern />} />
+        {/* The Alignment Audit questionnaire. Same treatment as /YourPattern:
+            its own AppShellV2 chrome, outside Layout, so free members who
+            bought the audit are never stopped by PendingApproval. */}
+        <Route path="/Audit" element={<Audit />} />
+        <Route path="/audit" element={<Navigate to="/Audit" replace />} />
         {/* Community pages bring their own DashboardSidebar, so they are
             declared here rather than in the generic loop. Going through the
             loop wraps them in Layout, which renders a second sidebar and a
