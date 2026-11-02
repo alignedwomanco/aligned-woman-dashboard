@@ -283,7 +283,7 @@ function PatternHero({ profile, isPaid }) {
               single filled action. Paid members get the outline tier. */}
           {/* October 2026: opens the Your Pattern page (her full Starting
               Point Profile and the two doors) instead of expanding here. */}
-          <Link to="/YourPattern" className={BTN_FILLED}>
+          <Link to="/Profile?tab=pattern" className={BTN_FILLED}>
             Read your full pattern
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -925,7 +925,7 @@ export default function Dashboard() {
                   Talk to LaurAI · coming soon
                 </span>
                 <Link
-                  to="/ProfileSettings"
+                  to="/Profile?tab=account"
                   className="font-body text-[11px] text-awburg-core/55 hover:text-awburg-core transition-colors"
                 >
                   Your profile

@@ -515,7 +515,7 @@ export default function Layout({ children, currentPageName }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
+                    <Link to="/Profile?tab=account" className="flex items-center gap-2">
                       <Settings className="w-4 h-4" /> Profile Settings
                     </Link>
                   </DropdownMenuItem>

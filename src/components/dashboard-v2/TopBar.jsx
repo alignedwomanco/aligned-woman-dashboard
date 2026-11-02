@@ -49,7 +49,7 @@ export default function TopBar({ user, hasUnreadNotifications }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem asChild>
-              <Link to={createPageUrl("ProfileSettings")} className="flex items-center gap-2">
+              <Link to="/Profile?tab=account" className="flex items-center gap-2">
                 <User className="w-4 h-4" /> Profile Settings
               </Link>
             </DropdownMenuItem>

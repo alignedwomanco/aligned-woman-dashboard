@@ -14,7 +14,7 @@ import {
 // Starting Point Profile v3 (October 2026). Built from the design file
 // "Starting Point Profile - All Screens" and the Base44 build brief.
 // Intro → Before → 12 questions (Halfway after 6) → Guess → Reading →
-// Result with the sign-up card. After sign-up she goes to /YourPattern.
+// Result with the sign-up card. After sign-up she goes to /Profile?tab=pattern.
 // The previous quiz is kept on checkpoint "Before new Starting Point
 // Profile and Your Pattern page".
 // ────────────────────────────────────────────────────────────────
@@ -510,14 +510,14 @@ export default function StartingPointProfile() {
     if (!params.resume || user === undefined) return;
     const stored = readResult();
     if (!stored?.archetype_key) {
-      if (user) navigate("/YourPattern", { replace: true });
+      if (user) navigate("/Profile?tab=pattern", { replace: true });
       return;
     }
     const primary = DESIGN_KEY[stored.archetype_key];
     const secondary = DESIGN_KEY[stored.secondary_key];
     const mix = mixFromObject(stored.mix, primary, secondary);
     const r = mix ? { primary, secondary, mix } : null;
-    if (!r) { navigate(user ? "/YourPattern" : "/StartingPointProfile", { replace: true }); return; }
+    if (!r) { navigate(user ? "/Profile?tab=pattern" : "/StartingPointProfile", { replace: true }); return; }
     setResumed({ res: r, guess: guessFromPlatform(stored.guess), imgIdx: Number(stored.image_variant) || 0 });
     setFit(stored.fit ? FIT_LABEL[stored.fit] : null);
     setStep("result");
@@ -656,7 +656,7 @@ export default function StartingPointProfile() {
   const goYourPattern = () => {
     let ret = "";
     try { ret = sessionStorage.getItem("aw_spp_return") || ""; } catch (_e) { ret = ""; }
-    navigate(ret === "/Audit" ? "/Audit" : "/YourPattern");
+    navigate(ret === "/Audit" ? "/Audit" : "/Profile?tab=pattern");
   };
 
   return (
