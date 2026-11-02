@@ -395,9 +395,10 @@ export default function AlignmentAuditPage() {
               ))}
               <div style={{ flex: "1 1 260px", minWidth: 0 }}>
                 <img
-                  src="https://media.base44.com/images/public/69f46886a412ee042303f1af/8e755b3a0_-t-e-x-t_-t-o_-i-m-a-g-e-6812273d-91a3-4ef1-b587-553a073074ef.png"
+                  className="aa-blueprint-img"
+                  src="https://media.base44.com/images/public/69f46886a412ee042303f1af/b668ffb8a_generated_image.png"
                   alt="The Alignment Audit blueprint, held open"
-                  style={{ display: "block", width: "100%", height: "auto", border: "1px solid rgba(74,14,46,0.18)" }}
+                  style={{ display: "block", width: "100%", height: "auto", position: "relative", zIndex: 1, opacity: 1, mixBlendMode: "normal", filter: "none", border: 0 }}
                 />
               </div>
             </div>
