@@ -23,7 +23,7 @@ function chipText(setName, v, answers) {
   if (typeof v === "string") return labelOf(setName, v, answers);
   const sel = Array.isArray(v.selected) ? v.selected : [];
   const parts = sel.filter((s) => s !== "other").map((s) => labelOf(setName, s, answers));
-  if (sel.includes("other") && has(v.other)) parts.push(v.other.trim());
+  if (sel.includes("other")) parts.push(has(v.other) ? v.other.trim() : "Other");
   if (has(v.legacy)) parts.push(v.legacy.trim());
   return parts.join(", ");
 }
