@@ -21,6 +21,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 //   submit    locks the answers. in_progress → submitted, with the due
 //             date five business days later (weekends and South African
 //             public holidays skipped).
+//
+// Admin actions (role admin, owner or master_admin only):
+//   admin_list      every audit, newest first, as a summary.
+//   admin_get       one audit in full, by id.
+//   admin_save      saves Laura's blueprint as a draft. Not visible to her.
+//   admin_release   saves the blueprint, marks it ready and emails her.
+//   admin_complete  marks the audit complete after the call.
 // ────────────────────────────────────────────────────────────────
 
 const EDITABLE = ["purchased", "in_progress"];
@@ -145,6 +152,124 @@ function forClient(a: any) {
   };
 }
 
+const ADMIN_ROLES = ["admin", "owner", "master_admin"];
+const PROFILE_URL = "https://app.alignedwomanco.com/Profile?tab=audit";
+
+const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+
+function summary(a: any, names: Record<string, string>) {
+  return {
+    id: a.id,
+    email: a.email || "",
+    name: names[lower(a.email)] || "",
+    status: a.status,
+    track: a.track || null,
+    progress_percent: a.progress_percent || 0,
+    purchased_at: a.purchased_at || a.created_date || null,
+    submitted_at: a.submitted_at || null,
+    due_at: a.due_at || null,
+    released_at: a.released_at || null,
+    completed_at: a.completed_at || null,
+    has_draft: !!String(a.diagnostic || "").trim(),
+  };
+}
+
+async function buyerNames(base44: any): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  try {
+    const sales = await base44.asServiceRole.entities.Sale.filter({ description: "Alignment Audit" });
+    for (const s of sales || []) {
+      if (s.buyer_email && s.buyer_name) out[lower(s.buyer_email)] = s.buyer_name;
+    }
+  } catch (_e) { /* names are a nicety */ }
+  return out;
+}
+
+async function sendReadyEmail(base44: any, audit: any, name: string) {
+  const first = esc(String(name || "").trim().split(" ")[0] || "there");
+  const subject = "Your Alignment Audit blueprint is ready";
+  const body =
+    '<div style="margin:0;padding:0;background-color:#F7F2EE;">' +
+      '<div style="max-width:560px;margin:0 auto;padding:40px 24px;font-family:\'Montserrat\',Helvetica,Arial,sans-serif;color:#3A2B30;">' +
+        '<div style="background-color:#FFFFFF;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(74,14,46,0.08);">' +
+          '<div style="height:6px;background:linear-gradient(90deg,#4A0E2E,#C4847A);"></div>' +
+          '<div style="padding:40px 36px;">' +
+            '<p style="margin:0 0 24px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#C4847A;font-weight:600;">The Alignment Audit</p>' +
+            '<h1 style="margin:0 0 20px;font-family:\'DM Serif Display\',Georgia,serif;font-size:30px;line-height:1.2;color:#4A0E2E;font-weight:400;">Your blueprint is ready</h1>' +
+            '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Hi ' + first + ',</p>' +
+            '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">I\'ve read everything you wrote, and your blueprint is waiting in your profile.</p>' +
+            '<p style="margin:0 0 28px;font-size:16px;line-height:1.7;">Read it when you have a quiet moment. Then we\'ll go through it together on our call.</p>' +
+            '<p style="margin:0 0 28px;"><a href="' + PROFILE_URL + '" style="display:inline-block;background:#C4847A;color:#26030F;text-decoration:none;font-size:12px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;padding:16px 28px;border-radius:100px;">Read your blueprint</a></p>' +
+            '<p style="margin:0;font-size:16px;line-height:1.7;">Laura</p>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  let status = "sent";
+  let errorMessage = "";
+  try {
+    await base44.asServiceRole.integrations.Core.SendEmail({ to: audit.email, subject, body });
+  } catch (err) {
+    status = "failed";
+    errorMessage = (err as any)?.message || "send_failed";
+  }
+  try {
+    await base44.asServiceRole.entities.EmailLog.create({
+      sent_at: new Date().toISOString(),
+      to_email: audit.email,
+      to_name: name || "",
+      subject,
+      type: "audit_ready",
+      status,
+      error_message: errorMessage,
+    });
+  } catch (_e) { /* logging is best effort */ }
+  return status === "sent";
+}
+
+async function handleAdmin(base44: any, action: string, body: any): Promise<Response> {
+  if (action === "admin_list") {
+    const all = await base44.asServiceRole.entities.AuditResponse.list("-created_date", 500);
+    const names = await buyerNames(base44);
+    return json({ audits: (all || []).map((a: any) => summary(a, names)) });
+  }
+  const id = String(body.id || "");
+  if (!id) return json({ error: "id_required" }, 400);
+  const rows = await base44.asServiceRole.entities.AuditResponse.filter({ id });
+  const audit = rows?.[0];
+  if (!audit) return json({ error: "not_found" }, 404);
+  const names = await buyerNames(base44);
+
+  if (action === "admin_get") {
+    return json({ audit: { ...audit, name: names[lower(audit.email)] || "" } });
+  }
+  if (action === "admin_save" || action === "admin_release") {
+    const diagnostic = String(body.diagnostic ?? "").slice(0, 100000);
+    const patch: Record<string, unknown> = { diagnostic };
+    let emailed = false;
+    if (action === "admin_release") {
+      if (!diagnostic.trim()) return json({ error: "diagnostic_required" }, 400);
+      if (!["submitted", "diagnostic_ready", "complete"].includes(audit.status)) return json({ error: "not_submitted" }, 409);
+      if (audit.status === "submitted") patch.status = "diagnostic_ready";
+      if (!audit.released_at) patch.released_at = new Date().toISOString();
+    }
+    const updated = await base44.asServiceRole.entities.AuditResponse.update(audit.id, patch);
+    if (action === "admin_release" && !audit.released_at && body.send_email !== false) {
+      emailed = await sendReadyEmail(base44, audit, names[lower(audit.email)] || "");
+    }
+    return json({ audit: { ...updated, name: names[lower(audit.email)] || "" }, emailed });
+  }
+  if (action === "admin_complete") {
+    if (!["diagnostic_ready", "complete"].includes(audit.status)) return json({ error: "not_released" }, 409);
+    const updated = await base44.asServiceRole.entities.AuditResponse.update(audit.id, {
+      status: "complete",
+      completed_at: audit.completed_at || new Date().toISOString(),
+    });
+    return json({ audit: { ...updated, name: names[lower(audit.email)] || "" } });
+  }
+  return json({ error: "unknown_action" }, 400);
+}
+
 async function updateProfileFacts(base44: any, user: any, facts: Record<string, unknown>) {
   const patch: Record<string, string> = {};
   for (const k of PROFILE_FACTS) {
@@ -180,6 +305,16 @@ Deno.serve(async (req) => {
   let body: any = {};
   try { body = await req.json(); } catch (_e) { body = {}; }
   const action = String(body.action || "");
+
+  if (action.startsWith("admin_")) {
+    if (!ADMIN_ROLES.includes(String(user.role || ""))) return json({ error: "forbidden" }, 403);
+    try {
+      return await handleAdmin(base44, action, body);
+    } catch (error) {
+      console.error("auditFlow admin error:", (error as any)?.message);
+      return json({ error: "server_error" }, 500);
+    }
+  }
 
   try {
     const audits = await findAudits(base44, user);
