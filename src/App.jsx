@@ -102,8 +102,6 @@ const AuthenticatedApp = () => {
       {/* The Alignment Audit sales page. Public on purpose: anyone can view
           and buy without an account. The questionnaire itself is /Audit. */}
       <Route path="/alignment-audit" element={<LayoutWrapper currentPageName="alignment-audit"><AlignmentAuditPage /></LayoutWrapper>} />
-      <Route path="/AlignmentAudit" element={<Navigate to="/alignment-audit" replace />} />
-      <Route path="/alignmentaudit" element={<Navigate to="/alignment-audit" replace />} />
       {/* GBV cap drop, September 2026. Public, inside the site header and footer. */}
       <Route path="/caps" element={<LayoutWrapper currentPageName="caps"><Caps /></LayoutWrapper>} />
       <Route path="/Caps" element={<Navigate to="/caps" replace />} />
