@@ -219,22 +219,25 @@ export default function AlignmentAuditPage() {
         .aw-audit details summary::-webkit-details-marker { display: none; }
         .aw-audit .aa-hero-mobile-bg { display: none; }
         @media (max-width: 1024px) {
-          .aw-audit .aa-hero { grid-template-columns: 1fr !important; position: relative; }
+          .aw-audit .aa-hero {
+            grid-template-columns: 1fr !important; position: relative;
+            aspect-ratio: 9 / 16;
+          }
           .aw-audit .aa-hero-media { display: none !important; }
           .aw-audit .aa-hero-mobile-bg {
             display: block !important; position: absolute; inset: 0; z-index: 0; overflow: hidden;
             background: #F3EAE1;
           }
           .aw-audit .aa-hero-mobile-bg img {
-            width: 100%; height: 100%; object-fit: contain; object-position: center center; display: block;
+            width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block;
           }
           .aw-audit .aa-hero-mobile-bg::after {
             content: ""; position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(20,2,10,0.42) 0%, rgba(20,2,10,0.3) 34%, rgba(20,2,10,0.88) 100%);
+            background: linear-gradient(180deg, rgba(20,2,10,0.62) 0%, rgba(20,2,10,0.28) 42%, rgba(20,2,10,0.35) 74%, rgba(20,2,10,0.8) 100%);
           }
           .aw-audit .aa-hero-copy {
             position: relative; z-index: 1;
-            padding: 18px 20px 56px !important; min-height: 84vh;
+            padding: 18px 20px 40px !important; min-height: 0 !important;
             justify-content: flex-start !important;
             text-align: center !important;
           }
