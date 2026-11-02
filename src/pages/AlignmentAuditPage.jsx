@@ -18,7 +18,7 @@ const CALL_URL = "https://calendly.com/hello-laurajanethomas/15min";
 const PRICE = "R2,997";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
 const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
-const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/d198d5e9e_-t-e-x-t_-t-o_-i-m-a-g-e-457d6e12-5e3c-41ac-b89b-b1f86d4f05a1.png";
+const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
 
 const C = {
   burg: "#4A0E2E",
@@ -176,8 +176,12 @@ export default function AlignmentAuditPage() {
         .aw-audit .aa-btn:hover { filter: brightness(0.95); }
         .aw-audit details summary { cursor: pointer; list-style: none; }
         .aw-audit details summary::-webkit-details-marker { display: none; }
+        @media (max-width: 900px) {
+          .aw-audit .aa-hero { grid-template-columns: 1fr !important; }
+          .aw-audit .aa-hero-media { min-height: 380px !important; }
+          .aw-audit .aa-hero-copy { padding: 56px 24px 64px !important; }
+        }
         @media (max-width: 720px) {
-          .aw-audit .aa-hero { background-position: center 30% !important; }
           .aw-audit .aa-hero-h { font-size: 40px !important; }
           .aw-audit .aa-sec { padding: 64px 20px !important; }
           .aw-audit .aa-h2 { font-size: 34px !important; }
@@ -190,34 +194,39 @@ export default function AlignmentAuditPage() {
 
       {/* 1. HERO */}
       <section
-        className="aa-sec aa-hero"
+        className="aa-hero"
         style={{
-          position: "relative",
-          color: "#FFFFFF",
-          padding: "140px 24px 96px",
-          textAlign: "center",
-          backgroundColor: C.burg,
-          backgroundImage: `linear-gradient(180deg, rgba(26,3,15,0.86) 0%, rgba(38,3,15,0.6) 45%, rgba(26,3,15,0.9) 100%), url("${HERO_IMAGE}")`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 40%",
-          backgroundRepeat: "no-repeat",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          alignItems: "stretch",
+          background: C.ivory,
+          color: C.ink,
         }}
       >
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <p style={{ ...eyebrow("rgba(255,255,255,0.6)"), fontWeight: 400, marginBottom: 32 }}>A senior diagnostic for women building a business or a career.</p>
-          <h1 className="aa-hero-h" style={{ margin: "0 0 32px", fontFamily: SERIF, fontWeight: 400, fontSize: 76, lineHeight: 1.02, letterSpacing: "-0.01em" }}>
+        <div className="aa-hero-media" style={{ position: "relative", minHeight: 640, overflow: "hidden" }}>
+          <img
+            src={HERO_IMAGE}
+            alt="The Alignment Audit blueprint on a chair in a daisy meadow"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "32% center", display: "block" }}
+          />
+        </div>
+        <div className="aa-hero-copy" style={{ padding: "104px 72px", display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "left" }}>
+          <p style={{ ...eyebrow(C.muted), fontWeight: 400, marginBottom: 28 }}>A senior diagnostic for women building a business or a career.</p>
+          <h1 className="aa-hero-h" style={{ margin: "0 0 28px", fontFamily: SERIF, fontWeight: 400, fontSize: 54, lineHeight: 1.06, letterSpacing: "-0.01em", color: C.ink }}>
             <span style={{ display: "block" }}>You've asked everyone else.</span>
-            <span style={{ display: "block", fontStyle: "italic", color: "rgba(255,200,180,0.88)" }}>Now get an answer about you.</span>
+            <span style={{ display: "block", fontStyle: "italic", color: C.burg }}>Now get an answer about you.</span>
           </h1>
-          <p style={{ margin: "0 auto 40px", maxWidth: 680, fontSize: 18, lineHeight: 1.65, color: "rgba(255,255,255,0.8)" }}>
+          <p style={{ margin: "0 0 36px", maxWidth: 560, fontSize: 17, lineHeight: 1.65, color: C.body }}>
             One questionnaire. One blueprint written about you. One hour with me. An honest read on your business or career, and on the woman running it.
           </p>
-          <BuyButton />
-          <div style={{ margin: "32px auto 0", maxWidth: 600 }}>
-            <p style={{ margin: "0 0 8px", fontSize: 14, color: "rgba(255,255,255,0.62)" }}>
+          <div>
+            <BuyButton />
+          </div>
+          <div style={{ marginTop: 30, maxWidth: 560 }}>
+            <p style={{ margin: "0 0 8px", fontSize: 14, color: C.muted }}>
               {PRICE}, paid once. Your blueprint within five business days.
             </p>
-            <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.6, color: "rgba(255,200,180,0.75)" }}>
+            <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.6, color: C.burg }}>
               Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
             </p>
           </div>
