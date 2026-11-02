@@ -301,16 +301,25 @@ export default function AlignmentAuditPage() {
           <div>
             <BuyButton />
           </div>
-          <div style={{ marginTop: 30, maxWidth: 560 }}>
-            <p style={{ margin: "0 0 8px", fontSize: 14, color: C.muted }}>
-              {PRICE}, paid once. Your blueprint within five business days.
-            </p>
-            <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.6, color: C.burg }}>
-              Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
-            </p>
-          </div>
         </div>
       </section>
+
+      {/* 1b. PRICING NOTE, directly under the hero */}
+      <div
+        style={{
+          background: C.ivory,
+          borderTop: "1px solid rgba(74,14,46,0.1)",
+          padding: "30px 24px 40px",
+          textAlign: "center",
+        }}
+      >
+        <p style={{ margin: "0 0 10px", fontSize: 14, color: C.muted }}>
+          {PRICE}, paid once. Your blueprint within five business days.
+        </p>
+        <p style={{ margin: "0 auto", maxWidth: 620, fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.6, color: C.burg }}>
+          Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
+        </p>
+      </div>
 
       {/* 2. THE JAR */}
       <section className="aa-sec" style={{ padding: "112px 24px", background: "#EFE7DD", textAlign: "center" }}>
