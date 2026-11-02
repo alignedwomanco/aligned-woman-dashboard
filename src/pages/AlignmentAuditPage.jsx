@@ -18,6 +18,7 @@ const CALL_URL = "https://calendly.com/hello-laurajanethomas/15min";
 const PRICE = "R2,997";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
 const PORTRAIT = "https://ucarecdn.com/2d3cf5ee-edac-4e39-b9b1-c7b5a3c5d8a7/-/preview/800x1066/";
+const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/c7263a3da_b7c306c12439e6ddd00f0a21d197b4b9.jpg";
 
 const C = {
   burg: "#4A0E2E",
@@ -176,6 +177,7 @@ export default function AlignmentAuditPage() {
         .aw-audit details summary { cursor: pointer; list-style: none; }
         .aw-audit details summary::-webkit-details-marker { display: none; }
         @media (max-width: 720px) {
+          .aw-audit .aa-hero { background-position: center 30% !important; }
           .aw-audit .aa-hero-h { font-size: 40px !important; }
           .aw-audit .aa-sec { padding: 64px 20px !important; }
           .aw-audit .aa-h2 { font-size: 34px !important; }
@@ -186,7 +188,20 @@ export default function AlignmentAuditPage() {
       `}</style>
 
       {/* 1. HERO */}
-      <section className="aa-sec" style={{ background: C.burg, color: "#FFFFFF", padding: "140px 24px 96px", textAlign: "center" }}>
+      <section
+        className="aa-sec aa-hero"
+        style={{
+          position: "relative",
+          color: "#FFFFFF",
+          padding: "140px 24px 96px",
+          textAlign: "center",
+          backgroundColor: C.burg,
+          backgroundImage: `linear-gradient(180deg, rgba(26,3,15,0.86) 0%, rgba(38,3,15,0.6) 45%, rgba(26,3,15,0.9) 100%), url("${HERO_IMAGE}")`,
+          backgroundSize: "cover",
+          backgroundPosition: "center 40%",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ ...eyebrow("rgba(255,255,255,0.6)"), fontWeight: 400, marginBottom: 32 }}>A senior diagnostic for women building a business or a career.</p>
           <h1 className="aa-hero-h" style={{ margin: "0 0 32px", fontFamily: SERIF, fontWeight: 400, fontSize: 76, lineHeight: 1.02, letterSpacing: "-0.01em" }}>
