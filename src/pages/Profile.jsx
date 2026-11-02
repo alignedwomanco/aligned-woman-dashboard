@@ -1,11 +1,12 @@
 import React from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import AppShellV2 from "@/components/dashboard-v2/AppShellV2";
 import PatternSection from "@/components/profile/PatternSection";
 import AuditSection from "@/components/profile/AuditSection";
 import ProfileSettings from "@/pages/ProfileSettings";
+import ProfileTabs, { PROFILE_TABS as TABS } from "@/components/profile/ProfileTabs";
 
 // ────────────────────────────────────────────────────────────────
 // My Profile (/Profile). One home for everything that is hers:
@@ -16,12 +17,6 @@ import ProfileSettings from "@/pages/ProfileSettings";
 // Declared in App.jsx beside /Dashboard, in its own AppShellV2 chrome and
 // outside Layout, so free members are never stopped by PendingApproval.
 // ────────────────────────────────────────────────────────────────
-
-const TABS = [
-  { id: "pattern", label: "Your Pattern" },
-  { id: "audit", label: "Alignment Audit" },
-  { id: "account", label: "Account" },
-];
 
 export default function Profile() {
   const [params, setParams] = useSearchParams();
@@ -38,13 +33,6 @@ export default function Profile() {
   const isPartner = linkedExperts.length > 0;
   const firstName = (me?.full_name || "").trim().split(" ")[0];
 
-  const tabStyle = (on) => ({
-    minHeight: 44, padding: "0 20px", borderRadius: 10, border: "none", cursor: "pointer", whiteSpace: "nowrap",
-    background: on ? "#4A0E2E" : "transparent", color: on ? "#FFFFFF" : "#6B5B60",
-    fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 13, textDecoration: "none",
-    display: "inline-flex", alignItems: "center",
-  });
-
   return (
     <div className="min-h-screen flex relative" style={{ background: "#FAF5F3" }}>
       <AppShellV2 active="profile">
@@ -57,25 +45,9 @@ export default function Profile() {
             Your pattern, your Alignment Audit and your account, in one place.
           </p>
 
-          <div role="tablist" aria-label="My Profile sections" style={{ display: "inline-flex", flexWrap: "wrap", gap: 4, padding: 4, borderRadius: 14, background: "#FFFFFF", marginBottom: 32, maxWidth: "100%" }}>
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                aria-selected={tab === t.id}
-                onClick={() => setParams({ tab: t.id }, { replace: true })}
-                style={tabStyle(tab === t.id)}
-              >
-                {t.label}
-              </button>
-            ))}
-            {isPartner && (
-              <Link to="/partner" style={tabStyle(false)}>Partner dashboard →</Link>
-            )}
-          </div>
+          <ProfileTabs active={tab} isPartner={isPartner} onSelect={(id) => setParams({ tab: id }, { replace: true })} />
 
-          <div role="tabpanel">
+          <div>
             {tab === "pattern" && <PatternSection />}
             {tab === "audit" && <AuditSection />}
             {tab === "account" && <ProfileSettings embedded />}
