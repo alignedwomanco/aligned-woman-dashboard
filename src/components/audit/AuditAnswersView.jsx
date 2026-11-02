@@ -29,7 +29,7 @@ function chipText(setName, v, answers) {
 }
 
 function boxText(def, v, answers) {
-  if (!has(typeof v === "object" ? JSON.stringify(v) === "{}" ? "" : "x" : v)) return "";
+  if (v === undefined || v === null || v === "") return "";
   if (def.kind === "chips" || def.kind === "toggle") return chipText(def.options, v, answers);
   if (def.kind === "number") return has(v) ? `${v}${def.suffix ? ` ${def.suffix}` : ""}` : "";
   if (typeof v === "object") return chipText(def.options, v, answers);
