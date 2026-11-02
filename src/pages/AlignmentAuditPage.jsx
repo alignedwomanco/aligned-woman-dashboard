@@ -19,7 +19,7 @@ const PRICE = "R2,997";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
 const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
-const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/50c7fb558_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-9b88f15a-48fc-4123-9a68-605317b271d9.png";
+const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/db8b7640b_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-ef746f81-ff44-40d1-8005-60428405848e.png";
 
 const C = {
   burg: "#4A0E2E",
