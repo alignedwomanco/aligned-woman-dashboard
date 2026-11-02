@@ -458,20 +458,45 @@ function LearningCardFree() {
   );
 }
 
-function MoreCoursesCard() {
+// The Alignment Audit card, beside the Blueprint card. Replaced "More courses
+// are coming" (Nov 2026). Buyers are told their audit is waiting on the
+// dashboard, so this card is where it waits: it reads her audit through
+// auditFlow "get" and changes with where she is. No audit: the sales page.
+function AuditCard() {
+  const [audit, setAudit] = useState(undefined); // undefined = loading
+  useEffect(() => {
+    let cancelled = false;
+    base44.functions
+      .invoke("auditFlow", { action: "get" })
+      .then((r) => { if (!cancelled) setAudit((r?.data ?? r)?.audit || null); })
+      .catch(() => { if (!cancelled) setAudit(null); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const s = audit?.status;
+  const copy = !audit
+    ? { eyebrow: "One-to-one with Laura", title: "The Alignment Audit.", body: "An honest read on your work and your life. A blueprint written about you, then an hour with Laura.", cta: "See the Audit", to: "/alignment-audit" }
+    : s === "purchased"
+    ? { eyebrow: "Your Alignment Audit", title: "Ready when you are.", body: "Set aside about 90 minutes. Your answers save as you go.", cta: "Start my Audit", to: "/Audit" }
+    : s === "in_progress"
+    ? { eyebrow: "Your Alignment Audit", title: `${audit.progress_percent || 0}% done.`, body: "Pick up exactly where you left off.", cta: "Continue", to: "/Audit" }
+    : s === "submitted"
+    ? { eyebrow: "Your Alignment Audit", title: "It's with Laura.", body: "Your blueprint arrives within five business days. You'll get an email when it's here.", cta: "View my Audit", to: "/Profile?tab=audit" }
+    : { eyebrow: "Your Alignment Audit", title: "Your blueprint is ready.", body: "Read it before your call with Laura.", cta: "Read my blueprint", to: "/Profile?tab=audit" };
+
+  if (audit === undefined) {
+    return <section className={`${GLASS_CARD} p-6 md:p-8 lg:w-72 flex-shrink-0 animate-pulse`} aria-hidden="true" />;
+  }
   return (
     <section className={`${GLASS_CARD} p-6 md:p-8 lg:w-72 flex-shrink-0`}>
-      <h3 className="font-display text-awburg-core text-[20px] leading-tight mb-3">
-        More courses are coming.
-      </h3>
-      <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5">
-        AW Verified experts are bringing their work here, taught the Aligned{" "}
-        <span className="font-display italic">Woman</span> way. Have a look at what is
-        arriving.
-      </p>
-      <Link to="/Classroom" className={BTN_OUTLINE}>
-        Explore courses
-      </Link>
+      <p className="font-body font-bold text-[10px] tracking-eyebrow uppercase text-awburg-core/60 mb-3">{copy.eyebrow}</p>
+      <h3 className="font-display text-awburg-core text-[20px] leading-tight mb-3">{copy.title}</h3>
+      <p className="font-body font-light text-[13px] leading-relaxed text-awburg-core/70 mb-5">{copy.body}</p>
+      {copy.to.startsWith("/alignment-audit") ? (
+        <a href={copy.to} className={BTN_OUTLINE}>{copy.cta}</a>
+      ) : (
+        <Link to={copy.to} className={BTN_OUTLINE}>{copy.cta}</Link>
+      )}
     </section>
   );
 }
@@ -888,7 +913,7 @@ export default function Dashboard() {
               ) : (
                 <LearningCardFree />
               )}
-              <MoreCoursesCard />
+              <AuditCard />
             </div>
           </section>
 
