@@ -19,6 +19,7 @@ const PRICE = "R2,997";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
 const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
+const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/50c7fb558_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-9b88f15a-48fc-4123-9a68-605317b271d9.png";
 
 const C = {
   burg: "#4A0E2E",
@@ -216,10 +217,29 @@ export default function AlignmentAuditPage() {
         }
         .aw-audit details summary { cursor: pointer; list-style: none; }
         .aw-audit details summary::-webkit-details-marker { display: none; }
-        @media (max-width: 900px) {
-          .aw-audit .aa-hero { grid-template-columns: 1fr !important; }
-          .aw-audit .aa-hero-media { min-height: 380px !important; }
-          .aw-audit .aa-hero-copy { padding: 56px 24px 64px !important; }
+        .aw-audit .aa-hero-mobile-bg { display: none; }
+        @media (max-width: 1024px) {
+          .aw-audit .aa-hero { grid-template-columns: 1fr !important; position: relative; }
+          .aw-audit .aa-hero-media { display: none !important; }
+          .aw-audit .aa-hero-mobile-bg {
+            display: block !important; position: absolute; inset: 0; z-index: 0; overflow: hidden;
+          }
+          .aw-audit .aa-hero-mobile-bg img {
+            width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;
+          }
+          .aw-audit .aa-hero-mobile-bg::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(20,2,10,0.42) 0%, rgba(20,2,10,0.3) 34%, rgba(20,2,10,0.88) 100%);
+          }
+          .aw-audit .aa-hero-copy {
+            position: relative; z-index: 1;
+            padding: 64px 24px 64px !important; min-height: 84vh;
+          }
+          .aw-audit .aa-hero-copy h1,
+          .aw-audit .aa-hero-copy h1 span { color: #FFFFFF !important; }
+          .aw-audit .aa-hero-copy h1 span:last-child { color: rgba(255,214,199,0.96) !important; }
+          .aw-audit .aa-hero-copy p { color: rgba(255,255,255,0.88) !important; }
+          .aw-audit .aa-hero-copy > div:last-child p:last-child { color: rgba(255,214,199,0.95) !important; }
         }
         @media (max-width: 720px) {
           .aw-audit .aa-hero-h { font-size: 40px !important; }
@@ -243,6 +263,9 @@ export default function AlignmentAuditPage() {
           color: C.ink,
         }}
       >
+        <div className="aa-hero-mobile-bg" aria-hidden="true">
+          <img src={HERO_IMAGE_MOBILE} alt="" />
+        </div>
         <div className="aa-hero-media" style={{ position: "relative", minHeight: 640, overflow: "hidden" }}>
           <img
             src={HERO_IMAGE}
