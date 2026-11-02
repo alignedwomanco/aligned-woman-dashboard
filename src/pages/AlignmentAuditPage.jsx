@@ -393,16 +393,12 @@ export default function AlignmentAuditPage() {
                   </ul>
                 </div>
               ))}
-              <div style={{ flex: "1 1 260px", minWidth: 0 }} aria-hidden="true">
-                <div style={{ background: "#FFFFFF", border: "1px solid rgba(74,14,46,0.18)", padding: "30px 26px" }}>
-                  <p style={{ margin: "0 0 4px", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: C.burgMid }}>Alignment Blueprint</p>
-                  <p style={{ margin: "0 0 20px", fontFamily: SERIF, fontSize: 18 }}>Prepared for you</p>
-                  {[100, 78].map((w, i) => <div key={i} style={{ height: 9, background: "#EDE5DC", marginBottom: i ? 22 : 9, width: `${w}%` }} />)}
-                  <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 600, color: C.burg }}>What's costing you most</p>
-                  {[100, 70].map((w, i) => <div key={i} style={{ height: 9, background: "#EDE5DC", marginBottom: i ? 22 : 9, width: `${w}%` }} />)}
-                  <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 600, color: C.burg }}>Your next move</p>
-                  {[100, 60].map((w, i) => <div key={i} style={{ height: 9, background: "#EDE5DC", marginBottom: 9, width: `${w}%` }} />)}
-                </div>
+              <div style={{ flex: "1 1 260px", minWidth: 0 }}>
+                <img
+                  src="https://media.base44.com/images/public/69f46886a412ee042303f1af/8e755b3a0_-t-e-x-t_-t-o_-i-m-a-g-e-6812273d-91a3-4ef1-b587-553a073074ef.png"
+                  alt="The Alignment Audit blueprint, held open"
+                  style={{ display: "block", width: "100%", height: "auto", border: "1px solid rgba(74,14,46,0.18)" }}
+                />
               </div>
             </div>
             <p style={{ margin: "48px 0 0", fontFamily: SERIF, fontStyle: "italic", fontSize: 22, textAlign: "center", color: C.burg }}>
