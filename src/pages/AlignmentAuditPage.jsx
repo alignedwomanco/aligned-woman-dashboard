@@ -173,7 +173,47 @@ export default function AlignmentAuditPage() {
   return (
     <div className="aw-audit" style={{ background: C.ivory, color: C.ink, fontFamily: SANS, fontWeight: 300 }}>
       <style>{`
-        .aw-audit .aa-btn:hover { filter: brightness(0.95); }
+        .aw-audit .aa-btn {
+          position: relative; overflow: hidden;
+          transition: transform 240ms ease, box-shadow 240ms ease, filter 240ms ease;
+        }
+        .aw-audit .aa-btn:hover {
+          filter: brightness(0.96);
+          transform: translateY(-2px);
+          box-shadow: 0 12px 26px rgba(74,14,46,0.22);
+        }
+        .aw-audit .aa-btn:active { transform: translateY(0); box-shadow: 0 4px 10px rgba(74,14,46,0.18); }
+        .aw-audit .aa-btn::after {
+          content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
+          background: linear-gradient(100deg, transparent, rgba(255,255,255,0.42), transparent);
+          transform: skewX(-18deg); opacity: 0; pointer-events: none;
+        }
+        .aw-audit .aa-btn:hover::after { animation: aa-sheen 900ms ease-out; }
+        .aw-audit .aa-btn span[aria-hidden="true"] {
+          display: inline-block;
+          animation: aa-arrow-nudge 1900ms ease-in-out infinite;
+        }
+        .aw-audit .aa-btn:hover span[aria-hidden="true"] {
+          animation: aa-arrow-slide 700ms ease-out;
+        }
+        @keyframes aa-sheen {
+          0% { left: -60%; opacity: 0; }
+          25% { opacity: 1; }
+          100% { left: 120%; opacity: 0; }
+        }
+        @keyframes aa-arrow-nudge {
+          0%, 70%, 100% { transform: translateX(0); }
+          80% { transform: translateX(4px); }
+          90% { transform: translateX(0); }
+        }
+        @keyframes aa-arrow-slide {
+          0% { transform: translateX(0); }
+          55% { transform: translateX(8px); }
+          100% { transform: translateX(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .aw-audit .aa-btn, .aw-audit .aa-btn span[aria-hidden="true"], .aw-audit .aa-btn::after { animation: none !important; transition: none !important; }
+        }
         .aw-audit details summary { cursor: pointer; list-style: none; }
         .aw-audit details summary::-webkit-details-marker { display: none; }
         @media (max-width: 900px) {
