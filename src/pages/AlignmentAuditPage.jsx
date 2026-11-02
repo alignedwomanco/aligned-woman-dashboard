@@ -14,7 +14,7 @@ import LandingFooter from "@/components/home/LandingFooter";
 const BUY_URL = "https://buy.stripe.com/dRmeVf5Nc7BT4OB18ReME08";      // R2,997 (ZAR)
 const BUY_URL_USD = "https://buy.stripe.com/28E8wR8Zo1dvgxjeZHeME09";  // $184 (USD), for buyers outside South Africa
 const PRICE_USD = "$184";
-const CALL_URL = "https://calendly.com/hello-laurajanethomas/15min";
+
 const PRICE = "R2,997";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
 const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
@@ -709,9 +709,6 @@ export default function AlignmentAuditPage() {
               <li>Full fee credited to the Clarity Sprint.</li>
             </ul>
             <BuyButton block />
-            <p style={{ margin: "18px 0 0", fontSize: 13, color: C.muted }}>
-              Not sure yet? <a href={CALL_URL} target="_blank" rel="noopener noreferrer" style={{ color: C.burg }}>Book a 15-minute call</a> first.
-            </p>
           </div>
         </div>
       </section>
