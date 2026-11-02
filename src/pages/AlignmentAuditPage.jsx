@@ -233,7 +233,24 @@ export default function AlignmentAuditPage() {
           }
           .aw-audit .aa-hero-copy {
             position: relative; z-index: 1;
-            padding: 64px 24px 64px !important; min-height: 84vh;
+            padding: 18px 20px 56px !important; min-height: 84vh;
+            justify-content: flex-start !important;
+            text-align: center !important;
+          }
+          .aw-audit .aa-hero-text {
+            text-align: center;
+            padding: 22px 18px 24px;
+            border-radius: 22px;
+            background: rgba(22,3,11,0.4);
+            box-shadow: 0 22px 54px rgba(14,2,7,0.5);
+            -webkit-backdrop-filter: blur(7px);
+            backdrop-filter: blur(7px);
+          }
+          .aw-audit .aa-hero-text p,
+          .aw-audit .aa-hero-text h1 {
+            text-shadow: 0 2px 14px rgba(14,2,7,0.8), 0 1px 3px rgba(14,2,7,0.85);
+            margin-left: auto !important;
+            margin-right: auto !important;
           }
           .aw-audit .aa-hero-copy h1,
           .aw-audit .aa-hero-copy h1 span { color: #FFFFFF !important; }
@@ -274,14 +291,16 @@ export default function AlignmentAuditPage() {
           />
         </div>
         <div className="aa-hero-copy" style={{ padding: "104px 72px", display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "left" }}>
-          <p style={{ ...eyebrow(C.muted), fontWeight: 400, marginBottom: 28 }}>A senior diagnostic for women building a business or a career.</p>
-          <h1 className="aa-hero-h" style={{ margin: "0 0 28px", fontFamily: SERIF, fontWeight: 400, fontSize: 54, lineHeight: 1.06, letterSpacing: "-0.01em", color: C.ink }}>
-            <span style={{ display: "block" }}>You've asked everyone else.</span>
-            <span style={{ display: "block", fontStyle: "italic", color: C.burg }}>Now get an answer about you.</span>
-          </h1>
-          <p style={{ margin: "0 0 36px", maxWidth: 560, fontSize: 17, lineHeight: 1.65, color: C.body }}>
-            One questionnaire. One blueprint written about you. One hour with me. An honest read on your business or career, and on the woman running it.
-          </p>
+          <div className="aa-hero-text">
+            <p style={{ ...eyebrow(C.muted), fontWeight: 400, marginBottom: 28 }}>A senior diagnostic for women building a business or a career.</p>
+            <h1 className="aa-hero-h" style={{ margin: "0 0 28px", fontFamily: SERIF, fontWeight: 400, fontSize: 54, lineHeight: 1.06, letterSpacing: "-0.01em", color: C.ink }}>
+              <span style={{ display: "block" }}>You've asked everyone else.</span>
+              <span style={{ display: "block", fontStyle: "italic", color: C.burg }}>Now get an answer about you.</span>
+            </h1>
+            <p style={{ margin: "0 0 36px", maxWidth: 560, fontSize: 17, lineHeight: 1.65, color: C.body }}>
+              One questionnaire. One blueprint written about you. One hour with me. An honest read on your business or career, and on the woman running it.
+            </p>
+          </div>
           <div>
             <BuyButton />
           </div>
