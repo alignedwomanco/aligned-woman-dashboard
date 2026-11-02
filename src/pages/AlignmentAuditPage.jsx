@@ -39,13 +39,23 @@ const SERIF = "'Libre Baskerville', Georgia, serif";
 const SANS = "Montserrat, sans-serif";
 
 /* ── Content ── */
-const LETTERS = [
-  { letter: "A", part: "Part 2", label: "Awareness", sub: "What you're not seeing.", look: "Your blind spots, the conversation you're avoiding, what you're calling \"fine\", and your Energy Leak Map.", back: "Where you actually are, and where your energy is leaking." },
-  { letter: "L", part: "Part 4", label: "Liberation", sub: "What you're carrying.", look: "Guilt, obligation, the approval you're still working for, and the rules about money and womanhood that still run you.", back: "What's costing you most, named plainly." },
-  { letter: "I", part: "Part 5", label: "Intention", sub: "What you actually want.", look: "Your one priority for six months, what's really in the way, and how you make big decisions now.", back: "The gap between what you want and what you think you should want." },
-  { letter: "V", part: "Part 6", label: "Vision", sub: "Where you're heading.", look: "An ordinary Tuesday three years from now, and the version of success you wouldn't say out loud.", back: "The two roads: where the year goes if nothing changes, and if you move." },
-  { letter: "E", part: "Part 7", label: "Embodiment", sub: "How you're living it.", look: "Sleep, stress recovery, where you sit on the burnout scale, and the signals you keep overriding.", back: "Your next move, and your first 30 days." },
-];
+// The A.L.I.V.E. cards change with the track she picks (business or career).
+const LETTERS = {
+  business: [
+    { letter: "A", label: "Awareness", sub: "What you're not seeing.", look: "Where the business actually is, your blind spots as its founder, the conversation you're avoiding, and your Energy Leak Map.", back: "Where you and the business really are, and where your energy is leaking." },
+    { letter: "L", label: "Liberation", sub: "What you're carrying.", look: "The clients, offers and promises you keep out of guilt, the approval you're still working for, and the money rules that still set your prices.", back: "What's costing the business, and you, most." },
+    { letter: "I", label: "Intention", sub: "What you actually want.", look: "The business you want, separated from the one it has become. Your one priority for six months, and how you make big calls.", back: "The gap between the business you want and the one you're running." },
+    { letter: "V", label: "Vision", sub: "Where you're heading.", look: "An ordinary Tuesday three years from now as the owner, and the version of success you wouldn't say out loud.", back: "Two roads: the business if nothing changes, and if you make the move." },
+    { letter: "E", label: "Embodiment", sub: "How you're living it.", look: "Your hours, your pace, what you should hand off, whether the business survives a month without you, and what your body keeps telling you.", back: "Your next move in the business, and your first 30 days." },
+  ],
+  career: [
+    { letter: "A", label: "Awareness", sub: "What you're not seeing.", look: "Where you really are in your role, your blind spots at work, the conversation you're avoiding, and your Energy Leak Map.", back: "Where your career really is, and where your energy is leaking." },
+    { letter: "L", label: "Liberation", sub: "What you're carrying.", look: "The expectations and approval you keep working for, the work nobody credits, and the rules about money and being a woman at work that still run you.", back: "What's holding your career back most." },
+    { letter: "I", label: "Intention", sub: "What you actually want.", look: "What you want from your work, separated from what you think you should want. Your one priority for six months, and how you make big calls.", back: "The gap between the career you want and the one you're in." },
+    { letter: "V", label: "Vision", sub: "Where you're heading.", look: "An ordinary Tuesday three years from now, the next move you keep circling, and the version of success you wouldn't say out loud.", back: "Two roads: your career if nothing changes, and if you make the move." },
+    { letter: "E", label: "Embodiment", sub: "How you're living it.", look: "When you really log off, your sleep, how fast you recover from stress, where you sit on the burnout scale, and what your body keeps telling you.", back: "Your next career move, and your first 30 days." },
+  ],
+};
 
 const MODULES = {
   business: {
@@ -216,6 +226,9 @@ export default function AlignmentAuditPage() {
           .aw-audit .aa-btn, .aw-audit .aa-btn span[aria-hidden="true"], .aw-audit .aa-btn::after { animation: none !important; transition: none !important; }
         }
         .aw-audit details summary { cursor: pointer; list-style: none; }
+        .aw-audit .aa-fade { animation: aaFade 380ms ease both; }
+        @keyframes aaFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) { .aw-audit .aa-fade { animation: none; } }
         .aw-audit details summary::-webkit-details-marker { display: none; }
         .aw-audit .aa-hero-mobile-bg { display: none; }
         @media (max-width: 1024px) {
@@ -388,7 +401,7 @@ export default function AlignmentAuditPage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-            {[LETTERS.slice(0, 3), LETTERS.slice(3)].map((row, r) => (
+            {[LETTERS[track].slice(0, 3), LETTERS[track].slice(3)].map((row, r) => (
               <div
                 key={r}
                 className="aa-alive-row"
@@ -402,10 +415,10 @@ export default function AlignmentAuditPage() {
                 }}
               >
                 {row.map((l) => (
-                  <div key={l.letter} style={{ background: C.card, padding: "36px 28px" }}>
+                  <div key={`${track}-${l.letter}`} className="aa-fade" style={{ background: C.card, padding: "36px 28px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
                       <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, lineHeight: 1, color: C.burg }}>{l.letter}</span>
-                      <span style={{ marginTop: 8, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted }}>{l.part}</span>
+                      <span style={{ marginTop: 8, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted }}>{track === "business" ? "Business" : "Career"}</span>
                     </div>
                     <p style={{ margin: "0 0 8px", fontFamily: SERIF, fontWeight: 700, fontSize: 17 }}>{l.label}</p>
                     <p style={{ margin: "0 0 14px", fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.4, color: C.burg }}>{l.sub}</p>
@@ -423,7 +436,7 @@ export default function AlignmentAuditPage() {
             <p style={{ ...eyebrow(), textAlign: "center", marginBottom: 20 }}>{mod.title}</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
               {mod.items.map((m) => (
-                <div key={m.name} style={{ background: "#FFFFFF", padding: "28px 26px" }}>
+                <div key={`${track}-${m.name}`} className="aa-fade" style={{ background: "#FFFFFF", padding: "28px 26px" }}>
                   <p style={{ margin: "0 0 10px", fontFamily: SERIF, fontSize: 20, color: C.burg }}>{m.name}</p>
                   <p style={{ margin: 0, fontSize: 13, lineHeight: 1.65 }}>{m.body}</p>
                 </div>
