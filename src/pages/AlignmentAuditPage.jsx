@@ -237,8 +237,8 @@ export default function AlignmentAuditPage() {
           }
           .aw-audit .aa-hero-copy {
             position: relative; z-index: 1;
-            padding: 18px 20px 40px !important; min-height: 0 !important;
-            justify-content: flex-start !important;
+            padding: 18px 20px 28px !important; min-height: 0 !important;
+            justify-content: space-between !important;
             text-align: center !important;
           }
           .aw-audit .aa-hero-text {
