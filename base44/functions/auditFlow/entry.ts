@@ -219,7 +219,7 @@ async function sendReadyEmail(base44: any, audit: any, name: string) {
       to_email: audit.email,
       to_name: name || "",
       subject,
-      type: "audit_ready",
+      type: "one_time",
       status,
       error_message: errorMessage,
     });
