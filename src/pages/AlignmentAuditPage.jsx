@@ -223,9 +223,10 @@ export default function AlignmentAuditPage() {
           .aw-audit .aa-hero-media { display: none !important; }
           .aw-audit .aa-hero-mobile-bg {
             display: block !important; position: absolute; inset: 0; z-index: 0; overflow: hidden;
+            background: #F3EAE1;
           }
           .aw-audit .aa-hero-mobile-bg img {
-            width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;
+            width: 100%; height: 100%; object-fit: contain; object-position: center center; display: block;
           }
           .aw-audit .aa-hero-mobile-bg::after {
             content: ""; position: absolute; inset: 0;
