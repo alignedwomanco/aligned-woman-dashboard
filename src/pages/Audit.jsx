@@ -532,10 +532,10 @@ export default function Audit() {
         <p className="eye">The Alignment Audit</p>
         {ready ? (
           <>
-            <h1 className="h-l" style={{ marginTop: 10 }}>Your diagnostic is ready.</h1>
+            <h1 className="h-l" style={{ marginTop: 10 }}>Your blueprint is ready.</h1>
             {audit?.diagnostic && (/^https?:\/\//.test(audit.diagnostic.trim()) ? (
               <div style={{ marginTop: 20 }}>
-                <a className="btn btn-s" href={audit.diagnostic.trim()} target="_blank" rel="noopener noreferrer">Read your diagnostic</a>
+                <a className="btn btn-s" href={audit.diagnostic.trim()} target="_blank" rel="noopener noreferrer">Read your blueprint</a>
               </div>
             ) : (
               <div className="aw-diag">{audit.diagnostic}</div>
@@ -544,7 +544,7 @@ export default function Audit() {
         ) : (
           <>
             <h1 className="h-l" style={{ marginTop: 10 }}>
-              {audit?.due_at ? <>Your diagnostic arrives by <em>{formatDue(audit.due_at)}</em>.</> : "Your audit is with Laura."}
+              {audit?.due_at ? <>Your blueprint arrives by <em>{formatDue(audit.due_at)}</em>.</> : "Your audit is with Laura."}
             </h1>
             {WHEN_YOU_FINISH.lines.map((l) => <p key={l} className="body" style={{ marginTop: 16 }}>{l}</p>)}
           </>

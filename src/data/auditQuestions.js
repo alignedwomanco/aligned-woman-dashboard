@@ -60,16 +60,16 @@ export const BEFORE_YOU_BEGIN = {
     "This is a coaching tool. It isn't therapy or a medical assessment. If something here brings up more than you expected, stop and talk to someone you trust.",
     // The doc adds "[Confirm storage and retention wording before launch.]"
     // after this line. That note is for Laura and is not shown.
-    "Only I read your answers, and they're used for your diagnostic and nothing else.",
+    "Only I read your answers, and they're used for your blueprint and nothing else.",
   ],
-  promise: "Within five business days of submitting, you get a written diagnostic: where you actually are, the pattern holding you back, and the move I'd make next. Then we go through it together on a one-hour call.",
+  promise: "Within five business days of submitting, you get a blueprint written about you: where you actually are, the pattern holding you back, and the move I'd make next. Then we go through it together on a one-hour call.",
   tickLead: "Before you start, tick to agree:",
 };
 
 // The exact wording she agrees to. Stored with her answers when she ticks.
 // The doc ends it with "[Link to full terms and privacy policy.]"; the page
 // renders that as a link to TERMS_URL until Laura's full page exists.
-export const AGREEMENT_TEXT = "I understand this audit is a coaching tool. It isn't therapy, medical advice or a diagnosis. I agree to Laura Jane Thomas collecting and using my answers, including anything I share about my health, to prepare my diagnostic. I know I can skip any question.";
+export const AGREEMENT_TEXT = "I understand this audit is a coaching tool. It isn't therapy, medical advice or a diagnosis. I agree to Laura Jane Thomas collecting and using my answers, including anything I share about my health, to prepare my blueprint. I know I can skip any question.";
 export const TERMS_LABEL = "Read the full terms and privacy policy.";
 export const TERMS_URL = "/terms-and-conditions";
 
@@ -297,7 +297,7 @@ export const PARTS = [
   {
     id: "p3",
     title: "Part 3: The Energy Leak Map",
-    intro: "This is where most of the diagnostic comes from. Don't rate how happy you are with each area. Rate what it does to your energy right now.",
+    intro: "This is where most of your blueprint comes from. Don't rate how happy you are with each area. Rate what it does to your energy right now.",
     questions: [
       { id: "q18", n: "18", type: "leakmap", placeholder: "", text: "Score each area from -5 (it drains me most days) to +5 (it fills me up). 0 is neutral. Leave out anything that doesn't apply." },
       { id: "q19", n: "19", type: "text", quote: "lowest", placeholder: "", text: "Look at your lowest score. What's actually happening there? Describe a bad day in that area." },
@@ -561,7 +561,7 @@ export const WHEN_YOU_FINISH = {
   title: "That's it.",
   lines: [
     "Thank you for being this honest. Most people never sit down and look at all of this in one go.",
-    "Within five business days you'll get your written diagnostic, and then we'll go through it together on a one-hour call.",
+    "Within five business days you'll get your written blueprint, and then we'll go through it together on a one-hour call.",
     "If anything you wrote is sitting heavily with you, don't wait for the call. Talk to someone you trust, or a professional.",
   ],
 };
