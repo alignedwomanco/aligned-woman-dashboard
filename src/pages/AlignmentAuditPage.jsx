@@ -17,7 +17,7 @@ const PRICE_USD = "$184";
 const CALL_URL = "https://calendly.com/hello-laurajanethomas/15min";
 const PRICE = "R2,997";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
-const PORTRAIT = "https://ucarecdn.com/2d3cf5ee-edac-4e39-b9b1-c7b5a3c5d8a7/-/preview/800x1066/";
+const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/2767f70f2_36eae51ba6f2ebc98a73880c341fc04e.jpg";
 
 const C = {
