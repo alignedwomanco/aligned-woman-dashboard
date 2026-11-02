@@ -272,6 +272,18 @@ export default function AlignmentAuditPage() {
           .aw-audit .aa-hero-copy p { color: rgba(255,255,255,0.88) !important; }
           .aw-audit .aa-hero-copy > div:last-child p:last-child { color: rgba(255,214,199,0.95) !important; }
         }
+        .aw-audit .aa-hero-note { display: none; }
+        /* Tablet only: the pricing note moves onto the hero image, so the
+           standalone block under the hero is hidden at this width. */
+        @media (min-width: 721px) and (max-width: 1024px) {
+          .aw-audit .aa-hero-note {
+            display: block; max-width: 560px; margin: 26px auto 0; text-align: center;
+          }
+          .aw-audit .aa-hero-note p {
+            text-shadow: 0 2px 14px rgba(14,2,7,0.8), 0 1px 3px rgba(14,2,7,0.85);
+          }
+          .aw-audit .aa-price-note { display: none !important; }
+        }
         @media (max-width: 720px) {
           .aw-audit .aa-hero-h { font-size: 40px !important; }
           .aw-audit .aa-sec { padding: 64px 20px !important; }
@@ -317,12 +329,22 @@ export default function AlignmentAuditPage() {
           </div>
           <div>
             <BuyButton soft />
+            <div className="aa-hero-note">
+              <p style={{ margin: "0 0 8px", fontSize: 13, lineHeight: 1.55, color: C.muted }}>
+                {PRICE}, paid once. Your blueprint within five business days.
+              </p>
+              <p style={{ margin: "0 auto", maxWidth: 520, fontFamily: SERIF, fontStyle: "italic", fontSize: 13, lineHeight: 1.6, color: C.burg }}>
+                Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 1b. PRICING NOTE, directly under the hero */}
+      {/* 1b. PRICING NOTE, directly under the hero (hidden on tablet,
+          where it sits on the hero image instead) */}
       <div
+        className="aa-price-note"
         style={{
           background: C.ivory,
           borderTop: "1px solid rgba(74,14,46,0.1)",
