@@ -282,8 +282,19 @@ export default function AlignmentAuditPage() {
           .aw-audit .aa-hero-note p {
             text-shadow: 0 2px 14px rgba(14,2,7,0.8), 0 1px 3px rgba(14,2,7,0.85);
           }
-          .aw-audit .aa-hero-note p:last-child { color: rgba(255,214,199,0.95) !important; }
+          .aw-audit .aa-hero-note p:first-child { font-size: 15px !important; line-height: 1.6 !important; }
+          .aw-audit .aa-hero-note p:last-child { color: rgba(255,214,199,0.95) !important; font-size: 15px !important; line-height: 1.65 !important; }
           .aw-audit .aa-price-note { display: none !important; }
+          /* Copy sits a little lower, the button follows the text instead of
+             being pinned to the bottom of the image. */
+          .aw-audit .aa-hero-copy {
+            justify-content: flex-start !important;
+            padding: 56px 24px 32px !important;
+          }
+          .aw-audit .aa-hero-text > p:last-of-type {
+            font-size: 19px !important; line-height: 1.6 !important;
+          }
+          .aw-audit .aa-hero-copy > div:last-child { margin-top: 30px; }
         }
         @media (max-width: 720px) {
           .aw-audit .aa-hero-h { font-size: 40px !important; }
