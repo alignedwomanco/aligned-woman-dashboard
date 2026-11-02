@@ -16,10 +16,7 @@ const BUY_URL_USD = "https://buy.stripe.com/28E8wR8Zo1dvgxjeZHeME09";  // $184 (
 const PRICE_USD = "$184";
 const CALL_URL = "https://calendly.com/hello-laurajanethomas/15min";
 const PRICE = "R2,997";
-const CAPACITY = "";          // e.g. "Three Audits a week". Empty hides it.
 const QUESTIONNAIRE_TIME = "about 90 minutes";
-const GUARANTEE = "";         // Empty hides the guarantee block until Laura signs it off.
-// Suggested: "If your blueprint doesn't tell you something about your situation you didn't already know, say so on our call and I'll refund you in full."
 const PORTRAIT = "https://ucarecdn.com/2d3cf5ee-edac-4e39-b9b1-c7b5a3c5d8a7/-/preview/800x1066/";
 
 const C = {
@@ -202,7 +199,7 @@ export default function AlignmentAuditPage() {
           <BuyButton />
           <div style={{ margin: "32px auto 0", maxWidth: 600 }}>
             <p style={{ margin: "0 0 8px", fontSize: 14, color: "rgba(255,255,255,0.62)" }}>
-              {PRICE}, paid once. Your blueprint within five business days.{CAPACITY ? ` ${CAPACITY}.` : ""}
+              {PRICE}, paid once. Your blueprint within five business days.
             </p>
             <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.6, color: "rgba(255,200,180,0.75)" }}>
               Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
@@ -403,14 +400,8 @@ export default function AlignmentAuditPage() {
               Outside South Africa? <a href={BUY_URL_USD} style={{ color: C.burg }}>Pay {PRICE_USD} in US dollars</a>
             </p>
             <p style={{ margin: "16px 0 0", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted }}>
-              {CAPACITY ? `${CAPACITY}. ` : ""}Online. Blueprint within five business days.
+              Online. Blueprint within five business days.
             </p>
-            {GUARANTEE && (
-              <div style={{ marginTop: 36, paddingTop: 28, borderTop: "1px solid rgba(74,14,46,0.18)" }}>
-                <p style={{ margin: "0 0 8px", fontFamily: SERIF, fontSize: 18, color: C.burg }}>The "nothing new" guarantee</p>
-                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7 }}>{GUARANTEE}</p>
-              </div>
-            )}
           </div>
         </div>
       </section>
