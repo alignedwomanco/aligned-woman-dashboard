@@ -15,6 +15,7 @@ import ExpertsTab from "@/components/adminpanel/ExpertsTab";
 import PagesTab from "@/components/adminpanel/PagesTab";
 import AppSettingsTab from "@/components/adminpanel/AppSettingsTab";
 import ApplicationsTab from "@/components/adminpanel/ApplicationsTab";
+import AuditsTab from "@/components/adminpanel/AuditsTab";
 
 const NAV_ITEMS = [
   { id: "overview", label: "Overview", icon: "📊" },
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { id: "emails", label: "Emails", icon: "✉️" },
   { id: "experts", label: "Experts", icon: "⭐" },
   { id: "applications", label: "Applications", icon: "📨" },
+  { id: "audits", label: "Alignment Audits", icon: "🧭" },
   { id: "pages", label: "Pages", icon: "📝" },
   { id: "app-settings", label: "App Settings", icon: "⚙️" },
 ];
@@ -70,6 +72,7 @@ export default function Admin() {
     "emails": <EmailsTab />,
     "experts": <ExpertsTab />,
     "applications": <ApplicationsTab />,
+    "audits": <AuditsTab />,
     "pages": <PagesTab />,
     "app-settings": <AppSettingsTab />,
   };
