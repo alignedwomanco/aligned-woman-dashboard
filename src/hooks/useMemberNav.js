@@ -48,13 +48,16 @@ export default function useMemberNav() {
     // go blank once you are inside /Community/hormone-health.
     { name: "Community", to: createPageUrl("Community"), active: location.pathname.toLowerCase().startsWith("/community") },
     { name: "Directory", to: createPageUrl("ExpertsDirectory"), active: isActive("ExpertsDirectory") },
-    { name: "Your Pattern", to: "/YourPattern", active: location.pathname === "/YourPattern" },
+    // Your Pattern now lives inside My Profile (/Profile?tab=pattern).
+    // Partners reach their partner dashboard from a tab on My Profile, so
+    // My Profile stays active while they are on /partner too.
     {
       name: "My Profile",
-      to: isApprovedExpert ? "/partner" : createPageUrl("ProfileSettings"),
-      active: isApprovedExpert
-        ? location.pathname === "/partner" || location.pathname === "/expert-dashboard"
-        : isActive("ProfileSettings"),
+      to: "/Profile",
+      active:
+        location.pathname.toLowerCase() === "/profile" ||
+        isActive("ProfileSettings") ||
+        (isApprovedExpert && (location.pathname === "/partner" || location.pathname === "/expert-dashboard")),
     },
   ];
 }
