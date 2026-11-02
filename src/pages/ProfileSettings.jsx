@@ -42,7 +42,9 @@ const toTitleCase = (str) => {
     .join(" ");
 };
 
-export default function ProfileSettings() {
+// `embedded` renders the account settings inside My Profile (/Profile?tab=account)
+// without this page's own background, padding and heading.
+export default function ProfileSettings({ embedded = false } = {}) {
   const [currentUser, setCurrentUser] = useState(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -122,11 +124,11 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="min-h-screen p-6 md:p-12" style={{ background: "var(--aw-off-white)" }}>
-      <div className="max-w-2xl mx-auto space-y-8">
+    <div className={embedded ? "" : "min-h-screen p-6 md:p-12"} style={embedded ? undefined : { background: "var(--aw-off-white)" }}>
+      <div className={embedded ? "max-w-2xl space-y-8" : "max-w-2xl mx-auto space-y-8"}>
 
         {/* Page heading */}
-        <div>
+        <div style={embedded ? { display: "none" } : undefined}>
           <h1 className="font-display text-3xl" style={{ color: "var(--aw-burg-core)" }}>
             Profile Settings
           </h1>
