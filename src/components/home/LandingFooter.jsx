@@ -10,6 +10,7 @@ const NAV = {
     { label: "Our Why", href: "/OurWhy" },
     { label: "The Blueprint", href: "/blueprint" },
     { label: "Caps4Cause", href: "/caps" },
+    { label: "Alignment Audit", href: "/alignment-audit" },
   ],
   ABOUT: [
     { label: "About Us", href: "/about-us" },
