@@ -295,6 +295,9 @@ export default function AlignmentAuditPage() {
             font-size: 19px !important; line-height: 1.6 !important;
           }
           .aw-audit .aa-hero-copy > div:last-child { margin-top: 30px; }
+          /* The three Core Audit blocks stack on tablet instead of running
+             side by side. */
+          .aw-audit .aa-core-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 720px) {
           .aw-audit .aa-hero-h { font-size: 40px !important; }
@@ -497,7 +500,7 @@ export default function AlignmentAuditPage() {
           </div>
 
           <p style={{ ...eyebrow(), marginBottom: 16 }}>The Core Audit</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
+          <div className="aa-core-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
             {[
               ["Your Alignment Questionnaire", "Included", "Business or career track, online, saved as you go. Six questions build on your Starting Point Profile, so you don't repeat yourself."],
               ["Your written blueprint", "R8,000", "Written by me within five business days, section by section through the A.L.I.V.E. Method. Yours to keep."],
