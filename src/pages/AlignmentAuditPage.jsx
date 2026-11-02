@@ -239,12 +239,9 @@ export default function AlignmentAuditPage() {
           }
           .aw-audit .aa-hero-text {
             text-align: center;
-            padding: 22px 18px 24px;
-            border-radius: 22px;
-            background: rgba(22,3,11,0.4);
-            box-shadow: 0 22px 54px rgba(14,2,7,0.5);
-            -webkit-backdrop-filter: blur(7px);
-            backdrop-filter: blur(7px);
+            padding: 0;
+            background: none;
+            box-shadow: none;
           }
           .aw-audit .aa-hero-text p,
           .aw-audit .aa-hero-text h1 {
