@@ -140,7 +140,6 @@ const AuthenticatedApp = () => {
             PendingApproval. /YourPattern was its own page; it now opens the
             pattern section here, so old links and emails still work. */}
         <Route path="/Profile" element={<Profile />} />
-        <Route path="/profile" element={<Navigate to={`/Profile${window.location.search}`} replace />} />
         <Route path="/YourPattern" element={<Navigate to="/Profile?tab=pattern" replace />} />
         {/* The Alignment Audit questionnaire. Same treatment as /YourPattern:
             its own AppShellV2 chrome, outside Layout, so free members who
