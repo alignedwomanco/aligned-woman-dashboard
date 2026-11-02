@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { resolveDomain } from "@/lib/expertDomain";
 import { motion } from "framer-motion";
 import MyCommunityTab from "@/components/partner/MyCommunityTab";
+import ProfileTabs from "@/components/profile/ProfileTabs";
 import {
   LayoutDashboard,
   UsersRound,
@@ -1265,6 +1266,11 @@ export default function ExpertDashboard() {
             </Link>
           </div>
         )}
+
+        {/* The My Profile tabs, so Your Pattern, Alignment Audit and Account
+            stay one click away from the partner dashboard. Not in admin mode,
+            where Laura is editing someone else's listing. */}
+        {!isAdminMode && <ProfileTabs active="partner" isPartner />}
 
         <div className="mb-8">
           <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "#C4847A", marginBottom: 8 }}>
