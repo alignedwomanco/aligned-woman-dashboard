@@ -282,6 +282,7 @@ export default function AlignmentAuditPage() {
           .aw-audit .aa-hero-note p {
             text-shadow: 0 2px 14px rgba(14,2,7,0.8), 0 1px 3px rgba(14,2,7,0.85);
           }
+          .aw-audit .aa-hero-note p:last-child { color: rgba(255,214,199,0.95) !important; }
           .aw-audit .aa-price-note { display: none !important; }
         }
         @media (max-width: 720px) {
@@ -326,9 +327,6 @@ export default function AlignmentAuditPage() {
             <p style={{ margin: "0 0 36px", maxWidth: 560, fontSize: 17, lineHeight: 1.65, color: C.body }}>
               One questionnaire. One blueprint written about you. One hour with me. An honest read on your business or career, and on the woman running it.
             </p>
-          </div>
-          <div>
-            <BuyButton soft />
             <div className="aa-hero-note">
               <p style={{ margin: "0 0 8px", fontSize: 13, lineHeight: 1.55, color: C.muted }}>
                 {PRICE}, paid once. Your blueprint within five business days.
@@ -337,6 +335,9 @@ export default function AlignmentAuditPage() {
                 Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
               </p>
             </div>
+          </div>
+          <div>
+            <BuyButton soft />
           </div>
         </div>
       </section>
