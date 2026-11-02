@@ -25,7 +25,7 @@ import { PaymentProvider } from './context/PaymentContext';
 import Checkout from './pages/Checkout';
 import ExpertDashboard from './pages/ExpertDashboard';
 import StartingPointProfile from './pages/StartingPointProfile';
-import YourPattern from './pages/YourPattern';
+import Profile from './pages/Profile';
 import Audit from '@/pages/Audit';
 import YourMoneyStory from './pages/YourMoneyStory';
 import MoneyStoryLanding from './pages/MoneyStoryLanding';
@@ -134,10 +134,14 @@ const AuthenticatedApp = () => {
             shell via AppShellV2. The previous dashboard is kept unrouted in
             src/pages/DashboardLegacy.jsx as a rollback. */}
         <Route path="/Dashboard" element={<Dashboard />} />
-        {/* Your Pattern: her full Starting Point Profile and the two doors.
-            Same treatment as /Dashboard: its own AppShellV2 chrome, outside
-            Layout, so free members are never stopped by PendingApproval. */}
-        <Route path="/YourPattern" element={<YourPattern />} />
+        {/* My Profile: her pattern, her Alignment Audit and her account in
+            one place. Same treatment as /Dashboard: its own AppShellV2
+            chrome, outside Layout, so free members are never stopped by
+            PendingApproval. /YourPattern was its own page; it now opens the
+            pattern section here, so old links and emails still work. */}
+        <Route path="/Profile" element={<Profile />} />
+        <Route path="/profile" element={<Navigate to={`/Profile${window.location.search}`} replace />} />
+        <Route path="/YourPattern" element={<Navigate to="/Profile?tab=pattern" replace />} />
         {/* The Alignment Audit questionnaire. Same treatment as /YourPattern:
             its own AppShellV2 chrome, outside Layout, so free members who
             bought the audit are never stopped by PendingApproval. */}
