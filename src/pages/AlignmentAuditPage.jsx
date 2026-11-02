@@ -18,7 +18,7 @@ const CALL_URL = "https://calendly.com/hello-laurajanethomas/15min";
 const PRICE = "R2,997";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
 const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
-const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/2767f70f2_36eae51ba6f2ebc98a73880c341fc04e.jpg";
+const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/d198d5e9e_-t-e-x-t_-t-o_-i-m-a-g-e-457d6e12-5e3c-41ac-b89b-b1f86d4f05a1.png";
 
 const C = {
   burg: "#4A0E2E",
