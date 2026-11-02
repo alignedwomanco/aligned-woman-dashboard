@@ -184,6 +184,7 @@ export default function AlignmentAuditPage() {
           .aw-audit .aa-price { font-size: 56px !important; }
           .aw-audit .aa-box { padding: 36px 22px !important; }
           .aw-audit .aa-arrow { display: none !important; }
+          .aw-audit .aa-alive-row { grid-template-columns: 1fr !important; max-width: 100% !important; }
         }
       `}</style>
 
@@ -285,19 +286,34 @@ export default function AlignmentAuditPage() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
-            {LETTERS.map((l) => (
-              <div key={l.letter} style={{ background: C.card, padding: "36px 28px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-                  <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, lineHeight: 1, color: C.burg }}>{l.letter}</span>
-                  <span style={{ marginTop: 8, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted }}>{l.part}</span>
-                </div>
-                <p style={{ margin: "0 0 8px", fontFamily: SERIF, fontWeight: 700, fontSize: 17 }}>{l.label}</p>
-                <p style={{ margin: "0 0 14px", fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.4, color: C.burg }}>{l.sub}</p>
-                <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600 }}>We look at:</p>
-                <p style={{ margin: "0 0 14px", fontSize: 12, lineHeight: 1.6, color: C.muted }}>{l.look}</p>
-                <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600 }}>You get back:</p>
-                <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, fontStyle: "italic", color: C.burg }}>{l.back}</p>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+            {[LETTERS.slice(0, 3), LETTERS.slice(3)].map((row, r) => (
+              <div
+                key={r}
+                className="aa-alive-row"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
+                  gap: 1,
+                  background: "rgba(26,26,26,0.10)",
+                  width: "100%",
+                  maxWidth: row.length === 3 ? 999 : 666,
+                }}
+              >
+                {row.map((l) => (
+                  <div key={l.letter} style={{ background: C.card, padding: "36px 28px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                      <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, lineHeight: 1, color: C.burg }}>{l.letter}</span>
+                      <span style={{ marginTop: 8, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted }}>{l.part}</span>
+                    </div>
+                    <p style={{ margin: "0 0 8px", fontFamily: SERIF, fontWeight: 700, fontSize: 17 }}>{l.label}</p>
+                    <p style={{ margin: "0 0 14px", fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.4, color: C.burg }}>{l.sub}</p>
+                    <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600 }}>We look at:</p>
+                    <p style={{ margin: "0 0 14px", fontSize: 12, lineHeight: 1.6, color: C.muted }}>{l.look}</p>
+                    <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600 }}>You get back:</p>
+                    <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, fontStyle: "italic", color: C.burg }}>{l.back}</p>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
