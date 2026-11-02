@@ -102,14 +102,14 @@ const REVIEWS = [
 /* ── Small pieces ── */
 const eyebrow = (color = C.burg) => ({ margin: 0, fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color });
 
-function BuyButton({ children = "Get my Alignment Audit", block = false }) {
+function BuyButton({ children = "Get my Alignment Audit", block = false, soft = false }) {
   return (
     <a
       href={BUY_URL}
       className="aa-btn"
       style={{
         display: block ? "flex" : "inline-flex", alignItems: "center", justifyContent: "center", gap: 12,
-        minHeight: 56, padding: "0 40px", background: C.rose, color: C.burgDeep,
+        minHeight: 56, padding: "0 40px", background: soft ? "rgba(196,132,122,0.6)" : C.rose, color: C.burgDeep,
         fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none",
       }}
     >
@@ -303,7 +303,7 @@ export default function AlignmentAuditPage() {
             </p>
           </div>
           <div>
-            <BuyButton />
+            <BuyButton soft />
           </div>
         </div>
       </section>
