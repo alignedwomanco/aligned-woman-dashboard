@@ -11,7 +11,9 @@ import LandingFooter from "@/components/home/LandingFooter";
    ════════════════════════════════════════════════════════════════ */
 
 /* ── SETTINGS: everything Laura may want to change lives here ── */
-const BUY_URL = "https://buy.stripe.com/dRmeVf5Nc7BT4OB18ReME08";
+const BUY_URL = "https://buy.stripe.com/dRmeVf5Nc7BT4OB18ReME08";      // R2,997 (ZAR)
+const BUY_URL_USD = "https://buy.stripe.com/28E8wR8Zo1dvgxjeZHeME09";  // $184 (USD), for buyers outside South Africa
+const PRICE_USD = "$184";
 const CALL_URL = "https://calendly.com/hello-laurajanethomas/15min";
 const PRICE = "R2,997";
 const CAPACITY = "";          // e.g. "Three Audits a week". Empty hides it.
@@ -394,9 +396,12 @@ export default function AlignmentAuditPage() {
             <p style={{ margin: "0 0 28px", fontFamily: SERIF, fontSize: 28, color: C.muted, textDecoration: "line-through" }}>R13,000</p>
             <p style={{ margin: "0 0 22px", fontSize: 14, color: C.muted }}>The Alignment Audit is a standalone diagnostic, at</p>
             <p className="aa-price" style={{ margin: "0 0 6px", fontFamily: SERIF, fontWeight: 700, fontSize: 76, color: C.burg }}>{PRICE}</p>
-            <p style={{ margin: "0 0 28px", fontSize: 13, color: C.muted }}>Paid once</p>
+            <p style={{ margin: "0 0 28px", fontSize: 13, color: C.muted }}>Paid once · {PRICE_USD} outside South Africa</p>
             <p style={{ margin: "0 0 32px", fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.6, color: C.burg }}>That's less than one hour of my advisory time, for a written blueprint and an hour with me.</p>
             <BuyButton block />
+            <p style={{ margin: "14px 0 0", fontSize: 13, color: C.muted }}>
+              Outside South Africa? <a href={BUY_URL_USD} style={{ color: C.burg }}>Pay {PRICE_USD} in US dollars</a>
+            </p>
             <p style={{ margin: "16px 0 0", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted }}>
               {CAPACITY ? `${CAPACITY}. ` : ""}Online. Blueprint within five business days.
             </p>
