@@ -146,9 +146,26 @@ const em = { fontStyle: "italic", color: C.burg };
 export default function AlignmentAuditPage() {
   const [track, setTrack] = useState("business");
   const [page, setPage] = useState(0);
-  const per = 3;
-  const pages = Math.ceil(REVIEWS.length / per);
-  const visible = REVIEWS.slice(page * per, page * per + per);
+  const [perView, setPerView] = useState(3);
+  const pages = Math.ceil(REVIEWS.length / perView);
+
+  // How many reviews sit on the single line, by width.
+  useEffect(() => {
+    const calc = () => setPerView(window.innerWidth <= 720 ? 1 : window.innerWidth <= 1024 ? 2 : 3);
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+
+  // A wider screen holds more reviews, so a page can fall out of range.
+  useEffect(() => { if (page >= pages) setPage(0); }, [pages, page]);
+
+  // Keeps the line moving on its own.
+  useEffect(() => {
+    if (pages < 2) return;
+    const id = setInterval(() => setPage((p) => (p + 1) % pages), 6000);
+    return () => clearInterval(id);
+  }, [pages]);
   const mod = MODULES[track];
 
   useEffect(() => {
@@ -613,16 +630,18 @@ export default function AlignmentAuditPage() {
             <button type="button" className="aa-arrow" aria-label="Previous reviews" onClick={() => setPage((page - 1 + pages) % pages)} style={{ flex: "0 0 auto", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", color: C.ink }}>
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
             </button>
-            <div style={{ flex: "1 1 auto", minWidth: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 48, alignItems: "start" }}>
-              {visible.map((t) => (
-                <figure key={t.name} style={{ margin: 0, textAlign: "center" }}>
-                  <p style={{ margin: "0 0 22px", fontFamily: SERIF, fontWeight: 700, fontSize: 20, lineHeight: 1.15, textTransform: "uppercase" }}>{t.headline}</p>
-                  <blockquote style={{ margin: "0 0 20px", fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1.75, color: C.muted }}>{t.quote}</blockquote>
-                  <figcaption style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: C.body }}>
-                    <span style={{ color: C.burg }}>{t.name}</span>{t.company ? ` | ${t.company}` : ""}
-                  </figcaption>
-                </figure>
-              ))}
+            <div style={{ flex: "1 1 auto", minWidth: 0, overflow: "hidden" }}>
+              <div style={{ display: "flex", transition: "transform 700ms cubic-bezier(0.4,0,0.2,1)", transform: `translateX(-${page * 100}%)` }}>
+                {REVIEWS.map((t) => (
+                  <figure key={t.name} style={{ flex: `0 0 ${100 / perView}%`, maxWidth: `${100 / perView}%`, boxSizing: "border-box", margin: 0, padding: "0 24px", textAlign: "center" }}>
+                    <p style={{ margin: "0 0 22px", fontFamily: SERIF, fontWeight: 700, fontSize: 20, lineHeight: 1.15, textTransform: "uppercase" }}>{t.headline}</p>
+                    <blockquote style={{ margin: "0 0 20px", fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1.75, color: C.muted }}>{t.quote}</blockquote>
+                    <figcaption style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: C.body }}>
+                      <span style={{ color: C.burg }}>{t.name}</span>{t.company ? ` | ${t.company}` : ""}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
             </div>
             <button type="button" className="aa-arrow" aria-label="Next reviews" onClick={() => setPage((page + 1) % pages)} style={{ flex: "0 0 auto", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", color: C.ink }}>
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
