@@ -254,7 +254,7 @@ export default function AlignmentAuditPage() {
             </h1>
             <p style={{ marginTop: 22, maxWidth: "34em", textWrap: "pretty" }}>Answer my questions in your own time. Within {TURNAROUND} I send you a blueprint, written by me, about you: what's draining you, what you actually want, and the one move I'd make next. We go through it together for an hour. Then I set up your ChatGPT or Claude to know who you are, so the work carries on after we're done.</p>
             <Buy innerRef={heroBtn} style={{ marginTop: 28, maxWidth: 420 }} />
-            <p style={{ marginTop: 14, fontSize: 14, color: C.body }}>{PRICE}, paid once. Written by me, not generated.</p>
+            <p style={{ marginTop: 14, fontSize: 14, color: C.body, textAlign: "center" }}>{PRICE}, paid once. Written by me, not generated.</p>
           </div>
           <div style={{ position: "relative", width: "100%", aspectRatio: "4/5", minHeight: "100%", background: C.sand }}>
             <img src={HERO_IMAGE} alt={HERO_ALT} style={cover} />
