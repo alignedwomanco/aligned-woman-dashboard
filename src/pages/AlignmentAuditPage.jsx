@@ -180,6 +180,76 @@ function ChaptersList({ act, openCh, setOpenCh, track, setTrack, compact }) {
   );
 }
 
+/* The three acts as tappable cards, for tablet and phone (below 1024px).
+   A closed card shows the act, its title, one summary line and how many
+   chapters it holds. Tapping a card opens it and closes any other, so only
+   one is open at a time. Open, it lists the chapter names only: no
+   dropdowns and no description text. Act two adds the business or career
+   toggle and one sentence, sharing the track choice with desktop.
+   Desktop keeps the sticky tabs and ChaptersList above. */
+function ActCards({ openAct, setOpenAct, track, setTrack }) {
+  return ACTS.map((a) => {
+    const open = openAct === a.id;
+    const panelId = `aa-act-${a.id}`;
+    const count = a.chapters.length;
+    return (
+      <div key={a.id} style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 14, overflow: "hidden" }}>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpenAct(open ? null : a.id)}
+          style={{ position: "relative", display: "block", width: "100%", minHeight: 44, background: "none", border: 0, padding: "20px 18px", color: "inherit", boxSizing: "border-box" }}
+        >
+          <span style={{ ...eyebrow(), display: "block" }}>{a.act}</span>
+          <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontSize: 24, lineHeight: 1.25, color: C.burg }}>{a.short}</span>
+          <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontStyle: "italic", fontSize: 18, lineHeight: 1.4, color: C.burg, textWrap: "pretty" }}>{a.summary}</span>
+          <span style={{ display: "block", marginTop: 10, fontSize: 12, lineHeight: 1.5, color: C.muted, fontVariantNumeric: "lining-nums" }}>{count} {count === 1 ? "chapter" : "chapters"}</span>
+          <span aria-hidden="true" style={{ ...plusIcon(open), position: "absolute", top: 18, right: 18 }}>+</span>
+        </button>
+        {/* The panel's height animates by growing its one grid row. While
+            closed it is hidden, so nothing inside can take keyboard focus. */}
+        <div style={{ display: "grid", gridTemplateRows: open ? "1fr" : "0fr", transition: "grid-template-rows 320ms cubic-bezier(0.2,0.7,0.2,1)" }}>
+          <div
+            id={panelId}
+            role="region"
+            aria-label={a.label}
+            style={{ minHeight: 0, overflow: "hidden", visibility: open ? "visible" : "hidden", transition: `visibility 0s linear ${open ? "0s" : "320ms"}` }}
+          >
+            <div style={{ height: 1, background: C.rose, margin: "0 18px" }} />
+            <div style={{ padding: "18px 18px 22px" }}>
+              <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                {a.chapters.map((ch, i) => (
+                  <li key={ch.n} style={{ marginTop: i === 0 ? 0 : 10 }}>
+                    <span style={{ display: "inline-block", marginRight: 10, fontFamily: SERIF, fontSize: 18, lineHeight: 1.2, color: C.rose, fontVariantNumeric: "lining-nums" }}>{String(ch.n).padStart(2, "0")}</span>
+                    <span style={{ fontWeight: 600, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: C.burgMid, lineHeight: 1.5 }}>{ch.name}</span>
+                    {ch.heart && (
+                      <span style={{ display: "block", marginTop: 6 }}>
+                        <span style={{ display: "inline-block", background: C.roseLight, color: C.ink, fontWeight: 600, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 100 }}>The heart of the Audit</span>
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+              {a.track && (
+                <>
+                  <div role="tablist" aria-label="Your track" style={{ display: "flex", gap: 3, margin: "20px auto 0", background: C.sand, borderRadius: 100, padding: 3, maxWidth: 420 }}>
+                    <button type="button" role="tab" aria-selected={track === "business"} onClick={() => setTrack("business")} style={trackTab(track === "business")}>I run a business</button>
+                    <button type="button" role="tab" aria-selected={track === "career"} onClick={() => setTrack("career")} style={trackTab(track === "career")}>I have a career</button>
+                  </div>
+                  <p style={{ marginTop: 16, fontSize: 15, textWrap: "pretty" }}>
+                    <strong style={{ fontWeight: 600, color: C.ink }}>{track === "business" ? "I run a business:" : "I have a career:"}</strong> {a.track[track]}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  });
+}
+
 /* ── Page ── */
 export default function AlignmentAuditPage() {
   const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
@@ -190,6 +260,8 @@ export default function AlignmentAuditPage() {
   // The open chapter in each act. One at a time per act.
   const [openCh, setOpenCh] = useState({ you: 1, work: 6, next: 8 });
   const [track, setTrack] = useState("business");
+  // The open act card on tablet and phone. All three start closed.
+  const [openAct, setOpenAct] = useState(null);
   const [aiList, setAiList] = useState(false);
   const [faq, setFaq] = useState(-1);
   const [tIndex, setTIndex] = useState(0);
@@ -457,16 +529,8 @@ export default function AlignmentAuditPage() {
           </div>
         </div>
         {overlayHero ? (
-          <div className="aa-acts" style={{ maxWidth: 1040, margin: "0 auto", padding: `36px ${PAD_X} 0`, display: "flex", flexDirection: "column", gap: 40 }}>
-            {ACTS.map((a) => (
-              <div key={a.id}>
-                <p style={eyebrow()}>{a.act}</p>
-                <h3 style={{ marginTop: 8, fontFamily: SERIF, fontSize: 26, lineHeight: 1.25, color: C.burg, textWrap: "balance" }}>{a.short}</h3>
-                <div style={{ marginTop: 16 }}>
-                  <ChaptersList act={a} openCh={openCh} setOpenCh={setOpenCh} track={track} setTrack={setTrack} compact />
-                </div>
-              </div>
-            ))}
+          <div className="aa-acts" style={{ maxWidth: 1040, margin: "0 auto", padding: `36px ${PAD_X} 0`, display: "flex", flexDirection: "column", gap: 12 }}>
+            <ActCards openAct={openAct} setOpenAct={setOpenAct} track={track} setTrack={setTrack} />
           </div>
         ) : (
           <>
