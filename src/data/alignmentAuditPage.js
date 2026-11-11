@@ -80,7 +80,7 @@ export const AI_KNOWS = [
 
 export const ITEMS = [
   { name: "Your questionnaire", desc: "Business or career track, online, saves as you go.", value: "Included" },
-  { name: "Your blueprint, written by me", desc: "Where you are, what it's costing you, what you want, and your next move.", value: "$488" },
+  { name: "Your blueprint, written by me", desc: "Where you are, what it's costing you, what you want, and your next move.", value: "Valued at $688" },
   { name: "One hour with me", desc: "We go through it together so you leave knowing what to do and why.", value: "$304" },
   { name: "Your AI script", desc: "Your blueprint, turned into custom instructions for ChatGPT or Claude. Your AI knows what you want, your pattern and your non-negotiables, so it keeps you on track long after our call.", value: "Included" },
 ];
