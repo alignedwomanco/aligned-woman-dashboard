@@ -85,6 +85,20 @@ function Answer({ q, v, answers }) {
         const shown = n === "na" ? "Doesn't apply" : `${n > 0 ? "+" : ""}${n}`;
         return <Line key={a.id} label={a.label}>{shown}</Line>;
       });
+    case "taps": {
+      const rows = OPTION_SETS[q.rows] || [];
+      const scale = OPTION_SETS[q.scale] || [];
+      const tapped = rows.filter((r) => scale.some((s) => s.value === v?.[r.id]));
+      return (
+        <>
+          {q.textBefore && <Line label={q.textBefore.label}>{v?.[q.textBefore.key]}</Line>}
+          {tapped.map((r) => (
+            <Line key={r.id} label={r.label}>{scale.find((s) => s.value === v[r.id]).label}</Line>
+          ))}
+          {q.textAfter && <Line label={q.textAfter.label}>{v?.[q.textAfter.key]}</Line>}
+        </>
+      );
+    }
     case "hours":
       return OPTION_SETS.TIME_RECEIPT.map((r) => (
         <Line key={r.id} label={r.label}>{has(v?.[r.id]) ? `${v[r.id]} hours` : ""}</Line>
