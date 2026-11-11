@@ -399,6 +399,10 @@ export default function AlignmentAuditPage() {
              drifting to the far edge. */
           .aa2 .aa-t-head { flex-direction: column; justify-content: center; gap: 20px; }
           .aa2 .aa-t-controls { justify-content: center; }
+          /* The Custom instructions / Written by Laura mock chat window is a
+             desktop illustration only. On phones and tablets it repeats what
+             the list above already says, so it is removed there. */
+          .aa2 .aa-ai-chat { display: none !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
@@ -584,7 +588,7 @@ export default function AlignmentAuditPage() {
             </div>
           </div>
           {/* Chat illustration */}
-          <div role="img" aria-label="Illustration of a chat window with custom instructions" style={{ background: C.ivory, color: C.body, borderRadius: 10, overflow: "hidden", border: "1px solid rgba(232,180,174,0.3)", maxWidth: 520, width: "100%", justifySelf: "center" }}>
+          <div className="aa-ai-chat" role="img" aria-label="Illustration of a chat window with custom instructions" style={{ background: C.ivory, color: C.body, borderRadius: 10, overflow: "hidden", border: "1px solid rgba(232,180,174,0.3)", maxWidth: 520, width: "100%", justifySelf: "center" }}>
             <div style={{ padding: "14px 18px", borderBottom: "1px solid rgba(74,14,46,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={eyebrow()}>Custom instructions</span>
               <span style={{ fontSize: 12, color: C.muted }}>Written by Laura</span>
