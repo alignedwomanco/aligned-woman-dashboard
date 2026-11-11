@@ -16,7 +16,8 @@
 // d1 to d5 sit in Part 6. An id never changes, wherever its question
 // moves: q37 and q38 now sit in Part 6 and keep their ids.
 //
-// RETIRED: q15, q24, q36, q40, q43 and q49 carry "retired: true". A
+// RETIRED: q15, q24, q36, q40, q43, q49 and q55 (11 November 2026, it
+// repeated d4) carry "retired: true". A
 // retired question stays in its part's array, is never shown on the audit
 // screens and is never counted in progress, on the review screen or in
 // numbering (questionsFor leaves it out). Its saved answer stays in
@@ -589,7 +590,7 @@ export const PARTS = [
           { key: "higher", label: "What would make it one point higher?", placeholder: "" },
         ],
       },
-      { id: "q55", type: "text", placeholder: "", text: "Ninety days from now, what would tell you this was worth doing?" },
+      { id: "q55", retired: true, type: "text", placeholder: "", text: "Ninety days from now, what would tell you this was worth doing?" },
       { id: "q56", type: "text", placeholder: "", text: "Anything else I should know about you, or about this moment in your life?" },
     ],
   },
