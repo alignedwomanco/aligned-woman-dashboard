@@ -16,8 +16,8 @@
 // d1 to d5 sit in Part 6. An id never changes, wherever its question
 // moves: q37 and q38 now sit in Part 6 and keep their ids.
 //
-// RETIRED: q15, q24, q36, q40, q43, q49 and q55 (11 November 2026, it
-// repeated d4) carry "retired: true". A
+// RETIRED: q15, q24, q36, q40, q43, q49, q55 (11 November 2026, it
+// repeated d4) and d5 (11 November 2026, merged into d3) carry "retired: true". A
 // retired question stays in its part's array, is never shown on the audit
 // screens and is never counted in progress, on the review screen or in
 // numbering (questionsFor leaves it out). Its saved answer stays in
@@ -225,7 +225,8 @@ const time = (key, label) => ({ key, label, kind: "time", placeholder: "" });
 const chips = (key, label, options, mode = "single") => ({ key, label, kind: "chips", options, mode, placeholder: "" });
 const toggle = (key, label, options) => ({ key, label, kind: "toggle", options, placeholder: "" });
 
-// Parts in screen order. The track module sits between Part 7 and Part 8.
+// Parts as stored. Screen order comes from partsForTrack: since 11 November
+// 2026 her track module sits straight after Part 1.
 export const PARTS = [
   {
     id: "p1",
@@ -445,12 +446,14 @@ export const PARTS = [
         text: "If the next 12 months could make one dream real, which would it be? Think big and get specific. Include the version you'd be a bit embarrassed to say out loud. If you could finish it by the end of next month, it isn't big enough.",
       },
       {
-        id: "d3", type: "fields", placeholder: "", lead: "What has to wait.",
-        text: "What else are you chasing right now that would have to wait for this? Which one would be hardest to put on hold, and why?",
-        fields: [text("wait", "What would have to wait"), text("hardest", "The hardest one to put on hold, and why")],
+        // Merged with d5 on 11 November 2026 (approved by Laura in chat).
+        // Keys kept, so earlier answers stay in place.
+        id: "d3", type: "fields", quote: ["calendar", "earlierGive"], placeholder: "", lead: "Make room.",
+        text: "What would you stop doing, or put on hold, to make room for this dream? Which one would be hardest to let go of, and why?",
+        fields: [text("wait", "What I'd stop or put on hold"), text("hardest", "The hardest one to let go of, and why")],
       },
       { id: "d4", type: "text", quote: "dream", placeholder: "", lead: "Three months from now.", text: "What would have to be true three months from now for you to know it's moving?" },
-      { id: "d5", type: "text", quote: ["calendar", "earlierGive"], placeholder: "", lead: "Make room.", text: "What would you stop doing in your week to make room for it?" },
+      { id: "d5", retired: true, type: "text", quote: ["calendar", "earlierGive"], placeholder: "", lead: "Make room.", text: "What would you stop doing in your week to make room for it?" },
       {
         // Moved from Part 5 and reworded on 10 November 2026. The "give"
         // box came off the screen; its saved words stay in answers.q37.give,
@@ -750,8 +753,11 @@ export function liveQuote(kind, answers) {
 }
 
 // Parts that apply to her track, in order.
+// Her track module comes straight after Part 1 (moved 11 November 2026).
 export function partsForTrack(track) {
-  return PARTS.filter((p) => !p.track || p.track === track);
+  const shared = PARTS.filter((p) => !p.track);
+  const mine = PARTS.filter((p) => p.track && p.track === track);
+  return [shared[0], ...mine, ...shared.slice(1)].filter(Boolean);
 }
 
 // The questions she sees in a part. Retired questions are left out, so
