@@ -220,6 +220,10 @@ export default function AlignmentAuditPage() {
           60% { box-shadow: 0 0 0 14px rgba(196,132,122,0); transform: scale(1.015); }
         }
         @keyframes aa-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        /* Tablet: the hero image stops short of a full screen. */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .aa-hero { min-height: min(calc(100svh - 60px), 680px) !important; }
+        }
         /* Tablet and phone: every block of copy is centred. */
         @media (max-width: 1023px) {
           .aa2, .aa2 * { text-align: center !important; }
@@ -240,7 +244,7 @@ export default function AlignmentAuditPage() {
 
       {/* 1. Hero */}
       {overlayHero ? (
-        <section style={{ position: "relative", minHeight: "calc(100svh - 60px)", display: "flex", flexDirection: "column", justifyContent: "flex-start", background: C.burg }}>
+        <section className="aa-hero" style={{ position: "relative", minHeight: "calc(100svh - 60px)", display: "flex", flexDirection: "column", justifyContent: "flex-start", background: C.burg }}>
           <img src={HERO_IMAGE_MOBILE} alt={HERO_ALT} style={cover} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(26,5,16,0.78) 0%, rgba(74,14,46,0.3) 38%, rgba(74,14,46,0.55) 60%, rgba(26,5,16,0.94) 100%)", pointerEvents: "none" }} />
           <div style={{ position: "relative", padding: "40px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 32 }}>
