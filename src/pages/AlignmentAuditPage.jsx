@@ -282,6 +282,10 @@ export default function AlignmentAuditPage() {
           /* Open panels inside both dropdowns: even padding so the copy is
              centred on the panel, not pushed right by the desktop indent. */
           .aa-ch-panel, .aa-faq-a { padding-left: 0 !important; padding-right: 0 !important; }
+          /* The stacked acts keep the full width of the column. Centring would
+             shrink a closed act to the width of its own title, so it would read
+             shorter than the same act once opened. */
+          .aa2 .aa-acts, .aa2 .aa-acts [style*="flex-direction: column"] { align-items: stretch !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
@@ -412,7 +416,7 @@ export default function AlignmentAuditPage() {
           </div>
         </div>
         {overlayHero ? (
-          <div style={{ maxWidth: 1040, margin: "0 auto", padding: `32px ${PAD_X} 0`, display: "flex", flexDirection: "column", gap: 3 }}>
+          <div className="aa-acts" style={{ maxWidth: 1040, margin: "0 auto", padding: `32px ${PAD_X} 0`, display: "flex", flexDirection: "column", gap: 3 }}>
             {ACTS.map((a, i) => {
               const actOpen = openAct === i;
               return (
