@@ -78,7 +78,8 @@ const MODULES = {
 
 const FAQ = [
   { q: "\"I've done the Starting Point Profile. Isn't this the same?\"", a: "No. The Profile names your pattern. The Audit reads your actual situation, your business or career, how the pattern shows up in it, and what to do next. Your Profile answers feed into it." },
-  { q: "\"Is this coaching?\"", a: "It's a diagnosis. You get a written blueprint and one call. If you want ongoing work after that, that's the Clarity Sprint, and your fee comes off it." },
+  { q: "\"Is this coaching?\"", a: "It's a diagnosis. You get a written blueprint, one call and your AI script. If you want ongoing work after that, that's the Clarity Sprint, and your fee comes off it." },
+  { q: "\"What's the AI script?\"", a: "After our call, I write the custom instructions for your ChatGPT or Claude: who you are, what you've decided, what you won't compromise on, and the pattern to call you out on. Paste them in once and your AI starts from you, not from the average of everyone else." },
   { q: "\"I don't run a business.\"", a: "Choose the career track at the start. The questions follow your role, your value and your next move." },
   { q: "\"I'm already flat out. I don't have time for this.\"", a: `The questionnaire takes ${QUESTIONNAIRE_TIME} and saves as you go, so you can do it in pieces. Then I do the work. The hour on the call is the only time you need to block out.` },
   { q: "\"Will you ask about my finances?\"", a: "I'll ask how money moves through your business or career. I won't ask for bank statements, account details or amounts." },
@@ -354,7 +355,7 @@ export default function AlignmentAuditPage() {
               <span style={{ display: "block", fontStyle: "italic", color: C.burg }}>Now get an answer about you.</span>
             </h1>
             <p style={{ margin: "0 0 36px", maxWidth: 560, fontSize: 17, lineHeight: 1.65, color: C.body }}>
-              One questionnaire. One blueprint written about you. One hour with me. An honest read on your business or career, and on the woman running it.
+              One questionnaire. One blueprint written about you. One hour with me. Then the script that gets your AI on board with who you are. An honest read on your business or career, and on the woman running it.
             </p>
             <div className="aa-hero-note">
               <p style={{ margin: "0 0 8px", fontSize: 13, lineHeight: 1.55, color: C.muted }}>
@@ -434,7 +435,7 @@ export default function AlignmentAuditPage() {
             <p style={{ ...eyebrow(), marginBottom: 24 }}>The Offer</p>
             <H2 style={{ fontSize: 64, lineHeight: 0.98, marginBottom: 24 }}>Introducing <span style={em}>The Alignment Audit.</span></H2>
             <p style={{ margin: "0 0 24px", fontSize: 17, lineHeight: 1.7, color: C.body }}>
-              You answer my questions online, in your own time. Within seven working days I send you a blueprint written about you: where you actually are, what's costing you, and the move I'd make next. Then we go through it together on a one-hour call.
+              You answer my questions online, in your own time. Within seven working days I send you a blueprint written about you: where you actually are, what's costing you, and the move I'd make next. Then we go through it together on a one-hour call. After the call, I write your AI script: custom instructions for your ChatGPT or Claude, so your AI knows who you are and what you want before you ask it anything.
             </p>
             <p style={{ margin: "0 0 24px", fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.5, color: C.burg }}>
               This is not a personality test. It's not a course. It's a diagnosis, written by me.
@@ -520,6 +521,7 @@ export default function AlignmentAuditPage() {
               ["Your Alignment Questionnaire", "Included", "Business or career track, online, saved as you go. Six questions build on your Starting Point Profile, so you don't repeat yourself."],
               ["Your written blueprint", "$488", "Written by me within seven working days, section by section through the A.L.I.V.E. Method. Yours to keep."],
               ["One hour with me", "$304", "We go through your blueprint together on a call, so nothing in it stays theoretical. You leave knowing your next move and why."],
+              ["Your AI script", "Included", "After our call, I write the custom instructions for your ChatGPT or Claude. Paste them in once, and your AI knows who you are and what you want before you ask it anything."],
             ].map(([t, v, d]) => (
               <div key={t} style={{ background: C.card, padding: "30px 28px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
@@ -588,7 +590,7 @@ export default function AlignmentAuditPage() {
             <p style={{ margin: "0 0 22px", fontSize: 14, color: C.muted }}>The Alignment Audit is a standalone diagnostic, at</p>
             <p className="aa-price" style={{ margin: "0 0 6px", fontFamily: SERIF, fontWeight: 700, fontSize: 76, color: C.burg }}>{PRICE}</p>
             <p style={{ margin: "0 0 28px", fontSize: 13, color: C.muted }}>Paid once</p>
-            <p style={{ margin: "0 0 32px", fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.6, color: C.burg }}>That's less than one hour of my advisory time, for a written blueprint and an hour with me.</p>
+            <p style={{ margin: "0 0 32px", fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.6, color: C.burg }}>That's less than one hour of my advisory time, for a written blueprint, an hour with me and your AI script.</p>
             <BuyButton block />
             <p style={{ margin: "16px 0 0", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted }}>
               Online. Blueprint within seven working days.
@@ -701,6 +703,7 @@ export default function AlignmentAuditPage() {
               <li>{PRICE}, paid once.</li>
               <li>Your blueprint within seven working days.</li>
               <li>One hour with me to go through it.</li>
+              <li>Your AI script after the call.</li>
               <li>Full fee credited to the Clarity Sprint.</li>
             </ul>
             <BuyButton block />

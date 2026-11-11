@@ -101,7 +101,7 @@ export const BEFORE_YOU_BEGIN = {
     // after this line. That note is for Laura and is not shown.
     "Only I read your answers, and they're used for your blueprint and nothing else.",
   ],
-  promise: "Within seven working days of submitting, you get a blueprint written about you: where you actually are, the pattern holding you back, and the move I'd make next. Then we go through it together on a one-hour call.",
+  promise: "Within seven working days of submitting, you get a blueprint written about you: where you actually are, the pattern holding you back, and the move I'd make next. We go through it together on a one-hour call. Then I write your AI script, so the tools you use every day start from who you are.",
   tickLead: "Before you start, tick to agree:",
 };
 
@@ -775,7 +775,7 @@ export const WHEN_YOU_FINISH = {
   title: "That's it.",
   lines: [
     "Thank you for being this honest. Most people never sit down and look at all of this in one go.",
-    "Within seven working days you'll get your written blueprint, and then we'll go through it together on a one-hour call.",
+    "Within seven working days you'll get your written blueprint, and then we'll go through it together on a one-hour call. After the call, I'll send your AI script: custom instructions for your ChatGPT or Claude, so your AI is on board with who you are and what you want.",
     "If anything you wrote is sitting heavily with you, don't wait for the call. Talk to someone you trust, or a professional.",
   ],
 };

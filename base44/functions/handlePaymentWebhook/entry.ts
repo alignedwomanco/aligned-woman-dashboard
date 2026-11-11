@@ -298,7 +298,7 @@ Deno.serve(async (req) => {
                   '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Your payment is confirmed and your audit is open.</p>' +
                   '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Sign in at app.alignedwomanco.com with ' + safeEmail + ', the email you paid with. The questions are waiting on your dashboard.</p>' +
                   '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Give yourself about 90 minutes somewhere you won’t be interrupted. Your answers save as you go, so you can stop and pick it up later.</p>' +
-                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Once you submit, I’ll write your personalised blueprint and send it within seven working days. Then we book your one-hour call to go through it.</p>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Once you submit, I’ll write your personalised blueprint and send it within seven working days. Then we book your one-hour call to go through it. After the call, I’ll send your AI script: custom instructions for your ChatGPT or Claude, so your AI is on board with who you are and what you want.</p>' +
                   '<p style="margin:0 0 28px;font-size:16px;line-height:1.7;">I’m excited to help you on your journey!</p>' +
                   '<a href="' + LOGIN_URL + '" style="display:inline-block;background-color:#4A0E2E;color:#FFFFFF;text-decoration:none;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;padding:16px 30px;border-radius:999px;">Start your audit</a>' +
                   '<p style="margin:32px 0 0;font-size:14px;line-height:1.7;color:#6B5B61;">With love,<br/>Laura</p>' +

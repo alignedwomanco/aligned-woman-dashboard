@@ -63,7 +63,7 @@ export default function AuditSection() {
   if (!audit) {
     return (
       <Card eyebrow="The Alignment Audit" title="An honest read on your work and your life.">
-        <p style={{ margin: "0 0 20px" }}>You answer my questions in your own time. Within seven working days I send you a blueprint written about you, then we go through it together on a one-hour call.</p>
+        <p style={{ margin: "0 0 20px" }}>You answer my questions in your own time. Within seven working days I send you a blueprint written about you, then we go through it together on a one-hour call. After the call, I send your AI script: custom instructions for your ChatGPT or Claude, so your AI starts from who you are.</p>
         <a href="/alignment-audit" style={BTN}>See the Alignment Audit</a>
       </Card>
     );
