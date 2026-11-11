@@ -51,15 +51,27 @@ export function CarryQuote({ quotes }) {
   );
 }
 
-// One of her answers from earlier in this audit, quoted back.
+// Her answers from earlier in this audit, quoted back. "kind" is one kind
+// or a list of kinds, shown in order. A kind with nothing to quote shows
+// nothing.
 export function LiveQuote({ kind, answers }) {
-  const line = kind ? liveQuote(kind, answers) : null;
-  if (!line) return null;
-  return (
-    <div className="aw-carry">
-      <blockquote style={{ marginTop: 0 }}>{line}</blockquote>
+  const kinds = Array.isArray(kind) ? kind : kind ? [kind] : [];
+  const found = kinds.map((k) => ({ k, quote: liveQuote(k, answers) })).filter((x) => x.quote);
+  if (!found.length) return null;
+  return found.map(({ k, quote }) => (
+    <div key={k} className="aw-carry">
+      {typeof quote === "string" ? (
+        <blockquote style={{ marginTop: 0, whiteSpace: "pre-wrap" }}>{quote}</blockquote>
+      ) : (
+        <>
+          <p>{quote.lead}</p>
+          {quote.lines.map((line, i) => (
+            <blockquote key={i} style={{ whiteSpace: "pre-wrap" }}>{line}</blockquote>
+          ))}
+        </>
+      )}
     </div>
-  );
+  ));
 }
 
 // Words she wrote before the answer format changed, where the new layout
@@ -309,7 +321,7 @@ function Sliders2Field({ q, value, onChange }) {
   );
 }
 
-function MultiField({ q, value, onChange }) {
+function MultiField({ q, n, value, onChange }) {
   const v = value || {};
   const selected = Array.isArray(v.selected) ? v.selected : [];
   const toggle = (val) => {
@@ -338,7 +350,7 @@ function MultiField({ q, value, onChange }) {
       </div>
       {q.withText && (
         <div className="aw-sub" style={{ marginTop: 14 }}>
-          <AutoText value={v.text} ariaLabel={`${q.n}, in your own words`} minRows={2} placeholder={q.placeholder} onChange={(t) => onChange({ ...v, text: t })} />
+          <AutoText value={v.text} ariaLabel={`${n}, in your own words`} minRows={2} placeholder={q.placeholder} onChange={(t) => onChange({ ...v, text: t })} />
         </div>
       )}
     </div>
@@ -572,7 +584,7 @@ function ReadinessField({ q, value, onChange }) {
 // Rows she adds with "Add another", up to maxRows. One empty row shows to
 // start. Each row is its own card on a phone, so its boxes read as one
 // answer. Empty rows are dropped when saving (see cleanAnswer in Audit.jsx).
-function RowsField({ q, value, onChange, answers }) {
+function RowsField({ q, n, value, onChange, answers }) {
   const rows = Array.isArray(value) && value.length ? value : [{}];
   const max = q.maxRows || 3;
   const legacy = rows.map((r) => r?.legacy).filter(hasText);
@@ -585,7 +597,7 @@ function RowsField({ q, value, onChange, answers }) {
       {legacy.map((t, i) => <LegacyNote key={i} text={t} />)}
       <div className="aw-rows">
         {rows.map((row, i) => (
-          <div key={i} className="aw-row-card" role="group" aria-label={`${q.n}, answer ${i + 1}`}>
+          <div key={i} className="aw-row-card" role="group" aria-label={`${n}, answer ${i + 1}`}>
             <div className="aw-cols">
               {q.columns.map((c) => (
                 <BoxWithLabel
@@ -648,12 +660,12 @@ function FieldsField({ q, value, onChange, answers }) {
   );
 }
 
-function ChipsField({ q, value, onChange }) {
+function ChipsField({ q, n, value, onChange }) {
   const v = value && typeof value === "object" ? value : {};
   return (
     <div className="aw-field">
       <LegacyNote text={v.legacy} />
-      <ChipSet id={q.id} options={optionsOf(q.options)} mode={q.mode} value={v} onChange={onChange} label={`Question ${q.n}`} />
+      <ChipSet id={q.id} options={optionsOf(q.options)} mode={q.mode} value={v} onChange={onChange} label={`Question ${n}`} />
     </div>
   );
 }
@@ -689,12 +701,14 @@ export function QuestionText({ q }) {
   );
 }
 
-export function AnswerField({ q, value, onChange, profileFacts, answers }) {
+// "n" is the number she sees beside the question (displayNumbers in
+// auditQuestions.js), used in labels for screen readers.
+export function AnswerField({ q, n, value, onChange, profileFacts, answers }) {
   switch (q.type) {
     case "text":
       return (
         <div className="aw-field">
-          <AutoText value={value} ariaLabel={`Question ${q.n}`} placeholder={q.placeholder} onChange={onChange} />
+          <AutoText value={value} ariaLabel={`Question ${n}`} placeholder={q.placeholder} onChange={onChange} />
         </div>
       );
     case "facts":
@@ -702,7 +716,7 @@ export function AnswerField({ q, value, onChange, profileFacts, answers }) {
     case "sliders2":
       return <Sliders2Field q={q} value={value} onChange={onChange} />;
     case "multi":
-      return <MultiField q={q} value={value} onChange={onChange} />;
+      return <MultiField q={q} n={n} value={value} onChange={onChange} />;
     case "leakmap":
       return <LeakMapField value={value} onChange={onChange} />;
     case "hours":
@@ -716,11 +730,11 @@ export function AnswerField({ q, value, onChange, profileFacts, answers }) {
     case "readiness":
       return <ReadinessField q={q} value={value} onChange={onChange} />;
     case "rows":
-      return <RowsField q={q} value={value} onChange={onChange} answers={answers} />;
+      return <RowsField q={q} n={n} value={value} onChange={onChange} answers={answers} />;
     case "fields":
       return <FieldsField q={q} value={value} onChange={onChange} answers={answers} />;
     case "chips":
-      return <ChipsField q={q} value={value} onChange={onChange} />;
+      return <ChipsField q={q} n={n} value={value} onChange={onChange} />;
     case "prefix":
       return <PrefixField q={q} value={value} onChange={onChange} />;
     default:
