@@ -697,7 +697,7 @@ export const PARTS = [
           { ...chips("when", "When I last told them how I really am", "LAST_TOLD"), hideWhen: { field: "who", value: "no_one_right_now" } },
         ],
       },
-      { id: "x2", type: "text", placeholder: "", text: "Look at everything you just wrote. If you were certain you could do it, what would you do first?" },
+      { id: "x2", type: "text", placeholder: "", text: "Look back at your evidence bank. If you were certain you could do it, what would you do first?" },
     ],
   },
   {
