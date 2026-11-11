@@ -39,6 +39,8 @@ export const STEPS = [
 export const ACTS = [
   {
     id: "you", label: "Act one: You", act: "Act one", short: "You",
+    // "summary" shows only on the phone and tablet act cards.
+    summary: "Where your energy really goes, and what you've been carrying that was never yours.",
     chapters: [
       { n: 1, name: "Where you are right now", look: "Your life as it looks from the outside, against how it feels from the inside, and what happens if nothing changes for 12 months.", back: "The gap between the two versions, named plainly. Most women have never seen it written down." },
       { n: 2, name: "Awareness: what you're not seeing", look: "The \"once things calm down\" stretch that turned into your life. The conversation you're avoiding. What your closest people keep telling you that you brush off.", back: "Your blind spots, named. The things everyone around you can see and you can't, because you're standing inside them." },
@@ -49,6 +51,7 @@ export const ACTS = [
   },
   {
     id: "work", label: "Act two: Your work", act: "Act two", short: "Your work",
+    summary: "What you're really known for, and the pattern that follows you from home into the boardroom.",
     chapters: [
       { n: 6, name: "Confidence: how you show up", look: "Where you say yes at work when you mean no. Where you're waiting to feel ready. Who you gave the credit to for your last win.", back: "The pattern that follows you from home into the boardroom, and how it's costing you at work." },
       { n: 7, name: "Your work", look: "What people always come to you for. What makes you angry, and the line being crossed. The sentence you'd stand behind if your name stood on its own.", back: "What you're actually known for, what you should be known for, and the values your work has to protect." },
@@ -61,6 +64,7 @@ export const ACTS = [
   },
   {
     id: "next", label: "Act three: What's next", act: "Act three", short: "What's next",
+    summary: "What you actually want, and the honest truth about what's in the way.",
     chapters: [
       { n: 8, name: "Intention: what you actually want", heart: true, look: "What you want, written as if nobody will ever read it. Then what you think you should want, and whose voice that is. How you make big decisions, and whether you ask AI or other people before you've asked yourself.", back: "What you want, separated from everyone else's voice. This chapter is the heart of the Audit." },
       { n: 9, name: "Vision: where you're heading", look: "An ordinary Tuesday three years from now. One dream for the next 12 months, including the version you'd be embarrassed to say out loud. What you'll give up for it, what you won't, and what's really in the way.", back: "Two roads: where you're headed if nothing changes, and where you go if you make the call. Each obstacle is marked as a real constraint or a fear dressed up as a fact." },
