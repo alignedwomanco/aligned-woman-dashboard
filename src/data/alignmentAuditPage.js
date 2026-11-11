@@ -12,7 +12,7 @@ export const BUY_URL = "https://buy.stripe.com/00w28t0sS09r5SFaJreME0a";
 export const PRICE = "$280";
 export const SPRINT_PRICE = "$2,000";
 // What the parts come to at standard rates (the crossed-out figure).
-export const PARTS_TOTAL = "$792";
+export const PARTS_TOTAL = "$1,088.00";
 // How long the blueprint takes. Used in every line that promises it.
 export const TURNAROUND = "seven working days";
 export const TURNAROUND_SHORT = "7 working days";
