@@ -21,9 +21,9 @@ export const LOGO = "https://media.base44.com/images/public/69f46886a412ee042303
 export const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
 // The hero image (the woman in the rose coat holding the blueprint), and
 // the image beside "You can't read the label from inside the jar."
-export const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
+export const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/db8b7640b_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-ef746f81-ff44-40d1-8005-60428405848e.png";
 export const HERO_ALT = "A woman in a rose wool coat holding the burgundy Alignment Audit blueprint";
-export const PROBLEM_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/db8b7640b_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-ef746f81-ff44-40d1-8005-60428405848e.png";
+export const PROBLEM_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
 
 /* ── CONTENT ── */
 export const STEPS = [
