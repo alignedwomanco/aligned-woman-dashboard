@@ -21,10 +21,10 @@ import {
 //   (the Starting Point Profile step was removed on 11 November 2026: the
 //   Profile stays separate from the audit. Her Profile quotes still show
 //   where she has taken it.)
-//   p1..p7   Parts 1 to 7, one per screen, with a pause screen before
+//   p1       Part 1
+//   tb | tc  her track module (moved here from after Part 7, 11 Nov 2026)
+//   p2..p9   Parts 2 to 9, one per screen, with a pause screen before
 //            Part 4 (not a part, not counted in progress)
-//   tb | tc  her track module
-//   p8, p9   Parts 8 and 9
 //   finish   When you finish
 //   review   every part with done or skipped, edit links, Submit
 // Answers autosave through the auditFlow backend function, which is the
@@ -347,8 +347,16 @@ export default function Audit() {
 
   const firstName = profile?.first_name || (me?.full_name || "").split(" ")[0] || "";
   const quotes = audit?.spp_snapshot?.quotes || {};
-  const partIndex = parts.findIndex((p) => p.id === screen);
-  const partLabel = partIndex >= 0 ? `Part ${partIndex + 1} of ${parts.length}` : "";
+  // The eyebrow matches the part titles: shared parts count 1 to 9, and the
+  // track module is labelled on its own, so "Part 2: Awareness" never sits
+  // under "Part 3 of 10".
+  const sharedParts = parts.filter((p) => !p.track);
+  const currentPart = parts.find((p) => p.id === screen);
+  const partLabel = !currentPart
+    ? ""
+    : currentPart.track
+      ? "Your track"
+      : `Part ${sharedParts.indexOf(currentPart) + 1} of ${sharedParts.length}`;
   const editable = audit?.status === "purchased" || audit?.status === "in_progress";
 
   // ── Screens ──
