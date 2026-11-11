@@ -324,8 +324,13 @@ function Sliders2Field({ q, value, onChange }) {
 function MultiField({ q, n, value, onChange }) {
   const v = value || {};
   const selected = Array.isArray(v.selected) ? v.selected : [];
+  // "exclusive" (Q17's "Nothing") clears the others, and any other option
+  // clears it.
   const toggle = (val) => {
-    const next = selected.includes(val) ? selected.filter((x) => x !== val) : [...selected, val];
+    let next = selected.includes(val) ? selected.filter((x) => x !== val) : [...selected, val];
+    if (q.exclusive && !selected.includes(val)) {
+      next = val === q.exclusive ? [val] : next.filter((x) => x !== q.exclusive);
+    }
     onChange({ ...v, selected: next });
   };
   return (
@@ -398,6 +403,46 @@ function LeakMapField({ value, onChange }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ── taps ──
+// One tap per line (q.rows), from the answers in q.scale. An optional
+// written box sits before the taps (textBefore) or after them (textAfter).
+// Saved flat: { <line id>: <answer>, <text key>: "..." }. A value that
+// isn't one of the answers (an old score) shows as untapped.
+function TapsField({ q, n, value, onChange }) {
+  const v = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const scale = optionsOf(q.scale);
+  const set = (key, val) => {
+    const next = { ...v };
+    if (val === "" || val === undefined) delete next[key];
+    else next[key] = val;
+    onChange(next);
+  };
+  const textBox = (t) => (
+    <div className="aw-sub" style={{ marginTop: 6, marginBottom: 18 }}>
+      <label className="aw-label" htmlFor={`${q.id}-${t.key}`}><span>{t.label}</span></label>
+      <AutoText id={`${q.id}-${t.key}`} value={typeof v[t.key] === "string" ? v[t.key] : ""} minRows={3} placeholder={t.placeholder} onChange={(x) => set(t.key, x)} />
+    </div>
+  );
+  return (
+    <div className="aw-field">
+      {q.textBefore && textBox(q.textBefore)}
+      {q.tapsLabel && <p className="aw-label" style={{ marginTop: 8 }}><span>{q.tapsLabel}</span></p>}
+      {optionsOf(q.rows).map((r) => (
+        <div key={r.id} className="aw-row aw-taprow">
+          <p className="aw-row-label" id={`${q.id}-${r.id}-l`} style={{ margin: "0 0 8px" }}>{r.label}</p>
+          <Toggle
+            options={scale}
+            value={scale.some((s) => s.value === v[r.id]) ? v[r.id] : ""}
+            label={`${n ? `Question ${n}, ` : ""}${r.label}`}
+            onChange={(val) => set(r.id, val)}
+          />
+        </div>
+      ))}
+      {q.textAfter && <div style={{ marginTop: 18 }}>{textBox(q.textAfter)}</div>}
     </div>
   );
 }
@@ -719,6 +764,8 @@ export function AnswerField({ q, n, value, onChange, profileFacts, answers }) {
       return <MultiField q={q} n={n} value={value} onChange={onChange} />;
     case "leakmap":
       return <LeakMapField value={value} onChange={onChange} />;
+    case "taps":
+      return <TapsField q={q} n={n} value={value} onChange={onChange} />;
     case "hours":
       return <HoursField value={value} onChange={onChange} />;
     case "lists2":
