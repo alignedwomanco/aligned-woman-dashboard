@@ -23,7 +23,7 @@ export const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee04
 // the image beside "You can't read the label from inside the jar."
 export const HERO_IMAGE = "https://base44.app/api/apps/69f46886a412ee042303f1af/files/mp/public/69f46886a412ee042303f1af/aaec1b4f4_audit-hero-book-spread.png";
 export const HERO_ALT = "An open Alignment Audit book on a woman's lap, showing a completed read with The Move";
-export const PROBLEM_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
+export const PROBLEM_IMAGE = "https://base44.app/api/apps/69f46886a412ee042303f1af/files/mp/public/69f46886a412ee042303f1af/c0ebf9f23_audit-open-door-spread.png";
 
 /* ── CONTENT ── */
 export const STEPS = [
