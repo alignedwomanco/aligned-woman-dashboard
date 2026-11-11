@@ -420,6 +420,7 @@ export const PARTS = [
   {
     id: "p4",
     title: "Part 4: Liberation. What you're carrying",
+    label: "About you",
     intro: "Some of what's heavy was never yours to carry.",
     pauseBefore: true,
     questions: [
@@ -443,9 +444,13 @@ export const PARTS = [
         text: "Finish this sentence without thinking too hard: \"Good women don't...\"",
       },
       {
+        // v2: the habit chips came off. A chip saved before stays under
+        // "habit" and shows in the admin view as an earlier version.
         id: "q31", type: "fields", placeholder: "",
-        text: "Pick the habit you most want to drop. Overworking, over-explaining, staying quiet, whatever yours is. What is it protecting you from?",
-        fields: [chips("habit", "The habit", "HABITS"), text("protects", "What it protects me from")],
+        text: "Which habit do you most want to drop? What is it protecting you from?",
+        fields: [text("habit_text", "The habit"), text("protects", "What it protects me from")],
+        retiredText: "Pick the habit you most want to drop. Overworking, over-explaining, staying quiet, whatever yours is. What is it protecting you from?",
+        retiredFields: [chips("habit", "The habit", "HABITS")],
       },
       { id: "q32", type: "text", placeholder: "", text: "What are you scared would happen if you fully rested for two weeks?" },
       { id: "q33", type: "text", carry: "q33", placeholder: "", text: "Which story about yourself are you tired of telling?" },
@@ -453,8 +458,14 @@ export const PARTS = [
   },
   {
     id: "p5",
-    title: "Part 5: Intention. What you actually want",
-    intro: "",
+    title: "Part 8: Intention. What you actually want",
+    label: "Both",
+    actBefore: {
+      title: "Last stretch.",
+      body: "This is where you get to want things.",
+      button: "Keep going",
+    },
+    intro: "Your life and your work, together this time.",
     questions: [
       // Q34 and Q35 sit side by side on a wide screen, stacked on a phone.
       { id: "q34", type: "text", pairWith: "q35", placeholder: "", text: "What do you want? Write the answer you'd give if nobody was ever going to read it." },
@@ -467,14 +478,6 @@ export const PARTS = [
         id: "q39", type: "fields", placeholder: "",
         text: "How do you make big decisions right now? Gut, research, asking several people before you trust yourself, or waiting until it's forced on you? How is that working?",
         fields: [chips("how", "How I decide", "DECIDE_HOW", "multi"), text("working", "How it's working")],
-      },
-      {
-        id: "q41", type: "lists2", placeholder: "",
-        text: "What are you good at that drains you? What are you good at that gives you energy back? Roughly how much of your week goes to each?",
-        lists: [
-          { key: "drains", label: "Good at, but it drains me", placeholder: "", extra: num("hours", "Hours a week", "hours a week") },
-          { key: "energy", label: "Good at, and it gives me energy", placeholder: "", extra: num("hours", "Hours a week", "hours a week") },
-        ],
       },
       {
         id: "d6", type: "fields", placeholder: "", lead: "Watching or doing.",
@@ -493,7 +496,8 @@ export const PARTS = [
   },
   {
     id: "p6",
-    title: "Part 6: Vision. Where you're heading",
+    title: "Part 9: Vision. Where you're heading",
+    label: "Both",
     intro: "This is the part where you get to want things. Take your time.",
     questions: [
       {
@@ -540,7 +544,8 @@ export const PARTS = [
   },
   {
     id: "p7",
-    title: "Part 7: Embodiment. How you're living it",
+    title: "Part 5: Embodiment. How you're living it",
+    label: "About you",
     intro: "Your body usually knows before you do.",
     questions: [
       {
@@ -548,7 +553,12 @@ export const PARTS = [
         text: "How many hours do you sleep on a normal night, and how do you feel when you wake up?",
         fields: [num("hours", "Hours a night"), chips("wake", "When I wake up I feel", "WAKE_FEEL")],
       },
-      { id: "q46", type: "rows5", rows: "STATES", placeholder: "", text: "How much of a normal week do you spend in each of these? Score 1 (rarely) to 5 (most of the time).", lowLabel: "Rarely", highLabel: "Most of the time" },
+      {
+        // v2: the 1 to 5 scores became one choice and a written box.
+        id: "q46", type: "fields", placeholder: "",
+        text: "Which of these sounds most like a normal week for you? What does that look like on a bad day?",
+        fields: [chips("state", "A normal week for me", "STATE_OPTS"), text("bad_day", "What that looks like on a bad day")],
+      },
       { id: "q47", type: "chips", options: "RECOVERY", mode: "single", placeholder: "", text: "After something stressful happens, how long until you feel okay again? Minutes, hours, days?" },
       { id: "q48", type: "single", options: "BURNOUT_STAGES", carry: "q48", placeholder: "", text: "Pick the one that sounds most like you right now:" },
       { id: "q49", retired: true, type: "text", placeholder: "", text: "What does your body keep asking for that you keep overriding?" },
@@ -564,11 +574,16 @@ export const PARTS = [
     id: "tb",
     track: "business",
     title: "I run a business",
+    label: "About your work",
     intro: "",
     groups: true,
     questions: [
       { id: "b1", n: "B1", group: "Position", type: "text", placeholder: "", text: "What do you want the business to be known for? What is it actually known for? If ten clients described it, what would they say?" },
-      { id: "b2", n: "B2", group: "Position", type: "text", placeholder: "", text: "Who's the client you'd clone tomorrow? Who's the one you dread hearing from?" },
+      {
+        id: "b2", n: "B2", group: "Position", type: "fields", placeholder: "",
+        text: "Who's the client you'd clone tomorrow? Who's the one you dread hearing from?",
+        fields: [text("clone", "The client I'd clone tomorrow, and why"), text("dread", "The client I dread hearing from, and why")],
+      },
       { id: "b3", n: "B3", group: "Position", type: "text", placeholder: "", text: "Why does someone pick you over the business most like yours? If you're not sure, say so." },
       {
         id: "b4", n: "B4", group: "Value", type: "rows", maxRows: 6, total: "share", placeholder: "",
@@ -579,23 +594,24 @@ export const PARTS = [
         // The two chip fields use her B4 offers as their options, and fall
         // back to text boxes when B4 is empty.
         id: "b5", n: "B5", group: "Value", type: "fields", placeholder: "",
-        text: "Which offer do you love delivering, and which do you resent? Is the money in the one you love?",
+        text: "Which offer do you love delivering, and which do you resent?",
         fields: [
           { ...chips("love", "The ones I love delivering", "B4_OFFERS", "multi"), fallback: "text" },
           { ...chips("resent", "The ones I resent", "B4_OFFERS", "multi"), fallback: "text" },
-          text("money", "Is the money in the one you love?"),
         ],
+        retiredText: "Is the money in the one you love?",
+        retiredFields: [text("money", "Is the money in the one you love?")],
       },
       { id: "b6", n: "B6", group: "Value", type: "text", carry: "worth", placeholder: "", text: "When did you last put your prices up? What stopped you doing it sooner?" },
       { id: "b7", n: "B7", group: "Value", type: "chips", options: "LEAKS", mode: "multi", placeholder: "", text: "Where is money leaking? Late invoices, discounts, scope creep, tools you pay for and don't use, clients who cost more than they pay." },
       { id: "b8", n: "B8", group: "Visibility", type: "text", placeholder: "", text: "How do new clients find you right now? If the honest answer is \"they just do\", write that." },
       { id: "b9", n: "B9", group: "Visibility", type: "text", placeholder: "", text: "What do you hold back from saying publicly about your work or your industry?" },
       {
-        id: "b10", n: "B10", group: "Pace", type: "fields", placeholder: "",
+        id: "b10", n: "B10", retired: true, group: "Pace", type: "fields", placeholder: "",
         text: "How many hours a week do you work? How many would you like to work?",
         fields: [num("now", "Hours I work now", "a week"), num("want", "Hours I'd like to work", "a week")],
       },
-      { id: "b11", n: "B11", group: "Pace", type: "text", placeholder: "", text: "What are you doing in the business that someone else should be doing?" },
+      { id: "b11", n: "B11", retired: true, group: "Pace", type: "text", placeholder: "", text: "What are you doing in the business that someone else should be doing?" },
       { id: "b12", n: "B12", group: "Pace", type: "text", placeholder: "", text: "If you were off sick for a month, what would happen to the business?" },
       { id: "b13", n: "B13", group: "Pace", type: "text", placeholder: "", text: "What does the business keep asking of you that you don't want to give anymore?" },
       { id: "b14", n: "B14", group: "Pace", type: "text", placeholder: "", text: "If the business disappeared tomorrow, what would you feel about yourself? Is it closer to grief or to terror?" },
@@ -605,6 +621,7 @@ export const PARTS = [
     id: "tc",
     track: "career",
     title: "I have a career",
+    label: "About your work",
     intro: "",
     groups: true,
     questions: [
@@ -615,7 +632,6 @@ export const PARTS = [
       { id: "c5", n: "C5", group: "Value", type: "text", carry: "worth", placeholder: "", text: "When did you last ask for more money or a bigger scope? What happened?" },
       { id: "c6", n: "C6", group: "Value", type: "text", placeholder: "", text: "What do you do that isn't in your job description and nobody credits you for?" },
       { id: "c7", n: "C7", group: "Visibility", type: "text", placeholder: "", text: "Who in your company or industry knows your work well? Who puts your name forward when you're not in the room? Who should, and doesn't?" },
-      { id: "c8", n: "C8", group: "Visibility", type: "multi", options: "MEETING_BEHAVIOURS", withText: true, placeholder: "", text: "In meetings, which of these do you do? Over-explain. Apologise before making your point. Turn statements into questions. Stay quiet when you know the answer. Push harder than the moment needs." },
       {
         id: "c9", n: "C9", group: "Pace", type: "fields", placeholder: "",
         text: "What time do you actually log off? How often do you check messages after that?",
@@ -640,7 +656,8 @@ export const PARTS = [
   },
   {
     id: "p8",
-    title: "Part 8: The honest bit",
+    title: "Part 10: The honest bit",
+    label: "Both",
     intro: "",
     questions: [
       { id: "q52", type: "text", placeholder: "", text: "What are you most afraid I'll tell you?" },
@@ -661,10 +678,16 @@ export const PARTS = [
   },
   {
     id: "p9",
-    title: "Part 9: What's already working",
-    intro: "We finish here on purpose. Whatever comes next gets built on what you've already got.",
+    title: "Part 11: The evidence bank",
+    label: "Both",
+    intro: "We finish here on purpose. Your dream needs proof that you can pull it off, and you already have more than you think.",
     questions: [
-      { id: "q57", type: "text", placeholder: "", text: "What are you proud of that most people don't see?" },
+      {
+        id: "x1", type: "rows", maxRows: 10, quote: "dream", placeholder: "",
+        text: "Write down everything you've done that you're proud of, big or small, that proves you can make this real. Work, life, anything. The more the better.",
+        columns: [text("did", "What I did"), text("proves", "What it proves I can do")],
+      },
+      { id: "q57", retired: true, type: "text", placeholder: "", text: "What are you proud of that most people don't see?" },
       { id: "q58", type: "text", placeholder: "", text: "Think of a hard stretch you've already come through. What got you through it?" },
       {
         id: "q59", type: "fields", carry: "q59", placeholder: "",
