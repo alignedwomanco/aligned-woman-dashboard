@@ -220,6 +220,11 @@ export default function AlignmentAuditPage() {
           60% { box-shadow: 0 0 0 14px rgba(196,132,122,0); transform: scale(1.015); }
         }
         @keyframes aa-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        /* Tablet and phone: every block of copy is centred. */
+        @media (max-width: 1023px) {
+          .aa2, .aa2 * { text-align: center !important; }
+          .aa2 [style*="flex-direction: column"] { align-items: center !important; }
+        }
         @media (prefers-reduced-motion: reduce) {
           .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
         }
