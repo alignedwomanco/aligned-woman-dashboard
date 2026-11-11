@@ -10,7 +10,7 @@ import { Q as SPP_Q, DESIGN_KEY, MINUTES } from "@/data/startingPointProfile";
 import { saveQuizResultToProfile, track } from "@/lib/sppStore";
 import {
   BEFORE_YOU_BEGIN, AGREEMENT_TEXT, TERMS_LABEL, TERMS_URL, TRACK_SCREEN, WHEN_YOU_FINISH, PAUSE_SCREEN,
-  SPP_CARRY, partsForTrack, questionsFor, isAnswered, migrateAnswers,
+  SPP_CARRY, partsForTrack, questionsFor, isAnswered, migrateAnswers, displayNumbers,
 } from "@/data/auditQuestions";
 
 // ────────────────────────────────────────────────────────────────
@@ -120,6 +120,8 @@ export default function Audit() {
 
   const trackValue = trackChoice || audit?.track || null;
   const parts = useMemo(() => (trackValue ? partsForTrack(trackValue) : []), [trackValue]);
+  // The number beside each question, worked out from its position.
+  const numbers = useMemo(() => (trackValue ? displayNumbers(trackValue) : {}), [trackValue]);
   const hasProfile = !!(profile?.computed_archetype_key || audit?.spp_snapshot?.primary);
 
   const screens = useMemo(() => {
@@ -420,11 +422,11 @@ export default function Audit() {
 
   const renderQuestion = (q) => (
     <section key={q.id} className="aw-q" aria-labelledby={`${q.id}-n`}>
-      <p className="aw-qnum" id={`${q.id}-n`}>{q.n}</p>
+      <p className="aw-qnum" id={`${q.id}-n`}>{numbers[q.id]}</p>
       {q.quote && <LiveQuote kind={q.quote} answers={answers} />}
       <QuestionText q={q} />
       {q.carry && <CarryQuote quotes={quotes[q.carry]} />}
-      <AnswerField q={q} value={answers[q.id]} answers={answers} profileFacts={profileFacts} onChange={(v) => setAnswer(q, v)} />
+      <AnswerField q={q} n={numbers[q.id]} value={answers[q.id]} answers={answers} profileFacts={profileFacts} onChange={(v) => setAnswer(q, v)} />
     </section>
   );
 
