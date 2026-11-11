@@ -245,7 +245,7 @@ export const YES_NO = opts(["Yes", "No"]);
 export const AGREE = opts(["Yes", "Partly", "No"]);
 export const HABITS = opts(["Overworking", "Over-explaining", "Staying quiet", "People-pleasing", "Perfectionism", "Other"]);
 export const CONSTRAINT = opts(["Real constraint", "Fear dressed up as a fact"]);
-export const DECIDE_HOW = opts(["Gut", "Research", "Asking several people", "Waiting until it's forced", "Other"]);
+export const DECIDE_HOW = opts(["Gut", "Research", "Asking several people", "Asking AI", "Waiting until it's forced", "Other"]);
 export const WAKE_FEEL = opts(["Rested", "Okay", "Tired", "Exhausted"]);
 export const RECOVERY = opts(["Minutes", "Hours", "A day", "A few days", "Longer"]);
 export const SYMPTOMS = opts(["Sleep", "Mood", "Digestion", "My cycle", "Headaches", "Libido", "Skin", "Other"]);
@@ -478,6 +478,13 @@ export const PARTS = [
         id: "q39", type: "fields", placeholder: "",
         text: "How do you make big decisions right now? Gut, research, asking several people before you trust yourself, or waiting until it's forced on you? How is that working?",
         fields: [chips("how", "How I decide", "DECIDE_HOW", "multi"), text("working", "How it's working")],
+      },
+      {
+        // Added 11 November 2026: the decide-first test from Laura's
+        // positioning. Did she know her answer before she asked?
+        id: "d7", type: "fields", placeholder: "",
+        text: "Think of the last big decision you ran past AI, or anyone else, before you'd made up your own mind. What did you already think? What did you end up doing?",
+        fields: [text("thought", "What I already thought"), text("did", "What I ended up doing")],
       },
       {
         id: "d6", type: "fields", placeholder: "", lead: "Watching or doing.",
