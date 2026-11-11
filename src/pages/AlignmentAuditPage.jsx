@@ -98,6 +98,54 @@ function Cross({ color }) {
   );
 }
 
+/* The chapters of one act, each one a dropdown. Shared by the stacked act
+   list on tablet and phone and the tab panel on desktop. */
+function ChaptersList({ act, openCh, setOpenCh, track, setTrack }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {act.chapters.map((ch) => {
+        const open = openCh[act.id] === ch.n;
+        return (
+          <div key={ch.n} style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10 }}>
+            <button type="button" aria-expanded={open} onClick={() => setOpenCh((p) => ({ ...p, [act.id]: open ? null : ch.n }))} style={{ width: "100%", display: "grid", gridTemplateColumns: "40px 1fr 32px", columnGap: 12, alignItems: "start", textAlign: "left", background: "none", border: 0, padding: "20px 18px", color: "inherit", minHeight: 48 }}>
+              <span style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1.2, color: C.rose, fontVariantNumeric: "lining-nums" }}>{String(ch.n).padStart(2, "0")}</span>
+              <span style={{ minWidth: 0 }}>
+                <span style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontWeight: 600, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: C.burgMid, lineHeight: 1.5 }}>{ch.name}</span>
+                  {ch.heart && <span style={{ display: "inline-block", background: C.roseLight, color: C.ink, fontWeight: 600, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 100 }}>The heart of the Audit</span>}
+                </span>
+                <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, textWrap: "pretty" }}>{ch.back}</span>
+              </span>
+              <span aria-hidden="true" style={plusIcon(open)}>+</span>
+            </button>
+            {open && (
+              <div className="aa-ch-panel" style={{ padding: "0 18px 22px 70px" }}>
+                <p style={eyebrow()}>What we look at</p>
+                <p style={{ marginTop: 8, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{ch.look}</p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {act.track && (
+        <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10, padding: "22px 18px" }}>
+          <p style={eyebrow()}>Your track</p>
+          <div role="tablist" aria-label="Your track" style={{ display: "flex", gap: 3, marginTop: 14, background: C.sand, borderRadius: 100, padding: 3, maxWidth: 420 }}>
+            <button type="button" role="tab" aria-selected={track === "business"} onClick={() => setTrack("business")} style={trackTab(track === "business")}>I run a business</button>
+            <button type="button" role="tab" aria-selected={track === "career"} onClick={() => setTrack("career")} style={trackTab(track === "career")}>I have a career</button>
+          </div>
+          <p style={{ marginTop: 18, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>
+            <strong style={{ fontWeight: 600, color: C.ink }}>{track === "business" ? "I run a business:" : "I have a career:"}</strong> {act.track[track]}
+          </p>
+          <p style={{ marginTop: 14, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, maxWidth: "30em", textWrap: "pretty" }}>
+            <span style={{ ...eyebrow(), fontStyle: "normal", fontFamily: SANS, marginRight: 10 }}>You get back</span>{act.track.back}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Page ── */
 export default function AlignmentAuditPage() {
   const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
@@ -107,6 +155,8 @@ export default function AlignmentAuditPage() {
   const [tab, setTab] = useState(0);
   // The open chapter in each act. One at a time per act.
   const [openCh, setOpenCh] = useState({ you: 1, work: 6, next: 8 });
+  // Which act is expanded in the stacked act list on tablet and phone.
+  const [openAct, setOpenAct] = useState(0);
   const [track, setTrack] = useState("business");
   const [aiList, setAiList] = useState(false);
   const [faq, setFaq] = useState(-1);
@@ -361,58 +411,44 @@ export default function AlignmentAuditPage() {
             <p style={{ marginTop: 20, textWrap: "pretty" }}>We start with you, because your business or career is run by a person, and that person is usually the part nobody looks at. Then your work. Then what's next. Every answer feeds your blueprint.</p>
           </div>
         </div>
-        <div role="tablist" aria-label="Acts" style={{ position: "sticky", top: 60, zIndex: 30, background: C.sand, marginTop: 40, padding: `12px ${PAD_X}`, borderBottom: "1px solid rgba(74,14,46,0.08)" }}>
-          <div style={{ maxWidth: 1040, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 3, background: C.ivory, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 10, padding: 3, boxSizing: "border-box" }}>
-            {ACTS.map((a, i) => (
-              <button key={a.id} type="button" role="tab" aria-selected={i === tab} aria-label={a.label} onClick={() => setTab(i)} style={actTab(i === tab)}>
-                <span style={{ display: "block", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600, opacity: 0.7 }}>{a.act}</span>
-                <span style={{ display: "block", marginTop: 4, fontFamily: SERIF, fontSize: 17, lineHeight: 1.2, textTransform: "none", letterSpacing: 0 }}>{a.short}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <div style={{ maxWidth: 1040, margin: "0 auto", padding: `24px ${PAD_X} 0` }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {act.chapters.map((ch) => {
-              const open = openCh[act.id] === ch.n;
+        {overlayHero ? (
+          <div style={{ maxWidth: 1040, margin: "0 auto", padding: `32px ${PAD_X} 0`, display: "flex", flexDirection: "column", gap: 3 }}>
+            {ACTS.map((a, i) => {
+              const actOpen = openAct === i;
               return (
-                <div key={ch.n} style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10 }}>
-                  <button type="button" aria-expanded={open} onClick={() => setOpenCh((p) => ({ ...p, [act.id]: open ? null : ch.n }))} style={{ width: "100%", display: "grid", gridTemplateColumns: "40px 1fr 32px", columnGap: 12, alignItems: "start", textAlign: "left", background: "none", border: 0, padding: "20px 18px", color: "inherit", minHeight: 48 }}>
-                    <span style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1.2, color: C.rose, fontVariantNumeric: "lining-nums" }}>{String(ch.n).padStart(2, "0")}</span>
-                    <span style={{ minWidth: 0 }}>
-                      <span style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontWeight: 600, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: C.burgMid, lineHeight: 1.5 }}>{ch.name}</span>
-                        {ch.heart && <span style={{ display: "inline-block", background: C.roseLight, color: C.ink, fontWeight: 600, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 100 }}>The heart of the Audit</span>}
+                <div key={a.id} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 10 }}>
+                    <button type="button" aria-expanded={actOpen} onClick={() => setOpenAct(actOpen ? -1 : i)} style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 32px", gap: 16, alignItems: "center", textAlign: "left", background: "none", border: 0, padding: 18, minHeight: 56, color: "inherit" }}>
+                      <span style={{ minWidth: 0 }}>
+                        <span style={{ display: "block", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600, color: C.burgMid }}>{a.act}</span>
+                        <span style={{ display: "block", marginTop: 4, fontFamily: SERIF, fontSize: 21, lineHeight: 1.25, color: C.burg }}>{a.short}</span>
                       </span>
-                      <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, textWrap: "pretty" }}>{ch.back}</span>
-                    </span>
-                    <span aria-hidden="true" style={plusIcon(open)}>+</span>
-                  </button>
-                  {open && (
-                    <div className="aa-ch-panel" style={{ padding: "0 18px 22px 70px" }}>
-                      <p style={eyebrow()}>What we look at</p>
-                      <p style={{ marginTop: 8, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{ch.look}</p>
-                    </div>
-                  )}
+                      <span aria-hidden="true" style={plusIcon(actOpen)}>+</span>
+                    </button>
+                  </div>
+                  {actOpen && <ChaptersList act={a} openCh={openCh} setOpenCh={setOpenCh} track={track} setTrack={setTrack} />}
                 </div>
               );
             })}
-            {act.track && (
-              <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10, padding: "22px 18px" }}>
-                <p style={eyebrow()}>Your track</p>
-                <div role="tablist" aria-label="Your track" style={{ display: "flex", gap: 3, marginTop: 14, background: C.sand, borderRadius: 100, padding: 3, maxWidth: 420 }}>
-                  <button type="button" role="tab" aria-selected={track === "business"} onClick={() => setTrack("business")} style={trackTab(track === "business")}>I run a business</button>
-                  <button type="button" role="tab" aria-selected={track === "career"} onClick={() => setTrack("career")} style={trackTab(track === "career")}>I have a career</button>
-                </div>
-                <p style={{ marginTop: 18, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>
-                  <strong style={{ fontWeight: 600, color: C.ink }}>{track === "business" ? "I run a business:" : "I have a career:"}</strong> {act.track[track]}
-                </p>
-                <p style={{ marginTop: 14, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, maxWidth: "30em", textWrap: "pretty" }}>
-                  <span style={{ ...eyebrow(), fontStyle: "normal", fontFamily: SANS, marginRight: 10 }}>You get back</span>{act.track.back}
-                </p>
-              </div>
-            )}
           </div>
+        ) : (
+          <>
+            <div role="tablist" aria-label="Acts" style={{ position: "sticky", top: 60, zIndex: 30, background: C.sand, marginTop: 40, padding: `12px ${PAD_X}`, borderBottom: "1px solid rgba(74,14,46,0.08)" }}>
+              <div style={{ maxWidth: 1040, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 3, background: C.ivory, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 10, padding: 3, boxSizing: "border-box" }}>
+                {ACTS.map((a, i) => (
+                  <button key={a.id} type="button" role="tab" aria-selected={i === tab} aria-label={a.label} onClick={() => setTab(i)} style={actTab(i === tab)}>
+                    <span style={{ display: "block", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600, opacity: 0.7 }}>{a.act}</span>
+                    <span style={{ display: "block", marginTop: 4, fontFamily: SERIF, fontSize: 17, lineHeight: 1.2, textTransform: "none", letterSpacing: 0 }}>{a.short}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ maxWidth: 1040, margin: "0 auto", padding: `24px ${PAD_X} 0` }}>
+              <ChaptersList act={act} openCh={openCh} setOpenCh={setOpenCh} track={track} setTrack={setTrack} />
+            </div>
+          </>
+        )}
+        <div style={{ maxWidth: 1040, margin: "0 auto", padding: `0 ${PAD_X}` }}>
           <p style={{ ...pull(), marginTop: 40, maxWidth: "28em" }}>Then I put it all together: your pattern, named, and the one move I'd make next.</p>
         </div>
       </section>
