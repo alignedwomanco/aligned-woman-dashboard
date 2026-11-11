@@ -82,7 +82,7 @@ const FAQ = [
   { q: "\"I don't run a business.\"", a: "Choose the career track at the start. The questions follow your role, your value and your next move." },
   { q: "\"I'm already flat out. I don't have time for this.\"", a: `The questionnaire takes ${QUESTIONNAIRE_TIME} and saves as you go, so you can do it in pieces. Then I do the work. The hour on the call is the only time you need to block out.` },
   { q: "\"Will you ask about my finances?\"", a: "I'll ask how money moves through your business or career. I won't ask for bank statements, account details or amounts." },
-  { q: "\"What happens after I pay?\"", a: "You get an email straight away. Sign in at app.alignedwomanco.com with the email you paid with, and your questionnaire is waiting on your dashboard. Submit it whenever you're ready. Your five business days start then." },
+  { q: "\"What happens after I pay?\"", a: "You get an email straight away. Sign in at app.alignedwomanco.com with the email you paid with, and your questionnaire is waiting on your dashboard. Submit it whenever you're ready. Your seven working days start then." },
 ];
 
 const REVIEWS = [
@@ -358,7 +358,7 @@ export default function AlignmentAuditPage() {
             </p>
             <div className="aa-hero-note">
               <p style={{ margin: "0 0 8px", fontSize: 13, lineHeight: 1.55, color: C.muted }}>
-                {PRICE}, paid once. Your blueprint within five business days.
+                {PRICE}, paid once. Your blueprint within seven working days.
               </p>
               <p style={{ margin: "0 auto", maxWidth: 520, fontFamily: SERIF, fontStyle: "italic", fontSize: 13, lineHeight: 1.6, color: C.burg }}>
                 Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
@@ -383,7 +383,7 @@ export default function AlignmentAuditPage() {
         }}
       >
         <p style={{ margin: "0 0 10px", fontSize: 14, color: C.muted }}>
-          {PRICE}, paid once. Your blueprint within five business days.
+          {PRICE}, paid once. Your blueprint within seven working days.
         </p>
         <p style={{ margin: "0 auto", maxWidth: 620, fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.6, color: C.burg }}>
           Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
@@ -434,7 +434,7 @@ export default function AlignmentAuditPage() {
             <p style={{ ...eyebrow(), marginBottom: 24 }}>The Offer</p>
             <H2 style={{ fontSize: 64, lineHeight: 0.98, marginBottom: 24 }}>Introducing <span style={em}>The Alignment Audit.</span></H2>
             <p style={{ margin: "0 0 24px", fontSize: 17, lineHeight: 1.7, color: C.body }}>
-              You answer my questions online, in your own time. Within five business days I send you a blueprint written about you: where you actually are, what's costing you, and the move I'd make next. Then we go through it together on a one-hour call.
+              You answer my questions online, in your own time. Within seven working days I send you a blueprint written about you: where you actually are, what's costing you, and the move I'd make next. Then we go through it together on a one-hour call.
             </p>
             <p style={{ margin: "0 0 24px", fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.5, color: C.burg }}>
               This is not a personality test. It's not a course. It's a diagnosis, written by me.
@@ -518,7 +518,7 @@ export default function AlignmentAuditPage() {
           <div className="aa-core-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
             {[
               ["Your Alignment Questionnaire", "Included", "Business or career track, online, saved as you go. Six questions build on your Starting Point Profile, so you don't repeat yourself."],
-              ["Your written blueprint", "$488", "Written by me within five business days, section by section through the A.L.I.V.E. Method. Yours to keep."],
+              ["Your written blueprint", "$488", "Written by me within seven working days, section by section through the A.L.I.V.E. Method. Yours to keep."],
               ["One hour with me", "$304", "We go through your blueprint together on a call, so nothing in it stays theoretical. You leave knowing your next move and why."],
             ].map(([t, v, d]) => (
               <div key={t} style={{ background: C.card, padding: "30px 28px" }}>
@@ -591,7 +591,7 @@ export default function AlignmentAuditPage() {
             <p style={{ margin: "0 0 32px", fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.6, color: C.burg }}>That's less than one hour of my advisory time, for a written blueprint and an hour with me.</p>
             <BuyButton block />
             <p style={{ margin: "16px 0 0", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted }}>
-              Online. Blueprint within five business days.
+              Online. Blueprint within seven working days.
             </p>
           </div>
         </div>
@@ -699,7 +699,7 @@ export default function AlignmentAuditPage() {
             <p style={{ margin: "0 0 12px", fontFamily: SERIF, fontSize: 20 }}>Get your Alignment Audit.</p>
             <ul style={{ margin: "0 0 24px", padding: 0, listStyle: "none", fontSize: 13, lineHeight: 1.9, color: C.muted }}>
               <li>{PRICE}, paid once.</li>
-              <li>Your blueprint within five business days.</li>
+              <li>Your blueprint within seven working days.</li>
               <li>One hour with me to go through it.</li>
               <li>Full fee credited to the Clarity Sprint.</li>
             </ul>

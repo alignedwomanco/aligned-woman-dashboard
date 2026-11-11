@@ -481,7 +481,7 @@ function AuditCard() {
     : s === "in_progress"
     ? { eyebrow: "Your Alignment Audit", title: `${audit.progress_percent || 0}% done.`, body: "Pick up exactly where you left off.", cta: "Continue", to: "/Audit" }
     : s === "submitted"
-    ? { eyebrow: "Your Alignment Audit", title: "It's with Laura.", body: "Your blueprint arrives within five business days. You'll get an email when it's here.", cta: "View my Audit", to: "/Profile?tab=audit" }
+    ? { eyebrow: "Your Alignment Audit", title: "It's with Laura.", body: "Your blueprint arrives within seven working days. You'll get an email when it's here.", cta: "View my Audit", to: "/Profile?tab=audit" }
     : { eyebrow: "Your Alignment Audit", title: "Your blueprint is ready.", body: "Read it before your call with Laura.", cta: "Read my blueprint", to: "/Profile?tab=audit" };
 
   if (audit === undefined) {

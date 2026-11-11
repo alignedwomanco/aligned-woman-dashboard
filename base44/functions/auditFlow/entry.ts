@@ -19,7 +19,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 //             she is on, progress and track, and copies the once-only
 //             facts to her MemberProfile.
 //   submit    locks the answers. in_progress → submitted, with the due
-//             date five business days later (weekends and South African
+//             date seven working days later (weekends and South African
 //             public holidays skipped).
 //
 // Admin actions (role admin, owner or master_admin only):
@@ -105,9 +105,9 @@ function saHolidays(year: number): Set<string> {
   return set;
 }
 
-// Five business days after the submission day, in South African time.
+// Seven working days after the submission day, in South African time.
 // Due at 17:00 SAST on that day.
-function dueDateFrom(submitted: Date, businessDays = 5): Date {
+function dueDateFrom(submitted: Date, businessDays = 7): Date {
   const local = new Date(submitted.getTime() + SAST_OFFSET_MS);
   let day = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate()));
   let counted = 0;
