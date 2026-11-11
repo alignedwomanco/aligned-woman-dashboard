@@ -128,6 +128,9 @@ export default function Audit() {
   const screens = useMemo(() => {
     const list = ["before", "track"];
     parts.forEach((p) => {
+      // An act intro screen (v2) and the pause screen are not parts and
+      // are not counted in progress.
+      if (p.actBefore) list.push(`act_${p.id}`);
       if (p.pauseBefore) list.push("pause");
       list.push(p.id);
     });
@@ -350,13 +353,15 @@ export default function Audit() {
   // The eyebrow matches the part titles: shared parts count 1 to 9, and the
   // track module is labelled on its own, so "Part 2: Awareness" never sits
   // under "Part 3 of 10".
+  // Her track module carries on the shared part before it (Part 7: Your
+  // work), so it shares that number.
   const sharedParts = parts.filter((p) => !p.track);
   const currentPart = parts.find((p) => p.id === screen);
-  const partLabel = !currentPart
-    ? ""
-    : currentPart.track
-      ? "Your track"
-      : `Part ${sharedParts.indexOf(currentPart) + 1} of ${sharedParts.length}`;
+  const numberedPart = currentPart?.track
+    ? [...parts.slice(0, parts.indexOf(currentPart))].reverse().find((p) => !p.track)
+    : currentPart;
+  const partLabel = numberedPart ? `Part ${sharedParts.indexOf(numberedPart) + 1} of ${sharedParts.length}` : "";
+  const actPart = typeof screen === "string" && screen.startsWith("act_") ? parts.find((p) => `act_${p.id}` === screen) : null;
   const editable = audit?.status === "purchased" || audit?.status === "in_progress";
 
   // ── Screens ──
@@ -425,7 +430,7 @@ export default function Audit() {
     let lastGroup = null;
     return (
       <div className={"aw-col" + (hasPair ? " wide" : "")}>
-        <p className="eye">{partLabel}</p>
+        <p className="eye">{partLabel}{part.label ? ` · ${part.label}` : ""}</p>
         <h1 className="h-l" style={{ marginTop: 10 }}>{part.title}</h1>
         {part.intro && <p className="body" style={{ marginTop: 12 }}>{part.intro}</p>}
         <div style={{ marginTop: 12 }}>
@@ -461,6 +466,15 @@ export default function Audit() {
       <h1 className="h-l">{PAUSE_SCREEN.title}</h1>
       <p className="body" style={{ marginTop: 16 }}>{PAUSE_SCREEN.body}</p>
       <div style={{ marginTop: 28 }}><Primary onClick={goNext}>{PAUSE_SCREEN.button}</Primary></div>
+    </div>
+  );
+
+  // The screen before each act (v2). Shaped like the pause screen.
+  const renderAct = (p) => (
+    <div className="aw-col aw-pause">
+      <h1 className="h-l">{p.actBefore.title}</h1>
+      <p className="body" style={{ marginTop: 16 }}>{p.actBefore.body}</p>
+      <div style={{ marginTop: 28 }}><Primary onClick={goNext}>{p.actBefore.button}</Primary></div>
     </div>
   );
 
@@ -576,6 +590,7 @@ export default function Audit() {
   else if (screen === "before") body = renderBefore();
   else if (screen === "track") body = renderTrack();
   else if (screen === "pause") body = renderPause();
+  else if (actPart) body = renderAct(actPart);
   else if (screen === "finish") body = renderFinish();
   else if (screen === "review") body = renderReview();
   else {
@@ -608,7 +623,7 @@ export default function Audit() {
               </div>
             )}
             <div className="aw-audit-body">{body}</div>
-            {inForm && screen !== "review" && screen !== "pause" && (
+            {inForm && screen !== "review" && screen !== "pause" && !actPart && (
               <div className="aw-nav">
                 <div className="aw-nav-inner">
                   {canBack && <button type="button" className="btn btn-s" onClick={goBack}>Back</button>}
