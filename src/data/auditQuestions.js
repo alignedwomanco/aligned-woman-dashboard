@@ -270,9 +270,19 @@ export const PARTS = [
   {
     id: "p1",
     title: "Part 1: Where you are right now",
-    intro: "The facts first, so the rest has context.",
+    label: "Your work and your life",
+    actBefore: {
+      title: "First, you.",
+      body: "Not your job title, not your business. Your work comes later, and it'll make more sense once we've done this.",
+      button: "Let's start",
+    },
+    intro: "Your work and your life, as they are today. Answer for both. Everything after this builds on it.",
     questions: [
-      { id: "q1", type: "text", placeholder: "", text: "In a few sentences, where are you right now? Say it the way you'd say it to a close friend, not a recruiter." },
+      {
+        id: "q1", type: "fields", placeholder: "",
+        text: "In a few sentences, where are you right now? Say it the way you'd say it to a close friend, not a recruiter.",
+        fields: [text("work", "In my work"), text("life", "In my life")],
+      },
       {
         id: "q2", track: "business", type: "facts", placeholder: "",
         text: "What's the business, how long have you been running it, and what stage is it at? (Idea, just started, growing, stuck, rebuilding.)",
@@ -293,12 +303,14 @@ export const PARTS = [
       },
       { id: "q4", type: "text", placeholder: "", text: "What happened in the last month or two that made you book this now?" },
       {
-        id: "q5", type: "sliders2", placeholder: "",
-        text: "Two sliders, 1 to 10. How right does your life look from the outside? How right does it feel from the inside?",
-        sliders: [
-          { key: "outside", label: "How right does your life look from the outside?" },
-          { key: "inside", label: "How right does it feel from the inside?" },
-        ],
+        // The two sliders became two written boxes (v2). Slider scores
+        // saved before stay under outside/inside and show in the admin
+        // view as an earlier version.
+        id: "q5", type: "fields", placeholder: "",
+        text: "How does your life look from the outside, to the people who see it? And how does it feel from the inside, the version only you know?",
+        fields: [text("outside_words", "From the outside"), text("inside_words", "From the inside")],
+        retiredText: "Two sliders, 1 to 10. How right does your life look from the outside? How right does it feel from the inside?",
+        retiredFields: [num("outside", "From the outside, out of 10"), num("inside", "From the inside, out of 10")],
       },
       { id: "q6", type: "text", placeholder: "", text: "If nothing changes in the next 12 months, what happens? Be specific. What gets worse, and what do you lose?" },
       { id: "q7", type: "text", placeholder: "", text: "What have you already tried to change this? What helped for a while, and what didn't work at all?" },
@@ -307,6 +319,7 @@ export const PARTS = [
   {
     id: "p2",
     title: "Part 2: Awareness. What you're not seeing",
+    label: "About you",
     intro: "A blind spot doesn't show up when you ask about it directly. These come at it sideways.",
     questions: [
       {
@@ -328,13 +341,13 @@ export const PARTS = [
         ],
       },
       {
-        id: "q11", type: "rows", maxRows: 3, placeholder: "",
+        id: "q11", retired: true, type: "rows", maxRows: 3, placeholder: "",
         text: "Which decision have you made in your head more than once, and still not acted on?",
         columns: [text("decision", "The decision"), chips("how_long", "How long I've been circling it", "HOW_LONG")],
       },
       {
         id: "q12", type: "fields", placeholder: "",
-        text: "Where do you say yes when you mean no? Give me the most recent example, not the general habit.",
+        text: "Outside of work, where do you say yes when you mean no? Give me the most recent example, not the general habit.",
         fields: [chips("who", "Who asked", "RELATIONSHIPS"), text("yes_to", "What I said yes to"), text("wanted", "What I wanted to say")],
       },
       {
@@ -355,26 +368,32 @@ export const PARTS = [
         text: "When did you last feel completely like yourself? Where were you and what were you doing?",
         fields: [chips("when", "When", "LAST_FELT"), text("where", "Where I was and what I was doing")],
       },
-      { id: "q17", type: "multi", options: "LOCKED_AREAS", placeholder: "", text: "Is there an area you'd rather I didn't ask about? You don't need to say what it is. Just tick where it lives: work, money, my body, my relationship, family, friendships, something else." },
+      { id: "q17", type: "multi", options: "LOCKED_AREAS", exclusive: "nothing", placeholder: "", text: "Is there an area you'd rather I didn't ask about? You don't need to say what it is. Just tick where it lives." },
     ],
   },
   {
     id: "p3",
-    title: "Part 3: The Energy Leak Map",
-    intro: "This is where most of your blueprint comes from. Don't rate how happy you are with each area. Rate what it does to your energy right now.",
+    title: "Part 3: Energy. Where it goes",
+    label: "About you",
+    intro: "Not how happy you are with each area. What it does to your energy right now.",
     questions: [
-      { id: "q18", type: "leakmap", placeholder: "", text: "Score each area from -5 (it drains me most days) to +5 (it fills me up). 0 is neutral. Leave out anything that doesn't apply." },
-      { id: "q19", type: "text", quote: "lowest", placeholder: "", text: "Look at your lowest score. What's actually happening there? Describe a bad day in that area." },
-      { id: "q20", type: "text", quote: "highest", placeholder: "", text: "Look at your highest score. What makes it work? How much of your week does it get?" },
-      { id: "q21", type: "hours", placeholder: "", lead: "The time receipt.", text: "Open your calendar for last week. Roughly how many hours went to: paid work, unpaid work for other people, admin, your body, the people you love, and nothing at all?" },
+      { id: "q18", type: "taps", rows: "LEAK_AREAS", scale: "LEAK_SCALE", placeholder: "", lead: "The energy leak map.", text: "For each area, tap the one that fits right now." },
+      { id: "q19", type: "text", quote: "drains", placeholder: "", text: "Which one drains you most? What's actually happening there? Describe a bad day in that area." },
+      { id: "q20", type: "text", quote: "fills", placeholder: "", text: "Which one gives you the most? What makes it work? How much of your week does it get? If nothing on the list fills you up right now, what used to?" },
       {
-        id: "q22", type: "rows", maxRows: 3, carry: "q22", placeholder: "",
+        id: "q21", type: "taps", rows: "TIME_RECEIPT", scale: "TIME_SCALE", placeholder: "", lead: "The time receipt.",
+        text: "Walk me through yesterday, from when you woke up to when you went to sleep. Roughly what you did and when. If yesterday wasn't normal, use the last ordinary day.",
+        textBefore: { key: "day", label: "My day, roughly" },
+        tapsLabel: "Now, how much of your week does each of these get?",
+      },
+      {
+        id: "q22", retired: true, type: "rows", maxRows: 3, carry: "q22", placeholder: "",
         lead: "The spending pattern.",
         text: "Think back over the last month. What did you spend on that you didn't need, and what were you trying to feel at the time? No amounts or details. Just the pattern.",
         columns: [short("bought", "What I bought"), chips("feel", "What I was trying to feel", "FEELINGS", "multi")],
       },
       {
-        id: "q23", type: "lists2", placeholder: "", lead: "Your stress bucket.",
+        id: "q23", retired: true, type: "lists2", placeholder: "", lead: "Your stress bucket.",
         text: "Make two lists. First, everything filling your bucket right now, including the things you've decided are \"just part of it\". Be specific: not \"work\" but \"the 7am Monday meeting\". Second, everything that empties it. Scrolling and wine don't count.",
         lists: [
           { key: "filling", label: "First: what's filling it", placeholder: "", extra: chips("can_change", "Can I change this?", "CAN_CHANGE") },
@@ -386,9 +405,13 @@ export const PARTS = [
         text: "Who do you feel more tired after seeing? You don't need to name them. What happens in those conversations?",
         columns: [chips("who", "Who", "RELATIONSHIPS"), text("what", "What happens")],
       },
-      { id: "q25", type: "rows5", rows: "INVISIBLE_LOAD", placeholder: "", lead: "The invisible load.", text: "Score each line from 1 (rarely) to 5 (almost always).", lowLabel: "Rarely", highLabel: "Almost always" },
       {
-        id: "q26", type: "fields", placeholder: "",
+        id: "q25", type: "taps", rows: "INVISIBLE_LOAD", scale: "LOAD_SCALE", placeholder: "", lead: "The invisible load.",
+        text: "For each line, tap the one that fits.",
+        textAfter: { key: "costs", label: "Which one costs you the most, and with who?" },
+      },
+      {
+        id: "q26", retired: true, type: "fields", placeholder: "",
         text: "What time of day do you crash? What do you reach for when it happens? Coffee, sugar, wine, your phone, a nap, pushing through?",
         fields: [chips("when", "When", "CRASH_TIME"), chips("reach", "What I reach for", "REACH_FOR", "multi")],
       },
