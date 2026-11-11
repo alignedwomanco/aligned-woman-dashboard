@@ -322,6 +322,11 @@ export default function AlignmentAuditPage() {
              own widths but sit at the full width of the panel, with clear air
              between them, instead of shrinking and crowding each other. */
           .aa2 .aa-chat { align-items: stretch !important; gap: 18px !important; }
+          /* Testimonial header: the heading and its counter and arrows stack
+             and sit centred under one another, instead of the controls
+             drifting to the far edge. */
+          .aa2 .aa-t-head { flex-direction: column; justify-content: center; gap: 20px; }
+          .aa2 .aa-t-controls { justify-content: center; }
         }
         @media (prefers-reduced-motion: reduce) {
           .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
@@ -578,12 +583,12 @@ export default function AlignmentAuditPage() {
 
       {/* 9. Testimonials */}
       <section style={{ background: C.sand, padding: "clamp(64px,9vw,112px) 0" }}>
-        <div style={{ maxWidth: 1120, margin: "0 auto", padding: `0 ${PAD_X}`, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "end", gap: 20 }}>
+        <div className="aa-t-head" style={{ maxWidth: 1120, margin: "0 auto", padding: `0 ${PAD_X}`, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "end", gap: 20 }}>
           <div style={{ maxWidth: "34em" }}>
             <h2 style={h2()}>What people say after working with me.</h2>
             <p style={{ marginTop: 12 }}>From women I've worked with.</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="aa-t-controls" style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span aria-live="polite" style={{ fontSize: 14, color: C.body, fontVariantNumeric: "lining-nums" }}>{shown} of {total}</span>
             <button type="button" className="aa-circ" aria-label="Previous" onClick={() => scrollT(Math.max(0, tIndex - 1))}>←</button>
             <button type="button" className="aa-circ" aria-label="Next" onClick={() => scrollT(Math.min(total - 1, tIndex + 1))}>→</button>
