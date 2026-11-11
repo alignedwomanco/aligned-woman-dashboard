@@ -847,7 +847,6 @@ export const SPP_CARRY = {
 };
 export const CARRY_LEAD = "In your Starting Point Profile, you said:";
 
-const signed = (n) => (n > 0 ? `+${n}` : String(n));
 function joinAreas(labels) {
   if (labels.length <= 1) return labels[0] || "";
   return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
