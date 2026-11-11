@@ -6,7 +6,7 @@ import "@/components/spp/spp.css";
 import "@/components/audit/audit.css";
 import { Primary, Check } from "@/components/spp/SppUI";
 import { AnswerField, CarryQuote, LiveQuote, QuestionText } from "@/components/audit/AuditFields";
-import { Q as SPP_Q, DESIGN_KEY, MINUTES } from "@/data/startingPointProfile";
+import { Q as SPP_Q, DESIGN_KEY } from "@/data/startingPointProfile";
 import { saveQuizResultToProfile, track } from "@/lib/sppStore";
 import {
   BEFORE_YOU_BEGIN, AGREEMENT_TEXT, TERMS_LABEL, TERMS_URL, TRACK_SCREEN, WHEN_YOU_FINISH, PAUSE_SCREEN,
@@ -18,7 +18,9 @@ import {
 // account. Screens, in order (brief: "The audit form"):
 //   before   Before you begin, with the agreement tick
 //   track    I run a business / I have a career
-//   spp      the Starting Point Profile, only if she has never taken it
+//   (the Starting Point Profile step was removed on 11 November 2026: the
+//   Profile stays separate from the audit. Her Profile quotes still show
+//   where she has taken it.)
 //   p1..p7   Parts 1 to 7, one per screen, with a pause screen before
 //            Part 4 (not a part, not counted in progress)
 //   tb | tc  her track module
@@ -122,18 +124,16 @@ export default function Audit() {
   const parts = useMemo(() => (trackValue ? partsForTrack(trackValue) : []), [trackValue]);
   // The number beside each question, worked out from its position.
   const numbers = useMemo(() => (trackValue ? displayNumbers(trackValue) : {}), [trackValue]);
-  const hasProfile = !!(profile?.computed_archetype_key || audit?.spp_snapshot?.primary);
 
   const screens = useMemo(() => {
     const list = ["before", "track"];
-    if (!hasProfile) list.push("spp");
     parts.forEach((p) => {
       if (p.pauseBefore) list.push("pause");
       list.push(p.id);
     });
     list.push("finish", "review");
     return list;
-  }, [parts, hasProfile]);
+  }, [parts]);
 
   const visibleQuestions = useMemo(() => parts.flatMap((p) => questionsFor(p, trackValue)), [parts, trackValue]);
   const progress = useMemo(() => {
@@ -326,11 +326,6 @@ export default function Audit() {
     flush({ track: value });
   };
 
-  const goToProfile = () => {
-    try { sessionStorage.setItem(SPP_RETURN_KEY, "/Audit"); } catch (_e) { /* ignore */ }
-    flush({ last_part: "spp" }).finally(() => navigate("/StartingPointProfile"));
-  };
-
   const submit = async () => {
     setBusy(true);
     setError("");
@@ -354,10 +349,6 @@ export default function Audit() {
   const quotes = audit?.spp_snapshot?.quotes || {};
   const partIndex = parts.findIndex((p) => p.id === screen);
   const partLabel = partIndex >= 0 ? `Part ${partIndex + 1} of ${parts.length}` : "";
-  // The pause screen is not counted in the progress bar.
-  const counted = screens.filter((s) => s !== "pause");
-  const countedIdx = counted.indexOf(screen === "pause" ? screens[idx - 1] : screen);
-  const navPct = counted.length > 1 && countedIdx >= 0 ? Math.round((countedIdx / (counted.length - 1)) * 100) : 0;
   const editable = audit?.status === "purchased" || audit?.status === "in_progress";
 
   // ── Screens ──
@@ -406,17 +397,6 @@ export default function Audit() {
         })}
       </div>
       <p className="small" style={{ marginTop: 18, fontStyle: "italic" }}>{TRACK_SCREEN.note}</p>
-    </div>
-  );
-
-  const renderSpp = () => (
-    <div className="aw-col">
-      <p className="eye">Before Part 1</p>
-      <h1 className="h-l" style={{ marginTop: 10 }}>First, your Starting Point Profile.</h1>
-      <p className="body" style={{ marginTop: 16 }}>
-        The audit builds on it. It takes about {MINUTES} minutes, and you come straight back here when you finish. Everything so far is saved.
-      </p>
-      <div style={{ marginTop: 24 }}><Primary onClick={goToProfile}>Take my Starting Point Profile</Primary></div>
     </div>
   );
 
@@ -587,7 +567,6 @@ export default function Audit() {
   else if (!editable || screen === "done") body = renderDone();
   else if (screen === "before") body = renderBefore();
   else if (screen === "track") body = renderTrack();
-  else if (screen === "spp") body = renderSpp();
   else if (screen === "pause") body = renderPause();
   else if (screen === "finish") body = renderFinish();
   else if (screen === "review") body = renderReview();
@@ -614,14 +593,14 @@ export default function Audit() {
                     </span>
                   </div>
                   <div className="pbar">
-                    <div className="ptrack"><div className="pfill" style={{ width: `${navPct}%` }} /></div>
+                    <div className="ptrack"><div className="pfill" style={{ width: `${progress}%` }} /></div>
                     <span className="ppct">{progress}%</span>
                   </div>
                 </div>
               </div>
             )}
             <div className="aw-audit-body">{body}</div>
-            {inForm && screen !== "review" && screen !== "spp" && screen !== "pause" && (
+            {inForm && screen !== "review" && screen !== "pause" && (
               <div className="aw-nav">
                 <div className="aw-nav-inner">
                   {canBack && <button type="button" className="btn btn-s" onClick={goBack}>Back</button>}
