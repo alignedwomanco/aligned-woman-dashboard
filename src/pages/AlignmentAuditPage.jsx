@@ -99,36 +99,70 @@ function Cross({ color }) {
 }
 
 /* The chapters of one act, each one a dropdown. Shared by the stacked act
-   list on tablet and phone and the tab panel on desktop. */
-function ChaptersList({ act, openCh, setOpenCh, track, setTrack }) {
+   list on tablet and phone and the tab panel on desktop. The rows sit inside
+   one card, divided by hairlines, so the bars read as a single list instead of
+   a stack of loose boxes. Compact (tablet and phone) keeps the bar short: the
+   number and the chapter name only, with the italic line and what we look at
+   revealed inside the open bar. */
+function ChaptersList({ act, openCh, setOpenCh, track, setTrack, compact }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {act.chapters.map((ch) => {
-        const open = openCh[act.id] === ch.n;
-        return (
-          <div key={ch.n} style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10 }}>
-            <button type="button" aria-expanded={open} onClick={() => setOpenCh((p) => ({ ...p, [act.id]: open ? null : ch.n }))} style={{ width: "100%", display: "grid", gridTemplateColumns: "40px 1fr 32px", columnGap: 12, alignItems: "start", textAlign: "left", background: "none", border: 0, padding: "20px 18px", color: "inherit", minHeight: 48 }}>
-              <span style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1.2, color: C.rose, fontVariantNumeric: "lining-nums" }}>{String(ch.n).padStart(2, "0")}</span>
-              <span style={{ minWidth: 0 }}>
-                <span style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontWeight: 600, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: C.burgMid, lineHeight: 1.5 }}>{ch.name}</span>
-                  {ch.heart && <span style={{ display: "inline-block", background: C.roseLight, color: C.ink, fontWeight: 600, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 100 }}>The heart of the Audit</span>}
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 14, overflow: "hidden" }}>
+        {act.chapters.map((ch, i) => {
+          const open = openCh[act.id] === ch.n;
+          return (
+            <div
+              key={ch.n}
+              style={{
+                borderTop: i ? "1px solid rgba(74,14,46,0.08)" : 0,
+                background: open ? "rgba(196,132,122,0.08)" : "transparent",
+                transition: "background 220ms",
+              }}
+            >
+              <button
+                type="button"
+                aria-expanded={open}
+                onClick={() => setOpenCh((p) => ({ ...p, [act.id]: open ? null : ch.n }))}
+                style={{
+                  width: "100%",
+                  display: "grid",
+                  gridTemplateColumns: compact ? "30px 1fr 28px" : "40px 1fr 32px",
+                  columnGap: compact ? 10 : 12,
+                  alignItems: "center",
+                  textAlign: "left",
+                  background: "none",
+                  border: 0,
+                  padding: compact ? "16px 14px" : "20px 18px",
+                  color: "inherit",
+                  minHeight: 48,
+                  cursor: "pointer",
+                }}
+              >
+                <span style={{ fontFamily: SERIF, fontSize: compact ? 18 : 22, lineHeight: 1.2, color: C.rose, fontVariantNumeric: "lining-nums" }}>{String(ch.n).padStart(2, "0")}</span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: "block", fontWeight: 600, fontSize: compact ? 11 : 12, letterSpacing: "0.12em", textTransform: "uppercase", color: C.burgMid, lineHeight: 1.5 }}>{ch.name}</span>
+                  {ch.heart && (
+                    <span style={{ display: "inline-block", marginTop: compact ? 7 : 8, background: C.roseLight, color: C.ink, fontWeight: 600, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 100 }}>The heart of the Audit</span>
+                  )}
+                  {!compact && <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, textWrap: "pretty" }}>{ch.back}</span>}
                 </span>
-                <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, textWrap: "pretty" }}>{ch.back}</span>
-              </span>
-              <span aria-hidden="true" style={plusIcon(open)}>+</span>
-            </button>
-            {open && (
-              <div className="aa-ch-panel" style={{ padding: "0 18px 22px 70px" }}>
-                <p style={eyebrow()}>What we look at</p>
-                <p style={{ marginTop: 8, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{ch.look}</p>
-              </div>
-            )}
-          </div>
-        );
-      })}
+                <span aria-hidden="true" style={compact ? { ...plusIcon(open), width: 26, height: 26, fontSize: 17, alignSelf: "center" } : plusIcon(open)}>+</span>
+              </button>
+              {open && (
+                <div className="aa-ch-panel" style={{ padding: compact ? "0 14px 20px 54px" : "0 18px 22px 70px" }}>
+                  {compact && (
+                    <p style={{ marginBottom: 16, fontFamily: SERIF, fontStyle: "italic", fontSize: 19, lineHeight: 1.4, color: C.burg, textWrap: "pretty" }}>{ch.back}</p>
+                  )}
+                  <p style={eyebrow()}>What we look at</p>
+                  <p style={{ marginTop: 8, fontSize: compact ? 15 : 16, maxWidth: "34em", textWrap: "pretty" }}>{ch.look}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
       {act.track && (
-        <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10, padding: "22px 18px" }}>
+        <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 14, padding: "22px 18px" }}>
           <p style={eyebrow()}>Your track</p>
           <div role="tablist" aria-label="Your track" style={{ display: "flex", gap: 3, marginTop: 14, background: C.sand, borderRadius: 100, padding: 3, maxWidth: 420 }}>
             <button type="button" role="tab" aria-selected={track === "business"} onClick={() => setTrack("business")} style={trackTab(track === "business")}>I run a business</button>
@@ -420,7 +454,7 @@ export default function AlignmentAuditPage() {
                 <p style={eyebrow()}>{a.act}</p>
                 <h3 style={{ marginTop: 8, fontFamily: SERIF, fontSize: 26, lineHeight: 1.25, color: C.burg, textWrap: "balance" }}>{a.short}</h3>
                 <div style={{ marginTop: 16 }}>
-                  <ChaptersList act={a} openCh={openCh} setOpenCh={setOpenCh} track={track} setTrack={setTrack} />
+                  <ChaptersList act={a} openCh={openCh} setOpenCh={setOpenCh} track={track} setTrack={setTrack} compact />
                 </div>
               </div>
             ))}
