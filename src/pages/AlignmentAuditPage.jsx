@@ -229,6 +229,9 @@ export default function AlignmentAuditPage() {
         @media (max-width: 1023px) {
           .aa2, .aa2 * { text-align: center !important; }
           .aa2 [style*="flex-direction: column"] { align-items: center !important; }
+          /* Open panels inside both dropdowns: even padding so the copy is
+             centred on the panel, not pushed right by the desktop indent. */
+          .aa-ch-panel, .aa-faq-a { padding-left: 0 !important; padding-right: 0 !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
@@ -386,7 +389,7 @@ export default function AlignmentAuditPage() {
                     <span aria-hidden="true" style={plusIcon(open)}>+</span>
                   </button>
                   {open && (
-                    <div style={{ padding: "0 18px 22px 70px" }}>
+                    <div className="aa-ch-panel" style={{ padding: "0 18px 22px 70px" }}>
                       <p style={eyebrow()}>What we look at</p>
                       <p style={{ marginTop: 8, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{ch.look}</p>
                     </div>
@@ -569,7 +572,7 @@ export default function AlignmentAuditPage() {
                     <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 21, lineHeight: 1.35, color: C.burg, textWrap: "pretty" }}>{f.q}</span>
                     <span aria-hidden="true" style={plusIcon(open)}>+</span>
                   </button>
-                  {open && <p style={{ padding: "0 48px 22px 0", fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{f.a}</p>}
+                  {open && <p className="aa-faq-a" style={{ padding: "0 48px 22px 0", fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{f.a}</p>}
                 </div>
               );
             })}
