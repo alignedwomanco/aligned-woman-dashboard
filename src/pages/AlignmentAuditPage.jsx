@@ -100,19 +100,14 @@ function Cross({ color }) {
 
 /* The chapters of one act, each one a dropdown. Shared by the stacked act
    list on tablet and phone and the tab panel on desktop. */
-function ChaptersList({ act, openCh, setOpenCh, track, setTrack, nested }) {
-  // Nested: the chapters sit inside the act block that was opened, so each one
-  // is a row of that block divided by hairlines rather than a card of its own.
-  const row = nested
-    ? { background: "transparent", border: 0, borderTop: "1px solid rgba(74,14,46,0.12)", borderRadius: 0 }
-    : { background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10 };
+function ChaptersList({ act, openCh, setOpenCh, track, setTrack }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: nested ? 0 : 3 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {act.chapters.map((ch) => {
         const open = openCh[act.id] === ch.n;
         return (
-          <div key={ch.n} style={row}>
-            <button type="button" aria-expanded={open} onClick={() => setOpenCh((p) => ({ ...p, [act.id]: open ? null : ch.n }))} style={{ width: "100%", display: "grid", gridTemplateColumns: "40px 1fr 32px", columnGap: 12, alignItems: "start", textAlign: "left", background: "none", border: 0, padding: nested ? "18px 0" : "20px 18px", color: "inherit", minHeight: 48 }}>
+          <div key={ch.n} style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10 }}>
+            <button type="button" aria-expanded={open} onClick={() => setOpenCh((p) => ({ ...p, [act.id]: open ? null : ch.n }))} style={{ width: "100%", display: "grid", gridTemplateColumns: "40px 1fr 32px", columnGap: 12, alignItems: "start", textAlign: "left", background: "none", border: 0, padding: "20px 18px", color: "inherit", minHeight: 48 }}>
               <span style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1.2, color: C.rose, fontVariantNumeric: "lining-nums" }}>{String(ch.n).padStart(2, "0")}</span>
               <span style={{ minWidth: 0 }}>
                 <span style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
@@ -133,7 +128,7 @@ function ChaptersList({ act, openCh, setOpenCh, track, setTrack, nested }) {
         );
       })}
       {act.track && (
-        <div style={{ ...(nested ? { ...row, borderTop: "1px solid rgba(74,14,46,0.12)" } : { background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10 }), padding: nested ? "18px 0" : "22px 18px" }}>
+        <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10, padding: "22px 18px" }}>
           <p style={eyebrow()}>Your track</p>
           <div role="tablist" aria-label="Your track" style={{ display: "flex", gap: 3, marginTop: 14, background: C.sand, borderRadius: 100, padding: 3, maxWidth: 420 }}>
             <button type="button" role="tab" aria-selected={track === "business"} onClick={() => setTrack("business")} style={trackTab(track === "business")}>I run a business</button>
@@ -160,8 +155,6 @@ export default function AlignmentAuditPage() {
   const [tab, setTab] = useState(0);
   // The open chapter in each act. One at a time per act.
   const [openCh, setOpenCh] = useState({ you: 1, work: 6, next: 8 });
-  // Which act is expanded in the stacked act list on tablet and phone.
-  const [openAct, setOpenAct] = useState(0);
   const [track, setTrack] = useState("business");
   const [aiList, setAiList] = useState(false);
   const [faq, setFaq] = useState(-1);
@@ -421,26 +414,16 @@ export default function AlignmentAuditPage() {
           </div>
         </div>
         {overlayHero ? (
-          <div className="aa-acts" style={{ maxWidth: 1040, margin: "0 auto", padding: `32px ${PAD_X} 0`, display: "flex", flexDirection: "column", gap: 3 }}>
-            {ACTS.map((a, i) => {
-              const actOpen = openAct === i;
-              return (
-                <div key={a.id} style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 10 }}>
-                  <button type="button" aria-expanded={actOpen} onClick={() => setOpenAct(actOpen ? -1 : i)} style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 32px", gap: 16, alignItems: "center", textAlign: "left", background: "none", border: 0, padding: 18, minHeight: 56, color: "inherit" }}>
-                    <span style={{ minWidth: 0 }}>
-                      <span style={{ display: "block", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600, color: C.burgMid }}>{a.act}</span>
-                      <span style={{ display: "block", marginTop: 4, fontFamily: SERIF, fontSize: 21, lineHeight: 1.25, color: C.burg }}>{a.short}</span>
-                    </span>
-                    <span aria-hidden="true" style={plusIcon(actOpen)}>+</span>
-                  </button>
-                  {actOpen && (
-                    <div style={{ padding: "0 18px 18px" }}>
-                      <ChaptersList nested act={a} openCh={openCh} setOpenCh={setOpenCh} track={track} setTrack={setTrack} />
-                    </div>
-                  )}
+          <div className="aa-acts" style={{ maxWidth: 1040, margin: "0 auto", padding: `36px ${PAD_X} 0`, display: "flex", flexDirection: "column", gap: 40 }}>
+            {ACTS.map((a) => (
+              <div key={a.id}>
+                <p style={eyebrow()}>{a.act}</p>
+                <h3 style={{ marginTop: 8, fontFamily: SERIF, fontSize: 26, lineHeight: 1.25, color: C.burg, textWrap: "balance" }}>{a.short}</h3>
+                <div style={{ marginTop: 16 }}>
+                  <ChaptersList act={a} openCh={openCh} setOpenCh={setOpenCh} track={track} setTrack={setTrack} />
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         ) : (
           <>
