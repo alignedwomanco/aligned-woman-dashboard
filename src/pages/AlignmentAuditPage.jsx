@@ -39,6 +39,7 @@ const C = {
   sandDeep: "#E3DACF",
 };
 const SERIF = "'Baskervville', 'Baskerville Display PT', Baskerville, 'Times New Roman', Georgia, serif";
+const BASKERVILLE = "'Baskervville', Baskerville, 'Baskerville Display PT', 'Times New Roman', Georgia, serif";
 const SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
 const PAD_X = "clamp(20px,6vw,80px)";
 const PAD = `clamp(64px,9vw,112px) ${PAD_X}`;
@@ -249,8 +250,8 @@ export default function AlignmentAuditPage() {
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(8,1,5,0.9) 0%, rgba(26,5,16,0.62) 38%, rgba(26,5,16,0.82) 60%, rgba(8,1,5,0.98) 100%)", pointerEvents: "none" }} />
           <div style={{ position: "relative", padding: "40px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 32 }}>
             <p style={{ ...eyebrow(C.roseLight), lineHeight: 1.7, maxWidth: "22em", textWrap: "balance" }}>The Alignment Audit · For ambitious women ready for what's next</p>
-            <h1 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(36px,10vw,42px)", lineHeight: 1.1, letterSpacing: "-0.01em", color: C.ivory, maxWidth: "9em", textWrap: "balance" }}>
-              You know it's time to change. <em style={{ fontStyle: "italic", fontWeight: 700, color: C.roseLight }}>Now find out how.</em>
+            <h1 style={{ fontFamily: BASKERVILLE, fontWeight: 400, fontSize: "clamp(36px,10vw,42px)", lineHeight: 1.15, letterSpacing: "-0.01em", color: C.ivory, maxWidth: "9em", textWrap: "balance" }}>
+              You know it's time to change. <em style={{ fontStyle: "italic", fontWeight: 400, fontFamily: BASKERVILLE, color: C.roseLight }}>Now find out how.</em>
             </h1>
           </div>
           <div style={{ position: "relative", padding: "28px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 20 }}>
