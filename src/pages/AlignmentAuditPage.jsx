@@ -1,718 +1,641 @@
-import React, { useEffect, useState } from "react";
-import LandingFooter from "@/components/home/LandingFooter";
+import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  BUY_URL, PRICE, SPRINT_PRICE, PARTS_TOTAL, TURNAROUND, TURNAROUND_SHORT,
+  LOGO, PORTRAIT, HERO_IMAGE, HERO_ALT, PROBLEM_IMAGE,
+  STEPS, ACTS, AI_KNOWS, ITEMS, TESTIMONIALS, FAQ, FOR_YOU, NOT_FOR_YOU, FOOTER,
+} from "@/data/alignmentAuditPage";
 
 /* ════════════════════════════════════════════════════════════════
    THE ALIGNMENT AUDIT: public sales page (/alignment-audit)
    Anyone can view and buy. No login. Buying goes to the Stripe
-   payment link below; handlePaymentWebhook grants alignment_audit_paid
-   when the link carries metadata product=alignment_audit.
-   The questionnaire itself is /Audit (signed-in only).
-   Structure mirrors laurajanethomas.biz/claritysprint.
+   payment link in src/data/alignmentAuditPage.js; handlePaymentWebhook
+   grants alignment_audit_paid when the link carries metadata
+   product=alignment_audit. The questionnaire itself is /Audit.
+
+   Built from the design "Alignment Audit - Desktop" (11 November 2026),
+   which is one page that reflows for a phone. The page carries its own
+   header and footer, so App.jsx routes it without the site Layout, the
+   same way as /claritysprint.
+
+   Settings and every line of copy that is a list live in the data file.
+   Sections, in order: header, hero, price strip, the problem, about
+   Laura, the offer, the chapters, your AI script, what you get,
+   testimonials, price box, FAQ, is this for you, close, footer, and a
+   buy bar that sticks to the bottom of a phone screen.
    ════════════════════════════════════════════════════════════════ */
 
-/* ── SETTINGS: everything Laura may want to change lives here ── */
-const BUY_URL = "https://buy.stripe.com/00w28t0sS09r5SFaJreME0a";      // $280 (USD), one price for everyone
-
-const PRICE = "$280";
-const QUESTIONNAIRE_TIME = "about 90 minutes";
-const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
-const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
-const HERO_IMAGE_MOBILE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/db8b7640b_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-ef746f81-ff44-40d1-8005-60428405848e.png";
-
+// The page palette, from the design. Used nowhere else.
 const C = {
   burg: "#4A0E2E",
   burgMid: "#6B1642",
-  burgDeep: "#26030F",
+  ink: "#080105",
+  body: "#3E3036",
+  muted: "#8A7A76",
   rose: "#C4847A",
   roseLight: "#E8B4AE",
   ivory: "#F5F1EC",
   sand: "#EEE7DF",
-  card: "rgba(245,238,228,0.97)",
-  ink: "#1A0E12",
-  body: "#4A3C42",
-  muted: "#5A4A50",
-  line: "rgba(74,14,46,0.2)",
+  sandDeep: "#E3DACF",
 };
-const SERIF = "'Libre Baskerville', Georgia, serif";
-const SANS = "Montserrat, sans-serif";
+const SERIF = "'Baskervville', 'Baskerville Display PT', Baskerville, 'Times New Roman', Georgia, serif";
+const SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
+const PAD_X = "clamp(20px,6vw,80px)";
+const PAD = `clamp(64px,9vw,112px) ${PAD_X}`;
+// Placeholder line widths in the chat illustration.
+const WIDTHS = ["82%", "58%", "70%", "46%", "88%", "64%", "76%", "52%", "66%", "40%", "80%", "60%"];
 
-/* ── Content ── */
-// The A.L.I.V.E. cards change with the track she picks (business or career).
-const LETTERS = {
-  business: [
-    { letter: "A", label: "Awareness", sub: "What you're not seeing.", look: "Where the business actually is, your blind spots as its founder, the conversation you're avoiding, and your Energy Leak Map.", back: "Where you and the business really are, and where your energy is leaking." },
-    { letter: "L", label: "Liberation", sub: "What you're carrying.", look: "The clients, offers and promises you keep out of guilt, the approval you're still working for, and the money rules that still set your prices.", back: "What's costing the business, and you, most." },
-    { letter: "I", label: "Intention", sub: "What you actually want.", look: "The business you want, separated from the one it has become. Your one priority for six months, and how you make big calls.", back: "The gap between the business you want and the one you're running." },
-    { letter: "V", label: "Vision", sub: "Where you're heading.", look: "An ordinary Tuesday three years from now as the owner, and the version of success you wouldn't say out loud.", back: "Two roads: the business if nothing changes, and if you make the move." },
-    { letter: "E", label: "Embodiment", sub: "How you're living it.", look: "Your hours, your pace, what you should hand off, whether the business survives a month without you, and what your body keeps telling you.", back: "Your next move in the business, and your first 30 days." },
-  ],
-  career: [
-    { letter: "A", label: "Awareness", sub: "What you're not seeing.", look: "Where you really are in your role, your blind spots at work, the conversation you're avoiding, and your Energy Leak Map.", back: "Where your career really is, and where your energy is leaking." },
-    { letter: "L", label: "Liberation", sub: "What you're carrying.", look: "The expectations and approval you keep working for, the work nobody credits, and the rules about money and being a woman at work that still run you.", back: "What's holding your career back most." },
-    { letter: "I", label: "Intention", sub: "What you actually want.", look: "What you want from your work, separated from what you think you should want. Your one priority for six months, and how you make big calls.", back: "The gap between the career you want and the one you're in." },
-    { letter: "V", label: "Vision", sub: "Where you're heading.", look: "An ordinary Tuesday three years from now, the next move you keep circling, and the version of success you wouldn't say out loud.", back: "Two roads: your career if nothing changes, and if you make the move." },
-    { letter: "E", label: "Embodiment", sub: "How you're living it.", look: "When you really log off, your sleep, how fast you recover from stress, where you sit on the burnout scale, and what your body keeps telling you.", back: "Your next career move, and your first 30 days." },
-  ],
-};
+/* ── Shared styles ── */
+const eyebrow = (color = C.burgMid) => ({ fontWeight: 600, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color });
+const h2 = (color = C.ink) => ({ fontFamily: SERIF, fontSize: "clamp(30px,1.8vw + 24px,50px)", lineHeight: 1.12, color, textWrap: "balance" });
+const pull = (color = C.burg) => ({ fontFamily: SERIF, fontStyle: "italic", fontSize: "clamp(22px,1vw + 18px,26px)", lineHeight: 1.4, color, textWrap: "pretty" });
+const em = (color = C.burg) => ({ fontStyle: "italic", color });
+const rule = { width: 40, height: 1, background: C.rose };
+const tint = (alpha) => ({ position: "absolute", inset: 0, background: `rgba(74,14,46,${alpha})`, pointerEvents: "none" });
+const cover = { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" };
 
-const MODULES = {
-  business: {
-    title: "Plus your business module: 14 questions",
-    items: [
-      { name: "Position", body: "What the business is known for against what you want it known for, the client you'd clone and the one you dread, and why anyone picks you." },
-      { name: "Value", body: "Where your money actually comes from, the offer you love against the one you resent, your pricing, and where money is leaking out." },
-      { name: "Visibility", body: "How new clients really find you, and what you hold back from saying publicly about your work." },
-      { name: "Pace", body: "The hours you work against the hours you want, what to hand off, what happens if you're off for a month, and who you are without the business." },
-    ],
-  },
-  career: {
-    title: "Plus your career module: 13 questions",
-    items: [
-      { name: "Position", body: "What you're known for at work against what you want to be known for, how your manager would sum up your value, and whether you've outgrown the role." },
-      { name: "Value", body: "What your experience is worth in your market, when you last asked for more, and the work you do that nobody credits." },
-      { name: "Visibility", body: "Who puts your name forward when you're not in the room, and the habits in meetings that make you smaller." },
-      { name: "Pace", body: "When you really log off, the next move you keep circling, the business idea at the back of your mind, and who you are without the job title." },
-    ],
-  },
-};
-
-const FAQ = [
-  { q: "\"I've done the Starting Point Profile. Isn't this the same?\"", a: "No. The Profile names your pattern. The Audit reads your actual situation, your business or career, how the pattern shows up in it, and what to do next. Your Profile answers feed into it." },
-  { q: "\"Is this coaching?\"", a: "It's a diagnosis. You get a written blueprint, one call and your AI script. If you want ongoing work after that, that's the Clarity Sprint, and your fee comes off it." },
-  { q: "\"What's the AI script?\"", a: "After our call, I write the custom instructions for your ChatGPT or Claude: who you are, what you've decided, what you won't compromise on, and the pattern to call you out on. Paste them in once and your AI starts from you, not from the average of everyone else." },
-  { q: "\"I don't run a business.\"", a: "Choose the career track at the start. The questions follow your role, your value and your next move." },
-  { q: "\"I'm already flat out. I don't have time for this.\"", a: `The questionnaire takes ${QUESTIONNAIRE_TIME} and saves as you go, so you can do it in pieces. Then I do the work. The hour on the call is the only time you need to block out.` },
-  { q: "\"Will you ask about my finances?\"", a: "I'll ask how money moves through your business or career. I won't ask for bank statements, account details or amounts." },
-  { q: "\"What happens after I pay?\"", a: "You get an email straight away. Sign in at app.alignedwomanco.com with the email you paid with, and your questionnaire is waiting on your dashboard. Submit it whenever you're ready. Your seven working days start then." },
-];
-
-const REVIEWS = [
-  { headline: "She took my scattered thoughts and narrowed them into a clear vision, purpose and concrete goals.", quote: "Working with Laura was a total game-changer and I didn't know how much I needed her expertise. Coming in with a mountain of ideas, I needed someone to help me cut through the noise. She took my scattered thoughts and expertly narrowed them down into a clear vision, purpose and concrete goals, carving out something truly tangible and giving me the confidence and courage to face difficult new challenges head on. With her guidance, I was able to turn my passion into a movement and platform I care deeply about. If you are a woman looking to turn big ideas into a grounded, actionable reality with a strategist who truly knows how to nurture your potential, I cannot recommend Aligned Women highly enough.", name: "Warda Moerat", company: "Snr Growth Manager, FNB Private Banking" },
-  { headline: "For the first time in my business, everything feels aligned.", quote: "I came to Laura overwhelmed and unclear about how to position my brand. Within a matter of weeks, she helped me articulate exactly what I do, who I do it for, and how to confidently show up as a leader. For the first time in my business, everything feels aligned, and the results speak for themselves.", name: "Tasha Berrings", company: "Founder, Clean Beauty Startup" },
-  { headline: "Laura provides actionable support to help you thrive.", quote: "Laura provides actionable support to help you thrive. If you're considering her for consulting or coaching, I can hands down say you're getting your money's worth. You leave with valuable insights and practical techniques to help navigate and reconnect with what truly drives you, all while protecting your energy so you don't end up overworked and burnt out. One session and Laura will leave you feeling empowered. I highly recommend her services.", name: "Tharunisa Reddy", company: "" },
-  { headline: "She taught me to back myself.", quote: "Laura is just phenomenal. She helped me connect to my core and feel more confident about what I do and the value I provide to others. I feel far less awkward selling myself or my services. She taught me to back myself, and to detach my sense of self-worth from how much I make. It set me free, and I am excited for the next chapter in my career.", name: "Iris Smyth", company: "" },
-  { headline: "Working with Laura was like plugging my business into power.", quote: "She pulled the strategy, story, and messaging out of me in a way that felt effortless. The outcome was anything but. I now have a clear roadmap, a stronger offer, and marketing that finally makes sense and feels like me.", name: "Vanessa Rathbone", company: "Founder, Wellness Consultancy" },
-  { headline: "Brand therapist, coach, and visionary all in one.", quote: "Laura isn't just a strategist. She's a brand therapist, coach, and visionary all in one. Her ability to combine mindset work with razor-sharp strategy is unmatched. I walked away with more than a brand. I walked away with confidence, direction, and a business that is finally growing.", name: "Elena S.", company: "CEO, Luxury Wellness Brand" },
-  { headline: "Zoom out and zoom in with equal brilliance.", quote: "I have worked with other consultants before, but no one has Laura's ability to zoom out and zoom in with equal brilliance. Her mind is next level.", name: "Ashleigh", company: "Founder, Thee Lux Retreat Co." },
-  { headline: "Laura has an extraordinary gift for translating messy ideas into clear, compelling vision.", quote: "She doesn't just 'get' what's in your head, she elevates it beyond what you thought was possible. Her blend of strategic insight, creative brilliance, and intuition is unmatched. I can't recommend her highly enough.", name: "Wendy Mahoney", company: "Newmella Holdings" },
-  { headline: "Partnering with this team has been transformative for Ubank.", quote: "We have never experienced such rapid and consistent elevation of our brand. Their strategic alignment of both our internal and external communications, coupled with their ability to manage high-level partnerships, has significantly advanced our business objectives, even earning us industry recognition. Their professionalism, dedication, and impact have been exceptional. We highly recommend their services.", name: "Luthando Vutula", company: "CEO, Ubank" },
-  { headline: "This was a complete inside-out transformation of a business established for over 30 years.", quote: "Taking on this project was no small feat. The strategy and rebrand not only needed to resonate with our customers, but also with both internal and external stakeholders. Laura's presentation of the new brand direction received immediate buy-in from our external partners and was successfully rolled out internally to ensure alignment at every level. This rebrand combines visual appeal with real-world functionality, driving both engagement and execution.", name: "Kevin Vyvyan-Day", company: "CEO, Barron" },
-  { headline: "I thought I was just getting a logo, but what Laura delivered was an entire brand world.", quote: "She didn't just design something beautiful; she built a visual system that finally reflects the depth and direction of my business. It's cohesive, elevated, and powerful. I finally feel seen and so does my audience.", name: "Jenna Cummings", company: "Founder, Luxury Interior Studio" },
-  { headline: "Laura and her team take no prisoners and always aim for excellence.", quote: "We might live on the opposite sides of the world, but that hasn't stopped us from success. I hired Laura to help with Strategy for two clients. Both of these clients' social media accounts engagement rate and website visits went up as a result. I look forward to continuing to work with Laura!", name: "Stephanie O'Brien", company: "Founder, Carmella Consulting" },
-  { headline: "Laura and her team successfully captured the essence of our luxury mental wellness brand.", quote: "A brand transcends mere elements such as logos and visuals; it embodies the brand's personality. Healing Destinations holds personal significance to me, and this can present a formidable challenge for many. The result was an exemplary final product. For those seeking insight, creativity and a beautiful brand, I highly recommend.", name: "Mica Angel", company: "Mother, Founder & CEO, Healing Destinations" },
-  { headline: "No matter whether you are local or international, this is the company to take your marketing to another level.", quote: "Laura and her team are able to beat time difference odds and provide us with extremely fast service. We have also been able to upscale our client delivery, because of Laura's insight in culture and marketing strategy. The keen eye for detail and gorgeous design is a huge bonus!", name: "Shanny Sommer", company: "CEO, Welcome To Influence" },
-  { headline: "They listened attentively, grasped our needs and consistently exceeded our expectations.", quote: "From the moment we engaged with them, it was evident that they are deeply knowledgeable and invested in our brand's success. Their commitment to understanding our vision and goals was refreshing.", name: "Charen Nortje", company: "CEO, Ring Artisan" },
-  { headline: "Working with Laura and her team has been an amazing experience.", quote: "I would recommend 100%, very hands on, professional and understanding. I wished I had found her sooner. Continue being such an amazing company!!", name: "Christelle Dossous", company: "Onaturell Beauty" },
-  { headline: "Real insight, real confidence.", quote: "Laura's talk on The Hidden Tax on Female Leadership made me think differently about where I am in my life and my work. It gave me real insight, real confidence, and I wish it had been longer.", name: "Big5Digital", company: "Guest keynote, 2026" },
-  { headline: "No one has ever explained money to me the way she did.", quote: "Laura was incredible. No one has ever explained money to me the way she did. Her stories were so real, you could hear a pin drop in the room. She really touched people.", name: "Mpho Gumede", company: "That Brunch Club" },
-  { headline: "Our Women's Day celebration was a huge success.", quote: "To the most amazing speaker and panellist, on behalf of the D&I team and EY, thank you for helping make our Women's Day celebration a huge success.", name: "Clayton Jordy Fowlds", company: "D&I Team, EY" },
-  { headline: "They even stayed overtime.", quote: "The teams thoroughly enjoyed and were engaged in your H2H workshop. They even stayed overtime. Thank you for such a fantastic session.", name: "Cathy Stadler", company: "Director of Marketing, Oracle" },
-];
+const plusIcon = (open, dark) => ({
+  width: 32, height: 32, borderRadius: "50%",
+  border: `1px solid ${dark ? "rgba(245,241,236,0.3)" : "rgba(74,14,46,0.2)"}`,
+  display: "flex", alignItems: "center", justifyContent: "center",
+  fontSize: 20, fontWeight: 300, lineHeight: 1, color: dark ? C.ivory : C.burg,
+  transition: "transform 320ms cubic-bezier(0.2,0.7,0.2,1)", transform: `rotate(${open ? 45 : 0}deg)`,
+});
+const actTab = (on) => ({
+  minWidth: 0, minHeight: 56, padding: "8px 6px", borderRadius: 8, border: 0, fontFamily: SANS, textAlign: "center",
+  transition: "background 180ms,color 180ms", background: on ? C.burg : "transparent", color: on ? C.ivory : C.burg,
+});
+const trackTab = (on) => ({
+  flex: 1, height: 44, borderRadius: 100, border: 0, fontFamily: SANS, fontWeight: 600, fontSize: 11,
+  letterSpacing: "0.12em", textTransform: "uppercase", transition: "background 180ms,color 180ms",
+  background: on ? C.burg : "transparent", color: on ? C.ivory : C.burg,
+});
 
 /* ── Small pieces ── */
-const eyebrow = (color = C.burg) => ({ margin: 0, fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color });
-
-function BuyButton({ children = "Get my Alignment Audit", block = false, soft = false }) {
+// The buy button. "tone" is burg (on a light section) or rose (on a dark one).
+function Buy({ tone = "burg", style, innerRef }) {
   return (
-    <a
-      href={BUY_URL}
-      className="aa-btn"
-      style={{
-        display: block ? "flex" : "inline-flex", alignItems: "center", justifyContent: "center", gap: 12,
-        minHeight: 56, padding: "0 40px", background: soft ? "rgba(196,132,122,0.6)" : C.rose, color: C.burgDeep,
-        fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none",
-      }}
-    >
-      {children} <span aria-hidden="true">→</span>
+    <a ref={innerRef} href={BUY_URL} className={`aa-buy aa-buy-${tone}`} style={style}>
+      Get my Alignment Audit <span className="aa-arrow" aria-hidden="true">→</span>
     </a>
   );
 }
 
-function Icon({ d, color }) {
+function Tick({ color }) {
   return (
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
-      <circle cx="12" cy="12" r="10" />
-      <path d={d} />
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3 }}>
+      <path d="M4 12.5l5 5L20 6.5" />
     </svg>
   );
 }
 
-function H2({ children, style }) {
-  return <h2 className="aa-h2" style={{ margin: 0, fontFamily: SERIF, fontWeight: 400, fontSize: 56, lineHeight: 1.02, color: C.ink, ...style }}>{children}</h2>;
+function Cross({ color }) {
+  return (
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3 }}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
 }
-const em = { fontStyle: "italic", color: C.burg };
 
 /* ── Page ── */
 export default function AlignmentAuditPage() {
+  const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  const [tab, setTab] = useState(0);
+  // The open chapter in each act. One at a time per act.
+  const [openCh, setOpenCh] = useState({ you: 1, work: 6, next: 8 });
   const [track, setTrack] = useState("business");
-  const [page, setPage] = useState(0);
-  const [perView, setPerView] = useState(3);
-  const pages = Math.ceil(REVIEWS.length / perView);
+  const [aiList, setAiList] = useState(false);
+  const [faq, setFaq] = useState(-1);
+  const [tIndex, setTIndex] = useState(0);
+  const [expanded, setExpanded] = useState({});
+  // For the buy bar on a phone: shown once the hero button has scrolled
+  // away, hidden again while the price box or the closing card is on screen.
+  const [heroOut, setHeroOut] = useState(false);
+  const [priceIn, setPriceIn] = useState(false);
+  const [closeIn, setCloseIn] = useState(false);
 
-  // How many reviews sit on the single line, by width.
-  useEffect(() => {
-    const calc = () => setPerView(window.innerWidth <= 720 ? 1 : window.innerWidth <= 1024 ? 2 : 3);
-    calc();
-    window.addEventListener("resize", calc);
-    return () => window.removeEventListener("resize", calc);
-  }, []);
-
-  // A wider screen holds more reviews, so a page can fall out of range.
-  useEffect(() => { if (page >= pages) setPage(0); }, [pages, page]);
-
-  // Keeps the line moving on its own.
-  useEffect(() => {
-    if (pages < 2) return;
-    const id = setInterval(() => setPage((p) => (p + 1) % pages), 6000);
-    return () => clearInterval(id);
-  }, [pages]);
-  const mod = MODULES[track];
+  const heroBtn = useRef(null);
+  const priceBox = useRef(null);
+  const closeCard = useRef(null);
+  const tRow = useRef(null);
 
   useEffect(() => {
-    const id = "aw-audit-fonts";
+    const id = "aw-audit-fonts-2";
     if (!document.getElementById(id)) {
       const l = document.createElement("link");
       l.id = id;
       l.rel = "stylesheet";
-      l.href = "https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap";
+      l.href = "https://fonts.googleapis.com/css2?family=Baskervville:ital,wght@0,400..700;1,400..700&family=Montserrat:wght@400;600&display=swap";
       document.head.appendChild(l);
     }
     document.title = "The Alignment Audit | The Aligned Woman Co.";
   }, []);
 
-  const trackBtn = (key, label) => {
-    const on = track === key;
-    return (
-      <button
-        type="button"
-        onClick={() => setTrack(key)}
-        aria-pressed={on}
-        style={{
-          minHeight: 48, padding: "0 32px", border: `1px solid ${C.burg}`, cursor: "pointer",
-          background: on ? C.burg : "transparent", color: on ? C.ivory : C.burg,
-          fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </button>
-    );
+  useEffect(() => {
+    const onResize = () => setMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return undefined;
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (e.target === heroBtn.current) setHeroOut(!e.isIntersecting && e.boundingClientRect.top < 0);
+      else if (e.target === priceBox.current) setPriceIn(e.isIntersecting);
+      else if (e.target === closeCard.current) setCloseIn(e.isIntersecting);
+    }), { threshold: 0.05 });
+    [heroBtn, priceBox, closeCard].forEach((r) => { if (r.current) io.observe(r.current); });
+    return () => io.disconnect();
+  }, [mobile]);
+
+  const act = ACTS[tab] || ACTS[0];
+  const total = TESTIMONIALS.length;
+  const shown = Math.min(tIndex + 1, total);
+  const stickyVisible = mobile && heroOut && !priceIn && !closeIn;
+
+  // One testimonial card plus the gap, for the arrows and the counter.
+  const cardStep = () => {
+    const row = tRow.current;
+    if (!row || !row.firstElementChild) return 1;
+    return row.firstElementChild.getBoundingClientRect().width + 12;
+  };
+  const scrollT = (i) => { if (tRow.current) tRow.current.scrollTo({ left: i * cardStep(), behavior: "smooth" }); };
+  const onTScroll = (e) => {
+    const i = Math.round(e.currentTarget.scrollLeft / cardStep());
+    if (i !== tIndex) setTIndex(i);
   };
 
   return (
-    <div className="aw-audit" style={{ background: C.ivory, color: C.ink, fontFamily: SANS, fontWeight: 300 }}>
+    <div className="aa2" style={{ minHeight: "100vh", background: C.ivory, color: C.body, overflowX: "clip", fontFamily: SANS, fontWeight: 400, fontSize: 17, lineHeight: 1.6 }}>
       <style>{`
-        .aw-audit .aa-btn {
-          position: relative; overflow: hidden;
-          transition: transform 240ms ease, box-shadow 240ms ease, filter 240ms ease;
+        .aa2 p { margin: 0; }
+        .aa2 h1, .aa2 h2, .aa2 h3 { margin: 0; font-weight: 400; }
+        .aa2 a { color: ${C.burgMid}; border: 0; text-decoration: none; }
+        .aa2 a:hover { color: ${C.burg}; }
+        .aa2 button { font: inherit; cursor: pointer; }
+        .aa2 a:focus-visible, .aa2 button:focus-visible { outline: 2px solid ${C.rose}; outline-offset: 3px; }
+        .aa2 .aa-buy {
+          display: flex; align-items: center; justify-content: center; gap: 12px;
+          width: 100%; height: 56px; border-radius: 100px; box-sizing: border-box;
+          font-weight: 600; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase;
+          transition: background 180ms;
         }
-        .aw-audit .aa-btn:hover {
-          filter: brightness(0.96);
-          transform: translateY(-2px);
-          box-shadow: 0 12px 26px rgba(74,14,46,0.22);
+        .aa2 .aa-buy-burg, .aa2 .aa-buy-burg:hover { color: ${C.ivory}; }
+        .aa2 .aa-buy-burg { background: ${C.burg}; }
+        .aa2 .aa-buy-burg:hover { background: ${C.burgMid}; }
+        .aa2 .aa-buy-rose, .aa2 .aa-buy-rose:hover { color: ${C.ink}; }
+        .aa2 .aa-buy-rose { background: ${C.rose}; }
+        .aa2 .aa-buy-rose:hover { background: ${C.roseLight}; }
+        .aa2 .aa-arrow { display: inline-block; animation: aa-nudge 2.4s ease-in-out infinite; }
+        .aa2 .aa-pill {
+          display: inline-flex; align-items: center; justify-content: center; border-radius: 100px;
+          font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+          transition: background 180ms, color 180ms;
         }
-        .aw-audit .aa-btn:active { transform: translateY(0); box-shadow: 0 4px 10px rgba(74,14,46,0.18); }
-        .aw-audit .aa-btn::after {
-          content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
-          background: linear-gradient(100deg, transparent, rgba(255,255,255,0.42), transparent);
-          transform: skewX(-18deg); opacity: 0; pointer-events: none;
+        .aa2 .aa-pill-line { height: 40px; padding: 0 18px; border: 1.5px solid ${C.burg}; color: ${C.burg}; }
+        .aa2 .aa-pill-line:hover { background: ${C.burg}; color: ${C.ivory}; }
+        .aa2 .aa-pill-solid, .aa2 .aa-pill-solid:hover { color: ${C.ivory}; }
+        .aa2 .aa-pill-solid { flex: none; height: 48px; padding: 0 20px; background: ${C.burg}; }
+        .aa2 .aa-pill-solid:hover { background: ${C.burgMid}; }
+        .aa2 .aa-circ {
+          width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid ${C.burg};
+          background: none; color: ${C.burg}; font-size: 18px; transition: background 180ms, color 180ms;
         }
-        .aw-audit .aa-btn:hover::after { animation: aa-sheen 900ms ease-out; }
-        .aw-audit .aa-btn span[aria-hidden="true"] {
-          display: inline-block;
-          animation: aa-arrow-nudge 1900ms ease-in-out infinite;
-        }
-        .aw-audit .aa-btn:hover span[aria-hidden="true"] {
-          animation: aa-arrow-slide 700ms ease-out;
-        }
-        @keyframes aa-sheen {
-          0% { left: -60%; opacity: 0; }
-          25% { opacity: 1; }
-          100% { left: 120%; opacity: 0; }
-        }
-        @keyframes aa-arrow-nudge {
-          0%, 70%, 100% { transform: translateX(0); }
-          80% { transform: translateX(4px); }
-          90% { transform: translateX(0); }
-        }
-        @keyframes aa-arrow-slide {
-          0% { transform: translateX(0); }
-          55% { transform: translateX(8px); }
-          100% { transform: translateX(0); }
-        }
+        .aa2 .aa-circ:hover { background: ${C.burg}; color: ${C.ivory}; }
+        .aa2 .aa-foot-link { display: inline-block; padding: 7px 0; font-size: 15px; color: ${C.ivory}; }
+        .aa2 .aa-foot-link:hover { color: ${C.roseLight}; }
+        .aa2 .aa-row { scrollbar-width: none; }
+        .aa2 .aa-row::-webkit-scrollbar { height: 0; width: 0; }
+        @keyframes aa-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+        @keyframes aa-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @media (prefers-reduced-motion: reduce) {
-          .aw-audit .aa-btn, .aw-audit .aa-btn span[aria-hidden="true"], .aw-audit .aa-btn::after { animation: none !important; transition: none !important; }
-        }
-        .aw-audit details summary { cursor: pointer; list-style: none; }
-        .aw-audit .aa-fade { animation: aaFade 380ms ease both; }
-        @keyframes aaFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-        @media (prefers-reduced-motion: reduce) { .aw-audit .aa-fade { animation: none; } }
-        .aw-audit details summary::-webkit-details-marker { display: none; }
-        .aw-audit .aa-hero-mobile-bg { display: none; }
-        @media (max-width: 1024px) {
-          .aw-audit .aa-hero {
-            grid-template-columns: 1fr !important; position: relative;
-            aspect-ratio: 9 / 16;
-          }
-          .aw-audit .aa-hero-media { display: none !important; }
-          .aw-audit .aa-hero-mobile-bg {
-            display: block !important; position: absolute; inset: 0; z-index: 0; overflow: hidden;
-            background: #F3EAE1;
-          }
-          .aw-audit .aa-hero-mobile-bg img {
-            width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block;
-          }
-          .aw-audit .aa-hero-mobile-bg::after {
-            content: ""; position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(20,2,10,0.62) 0%, rgba(20,2,10,0.28) 42%, rgba(20,2,10,0.35) 74%, rgba(20,2,10,0.8) 100%);
-          }
-          .aw-audit .aa-hero-copy {
-            position: relative; z-index: 1;
-            padding: 18px 20px 28px !important; min-height: 0 !important;
-            justify-content: space-between !important;
-            text-align: center !important;
-          }
-          .aw-audit .aa-hero-text {
-            text-align: center;
-            padding: 0;
-            background: none;
-            box-shadow: none;
-          }
-          .aw-audit .aa-hero-text p,
-          .aw-audit .aa-hero-text h1 {
-            text-shadow: 0 2px 14px rgba(14,2,7,0.8), 0 1px 3px rgba(14,2,7,0.85);
-            margin-left: auto !important;
-            margin-right: auto !important;
-          }
-          .aw-audit .aa-hero-copy h1,
-          .aw-audit .aa-hero-copy h1 span { color: #FFFFFF !important; }
-          .aw-audit .aa-hero-copy h1 span:last-child { color: rgba(255,214,199,0.96) !important; }
-          .aw-audit .aa-hero-copy p { color: rgba(255,255,255,0.88) !important; }
-          .aw-audit .aa-hero-copy > div:last-child p:last-child { color: rgba(255,214,199,0.95) !important; }
-        }
-        .aw-audit .aa-hero-note { display: none; }
-        /* Tablet only: the pricing note moves onto the hero image, so the
-           standalone block under the hero is hidden at this width. */
-        @media (min-width: 721px) and (max-width: 1024px) {
-          .aw-audit .aa-hero-note {
-            display: block; max-width: 560px; margin: 26px auto 0; text-align: center;
-          }
-          .aw-audit .aa-hero-note p {
-            text-shadow: 0 2px 14px rgba(14,2,7,0.8), 0 1px 3px rgba(14,2,7,0.85);
-          }
-          .aw-audit .aa-hero-note p:first-child { font-size: 15px !important; line-height: 1.6 !important; }
-          .aw-audit .aa-hero-note p:last-child { color: rgba(255,214,199,0.95) !important; font-size: 15px !important; line-height: 1.65 !important; }
-          .aw-audit .aa-price-note { display: none !important; }
-          /* Copy sits a little lower, the button follows the text instead of
-             being pinned to the bottom of the image. */
-          .aw-audit .aa-hero-copy {
-            justify-content: flex-start !important;
-            padding: 56px 24px 32px !important;
-          }
-          .aw-audit .aa-hero-text > p:last-of-type {
-            font-size: 19px !important; line-height: 1.6 !important;
-          }
-          .aw-audit .aa-hero-copy > div:last-child { margin-top: 30px; }
-          /* The three Core Audit blocks stack on tablet instead of running
-             side by side. */
-          .aw-audit .aa-core-grid { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 720px) {
-          .aw-audit .aa-hero-h { font-size: 40px !important; }
-          .aw-audit .aa-sec { padding: 64px 20px !important; }
-          .aw-audit .aa-h2 { font-size: 34px !important; }
-          .aw-audit .aa-price { font-size: 56px !important; }
-          .aw-audit .aa-box { padding: 36px 22px !important; }
-          .aw-audit .aa-arrow { display: none !important; }
-          .aw-audit .aa-alive-row { grid-template-columns: 1fr !important; max-width: 100% !important; }
+          .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
         }
       `}</style>
 
-      {/* 1. HERO */}
-      <section
-        className="aa-hero"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          alignItems: "stretch",
-          background: C.ivory,
-          color: C.ink,
-        }}
-      >
-        <div className="aa-hero-mobile-bg" aria-hidden="true">
-          <img src={HERO_IMAGE_MOBILE} alt="" />
-        </div>
-        <div className="aa-hero-media" style={{ position: "relative", minHeight: 640, overflow: "hidden" }}>
-          <img
-            src={HERO_IMAGE}
-            alt="The Alignment Audit blueprint on a chair in a daisy meadow"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "32% center", display: "block" }}
-          />
-        </div>
-        <div className="aa-hero-copy" style={{ padding: "104px 72px", display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "left" }}>
-          <div className="aa-hero-text">
-            <p style={{ ...eyebrow(C.muted), fontWeight: 400, marginBottom: 28 }}>A senior diagnostic for women building a business or a career.</p>
-            <h1 className="aa-hero-h" style={{ margin: "0 0 28px", fontFamily: SERIF, fontWeight: 400, fontSize: 54, lineHeight: 1.06, letterSpacing: "-0.01em", color: C.ink }}>
-              <span style={{ display: "block" }}>You've asked everyone else.</span>
-              <span style={{ display: "block", fontStyle: "italic", color: C.burg }}>Now get an answer about you.</span>
+      {/* Header */}
+      <header style={{ position: "sticky", top: 0, zIndex: 40, background: "rgba(245,241,236,0.96)", borderBottom: "1px solid rgba(74,14,46,0.08)", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: `0 ${PAD_X}` }}>
+        <Link to="/" aria-label="The Aligned Woman Co. home" style={{ display: "flex", alignItems: "center", height: 48 }}>
+          <img src={LOGO} alt="The Aligned Woman Co." style={{ height: 26, width: "auto", display: "block" }} />
+        </Link>
+        <a href={BUY_URL} className="aa-pill aa-pill-line">Get my Audit</a>
+      </header>
+
+      {/* 1. Hero */}
+      {mobile ? (
+        <section style={{ position: "relative", minHeight: "calc(100svh - 60px)", display: "flex", flexDirection: "column", justifyContent: "flex-start", background: C.burg }}>
+          <img src={HERO_IMAGE} alt={HERO_ALT} style={cover} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(26,5,16,0.78) 0%, rgba(74,14,46,0.3) 38%, rgba(74,14,46,0.55) 60%, rgba(26,5,16,0.94) 100%)", pointerEvents: "none" }} />
+          <div style={{ position: "relative", padding: "40px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 32 }}>
+            <p style={{ ...eyebrow(C.roseLight), lineHeight: 1.7, maxWidth: "22em", textWrap: "balance" }}>The Alignment Audit · For ambitious women ready for what's next</p>
+            <h1 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(36px,10vw,42px)", lineHeight: 1.1, letterSpacing: "-0.01em", color: C.ivory, maxWidth: "9em", textWrap: "balance" }}>
+              You know it's time to change. <em style={{ fontStyle: "italic", fontWeight: 700, color: C.roseLight }}>Now find out how.</em>
             </h1>
-            <p style={{ margin: "0 0 36px", maxWidth: 560, fontSize: 17, lineHeight: 1.65, color: C.body }}>
-              One questionnaire. One blueprint written about you. One hour with me. Then the script that gets your AI on board with who you are. An honest read on your business or career, and on the woman running it.
-            </p>
-            <div className="aa-hero-note">
-              <p style={{ margin: "0 0 8px", fontSize: 13, lineHeight: 1.55, color: C.muted }}>
-                {PRICE}, paid once. Your blueprint within seven working days.
-              </p>
-              <p style={{ margin: "0 auto", maxWidth: 520, fontFamily: SERIF, fontStyle: "italic", fontSize: 13, lineHeight: 1.6, color: C.burg }}>
-                Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
-              </p>
-            </div>
           </div>
-          <div>
-            <BuyButton soft />
+          <div style={{ position: "relative", padding: "28px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 20 }}>
+            <p style={{ fontSize: 16, lineHeight: 1.6, color: C.ivory, maxWidth: "30em", textWrap: "pretty" }}>Answer my questions in your own time. Within {TURNAROUND} I send you a blueprint, written by me, about you: what's draining you, what you actually want, and the one move I'd make next.</p>
+            <p style={{ marginTop: -6, fontSize: 16, lineHeight: 1.6, color: C.ivory, maxWidth: "30em", textWrap: "pretty" }}>We go through your blueprint together for an hour. Then I set up your ChatGPT or Claude to know who you are, so the work carries on after we're done.</p>
+            <Buy tone="rose" innerRef={heroBtn} style={{ marginTop: 4 }} />
+            <p style={{ marginTop: -6, fontSize: 14, color: C.ivory }}>{PRICE}, paid once. Written by me, not generated.</p>
+          </div>
+        </section>
+      ) : (
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,460px),1fr))", alignItems: "stretch", minHeight: "calc(100vh - 60px)" }}>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `clamp(40px,6vw,96px) ${PAD_X} clamp(48px,6vw,96px)`, maxWidth: 640, justifySelf: "end", width: "100%", boxSizing: "border-box" }}>
+            <p style={{ ...eyebrow(), lineHeight: 1.7, textWrap: "balance" }}>The Alignment Audit · For ambitious women ready for what's next</p>
+            <h1 style={{ fontFamily: SERIF, fontSize: "clamp(38px,2.6vw + 28px,62px)", lineHeight: 1.08, letterSpacing: "-0.01em", color: C.ink, marginTop: 20, textWrap: "pretty" }}>
+              You know it's time to change. <em style={em()}>Now find out how.</em>
+            </h1>
+            <p style={{ marginTop: 22, maxWidth: "34em", textWrap: "pretty" }}>Answer my questions in your own time. Within {TURNAROUND} I send you a blueprint, written by me, about you: what's draining you, what you actually want, and the one move I'd make next. We go through it together for an hour. Then I set up your ChatGPT or Claude to know who you are, so the work carries on after we're done.</p>
+            <Buy innerRef={heroBtn} style={{ marginTop: 28, maxWidth: 420 }} />
+            <p style={{ marginTop: 14, fontSize: 14, color: C.body }}>{PRICE}, paid once. Written by me, not generated.</p>
+          </div>
+          <div style={{ position: "relative", width: "100%", aspectRatio: "4/5", minHeight: "100%", background: C.sand }}>
+            <img src={HERO_IMAGE} alt={HERO_ALT} style={cover} />
+            <div style={tint(0.12)} />
+          </div>
+        </section>
+      )}
+
+      {/* 2. Price strip */}
+      <section style={{ background: C.burg, color: C.ivory, padding: `28px ${PAD_X}`, textAlign: "center" }}>
+        <p style={{ maxWidth: "40em", margin: "0 auto", fontSize: 16, lineHeight: 1.6, textWrap: "balance" }}>My Clarity Sprint is over {SPRINT_PRICE}. The Alignment Audit is the same diagnostic thinking, on its own, for {PRICE}. If you go on to the Sprint, the full fee comes off.</p>
+      </section>
+
+      {/* 3. The problem */}
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,460px),1fr))", alignItems: "stretch" }}>
+        <div style={{ position: "relative", width: "100%", aspectRatio: "4/5", minHeight: "100%", background: C.sand }}>
+          {PROBLEM_IMAGE && <img src={PROBLEM_IMAGE} alt="" loading="lazy" style={cover} />}
+          <div style={tint(0.12)} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", textAlign: "left", padding: PAD, maxWidth: 640, width: "100%", boxSizing: "border-box" }}>
+          <h2 style={h2()}>You can't read the label <em style={em()}>from inside the jar.</em></h2>
+          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 18, textAlign: "left", maxWidth: "34em" }}>
+            <p>You know something has to change. You can feel it every Monday. What you can't see is how.</p>
+            <p>Maybe you built something real and it's stalled. Maybe you're good at your job and you've outgrown it. Either way, you've done the reading. You took the free quiz. You asked ChatGPT at midnight. You can name your pattern, and you're still making the same call you made last year. <em style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: "1.05em", color: C.burg }}>(Yes, close the tab.)</em></p>
+            <p>More information won't fix that. You're too close to your own life to see it, which is why every answer you find feels true for about a day.</p>
+          </div>
+          <div style={{ ...rule, margin: "44px 0 22px" }} />
+          <p style={{ ...pull(), maxWidth: "28em" }}>ChatGPT gives you the most likely answer. Your friends give you the kindest one. The Alignment Audit gives you the honest one, from someone who's built the thing.</p>
+          <Buy style={{ marginTop: 40, maxWidth: 420 }} />
+        </div>
+      </section>
+
+      {/* 4. About Laura */}
+      <section style={{ background: C.sand, padding: PAD }}>
+        <div style={{ maxWidth: 1040, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,380px),1fr))", gap: "clamp(32px,5vw,80px)", alignItems: "center" }}>
+          <div style={{ position: "relative", width: "100%", aspectRatio: "3/4", borderRadius: 4, overflow: "hidden", background: C.sandDeep }}>
+            <img src={PORTRAIT} alt="Laura Jane Thomas, founder of The Aligned Woman Co." loading="lazy" style={cover} />
+            <div style={tint(0.14)} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", maxWidth: "34em" }}>
+            <h2 style={h2()}>I've sat on <em style={em()}>both sides of this.</em></h2>
+            <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 18 }}>
+              <p>I built and ran my own multi-seven-figure, award-winning marketing agency for over a decade. I also learned what it costs to build something while running yourself into the ground. My body called it before I did.</p>
+              <p>So when I read your answers, you're not getting theory or a framework borrowed from the internet. You're getting someone who has made these decisions with real money on the line, and who knows a plan only works if the person carrying it can sustain it.</p>
+              <p>I'm a certified NLP and Time Line Therapy practitioner, a certified director, a speaker and an author.</p>
+            </div>
+            <div style={{ ...rule, margin: "32px 0 18px" }} />
+            <p style={pull()}>Operator experience, without the burnout most business advice runs on.</p>
           </div>
         </div>
       </section>
 
-      {/* 1b. PRICING NOTE, directly under the hero (hidden on tablet,
-          where it sits on the hero image instead) */}
-      <div
-        className="aa-price-note"
-        style={{
-          background: C.ivory,
-          borderTop: "1px solid rgba(74,14,46,0.1)",
-          padding: "30px 24px 40px",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ margin: "0 0 10px", fontSize: 14, color: C.muted }}>
-          {PRICE}, paid once. Your blueprint within seven working days.
-        </p>
-        <p style={{ margin: "0 auto", maxWidth: 620, fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.6, color: C.burg }}>
-          Usually I work at fractional CMO and advisory rates. The Alignment Audit is my diagnostic on its own, so you can get my eyes on your situation before you commit to anything more.
-        </p>
-      </div>
-
-      {/* 2. THE JAR */}
-      <section className="aa-sec" style={{ padding: "112px 24px", background: "#EFE7DD", textAlign: "center" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <H2 style={{ marginBottom: 48 }}>You can't read the label <span style={em}>from inside the jar.</span></H2>
-          <div style={{ fontSize: 15, lineHeight: 1.75 }}>
-            <p style={{ margin: "0 0 20px" }}>Maybe you built something real and it has stalled. You're busier than ever and the growth doesn't match the effort.</p>
-            <p style={{ margin: "0 0 20px" }}>Maybe you're good at your job and you've outgrown it. You know there's a next move. You can't see it from where you're standing.</p>
-            <p style={{ margin: "0 0 20px" }}>So you read the books. You took the free quiz. You asked ChatGPT at midnight. You know your pattern by name now, and you're still making the same call you made last year. <span style={{ fontFamily: SERIF, ...em }}>(Yes, close the tab.)</span></p>
-            <p style={{ margin: "0 0 20px" }}>More information won't fix that. You're too close to your own situation to see it, which is why every answer you find feels true for about a day.</p>
-            <p style={{ margin: "32px 0 0", fontFamily: SERIF, fontStyle: "italic", fontSize: 22, lineHeight: 1.5, color: C.burg }}>
-              ChatGPT gives you the most likely answer. Your friends give you the kindest one. The Alignment Audit gives you the honest one, from someone who's built the thing.
-            </p>
+      {/* 5. The offer */}
+      <section style={{ padding: PAD }}>
+        <div style={{ maxWidth: 1040, margin: "0 auto" }}>
+          <div style={{ maxWidth: "34em" }}>
+            <p style={eyebrow()}>The offer</p>
+            <h2 style={{ ...h2(), marginTop: 16 }}>Introducing <em style={em()}>The Alignment Audit.</em></h2>
+            <p style={{ marginTop: 20 }}>This isn't a personality test or a course. It's a diagnosis, and I write it.</p>
           </div>
-          <div style={{ marginTop: 40 }}><BuyButton /></div>
+          <ol style={{ listStyle: "none", margin: "48px 0 0", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,190px),1fr))", gap: 0 }}>
+            {STEPS.map((s, i) => (
+              <li key={s.k} style={{ position: "relative", display: "grid", gridTemplateColumns: "28px 1fr", columnGap: 16, paddingBottom: 32, minWidth: 0 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <span style={{ flex: "none", width: 28, height: 28, borderRadius: "50%", border: `1.5px solid ${C.burg}`, color: C.burg, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 12, background: C.ivory }}>{i + 1}</span>
+                  <span style={{ flex: 1, width: 1, background: C.rose, marginTop: 6, minHeight: 24 }} />
+                </div>
+                <div style={{ paddingRight: 16, paddingTop: 3 }}>
+                  <p style={{ fontFamily: SERIF, fontSize: 21, lineHeight: 1.3, color: C.burg }}>{s.k}</p>
+                  <p style={{ marginTop: 6, fontSize: 16, textWrap: "pretty" }}>{s.t}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p style={{ ...pull(), marginTop: 8 }}>You answer. I do the thinking.</p>
         </div>
       </section>
 
-      {/* 3. BOTH SIDES */}
-      <section className="aa-sec" style={{ padding: "112px 48px" }}>
-        <div style={{ maxWidth: 1300, margin: "0 auto", display: "flex", flexWrap: "wrap", gap: 64, alignItems: "center" }}>
-          <div style={{ flex: "1 1 360px", minWidth: 0 }}>
-            <img src={PORTRAIT} alt="Laura Jane Thomas" loading="lazy" style={{ width: "100%", aspectRatio: "3 / 4", objectFit: "cover", display: "block" }} />
-          </div>
-          <div style={{ flex: "1 1 420px", minWidth: 0 }}>
-            <H2 style={{ fontSize: 46, lineHeight: 1.05, marginBottom: 24 }}>I have sat on <span style={em}>both sides of this.</span></H2>
-            <div style={{ fontSize: 14, lineHeight: 1.75, color: C.body }}>
-              <p style={{ margin: "0 0 18px" }}>Before I advised anyone, I built and ran my own multi-seven-figure, award-winning marketing agency for over a decade and led brand and marketing work for some of the biggest names in the market.</p>
-              <p style={{ margin: "0 0 18px" }}>I am a certified Neuro-Linguistic Programming (NLP) and Time Line Therapy practitioner, certified by the American Board of NLP. I am also a certified director, a speaker and an author, and I hold a specialised degree in brand communications.</p>
-              <p style={{ margin: "0 0 18px" }}>I have built a business from nothing, and I have been the strategist brought in to fix and grow ones that were already established. I have sat on both sides of the problem you are bringing me.</p>
-              <p style={{ margin: "0 0 18px" }}>So when I read your answers, you are not getting theory or a borrowed framework off the internet. You are getting someone who has made these exact decisions with real money on the line, many times over.</p>
-              <p style={{ margin: "0 0 18px" }}>I also learned the hard way what it costs to build something while running yourself into the ground. After a decade at full tilt, I had every answer and no idea who I was. My body called it before I did. I rebuilt, and I changed how I work and how I help the people I work with. So your Audit reads your business or career and the woman running it, because you can only sustain a plan that fits the person carrying it out.</p>
-              <p style={{ margin: 0, fontFamily: SERIF, fontStyle: "italic", fontSize: 15, color: C.burg }}>That is the difference. Operator experience, without the burnout most business advice runs on.</p>
-            </div>
+      {/* 6. The chapters */}
+      <section style={{ background: C.sand, padding: "clamp(64px,9vw,112px) 0" }}>
+        <div style={{ maxWidth: 1040, margin: "0 auto", padding: `0 ${PAD_X}` }}>
+          <div style={{ maxWidth: "34em" }}>
+            <p style={eyebrow()}>What we cover</p>
+            <h2 style={{ ...h2(), marginTop: 16 }}>Eleven chapters. <em style={em()}>One clear picture of you.</em></h2>
+            <p style={{ marginTop: 20, textWrap: "pretty" }}>We start with you, because your business or career is run by a person, and that person is usually the part nobody looks at. Then your work. Then what's next. Every answer feeds your blueprint.</p>
           </div>
         </div>
-      </section>
-
-      {/* 4. THE OFFER */}
-      <section className="aa-sec" style={{ padding: "112px 24px", background: C.sand }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div style={{ maxWidth: 780, margin: "0 auto 48px", textAlign: "center" }}>
-            <p style={{ ...eyebrow(), marginBottom: 24 }}>The Offer</p>
-            <H2 style={{ fontSize: 64, lineHeight: 0.98, marginBottom: 24 }}>Introducing <span style={em}>The Alignment Audit.</span></H2>
-            <p style={{ margin: "0 0 24px", fontSize: 17, lineHeight: 1.7, color: C.body }}>
-              You answer my questions online, in your own time. Within seven working days I send you a blueprint written about you: where you actually are, what's costing you, and the move I'd make next. Then we go through it together on a one-hour call. After the call, I write your AI script: custom instructions for your ChatGPT or Claude, so your AI knows who you are and what you want before you ask it anything.
-            </p>
-            <p style={{ margin: "0 0 24px", fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.5, color: C.burg }}>
-              This is not a personality test. It's not a course. It's a diagnosis, written by me.
-            </p>
-            <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: C.body }}>
-              It runs on my A.L.I.V.E. Method: Awareness, Liberation, Intention, Vision, Embodiment. Around 60 questions everyone answers, then a module for your track. You can skip anything that feels too heavy to write down.
-            </p>
+        <div role="tablist" aria-label="Acts" style={{ position: "sticky", top: 60, zIndex: 30, background: C.sand, marginTop: 40, padding: `12px ${PAD_X}`, borderBottom: "1px solid rgba(74,14,46,0.08)" }}>
+          <div style={{ maxWidth: 1040, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 3, background: C.ivory, border: "1px solid rgba(74,14,46,0.15)", borderRadius: 10, padding: 3, boxSizing: "border-box" }}>
+            {ACTS.map((a, i) => (
+              <button key={a.id} type="button" role="tab" aria-selected={i === tab} aria-label={a.label} onClick={() => setTab(i)} style={actTab(i === tab)}>
+                <span style={{ display: "block", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600, opacity: 0.7 }}>{a.act}</span>
+                <span style={{ display: "block", marginTop: 4, fontFamily: SERIF, fontSize: 17, lineHeight: 1.2, textTransform: "none", letterSpacing: 0 }}>{a.short}</span>
+              </button>
+            ))}
           </div>
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 40 }}>
-            <p style={{ ...eyebrow(C.muted), fontWeight: 400, marginBottom: 14 }}>Choose your track</p>
-            <div style={{ display: "inline-flex", flexWrap: "wrap", justifyContent: "center" }}>
-              {trackBtn("business", "I run a business")}
-              {trackBtn("career", "I have a career")}
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-            {[LETTERS[track].slice(0, 3), LETTERS[track].slice(3)].map((row, r) => (
-              <div
-                key={r}
-                className="aa-alive-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
-                  gap: 1,
-                  background: "rgba(26,26,26,0.10)",
-                  width: "100%",
-                  maxWidth: row.length === 3 ? 999 : 666,
-                }}
-              >
-                {row.map((l) => (
-                  <div key={`${track}-${l.letter}`} className="aa-fade" style={{ background: C.card, padding: "36px 28px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-                      <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, lineHeight: 1, color: C.burg }}>{l.letter}</span>
-                      <span style={{ marginTop: 8, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted }}>{track === "business" ? "Business" : "Career"}</span>
+        </div>
+        <div style={{ maxWidth: 1040, margin: "0 auto", padding: `24px ${PAD_X} 0` }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {act.chapters.map((ch) => {
+              const open = openCh[act.id] === ch.n;
+              return (
+                <div key={ch.n} style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10 }}>
+                  <button type="button" aria-expanded={open} onClick={() => setOpenCh((p) => ({ ...p, [act.id]: open ? null : ch.n }))} style={{ width: "100%", display: "grid", gridTemplateColumns: "40px 1fr 32px", columnGap: 12, alignItems: "start", textAlign: "left", background: "none", border: 0, padding: "20px 18px", color: "inherit", minHeight: 48 }}>
+                    <span style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1.2, color: C.rose, fontVariantNumeric: "lining-nums" }}>{String(ch.n).padStart(2, "0")}</span>
+                    <span style={{ minWidth: 0 }}>
+                      <span style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontWeight: 600, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: C.burgMid, lineHeight: 1.5 }}>{ch.name}</span>
+                        {ch.heart && <span style={{ display: "inline-block", background: C.roseLight, color: C.ink, fontWeight: 600, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 100 }}>The heart of the Audit</span>}
+                      </span>
+                      <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, textWrap: "pretty" }}>{ch.back}</span>
+                    </span>
+                    <span aria-hidden="true" style={plusIcon(open)}>+</span>
+                  </button>
+                  {open && (
+                    <div style={{ padding: "0 18px 22px 70px" }}>
+                      <p style={eyebrow()}>What we look at</p>
+                      <p style={{ marginTop: 8, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{ch.look}</p>
                     </div>
-                    <p style={{ margin: "0 0 8px", fontFamily: SERIF, fontWeight: 700, fontSize: 17 }}>{l.label}</p>
-                    <p style={{ margin: "0 0 14px", fontFamily: SERIF, fontStyle: "italic", fontSize: 14, lineHeight: 1.4, color: C.burg }}>{l.sub}</p>
-                    <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600 }}>We look at:</p>
-                    <p style={{ margin: "0 0 14px", fontSize: 12, lineHeight: 1.6, color: C.muted }}>{l.look}</p>
-                    <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600 }}>You get back:</p>
-                    <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, fontStyle: "italic", color: C.burg }}>{l.back}</p>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: 48 }}>
-            <p style={{ ...eyebrow(), textAlign: "center", marginBottom: 20 }}>{mod.title}</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
-              {mod.items.map((m) => (
-                <div key={`${track}-${m.name}`} className="aa-fade" style={{ background: "#FFFFFF", padding: "28px 26px" }}>
-                  <p style={{ margin: "0 0 10px", fontFamily: SERIF, fontSize: 20, color: C.burg }}>{m.name}</p>
-                  <p style={{ margin: 0, fontSize: 13, lineHeight: 1.65 }}>{m.body}</p>
+                  )}
                 </div>
-              ))}
-            </div>
-            <p style={{ margin: "18px auto 0", maxWidth: 640, fontSize: 13, lineHeight: 1.6, textAlign: "center", color: C.muted }}>
-              Grouped the same way as the Clarity Sprint, so nothing is wasted if you go on to work with me.
-            </p>
+              );
+            })}
+            {act.track && (
+              <div style={{ background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10, padding: "22px 18px" }}>
+                <p style={eyebrow()}>Your track</p>
+                <div role="tablist" aria-label="Your track" style={{ display: "flex", gap: 3, marginTop: 14, background: C.sand, borderRadius: 100, padding: 3, maxWidth: 420 }}>
+                  <button type="button" role="tab" aria-selected={track === "business"} onClick={() => setTrack("business")} style={trackTab(track === "business")}>I run a business</button>
+                  <button type="button" role="tab" aria-selected={track === "career"} onClick={() => setTrack("career")} style={trackTab(track === "career")}>I have a career</button>
+                </div>
+                <p style={{ marginTop: 18, fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>
+                  <strong style={{ fontWeight: 600, color: C.ink }}>{track === "business" ? "I run a business:" : "I have a career:"}</strong> {act.track[track]}
+                </p>
+                <p style={{ marginTop: 14, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.4, color: C.burg, maxWidth: "30em", textWrap: "pretty" }}>
+                  <span style={{ ...eyebrow(), fontStyle: "normal", fontFamily: SANS, marginRight: 10 }}>You get back</span>{act.track.back}
+                </p>
+              </div>
+            )}
           </div>
-
-          <p style={{ margin: "64px 0 0", fontFamily: SERIF, fontStyle: "italic", fontSize: 28, textAlign: "center", color: C.burg }}>
-            One questionnaire. One blueprint. One hour. The thinking in between is mine.
-          </p>
+          <p style={{ ...pull(), marginTop: 40, maxWidth: "28em" }}>Then I put it all together: your pattern, named, and the one move I'd make next.</p>
         </div>
       </section>
 
-      {/* 5. WHAT YOU GET */}
-      <section className="aa-sec" style={{ padding: "104px 24px", background: C.sand, borderTop: "1px solid rgba(74,14,46,0.1)" }}>
-        <div style={{ maxWidth: 1300, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <p style={{ ...eyebrow(), marginBottom: 24 }}>What You Get</p>
-            <H2 style={{ marginBottom: 16 }}>What you get inside <span style={em}>The Alignment Audit.</span></H2>
-            <p style={{ margin: "0 auto", maxWidth: 620, fontSize: 15, color: C.muted }}>A complete senior diagnostic, for women who want an honest read before they decide what to do next.</p>
-          </div>
-
-          <p style={{ ...eyebrow(), marginBottom: 16 }}>The Core Audit</p>
-          <div className="aa-core-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
-            {[
-              ["Your Alignment Questionnaire", "Included", "Business or career track, online, saved as you go. Six questions build on your Starting Point Profile, so you don't repeat yourself."],
-              ["Your written blueprint", "$488", "Written by me within seven working days, section by section through the A.L.I.V.E. Method. Yours to keep."],
-              ["One hour with me", "$304", "We go through your blueprint together on a call, so nothing in it stays theoretical. You leave knowing your next move and why."],
-              ["Your AI script", "Included", "After our call, I write the custom instructions for your ChatGPT or Claude. Paste them in once, and your AI knows who you are and what you want before you ask it anything."],
-            ].map(([t, v, d]) => (
-              <div key={t} style={{ background: C.card, padding: "30px 28px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
-                  <p style={{ margin: 0, fontFamily: SERIF, fontWeight: 700, fontSize: 16 }}>{t}</p>
-                  <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: C.burg, whiteSpace: "nowrap" }}>{v}</p>
-                </div>
-                <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, color: C.muted }}>{d}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="aa-box" style={{ marginTop: 16, padding: "56px 48px", background: C.card, border: `1px solid ${C.burg}` }}>
-            <p style={{ ...eyebrow(), marginBottom: 16 }}>Included: written by me</p>
-            <h3 style={{ margin: "0 0 20px", fontFamily: SERIF, fontWeight: 400, fontSize: 46, lineHeight: 1 }}>Your <span style={em}>blueprint.</span></h3>
-            <p style={{ margin: "0 0 40px", maxWidth: 760, fontSize: 14, lineHeight: 1.7, color: C.body }}>Not a score or a personality type. A blueprint written about you, built from everything you tell me. It comes in two parts.</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "48px 64px" }}>
-              {[
-                ["Part one: where you are", [
-                  ["Your Energy Leak Map.", "Fourteen areas of your life, from sleep and money to your phone and the voice in your head, read for what they're doing to your energy."],
-                  ["The receipts.", "Where last week's hours went, your spending pattern and the invisible load you carry for other people, set against what you say matters."],
-                  ["Your blind spots.", "The conversation you're avoiding and the decision you keep making in your head, named plainly."],
-                  ["What's costing you most.", "The beliefs and habits doing the damage, and what each one costs you now."],
-                ]],
-                ["Part two: where you go from here", [
-                  ["What you actually want.", "Separated from what you think you should want."],
-                  ["The two roads.", "Where the next year goes if nothing changes, and where it goes if you make the move."],
-                  ["Your track.", "Your position, value, visibility and pace, read against your business or your career."],
-                  ["Your next move.", "The one decision I'd make first in your position, why, and your first 30 days."],
-                ]],
-              ].map(([title, items]) => (
-                <div key={title} style={{ flex: "1 1 320px", minWidth: 0 }}>
-                  <p style={{ margin: "0 0 18px", fontFamily: SERIF, fontSize: 20, color: C.burg }}>{title}</p>
-                  <ul style={{ margin: 0, padding: 0, listStyle: "none", fontSize: 13, lineHeight: 1.65 }}>
-                    {items.map(([b, t]) => (
-                      <li key={b} style={{ marginBottom: 14 }}><span style={{ fontWeight: 600 }}>{b}</span> {t}</li>
+      {/* 7. Your AI script */}
+      <section style={{ background: C.burg, color: C.ivory, padding: PAD }}>
+        <div style={{ maxWidth: 1040, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,400px),1fr))", gap: "clamp(40px,5vw,80px)", alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", maxWidth: "34em" }}>
+            <p style={eyebrow(C.roseLight)}>After the call</p>
+            <h2 style={{ ...h2(C.ivory), marginTop: 16 }}>Our call ends. <em style={em(C.roseLight)}>The work doesn't.</em></h2>
+            <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 18, color: C.ivory }}>
+              <p>Right now, your AI knows nothing about you. Ask it what to do next and it gives you the average answer, the one written for everyone.</p>
+              <p>After our call, I turn your blueprint into custom instructions for your ChatGPT or Claude. You paste them in once. From then on, every conversation starts from you.</p>
+            </div>
+            <div style={{ marginTop: 40 }}>
+              <div style={{ borderTop: "1px solid rgba(245,241,236,0.14)", borderBottom: "1px solid rgba(245,241,236,0.14)" }}>
+                <button type="button" aria-expanded={aiList} onClick={() => setAiList((x) => !x)} style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 32px", gap: 16, alignItems: "center", textAlign: "left", background: "none", border: 0, padding: "18px 0", minHeight: 56, color: C.ivory }}>
+                  <span style={eyebrow(C.roseLight)}>What your AI will know</span>
+                  <span aria-hidden="true" style={plusIcon(aiList, true)}>+</span>
+                </button>
+                {aiList && (
+                  <ul style={{ listStyle: "none", margin: 0, padding: "0 0 10px", display: "flex", flexDirection: "column" }}>
+                    {AI_KNOWS.map((k) => (
+                      <li key={k.key} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 14, padding: "12px 0", fontSize: 16, color: C.ivory }}>
+                        <Tick color={C.roseLight} />
+                        <span>{k.a}{k.em && <em style={{ fontStyle: "italic", fontFamily: SERIF, fontSize: "1.08em" }}>{k.em}</em>}{k.b || ""}</span>
+                      </li>
                     ))}
                   </ul>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Chat illustration */}
+          <div role="img" aria-label="Illustration of a chat window with custom instructions" style={{ background: C.ivory, color: C.body, borderRadius: 10, overflow: "hidden", border: "1px solid rgba(232,180,174,0.3)", maxWidth: 520, width: "100%", justifySelf: "center" }}>
+            <div style={{ padding: "14px 18px", borderBottom: "1px solid rgba(74,14,46,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={eyebrow()}>Custom instructions</span>
+              <span style={{ fontSize: 12, color: C.muted }}>Written by Laura</span>
+            </div>
+            <div style={{ padding: "6px 18px 10px", display: "flex", flexDirection: "column" }}>
+              {AI_KNOWS.map((k, i) => (
+                <div key={k.key} style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 14, alignItems: "center", padding: "11px 0", borderBottom: "1px solid rgba(74,14,46,0.06)" }}>
+                  <span style={{ fontWeight: 600, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: C.burg }}>{k.key}</span>
+                  <span style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <span style={{ display: "block", height: 8, borderRadius: 4, background: "rgba(74,14,46,0.14)", width: WIDTHS[i * 2] }} />
+                    <span style={{ display: "block", height: 8, borderRadius: 4, background: "rgba(74,14,46,0.09)", width: WIDTHS[i * 2 + 1] }} />
+                  </span>
                 </div>
               ))}
-              <div style={{ flex: "1 1 260px", minWidth: 0 }}>
-                <img
-                  className="aa-blueprint-img"
-                  src="https://media.base44.com/images/public/69f46886a412ee042303f1af/b668ffb8a_generated_image.png"
-                  alt="The Alignment Audit blueprint, held open"
-                  style={{ display: "block", width: "100%", height: "auto", position: "relative", zIndex: 1, opacity: 1, mixBlendMode: "normal", filter: "none", border: 0 }}
-                />
+            </div>
+            <div style={{ background: C.sand, padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ alignSelf: "flex-start", maxWidth: "85%", background: C.ivory, borderRadius: "10px 10px 10px 2px", padding: "12px 14px", fontSize: 14, lineHeight: 1.5, color: C.body }}>Before I answer, what do you think? You said you'd ask yourself first.</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 44, borderRadius: 100, background: C.ivory, border: "1px solid rgba(74,14,46,0.1)", padding: "0 8px 0 16px", fontSize: 14, color: C.muted }}>
+                Message
+                <span style={{ width: 30, height: 30, borderRadius: "50%", background: C.burg, color: C.ivory, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>↑</span>
               </div>
             </div>
-            <p style={{ margin: "48px 0 0", fontFamily: SERIF, fontStyle: "italic", fontSize: 22, textAlign: "center", color: C.burg }}>
-              Most advice assumes you'll run like a machine. This is written for the woman who has to carry it out.
-            </p>
           </div>
-
-          <p style={{ ...eyebrow(), margin: "48px 0 16px" }}>Plus This Bonus</p>
-          <div style={{ background: "rgba(38,3,15,0.95)", padding: "32px 30px", marginBottom: 64 }}>
-            <span style={{ display: "inline-block", marginBottom: 14, padding: "5px 12px", border: "1px solid rgba(255,255,255,0.3)", fontSize: 9, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)" }}>Bonus</span>
-            <p style={{ margin: "0 0 8px", fontFamily: SERIF, fontWeight: 700, fontSize: 17, color: "#FFFFFF" }}>Your full fee, credited to the Clarity Sprint</p>
-            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
-              If your blueprint shows you need one-to-one work with me, book the Clarity Sprint within 12 months and the full {PRICE} comes off. Your answers carry straight into our first session.
-            </p>
-          </div>
-
-          <div id="buy" className="aa-box" style={{ maxWidth: 680, margin: "0 auto", padding: "56px 44px", background: "rgba(245,238,228,0.95)", border: "1px solid rgba(26,26,26,0.2)", textAlign: "center", boxSizing: "border-box" }}>
-            <p style={{ margin: "0 0 6px", fontSize: 14, color: C.muted }}>If you booked each element separately at my standard rates:</p>
-            <p style={{ margin: "0 0 28px", fontFamily: SERIF, fontSize: 28, color: C.muted, textDecoration: "line-through" }}>$792</p>
-            <p style={{ margin: "0 0 22px", fontSize: 14, color: C.muted }}>The Alignment Audit is a standalone diagnostic, at</p>
-            <p className="aa-price" style={{ margin: "0 0 6px", fontFamily: SERIF, fontWeight: 700, fontSize: 76, color: C.burg }}>{PRICE}</p>
-            <p style={{ margin: "0 0 28px", fontSize: 13, color: C.muted }}>Paid once</p>
-            <p style={{ margin: "0 0 32px", fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.6, color: C.burg }}>That's less than one hour of my advisory time, for a written blueprint, an hour with me and your AI script.</p>
-            <BuyButton block />
-            <p style={{ margin: "16px 0 0", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted }}>
-              Online. Blueprint within seven working days.
-            </p>
-          </div>
+        </div>
+        <div style={{ maxWidth: 620, margin: "clamp(48px,6vw,72px) auto 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          <div style={{ ...rule, marginBottom: 18 }} />
+          <p style={pull(C.ivory)}>Most people use AI to think for them. Yours will be set up to make you think for yourself.</p>
+          <p style={{ marginTop: 20, fontSize: 14, lineHeight: 1.6, color: C.roseLight, maxWidth: "34em" }}>Your AI isn't me and it won't replace a coach. What it will do is keep you pointed in the direction we chose, every day, long after our hour is up.</p>
         </div>
       </section>
 
-      {/* 6. OBJECTIONS */}
-      <section className="aa-sec" style={{ padding: "104px 24px", textAlign: "center" }}>
-        <div style={{ maxWidth: 820, margin: "0 auto" }}>
-          <H2 style={{ lineHeight: 0.98, marginBottom: 48 }}>What you might be thinking right now.</H2>
-          <div style={{ textAlign: "left", borderTop: `1px solid ${C.line}` }}>
-            {FAQ.map((f) => (
-              <details key={f.q} style={{ borderBottom: `1px solid ${C.line}`, padding: "20px 0" }}>
-                <summary style={{ minHeight: 44, display: "flex", alignItems: "center", fontFamily: SERIF, fontStyle: "italic", fontSize: 18, color: C.burg }}>{f.q}</summary>
-                <p style={{ margin: "12px 0 0", fontSize: 14, lineHeight: 1.7, color: C.body }}>{f.a}</p>
-              </details>
-            ))}
+      {/* 8. What you get */}
+      <section style={{ padding: PAD }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+          <div style={{ maxWidth: "34em" }}>
+            <p style={eyebrow()}>What you get</p>
+            <h2 style={{ ...h2(), marginTop: 16 }}>What you get inside <em style={em()}>The Alignment Audit.</em></h2>
           </div>
-          <p style={{ margin: "48px 0 24px", fontFamily: SERIF, fontStyle: "italic", fontSize: 22, color: C.burg }}>If you have read this far and you are still here, you already know what you are going to do.</p>
-          <BuyButton />
-        </div>
-      </section>
-
-      {/* 7. REVIEWS */}
-      <section className="aa-sec" style={{ padding: "104px 24px", background: "#EDE7E0" }}>
-        <div style={{ maxWidth: 1300, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <H2 style={{ fontStyle: "italic", fontSize: 52, lineHeight: 1, marginBottom: 14 }}>What people say after working with me.</H2>
-            <p style={{ margin: 0, fontSize: 14, color: C.muted }}>Senior receipts from the wider practice. Real outcomes. Named voices.</p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <button type="button" className="aa-arrow" aria-label="Previous reviews" onClick={() => setPage((page - 1 + pages) % pages)} style={{ flex: "0 0 auto", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", color: C.ink }}>
-              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-            </button>
-            <div style={{ flex: "1 1 auto", minWidth: 0, overflow: "hidden" }}>
-              <div style={{ display: "flex", transition: "transform 700ms cubic-bezier(0.4,0,0.2,1)", transform: `translateX(-${page * 100}%)` }}>
-                {REVIEWS.map((t) => (
-                  <figure key={t.name} style={{ flex: `0 0 ${100 / perView}%`, maxWidth: `${100 / perView}%`, boxSizing: "border-box", margin: 0, padding: "0 24px", textAlign: "center" }}>
-                    <p style={{ margin: "0 0 22px", fontFamily: SERIF, fontWeight: 700, fontSize: 20, lineHeight: 1.15, textTransform: "uppercase" }}>{t.headline}</p>
-                    <blockquote style={{ margin: "0 0 20px", fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1.75, color: C.muted }}>{t.quote}</blockquote>
-                    <figcaption style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: C.body }}>
-                      <span style={{ color: C.burg }}>{t.name}</span>{t.company ? ` | ${t.company}` : ""}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </div>
-            <button type="button" className="aa-arrow" aria-label="Next reviews" onClick={() => setPage((page + 1) % pages)} style={{ flex: "0 0 auto", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: "none", cursor: "pointer", color: C.ink }}>
-              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-            </button>
-          </div>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 20, marginTop: 40 }}>
-            <button type="button" aria-label="Previous reviews" onClick={() => setPage((page - 1 + pages) % pages)} style={{ minWidth: 44, minHeight: 44, background: "transparent", border: "none", cursor: "pointer", fontSize: 18, color: C.ink }}>‹</button>
-            <p style={{ margin: 0, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted }}>{page + 1} of {pages}</p>
-            <button type="button" aria-label="Next reviews" onClick={() => setPage((page + 1) % pages)} style={{ minWidth: 44, minHeight: 44, background: "transparent", border: "none", cursor: "pointer", fontSize: 18, color: C.ink }}>›</button>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. RIGHT FOR YOU */}
-      <section className="aa-sec" style={{ padding: "104px 24px", background: C.burg }}>
-        <div style={{ maxWidth: 1300, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 56, color: C.ivory }}>
-            <p style={{ ...eyebrow("rgba(245,241,236,0.6)"), fontWeight: 400, marginBottom: 24 }}>Is This Right For You?</p>
-            <H2 style={{ color: C.ivory, lineHeight: 0.98 }}>Is this the right offer for you?</H2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40, marginBottom: 56 }}>
-            {[
-              ["This is for you if:", "M8 12l3 3 5-6", C.burg, [
-                "You look completely capable from the outside and second-guess every big call on the inside.",
-                "You know something is off and you can't name it yet.",
-                "You want a senior read before you spend money on the wrong fix.",
-                "You're not sure you're ready for six weeks, and you want to start somewhere real.",
-              ]],
-              ["This is not for you if:", "M9 9l6 6M15 9l-6 6", C.muted, [
-                "You want someone to make the decision for you.",
-                "You want reassurance more than the truth. I'll tell you what I see, even when it's not what you hoped to hear.",
-                "You're not going to act on what you read.",
-              ]],
-            ].map(([title, d, color, items]) => (
-              <div key={title} className="aa-box" style={{ background: "rgba(245,241,236,0.94)", padding: "44px 40px", borderRadius: 8 }}>
-                <p style={{ ...eyebrow(C.ink), fontWeight: 700, marginBottom: 28 }}>{title}</p>
-                <ul style={{ margin: 0, padding: 0, listStyle: "none", fontSize: 14, lineHeight: 1.65 }}>
-                  {items.map((it) => (
-                    <li key={it} style={{ display: "flex", gap: 14, marginBottom: 18 }}><Icon d={d} color={color} /><span>{it}</span></li>
-                  ))}
-                </ul>
+          <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,240px),1fr))", gap: 3 }}>
+            {ITEMS.map((it) => (
+              <div key={it.name} style={{ background: C.sand, borderRadius: 10, padding: "24px 22px", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                  <h3 style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1.25, color: C.burg }}>{it.name}</h3>
+                  <span style={{ flex: "none", fontWeight: 600, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: C.burgMid, fontVariantNumeric: "lining-nums" }}>{it.value}</span>
+                </div>
+                <p style={{ fontSize: 16, textWrap: "pretty" }}>{it.desc}</p>
               </div>
             ))}
           </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ margin: "0 0 28px", fontFamily: SERIF, fontStyle: "italic", fontSize: 22, color: "rgba(245,241,236,0.85)" }}>If you have read both columns and you are still here, you already know which one applies to you.</p>
-            <BuyButton />
+          <div style={{ marginTop: 3, background: C.ink, color: C.ivory, borderRadius: 10, padding: "28px 22px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,300px),1fr))", gap: 20, alignItems: "start" }}>
+            <div>
+              <span style={{ display: "inline-block", background: C.roseLight, color: C.ink, fontWeight: 600, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", padding: "5px 12px", borderRadius: 100 }}>Bonus</span>
+              <h3 style={{ fontFamily: SERIF, fontSize: "clamp(24px,1vw + 18px,30px)", lineHeight: 1.25, color: C.ivory, marginTop: 16, textWrap: "balance" }}>Your full fee, credited to the Clarity Sprint.</h3>
+            </div>
+            <p style={{ fontSize: 16, color: C.ivory, maxWidth: "34em", textWrap: "pretty" }}>If your blueprint shows you need one-to-one work, book the Sprint within 12 months and the full {PRICE} comes off a programme that's over {SPRINT_PRICE}. Your answers carry straight into our first session.</p>
+          </div>
+          <Buy style={{ marginTop: 40, maxWidth: 420 }} />
+        </div>
+      </section>
+
+      {/* 9. Testimonials */}
+      <section style={{ background: C.sand, padding: "clamp(64px,9vw,112px) 0" }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto", padding: `0 ${PAD_X}`, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "end", gap: 20 }}>
+          <div style={{ maxWidth: "34em" }}>
+            <h2 style={h2()}>What people say after working with me.</h2>
+            <p style={{ marginTop: 12 }}>From women I've worked with.</p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span aria-live="polite" style={{ fontSize: 14, color: C.body, fontVariantNumeric: "lining-nums" }}>{shown} of {total}</span>
+            <button type="button" className="aa-circ" aria-label="Previous" onClick={() => scrollT(Math.max(0, tIndex - 1))}>←</button>
+            <button type="button" className="aa-circ" aria-label="Next" onClick={() => scrollT(Math.min(total - 1, tIndex + 1))}>→</button>
+          </div>
+        </div>
+        <div ref={tRow} className="aa-row" onScroll={onTScroll} style={{ marginTop: 36, display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", padding: `0 ${PAD_X}`, scrollPadding: `0 ${PAD_X}`, alignItems: "stretch" }}>
+          {TESTIMONIALS.map((t, i) => {
+            const long = t.q.length > 230;
+            const ex = !!expanded[i];
+            return (
+              <figure key={t.who} style={{ flex: "0 0 min(85%,352px)", scrollSnapAlign: "start", margin: 0, background: C.ivory, border: "1px solid rgba(74,14,46,0.08)", borderRadius: 10, padding: "28px 24px", display: "flex", flexDirection: "column", gap: 14, boxSizing: "border-box" }}>
+                <h3 style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1.3, color: C.burg, textWrap: "pretty" }}>{t.h}</h3>
+                <blockquote style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: C.body, textWrap: "pretty", flex: 1, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden", WebkitLineClamp: long && !ex ? 4 : 99 }}>{t.q}</blockquote>
+                {long && (
+                  <button type="button" onClick={() => setExpanded((p) => ({ ...p, [i]: !ex }))} style={{ alignSelf: "flex-start", background: "none", border: 0, padding: "12px 0", color: C.burgMid, fontWeight: 600, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase" }}>{ex ? "Read less" : "Read more"}</button>
+                )}
+                <figcaption style={{ fontSize: 14, color: C.body }}>
+                  <span style={{ fontWeight: 600, color: C.ink }}>{t.who}</span>
+                  {t.co && <span style={{ color: C.muted }}> | {t.co}</span>}
+                </figcaption>
+              </figure>
+            );
+          })}
+        </div>
+        <div style={{ maxWidth: 1120, margin: "20px auto 0", padding: `0 ${PAD_X}` }}>
+          <div style={{ height: 1, background: "rgba(74,14,46,0.1)", position: "relative" }}>
+            <div style={{ position: "absolute", top: 0, left: 0, height: 1, background: C.burg, width: `${(shown / Math.max(total, 1)) * 100}%`, transition: "width 320ms cubic-bezier(0.2,0.7,0.2,1)" }} />
           </div>
         </div>
       </section>
 
-      {/* 9. THIS IS THE MOMENT */}
-      <section className="aa-sec" style={{ padding: "120px 24px", background: "#F2EBE3", textAlign: "center" }}>
+      {/* 10. Price box */}
+      <section style={{ background: C.sand, padding: `0 ${PAD_X} clamp(64px,9vw,112px)` }}>
+        <div ref={priceBox} id="buy" style={{ maxWidth: 560, margin: "0 auto", background: C.ivory, border: `1px solid ${C.burg}`, borderRadius: 10, padding: "clamp(32px,5vw,48px) clamp(22px,4vw,40px)", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", boxSizing: "border-box" }}>
+          <p style={{ fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>One-to-one, my Clarity Sprint is over {SPRINT_PRICE}. At my standard rates, the Audit's parts come to <s style={{ color: C.muted, textDecorationColor: C.rose }}>{PARTS_TOTAL}</s>.</p>
+          <p style={{ marginTop: 28, fontFamily: SERIF, fontSize: "clamp(64px,5vw + 20px,80px)", lineHeight: 1, color: C.ink, fontVariantNumeric: "lining-nums", letterSpacing: "-0.02em" }}>{PRICE}</p>
+          <p style={{ ...eyebrow(), marginTop: 8 }}>Paid once</p>
+          <p style={{ marginTop: 22, fontFamily: SERIF, fontStyle: "italic", fontSize: 20, lineHeight: 1.45, color: C.burg, maxWidth: "28em", textWrap: "pretty" }}>Less than one hour of my advisory time, for a blueprint I write for you, an hour with me and your AI script.</p>
+          <Buy style={{ marginTop: 28 }} />
+          <p style={{ marginTop: 14, fontSize: 14 }}>Online. Your blueprint within {TURNAROUND}.</p>
+        </div>
+      </section>
+
+      {/* 11. FAQ */}
+      <section style={{ padding: PAD }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <p style={{ ...eyebrow(C.muted), fontWeight: 400, marginBottom: 24 }}>Let's begin</p>
-          <H2 style={{ lineHeight: 0.98, marginBottom: 24 }}>This is the moment.</H2>
-          <p style={{ margin: "0 0 12px", fontSize: 15, lineHeight: 1.7, color: C.muted }}>You know what the Audit is, what it costs and what you walk away with. The only question left is whether you want the honest version.</p>
-          <p style={{ margin: "0 0 40px", fontFamily: SERIF, fontStyle: "italic", fontSize: 16, color: C.burg }}>You don't need another opinion. You need an accurate one.</p>
-          <div className="aa-box" style={{ maxWidth: 560, margin: "0 auto", padding: 32, border: "1px solid rgba(26,26,26,0.2)", background: "rgba(245,238,228,0.95)", boxSizing: "border-box" }}>
-            <p style={{ margin: "0 0 12px", fontFamily: SERIF, fontSize: 20 }}>Get your Alignment Audit.</p>
-            <ul style={{ margin: "0 0 24px", padding: 0, listStyle: "none", fontSize: 13, lineHeight: 1.9, color: C.muted }}>
-              <li>{PRICE}, paid once.</li>
-              <li>Your blueprint within seven working days.</li>
-              <li>One hour with me to go through it.</li>
-              <li>Your AI script after the call.</li>
-              <li>Full fee credited to the Clarity Sprint.</li>
-            </ul>
-            <BuyButton block />
+          <h2 style={h2()}>What you might be thinking right now.</h2>
+          <div style={{ marginTop: 36, borderTop: "1px solid rgba(74,14,46,0.12)" }}>
+            {FAQ.map((f, i) => {
+              const open = faq === i;
+              return (
+                <div key={f.q} style={{ borderBottom: "1px solid rgba(74,14,46,0.12)" }}>
+                  <button type="button" aria-expanded={open} onClick={() => setFaq(open ? -1 : i)} style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 32px", gap: 16, alignItems: "center", textAlign: "left", background: "none", border: 0, padding: "20px 0", minHeight: 56 }}>
+                    <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 21, lineHeight: 1.35, color: C.burg, textWrap: "pretty" }}>{f.q}</span>
+                    <span aria-hidden="true" style={plusIcon(open)}>+</span>
+                  </button>
+                  {open && <p style={{ padding: "0 48px 22px 0", fontSize: 16, maxWidth: "34em", textWrap: "pretty" }}>{f.a}</p>}
+                </div>
+              );
+            })}
+          </div>
+          <p style={{ ...pull(), marginTop: 44, maxWidth: "28em" }}>If you've read this far and you're still here, you already know what you're going to do.</p>
+          <Buy style={{ marginTop: 32, maxWidth: 420 }} />
+        </div>
+      </section>
+
+      {/* 12. Is this for you */}
+      <section style={{ background: C.burg, color: C.ivory, padding: PAD }}>
+        <div style={{ maxWidth: 1040, margin: "0 auto" }}>
+          <h2 style={h2(C.ivory)}>Is this the right offer for you?</h2>
+          <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,360px),1fr))", gap: 3 }}>
+            <div style={{ background: C.ivory, color: C.body, borderRadius: 10, padding: "28px 24px" }}>
+              <p style={eyebrow()}>This is for you if</p>
+              <ul style={{ listStyle: "none", margin: "18px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+                {FOR_YOU.map((x) => (
+                  <li key={x} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 14, fontSize: 16, textWrap: "pretty" }}><Tick color={C.burg} /><span>{x}</span></li>
+                ))}
+              </ul>
+            </div>
+            <div style={{ background: C.ivory, color: C.body, borderRadius: 10, padding: "28px 24px" }}>
+              <p style={eyebrow()}>This isn't for you if</p>
+              <ul style={{ listStyle: "none", margin: "18px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+                {NOT_FOR_YOU.map((x) => (
+                  <li key={x} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 14, fontSize: 16, textWrap: "pretty" }}><Cross color={C.rose} /><span>{x}</span></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p style={{ ...pull(C.ivory), marginTop: 40, maxWidth: "28em" }}>If you've read both columns and you're still here, you already know which one applies to you.</p>
+          <Buy tone="rose" style={{ marginTop: 32, maxWidth: 420 }} />
+        </div>
+      </section>
+
+      {/* 13. Close */}
+      <section style={{ padding: PAD }}>
+        <div style={{ maxWidth: 620, margin: "0 auto", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <p style={eyebrow()}>Let's begin</p>
+          <h2 style={{ ...h2(), marginTop: 16, textWrap: "wrap" }}>This is the moment.</h2>
+          <p style={{ marginTop: 20, maxWidth: "34em", textWrap: "pretty" }}>You know what the Audit is, what it costs and what you walk away with. The only question left is whether you want the honest version.</p>
+          <p style={{ ...pull(), marginTop: 24 }}>You don't need another opinion. You need an accurate one.</p>
+          <div ref={closeCard} style={{ marginTop: 40, width: "100%", background: C.sand, borderRadius: 10, padding: "clamp(28px,4vw,40px) clamp(22px,4vw,36px)", textAlign: "left", boxSizing: "border-box" }}>
+            <h3 style={{ fontFamily: SERIF, fontSize: 26, lineHeight: 1.25, color: C.burg }}>Get your Alignment Audit.</h3>
+            <p style={{ marginTop: 12, fontSize: 16, textWrap: "pretty" }}>{PRICE}, paid once. Your blueprint within {TURNAROUND}. One hour with me to go through it. Your AI script after the call. Full fee credited to the Clarity Sprint.</p>
+            <Buy style={{ marginTop: 24 }} />
           </div>
         </div>
       </section>
 
-      <LandingFooter />
+      {/* Footer */}
+      <footer style={{ background: C.ink, color: C.ivory, padding: `clamp(56px,7vw,80px) ${PAD_X} 40px` }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,200px),1fr))", gap: 40 }}>
+          <div style={{ maxWidth: 300 }}>
+            <img src={LOGO} alt="The Aligned Woman Co." style={{ height: 28, width: "auto", display: "block", filter: "brightness(0) invert(1)" }} />
+            <p style={{ marginTop: 18, fontSize: 14, color: "rgba(245,241,236,0.7)" }}>Built for women. Grounded in evidence. Verified at every step.</p>
+          </div>
+          {FOOTER.map((col) => (
+            <div key={col.title}>
+              <p style={eyebrow(C.roseLight)}>{col.title}</p>
+              <ul style={{ listStyle: "none", margin: "14px 0 0", padding: 0, display: "flex", flexDirection: "column" }}>
+                {col.links.map(([label, href]) => (
+                  <li key={label}>
+                    {href.startsWith("/") ? (
+                      <Link to={href} className="aa-foot-link">{label}</Link>
+                    ) : (
+                      <a href={href} className="aa-foot-link">{label}</a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <div style={{ maxWidth: 1120, margin: "48px auto 0", paddingTop: 20, borderTop: "1px solid rgba(245,241,236,0.12)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 8, fontSize: 13, color: "rgba(245,241,236,0.6)" }}>
+          <span>© {new Date().getFullYear()} The Aligned Woman Co. All rights reserved.</span>
+          <span>Designed for women. Built with intention.</span>
+        </div>
+      </footer>
+
+      {/* Buy bar that sticks to the bottom of a phone screen */}
+      {stickyVisible && (
+        <div style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50, background: C.ivory, borderTop: "1px solid rgba(74,14,46,0.12)", padding: "10px 20px calc(10px + env(safe-area-inset-bottom))", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, animation: "aa-slide-up 320ms cubic-bezier(0.2,0.7,0.2,1)" }}>
+          <span style={{ fontSize: 14, lineHeight: 1.3, color: C.body, fontVariantNumeric: "lining-nums" }}><strong style={{ fontWeight: 600, color: C.ink }}>{PRICE}</strong> · Blueprint in {TURNAROUND_SHORT}</span>
+          <a href={BUY_URL} className="aa-pill aa-pill-solid">Get my Audit</a>
+        </div>
+      )}
     </div>
   );
 }
