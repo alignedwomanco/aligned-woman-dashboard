@@ -1,5 +1,5 @@
 import React from "react";
-import { partsForTrack, questionsFor, isAnswered, optionsFor, OPTION_SETS } from "@/data/auditQuestions";
+import { partsForTrack, questionsFor, displayNumbers, isAnswered, optionsFor, OPTION_SETS } from "@/data/auditQuestions";
 import { QuestionText } from "@/components/audit/AuditFields";
 
 // ────────────────────────────────────────────────────────────────
@@ -8,6 +8,11 @@ import { QuestionText } from "@/components/audit/AuditFields";
 // the admin Audits tab. Questions she skipped are left out. Every answer
 // shape the questionnaire saves (see AuditFields.jsx) is turned back into
 // plain words here, using the same option labels she picked from.
+// Questions are in the order she saw them, with the numbers she saw
+// (displayNumbers). Answers to questions that have since been retired, and
+// boxes that have come off a question, are listed at the end of their part
+// under "From an earlier version of the audit", each under its original
+// wording, so nothing she wrote is lost.
 // ────────────────────────────────────────────────────────────────
 
 const has = (x) => x !== undefined && x !== null && String(x).trim() !== "";
@@ -49,7 +54,7 @@ function Line({ label, children }) {
 function Answer({ q, v, answers }) {
   switch (q.type) {
     case "text":
-      return <p className="aav-text">{v}</p>;
+      return <p className="aav-text">{typeof v === "object" && v !== null ? v.legacy || "" : v}</p>;
     case "prefix":
       return <p className="aav-text"><em>{q.leadIn}</em> {v}</p>;
     case "facts":
@@ -131,9 +136,28 @@ function Answer({ q, v, answers }) {
   }
 }
 
+// What she wrote in a part under an earlier version of the audit: answers
+// to retired questions, and boxes that have since come off a question
+// (Q37 "What I'll give up"). Each is shown under its original wording.
+function earlierFor(part, track, answers) {
+  const out = [];
+  for (const q of part.questions) {
+    if (q.track && q.track !== track) continue;
+    if (q.retired) {
+      if (isAnswered(q, answers[q.id])) out.push({ key: q.id, q, v: answers[q.id] });
+    } else if (q.retiredFields) {
+      const old = { ...q, text: q.retiredText || q.text, text2: undefined, lead: undefined, fields: q.retiredFields };
+      if (isAnswered(old, answers[q.id])) out.push({ key: `${q.id}-earlier`, q: old, v: answers[q.id] });
+    }
+  }
+  return out;
+}
+
 export default function AuditAnswersView({ track, answers }) {
   const a = answers || {};
-  const parts = partsForTrack(track || "business");
+  const t = track || "business";
+  const parts = partsForTrack(t);
+  const numbers = displayNumbers(t);
   return (
     <div className="aav">
       <style>{`
@@ -154,21 +178,36 @@ export default function AuditAnswersView({ track, answers }) {
         .aav-list{margin:6px 0 0;padding-left:18px;font-size:15px;line-height:1.6}
         .aav-extra{color:#6B1642;font-size:13px}
         .aav-empty{font-size:14px;color:#8A7A76}
+        .aav-earlier{padding-top:20px;border-top:1px solid rgba(74,14,46,0.12)}
+        .aav-earlier .aav-q{border-top:0;padding:14px 0 6px}
       `}</style>
       {parts.map((p) => {
-        const qs = questionsFor(p, track || "business").filter((q) => isAnswered(q, a[q.id]));
+        const qs = questionsFor(p, t).filter((q) => isAnswered(q, a[q.id]));
+        const earlier = earlierFor(p, t, a);
         return (
           <section key={p.id} className="aav-part">
             <h3 className="aav-title">{p.title}</h3>
-            {qs.length === 0 ? (
+            {qs.length === 0 && earlier.length === 0 && (
               <p className="aav-empty">Nothing answered in this part.</p>
-            ) : qs.map((q) => (
+            )}
+            {qs.map((q) => (
               <div key={q.id} className="aav-q">
-                <p className="aav-qn">Question {q.n}</p>
+                <p className="aav-qn">Question {numbers[q.id]}</p>
                 <QuestionText q={q} />
                 <Answer q={q} v={a[q.id]} answers={a} />
               </div>
             ))}
+            {earlier.length > 0 && (
+              <div className="aav-earlier">
+                <p className="aav-qn">From an earlier version of the audit</p>
+                {earlier.map(({ key, q, v }) => (
+                  <div key={key} className="aav-q">
+                    <QuestionText q={q} />
+                    <Answer q={q} v={v} answers={a} />
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         );
       })}
