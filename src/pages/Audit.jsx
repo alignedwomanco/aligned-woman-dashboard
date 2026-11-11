@@ -21,10 +21,10 @@ import {
 //   (the Starting Point Profile step was removed on 11 November 2026: the
 //   Profile stays separate from the audit. Her Profile quotes still show
 //   where she has taken it.)
-//   p1       Part 1
-//   tb | tc  her track module (moved here from after Part 7, 11 Nov 2026)
-//   p2..p9   Parts 2 to 9, one per screen, with a pause screen before
-//            Part 4 (not a part, not counted in progress)
+//   Parts in PART_ORDER (src/data/auditQuestions.js), one per screen.
+//   An act intro screen sits before Parts 1, 6 and 8, and the pause
+//   screen before Part 4. Neither is a part or counted in progress.
+//   Her track module comes straight after Part 7 and shares its number.
 //   finish   When you finish
 //   review   every part with done or skipped, edit links, Submit
 // Answers autosave through the auditFlow backend function, which is the
@@ -350,10 +350,8 @@ export default function Audit() {
 
   const firstName = profile?.first_name || (me?.full_name || "").split(" ")[0] || "";
   const quotes = audit?.spp_snapshot?.quotes || {};
-  // The eyebrow matches the part titles: shared parts count 1 to 9, and the
-  // track module is labelled on its own, so "Part 2: Awareness" never sits
-  // under "Part 3 of 10".
-  // Her track module carries on the shared part before it (Part 7: Your
+  // The eyebrow matches the part titles: shared parts count 1 to 11. Her
+  // track module carries on the shared part before it (Part 7: Your
   // work), so it shares that number.
   const sharedParts = parts.filter((p) => !p.track);
   const currentPart = parts.find((p) => p.id === screen);
