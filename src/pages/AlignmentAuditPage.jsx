@@ -75,7 +75,7 @@ const trackTab = (on) => ({
 // The buy button. "tone" is burg (on a light section) or rose (on a dark one).
 function Buy({ tone = "burg", style, innerRef }) {
   return (
-    <a ref={innerRef} href={BUY_URL} className={`aa-buy aa-buy-${tone}`} style={style}>
+    <a ref={innerRef} href={BUY_URL} className={`aa-buy aa-buy-${tone}`} style={{ marginLeft: "auto", marginRight: "auto", ...style }}>
       Get my Alignment Audit <span className="aa-arrow" aria-hidden="true">→</span>
     </a>
   );
@@ -176,10 +176,12 @@ export default function AlignmentAuditPage() {
         .aa2 a:focus-visible, .aa2 button:focus-visible { outline: 2px solid ${C.rose}; outline-offset: 3px; }
         .aa2 .aa-buy {
           display: flex; align-items: center; justify-content: center; gap: 12px;
-          width: 100%; height: 56px; border-radius: 100px; box-sizing: border-box;
-          font-weight: 600; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase;
+          width: 100%; height: 68px; border-radius: 100px; box-sizing: border-box;
+          font-weight: 600; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase;
           transition: background 180ms;
+          animation: aa-buy-pulse 2.8s ease-out infinite;
         }
+        @media (prefers-reduced-motion: reduce) { .aa2 .aa-buy { animation: none; } }
         .aa2 .aa-buy-burg, .aa2 .aa-buy-burg:hover { color: ${C.ivory}; }
         .aa2 .aa-buy-burg { background: ${C.burg}; }
         .aa2 .aa-buy-burg:hover { background: ${C.burgMid}; }
@@ -207,6 +209,10 @@ export default function AlignmentAuditPage() {
         .aa2 .aa-row { scrollbar-width: none; }
         .aa2 .aa-row::-webkit-scrollbar { height: 0; width: 0; }
         @keyframes aa-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+        @keyframes aa-buy-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(196,132,122,0.5); transform: scale(1); }
+          60% { box-shadow: 0 0 0 14px rgba(196,132,122,0); transform: scale(1.015); }
+        }
         @keyframes aa-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @media (prefers-reduced-motion: reduce) {
           .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
