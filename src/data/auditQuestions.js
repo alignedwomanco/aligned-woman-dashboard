@@ -457,7 +457,7 @@ export const PARTS = [
       {
         // Moved from Part 5 and reworded on 10 November 2026. The "give"
         // box came off the screen; its saved words stay in answers.q37.give,
-        // show above d5 (liveQuote "earlierGive") and in the admin and
+        // show above d3 (liveQuote "earlierGive"; d5 merged into d3 on 11 Nov 2026) and in the admin and
         // profile views under the original wording below.
         id: "q37", type: "fields", placeholder: "",
         text: "What will you not give up for this, no matter what?",
