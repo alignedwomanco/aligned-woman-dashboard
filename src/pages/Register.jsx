@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,19 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+
+  // A woman who is already signed in has no use for this form (for example
+  // when Stripe sends her here after paying). Pass her straight on to where
+  // she was heading. Checked once, on arrival; anyone not signed in stays.
+  useEffect(() => {
+    let cancelled = false;
+    base44.auth.me()
+      .then((user) => {
+        if (!cancelled && user?.id) window.location.replace(getPostAuthDestination());
+      })
+      .catch(() => { /* not signed in: show the form */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
