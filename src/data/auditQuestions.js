@@ -5,9 +5,30 @@
 // 2026) and are approved copy. Never rewrite or paraphrase either here;
 // change the doc first, with Laura's approval, then copy it across.
 //
+// The One Big Dream update (10 November 2026) is approved copy from
+// "Alignment Audit: One Big Dream and $280 Update" and follows the same
+// rule.
+//
 // Question ids are stable and are the keys in AuditResponse.answers:
-// q1 to q59 for the shared parts, b1 to b14 and c1 to c13 for the track
-// modules. q14 is answered inside q13's rows and no longer has a field.
+// q1 to q59 and d1 to d6 for the shared parts, b1 to b14 and c1 to c13
+// for the track modules. q14 is answered inside q13's rows and no longer
+// has a field. d1 to d6 were added on 10 November 2026: d6 closes Part 5,
+// d1 to d5 sit in Part 6. An id never changes, wherever its question
+// moves: q37 and q38 now sit in Part 6 and keep their ids.
+//
+// RETIRED: q15, q24, q36, q40, q43 and q49 carry "retired: true". A
+// retired question stays in its part's array, is never shown on the audit
+// screens and is never counted in progress, on the review screen or in
+// numbering (questionsFor leaves it out). Its saved answer stays in
+// answers, untouched, and shows in the admin and profile views under
+// "From an earlier version of the audit" (see AuditAnswersView.jsx). q37 lost its
+// "give" box the same way: the saved words are kept (see retiredFields).
+//
+// NUMBERING: shared questions carry no number of their own. The number
+// she sees is worked out from position by displayNumbers(track): 1 to 57
+// with no gaps on either track, skipping retired questions. Only track
+// questions keep a hand-typed "n" (B1 to B14, C1 to C13). Never type a
+// number onto a shared question.
 //
 // "type" picks the field:
 //   text      a text field that grows as she types
@@ -34,9 +55,10 @@
 //
 // "carry" names the Starting Point Profile answers shown as a quote above
 // the question (see SPP_CARRY). "quote" names an answer of hers from
-// earlier in this audit shown the same way (see liveQuote).
+// earlier in this audit shown the same way (see liveQuote). It is one
+// kind, or a list of kinds shown in order.
 
-export const AUDIT_VERSION = "2026-11-01b";
+export const AUDIT_VERSION = "2026-11-10";
 
 // Turns approved labels into options. Values are lower_snake_case.
 export function slug(label) {
@@ -191,6 +213,7 @@ export const SYMPTOMS = opts(["Sleep", "Mood", "Digestion", "My cycle", "Headach
 export const LAST_TOLD = opts(["This week", "This month", "Longer ago", "Never"]);
 export const LEAKS = opts(["Late invoices", "Discounts", "Scope creep", "Tools I pay for and don't use", "Clients who cost more than they pay", "Other"]);
 export const CHECK_AFTER = opts(["Never", "Sometimes", "Most evenings", "Always"]);
+export const GOAL_STATUS = opts(["Done", "Partly", "Didn't start", "Dropped"]);
 export const NEXT_MOVE = opts(["A promotion", "A new company", "A new industry", "A break", "Going out on my own", "Other"]);
 
 // Box helpers, so every box carries a label, a kind and an empty placeholder.
@@ -208,9 +231,9 @@ export const PARTS = [
     title: "Part 1: Where you are right now",
     intro: "The facts first, so the rest has context.",
     questions: [
-      { id: "q1", n: "1", type: "text", placeholder: "", text: "In a few sentences, where are you right now? Say it the way you'd say it to a close friend, not a recruiter." },
+      { id: "q1", type: "text", placeholder: "", text: "In a few sentences, where are you right now? Say it the way you'd say it to a close friend, not a recruiter." },
       {
-        id: "q2", n: "2", track: "business", type: "facts", placeholder: "",
+        id: "q2", track: "business", type: "facts", placeholder: "",
         text: "What's the business, how long have you been running it, and what stage is it at? (Idea, just started, growing, stuck, rebuilding.)",
         fields: [
           { key: "what", label: "The business", profile: "role_or_business", placeholder: "" },
@@ -219,7 +242,7 @@ export const PARTS = [
         ],
       },
       {
-        id: "q3", n: "3", track: "career", type: "facts", placeholder: "",
+        id: "q3", track: "career", type: "facts", placeholder: "",
         text: "What's your role, how long have you been in it, and what industry are you in?",
         fields: [
           { key: "role", label: "Role", profile: "role_or_business", placeholder: "" },
@@ -227,17 +250,17 @@ export const PARTS = [
           { key: "industry", label: "Industry", profile: "industry", placeholder: "" },
         ],
       },
-      { id: "q4", n: "4", type: "text", placeholder: "", text: "What happened in the last month or two that made you book this now?" },
+      { id: "q4", type: "text", placeholder: "", text: "What happened in the last month or two that made you book this now?" },
       {
-        id: "q5", n: "5", type: "sliders2", placeholder: "",
+        id: "q5", type: "sliders2", placeholder: "",
         text: "Two sliders, 1 to 10. How right does your life look from the outside? How right does it feel from the inside?",
         sliders: [
           { key: "outside", label: "How right does your life look from the outside?" },
           { key: "inside", label: "How right does it feel from the inside?" },
         ],
       },
-      { id: "q6", n: "6", type: "text", placeholder: "", text: "If nothing changes in the next 12 months, what happens? Be specific. What gets worse, and what do you lose?" },
-      { id: "q7", n: "7", type: "text", placeholder: "", text: "What have you already tried to change this? What helped for a while, and what didn't work at all?" },
+      { id: "q6", type: "text", placeholder: "", text: "If nothing changes in the next 12 months, what happens? Be specific. What gets worse, and what do you lose?" },
+      { id: "q7", type: "text", placeholder: "", text: "What have you already tried to change this? What helped for a while, and what didn't work at all?" },
     ],
   },
   {
@@ -246,17 +269,17 @@ export const PARTS = [
     intro: "A blind spot doesn't show up when you ask about it directly. These come at it sideways.",
     questions: [
       {
-        id: "q8", n: "8", type: "rows", maxRows: 3, placeholder: "",
+        id: "q8", type: "rows", maxRows: 3, placeholder: "",
         text: "What are you waiting to sort out \"once things calm down\"? How long have you been telling yourself you just need to get through this stretch? Has the stretch turned into years?",
         columns: [text("what", "What's waiting"), chips("how_long", "How long it's been waiting", "HOW_LONG")],
       },
       {
-        id: "q9", n: "9", type: "fields", carry: "q9", placeholder: "",
+        id: "q9", type: "fields", carry: "q9", placeholder: "",
         text: "What conversation have you been avoiding? Who is it with?",
         fields: [text("about", "What it's about"), chips("who", "Who it's with", "RELATIONSHIPS")],
       },
       {
-        id: "q10", n: "10", type: "fields", placeholder: "",
+        id: "q10", type: "fields", placeholder: "",
         text: "What do the people closest to you keep telling you that you brush off? Now write two lines in your best friend's voice: \"What's really going on with her is...\"",
         fields: [
           text("told", "What they keep telling me"),
@@ -264,34 +287,34 @@ export const PARTS = [
         ],
       },
       {
-        id: "q11", n: "11", type: "rows", maxRows: 3, placeholder: "",
+        id: "q11", type: "rows", maxRows: 3, placeholder: "",
         text: "Which decision have you made in your head more than once, and still not acted on?",
         columns: [text("decision", "The decision"), chips("how_long", "How long I've been circling it", "HOW_LONG")],
       },
       {
-        id: "q12", n: "12", type: "fields", placeholder: "",
+        id: "q12", type: "fields", placeholder: "",
         text: "Where do you say yes when you mean no? Give me the most recent example, not the general habit.",
         fields: [chips("who", "Who asked", "RELATIONSHIPS"), text("yes_to", "What I said yes to"), text("wanted", "What I wanted to say")],
       },
       {
         // Q13 and Q14 share one card so each complaint stays lined up with
         // its follow-up. Saved under q13; q14 has no field of its own.
-        id: "q13", n: "13 and 14", type: "rows", maxRows: 3, placeholder: "",
+        id: "q13", type: "rows", maxRows: 3, placeholder: "",
         text: "What do you complain about most? Think about what comes up when you're venting to a friend, or going over it in your own head at night. Add up to three.",
         text2: "Now take that same complaint and look at what you do that keeps it going. This isn't about blame. Most of what we complain about survives because we keep making room for it. We say yes when we could say no, or we fix it ourselves instead of having the hard conversation. What's your version here, and what would change if you stopped doing it?",
         columns: [text("complaint", "The complaint"), text("keeps", "What I do that keeps it going"), text("if_stopped", "What would change if I stopped")],
       },
       {
-        id: "q15", n: "15", type: "rows", maxRows: 3, placeholder: "",
+        id: "q15", retired: true, type: "rows", maxRows: 3, placeholder: "",
         text: "What are you calling \"fine\" that isn't?",
         columns: [text("what", "What I'm calling fine")],
       },
       {
-        id: "q16", n: "16", type: "fields", placeholder: "",
+        id: "q16", type: "fields", placeholder: "",
         text: "When did you last feel completely like yourself? Where were you and what were you doing?",
         fields: [chips("when", "When", "LAST_FELT"), text("where", "Where I was and what I was doing")],
       },
-      { id: "q17", n: "17", type: "multi", options: "LOCKED_AREAS", placeholder: "", text: "Is there an area you'd rather I didn't ask about? You don't need to say what it is. Just tick where it lives: work, money, my body, my relationship, family, friendships, something else." },
+      { id: "q17", type: "multi", options: "LOCKED_AREAS", placeholder: "", text: "Is there an area you'd rather I didn't ask about? You don't need to say what it is. Just tick where it lives: work, money, my body, my relationship, family, friendships, something else." },
     ],
   },
   {
@@ -299,18 +322,18 @@ export const PARTS = [
     title: "Part 3: The Energy Leak Map",
     intro: "This is where most of your blueprint comes from. Don't rate how happy you are with each area. Rate what it does to your energy right now.",
     questions: [
-      { id: "q18", n: "18", type: "leakmap", placeholder: "", text: "Score each area from -5 (it drains me most days) to +5 (it fills me up). 0 is neutral. Leave out anything that doesn't apply." },
-      { id: "q19", n: "19", type: "text", quote: "lowest", placeholder: "", text: "Look at your lowest score. What's actually happening there? Describe a bad day in that area." },
-      { id: "q20", n: "20", type: "text", quote: "highest", placeholder: "", text: "Look at your highest score. What makes it work? How much of your week does it get?" },
-      { id: "q21", n: "21", type: "hours", placeholder: "", lead: "The time receipt.", text: "Open your calendar for last week. Roughly how many hours went to: paid work, unpaid work for other people, admin, your body, the people you love, and nothing at all?" },
+      { id: "q18", type: "leakmap", placeholder: "", text: "Score each area from -5 (it drains me most days) to +5 (it fills me up). 0 is neutral. Leave out anything that doesn't apply." },
+      { id: "q19", type: "text", quote: "lowest", placeholder: "", text: "Look at your lowest score. What's actually happening there? Describe a bad day in that area." },
+      { id: "q20", type: "text", quote: "highest", placeholder: "", text: "Look at your highest score. What makes it work? How much of your week does it get?" },
+      { id: "q21", type: "hours", placeholder: "", lead: "The time receipt.", text: "Open your calendar for last week. Roughly how many hours went to: paid work, unpaid work for other people, admin, your body, the people you love, and nothing at all?" },
       {
-        id: "q22", n: "22", type: "rows", maxRows: 3, carry: "q22", placeholder: "",
+        id: "q22", type: "rows", maxRows: 3, carry: "q22", placeholder: "",
         lead: "The spending pattern.",
         text: "Think back over the last month. What did you spend on that you didn't need, and what were you trying to feel at the time? No amounts or details. Just the pattern.",
         columns: [short("bought", "What I bought"), chips("feel", "What I was trying to feel", "FEELINGS", "multi")],
       },
       {
-        id: "q23", n: "23", type: "lists2", placeholder: "", lead: "Your stress bucket.",
+        id: "q23", type: "lists2", placeholder: "", lead: "Your stress bucket.",
         text: "Make two lists. First, everything filling your bucket right now, including the things you've decided are \"just part of it\". Be specific: not \"work\" but \"the 7am Monday meeting\". Second, everything that empties it. Scrolling and wine don't count.",
         lists: [
           { key: "filling", label: "First: what's filling it", placeholder: "", extra: chips("can_change", "Can I change this?", "CAN_CHANGE") },
@@ -318,13 +341,13 @@ export const PARTS = [
         ],
       },
       {
-        id: "q24", n: "24", type: "rows", maxRows: 3, placeholder: "",
+        id: "q24", retired: true, type: "rows", maxRows: 3, placeholder: "",
         text: "Who do you feel more tired after seeing? You don't need to name them. What happens in those conversations?",
         columns: [chips("who", "Who", "RELATIONSHIPS"), text("what", "What happens")],
       },
-      { id: "q25", n: "25", type: "rows5", rows: "INVISIBLE_LOAD", placeholder: "", lead: "The invisible load.", text: "Score each line from 1 (rarely) to 5 (almost always).", lowLabel: "Rarely", highLabel: "Almost always" },
+      { id: "q25", type: "rows5", rows: "INVISIBLE_LOAD", placeholder: "", lead: "The invisible load.", text: "Score each line from 1 (rarely) to 5 (almost always).", lowLabel: "Rarely", highLabel: "Almost always" },
       {
-        id: "q26", n: "26", type: "fields", placeholder: "",
+        id: "q26", type: "fields", placeholder: "",
         text: "What time of day do you crash? What do you reach for when it happens? Coffee, sugar, wine, your phone, a nap, pushing through?",
         fields: [chips("when", "When", "CRASH_TIME"), chips("reach", "What I reach for", "REACH_FOR", "multi")],
       },
@@ -337,31 +360,31 @@ export const PARTS = [
     pauseBefore: true,
     questions: [
       {
-        id: "q27", n: "27", type: "rows", maxRows: 3, placeholder: "",
+        id: "q27", type: "rows", maxRows: 3, placeholder: "",
         text: "What are you still doing out of guilt or obligation? A role, a client, a promise, a habit. Which of those would you stop tomorrow if nobody would be disappointed?",
         columns: [short("what", "What it is"), chips("type", "Type", "OBLIGATION_TYPE"), toggle("stop", "Would I stop tomorrow?", "YES_NO")],
       },
       {
-        id: "q28", n: "28", type: "fields", placeholder: "",
+        id: "q28", type: "fields", placeholder: "",
         text: "Whose approval are you still working for? It could be someone who isn't in your life anymore.",
         fields: [chips("who", "Who", "RELATIONSHIPS_PAST"), text("earn", "What I do to earn it")],
       },
       {
-        id: "q29", n: "29", type: "rows", maxRows: 3, placeholder: "",
+        id: "q29", type: "rows", maxRows: 3, placeholder: "",
         text: "What rule did you grow up with about money, work or being a woman that still runs you? Do you actually agree with it?",
         columns: [short("rule", "The rule"), chips("agree", "Do I agree?", "AGREE")],
       },
       {
-        id: "q30", n: "30", type: "prefix", leadIn: "Good women don't", placeholder: "",
+        id: "q30", type: "prefix", leadIn: "Good women don't", placeholder: "",
         text: "Finish this sentence without thinking too hard: \"Good women don't...\"",
       },
       {
-        id: "q31", n: "31", type: "fields", placeholder: "",
+        id: "q31", type: "fields", placeholder: "",
         text: "Pick the habit you most want to drop. Overworking, over-explaining, staying quiet, whatever yours is. What is it protecting you from?",
         fields: [chips("habit", "The habit", "HABITS"), text("protects", "What it protects me from")],
       },
-      { id: "q32", n: "32", type: "text", placeholder: "", text: "What are you scared would happen if you fully rested for two weeks?" },
-      { id: "q33", n: "33", type: "text", carry: "q33", placeholder: "", text: "Which story about yourself are you tired of telling?" },
+      { id: "q32", type: "text", placeholder: "", text: "What are you scared would happen if you fully rested for two weeks?" },
+      { id: "q33", type: "text", carry: "q33", placeholder: "", text: "Which story about yourself are you tired of telling?" },
     ],
   },
   {
@@ -370,51 +393,83 @@ export const PARTS = [
     intro: "",
     questions: [
       // Q34 and Q35 sit side by side on a wide screen, stacked on a phone.
-      { id: "q34", n: "34", type: "text", pairWith: "q35", placeholder: "", text: "What do you want? Write the answer you'd give if nobody was ever going to read it." },
+      { id: "q34", type: "text", pairWith: "q35", placeholder: "", text: "What do you want? Write the answer you'd give if nobody was ever going to read it." },
       {
-        id: "q35", n: "35", type: "fields", em: "should", placeholder: "",
+        id: "q35", type: "fields", em: "should", placeholder: "",
         text: "Now, what do you think you should want? Whose voice is that?",
         fields: [text("should", "What I think I should want"), chips("whose", "Whose voice", "RELATIONSHIPS_VOICE")],
       },
-      { id: "q36", n: "36", type: "text", placeholder: "", text: "You get one priority for the next six months and everything else is allowed to slide. What is it?" },
       {
-        id: "q37", n: "37", type: "fields", placeholder: "",
-        text: "What are you willing to give up to get it? What will you not give up, no matter what?",
-        fields: [text("give", "What I'll give up"), text("wont", "What I won't give up")],
-      },
-      {
-        id: "q38", n: "38", type: "rows", maxRows: 5, quote: "priority", placeholder: "",
-        text: "What's in the way of that priority? List it all, then mark each one: a real constraint, or a fear dressed up as a fact.",
-        columns: [short("obstacle", "What's in the way"), toggle("kind", "Real constraint, or fear dressed up as a fact?", "CONSTRAINT")],
-      },
-      {
-        id: "q39", n: "39", type: "fields", placeholder: "",
+        id: "q39", type: "fields", placeholder: "",
         text: "How do you make big decisions right now? Gut, research, asking several people before you trust yourself, or waiting until it's forced on you? How is that working?",
         fields: [chips("how", "How I decide", "DECIDE_HOW", "multi"), text("working", "How it's working")],
       },
       {
-        id: "q40", n: "40", type: "fields", placeholder: "",
-        text: "Think of a recent decision you handed to someone else. How did it turn out, and how did you feel about yourself afterwards?",
-        fields: [short("decision", "The decision"), chips("who", "Who made it", "RELATIONSHIPS"), text("outcome", "How it turned out"), text("felt", "How I felt about myself")],
-      },
-      {
-        id: "q41", n: "41", type: "lists2", placeholder: "",
+        id: "q41", type: "lists2", placeholder: "",
         text: "What are you good at that drains you? What are you good at that gives you energy back? Roughly how much of your week goes to each?",
         lists: [
           { key: "drains", label: "Good at, but it drains me", placeholder: "", extra: num("hours", "Hours a week", "hours a week") },
           { key: "energy", label: "Good at, and it gives me energy", placeholder: "", extra: num("hours", "Hours a week", "hours a week") },
         ],
       },
+      {
+        id: "d6", type: "fields", placeholder: "", lead: "Watching or doing.",
+        text: "Can I be honest with you? Most of us watch far more about change than we actually do. In a normal week, roughly how many hours go to learning how to change your life or work, like podcasts, books, courses and reels? And how many go to actually doing it?",
+        fields: [num("learning", "Hours learning", "a week"), num("doing", "Hours doing", "a week")],
+      },
+      // Retired on 10 November 2026. Hidden from her, answers kept. Her Q36
+      // answer is quoted back above d2 (see liveQuote "earlierDream").
+      { id: "q36", retired: true, type: "text", placeholder: "", text: "You get one priority for the next six months and everything else is allowed to slide. What is it?" },
+      {
+        id: "q40", retired: true, type: "fields", placeholder: "",
+        text: "Think of a recent decision you handed to someone else. How did it turn out, and how did you feel about yourself afterwards?",
+        fields: [short("decision", "The decision"), chips("who", "Who made it", "RELATIONSHIPS"), text("outcome", "How it turned out"), text("felt", "How I felt about myself")],
+      },
     ],
   },
   {
     id: "p6",
     title: "Part 6: Vision. Where you're heading",
-    intro: "",
+    intro: "This is the part where you get to want things. Take your time.",
     questions: [
-      { id: "q42", n: "42", type: "text", placeholder: "", text: "It's three years from now and it went well. Walk me through an ordinary Tuesday. What time do you start, who's around you, what are you working on, and how do you feel at 4pm?" },
-      { id: "q43", n: "43", type: "text", placeholder: "", text: "What does success look like for you that you'd be a bit embarrassed to say out loud? Too big, too small, too selfish, whatever it is." },
-      { id: "q44", n: "44", type: "text", placeholder: "", text: "Who do you look at and think \"I want that\"? Which part, exactly? Be honest, even if it's the money or the status." },
+      {
+        id: "d1", type: "rows", maxRows: 3, placeholder: "", lead: "This year's receipts.",
+        text: "Think back to January. What did you want this year to be about? How much of it happened?",
+        columns: [short("wanted", "What I wanted"), chips("status", "Where it got to", "GOAL_STATUS"), text("blocker", "What got in the way")],
+      },
+      { id: "q42", type: "text", placeholder: "", text: "It's three years from now and it went well. Walk me through an ordinary Tuesday. What time do you start, who's around you, what are you working on, and how do you feel at 4pm?" },
+      { id: "q44", type: "text", placeholder: "", text: "Who do you look at and think \"I want that\"? Which part, exactly? Be honest, even if it's the money or the status." },
+      {
+        id: "d2", type: "text", quote: "earlierDream", placeholder: "", lead: "One big dream.",
+        text: "If the next 12 months could make one dream real, which would it be? Think big and get specific. Include the version you'd be a bit embarrassed to say out loud. If you could finish it by the end of next month, it isn't big enough.",
+      },
+      {
+        id: "d3", type: "fields", placeholder: "", lead: "What has to wait.",
+        text: "What else are you chasing right now that would have to wait for this? Which one would be hardest to put on hold, and why?",
+        fields: [text("wait", "What would have to wait"), text("hardest", "The hardest one to put on hold, and why")],
+      },
+      { id: "d4", type: "text", quote: "dream", placeholder: "", lead: "Three months from now.", text: "What would have to be true three months from now for you to know it's moving?" },
+      { id: "d5", type: "text", quote: ["calendar", "earlierGive"], placeholder: "", lead: "Make room.", text: "What would you stop doing in your week to make room for it?" },
+      {
+        // Moved from Part 5 and reworded on 10 November 2026. The "give"
+        // box came off the screen; its saved words stay in answers.q37.give,
+        // show above d5 (liveQuote "earlierGive") and in the admin and
+        // profile views under the original wording below.
+        id: "q37", type: "fields", placeholder: "",
+        text: "What will you not give up for this, no matter what?",
+        fields: [text("wont", "What I won't give up")],
+        retiredText: "What are you willing to give up to get it? What will you not give up, no matter what?",
+        retiredFields: [text("give", "What I'll give up")],
+      },
+      {
+        // Moved from Part 5 and reworded on 10 November 2026.
+        id: "q38", type: "rows", maxRows: 5, quote: "dream", placeholder: "",
+        text: "What's in the way of it? List it all, then mark each one: a real constraint, or a fear dressed up as a fact.",
+        columns: [short("obstacle", "What's in the way"), toggle("kind", "Real constraint, or fear dressed up as a fact?", "CONSTRAINT")],
+      },
+      // Retired on 10 November 2026. Hidden from her, answer kept and quoted
+      // back above d2 (see liveQuote "earlierDream").
+      { id: "q43", retired: true, type: "text", placeholder: "", text: "What does success look like for you that you'd be a bit embarrassed to say out loud? Too big, too small, too selfish, whatever it is." },
     ],
   },
   {
@@ -423,20 +478,20 @@ export const PARTS = [
     intro: "Your body usually knows before you do.",
     questions: [
       {
-        id: "q45", n: "45", type: "fields", placeholder: "",
+        id: "q45", type: "fields", placeholder: "",
         text: "How many hours do you sleep on a normal night, and how do you feel when you wake up?",
         fields: [num("hours", "Hours a night"), chips("wake", "When I wake up I feel", "WAKE_FEEL")],
       },
-      { id: "q46", n: "46", type: "rows5", rows: "STATES", placeholder: "", text: "How much of a normal week do you spend in each of these? Score 1 (rarely) to 5 (most of the time).", lowLabel: "Rarely", highLabel: "Most of the time" },
-      { id: "q47", n: "47", type: "chips", options: "RECOVERY", mode: "single", placeholder: "", text: "After something stressful happens, how long until you feel okay again? Minutes, hours, days?" },
-      { id: "q48", n: "48", type: "single", options: "BURNOUT_STAGES", carry: "q48", placeholder: "", text: "Pick the one that sounds most like you right now:" },
-      { id: "q49", n: "49", type: "text", placeholder: "", text: "What does your body keep asking for that you keep overriding?" },
+      { id: "q46", type: "rows5", rows: "STATES", placeholder: "", text: "How much of a normal week do you spend in each of these? Score 1 (rarely) to 5 (most of the time).", lowLabel: "Rarely", highLabel: "Most of the time" },
+      { id: "q47", type: "chips", options: "RECOVERY", mode: "single", placeholder: "", text: "After something stressful happens, how long until you feel okay again? Minutes, hours, days?" },
+      { id: "q48", type: "single", options: "BURNOUT_STAGES", carry: "q48", placeholder: "", text: "Pick the one that sounds most like you right now:" },
+      { id: "q49", retired: true, type: "text", placeholder: "", text: "What does your body keep asking for that you keep overriding?" },
       {
-        id: "q50", n: "50", type: "fields", placeholder: "",
+        id: "q50", type: "fields", placeholder: "",
         text: "Which symptoms have you been treating as normal, or putting down to \"just stress\"? Think sleep, mood, digestion, your cycle, headaches, libido. Share only what you're comfortable with.",
         fields: [chips("symptoms", "Symptoms", "SYMPTOMS", "multi"), text("detail", "Anything you'd like to add")],
       },
-      { id: "q51", n: "51", type: "text", placeholder: "", text: "What's one thing you know works for you that you've stopped doing? A walk, a class, cooking, being outside, seeing a particular friend." },
+      { id: "q51", type: "text", placeholder: "", text: "What's one thing you know works for you that you've stopped doing? A walk, a class, cooking, being outside, seeing a particular friend." },
     ],
   },
   {
@@ -522,10 +577,10 @@ export const PARTS = [
     title: "Part 8: The honest bit",
     intro: "",
     questions: [
-      { id: "q52", n: "52", type: "text", placeholder: "", text: "What are you most afraid I'll tell you?" },
-      { id: "q53", n: "53", type: "text", placeholder: "", text: "What do you already know you need to do?" },
+      { id: "q52", type: "text", placeholder: "", text: "What are you most afraid I'll tell you?" },
+      { id: "q53", type: "text", placeholder: "", text: "What do you already know you need to do?" },
       {
-        id: "q54", n: "54", type: "readiness", placeholder: "",
+        id: "q54", type: "readiness", placeholder: "",
         text: "On a scale of 1 to 10, how ready are you to change something in the next 30 days? Why that number and not lower? What would make it one point higher?",
         scaleText: "On a scale of 1 to 10, how ready are you to change something in the next 30 days?",
         textFields: [
@@ -534,8 +589,8 @@ export const PARTS = [
           { key: "higher", label: "What would make it one point higher?", placeholder: "" },
         ],
       },
-      { id: "q55", n: "55", type: "text", placeholder: "", text: "What would make this audit worth it for you?" },
-      { id: "q56", n: "56", type: "text", placeholder: "", text: "Anything else I should know about you, or about this moment in your life?" },
+      { id: "q55", type: "text", placeholder: "", text: "Ninety days from now, what would tell you this was worth doing?" },
+      { id: "q56", type: "text", placeholder: "", text: "Anything else I should know about you, or about this moment in your life?" },
     ],
   },
   {
@@ -543,10 +598,10 @@ export const PARTS = [
     title: "Part 9: What's already working",
     intro: "We finish here on purpose. Whatever comes next gets built on what you've already got.",
     questions: [
-      { id: "q57", n: "57", type: "text", placeholder: "", text: "What are you proud of that most people don't see?" },
-      { id: "q58", n: "58", type: "text", placeholder: "", text: "Think of a hard stretch you've already come through. What got you through it?" },
+      { id: "q57", type: "text", placeholder: "", text: "What are you proud of that most people don't see?" },
+      { id: "q58", type: "text", placeholder: "", text: "Think of a hard stretch you've already come through. What got you through it?" },
       {
-        id: "q59", n: "59", type: "fields", carry: "q59", placeholder: "",
+        id: "q59", type: "fields", carry: "q59", placeholder: "",
         text: "Who can you be completely honest with right now? When did you last tell them how you really are?",
         fields: [
           chips("who", "Who", "RELATIONSHIPS_HONEST"),
@@ -599,6 +654,7 @@ export const OPTION_SETS = {
   LEAKS,
   CHECK_AFTER,
   NEXT_MOVE,
+  GOAL_STATUS,
 };
 
 // Her B4 offers, as chip options for B5.
@@ -641,9 +697,18 @@ function joinAreas(labels) {
   return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
 }
 
+// Her own words from an answer, whether it was saved as plain text or kept
+// under "legacy" when a layout changed.
+function wordsOf(v) {
+  if (typeof v === "string") return v.trim();
+  if (v && typeof v === "object" && typeof v.legacy === "string") return v.legacy.trim();
+  return "";
+}
+
 // Her earlier answers quoted back above a later question. Read live, so
 // they change if she goes back and edits. Returns null when there is
-// nothing to quote.
+// nothing to quote, one line as a string, or { lead, lines } for a small
+// heading with one or more lines under it.
 export function liveQuote(kind, answers) {
   if (kind === "lowest" || kind === "highest") {
     const map = answers?.q18 || {};
@@ -658,9 +723,27 @@ export function liveQuote(kind, answers) {
       ? `Your ${word} was ${at[0]}, at ${signed(target)}.`
       : `Your ${word} were ${joinAreas(at)}, both at ${signed(target)}.`;
   }
-  if (kind === "priority") {
-    const p = String(answers?.q36 || "").trim();
-    return p ? `Your priority: ${p}` : null;
+  // Her answers to the retired Q36 and Q43, above One big dream.
+  if (kind === "earlierDream") {
+    const lines = [wordsOf(answers?.q36), wordsOf(answers?.q43)].filter(Boolean);
+    return lines.length ? { lead: "You wrote earlier:", lines } : null;
+  }
+  if (kind === "dream") {
+    const d = wordsOf(answers?.d2);
+    return d ? `Your dream: ${d}` : null;
+  }
+  // Her Q21 time receipt on one line. Items she left blank are left out.
+  if (kind === "calendar") {
+    const map = answers?.q21 || {};
+    const items = TIME_RECEIPT
+      .filter((r) => typeof map[r.id] === "number")
+      .map((r) => `${r.label} ${map[r.id]}`);
+    return items.length ? { lead: "Your calendar last week:", lines: [items.join(" · ")] } : null;
+  }
+  // What she said she'd give up, from before Q37 lost that box.
+  if (kind === "earlierGive") {
+    const g = wordsOf(answers?.q37?.give);
+    return g ? `You wrote earlier: ${g}` : null;
   }
   return null;
 }
@@ -670,8 +753,27 @@ export function partsForTrack(track) {
   return PARTS.filter((p) => !p.track || p.track === track);
 }
 
+// The questions she sees in a part. Retired questions are left out, so
+// they never show on the audit screens, in progress, on the review screen
+// or in numbering.
 export function questionsFor(part, track) {
-  return part.questions.filter((q) => !q.track || q.track === track);
+  return part.questions.filter((q) => !q.retired && (!q.track || q.track === track));
+}
+
+// The number shown beside each question, worked out from position: a map
+// from question id to label. Shared questions run 1, 2, 3 with no gaps,
+// carrying on past the track module. Track questions keep their letters
+// (B1 to B14, C1 to C13). Q13 takes one number: Q14 is answered inside it.
+export function displayNumbers(track) {
+  const out = {};
+  let count = 0;
+  for (const part of partsForTrack(track)) {
+    for (const q of questionsFor(part, track)) {
+      if (part.track) out[q.id] = q.n || "";
+      else { count += 1; out[q.id] = String(count); }
+    }
+  }
+  return out;
 }
 
 // ── Answers saved before the Answer Format Update ──
@@ -760,8 +862,12 @@ export function isAnswered(q, v) {
     case "text":
     case "prefix":
       return String(v).trim().length > 0;
-    case "facts":
     case "fields":
+      // Only the boxes on screen now count, plus words kept under "legacy".
+      // A box that has since come off (Q37 "give") doesn't mark it done.
+      if (typeof v !== "object" || Array.isArray(v)) return filled(v);
+      return filled(v.legacy) || (q.fields || []).some((f) => filled(v[f.key]));
+    case "facts":
     case "hours":
     case "lists2":
     case "rows":
