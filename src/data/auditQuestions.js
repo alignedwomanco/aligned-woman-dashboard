@@ -9,6 +9,18 @@
 // "Alignment Audit: One Big Dream and $280 Update" and follows the same
 // rule.
 //
+// QUESTION SET V2 (11 November 2026): approved copy from the Claude Doc
+// "Alignment Audit: Question Set v2". The audit now runs in three acts:
+// Act One about her (Parts 1 to 5), Act Two about her work (Part 6
+// Confidence, Part 7 Your work and her track module), Act Three where
+// she's going (Parts 8 and 9), then the close (Parts 10 and 11). Screen
+// order comes from PART_ORDER, not from the order of PARTS below. Each
+// part carries a "label" (About you, About your work, Both) and the first
+// part of each act carries "actBefore", an intro screen shown before it.
+// New ids: e1 to e6 (Confidence), w1 to w9 (Your work), x1 and x2 (the
+// evidence bank). Sliders and 1 to 5 scores became "taps" (one tap per
+// line) or written boxes.
+//
 // Question ids are stable and are the keys in AuditResponse.answers:
 // q1 to q59 and d1 to d6 for the shared parts, b1 to b14 and c1 to c13
 // for the track modules. q14 is answered inside q13's rows and no longer
@@ -46,6 +58,10 @@
 //   fields    two or more labelled boxes for one question
 //   chips     tappable options, mode "single" or "multi"
 //   prefix    one line that starts with fixed words she finishes
+//   taps      one tap per line ("rows" lists the lines, "scale" the
+//             answers), with an optional written box before (textBefore)
+//             or after (textAfter). Saved flat: { <line id>: <answer>,
+//             <text key>: "..." }
 //
 // Inside rows and fields, each box has a "kind": text, short, number
 // (optional suffix), time, chips (options and mode) or toggle.
@@ -73,11 +89,11 @@ const opts = (labels) => labels.map((label) => ({ value: slug(label), label }));
 
 export const BEFORE_YOU_BEGIN = {
   title: "Before you begin",
-  intro: "This audit reads your work and the woman doing it. You can't fix one while the other is leaking, so both are in here.",
+  intro: "This audit reads your work and the woman doing it. You can't fix one while the other is leaking, so both are in here. We start with you, then your work, then where you're heading. Every part tells you which one it's about.",
   bullets: [
     "Answer with the true version. Not the one you'd give at a dinner party.",
     "Write the way you talk. One line is fine if one line is the answer.",
-    "One question asks you to look at last week's calendar. Do it. Your memory is kind to you. Your calendar isn't.",
+    "One question asks you to walk me through a normal day. Be honest about the boring parts. That's usually where the answer is.",
     "If a question feels too heavy to write down, skip it. We can talk about it on the call, or not at all.",
     "Give yourself about 90 minutes. You can save and come back.",
     "This is a coaching tool. It isn't therapy or a medical assessment. If something here brings up more than you expected, stop and talk to someone you trust.",
@@ -172,14 +188,36 @@ export const BURNOUT_STAGES = [
   { value: "5", label: "Shut down. Everything feels heavy, and my body has made the stop for me." },
 ];
 
+// "nothing" is exclusive: ticking it clears the others, and ticking an
+// area clears it (see "exclusive" on q17).
 export const LOCKED_AREAS = [
-  { value: "work", label: "work" },
-  { value: "money", label: "money" },
-  { value: "body", label: "my body" },
-  { value: "relationship", label: "my relationship" },
-  { value: "family", label: "family" },
-  { value: "friendships", label: "friendships" },
-  { value: "other", label: "something else" },
+  { value: "nothing", label: "Nothing. Ask me anything." },
+  { value: "work", label: "Work" },
+  { value: "money", label: "Money" },
+  { value: "body", label: "My body" },
+  { value: "relationship", label: "My relationship" },
+  { value: "family", label: "Family" },
+  { value: "friendships", label: "Friendships" },
+  { value: "other", label: "Something else" },
+];
+
+// Answers for the "taps" questions.
+export const LEAK_SCALE = [
+  { value: "drains", label: "Drains me" },
+  { value: "fine", label: "It's fine" },
+  { value: "fills", label: "Fills me up" },
+  { value: "na", label: "Doesn't apply" },
+];
+export const TIME_SCALE = [
+  { value: "most", label: "Most of my week" },
+  { value: "fair", label: "A fair bit" },
+  { value: "little", label: "A little" },
+  { value: "none", label: "Almost none" },
+];
+export const LOAD_SCALE = [
+  { value: "me", label: "That's me" },
+  { value: "sometimes", label: "Sometimes" },
+  { value: "not", label: "Not me" },
 ];
 
 export const MEETING_BEHAVIOURS = [
@@ -216,6 +254,7 @@ export const LEAKS = opts(["Late invoices", "Discounts", "Scope creep", "Tools I
 export const CHECK_AFTER = opts(["Never", "Sometimes", "Most evenings", "Always"]);
 export const GOAL_STATUS = opts(["Done", "Partly", "Didn't start", "Dropped"]);
 export const NEXT_MOVE = opts(["A promotion", "A new company", "A new industry", "A break", "Going out on my own", "Other"]);
+export const STATE_OPTS = STATES.map((s) => ({ value: s.id, label: s.label }));
 
 // Box helpers, so every box carries a label, a kind and an empty placeholder.
 const text = (key, label) => ({ key, label, kind: "text", placeholder: "" });
