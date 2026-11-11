@@ -100,6 +100,9 @@ function Cross({ color }) {
 /* ── Page ── */
 export default function AlignmentAuditPage() {
   const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  // Tablet and below: the hero copy sits over the image, starting at the top
+  // of the page, instead of beside it.
+  const [overlayHero, setOverlayHero] = useState(() => typeof window !== "undefined" && window.innerWidth < 1024);
   const [tab, setTab] = useState(0);
   // The open chapter in each act. One at a time per act.
   const [openCh, setOpenCh] = useState({ you: 1, work: 6, next: 8 });
@@ -132,7 +135,10 @@ export default function AlignmentAuditPage() {
   }, []);
 
   useEffect(() => {
-    const onResize = () => setMobile(window.innerWidth < 768);
+    const onResize = () => {
+      setMobile(window.innerWidth < 768);
+      setOverlayHero(window.innerWidth < 1024);
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -228,7 +234,7 @@ export default function AlignmentAuditPage() {
       </header>
 
       {/* 1. Hero */}
-      {mobile ? (
+      {overlayHero ? (
         <section style={{ position: "relative", minHeight: "calc(100svh - 60px)", display: "flex", flexDirection: "column", justifyContent: "flex-start", background: C.burg }}>
           <img src={HERO_IMAGE} alt={HERO_ALT} style={cover} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(26,5,16,0.78) 0%, rgba(74,14,46,0.3) 38%, rgba(74,14,46,0.55) 60%, rgba(26,5,16,0.94) 100%)", pointerEvents: "none" }} />
