@@ -284,7 +284,7 @@ Deno.serve(async (req) => {
       await sendLoggedEmail(base44, {
         to: email,
         toName: fullName,
-        subject: "Your Alignment Audit is ready",
+        subject: "Let’s start your Alignment Audit",
         type: "welcome",
         body:
           '<div style="margin:0;padding:0;background-color:#F7F2EE;">' +
@@ -293,11 +293,13 @@ Deno.serve(async (req) => {
                 '<div style="height:6px;background:linear-gradient(90deg,#4A0E2E,#C4847A);"></div>' +
                 '<div style="padding:40px 36px;">' +
                   '<p style="margin:0 0 24px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#C4847A;font-weight:600;">One-to-one with Laura</p>' +
-                  '<h1 style="margin:0 0 20px;font-family:\'DM Serif Display\',Georgia,serif;font-size:30px;line-height:1.2;color:#4A0E2E;font-weight:400;">Your Alignment Audit is ready</h1>' +
+                  '<h1 style="margin:0 0 20px;font-family:\'DM Serif Display\',Georgia,serif;font-size:30px;line-height:1.2;color:#4A0E2E;font-weight:400;">Let’s start your Alignment Audit</h1>' +
                   '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Hi ' + safeFirst + ',</p>' +
-                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Your payment is confirmed.</p>' +
-                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Sign in at app.alignedwomanco.com with ' + safeEmail + ', the same email you paid with. Your audit is waiting on your dashboard.</p>' +
-                  '<p style="margin:0 0 28px;font-size:16px;line-height:1.7;">Set aside about 90 minutes. Your answers save as you go, so you can stop and come back.</p>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Your payment is confirmed and your audit is open.</p>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Sign in at app.alignedwomanco.com with ' + safeEmail + ', the email you paid with. The questions are waiting on your dashboard.</p>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Give yourself about 90 minutes somewhere you won’t be interrupted. Your answers save as you go, so you can stop and pick it up later.</p>' +
+                  '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Once you submit, I’ll write your personalised blueprint and send it within five business days. Then we book your one-hour call to go through it.</p>' +
+                  '<p style="margin:0 0 28px;font-size:16px;line-height:1.7;">I’m excited to help you on your journey!</p>' +
                   '<a href="' + LOGIN_URL + '" style="display:inline-block;background-color:#4A0E2E;color:#FFFFFF;text-decoration:none;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;padding:16px 30px;border-radius:999px;">Start your audit</a>' +
                   '<p style="margin:32px 0 0;font-size:14px;line-height:1.7;color:#6B5B61;">With love,<br/>Laura</p>' +
                 '</div>' +
