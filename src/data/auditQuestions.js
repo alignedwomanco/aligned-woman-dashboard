@@ -697,9 +697,72 @@ export const PARTS = [
           { ...chips("when", "When I last told them how I really am", "LAST_TOLD"), hideWhen: { field: "who", value: "no_one_right_now" } },
         ],
       },
+      { id: "x2", type: "text", placeholder: "", text: "Look at everything you just wrote. If you were certain you could do it, what would you do first?" },
+    ],
+  },
+  {
+    id: "pc",
+    title: "Part 6: Confidence. How you show up",
+    label: "About your work",
+    actBefore: {
+      title: "Now your work.",
+      body: "Some questions will quote what you wrote earlier. That's on purpose. The patterns rarely stay at home.",
+      button: "Keep going",
+    },
+    intro: "Confidence isn't how loud you are. It's what you do when you're not sure.",
+    questions: [
+      {
+        id: "e1", type: "fields", quote: "earlierYes", placeholder: "",
+        text: "Earlier you told me where you say yes when you mean no. Where does the same thing happen at work? Give me the most recent example.",
+        fields: [chips("who", "Who asked", "RELATIONSHIPS"), text("yes_to", "What I said yes to"), text("wanted", "What I wanted to say")],
+      },
+      { id: "e2", type: "text", placeholder: "", text: "Where at work are you waiting to feel ready before you act? What are you actually waiting for?" },
+      { id: "e3", type: "text", placeholder: "", text: "Think of your last real win at work. Who or what did you give the credit to? What did you actually do?" },
+      {
+        id: "e4", type: "fields", placeholder: "",
+        text: "Think of the room where the stakes are highest for you: a board, a pitch, a negotiation, a salary conversation.",
+        fields: [text("happens", "What happens to me in that room"), text("know", "What I know better than anyone in it")],
+      },
+      {
+        // Was C8 on the career track only. Now shared, so it has no letter.
+        id: "c8", type: "multi", options: "MEETING_BEHAVIOURS", withText: true, placeholder: "",
+        text: "In meetings or on calls, which of these do you do? Tick any that fit, then tell me when you last caught yourself.",
+      },
+      { id: "e5", type: "text", placeholder: "", text: "What are you carrying at work that nobody there knows about?" },
+      { id: "e6", type: "text", quote: "earlierStory", placeholder: "", text: "Earlier you named the story you're tired of telling. How does that story show up in your work?" },
+    ],
+  },
+  {
+    id: "pw",
+    title: "Part 7: Your work",
+    label: "About your work",
+    intro: "Who you are at work, who it's for, what it pays you and what it costs you.",
+    questions: [
+      { id: "w1", type: "text", placeholder: "", text: "What do people consistently come to you for? What could you teach for an hour without notes?" },
+      { id: "w2", type: "text", placeholder: "", text: "Think of a time this year you were really angry or frustrated at work. Not annoyed. Angry. What happened, and what line was being crossed?" },
+      { id: "w3", type: "text", placeholder: "", text: "Now think of a time at work when you felt most like yourself, when it felt easy and it mattered. What were you doing?" },
+      {
+        // Moved from Intention in v2. The hours boxes came off; hours saved
+        // before stay on each line in answers.q41.
+        id: "q41", type: "lists2", placeholder: "",
+        text: "What are you good at that drains you? What are you good at that gives you energy back?",
+        lists: [
+          { key: "drains", label: "Good at, but it drains me", placeholder: "" },
+          { key: "energy", label: "Good at, and it gives me energy", placeholder: "" },
+        ],
+      },
+      { id: "w4", type: "text", quote: "earlierRule", placeholder: "", text: "Earlier you named a rule about money, work or being a woman. Where does that rule show up in how you charge, ask or negotiate?" },
+      { id: "w5", track: "business", type: "text", placeholder: "", text: "Think of the woman you most want to work with. How is she like who you were five or ten years ago?" },
+      { id: "w6", track: "career", type: "text", placeholder: "", text: "Who comes to you for advice? What do they have in common with an earlier version of you?" },
+      { id: "w7", type: "text", placeholder: "", text: "What do you know about your work or your industry that you've never written down or said out loud?" },
+      { id: "w8", type: "text", placeholder: "", text: "Where has doing it all yourself served you? Where has it started holding you back?" },
+      { id: "w9", type: "text", placeholder: "", text: "If your name stood on its own, with no company and no job title, what one sentence would say what you stand for?" },
     ],
   },
 ];
+
+// The order she sees the parts in. "TRACK" is her track module (tb or tc).
+export const PART_ORDER = ["p1", "p2", "p3", "p4", "p7", "pc", "pw", "TRACK", "p5", "p6", "p8", "p9"];
 
 export const WHEN_YOU_FINISH = {
   title: "That's it.",
@@ -714,7 +777,11 @@ export const WHEN_YOU_FINISH = {
 export const OPTION_SETS = {
   BUSINESS_STAGES,
   LEAK_AREAS,
+  LEAK_SCALE,
   TIME_RECEIPT,
+  TIME_SCALE,
+  LOAD_SCALE,
+  STATE_OPTS,
   INVISIBLE_LOAD,
   STATES,
   BURNOUT_STAGES,
@@ -837,12 +904,11 @@ export function liveQuote(kind, answers) {
   return null;
 }
 
-// Parts that apply to her track, in order.
-// Her track module comes straight after Part 1 (moved 11 November 2026).
+// Parts that apply to her track, in the order she sees them (PART_ORDER).
 export function partsForTrack(track) {
-  const shared = PARTS.filter((p) => !p.track);
+  const byId = Object.fromEntries(PARTS.map((p) => [p.id, p]));
   const mine = PARTS.filter((p) => p.track && p.track === track);
-  return [shared[0], ...mine, ...shared.slice(1)].filter(Boolean);
+  return PART_ORDER.flatMap((id) => (id === "TRACK" ? mine : byId[id] ? [byId[id]] : []));
 }
 
 // The questions she sees in a part. Retired questions are left out, so
