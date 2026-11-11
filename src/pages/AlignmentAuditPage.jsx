@@ -318,6 +318,10 @@ export default function AlignmentAuditPage() {
              shrink a closed act to the width of its own title, so it would read
              shorter than the same act once opened. */
           .aa2 .aa-acts, .aa2 .aa-acts [style*="flex-direction: column"] { align-items: stretch !important; }
+          /* The chat illustration: the bubble and the message bar keep their
+             own widths but sit at the full width of the panel, with clear air
+             between them, instead of shrinking and crowding each other. */
+          .aa2 .aa-chat { align-items: stretch !important; gap: 18px !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .aa2 *, .aa2 *::before, .aa2 *::after { animation: none !important; transition: none !important; }
@@ -527,7 +531,7 @@ export default function AlignmentAuditPage() {
                 </div>
               ))}
             </div>
-            <div style={{ background: C.sand, padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="aa-chat" style={{ background: C.sand, padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ alignSelf: "flex-start", maxWidth: "85%", background: C.ivory, borderRadius: "10px 10px 10px 2px", padding: "12px 14px", fontSize: 14, lineHeight: 1.5, color: C.body }}>Before I answer, what do you think? You said you'd ask yourself first.</div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 44, borderRadius: 100, background: C.ivory, border: "1px solid rgba(74,14,46,0.1)", padding: "0 8px 0 16px", fontSize: 14, color: C.muted }}>
                 Message
