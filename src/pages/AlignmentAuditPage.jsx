@@ -11,11 +11,9 @@ import LandingFooter from "@/components/home/LandingFooter";
    ════════════════════════════════════════════════════════════════ */
 
 /* ── SETTINGS: everything Laura may want to change lives here ── */
-const BUY_URL = "https://buy.stripe.com/dRmeVf5Nc7BT4OB18ReME08";      // R2,997 (ZAR)
-const BUY_URL_USD = "https://buy.stripe.com/28E8wR8Zo1dvgxjeZHeME09";  // $184 (USD), for buyers outside South Africa
-const PRICE_USD = "$184";
+const BUY_URL = "https://buy.stripe.com/00w28t0sS09r5SFaJreME0a";      // $280 (USD), one price for everyone
 
-const PRICE = "R2,997";
+const PRICE = "$280";
 const QUESTIONNAIRE_TIME = "about 90 minutes";
 const PORTRAIT = "https://media.base44.com/images/public/69f46886a412ee042303f1af/f214efd57_LAURATHOMAS.jpg";
 const HERO_IMAGE = "https://media.base44.com/images/public/69f46886a412ee042303f1af/bb0aa636c_-e-x-t-e-r-n-a-l_-i-m-a-g-e_-t-o_-i-m-a-g-e-c3e4cb49-6189-4f32-a0bd-b89edf9acaf2.png";
@@ -520,8 +518,8 @@ export default function AlignmentAuditPage() {
           <div className="aa-core-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 1, background: "rgba(26,26,26,0.10)" }}>
             {[
               ["Your Alignment Questionnaire", "Included", "Business or career track, online, saved as you go. Six questions build on your Starting Point Profile, so you don't repeat yourself."],
-              ["Your written blueprint", "R8,000", "Written by me within five business days, section by section through the A.L.I.V.E. Method. Yours to keep."],
-              ["One hour with me", "R5,000", "We go through your blueprint together on a call, so nothing in it stays theoretical. You leave knowing your next move and why."],
+              ["Your written blueprint", "$488", "Written by me within five business days, section by section through the A.L.I.V.E. Method. Yours to keep."],
+              ["One hour with me", "$304", "We go through your blueprint together on a call, so nothing in it stays theoretical. You leave knowing your next move and why."],
             ].map(([t, v, d]) => (
               <div key={t} style={{ background: C.card, padding: "30px 28px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
@@ -586,15 +584,12 @@ export default function AlignmentAuditPage() {
 
           <div id="buy" className="aa-box" style={{ maxWidth: 680, margin: "0 auto", padding: "56px 44px", background: "rgba(245,238,228,0.95)", border: "1px solid rgba(26,26,26,0.2)", textAlign: "center", boxSizing: "border-box" }}>
             <p style={{ margin: "0 0 6px", fontSize: 14, color: C.muted }}>If you booked each element separately at my standard rates:</p>
-            <p style={{ margin: "0 0 28px", fontFamily: SERIF, fontSize: 28, color: C.muted, textDecoration: "line-through" }}>R13,000</p>
+            <p style={{ margin: "0 0 28px", fontFamily: SERIF, fontSize: 28, color: C.muted, textDecoration: "line-through" }}>$792</p>
             <p style={{ margin: "0 0 22px", fontSize: 14, color: C.muted }}>The Alignment Audit is a standalone diagnostic, at</p>
             <p className="aa-price" style={{ margin: "0 0 6px", fontFamily: SERIF, fontWeight: 700, fontSize: 76, color: C.burg }}>{PRICE}</p>
-            <p style={{ margin: "0 0 28px", fontSize: 13, color: C.muted }}>Paid once · {PRICE_USD} outside South Africa</p>
+            <p style={{ margin: "0 0 28px", fontSize: 13, color: C.muted }}>Paid once</p>
             <p style={{ margin: "0 0 32px", fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.6, color: C.burg }}>That's less than one hour of my advisory time, for a written blueprint and an hour with me.</p>
             <BuyButton block />
-            <p style={{ margin: "14px 0 0", fontSize: 13, color: C.muted }}>
-              Outside South Africa? <a href={BUY_URL_USD} style={{ color: C.burg }}>Pay {PRICE_USD} in US dollars</a>
-            </p>
             <p style={{ margin: "16px 0 0", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted }}>
               Online. Blueprint within five business days.
             </p>
