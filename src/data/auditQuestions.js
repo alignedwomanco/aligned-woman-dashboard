@@ -866,18 +866,29 @@ function wordsOf(v) {
 // nothing to quote, one line as a string, or { lead, lines } for a small
 // heading with one or more lines under it.
 export function liveQuote(kind, answers) {
-  if (kind === "lowest" || kind === "highest") {
+  // The leak map areas she tapped as draining her, or filling her up.
+  if (kind === "drains" || kind === "fills") {
     const map = answers?.q18 || {};
-    const scored = LEAK_AREAS
-      .map((a) => ({ label: a.label, v: map[a.id] }))
-      .filter((x) => typeof x.v === "number");
-    if (!scored.length) return null;
-    const target = kind === "lowest" ? Math.min(...scored.map((x) => x.v)) : Math.max(...scored.map((x) => x.v));
-    const at = scored.filter((x) => x.v === target).map((x) => x.label);
-    const word = kind === "lowest" ? "lowest" : "highest";
-    return at.length === 1
-      ? `Your ${word} was ${at[0]}, at ${signed(target)}.`
-      : `Your ${word} were ${joinAreas(at)}, both at ${signed(target)}.`;
+    const at = LEAK_AREAS.filter((a) => map[a.id] === kind).map((a) => a.label);
+    if (!at.length) return null;
+    return { lead: kind === "drains" ? "You said these drain you:" : "You said these fill you up:", lines: [joinAreas(at)] };
+  }
+  // Her Q12 answer, above its work version (e1).
+  if (kind === "earlierYes") {
+    const v = answers?.q12 || {};
+    const lines = [wordsOf(v.yes_to) && `I said yes to: ${wordsOf(v.yes_to)}`, wordsOf(v.wanted) && `I wanted to say: ${wordsOf(v.wanted)}`].filter(Boolean);
+    return lines.length ? { lead: "Outside work, you wrote:", lines } : null;
+  }
+  // Her Q33 story, above its work version (e6).
+  if (kind === "earlierStory") {
+    const s = wordsOf(answers?.q33);
+    return s ? { lead: "You wrote earlier:", lines: [s] } : null;
+  }
+  // Her Q29 rules, above their work version (w4).
+  if (kind === "earlierRule") {
+    const rows = Array.isArray(answers?.q29) ? answers.q29 : [];
+    const lines = rows.map((r) => wordsOf(r?.rule)).filter(Boolean);
+    return lines.length ? { lead: "You wrote earlier:", lines } : null;
   }
   // Her answers to the retired Q36 and Q43, above One big dream.
   if (kind === "earlierDream") {
@@ -888,13 +899,17 @@ export function liveQuote(kind, answers) {
     const d = wordsOf(answers?.d2);
     return d ? `Your dream: ${d}` : null;
   }
-  // Her Q21 time receipt on one line. Items she left blank are left out.
+  // Her Q21 time receipt taps, grouped by answer. Items she left blank are
+  // left out.
   if (kind === "calendar") {
     const map = answers?.q21 || {};
-    const items = TIME_RECEIPT
-      .filter((r) => typeof map[r.id] === "number")
-      .map((r) => `${r.label} ${map[r.id]}`);
-    return items.length ? { lead: "Your calendar last week:", lines: [items.join(" · ")] } : null;
+    const lines = TIME_SCALE
+      .map((s) => {
+        const at = TIME_RECEIPT.filter((r) => map[r.id] === s.value).map((r) => r.label.toLowerCase());
+        return at.length ? `${s.label}: ${joinAreas(at)}` : "";
+      })
+      .filter(Boolean);
+    return lines.length ? { lead: "Your time receipt:", lines } : null;
   }
   // What she said she'd give up, from before Q37 lost that box.
   if (kind === "earlierGive") {
@@ -986,6 +1001,27 @@ export function migrateAnswers(answers) {
     }
     if (touched) { out[q.id] = next; changed[q.id] = next; }
   }
+  // v2: leak map scores (-5 to +5) become taps, and invisible load scores
+  // (1 to 5) become taps. Time receipt hours have no tap equivalent and are
+  // left where they are.
+  const leak = src.q18;
+  if (leak && typeof leak === "object" && Object.values(leak).some((x) => typeof x === "number")) {
+    const next = {};
+    for (const [k, x] of Object.entries(leak)) {
+      next[k] = typeof x === "number" ? (x < 0 ? "drains" : x > 0 ? "fills" : "fine") : x;
+    }
+    out.q18 = next;
+    changed.q18 = next;
+  }
+  const load = src.q25;
+  if (load && typeof load === "object" && Object.values(load).some((x) => typeof x === "number")) {
+    const next = {};
+    for (const [k, x] of Object.entries(load)) {
+      next[k] = typeof x === "number" ? (x >= 4 ? "me" : x >= 2 ? "sometimes" : "not") : x;
+    }
+    out.q25 = next;
+    changed.q25 = next;
+  }
   // A saved Q14 lands in the first row's "What I do that keeps it going".
   if (typeof src.q14 === "string" && src.q14.trim()) {
     const rows = Array.isArray(out.q13) && out.q13.length ? out.q13.map((r) => ({ ...r })) : [{}];
@@ -1039,6 +1075,13 @@ export function isAnswered(q, v) {
     case "leakmap":
     case "rows5":
       return Object.keys(v || {}).length > 0;
+    case "taps": {
+      if (typeof v !== "object") return false;
+      const scale = (OPTION_SETS[q.scale] || []).map((o) => o.value);
+      const rows = OPTION_SETS[q.rows] || [];
+      if (rows.some((r) => scale.includes(v[r.id]))) return true;
+      return [q.textBefore, q.textAfter].some((t) => t && String(v[t.key] || "").trim().length > 0);
+    }
     case "single":
       return !!v;
     case "readiness":
