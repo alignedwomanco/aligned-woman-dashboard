@@ -397,7 +397,7 @@ export default function AlignmentAuditPage() {
           /* Testimonial header: the heading and its counter and arrows stack
              and sit centred under one another, instead of the controls
              drifting to the far edge. */
-          .aa2 .aa-t-head { flex-direction: column; justify-content: center; gap: 20px; }
+          .aa2 .aa-t-head { flex-direction: column; justify-content: center; align-items: center; gap: 20px; width: 100%; }
           .aa2 .aa-t-controls { justify-content: center; }
           /* The Custom instructions / Written by Laura mock chat window is a
              desktop illustration only. On phones and tablets it repeats what
